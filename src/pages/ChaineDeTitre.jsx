@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, ZoomIn, ZoomOut, ArrowUp, ArrowDown, Eye, EyeOff } from "lucide-react";
+import { Search, Link2, Trash2, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -32,8 +32,6 @@ export default function ChaineDeTitre() {
   const [draggingItem, setDraggingItem] = useState(null);
   const [connectingArrow, setConnectingArrow] = useState(null);
   const [zoom, setZoom] = useState(1);
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
 
   const { data: actes, isLoading } = useQuery({
@@ -152,7 +150,7 @@ export default function ChaineDeTitre() {
       acte: acte,
       acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
       info: { x: x, y: showAcheteurs ? y + 130 : y },
-      vendeurs: { x: x, y: showAcheteurs ? y + 200 : y + 70, visible: true }
+      vendeurs: { x: x, y: showAcheteurs ? y + 300 : y + 170, visible: true }
     };
 
     setPlacedActes(prev => {
@@ -161,19 +159,29 @@ export default function ChaineDeTitre() {
       // Recursively add previous acts
       const addPreviousActes = (currentActe, currentId, baseX, baseY) => {
         if (currentActe.numeros_actes_anterieurs && currentActe.numeros_actes_anterieurs.length > 0) {
-          let offsetY = baseY + 450;
+          let offsetY = baseY + 500;
+          const numAnteriors = currentActe.numeros_actes_anterieurs.length;
+          
           currentActe.numeros_actes_anterieurs.forEach((numeroAnterieur, idx) => {
             const acteAnterieur = findActeByNumero(numeroAnterieur);
             if (acteAnterieur) {
               const alreadyPlaced = updated.some(pa => pa.acte.numero_acte === acteAnterieur.numero_acte);
               if (!alreadyPlaced) {
+                // Calculate horizontal offset for multiple anterior acts
+                let offsetX = baseX;
+                if (numAnteriors > 1) {
+                  // Space them out horizontally
+                  const totalWidth = (numAnteriors - 1) * 400;
+                  offsetX = baseX - (totalWidth / 2) + (idx * 400);
+                }
+                
                 const anteriorActeId = `${acteAnterieur.numero_acte}-${Date.now()}-${idx}`;
                 const anteriorActe = {
                   id: anteriorActeId,
                   acte: acteAnterieur,
                   acheteurs: null,
-                  info: { x: baseX, y: offsetY },
-                  vendeurs: { x: baseX, y: offsetY + 70, visible: true }
+                  info: { x: offsetX, y: offsetY },
+                  vendeurs: { x: offsetX, y: offsetY + 170, visible: true }
                 };
                 updated.push(anteriorActe);
                 
@@ -182,15 +190,14 @@ export default function ChaineDeTitre() {
                 }, 100);
                 
                 // Recursively add previous acts for this anterior act
-                addPreviousActes(acteAnterieur, anteriorActeId, baseX, offsetY);
-                offsetY += 450;
+                addPreviousActes(acteAnterieur, anteriorActeId, offsetX, offsetY);
               }
             }
           });
         }
       };
 
-      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 200 : y + 70);
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 300 : y + 170);
       
       return updated;
     });
@@ -237,23 +244,8 @@ export default function ChaineDeTitre() {
     });
   };
 
-  const handleCanvasMouseDown = (e) => {
-    if (e.target === e.currentTarget || e.target.closest('svg')) {
-      setIsPanning(true);
-      setPanStart({
-        x: e.clientX - canvasRef.current.scrollLeft,
-        y: e.clientY - canvasRef.current.scrollTop
-      });
-    }
-  };
-
   const handleMouseMove = (e) => {
-    if (isPanning) {
-      const dx = e.clientX - panStart.x;
-      const dy = e.clientY - panStart.y;
-      canvasRef.current.scrollLeft = -dx;
-      canvasRef.current.scrollTop = -dy;
-    } else if (draggingItem !== null) {
+    if (draggingItem !== null) {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / zoom - draggingItem.offsetX;
       const y = (e.clientY - rect.top) / zoom - draggingItem.offsetY;
@@ -276,7 +268,6 @@ export default function ChaineDeTitre() {
 
   const handleMouseUp = () => {
     setDraggingItem(null);
-    setIsPanning(false);
   };
 
   const removeActe = (index) => {
@@ -302,7 +293,7 @@ export default function ChaineDeTitre() {
             ...acte,
             [section]: {
               x: infoX,
-              y: section === 'acheteurs' ? infoY - 130 : infoY + 70,
+              y: section === 'acheteurs' ? infoY - 130 : infoY + 170,
               visible: true
             }
           };
@@ -538,11 +529,10 @@ export default function ChaineDeTitre() {
                   ref={canvasRef}
                   onDrop={handleCanvasDrop}
                   onDragOver={handleCanvasDragOver}
-                  onMouseDown={handleCanvasMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onWheel={handleWheel}
-                  className="relative w-full h-[calc(100vh-200px)] overflow-auto cursor-grab active:cursor-grabbing"
+                  className="relative w-full h-[calc(100vh-200px)] overflow-auto"
                   style={{ 
                     minHeight: '900px',
                     backgroundImage: `
