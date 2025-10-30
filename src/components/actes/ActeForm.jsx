@@ -27,16 +27,24 @@ const CIRCONSCRIPTIONS = [
 ];
 
 export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
-  const [formData, setFormData] = useState(acte || {
-    numero_acte: "",
-    numeros_actes_anterieurs: [""],
-    date_bpd: "",
-    type_acte: "",
-    circonscription_fonciere: "",
-    notaire: "",
-    document_pdf_url: "",
-    vendeurs: [{ nom: "", prenom: "" }],
-    acheteurs: [{ nom: "", prenom: "" }],
+  const [formData, setFormData] = useState({
+    numero_acte: acte?.numero_acte || "",
+    numeros_actes_anterieurs: acte?.numeros_actes_anterieurs && acte.numeros_actes_anterieurs.length > 0 
+      ? acte.numeros_actes_anterieurs 
+      : acte?.numero_acte_anterieur 
+        ? [acte.numero_acte_anterieur]
+        : [""],
+    date_bpd: acte?.date_bpd || "",
+    type_acte: acte?.type_acte || "",
+    circonscription_fonciere: acte?.circonscription_fonciere || "",
+    notaire: acte?.notaire || "",
+    document_pdf_url: acte?.document_pdf_url || "",
+    vendeurs: acte?.vendeurs && acte.vendeurs.length > 0 
+      ? acte.vendeurs.map(v => ({ nom: v.nom || "", prenom: v.prenom || "" }))
+      : [{ nom: "", prenom: "" }],
+    acheteurs: acte?.acheteurs && acte.acheteurs.length > 0
+      ? acte.acheteurs.map(a => ({ nom: a.nom || "", prenom: a.prenom || "" }))
+      : [{ nom: "", prenom: "" }],
   });
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
