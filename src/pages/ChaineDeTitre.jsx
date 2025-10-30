@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,10 @@ export default function ChaineDeTitre() {
     }
   };
 
+  const findActeByNumero = (numeroActe) => {
+    return actes.find(a => a.numero_acte === numeroActe);
+  };
+
   const handleDragStart = (e, acte) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("acte", JSON.stringify(acte));
@@ -67,15 +71,55 @@ export default function ChaineDeTitre() {
       const x = (e.clientX - rect.left) / zoom;
       const y = (e.clientY - rect.top) / zoom;
       
-      const acteId = `${acte.id}-${Date.now()}`;
-      setPlacedActes([...placedActes, {
-        id: acteId,
-        acte: acte,
-        acheteurs: { x: x, y: y },
-        info: { x: x, y: y + 150 },
-        vendeurs: { x: x, y: y + 300 }
-      }]);
+      addActeToCanvas(acte, x, y);
     }
+  };
+
+  const addActeToCanvas = (acte, x, y) => {
+    const acteId = `${acte.numero_acte}-${Date.now()}`;
+    const newActe = {
+      id: acteId,
+      acte: acte,
+      acheteurs: { x: x, y: y },
+      info: { x: x, y: y + 100 },
+      vendeurs: { x: x, y: y + 200 }
+    };
+
+    setPlacedActes(prev => {
+      const updated = [...prev, newActe];
+      
+      // Automatically add previous acts if they exist
+      if (acte.numeros_actes_anterieurs && acte.numeros_actes_anterieurs.length > 0) {
+        let offsetY = 400;
+        acte.numeros_actes_anterieurs.forEach((numeroAnterieur, idx) => {
+          const acteAnterieur = findActeByNumero(numeroAnterieur);
+          if (acteAnterieur) {
+            // Check if this acte is not already placed
+            const alreadyPlaced = updated.some(pa => pa.acte.numero_acte === acteAnterieur.numero_acte);
+            if (!alreadyPlaced) {
+              const anteriorActeId = `${acteAnterieur.numero_acte}-${Date.now()}-${idx}`;
+              const anteriorActe = {
+                id: anteriorActeId,
+                acte: acteAnterieur,
+                acheteurs: { x: x, y: y + offsetY },
+                info: { x: x, y: y + offsetY + 100 },
+                vendeurs: { x: x, y: y + offsetY + 200 }
+              };
+              updated.push(anteriorActe);
+              
+              // Create arrow from vendeur of current acte to acheteur of anterior acte
+              setTimeout(() => {
+                setArrows(prevArrows => [...prevArrows, { from: acteId, to: anteriorActeId, type: 'chain' }]);
+              }, 100);
+              
+              offsetY += 400;
+            }
+          }
+        });
+      }
+      
+      return updated;
+    });
   };
 
   const handleCanvasDragOver = (e) => {
@@ -122,7 +166,7 @@ export default function ChaineDeTitre() {
 
   const completeConnection = (toActeId) => {
     if (connectingArrow && connectingArrow !== toActeId) {
-      setArrows([...arrows, { from: connectingArrow, to: toActeId }]);
+      setArrows([...arrows, { from: connectingArrow, to: toActeId, type: 'manual' }]);
       setConnectingArrow(null);
     }
   };
@@ -145,6 +189,14 @@ export default function ChaineDeTitre() {
 
   const getBlockCenter = (position, width = 250, height = 80) => {
     return { x: position.x + width / 2, y: position.y + height / 2 };
+  };
+
+  const getVendeurBottom = (position, height = 80) => {
+    return { x: position.x + 125, y: position.y + height };
+  };
+
+  const getAcheteurTop = (position) => {
+    return { x: position.x + 125, y: position.y };
   };
 
   return (
@@ -282,8 +334,16 @@ export default function ChaineDeTitre() {
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onWheel={handleWheel}
-                  className="relative w-full h-[calc(100vh-250px)] bg-slate-800/20 border-2 border-dashed border-slate-700 overflow-auto"
-                  style={{ minHeight: '600px' }}
+                  className="relative w-full h-[calc(100vh-250px)] overflow-auto"
+                  style={{ 
+                    minHeight: '600px',
+                    backgroundImage: `
+                      linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '30px 30px',
+                    backgroundColor: 'rgba(30, 41, 59, 0.2)'
+                  }}
                 >
                   <div style={{ 
                     transform: `scale(${zoom})`, 
@@ -332,8 +392,13 @@ export default function ChaineDeTitre() {
                         const toActe = placedActes.find(a => a.id === arrow.to);
                         if (!fromActe || !toActe) return null;
 
-                        const from = getBlockCenter(fromActe.info);
-                        const to = getBlockCenter(toActe.info);
+                        // For chain connections: from vendeur bottom to acheteur top
+                        const from = arrow.type === 'chain' 
+                          ? getVendeurBottom(fromActe.vendeurs) 
+                          : getBlockCenter(fromActe.info);
+                        const to = arrow.type === 'chain'
+                          ? getAcheteurTop(toActe.acheteurs)
+                          : getBlockCenter(toActe.info);
 
                         return (
                           <g key={idx}>
@@ -346,7 +411,7 @@ export default function ChaineDeTitre() {
                                 refY="3"
                                 orient="auto"
                               >
-                                <polygon points="0 0, 10 3, 0 6" fill="#34d399" />
+                                <polygon points="0 0, 10 3, 0 6" fill={arrow.type === 'chain' ? "#10b981" : "#34d399"} />
                               </marker>
                             </defs>
                             <line
@@ -354,7 +419,7 @@ export default function ChaineDeTitre() {
                               y1={from.y}
                               x2={to.x}
                               y2={to.y}
-                              stroke="#34d399"
+                              stroke={arrow.type === 'chain' ? "#10b981" : "#34d399"}
                               strokeWidth="3"
                               markerEnd={`url(#arrowhead-${idx})`}
                             />
@@ -386,20 +451,19 @@ export default function ChaineDeTitre() {
                               zIndex: 10
                             }}
                           >
-                            <Card className="border-cyan-500/50 bg-cyan-500/10 backdrop-blur-sm shadow-lg">
+                            <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
                               <CardContent className="p-3">
-                                <div className="flex justify-between items-center mb-2">
+                                <div className="flex justify-end items-center mb-2">
                                   <button
                                     onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
-                                    className="cursor-move p-1 hover:bg-cyan-500/20 rounded"
+                                    className="cursor-move p-1 hover:bg-blue-500/20 rounded"
                                   >
-                                    <MoveIcon className="w-3 h-3 text-cyan-400" />
+                                    <MoveIcon className="w-3 h-3 text-blue-400" />
                                   </button>
-                                  <div className="text-xs font-semibold text-cyan-400">ACHETEUR(S)</div>
                                 </div>
-                                <div className="space-y-1">
+                                <div className="space-y-1 text-center">
                                   {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
-                                    <div key={idx} className="text-sm text-white">
+                                    <div key={idx} className="text-sm text-white font-medium">
                                       {name}
                                     </div>
                                   ))}
@@ -418,14 +482,14 @@ export default function ChaineDeTitre() {
                               zIndex: 10
                             }}
                           >
-                            <Card className="border-slate-700 bg-slate-800/90 backdrop-blur-sm shadow-xl">
+                            <Card className="border-purple-500/50 bg-purple-500/10 backdrop-blur-sm shadow-xl">
                               <CardContent className="p-3">
                                 <div className="flex justify-between items-center mb-2">
                                   <button
                                     onMouseDown={(e) => startDragging(e, index, 'info')}
-                                    className="cursor-move p-1 hover:bg-slate-700 rounded"
+                                    className="cursor-move p-1 hover:bg-purple-500/20 rounded"
                                   >
-                                    <MoveIcon className="w-3 h-3 text-slate-400" />
+                                    <MoveIcon className="w-3 h-3 text-purple-400" />
                                   </button>
                                   <div className="flex gap-1">
                                     <Button
@@ -460,9 +524,9 @@ export default function ChaineDeTitre() {
                                 </div>
                                 <div className="text-center space-y-1">
                                   <div className="font-mono font-bold text-white text-sm">
-                                    {acteData.acte.numero_acte}
+                                    N° {acteData.acte.numero_acte}
                                   </div>
-                                  <div className="text-xs text-slate-400">
+                                  <div className="text-xs text-slate-300">
                                     {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
                                   </div>
                                   <Badge 
@@ -486,20 +550,19 @@ export default function ChaineDeTitre() {
                               zIndex: 10
                             }}
                           >
-                            <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                            <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
                               <CardContent className="p-3">
-                                <div className="flex justify-between items-center mb-2">
+                                <div className="flex justify-end items-center mb-2">
                                   <button
                                     onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
-                                    className="cursor-move p-1 hover:bg-emerald-500/20 rounded"
+                                    className="cursor-move p-1 hover:bg-blue-500/20 rounded"
                                   >
-                                    <MoveIcon className="w-3 h-3 text-emerald-400" />
+                                    <MoveIcon className="w-3 h-3 text-blue-400" />
                                   </button>
-                                  <div className="text-xs font-semibold text-emerald-400">VENDEUR(S)</div>
                                 </div>
-                                <div className="space-y-1">
+                                <div className="space-y-1 text-center">
                                   {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
-                                    <div key={idx} className="text-sm text-white">
+                                    <div key={idx} className="text-sm text-white font-medium">
                                       {name}
                                     </div>
                                   ))}
@@ -532,6 +595,11 @@ export default function ChaineDeTitre() {
                             <span className="font-mono text-emerald-400">{fromActe?.acte.numero_acte}</span>
                             {" → "}
                             <span className="font-mono text-cyan-400">{toActe?.acte.numero_acte}</span>
+                            {arrow.type === 'chain' && (
+                              <Badge variant="outline" className="ml-2 text-xs border-green-500/30 text-green-400">
+                                Auto
+                              </Badge>
+                            )}
                           </div>
                           <Button
                             variant="ghost"
