@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +64,19 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
   });
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [showNotaireDropdown, setShowNotaireDropdown] = useState(false);
+
+  // Get list of unique notaires from existing actes
+  const { data: actes } = useQuery({
+    queryKey: ['actes'],
+    queryFn: () => base44.entities.Acte.list(),
+    initialData: [],
+  });
+
+  const uniqueNotaires = [...new Set(actes.map(a => a.notaire).filter(Boolean))];
+  const filteredNotaires = uniqueNotaires.filter(n => 
+    n.toLowerCase().includes(formData.notaire.toLowerCase())
+  );
 
   const handleInputChange = (field, value) => {
     setFormData(prev => {
@@ -292,18 +306,41 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
             </div>
           )}
 
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2 md:col-span-2 relative">
             <Label htmlFor="notaire" className="text-slate-300">
               Notaire <span className="text-red-400">*</span>
             </Label>
             <Input
               id="notaire"
               value={formData.notaire}
-              onChange={(e) => handleInputChange('notaire', e.target.value)}
+              onChange={(e) => {
+                handleInputChange('notaire', e.target.value);
+                setShowNotaireDropdown(true);
+              }}
+              onFocus={() => setShowNotaireDropdown(true)}
+              onBlur={() => setTimeout(() => setShowNotaireDropdown(false), 200)}
               placeholder="Nom du notaire"
               required
               className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+              autoComplete="off"
             />
+            {showNotaireDropdown && filteredNotaires.length > 0 && formData.notaire && (
+              <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filteredNotaires.map((notaire, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      handleInputChange('notaire', notaire);
+                      setShowNotaireDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-white hover:bg-slate-700 transition-colors"
+                  >
+                    {notaire}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 md:col-span-2">

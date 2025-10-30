@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -77,15 +78,31 @@ export default function Dashboard() {
       bValue = bValue ? new Date(bValue).getTime() : 0;
     }
 
-    // Handle string fields
-    if (typeof aValue === 'string') {
-      aValue = aValue.toLowerCase();
-      bValue = bValue?.toLowerCase() || '';
+    // Handle string fields (including numero_acte)
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      // Try to compare as numbers if they look like numbers
+      const aNum = parseFloat(aValue.replace(/[^\d.-]/g, ''));
+      const bNum = parseFloat(bValue.replace(/[^\d.-]/g, ''));
+      
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        aValue = aNum;
+        bValue = bNum;
+      } else {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+    } else if (typeof aValue === 'string') { // For cases where only aValue is string, bValue might be null/undefined initially
+        aValue = aValue.toLowerCase();
+        // bValue will be handled by the undefined/null check below
+    } else if (typeof bValue === 'string') { // For cases where only bValue is string
+        bValue = bValue.toLowerCase();
+        // aValue will be handled by the undefined/null check below
     }
 
+
     // Handle undefined/null values
-    if (aValue === undefined || aValue === null) aValue = '';
-    if (bValue === undefined || bValue === null) bValue = '';
+    if (aValue === undefined || aValue === null) aValue = sortDirection === 'asc' ? Infinity : -Infinity;
+    if (bValue === undefined || bValue === null) bValue = sortDirection === 'asc' ? Infinity : -Infinity;
 
     if (sortDirection === 'asc') {
       return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
