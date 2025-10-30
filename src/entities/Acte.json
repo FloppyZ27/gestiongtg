@@ -1,0 +1,76 @@
+{
+  "name": "Acte",
+  "type": "object",
+  "properties": {
+    "numero_acte": {
+      "type": "string",
+      "description": "Num\u00e9ro unique de l'acte"
+    },
+    "date_bpd": {
+      "type": "string",
+      "format": "date",
+      "description": "Date BPD de l'acte"
+    },
+    "type_acte": {
+      "type": "string",
+      "enum": [
+        "Vente",
+        "Donation",
+        "Succession",
+        "Hypoth\u00e8que",
+        "Pr\u00eat",
+        "\u00c9change",
+        "Bail",
+        "Servitude",
+        "Autre"
+      ],
+      "description": "Type d'acte notari\u00e9"
+    },
+    "notaire": {
+      "type": "string",
+      "description": "Nom du notaire responsable"
+    },
+    "vendeurs": {
+      "type": "array",
+      "description": "Liste des vendeurs",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nom": {
+            "type": "string"
+          },
+          "prenom": {
+            "type": "string"
+          },
+          "adresse": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "acheteurs": {
+      "type": "array",
+      "description": "Liste des acheteurs",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nom": {
+            "type": "string"
+          },
+          "prenom": {
+            "type": "string"
+          },
+          "adresse": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "numero_acte",
+    "date_bpd",
+    "type_acte",
+    "notaire"
+  ]
+}
