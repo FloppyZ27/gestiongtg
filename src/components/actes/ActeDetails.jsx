@@ -1,51 +1,65 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, FileText, Calendar, User, Users } from "lucide-react";
+import { X, FileText, Calendar, User, Users, Edit, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
 
 const typeColors = {
-  "Vente": "bg-blue-100 text-blue-800 border-blue-200",
-  "Donation": "bg-green-100 text-green-800 border-green-200",
-  "Succession": "bg-purple-100 text-purple-800 border-purple-200",
-  "Hypothèque": "bg-orange-100 text-orange-800 border-orange-200",
-  "Prêt": "bg-yellow-100 text-yellow-800 border-yellow-200",
-  "Échange": "bg-pink-100 text-pink-800 border-pink-200",
-  "Bail": "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "Servitude": "bg-cyan-100 text-cyan-800 border-cyan-200",
-  "Autre": "bg-gray-100 text-gray-800 border-gray-200",
+  "Vente": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  "Donation": "bg-green-500/20 text-green-400 border-green-500/30",
+  "Succession": "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  "Hypothèque": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  "Prêt": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  "Échange": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+  "Bail": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  "Servitude": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+  "Autre": "bg-slate-500/20 text-slate-400 border-slate-500/30",
 };
 
 export default function ActeDetails({ acte, onClose }) {
+  const navigate = useNavigate();
+
   return (
-    <Card className="border-none shadow-xl">
-      <CardHeader className="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-2xl">
+      <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-2xl font-bold text-slate-900 mb-2">
+            <CardTitle className="text-2xl font-bold text-white mb-2">
               Détails de l'acte
             </CardTitle>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Badge 
                 variant="secondary"
                 className={`${typeColors[acte.type_acte] || typeColors["Autre"]} border font-medium text-base px-3 py-1`}
               >
                 {acte.type_acte}
               </Badge>
-              <span className="text-slate-600 font-mono text-lg">{acte.numero_acte}</span>
+              <span className="text-slate-300 font-mono text-lg">{acte.numero_acte}</span>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="hover:bg-white"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(createPageUrl("EditerActe") + "?id=" + acte.id)}
+              className="hover:bg-cyan-500/10 text-cyan-400 hover:text-cyan-300"
+            >
+              <Edit className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="hover:bg-slate-800 text-white"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       
@@ -53,32 +67,42 @@ export default function ActeDetails({ acte, onClose }) {
         {/* Informations générales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
               <Calendar className="w-4 h-4" />
               <span className="font-medium">Date BPD</span>
             </div>
-            <p className="text-lg font-semibold text-slate-900">
+            <p className="text-lg font-semibold text-white">
               {format(new Date(acte.date_bpd), "dd MMMM yyyy", { locale: fr })}
             </p>
           </div>
           
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
               <User className="w-4 h-4" />
               <span className="font-medium">Notaire</span>
             </div>
-            <p className="text-lg font-semibold text-slate-900">{acte.notaire}</p>
+            <p className="text-lg font-semibold text-white">{acte.notaire}</p>
           </div>
+
+          {acte.numero_acte_anterieur && (
+            <div className="space-y-2 md:col-span-2">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Hash className="w-4 h-4" />
+                <span className="font-medium">N° d'acte antérieur</span>
+              </div>
+              <p className="text-lg font-semibold text-cyan-400 font-mono">{acte.numero_acte_anterieur}</p>
+            </div>
+          )}
         </div>
 
-        <Separator className="bg-slate-200" />
+        <Separator className="bg-slate-700" />
 
         {/* Vendeurs */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-bold text-slate-900">Vendeurs</h3>
-            <Badge variant="outline" className="ml-2">
+            <Users className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-lg font-bold text-white">Vendeurs</h3>
+            <Badge variant="outline" className="ml-2 bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
               {acte.vendeurs?.length || 0}
             </Badge>
           </div>
@@ -86,13 +110,13 @@ export default function ActeDetails({ acte, onClose }) {
           {acte.vendeurs && acte.vendeurs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.vendeurs.map((vendeur, index) => (
-                <Card key={index} className="border-blue-200 bg-blue-50">
+                <Card key={index} className="border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm">
                   <CardContent className="p-4 space-y-2">
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-white">
                       {vendeur.prenom} {vendeur.nom}
                     </p>
                     {vendeur.adresse && (
-                      <p className="text-sm text-slate-600">{vendeur.adresse}</p>
+                      <p className="text-sm text-slate-400">{vendeur.adresse}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -103,14 +127,14 @@ export default function ActeDetails({ acte, onClose }) {
           )}
         </div>
 
-        <Separator className="bg-slate-200" />
+        <Separator className="bg-slate-700" />
 
         {/* Acheteurs */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-green-600" />
-            <h3 className="text-lg font-bold text-slate-900">Acheteurs</h3>
-            <Badge variant="outline" className="ml-2">
+            <Users className="w-5 h-5 text-purple-400" />
+            <h3 className="text-lg font-bold text-white">Acheteurs</h3>
+            <Badge variant="outline" className="ml-2 bg-purple-500/10 text-purple-400 border-purple-500/30">
               {acte.acheteurs?.length || 0}
             </Badge>
           </div>
@@ -118,13 +142,13 @@ export default function ActeDetails({ acte, onClose }) {
           {acte.acheteurs && acte.acheteurs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.acheteurs.map((acheteur, index) => (
-                <Card key={index} className="border-green-200 bg-green-50">
+                <Card key={index} className="border-purple-500/30 bg-purple-500/5 backdrop-blur-sm">
                   <CardContent className="p-4 space-y-2">
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-white">
                       {acheteur.prenom} {acheteur.nom}
                     </p>
                     {acheteur.adresse && (
-                      <p className="text-sm text-slate-600">{acheteur.adresse}</p>
+                      <p className="text-sm text-slate-400">{acheteur.adresse}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -136,16 +160,16 @@ export default function ActeDetails({ acte, onClose }) {
         </div>
 
         {/* Métadonnées */}
-        <Separator className="bg-slate-200" />
+        <Separator className="bg-slate-700" />
         
-        <div className="bg-slate-50 rounded-lg p-4 space-y-2">
-          <p className="text-sm text-slate-600">
-            <span className="font-medium">Créé le :</span>{" "}
+        <div className="bg-slate-800/30 rounded-lg p-4 space-y-2 border border-slate-700">
+          <p className="text-sm text-slate-400">
+            <span className="font-medium text-slate-300">Créé le :</span>{" "}
             {format(new Date(acte.created_date), "dd/MM/yyyy à HH:mm", { locale: fr })}
           </p>
           {acte.created_by && (
-            <p className="text-sm text-slate-600">
-              <span className="font-medium">Par :</span> {acte.created_by}
+            <p className="text-sm text-slate-400">
+              <span className="font-medium text-slate-300">Par :</span> {acte.created_by}
             </p>
           )}
         </div>

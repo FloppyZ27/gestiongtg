@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Num\u00e9ro unique de l'acte"
     },
+    "numero_acte_anterieur": {
+      "type": "string",
+      "description": "Num\u00e9ro de l'acte ant\u00e9rieur"
+    },
     "date_bpd": {
       "type": "string",
       "format": "date",
