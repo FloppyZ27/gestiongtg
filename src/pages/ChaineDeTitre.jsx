@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react";
+import { Search, Link2, Trash2, ZoomIn, ZoomOut, Eye, EyeOff, Printer } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -110,6 +111,10 @@ export default function ChaineDeTitre() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const findActeByNumero = (numeroActe) => {
     return actes.find(a => a.numero_acte === numeroActe);
   };
@@ -145,19 +150,25 @@ export default function ChaineDeTitre() {
 
   const addActeToCanvas = (acte, x, y, showAcheteurs = true) => {
     const acteId = `${acte.numero_acte}-${Date.now()}`;
+    
+    // Calculate centered X positions for acheteurs and vendeurs
+    const infoWidth = 350;
+    const boxWidth = 250;
+    const centeredX = x + (infoWidth - boxWidth) / 2;
+    
     const newActe = {
       id: acteId,
       acte: acte,
-      acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
+      acheteurs: showAcheteurs ? { x: centeredX, y: y, visible: true } : null,
       info: { x: x, y: showAcheteurs ? y + 130 : y },
-      vendeurs: { x: x, y: showAcheteurs ? y + 300 : y + 170, visible: true }
+      vendeurs: { x: centeredX, y: showAcheteurs ? y + 470 : y + 340, visible: true }
     };
 
     setPlacedActes(prev => {
       const updated = [...prev, newActe];
       
       // Recursively add previous acts
-      const addPreviousActes = (currentActe, currentId, baseX, baseY) => {
+      const addPreviousActes = (currentActe, currentId, parentInfoX, baseY) => {
         if (currentActe.numeros_actes_anterieurs && currentActe.numeros_actes_anterieurs.length > 0) {
           let offsetY = baseY + 500;
           const numAnteriors = currentActe.numeros_actes_anterieurs.length;
@@ -167,13 +178,15 @@ export default function ChaineDeTitre() {
             if (acteAnterieur) {
               const alreadyPlaced = updated.some(pa => pa.acte.numero_acte === acteAnterieur.numero_acte);
               if (!alreadyPlaced) {
-                // Calculate horizontal offset for multiple anterior acts
-                let offsetX = baseX;
+                // Calculate horizontal offset for multiple anterior acts relative to parent
+                let offsetX = parentInfoX;
                 if (numAnteriors > 1) {
-                  // Space them out horizontally
+                  // Space them out horizontally relative to parent position
                   const totalWidth = (numAnteriors - 1) * 400;
-                  offsetX = baseX - (totalWidth / 2) + (idx * 400);
+                  offsetX = parentInfoX - (totalWidth / 2) + (idx * 400);
                 }
+                
+                const anteriorCenteredX = offsetX + (infoWidth - boxWidth) / 2;
                 
                 const anteriorActeId = `${acteAnterieur.numero_acte}-${Date.now()}-${idx}`;
                 const anteriorActe = {
@@ -181,7 +194,7 @@ export default function ChaineDeTitre() {
                   acte: acteAnterieur,
                   acheteurs: null,
                   info: { x: offsetX, y: offsetY },
-                  vendeurs: { x: offsetX, y: offsetY + 170, visible: true }
+                  vendeurs: { x: anteriorCenteredX, y: offsetY + 340, visible: true }
                 };
                 updated.push(anteriorActe);
                 
@@ -189,7 +202,7 @@ export default function ChaineDeTitre() {
                   setArrows(prevArrows => [...prevArrows, { from: currentId, to: anteriorActeId, type: 'chain' }]);
                 }, 100);
                 
-                // Recursively add previous acts for this anterior act
+                // Recursively add previous acts for this anterior act, using its own position as parent
                 addPreviousActes(acteAnterieur, anteriorActeId, offsetX, offsetY);
               }
             }
@@ -197,7 +210,7 @@ export default function ChaineDeTitre() {
         }
       };
 
-      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 300 : y + 170);
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 470 : y + 340);
       
       return updated;
     });
@@ -286,14 +299,18 @@ export default function ChaineDeTitre() {
           // Show section
           return { ...acte, [section]: { ...acte[section], visible: true } };
         } else {
-          // Create section
-          const infoY = acte.info.y;
+          // Create section - centered with info
           const infoX = acte.info.x;
+          const infoY = acte.info.y;
+          const infoWidth = 350;
+          const boxWidth = 250;
+          const centeredX = infoX + (infoWidth - boxWidth) / 2;
+          
           return {
             ...acte,
             [section]: {
-              x: infoX,
-              y: section === 'acheteurs' ? infoY - 130 : infoY + 170,
+              x: centeredX,
+              y: section === 'acheteurs' ? infoY - 130 : infoY + 340,
               visible: true
             }
           };
@@ -368,6 +385,43 @@ export default function ChaineDeTitre() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #canvas-print, #canvas-print * {
+            visibility: visible;
+          }
+          #canvas-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            min-height: auto;
+            overflow: visible !important;
+            transform: scale(1) !important; /* Ensure canvas is at 100% scale for printing */
+            transform-origin: 0 0 !important;
+            background-color: white !important; /* White background for print */
+            background-image: none !important; /* No grid lines for print */
+          }
+          #canvas-print > div { /* Inner div that holds scaled content */
+            width: 100% !important;
+            height: auto !important;
+            min-height: auto !important;
+            transform: scale(1) !important;
+          }
+          .Card {
+            box-shadow: none !important; /* Remove shadows for cleaner print */
+            border: 1px solid #ccc !important; /* Add a light border for definition */
+          }
+          .Badge {
+            border: 1px solid #ccc !important; /* Ensure badge borders are visible */
+          }
+        }
+      `}</style>
+      
       <div className="max-w-[1800px] mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Link2 className="w-8 h-8 text-emerald-400" />
@@ -500,6 +554,17 @@ export default function ChaineDeTitre() {
                         <ZoomIn className="w-3 h-3 text-slate-400" />
                       </Button>
                     </div>
+                    {placedActes.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePrint}
+                        className="gap-2 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                      >
+                        <Printer className="w-4 h-4" />
+                        Imprimer
+                      </Button>
+                    )}
                     {connectingArrow && (
                       <Button
                         variant="outline"
@@ -526,6 +591,7 @@ export default function ChaineDeTitre() {
               </CardHeader>
               <CardContent className="p-0">
                 <div
+                  id="canvas-print"
                   ref={canvasRef}
                   onDrop={handleCanvasDrop}
                   onDragOver={handleCanvasDragOver}
