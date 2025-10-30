@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { FileText, LayoutDashboard, Plus, Scale, Sparkles } from "lucide-react";
+import { FileText, LayoutDashboard, Plus, MapPin, Compass } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -62,15 +62,13 @@ export default function Layout({ children, currentPageName }) {
         <Sidebar className="border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl">
           <SidebarHeader className="border-b border-slate-800 p-6">
             <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
-                <Scale className="w-6 h-6 text-white" />
-                <div className="absolute -top-1 -right-1">
-                  <Sparkles className="w-4 h-4 text-yellow-400" />
-                </div>
+              <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <MapPin className="w-5 h-5 text-white absolute" />
+                <Compass className="w-6 h-6 text-white opacity-60" />
               </div>
               <div>
-                <h2 className="font-bold text-white text-lg">ActesNotariaux</h2>
-                <p className="text-xs text-slate-400">Gestion moderne</p>
+                <h2 className="font-bold text-white text-lg">GestionGTG</h2>
+                <p className="text-xs text-slate-400">Arpentage & Géomatique</p>
               </div>
             </div>
           </SidebarHeader>
@@ -88,7 +86,7 @@ export default function Layout({ children, currentPageName }) {
                         asChild 
                         className={`transition-all duration-200 rounded-lg mb-1 ${
                           location.pathname === item.url 
-                            ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20' 
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
                             : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                         }`}
                       >
@@ -106,11 +104,11 @@ export default function Layout({ children, currentPageName }) {
 
           <SidebarFooter className="border-t border-slate-800 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm truncate">Système Notarial</p>
+                <p className="font-semibold text-white text-sm truncate">GestionGTG</p>
                 <p className="text-xs text-slate-400 truncate">Version 2.0</p>
               </div>
             </div>
@@ -121,7 +119,7 @@ export default function Layout({ children, currentPageName }) {
           <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 md:hidden">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="hover:bg-slate-800 p-2 rounded-lg transition-colors duration-200 text-white" />
-              <h1 className="text-xl font-bold text-white">ActesNotariaux</h1>
+              <h1 className="text-xl font-bold text-white">GestionGTG</h1>
             </div>
           </header>
 

@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, Search, FileText, Calendar, TrendingUp, Sparkles } from "lucide-react";
+import { Plus, Search, FileText, Calendar, TrendingUp, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import ActesList from "../components/actes/ActesList";
 import ActeDetails from "../components/actes/ActeDetails";
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedActe, setSelectedActe] = useState(null);
+  const [sortField, setSortField] = useState('created_date');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   const { data: actes, isLoading } = useQuery({
     queryKey: ['actes'],
@@ -31,14 +31,55 @@ export default function Dashboard() {
     );
   });
 
+  const sortedActes = [...filteredActes].sort((a, b) => {
+    let aValue = a[sortField];
+    let bValue = b[sortField];
+
+    // Handle nested fields for vendeurs and acheteurs
+    if (sortField === 'vendeurs') {
+      aValue = a.vendeurs?.length || 0;
+      bValue = b.vendeurs?.length || 0;
+    } else if (sortField === 'acheteurs') {
+      aValue = a.acheteurs?.length || 0;
+      bValue = b.acheteurs?.length || 0;
+    }
+
+    // Handle date fields
+    if (sortField === 'date_bpd' || sortField === 'created_date') {
+      aValue = new Date(aValue).getTime();
+      bValue = new Date(bValue).getTime();
+    }
+
+    // Handle string fields
+    if (typeof aValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue?.toLowerCase() || '';
+    }
+
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   const statsCards = [
     {
       title: "Total des actes",
       value: actes.length,
       icon: FileText,
-      gradient: "from-cyan-500 to-blue-600",
-      iconBg: "bg-cyan-500/20",
-      iconColor: "text-cyan-400",
+      gradient: "from-emerald-500 to-teal-600",
+      iconBg: "bg-emerald-500/20",
+      iconColor: "text-emerald-400",
     },
     {
       title: "Ce mois",
@@ -48,17 +89,17 @@ export default function Dashboard() {
         return acteDate.getMonth() === now.getMonth() && acteDate.getFullYear() === now.getFullYear();
       }).length,
       icon: Calendar,
-      gradient: "from-purple-500 to-pink-600",
-      iconBg: "bg-purple-500/20",
-      iconColor: "text-purple-400",
+      gradient: "from-cyan-500 to-blue-600",
+      iconBg: "bg-cyan-500/20",
+      iconColor: "text-cyan-400",
     },
     {
       title: "Types d'actes",
       value: new Set(actes.map(a => a.type_acte)).size,
       icon: TrendingUp,
-      gradient: "from-orange-500 to-red-600",
-      iconBg: "bg-orange-500/20",
-      iconColor: "text-orange-400",
+      gradient: "from-purple-500 to-pink-600",
+      iconBg: "bg-purple-500/20",
+      iconColor: "text-purple-400",
     },
   ];
 
@@ -68,15 +109,15 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                 Tableau de bord
               </h1>
-              <Sparkles className="w-6 h-6 text-yellow-400" />
+              <MapPin className="w-6 h-6 text-emerald-400" />
             </div>
-            <p className="text-slate-400">Gestion de vos actes notariés</p>
+            <p className="text-slate-400">Gestion de vos actes d'arpentage</p>
           </div>
           <Link to={createPageUrl("AjouterActe")}>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/50 transition-all duration-200 border-0">
+            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-200 border-0">
               <Plus className="w-5 h-5 mr-2" />
               Nouvel acte
             </Button>
@@ -121,9 +162,12 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="p-0">
             <ActesList 
-              actes={filteredActes}
+              actes={sortedActes}
               isLoading={isLoading}
               onSelectActe={setSelectedActe}
+              onSort={handleSort}
+              sortField={sortField}
+              sortDirection={sortDirection}
             />
           </CardContent>
         </Card>

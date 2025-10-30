@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Save, X, UserPlus } from "lucide-react";
+import { Plus, Trash2, Save, X, UserPlus, FileText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const TYPES_ACTES = [
@@ -26,6 +26,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
     date_bpd: "",
     type_acte: "",
     notaire: "",
+    chemin_document_pdf: "",
     vendeurs: [{ nom: "", prenom: "", adresse: "" }],
     acheteurs: [{ nom: "", prenom: "", adresse: "" }],
   });
@@ -146,6 +147,23 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
               className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
             />
           </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="chemin_document_pdf" className="text-slate-300 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Chemin du document PDF
+            </Label>
+            <Input
+              id="chemin_document_pdf"
+              value={formData.chemin_document_pdf || ""}
+              onChange={(e) => handleInputChange('chemin_document_pdf', e.target.value)}
+              placeholder="Ex: \\\\serveur\\partage\\actes\\2024\\ACT-2024-001.pdf"
+              className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              Chemin réseau ou local vers le fichier PDF (ex: \\serveur\partage\actes\fichier.pdf)
+            </p>
+          </div>
         </div>
       </div>
 
@@ -160,7 +178,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
             variant="outline"
             size="sm"
             onClick={() => addPerson('vendeurs')}
-            className="gap-2 bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+            className="gap-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
           >
             <UserPlus className="w-4 h-4" />
             Ajouter un vendeur
@@ -171,7 +189,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
           <Card key={index} className="border-slate-700 bg-slate-800/30 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-base font-semibold text-cyan-400">
+                <CardTitle className="text-base font-semibold text-emerald-400">
                   Vendeur {index + 1}
                 </CardTitle>
                 {formData.vendeurs.length > 1 && (
@@ -233,7 +251,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
             variant="outline"
             size="sm"
             onClick={() => addPerson('acheteurs')}
-            className="gap-2 bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20"
+            className="gap-2 bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
           >
             <UserPlus className="w-4 h-4" />
             Ajouter un acheteur
@@ -244,7 +262,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
           <Card key={index} className="border-slate-700 bg-slate-800/30 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-base font-semibold text-purple-400">
+                <CardTitle className="text-base font-semibold text-cyan-400">
                   Acheteur {index + 1}
                 </CardTitle>
                 {formData.acheteurs.length > 1 && (
@@ -310,7 +328,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/30 transition-all"
+          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
         >
           <Save className="w-4 h-4" />
           {isSubmitting ? "Enregistrement..." : (acte ? "Modifier l'acte" : "Enregistrer l'acte")}

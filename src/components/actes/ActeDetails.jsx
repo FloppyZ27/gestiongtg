@@ -4,13 +4,13 @@ import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, FileText, Calendar, User, Users, Edit, Hash } from "lucide-react";
+import { X, FileText, Calendar, User, Users, Edit, Hash, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
 
 const typeColors = {
-  "Vente": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  "Vente": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
   "Donation": "bg-green-500/20 text-green-400 border-green-500/30",
   "Succession": "bg-purple-500/20 text-purple-400 border-purple-500/30",
   "Hypothèque": "bg-orange-500/20 text-orange-400 border-orange-500/30",
@@ -24,9 +24,17 @@ const typeColors = {
 export default function ActeDetails({ acte, onClose }) {
   const navigate = useNavigate();
 
+  const handleOpenPDF = () => {
+    if (!acte.chemin_document_pdf) {
+      alert("Aucun chemin de document PDF n'est défini pour cet acte.");
+      return;
+    }
+    window.open(`file:///${acte.chemin_document_pdf.replace(/\\/g, '/')}`, '_blank');
+  };
+
   return (
     <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-2xl">
-      <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10">
+      <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-2xl font-bold text-white mb-2">
@@ -47,7 +55,7 @@ export default function ActeDetails({ acte, onClose }) {
               variant="ghost"
               size="icon"
               onClick={() => navigate(createPageUrl("EditerActe") + "?id=" + acte.id)}
-              className="hover:bg-cyan-500/10 text-cyan-400 hover:text-cyan-300"
+              className="hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300"
             >
               <Edit className="w-5 h-5" />
             </Button>
@@ -90,7 +98,30 @@ export default function ActeDetails({ acte, onClose }) {
                 <Hash className="w-4 h-4" />
                 <span className="font-medium">N° d'acte antérieur</span>
               </div>
-              <p className="text-lg font-semibold text-cyan-400 font-mono">{acte.numero_acte_anterieur}</p>
+              <p className="text-lg font-semibold text-emerald-400 font-mono">{acte.numero_acte_anterieur}</p>
+            </div>
+          )}
+
+          {acte.chemin_document_pdf && (
+            <div className="space-y-2 md:col-span-2">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <FileText className="w-4 h-4" />
+                <span className="font-medium">Document PDF</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-slate-400 font-mono bg-slate-800/50 px-3 py-2 rounded border border-slate-700 flex-1 truncate">
+                  {acte.chemin_document_pdf}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenPDF}
+                  className="bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Ouvrir
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -100,9 +131,9 @@ export default function ActeDetails({ acte, onClose }) {
         {/* Vendeurs */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-cyan-400" />
+            <Users className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white">Vendeurs</h3>
-            <Badge variant="outline" className="ml-2 bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
+            <Badge variant="outline" className="ml-2 bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
               {acte.vendeurs?.length || 0}
             </Badge>
           </div>
@@ -110,7 +141,7 @@ export default function ActeDetails({ acte, onClose }) {
           {acte.vendeurs && acte.vendeurs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.vendeurs.map((vendeur, index) => (
-                <Card key={index} className="border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm">
+                <Card key={index} className="border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm">
                   <CardContent className="p-4 space-y-2">
                     <p className="font-semibold text-white">
                       {vendeur.prenom} {vendeur.nom}
@@ -132,9 +163,9 @@ export default function ActeDetails({ acte, onClose }) {
         {/* Acheteurs */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-400" />
+            <Users className="w-5 h-5 text-cyan-400" />
             <h3 className="text-lg font-bold text-white">Acheteurs</h3>
-            <Badge variant="outline" className="ml-2 bg-purple-500/10 text-purple-400 border-purple-500/30">
+            <Badge variant="outline" className="ml-2 bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
               {acte.acheteurs?.length || 0}
             </Badge>
           </div>
@@ -142,7 +173,7 @@ export default function ActeDetails({ acte, onClose }) {
           {acte.acheteurs && acte.acheteurs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.acheteurs.map((acheteur, index) => (
-                <Card key={index} className="border-purple-500/30 bg-purple-500/5 backdrop-blur-sm">
+                <Card key={index} className="border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm">
                   <CardContent className="p-4 space-y-2">
                     <p className="font-semibold text-white">
                       {acheteur.prenom} {acheteur.nom}

@@ -34,6 +34,10 @@
       "type": "string",
       "description": "Nom du notaire responsable"
     },
+    "chemin_document_pdf": {
+      "type": "string",
+      "description": "Chemin d'acc\u00e8s au document PDF sur le serveur"
+    },
     "vendeurs": {
       "type": "array",
       "description": "Liste des vendeurs",
