@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +27,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const navigationItems = [
+  {
+    title: "Tableau de Bord",
+    url: createPageUrl("TableauDeBord"),
+    icon: BarChart3,
+  },
   {
     title: "Profil",
     url: createPageUrl("Profil"),
