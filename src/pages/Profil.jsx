@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -55,6 +56,7 @@ export default function Profil() {
     telephone: user?.telephone || "",
     adresse: user?.adresse || "",
     poste: user?.poste || "",
+    date_naissance: user?.date_naissance || "",
   });
 
   const [rendezVousForm, setRendezVousForm] = useState({
@@ -73,6 +75,7 @@ export default function Profil() {
         telephone: user.telephone || "",
         adresse: user.adresse || "",
         poste: user.poste || "",
+        date_naissance: user.date_naissance || "",
       });
     }
   }, [user]);
@@ -174,6 +177,21 @@ export default function Profil() {
   const dossiersEnCours = dossiers.filter(d => d.statut === 'en_cours');
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
 
+  // Jours fériés Canada/Québec 2025 (placeholder year for example)
+  const getHolidays = (year) => {
+    return [
+      { date: `${year}-01-01`, name: "Jour de l'an" },
+      { date: `${year}-04-18`, name: "Vendredi saint" },
+      { date: `${year}-05-19`, name: "Fête de la Reine" },
+      { date: `${year}-06-24`, name: "Fête nationale du Québec" },
+      { date: `${year}-07-01`, name: "Fête du Canada" },
+      { date: `${year}-09-01`, name: "Fête du Travail" },
+      { date: `${year}-10-13`, name: "Action de grâce" },
+      { date: `${year}-12-25`, name: "Noël" },
+      { date: `${year}-12-26`, name: "Lendemain de Noël" },
+    ];
+  };
+
   // Calendar logic
   let startDate, endDate, daysInView;
   
@@ -190,10 +208,39 @@ export default function Profil() {
   }
 
   const getEventsForDay = (day) => {
-    return rendezVous.filter(rdv => {
+    const events = rendezVous.filter(rdv => {
       const rdvDate = new Date(rdv.date_debut);
       return isSameDay(rdvDate, day);
     });
+
+    // Add holidays
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const currentYear = day.getFullYear();
+    const holidays = getHolidays(currentYear);
+    const holiday = holidays.find(h => h.date === dayStr);
+    if (holiday) {
+      events.push({
+        id: `holiday-${dayStr}`,
+        titre: holiday.name,
+        type: 'holiday',
+        date_debut: dayStr
+      });
+    }
+
+    // Add birthday if it's user's birthday
+    if (user?.date_naissance) {
+      const birthDate = new Date(user.date_naissance);
+      if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
+        events.push({
+          id: `birthday-${user.email}`,
+          titre: `🎂 Anniversaire de ${user.full_name}`,
+          type: 'birthday',
+          date_debut: dayStr
+        });
+      }
+    }
+
+    return events;
   };
 
   const previousPeriod = () => {
@@ -538,12 +585,16 @@ export default function Profil() {
                           {events.map(event => (
                             <div
                               key={event.id}
-                              onClick={() => handleEditRendezVous(event)}
+                              onClick={() => event.type !== 'holiday' && event.type !== 'birthday' && handleEditRendezVous(event)}
                               className={`
-                                text-xs p-1 rounded cursor-pointer truncate
+                                text-xs p-1 rounded truncate
                                 ${event.type === 'absence' 
-                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                                  : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer' 
+                                  : event.type === 'holiday'
+                                  ? 'bg-blue-500/20 text-blue-400 cursor-default'
+                                  : event.type === 'birthday'
+                                  ? 'bg-purple-500/20 text-purple-400 cursor-default'
+                                  : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer'
                                 }
                               `}
                               title={event.titre}
@@ -581,6 +632,15 @@ export default function Profil() {
                 <Input
                   value={profileForm.poste}
                   onChange={(e) => setProfileForm({...profileForm, poste: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date de naissance</Label>
+                <Input
+                  type="date"
+                  value={profileForm.date_naissance}
+                  onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
                   className="bg-slate-800 border-slate-700"
                 />
               </div>

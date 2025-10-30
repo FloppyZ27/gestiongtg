@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -46,15 +47,33 @@ export default function Calendrier() {
   };
 
   // Filter events
+  // This filter applies only to 'rendez-vous' and 'absence' entities from allRendezVous
   const filteredRendezVous = allRendezVous.filter(rdv => {
     const userMatch = selectedUser === 'all' || rdv.utilisateur_email === selectedUser;
     const typeMatch = selectedType === 'all' || rdv.type === selectedType;
     return userMatch && typeMatch;
   });
 
+  // Jours fériés Canada/Québec
+  // Note: For a production app, calculating floating holidays (like Victoria Day, Labour Day, Thanksgiving) dynamically
+  // would be more robust. These dates are accurate for 2025.
+  const getHolidays = (year) => {
+    return [
+      { date: `${year}-01-01`, name: "Jour de l'an" },
+      { date: `${year}-04-18`, name: "Vendredi saint" }, // Good Friday 2025
+      { date: `${year}-05-19`, name: "Fête de la Reine" }, // Victoria Day 2025
+      { date: `${year}-06-24`, name: "Fête nationale du Québec" },
+      { date: `${year}-07-01`, name: "Fête du Canada" },
+      { date: `${year}-09-01`, name: "Fête du Travail" }, // Labour Day 2025
+      { date: `${year}-10-13`, name: "Action de grâce" }, // Thanksgiving 2025
+      { date: `${year}-12-25`, name: "Noël" },
+      { date: `${year}-12-26`, name: "Lendemain de Noël" },
+    ];
+  };
+
   // Calendar logic
   let startDate, endDate, daysInView;
-  
+
   if (viewMode === 'month') {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
@@ -68,10 +87,51 @@ export default function Calendrier() {
   }
 
   const getEventsForDay = (day) => {
-    return filteredRendezVous.filter(rdv => {
+    // Start with filtered RendezVous and Absences
+    const events = filteredRendezVous.filter(rdv => {
       const rdvDate = new Date(rdv.date_debut);
       return isSameDay(rdvDate, day);
     });
+
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const currentYear = day.getFullYear();
+
+    // Add holidays
+    const holidays = getHolidays(currentYear);
+    const holiday = holidays.find(h => h.date === dayStr);
+    if (holiday) {
+      events.push({
+        id: `holiday-${dayStr}`,
+        titre: holiday.name,
+        type: 'holiday',
+        date_debut: dayStr,
+        description: `C'est un jour férié : ${holiday.name}.`
+      });
+    }
+
+    // Add birthdays for all users
+    users.forEach(u => {
+      if (u.date_naissance) {
+        const birthDate = new Date(u.date_naissance);
+        // Check if the month and day match the current day in the calendar view
+        if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
+          // Check if this user's birthday should be displayed based on selectedUser filter
+          const userMatch = selectedUser === 'all' || u.email === selectedUser;
+          if (userMatch) {
+            events.push({
+              id: `birthday-${u.email}-${dayStr}`, // Unique ID for birthday on a specific day for a specific user
+              titre: `🎂 Anniversaire de ${u.full_name}`,
+              type: 'birthday',
+              date_debut: dayStr,
+              utilisateur_email: u.email, // Associate with user for avatar
+              description: `Aujourd'hui, c'est l'anniversaire de ${u.full_name} !`,
+            });
+          }
+        }
+      }
+    });
+
+    return events;
   };
 
   const previousPeriod = () => {
@@ -101,9 +161,21 @@ export default function Calendrier() {
   };
 
   const handleEventClick = (event) => {
-    setSelectedEvent(event);
-    setIsDetailsDialogOpen(true);
+    // Only open details for 'rendez-vous' or 'absence'
+    if (event.type === 'rendez-vous' || event.type === 'absence') {
+      setSelectedEvent(event);
+      setIsDetailsDialogOpen(true);
+    }
   };
+
+  // Compute all visible events for statistics based on the current calendar view
+  const allVisibleEvents = daysInView.flatMap(day => getEventsForDay(day));
+
+  const totalRdv = allVisibleEvents.filter(e => e.type === 'rendez-vous').length;
+  const totalAbsences = allVisibleEvents.filter(e => e.type === 'absence').length;
+  const totalHolidays = allVisibleEvents.filter(e => e.type === 'holiday').length;
+  const totalBirthdays = allVisibleEvents.filter(e => e.type === 'birthday').length;
+  const totalOverallEvents = allVisibleEvents.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -171,6 +243,14 @@ export default function Calendrier() {
                       <div className="w-4 h-4 rounded bg-red-500/20 border border-red-500/30"></div>
                       <span className="text-sm text-slate-300">Absence</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-blue-500/20 border border-blue-500/30"></div>
+                      <span className="text-sm text-slate-300">Jour férié</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-purple-500/20 border border-purple-500/30"></div>
+                      <span className="text-sm text-slate-300">Anniversaire</span>
+                    </div>
                   </div>
                 </div>
 
@@ -178,19 +258,31 @@ export default function Calendrier() {
                   <h4 className="text-sm font-semibold text-slate-400 mb-3">Statistiques</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Total événements</span>
-                      <span className="text-white font-semibold">{filteredRendezVous.length}</span>
+                      <span className="text-slate-400">Total événements (vue)</span>
+                      <span className="text-white font-semibold">{totalOverallEvents}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Rendez-vous</span>
                       <span className="text-emerald-400 font-semibold">
-                        {filteredRendezVous.filter(r => r.type === 'rendez-vous').length}
+                        {totalRdv}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Absences</span>
                       <span className="text-red-400 font-semibold">
-                        {filteredRendezVous.filter(r => r.type === 'absence').length}
+                        {totalAbsences}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Jours fériés</span>
+                      <span className="text-blue-400 font-semibold">
+                        {totalHolidays}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Anniversaires</span>
+                      <span className="text-purple-400 font-semibold">
+                        {totalBirthdays}
                       </span>
                     </div>
                   </div>
@@ -282,26 +374,43 @@ export default function Calendrier() {
                         </div>
                         <div className="space-y-1">
                           {events.map(event => {
-                            const user = getUserByEmail(event.utilisateur_email);
+                            const user = event.utilisateur_email ? getUserByEmail(event.utilisateur_email) : null;
+                            const isClickable = event.type === 'rendez-vous' || event.type === 'absence';
+
                             return (
                               <div
                                 key={event.id}
-                                onClick={() => handleEventClick(event)}
+                                onClick={() => isClickable && handleEventClick(event)}
                                 className={`
-                                  text-xs p-1 rounded cursor-pointer flex items-center gap-1
-                                  ${event.type === 'absence' 
-                                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                                    : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                  text-xs p-1 rounded flex items-center gap-1
+                                  ${event.type === 'absence'
+                                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                    : event.type === 'holiday'
+                                      ? 'bg-blue-500/20 text-blue-400'
+                                      : event.type === 'birthday'
+                                        ? 'bg-purple-500/20 text-purple-400'
+                                        : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
                                   }
+                                  ${isClickable ? 'cursor-pointer' : 'cursor-default'}
                                 `}
-                                title={`${event.titre} - ${user?.full_name}`}
+                                title={`${event.titre}${user ? ' - ' + user.full_name : ''}`}
                               >
-                                <Avatar className="w-4 h-4">
-                                  <AvatarImage src={user?.photo_url} />
-                                  <AvatarFallback className="text-[8px] bg-gradient-to-r from-emerald-500 to-teal-500">
-                                    {getInitials(user?.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
+                                {(event.type === 'rendez-vous' || event.type === 'absence') && user && (
+                                  <Avatar className="w-4 h-4">
+                                    <AvatarImage src={user?.photo_url} />
+                                    <AvatarFallback className="text-[8px] bg-gradient-to-r from-emerald-500 to-teal-500">
+                                      {getInitials(user?.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                )}
+                                {event.type === 'birthday' && user && (
+                                  <Avatar className="w-4 h-4">
+                                    <AvatarImage src={user?.photo_url} />
+                                    <AvatarFallback className="text-[8px] bg-gradient-to-r from-purple-500 to-pink-500">
+                                      {getInitials(user?.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                )}
                                 <span className="truncate flex-1">{event.titre}</span>
                               </div>
                             );

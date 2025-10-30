@@ -1,8 +1,9 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +18,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const navigationItems = [
   {
@@ -53,6 +60,65 @@ const navigationItems = [
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
+  const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: dossiers } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
+  const [entreeForm, setEntreeForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    heures: "",
+    dossier_id: "",
+    mandat: "",
+    tache: "",
+    description: ""
+  });
+
+  const createEntreeMutation = useMutation({
+    mutationFn: (data) => base44.entities.EntreeTemps.create({ ...data, utilisateur_email: user?.email }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
+      setIsEntreeTempsOpen(false);
+      resetForm();
+    },
+  });
+
+  const resetForm = () => {
+    setEntreeForm({
+      date: new Date().toISOString().split('T')[0],
+      heures: "",
+      dossier_id: "",
+      mandat: "",
+      tache: "",
+      description: ""
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createEntreeMutation.mutate({
+      ...entreeForm,
+      heures: parseFloat(entreeForm.heures)
+    });
+  };
+
+  const handleDossierChange = (dossierId) => {
+    const selectedDossier = dossiers.find(d => d.id === dossierId);
+    setEntreeForm({
+      ...entreeForm,
+      dossier_id: dossierId,
+      mandat: selectedDossier?.titre || ""
+    });
+  };
 
   return (
     <SidebarProvider>
@@ -123,7 +189,105 @@ export default function Layout({ children, currentPageName }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-900 p-4 bg-slate-950">
+          <SidebarFooter className="border-t border-slate-900 p-4 bg-slate-950 space-y-3">
+            <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Entrée de temps
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Nouvelle entrée de temps</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Date <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="date"
+                        value={entreeForm.date}
+                        onChange={(e) => setEntreeForm({...entreeForm, date: e.target.value})}
+                        required
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Heures <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="number"
+                        step="0.25"
+                        min="0"
+                        value={entreeForm.heures}
+                        onChange={(e) => setEntreeForm({...entreeForm, heures: e.target.value})}
+                        required
+                        placeholder="Ex: 2.5"
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Dossier</Label>
+                    <Select value={entreeForm.dossier_id} onValueChange={handleDossierChange}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner un dossier" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="aucun" className="text-white">Aucun dossier</SelectItem>
+                        {dossiers.map((dossier) => (
+                          <SelectItem key={dossier.id} value={dossier.id} className="text-white">
+                            {dossier.numero_dossier} - {dossier.titre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Mandat</Label>
+                    <Input
+                      value={entreeForm.mandat}
+                      onChange={(e) => setEntreeForm({...entreeForm, mandat: e.target.value})}
+                      placeholder="Mandat du dossier"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
+                    <Input
+                      value={entreeForm.tache}
+                      onChange={(e) => setEntreeForm({...entreeForm, tache: e.target.value})}
+                      required
+                      placeholder="Ex: Rédaction du rapport"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={entreeForm.description}
+                      onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
+                      placeholder="Détails supplémentaires..."
+                      className="bg-slate-800 border-slate-700 h-24"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      Enregistrer
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-white" />
