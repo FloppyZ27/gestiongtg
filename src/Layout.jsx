@@ -20,9 +20,9 @@ import {
 
 const navigationItems = [
   {
-    title: "Actes",
-    url: createPageUrl("Dashboard"),
-    icon: FileText,
+    title: "Profil",
+    url: createPageUrl("Profil"),
+    icon: User,
   },
   {
     title: "Clients",
@@ -35,14 +35,14 @@ const navigationItems = [
     icon: User,
   },
   {
+    title: "Actes",
+    url: createPageUrl("Dashboard"),
+    icon: FileText,
+  },
+  {
     title: "Chaine de Titre",
     url: createPageUrl("ChaineDeTitre"),
     icon: Link2,
-  },
-  {
-    title: "Profil",
-    url: createPageUrl("Profil"),
-    icon: User,
   },
 ];
 

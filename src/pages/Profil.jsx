@@ -7,18 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock, FileText, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, Trash2 } from "lucide-react";
+import { Calendar, Clock, FileText, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Profil() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [isRendezVousDialogOpen, setIsRendezVousDialogOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState(null);
+  const [editingRendezVous, setEditingRendezVous] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const queryClient = useQueryClient();
 
@@ -41,13 +41,6 @@ export default function Profil() {
     enabled: !!user,
   });
 
-  const { data: notes } = useQuery({
-    queryKey: ['notes', user?.email],
-    queryFn: () => base44.entities.Note.filter({ utilisateur_email: user?.email }, '-created_date'),
-    initialData: [],
-    enabled: !!user,
-  });
-
   const { data: rendezVous } = useQuery({
     queryKey: ['rendezVous', user?.email],
     queryFn: () => base44.entities.RendezVous.filter({ utilisateur_email: user?.email }, '-date_debut'),
@@ -61,11 +54,6 @@ export default function Profil() {
     telephone: user?.telephone || "",
     adresse: user?.adresse || "",
     poste: user?.poste || "",
-  });
-
-  const [noteForm, setNoteForm] = useState({
-    titre: "",
-    contenu: ""
   });
 
   const [rendezVousForm, setRendezVousForm] = useState({
@@ -107,37 +95,28 @@ export default function Profil() {
     },
   });
 
-  const createNoteMutation = useMutation({
-    mutationFn: (noteData) => base44.entities.Note.create({ ...noteData, utilisateur_email: user?.email }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setIsNoteDialogOpen(false);
-      resetNoteForm();
-    },
-  });
-
-  const updateNoteMutation = useMutation({
-    mutationFn: ({ id, noteData }) => base44.entities.Note.update(id, noteData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setIsNoteDialogOpen(false);
-      resetNoteForm();
-    },
-  });
-
-  const deleteNoteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Note.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
-  });
-
   const createRendezVousMutation = useMutation({
     mutationFn: (data) => base44.entities.RendezVous.create({ ...data, utilisateur_email: user?.email }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rendezVous'] });
       setIsRendezVousDialogOpen(false);
       resetRendezVousForm();
+    },
+  });
+
+  const updateRendezVousMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.RendezVous.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rendezVous'] });
+      setIsRendezVousDialogOpen(false);
+      resetRendezVousForm();
+    },
+  });
+
+  const deleteRendezVousMutation = useMutation({
+    mutationFn: (id) => base44.entities.RendezVous.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rendezVous'] });
     },
   });
 
@@ -155,23 +134,13 @@ export default function Profil() {
     updateProfileMutation.mutate(updateData);
   };
 
-  const handleNoteSubmit = (e) => {
-    e.preventDefault();
-    if (editingNote) {
-      updateNoteMutation.mutate({ id: editingNote.id, noteData: noteForm });
-    } else {
-      createNoteMutation.mutate(noteForm);
-    }
-  };
-
   const handleRendezVousSubmit = (e) => {
     e.preventDefault();
-    createRendezVousMutation.mutate(rendezVousForm);
-  };
-
-  const resetNoteForm = () => {
-    setNoteForm({ titre: "", contenu: "" });
-    setEditingNote(null);
+    if (editingRendezVous) {
+      updateRendezVousMutation.mutate({ id: editingRendezVous.id, data: rendezVousForm });
+    } else {
+      createRendezVousMutation.mutate(rendezVousForm);
+    }
   };
 
   const resetRendezVousForm = () => {
@@ -182,12 +151,19 @@ export default function Profil() {
       date_fin: "",
       type: "rendez-vous"
     });
+    setEditingRendezVous(null);
   };
 
-  const handleEditNote = (note) => {
-    setEditingNote(note);
-    setNoteForm({ titre: note.titre, contenu: note.contenu });
-    setIsNoteDialogOpen(true);
+  const handleEditRendezVous = (rdv) => {
+    setEditingRendezVous(rdv);
+    setRendezVousForm({
+      titre: rdv.titre,
+      description: rdv.description || "",
+      date_debut: rdv.date_debut,
+      date_fin: rdv.date_fin || "",
+      type: rdv.type
+    });
+    setIsRendezVousDialogOpen(true);
   };
 
   const getInitials = (name) => {
@@ -196,6 +172,23 @@ export default function Profil() {
 
   const dossiersEnCours = dossiers.filter(d => d.statut === 'en_cours');
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
+
+  // Calendar logic
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const startDate = startOfWeek(monthStart, { locale: fr });
+  const endDate = endOfWeek(monthEnd, { locale: fr });
+  const daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+
+  const getEventsForDay = (day) => {
+    return rendezVous.filter(rdv => {
+      const rdvDate = new Date(rdv.date_debut);
+      return isSameDay(rdvDate, day);
+    });
+  };
+
+  const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -210,8 +203,8 @@ export default function Profil() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Profile & Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Profile, Stats & Time entries */}
           <div className="space-y-6">
             {/* Profile Card */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
@@ -290,18 +283,81 @@ export default function Profil() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Entrées de temps */}
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-emerald-400" />
+                  Dernières entrées de temps
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {entreeTemps.map((entree) => (
+                    <div key={entree.id} className="p-3 bg-slate-800/50 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="text-white text-sm">{entree.description}</p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
+                          </p>
+                        </div>
+                        <span className="text-emerald-400 font-semibold">{entree.heures}h</span>
+                      </div>
+                    </div>
+                  ))}
+                  {entreeTemps.length === 0 && (
+                    <p className="text-center text-slate-500 py-4">Aucune entrée de temps</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dossiers en cours */}
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-emerald-400" />
+                  Dossiers en cours
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {dossiersEnCours.slice(0, 5).map((dossier) => (
+                    <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold text-white">{dossier.titre}</h4>
+                          <p className="text-sm text-slate-400">N° {dossier.numero_dossier}</p>
+                        </div>
+                        <Badge className="bg-emerald-500/20 text-emerald-400">
+                          {dossier.statut}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {dossiersEnCours.length === 0 && (
+                    <p className="text-center text-slate-500 py-4">Aucun dossier en cours</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Middle Column - Calendar & Rendez-vous */}
+          {/* Right Column - Calendar */}
           <div className="space-y-6">
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-emerald-400" />
-                    Rendez-vous & Absences
+                    Calendrier
                   </CardTitle>
-                  <Dialog open={isRendezVousDialogOpen} onOpenChange={setIsRendezVousDialogOpen}>
+                  <Dialog open={isRendezVousDialogOpen} onOpenChange={(open) => {
+                    setIsRendezVousDialogOpen(open);
+                    if (!open) resetRendezVousForm();
+                  }}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
                         <Plus className="w-4 h-4" />
@@ -309,7 +365,7 @@ export default function Profil() {
                     </DialogTrigger>
                     <DialogContent className="bg-slate-900 border-slate-800 text-white">
                       <DialogHeader>
-                        <DialogTitle>Nouveau rendez-vous</DialogTitle>
+                        <DialogTitle>{editingRendezVous ? "Modifier" : "Nouveau rendez-vous"}</DialogTitle>
                       </DialogHeader>
                       <form onSubmit={handleRendezVousSubmit} className="space-y-4">
                         <div className="space-y-2">
@@ -366,7 +422,7 @@ export default function Profil() {
                             Annuler
                           </Button>
                           <Button type="submit" className="bg-emerald-500">
-                            Créer
+                            {editingRendezVous ? "Modifier" : "Créer"}
                           </Button>
                         </div>
                       </form>
@@ -375,183 +431,78 @@ export default function Profil() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {rendezVous.map((rdv) => (
-                    <div
-                      key={rdv.id}
-                      className={`p-3 rounded-lg ${
-                        rdv.type === 'absence' 
-                          ? 'bg-red-500/10 border border-red-500/30' 
-                          : 'bg-emerald-500/10 border border-emerald-500/30'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold text-white">{rdv.titre}</h4>
-                          <p className="text-sm text-slate-400 mt-1">
-                            {format(new Date(rdv.date_debut), "dd MMM yyyy HH:mm", { locale: fr })}
-                          </p>
-                          {rdv.description && (
-                            <p className="text-sm text-slate-400 mt-2">{rdv.description}</p>
-                          )}
-                        </div>
-                        <Badge className={rdv.type === 'absence' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}>
-                          {rdv.type}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {rendezVous.length === 0 && (
-                    <p className="text-center text-slate-500 py-8">Aucun rendez-vous</p>
-                  )}
+                {/* Calendar Header */}
+                <div className="flex justify-between items-center mb-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={previousMonth}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <h3 className="text-lg font-semibold text-white">
+                    {format(currentMonth, "MMMM yyyy", { locale: fr })}
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={nextMonth}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Dossiers en cours */}
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-emerald-400" />
-                  Dossiers en cours
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {dossiersEnCours.slice(0, 5).map((dossier) => (
-                    <div key={dossier.id} className="p-3 bg-slate-800/50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold text-white">{dossier.titre}</h4>
-                          <p className="text-sm text-slate-400">N° {dossier.numero_dossier}</p>
-                        </div>
-                        <Badge className="bg-emerald-500/20 text-emerald-400">
-                          {dossier.statut}
-                        </Badge>
-                      </div>
+                {/* Day names */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+                    <div key={day} className="text-center text-xs font-semibold text-slate-500 p-2">
+                      {day}
                     </div>
                   ))}
-                  {dossiersEnCours.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Aucun dossier en cours</p>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Right Column - Time entries & Notes */}
-          <div className="space-y-6">
-            {/* Entrées de temps */}
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-emerald-400" />
-                  Dernières entrées de temps
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {entreeTemps.map((entree) => (
-                    <div key={entree.id} className="p-3 bg-slate-800/50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <p className="text-white text-sm">{entree.description}</p>
-                          <p className="text-xs text-slate-400 mt-1">
-                            {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
-                          </p>
-                        </div>
-                        <span className="text-emerald-400 font-semibold">{entree.heures}h</span>
-                      </div>
-                    </div>
-                  ))}
-                  {entreeTemps.length === 0 && (
-                    <p className="text-center text-slate-500 py-4">Aucune entrée de temps</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {daysInView.map((day, index) => {
+                    const events = getEventsForDay(day);
+                    const isCurrentMonth = isSameMonth(day, currentMonth);
+                    const isToday = isSameDay(day, new Date());
 
-            {/* Notes */}
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader className="border-b border-slate-800">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-white">Mes notes</CardTitle>
-                  <Dialog open={isNoteDialogOpen} onOpenChange={(open) => {
-                    setIsNoteDialogOpen(open);
-                    if (!open) resetNoteForm();
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-slate-900 border-slate-800 text-white">
-                      <DialogHeader>
-                        <DialogTitle>{editingNote ? "Modifier la note" : "Nouvelle note"}</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleNoteSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Titre</Label>
-                          <Input
-                            value={noteForm.titre}
-                            onChange={(e) => setNoteForm({...noteForm, titre: e.target.value})}
-                            required
-                            className="bg-slate-800 border-slate-700"
-                          />
+                    return (
+                      <div
+                        key={index}
+                        className={`
+                          min-h-[80px] p-2 rounded-lg border transition-colors
+                          ${isCurrentMonth ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-slate-800'}
+                          ${isToday ? 'border-emerald-500 border-2' : ''}
+                        `}
+                      >
+                        <div className={`text-sm mb-1 ${isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
+                          {format(day, 'd')}
                         </div>
-                        <div className="space-y-2">
-                          <Label>Contenu</Label>
-                          <Textarea
-                            value={noteForm.contenu}
-                            onChange={(e) => setNoteForm({...noteForm, contenu: e.target.value})}
-                            required
-                            className="bg-slate-800 border-slate-700 h-32"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button type="button" variant="outline" onClick={() => setIsNoteDialogOpen(false)}>
-                            Annuler
-                          </Button>
-                          <Button type="submit" className="bg-emerald-500">
-                            {editingNote ? "Modifier" : "Créer"}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {notes.map((note) => (
-                    <div key={note.id} className="p-3 bg-slate-800/50 rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-white">{note.titre}</h4>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditNote(note)}
-                            className="h-6 w-6 p-0 text-emerald-400 hover:text-emerald-300"
-                          >
-                            <FileText className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteNoteMutation.mutate(note.id)}
-                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
+                        <div className="space-y-1">
+                          {events.map(event => (
+                            <div
+                              key={event.id}
+                              onClick={() => handleEditRendezVous(event)}
+                              className={`
+                                text-xs p-1 rounded cursor-pointer truncate
+                                ${event.type === 'absence' 
+                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
+                                  : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                }
+                              `}
+                              title={event.titre}
+                            >
+                              {event.titre}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <p className="text-sm text-slate-300 whitespace-pre-wrap">{note.contenu}</p>
-                    </div>
-                  ))}
-                  {notes.length === 0 && (
-                    <p className="text-center text-slate-500 py-8">Aucune note</p>
-                  )}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

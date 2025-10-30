@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,9 +18,9 @@ export default function Clients() {
   const [formData, setFormData] = useState({
     prenom: "",
     nom: "",
-    adresse: "",
-    courriel: "",
-    telephone: "",
+    adresses: [{ adresse: "", actuelle: true }],
+    courriels: [{ courriel: "", actuel: true }],
+    telephones: [{ telephone: "", actuel: true }],
     notes: ""
   });
 
@@ -61,17 +62,25 @@ export default function Clients() {
     return (
       client.nom?.toLowerCase().includes(searchLower) ||
       client.prenom?.toLowerCase().includes(searchLower) ||
-      client.courriel?.toLowerCase().includes(searchLower) ||
-      client.telephone?.toLowerCase().includes(searchLower)
+      client.courriels?.some(c => c.courriel?.toLowerCase().includes(searchLower)) ||
+      client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower))
     );
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Filter out empty entries
+    const cleanedData = {
+      ...formData,
+      adresses: formData.adresses.filter(a => a.adresse.trim() !== ""),
+      courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
+      telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
+    };
+    
     if (editingClient) {
-      updateClientMutation.mutate({ id: editingClient.id, clientData: formData });
+      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
     } else {
-      createClientMutation.mutate(formData);
+      createClientMutation.mutate(cleanedData);
     }
   };
 
@@ -79,9 +88,9 @@ export default function Clients() {
     setFormData({
       prenom: "",
       nom: "",
-      adresse: "",
-      courriel: "",
-      telephone: "",
+      adresses: [{ adresse: "", actuelle: true }],
+      courriels: [{ courriel: "", actuel: true }],
+      telephones: [{ telephone: "", actuel: true }],
       notes: ""
     });
     setEditingClient(null);
@@ -92,9 +101,9 @@ export default function Clients() {
     setFormData({
       prenom: client.prenom || "",
       nom: client.nom || "",
-      adresse: client.adresse || "",
-      courriel: client.courriel || "",
-      telephone: client.telephone || "",
+      adresses: client.adresses && client.adresses.length > 0 ? client.adresses : [{ adresse: "", actuelle: true }],
+      courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [{ courriel: "", actuel: true }],
+      telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [{ telephone: "", actuel: true }],
       notes: client.notes || ""
     });
     setIsDialogOpen(true);
@@ -104,6 +113,46 @@ export default function Clients() {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
       deleteClientMutation.mutate(id);
     }
+  };
+
+  const addField = (fieldName) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+    }));
+  };
+
+  const removeField = (fieldName, index) => {
+    if (formData[fieldName].length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: prev[fieldName].filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updateField = (fieldName, index, key, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => 
+        i === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const toggleActuel = (fieldName, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => ({
+        ...item,
+        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
+      }))
+    }));
+  };
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "-";
   };
 
   const statsCards = [
@@ -149,13 +198,13 @@ export default function Clients() {
                 Nouveau client
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-2xl">
                   {editingClient ? "Modifier le client" : "Nouveau client"}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
@@ -178,37 +227,150 @@ export default function Clients() {
                     />
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="adresse">Adresse</Label>
-                  <Input
-                    id="adresse"
-                    value={formData.adresse}
-                    onChange={(e) => setFormData({...formData, adresse: e.target.value})}
-                    className="bg-slate-800 border-slate-700"
-                  />
+
+                {/* Adresses */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label>Adresses</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => addField('adresses')}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
+                  {formData.adresses.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={item.adresse}
+                          onChange={(e) => updateField('adresses', index, 'adresse', e.target.value)}
+                          placeholder="Adresse"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => toggleActuel('adresses', index)}
+                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                        title={item.actuelle ? "Actuelle" : "Marquer comme actuelle"}
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      {formData.adresses.length > 1 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeField('adresses', index)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="courriel">Courriel</Label>
-                    <Input
-                      id="courriel"
-                      type="email"
-                      value={formData.courriel}
-                      onChange={(e) => setFormData({...formData, courriel: e.target.value})}
-                      className="bg-slate-800 border-slate-700"
-                    />
+
+                {/* Courriels */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label>Courriels</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => addField('courriels')}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telephone">Téléphone</Label>
-                    <Input
-                      id="telephone"
-                      value={formData.telephone}
-                      onChange={(e) => setFormData({...formData, telephone: e.target.value})}
-                      className="bg-slate-800 border-slate-700"
-                    />
+                  {formData.courriels.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          type="email"
+                          value={item.courriel}
+                          onChange={(e) => updateField('courriels', index, 'courriel', e.target.value)}
+                          placeholder="Courriel"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => toggleActuel('courriels', index)}
+                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                        title={item.actuel ? "Actuel" : "Marquer comme actuel"}
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      {formData.courriels.length > 1 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeField('courriels', index)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Téléphones */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label>Téléphones</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => addField('telephones')}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
                   </div>
+                  {formData.telephones.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={item.telephone}
+                          onChange={(e) => updateField('telephones', index, 'telephone', e.target.value)}
+                          placeholder="Téléphone"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => toggleActuel('telephones', index)}
+                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                        title={item.actuel ? "Actuel" : "Marquer comme actuel"}
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      {formData.telephones.length > 1 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeField('telephones', index)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
                 </div>
                 
                 <div className="space-y-2">
@@ -277,9 +439,9 @@ export default function Clients() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">Nom complet</TableHead>
-                    <TableHead className="text-slate-300">Courriel</TableHead>
-                    <TableHead className="text-slate-300">Téléphone</TableHead>
-                    <TableHead className="text-slate-300">Adresse</TableHead>
+                    <TableHead className="text-slate-300">Courriel actuel</TableHead>
+                    <TableHead className="text-slate-300">Téléphone actuel</TableHead>
+                    <TableHead className="text-slate-300">Adresse actuelle</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -290,28 +452,22 @@ export default function Clients() {
                         {client.prenom} {client.nom}
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {client.courriel ? (
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-slate-500" />
-                            {client.courriel}
-                          </div>
-                        ) : "-"}
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-slate-500" />
+                          {getCurrentValue(client.courriels, 'courriel')}
+                        </div>
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {client.telephone ? (
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-slate-500" />
-                            {client.telephone}
-                          </div>
-                        ) : "-"}
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-slate-500" />
+                          {getCurrentValue(client.telephones, 'telephone')}
+                        </div>
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {client.adresse ? (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-slate-500" />
-                            {client.adresse}
-                          </div>
-                        ) : "-"}
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-slate-500" />
+                          {getCurrentValue(client.adresses, 'adresse')}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
