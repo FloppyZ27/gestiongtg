@@ -19,9 +19,9 @@ import {
 
 const navigationItems = [
   {
-    title: "Tableau de bord",
+    title: "Actes",
     url: createPageUrl("Dashboard"),
-    icon: LayoutDashboard,
+    icon: FileText,
   },
   {
     title: "Chaine de Titre",
