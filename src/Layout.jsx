@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -24,6 +25,11 @@ const navigationItems = [
     icon: FileText,
   },
   {
+    title: "Clients",
+    url: createPageUrl("Clients"),
+    icon: User,
+  },
+  {
     title: "Notaires",
     url: createPageUrl("Notaires"),
     icon: User,
@@ -32,6 +38,11 @@ const navigationItems = [
     title: "Chaine de Titre",
     url: createPageUrl("ChaineDeTitre"),
     icon: Link2,
+  },
+  {
+    title: "Profil",
+    url: createPageUrl("Profil"),
+    icon: User,
   },
 ];
 
