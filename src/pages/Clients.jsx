@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,7 +19,8 @@ export default function Clients() {
   const [formData, setFormData] = useState({
     prenom: "",
     nom: "",
-    adresses: [{ adresse: "", actuelle: true }],
+    type_client: "Client",
+    adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
     courriels: [{ courriel: "", actuel: true }],
     telephones: [{ telephone: "", actuel: true }],
     notes: ""
@@ -62,6 +64,7 @@ export default function Clients() {
     return (
       client.nom?.toLowerCase().includes(searchLower) ||
       client.prenom?.toLowerCase().includes(searchLower) ||
+      client.type_client?.toLowerCase().includes(searchLower) ||
       client.courriels?.some(c => c.courriel?.toLowerCase().includes(searchLower)) ||
       client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower))
     );
@@ -88,7 +91,8 @@ export default function Clients() {
     setFormData({
       prenom: "",
       nom: "",
-      adresses: [{ adresse: "", actuelle: true }],
+      type_client: "Client",
+      adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
       courriels: [{ courriel: "", actuel: true }],
       telephones: [{ telephone: "", actuel: true }],
       notes: ""
@@ -101,7 +105,8 @@ export default function Clients() {
     setFormData({
       prenom: client.prenom || "",
       nom: client.nom || "",
-      adresses: client.adresses && client.adresses.length > 0 ? client.adresses : [{ adresse: "", actuelle: true }],
+      type_client: client.type_client || "Client",
+      adresses: client.adresses && client.adresses.length > 0 ? client.adresses : [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
       courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [{ courriel: "", actuel: true }],
       telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [{ telephone: "", actuel: true }],
       notes: client.notes || ""
@@ -116,10 +121,17 @@ export default function Clients() {
   };
 
   const addField = (fieldName) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
-    }));
+    if (fieldName === 'adresses') {
+      setFormData(prev => ({
+        ...prev,
+        adresses: [...prev.adresses, { adresse: "", latitude: null, longitude: null, actuelle: false }]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+      }));
+    }
   };
 
   const removeField = (fieldName, index) => {
@@ -150,9 +162,37 @@ export default function Clients() {
     }));
   };
 
+  // Fonction pour géocoder l'adresse (simulation - nécessiterait une vraie API Google Maps)
+  const handleAddressChange = async (index, value) => {
+    updateField('adresses', index, 'adresse', value);
+    
+    // Note: Pour une vraie intégration Google Maps, vous auriez besoin d'ajouter
+    // l'API Google Maps Places et Geocoding. Ceci est une structure de base.
+    // Les coordonnées seraient obtenues via l'API Geocoding de Google.
+    
+    // Pour l'instant, on laisse latitude et longitude null
+    // Exemple de ce qui pourrait être fait avec l'API:
+    // const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(value)}&key=YOUR_API_KEY`);
+    // const data = await response.json();
+    // if (data.results[0]) {
+    //   updateField('adresses', index, 'latitude', data.results[0].geometry.location.lat);
+    //   updateField('adresses', index, 'longitude', data.results[0].geometry.location.lng);
+    // }
+  };
+
   const getCurrentValue = (items, key) => {
     const current = items?.find(item => item.actuel || item.actuelle);
     return current?.[key] || "-";
+  };
+
+  const getTypeColor = (type) => {
+    const colors = {
+      "Client": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      "Notaire": "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      "Courtier immobilier": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Compagnie": "bg-green-500/20 text-green-400 border-green-500/30"
+    };
+    return colors[type] || colors["Client"];
   };
 
   const statsCards = [
@@ -228,6 +268,21 @@ export default function Clients() {
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="type_client">Type de client</Label>
+                  <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner le type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="Client" className="text-white">Client</SelectItem>
+                      <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                      <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                      <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Adresses */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -243,35 +298,40 @@ export default function Clients() {
                     </Button>
                   </div>
                   {formData.adresses.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-start">
-                      <div className="flex-1">
-                        <Input
-                          value={item.adresse}
-                          onChange={(e) => updateField('adresses', index, 'adresse', e.target.value)}
-                          placeholder="Adresse"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => toggleActuel('adresses', index)}
-                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                        title={item.actuelle ? "Actuelle" : "Marquer comme actuelle"}
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      {formData.adresses.length > 1 && (
+                    <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                      <div className="flex gap-2 items-start">
+                        <div className="flex-1">
+                          <Input
+                            value={item.adresse}
+                            onChange={(e) => handleAddressChange(index, e.target.value)}
+                            placeholder="Entrez une adresse complète"
+                            className="bg-slate-800 border-slate-700"
+                          />
+                          <p className="text-xs text-slate-500 mt-1">
+                            Format recommandé: Numéro, Rue, Ville, Province, Code postal
+                          </p>
+                        </div>
                         <Button
                           type="button"
                           size="sm"
-                          variant="ghost"
-                          onClick={() => removeField('adresses', index)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          onClick={() => toggleActuel('adresses', index)}
+                          className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                          title={item.actuelle ? "Actuelle" : "Marquer comme actuelle"}
                         >
-                          <X className="w-4 h-4" />
+                          <Check className="w-4 h-4" />
                         </Button>
-                      )}
+                        {formData.adresses.length > 1 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeField('adresses', index)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -439,6 +499,7 @@ export default function Clients() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">Nom complet</TableHead>
+                    <TableHead className="text-slate-300">Type</TableHead>
                     <TableHead className="text-slate-300">Courriel actuel</TableHead>
                     <TableHead className="text-slate-300">Téléphone actuel</TableHead>
                     <TableHead className="text-slate-300">Adresse actuelle</TableHead>
@@ -450,6 +511,11 @@ export default function Clients() {
                     <TableRow key={client.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium text-white">
                         {client.prenom} {client.nom}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
+                          {client.type_client || "Client"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-slate-300">
                         <div className="flex items-center gap-2">
