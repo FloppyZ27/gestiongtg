@@ -4,21 +4,19 @@ import { createPageUrl } from "@/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Calendar, FileText, User, Edit, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from "lucide-react";
+import { Eye, FileText, User, Edit, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 const typeColors = {
   "Vente": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  "Donation": "bg-green-500/20 text-green-400 border-green-500/30",
-  "Succession": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  "Hypothèque": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  "Prêt": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  "Échange": "bg-pink-500/20 text-pink-400 border-pink-500/30",
-  "Bail": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  "Cession": "bg-green-500/20 text-green-400 border-green-500/30",
+  "Donation": "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  "Déclaration de Transmission": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  "Jugement": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  "Rectification": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+  "Retrocession": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
   "Servitude": "bg-teal-500/20 text-teal-400 border-teal-500/30",
-  "Autre": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+  "Bornage": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
 };
 
 export default function ActesList({ actes, isLoading, onSelectActe, onSort, sortField, sortDirection }) {
@@ -90,9 +88,6 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
               <SortButton field="numero_acte" label="N° d'acte" />
             </TableHead>
             <TableHead className="font-semibold text-slate-300">
-              <SortButton field="date_bpd" label="Date BPD" />
-            </TableHead>
-            <TableHead className="font-semibold text-slate-300">
               <SortButton field="type_acte" label="Type" />
             </TableHead>
             <TableHead className="font-semibold text-slate-300">
@@ -120,16 +115,10 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
                   {acte.numero_acte}
                 </div>
               </TableCell>
-              <TableCell className="text-slate-300">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-slate-500" />
-                  {format(new Date(acte.date_bpd), "dd MMM yyyy", { locale: fr })}
-                </div>
-              </TableCell>
               <TableCell>
                 <Badge 
                   variant="secondary"
-                  className={`${typeColors[acte.type_acte] || typeColors["Autre"]} border font-medium`}
+                  className={`${typeColors[acte.type_acte] || typeColors["Vente"]} border font-medium`}
                 >
                   {acte.type_acte}
                 </Badge>

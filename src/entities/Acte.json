@@ -22,16 +22,33 @@
       "type": "string",
       "enum": [
         "Vente",
+        "Cession",
         "Donation",
-        "Succession",
-        "Hypoth\u00e8que",
-        "Pr\u00eat",
-        "\u00c9change",
-        "Bail",
+        "D\u00e9claration de Transmission",
+        "Jugement",
+        "Rectification",
+        "Retrocession",
         "Servitude",
-        "Autre"
+        "Bornage"
       ],
       "description": "Type d'acte notari\u00e9"
+    },
+    "type_servitude": {
+      "type": "string",
+      "enum": [
+        "\u00c9lectrique",
+        "T\u00e9l\u00e9phonique",
+        "Passage",
+        "Aqueduc",
+        "\u00c9gout",
+        "Industrielle",
+        "Vue",
+        "Mitoyennet\u00e9",
+        "Tol\u00e9rance",
+        "Baignage",
+        "Autre"
+      ],
+      "description": "Type de servitude (si type_acte est Servitude)"
     },
     "circonscription_fonciere": {
       "type": "string",

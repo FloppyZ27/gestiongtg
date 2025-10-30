@@ -10,13 +10,27 @@ import { Separator } from "@/components/ui/separator";
 
 const TYPES_ACTES = [
   "Vente",
+  "Cession",
   "Donation",
-  "Succession",
-  "Hypothèque",
-  "Prêt",
-  "Échange",
-  "Bail",
+  "Déclaration de Transmission",
+  "Jugement",
+  "Rectification",
+  "Retrocession",
   "Servitude",
+  "Bornage"
+];
+
+const TYPES_SERVITUDES = [
+  "Électrique",
+  "Téléphonique",
+  "Passage",
+  "Aqueduc",
+  "Égout",
+  "Industrielle",
+  "Vue",
+  "Mitoyenneté",
+  "Tolérance",
+  "Baignage",
   "Autre"
 ];
 
@@ -36,6 +50,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
         : [""],
     date_bpd: acte?.date_bpd || "",
     type_acte: acte?.type_acte || "",
+    type_servitude: acte?.type_servitude || "",
     circonscription_fonciere: acte?.circonscription_fonciere || "",
     notaire: acte?.notaire || "",
     document_pdf_url: acte?.document_pdf_url || "",
@@ -50,7 +65,14 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
   const [uploadedFileName, setUploadedFileName] = useState("");
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      // Si on change le type d'acte et que ce n'est plus "Servitude", on vide type_servitude
+      if (field === 'type_acte' && value !== 'Servitude') {
+        newData.type_servitude = '';
+      }
+      return newData;
+    });
   };
 
   const handleFileUpload = async (e) => {
@@ -245,6 +267,30 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
               </SelectContent>
             </Select>
           </div>
+
+          {formData.type_acte === "Servitude" && (
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="type_servitude" className="text-slate-300">
+                Type de servitude <span className="text-red-400">*</span>
+              </Label>
+              <Select
+                value={formData.type_servitude}
+                onValueChange={(value) => handleInputChange('type_servitude', value)}
+                required
+              >
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Sélectionner un type de servitude" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {TYPES_SERVITUDES.map((type) => (
+                    <SelectItem key={type} value={type} className="text-white">
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="notaire" className="text-slate-300">

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, Search, FileText, Calendar, TrendingUp, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ActesList from "../components/actes/ActesList";
 import ActeDetails from "../components/actes/ActeDetails";
 
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [selectedActe, setSelectedActe] = useState(null);
   const [sortField, setSortField] = useState('created_date');
   const [sortDirection, setSortDirection] = useState('desc');
+  const [filterTypeActe, setFilterTypeActe] = useState("all");
+  const [filterCirconscription, setFilterCirconscription] = useState("all");
 
   const { data: actes, isLoading } = useQuery({
     queryKey: ['actes'],
@@ -37,13 +40,21 @@ export default function Dashboard() {
       a.prenom?.toLowerCase().includes(searchLower)
     );
     
+    // Filtre par type d'acte
+    const typeMatch = filterTypeActe === "all" || acte.type_acte === filterTypeActe;
+    
+    // Filtre par circonscription
+    const circonscriptionMatch = filterCirconscription === "all" || acte.circonscription_fonciere === filterCirconscription;
+    
     return (
-      acte.numero_acte?.toLowerCase().includes(searchLower) ||
+      typeMatch &&
+      circonscriptionMatch &&
+      (acte.numero_acte?.toLowerCase().includes(searchLower) ||
       acte.notaire?.toLowerCase().includes(searchLower) ||
       acte.type_acte?.toLowerCase().includes(searchLower) ||
       acte.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
       vendeursMatch ||
-      acheteursMatch
+      acheteursMatch)
     );
   });
 
@@ -62,8 +73,8 @@ export default function Dashboard() {
 
     // Handle date fields
     if (sortField === 'date_bpd' || sortField === 'created_date') {
-      aValue = new Date(aValue).getTime();
-      bValue = new Date(bValue).getTime();
+      aValue = aValue ? new Date(aValue).getTime() : 0;
+      bValue = bValue ? new Date(bValue).getTime() : 0;
     }
 
     // Handle string fields
@@ -72,10 +83,14 @@ export default function Dashboard() {
       bValue = bValue?.toLowerCase() || '';
     }
 
+    // Handle undefined/null values
+    if (aValue === undefined || aValue === null) aValue = '';
+    if (bValue === undefined || bValue === null) bValue = '';
+
     if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : -1;
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
     } else {
-      return aValue < bValue ? 1 : -1;
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
     }
   });
 
@@ -118,6 +133,9 @@ export default function Dashboard() {
       iconColor: "text-purple-400",
     },
   ];
+
+  const typesActes = ["Vente", "Cession", "Donation", "Déclaration de Transmission", "Jugement", "Rectification", "Retrocession", "Servitude", "Bornage"];
+  const circonscriptions = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -163,16 +181,63 @@ export default function Dashboard() {
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-              <CardTitle className="text-xl font-bold text-white">Liste des actes</CardTitle>
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher par acte, notaire, vendeur, acheteur..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-                />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <CardTitle className="text-xl font-bold text-white">Liste des actes</CardTitle>
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher par acte, notaire, vendeur, acheteur..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                  />
+                </div>
+              </div>
+              
+              {/* Filtres */}
+              <div className="flex flex-wrap gap-3">
+                <Select value={filterTypeActe} onValueChange={setFilterTypeActe}>
+                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Type d'acte" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                    {typesActes.map((type) => (
+                      <SelectItem key={type} value={type} className="text-white">
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
+                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    {circonscriptions.map((circ) => (
+                      <SelectItem key={circ} value={circ} className="text-white">
+                        {circ}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {(filterTypeActe !== "all" || filterCirconscription !== "all") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFilterTypeActe("all");
+                      setFilterCirconscription("all");
+                    }}
+                    className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  >
+                    Réinitialiser les filtres
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
