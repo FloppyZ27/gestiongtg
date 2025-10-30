@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Link2, Trash2, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -52,6 +52,15 @@ export default function ChaineDeTitre() {
       acte.notaire?.toLowerCase().includes(searchLower) ||
       acte.type_acte?.toLowerCase().includes(searchLower))
     );
+  }).sort((a, b) => {
+    // Sort by numero_acte in descending order
+    const numA = parseFloat(a.numero_acte.replace(/[^\d.-]/g, ''));
+    const numB = parseFloat(b.numero_acte.replace(/[^\d.-]/g, ''));
+    
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numB - numA;
+    }
+    return b.numero_acte.localeCompare(a.numero_acte);
   });
 
   // Check for servitudes when placedActes changes
@@ -74,7 +83,7 @@ export default function ChaineDeTitre() {
                   id: `servitude-${servitude.id}-${Date.now()}`,
                   servitude: servitude,
                   linkedToActeId: anteriorActeData.id,
-                  x: anteriorActeData.info.x + 350,
+                  x: anteriorActeData.info.x + 400,
                   y: anteriorActeData.info.y
                 });
               }
@@ -137,7 +146,7 @@ export default function ChaineDeTitre() {
       acte: acte,
       acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
       info: { x: x, y: showAcheteurs ? y + 130 : y },
-      vendeurs: { x: x, y: showAcheteurs ? y + 230 : y + 100, visible: true }
+      vendeurs: { x: x, y: showAcheteurs ? y + 210 : y + 80, visible: true }
     };
 
     setPlacedActes(prev => {
@@ -158,7 +167,7 @@ export default function ChaineDeTitre() {
                   acte: acteAnterieur,
                   acheteurs: null,
                   info: { x: baseX, y: offsetY },
-                  vendeurs: { x: baseX, y: offsetY + 100, visible: true }
+                  vendeurs: { x: baseX, y: offsetY + 80, visible: true }
                 };
                 updated.push(anteriorActe);
                 
@@ -175,7 +184,7 @@ export default function ChaineDeTitre() {
         }
       };
 
-      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 230 : y + 100);
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 210 : y + 80);
       
       return updated;
     });
@@ -245,7 +254,7 @@ export default function ChaineDeTitre() {
             ...acte,
             [section]: {
               x: infoX,
-              y: section === 'acheteurs' ? infoY - 130 : infoY + 100,
+              y: section === 'acheteurs' ? infoY - 130 : infoY + 80,
               visible: true
             }
           };
@@ -291,11 +300,17 @@ export default function ChaineDeTitre() {
       return { x: position.x + width / 2, y: position.y }; // Top center
     } else if (section === 'vendeurs') {
       return { x: position.x + width / 2, y: position.y }; // Top center
+    } else if (section === 'servitude') {
+      return { x: position.x, y: position.y + height / 2 }; // Left center
     }
   };
 
-  const getInfoBottomEdge = (position, width = 350, height = 60) => {
+  const getInfoBottomEdge = (position, width = 350, height = 50) => {
     return { x: position.x + width / 2, y: position.y + height };
+  };
+
+  const getInfoRightEdge = (position, width = 350, height = 50) => {
+    return { x: position.x + width, y: position.y + height / 2 };
   };
 
   const getVendeurBottomEdge = (position, width = 250, height = 100) => {
@@ -506,7 +521,7 @@ export default function ChaineDeTitre() {
                         // Line from acheteurs to info (if acheteurs exists and is visible)
                         if (acteData.acheteurs && acteData.acheteurs.visible) {
                           const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs', 250, 100);
-                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 350, 60);
+                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 350, 50);
                           lines.push(
                             <line
                               key={`acheteur-info-${idx}`}
@@ -552,7 +567,7 @@ export default function ChaineDeTitre() {
                         const from = fromActe.vendeurs && fromActe.vendeurs.visible 
                           ? getVendeurBottomEdge(fromActe.vendeurs) 
                           : getInfoBottomEdge(fromActe.info);
-                        const to = getBlockEdge(toActe.info, 'info', 350, 60);
+                        const to = getBlockEdge(toActe.info, 'info', 350, 50);
 
                         return (
                           <line
@@ -562,6 +577,28 @@ export default function ChaineDeTitre() {
                             x2={to.x}
                             y2={to.y}
                             stroke="#64748b"
+                            strokeWidth="2"
+                            strokeDasharray="5,5"
+                          />
+                        );
+                      })}
+
+                      {/* Lines from info to servitudes */}
+                      {servitudes.map((servitudeData, idx) => {
+                        const linkedActe = placedActes.find(a => a.id === servitudeData.linkedToActeId);
+                        if (!linkedActe) return null;
+
+                        const from = getInfoRightEdge(linkedActe.info);
+                        const to = getBlockEdge({ x: servitudeData.x, y: servitudeData.y }, 'servitude', 280, 120);
+
+                        return (
+                          <line
+                            key={`servitude-${idx}`}
+                            x1={from.x}
+                            y1={from.y}
+                            x2={to.x}
+                            y2={to.y}
+                            stroke="#fb923c"
                             strokeWidth="2"
                             strokeDasharray="5,5"
                           />
@@ -620,14 +657,14 @@ export default function ChaineDeTitre() {
                               }}
                             >
                               <Card className="border-purple-500/50 bg-purple-500/10 backdrop-blur-sm shadow-xl">
-                                <CardContent className="p-3">
+                                <CardContent className="p-2">
                                   {/* Bouton Acheteur en haut */}
-                                  <div className="flex justify-center mb-2">
+                                  <div className="flex justify-center mb-1">
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => toggleSection(index, 'acheteurs')}
-                                      className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                                      className="text-xs h-5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                     >
                                       <ArrowUp className="w-3 h-3 mr-1" />
                                       Acheteur
@@ -638,20 +675,8 @@ export default function ChaineDeTitre() {
                                     className="cursor-move"
                                     onMouseDown={(e) => startDragging(e, index, 'info')}
                                   >
-                                    <div className="flex justify-end items-center mb-2">
+                                    <div className="flex justify-end items-center mb-1">
                                       <div className="flex gap-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id);
-                                          }}
-                                          title="Créer une connexion"
-                                        >
-                                          <Plus className="w-3 h-3" />
-                                        </Button>
                                         {connectingArrow && connectingArrow !== acteData.id && (
                                           <Button
                                             variant="ghost"
@@ -683,7 +708,7 @@ export default function ChaineDeTitre() {
                                       <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
                                         N° {acteData.acte.numero_acte}
                                       </div>
-                                      <div className="text-slate-300" style={{ fontSize: getFontSize(12) }}>
+                                      <div className="text-slate-300" style={{ fontSize: getFontSize(11) }}>
                                         {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
                                       </div>
                                       <Badge 
@@ -696,12 +721,12 @@ export default function ChaineDeTitre() {
                                   </div>
 
                                   {/* Bouton Vendeur en bas */}
-                                  <div className="flex justify-center mt-2">
+                                  <div className="flex justify-center mt-1">
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={() => toggleSection(index, 'vendeurs')}
-                                      className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                                      className="text-xs h-5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                     >
                                       <ArrowDown className="w-3 h-3 mr-1" />
                                       Vendeur
@@ -754,7 +779,6 @@ export default function ChaineDeTitre() {
                             <Card className="border-orange-500/50 bg-orange-500/10 backdrop-blur-sm shadow-lg">
                               <CardContent className="p-3">
                                 <div className="text-center space-y-1">
-                                  <div className="text-orange-400 font-semibold text-xs mb-2">SERVITUDE</div>
                                   <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(13) }}>
                                     N° {servitudeData.servitude.numero_acte}
                                   </div>
