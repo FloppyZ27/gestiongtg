@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Link2, Trash2, ZoomIn, ZoomOut, ArrowUp, ArrowDown, Eye, EyeOff } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -32,6 +32,8 @@ export default function ChaineDeTitre() {
   const [draggingItem, setDraggingItem] = useState(null);
   const [connectingArrow, setConnectingArrow] = useState(null);
   const [zoom, setZoom] = useState(1);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
 
   const { data: actes, isLoading } = useQuery({
@@ -79,13 +81,17 @@ export default function ChaineDeTitre() {
             if (placedActesNumeros.includes(numeroAnterieur)) {
               const anteriorActeData = placedActes.find(pa => pa.acte.numero_acte === numeroAnterieur);
               if (anteriorActeData) {
-                newServitudes.push({
-                  id: `servitude-${servitude.id}-${Date.now()}`,
-                  servitude: servitude,
-                  linkedToActeId: anteriorActeData.id,
-                  x: anteriorActeData.info.x + 400,
-                  y: anteriorActeData.info.y
-                });
+                // Check if servitude already exists
+                const exists = servitudes.some(s => s.servitude.id === servitude.id && s.linkedToActeId === anteriorActeData.id);
+                if (!exists) {
+                  newServitudes.push({
+                    id: `servitude-${servitude.id}-${anteriorActeData.id}`,
+                    servitude: servitude,
+                    linkedToActeId: anteriorActeData.id,
+                    x: anteriorActeData.info.x + 400,
+                    y: anteriorActeData.info.y
+                  });
+                }
               }
             }
           });
@@ -146,7 +152,7 @@ export default function ChaineDeTitre() {
       acte: acte,
       acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
       info: { x: x, y: showAcheteurs ? y + 130 : y },
-      vendeurs: { x: x, y: showAcheteurs ? y + 210 : y + 80, visible: true }
+      vendeurs: { x: x, y: showAcheteurs ? y + 200 : y + 70, visible: true }
     };
 
     setPlacedActes(prev => {
@@ -167,7 +173,7 @@ export default function ChaineDeTitre() {
                   acte: acteAnterieur,
                   acheteurs: null,
                   info: { x: baseX, y: offsetY },
-                  vendeurs: { x: baseX, y: offsetY + 80, visible: true }
+                  vendeurs: { x: baseX, y: offsetY + 70, visible: true }
                 };
                 updated.push(anteriorActe);
                 
@@ -184,7 +190,7 @@ export default function ChaineDeTitre() {
         }
       };
 
-      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 210 : y + 80);
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 200 : y + 70);
       
       return updated;
     });
@@ -213,22 +219,64 @@ export default function ChaineDeTitre() {
     });
   };
 
+  const startDraggingServitude = (e, servitudeIndex) => {
+    e.stopPropagation();
+    const servitude = servitudes[servitudeIndex];
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const elementX = servitude.x * zoom;
+    const elementY = servitude.y * zoom;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    setDraggingItem({ 
+      servitudeIndex, 
+      section: 'servitude',
+      offsetX: (mouseX - elementX) / zoom,
+      offsetY: (mouseY - elementY) / zoom
+    });
+  };
+
+  const handleCanvasMouseDown = (e) => {
+    if (e.target === e.currentTarget || e.target.closest('svg')) {
+      setIsPanning(true);
+      setPanStart({
+        x: e.clientX - canvasRef.current.scrollLeft,
+        y: e.clientY - canvasRef.current.scrollTop
+      });
+    }
+  };
+
   const handleMouseMove = (e) => {
-    if (draggingItem !== null) {
+    if (isPanning) {
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      canvasRef.current.scrollLeft = -dx;
+      canvasRef.current.scrollTop = -dy;
+    } else if (draggingItem !== null) {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / zoom - draggingItem.offsetX;
       const y = (e.clientY - rect.top) / zoom - draggingItem.offsetY;
       
-      setPlacedActes(prev => prev.map((acte, idx) => 
-        idx === draggingItem.acteIndex 
-          ? { ...acte, [draggingItem.section]: { ...acte[draggingItem.section], x, y } }
-          : acte
-      ));
+      if (draggingItem.section === 'servitude') {
+        setServitudes(prev => prev.map((serv, idx) => 
+          idx === draggingItem.servitudeIndex 
+            ? { ...serv, x, y }
+            : serv
+        ));
+      } else {
+        setPlacedActes(prev => prev.map((acte, idx) => 
+          idx === draggingItem.acteIndex 
+            ? { ...acte, [draggingItem.section]: { ...acte[draggingItem.section], x, y } }
+            : acte
+        ));
+      }
     }
   };
 
   const handleMouseUp = () => {
     setDraggingItem(null);
+    setIsPanning(false);
   };
 
   const removeActe = (index) => {
@@ -254,7 +302,7 @@ export default function ChaineDeTitre() {
             ...acte,
             [section]: {
               x: infoX,
-              y: section === 'acheteurs' ? infoY - 130 : infoY + 80,
+              y: section === 'acheteurs' ? infoY - 130 : infoY + 70,
               visible: true
             }
           };
@@ -305,11 +353,11 @@ export default function ChaineDeTitre() {
     }
   };
 
-  const getInfoBottomEdge = (position, width = 350, height = 50) => {
+  const getInfoBottomEdge = (position, width = 350, height = 40) => {
     return { x: position.x + width / 2, y: position.y + height };
   };
 
-  const getInfoRightEdge = (position, width = 350, height = 50) => {
+  const getInfoRightEdge = (position, width = 350, height = 40) => {
     return { x: position.x + width, y: position.y + height / 2 };
   };
 
@@ -490,10 +538,11 @@ export default function ChaineDeTitre() {
                   ref={canvasRef}
                   onDrop={handleCanvasDrop}
                   onDragOver={handleCanvasDragOver}
+                  onMouseDown={handleCanvasMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onWheel={handleWheel}
-                  className="relative w-full h-[calc(100vh-200px)] overflow-auto"
+                  className="relative w-full h-[calc(100vh-200px)] overflow-auto cursor-grab active:cursor-grabbing"
                   style={{ 
                     minHeight: '900px',
                     backgroundImage: `
@@ -521,7 +570,7 @@ export default function ChaineDeTitre() {
                         // Line from acheteurs to info (if acheteurs exists and is visible)
                         if (acteData.acheteurs && acteData.acheteurs.visible) {
                           const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs', 250, 100);
-                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 350, 50);
+                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 350, 40);
                           lines.push(
                             <line
                               key={`acheteur-info-${idx}`}
@@ -567,7 +616,7 @@ export default function ChaineDeTitre() {
                         const from = fromActe.vendeurs && fromActe.vendeurs.visible 
                           ? getVendeurBottomEdge(fromActe.vendeurs) 
                           : getInfoBottomEdge(fromActe.info);
-                        const to = getBlockEdge(toActe.info, 'info', 350, 50);
+                        const to = getBlockEdge(toActe.info, 'info', 350, 40);
 
                         return (
                           <line
@@ -607,7 +656,7 @@ export default function ChaineDeTitre() {
                     </svg>
 
                     {placedActes.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-center">
+                      <div className="flex flex-col items-center justify-center h-full text-center pointer-events-none">
                         <Link2 className="w-16 h-16 text-slate-700 mb-4" />
                         <p className="text-slate-500 text-lg font-medium">
                           Glissez des actes ici pour créer votre chaine de titre
@@ -666,7 +715,11 @@ export default function ChaineDeTitre() {
                                       onClick={() => toggleSection(index, 'acheteurs')}
                                       className="text-xs h-5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                     >
-                                      <ArrowUp className="w-3 h-3 mr-1" />
+                                      {acteData.acheteurs && acteData.acheteurs.visible ? (
+                                        <EyeOff className="w-3 h-3 mr-1" />
+                                      ) : (
+                                        <Eye className="w-3 h-3 mr-1" />
+                                      )}
                                       Acheteur
                                     </Button>
                                   </div>
@@ -704,11 +757,11 @@ export default function ChaineDeTitre() {
                                         </Button>
                                       </div>
                                     </div>
-                                    <div className="text-center space-y-1">
-                                      <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
+                                    <div className="text-center space-y-0.5">
+                                      <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(13) }}>
                                         N° {acteData.acte.numero_acte}
                                       </div>
-                                      <div className="text-slate-300" style={{ fontSize: getFontSize(11) }}>
+                                      <div className="text-slate-300" style={{ fontSize: getFontSize(10) }}>
                                         {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
                                       </div>
                                       <Badge 
@@ -728,7 +781,11 @@ export default function ChaineDeTitre() {
                                       onClick={() => toggleSection(index, 'vendeurs')}
                                       className="text-xs h-5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                     >
-                                      <ArrowDown className="w-3 h-3 mr-1" />
+                                      {acteData.vendeurs && acteData.vendeurs.visible ? (
+                                        <EyeOff className="w-3 h-3 mr-1" />
+                                      ) : (
+                                        <Eye className="w-3 h-3 mr-1" />
+                                      )}
                                       Vendeur
                                     </Button>
                                   </div>
@@ -765,16 +822,17 @@ export default function ChaineDeTitre() {
                         ))}
 
                         {/* Servitudes Blocks */}
-                        {servitudes.map((servitudeData) => (
+                        {servitudes.map((servitudeData, servitudeIndex) => (
                           <div
                             key={servitudeData.id}
-                            className="absolute"
+                            className="absolute cursor-move"
                             style={{ 
                               left: servitudeData.x, 
                               top: servitudeData.y,
                               width: '280px',
                               zIndex: 10
                             }}
+                            onMouseDown={(e) => startDraggingServitude(e, servitudeIndex)}
                           >
                             <Card className="border-orange-500/50 bg-orange-500/10 backdrop-blur-sm shadow-lg">
                               <CardContent className="p-3">
