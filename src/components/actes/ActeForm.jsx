@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Save, X, UserPlus, FileText } from "lucide-react";
+import { Plus, Trash2, Save, X, UserPlus, FileText, Upload, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const TYPES_ACTES = [
@@ -26,13 +27,35 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
     date_bpd: "",
     type_acte: "",
     notaire: "",
-    chemin_document_pdf: "",
+    document_pdf_url: "",
     vendeurs: [{ nom: "", prenom: "", adresse: "" }],
     acheteurs: [{ nom: "", prenom: "", adresse: "" }],
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      alert('Veuillez sélectionner un fichier PDF');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData(prev => ({ ...prev, document_pdf_url: file_url }));
+      setUploadedFileName(file.name);
+    } catch (error) {
+      alert('Erreur lors de l\'upload du fichier');
+    }
+    setUploading(false);
   };
 
   const handlePersonChange = (type, index, field, value) => {
@@ -149,19 +172,33 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="chemin_document_pdf" className="text-slate-300 flex items-center gap-2">
+            <Label htmlFor="document_pdf" className="text-slate-300 flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              Chemin du document PDF
+              Document PDF
             </Label>
-            <Input
-              id="chemin_document_pdf"
-              value={formData.chemin_document_pdf || ""}
-              onChange={(e) => handleInputChange('chemin_document_pdf', e.target.value)}
-              placeholder="Ex: \\\\serveur\\partage\\actes\\2024\\ACT-2024-001.pdf"
-              className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 font-mono text-sm"
-            />
+            <div className="flex items-center gap-3">
+              <Input
+                id="document_pdf"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="bg-slate-800/50 border-slate-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-emerald-500/20 file:text-emerald-400 hover:file:bg-emerald-500/30"
+              />
+              {uploading && (
+                <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+              )}
+            </div>
+            {formData.document_pdf_url && (
+              <div className="flex items-center gap-2 text-sm">
+                <FileText className="w-4 h-4 text-green-400" />
+                <span className="text-green-400">
+                  {uploadedFileName || "Document uploadé avec succès"}
+                </span>
+              </div>
+            )}
             <p className="text-xs text-slate-500 mt-1">
-              Chemin réseau ou local vers le fichier PDF (ex: \\serveur\partage\actes\fichier.pdf)
+              Sélectionnez un fichier PDF depuis votre ordinateur
             </p>
           </div>
         </div>

@@ -59,8 +59,8 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Sidebar className="border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-          <SidebarHeader className="border-b border-slate-800 p-6">
+        <Sidebar className="border-r border-slate-950 bg-slate-950">
+          <SidebarHeader className="border-b border-slate-900 p-6 bg-slate-950">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
                 <MapPin className="w-5 h-5 text-white absolute" />
@@ -73,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </SidebarHeader>
           
-          <SidebarContent className="p-3">
+          <SidebarContent className="p-3 bg-slate-950">
             <SidebarGroup>
               <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
                 Navigation
@@ -87,7 +87,7 @@ export default function Layout({ children, currentPageName }) {
                         className={`transition-all duration-200 rounded-lg mb-1 ${
                           location.pathname === item.url 
                             ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-900'
                         }`}
                       >
                         <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
@@ -102,7 +102,7 @@ export default function Layout({ children, currentPageName }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-800 p-4">
+          <SidebarFooter className="border-t border-slate-900 p-4 bg-slate-950">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-white" />

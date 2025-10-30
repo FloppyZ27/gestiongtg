@@ -24,14 +24,6 @@ const typeColors = {
 export default function ActeDetails({ acte, onClose }) {
   const navigate = useNavigate();
 
-  const handleOpenPDF = () => {
-    if (!acte.chemin_document_pdf) {
-      alert("Aucun chemin de document PDF n'est défini pour cet acte.");
-      return;
-    }
-    window.open(`file:///${acte.chemin_document_pdf.replace(/\\/g, '/')}`, '_blank');
-  };
-
   return (
     <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-2xl">
       <CardHeader className="border-b border-slate-800 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10">
@@ -102,24 +94,23 @@ export default function ActeDetails({ acte, onClose }) {
             </div>
           )}
 
-          {acte.chemin_document_pdf && (
+          {acte.document_pdf_url && (
             <div className="space-y-2 md:col-span-2">
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <FileText className="w-4 h-4" />
                 <span className="font-medium">Document PDF</span>
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-sm text-slate-400 font-mono bg-slate-800/50 px-3 py-2 rounded border border-slate-700 flex-1 truncate">
-                  {acte.chemin_document_pdf}
-                </p>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleOpenPDF}
+                  asChild
                   className="bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 gap-2"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                  Ouvrir
+                  <a href={acte.document_pdf_url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4" />
+                    Ouvrir le PDF
+                  </a>
                 </Button>
               </div>
             </div>

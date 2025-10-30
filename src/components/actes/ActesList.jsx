@@ -24,15 +24,6 @@ const typeColors = {
 export default function ActesList({ actes, isLoading, onSelectActe, onSort, sortField, sortDirection }) {
   const navigate = useNavigate();
 
-  const handleOpenPDF = (cheminPDF) => {
-    if (!cheminPDF) {
-      alert("Aucun chemin de document PDF n'est défini pour cet acte.");
-      return;
-    }
-    // Open file using file:// protocol
-    window.open(`file:///${cheminPDF.replace(/\\/g, '/')}`, '_blank');
-  };
-
   const SortButton = ({ field, label }) => (
     <button
       onClick={() => onSort(field)}
@@ -50,6 +41,14 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
       )}
     </button>
   );
+
+  const formatPartiesNames = (parties) => {
+    if (!parties || parties.length === 0) return "-";
+    return parties
+      .filter(p => p.nom || p.prenom)
+      .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim())
+      .join(', ');
+  };
 
   if (isLoading) {
     return (
@@ -90,10 +89,9 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
             <TableHead className="font-semibold text-slate-300">
               <SortButton field="notaire" label="Notaire" />
             </TableHead>
-            <TableHead className="font-semibold text-slate-300">
-              <SortButton field="vendeurs" label="Parties" />
-            </TableHead>
-            <TableHead className="font-semibold text-slate-300">Document</TableHead>
+            <TableHead className="font-semibold text-slate-300">Vendeurs</TableHead>
+            <TableHead className="font-semibold text-slate-300">Acheteurs</TableHead>
+            <TableHead className="font-semibold text-slate-300">PDF</TableHead>
             <TableHead className="font-semibold text-slate-300 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -130,30 +128,28 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
                   {acte.notaire}
                 </div>
               </TableCell>
-              <TableCell>
-                <div className="flex gap-2 text-sm">
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                    {acte.vendeurs?.length || 0} vendeur(s)
-                  </Badge>
-                  <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30">
-                    {acte.acheteurs?.length || 0} acheteur(s)
-                  </Badge>
+              <TableCell className="text-slate-300 max-w-xs">
+                <div className="truncate text-sm">
+                  {formatPartiesNames(acte.vendeurs)}
+                </div>
+              </TableCell>
+              <TableCell className="text-slate-300 max-w-xs">
+                <div className="truncate text-sm">
+                  {formatPartiesNames(acte.acheteurs)}
                 </div>
               </TableCell>
               <TableCell>
-                {acte.chemin_document_pdf ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenPDF(acte.chemin_document_pdf);
-                    }}
-                    className="gap-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                {acte.document_pdf_url ? (
+                  <a
+                    href={acte.document_pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm hover:underline"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    PDF
-                  </Button>
+                    Ouvrir
+                  </a>
                 ) : (
                   <span className="text-slate-600 text-sm">-</span>
                 )}
