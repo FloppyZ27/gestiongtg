@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, MoveIcon } from "lucide-react";
+import { Search, Link2, Trash2, Plus, MoveIcon, ZoomIn, ZoomOut } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -25,8 +25,9 @@ export default function ChaineDeTitre() {
   const [searchTerm, setSearchTerm] = useState("");
   const [placedActes, setPlacedActes] = useState([]);
   const [arrows, setArrows] = useState([]);
-  const [draggingActe, setDraggingActe] = useState(null);
+  const [draggingItem, setDraggingItem] = useState(null);
   const [connectingArrow, setConnectingArrow] = useState(null);
+  const [zoom, setZoom] = useState(1);
   const canvasRef = useRef(null);
 
   const { data: actes, isLoading } = useQuery({
@@ -44,6 +45,14 @@ export default function ChaineDeTitre() {
     );
   });
 
+  const handleWheel = (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(prev => Math.max(0.3, Math.min(2, prev + delta)));
+    }
+  };
+
   const handleDragStart = (e, acte) => {
     e.dataTransfer.effectAllowed = "copy";
     e.dataTransfer.setData("acte", JSON.stringify(acte));
@@ -55,14 +64,16 @@ export default function ChaineDeTitre() {
     if (acteData) {
       const acte = JSON.parse(acteData);
       const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
       
+      const acteId = `${acte.id}-${Date.now()}`;
       setPlacedActes([...placedActes, {
-        ...acte,
-        id: `${acte.id}-${Date.now()}`,
-        x,
-        y
+        id: acteId,
+        acte: acte,
+        acheteurs: { x: x, y: y },
+        info: { x: x, y: y + 150 },
+        vendeurs: { x: x, y: y + 300 }
       }]);
     }
   };
@@ -71,28 +82,35 @@ export default function ChaineDeTitre() {
     e.preventDefault();
   };
 
-  const startDraggingActe = (e, index) => {
-    setDraggingActe({ index, offsetX: e.clientX - placedActes[index].x, offsetY: e.clientY - placedActes[index].y });
+  const startDragging = (e, acteIndex, section) => {
+    const acte = placedActes[acteIndex];
+    setDraggingItem({ 
+      acteIndex, 
+      section,
+      offsetX: e.clientX / zoom - acte[section].x, 
+      offsetY: e.clientY / zoom - acte[section].y 
+    });
   };
 
   const handleMouseMove = (e) => {
-    if (draggingActe !== null) {
+    if (draggingItem !== null) {
       const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left - draggingActe.offsetX;
-      const y = e.clientY - rect.top - draggingActe.offsetY;
+      const x = (e.clientX - rect.left) / zoom - draggingItem.offsetX;
+      const y = (e.clientY - rect.top) / zoom - draggingItem.offsetY;
       
       setPlacedActes(prev => prev.map((acte, idx) => 
-        idx === draggingActe.index ? { ...acte, x, y } : acte
+        idx === draggingItem.acteIndex 
+          ? { ...acte, [draggingItem.section]: { x, y } }
+          : acte
       ));
     }
   };
 
   const handleMouseUp = () => {
-    setDraggingActe(null);
+    setDraggingItem(null);
   };
 
   const removeActe = (index) => {
-    // Remove acte and associated arrows
     const acteId = placedActes[index].id;
     setPlacedActes(prev => prev.filter((_, i) => i !== index));
     setArrows(prev => prev.filter(arrow => arrow.from !== acteId && arrow.to !== acteId));
@@ -119,15 +137,14 @@ export default function ChaineDeTitre() {
   };
 
   const renderPersonNames = (parties) => {
-    if (!parties || parties.length === 0) return "-";
+    if (!parties || parties.length === 0) return ["-"];
     return parties
       .filter(p => p.nom || p.prenom)
-      .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim())
-      .join(', ');
+      .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim());
   };
 
-  const getActeCenter = (acte) => {
-    return { x: acte.x + 150, y: acte.y + 150 }; // Approximate center of card
+  const getBlockCenter = (position, width = 250, height = 80) => {
+    return { x: position.x + width / 2, y: position.y + height / 2 };
   };
 
   return (
@@ -169,8 +186,8 @@ export default function ChaineDeTitre() {
                       className="cursor-move"
                     >
                       <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm hover:bg-slate-800 transition-all">
-                        <CardContent className="p-3">
-                          <div className="flex justify-between items-start mb-2">
+                        <CardContent className="p-3 space-y-2">
+                          <div className="flex justify-between items-start">
                             <div className="font-semibold text-white font-mono text-xs">
                               {acte.numero_acte}
                             </div>
@@ -182,7 +199,19 @@ export default function ChaineDeTitre() {
                             </Badge>
                           </div>
                           <div className="text-xs text-slate-400">
-                            {acte.notaire}
+                            <div className="font-semibold text-cyan-400">Acheteur(s):</div>
+                            {renderPersonNames(acte.acheteurs).map((name, idx) => (
+                              <div key={idx}>{name}</div>
+                            ))}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            <div className="font-semibold text-emerald-400">Vendeur(s):</div>
+                            {renderPersonNames(acte.vendeurs).map((name, idx) => (
+                              <div key={idx}>{name}</div>
+                            ))}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {format(new Date(acte.date_bpd), "dd MMM yyyy", { locale: fr })}
                           </div>
                         </CardContent>
                       </Card>
@@ -199,7 +228,28 @@ export default function ChaineDeTitre() {
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg font-bold text-white">Canvas de la chaine de titre</CardTitle>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-800/50 rounded-lg border border-slate-700">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setZoom(prev => Math.max(0.3, prev - 0.1))}
+                      >
+                        <ZoomOut className="w-3 h-3 text-slate-400" />
+                      </Button>
+                      <span className="text-sm text-slate-400 font-mono w-12 text-center">
+                        {Math.round(zoom * 100)}%
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setZoom(prev => Math.min(2, prev + 0.1))}
+                      >
+                        <ZoomIn className="w-3 h-3 text-slate-400" />
+                      </Button>
+                    </div>
                     {connectingArrow && (
                       <Button
                         variant="outline"
@@ -231,150 +281,236 @@ export default function ChaineDeTitre() {
                   onDragOver={handleCanvasDragOver}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
+                  onWheel={handleWheel}
                   className="relative w-full h-[calc(100vh-250px)] bg-slate-800/20 border-2 border-dashed border-slate-700 overflow-auto"
                   style={{ minHeight: '600px' }}
                 >
-                  {/* SVG for arrows */}
-                  <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
-                    {arrows.map((arrow, idx) => {
-                      const fromActe = placedActes.find(a => a.id === arrow.from);
-                      const toActe = placedActes.find(a => a.id === arrow.to);
-                      if (!fromActe || !toActe) return null;
+                  <div style={{ 
+                    transform: `scale(${zoom})`, 
+                    transformOrigin: '0 0',
+                    width: `${100 / zoom}%`,
+                    height: `${100 / zoom}%`,
+                    position: 'relative'
+                  }}>
+                    {/* SVG for connections between blocks and arrows */}
+                    <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
+                      {/* Lines connecting the 3 blocks of each acte */}
+                      {placedActes.map((acteData, idx) => {
+                        const acheteurCenter = getBlockCenter(acteData.acheteurs);
+                        const infoCenter = getBlockCenter(acteData.info);
+                        const vendeurCenter = getBlockCenter(acteData.vendeurs);
+                        
+                        return (
+                          <g key={`lines-${idx}`}>
+                            {/* Line from acheteurs to info */}
+                            <line
+                              x1={acheteurCenter.x}
+                              y1={acheteurCenter.y}
+                              x2={infoCenter.x}
+                              y2={infoCenter.y}
+                              stroke="#64748b"
+                              strokeWidth="2"
+                              strokeDasharray="5,5"
+                            />
+                            {/* Line from info to vendeurs */}
+                            <line
+                              x1={infoCenter.x}
+                              y1={infoCenter.y}
+                              x2={vendeurCenter.x}
+                              y2={vendeurCenter.y}
+                              stroke="#64748b"
+                              strokeWidth="2"
+                              strokeDasharray="5,5"
+                            />
+                          </g>
+                        );
+                      })}
+                      
+                      {/* Arrows between different actes */}
+                      {arrows.map((arrow, idx) => {
+                        const fromActe = placedActes.find(a => a.id === arrow.from);
+                        const toActe = placedActes.find(a => a.id === arrow.to);
+                        if (!fromActe || !toActe) return null;
 
-                      const from = getActeCenter(fromActe);
-                      const to = getActeCenter(toActe);
+                        const from = getBlockCenter(fromActe.info);
+                        const to = getBlockCenter(toActe.info);
 
-                      return (
-                        <g key={idx}>
-                          <defs>
-                            <marker
-                              id={`arrowhead-${idx}`}
-                              markerWidth="10"
-                              markerHeight="10"
-                              refX="9"
-                              refY="3"
-                              orient="auto"
-                            >
-                              <polygon points="0 0, 10 3, 0 6" fill="#34d399" />
-                            </marker>
-                          </defs>
-                          <line
-                            x1={from.x}
-                            y1={from.y}
-                            x2={to.x}
-                            y2={to.y}
-                            stroke="#34d399"
-                            strokeWidth="2"
-                            markerEnd={`url(#arrowhead-${idx})`}
-                          />
-                        </g>
-                      );
-                    })}
-                  </svg>
-
-                  {placedActes.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <Link2 className="w-16 h-16 text-slate-700 mb-4" />
-                      <p className="text-slate-500 text-lg font-medium">
-                        Glissez des actes ici pour créer votre chaine de titre
-                      </p>
-                      <p className="text-slate-600 text-sm mt-2">
-                        Positionnez-les librement et créez des connexions
-                      </p>
-                    </div>
-                  ) : (
-                    placedActes.map((acte, index) => (
-                      <div
-                        key={acte.id}
-                        className="absolute"
-                        style={{ 
-                          left: acte.x, 
-                          top: acte.y,
-                          width: '300px',
-                          zIndex: 10
-                        }}
-                      >
-                        <Card className="border-slate-700 bg-slate-800/90 backdrop-blur-sm shadow-xl">
-                          <CardContent className="p-4">
-                            {/* Header avec boutons */}
-                            <div className="flex justify-between items-center mb-3">
-                              <button
-                                onMouseDown={(e) => startDraggingActe(e, index)}
-                                className="cursor-move p-1 hover:bg-slate-700 rounded"
+                        return (
+                          <g key={idx}>
+                            <defs>
+                              <marker
+                                id={`arrowhead-${idx}`}
+                                markerWidth="10"
+                                markerHeight="10"
+                                refX="9"
+                                refY="3"
+                                orient="auto"
                               >
-                                <MoveIcon className="w-4 h-4 text-slate-400" />
-                              </button>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                  onClick={() => connectingArrow === acte.id ? setConnectingArrow(null) : startConnectingArrow(acte.id)}
-                                  title="Créer une connexion"
-                                >
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                                {connectingArrow && connectingArrow !== acte.id && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                    onClick={() => completeConnection(acte.id)}
-                                    title="Connecter ici"
-                                  >
-                                    <Link2 className="w-3 h-3" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  onClick={() => removeActe(index)}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
+                                <polygon points="0 0, 10 3, 0 6" fill="#34d399" />
+                              </marker>
+                            </defs>
+                            <line
+                              x1={from.x}
+                              y1={from.y}
+                              x2={to.x}
+                              y2={to.y}
+                              stroke="#34d399"
+                              strokeWidth="3"
+                              markerEnd={`url(#arrowhead-${idx})`}
+                            />
+                          </g>
+                        );
+                      })}
+                    </svg>
 
-                            {/* Acheteurs */}
-                            <div className="mb-3 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-                              <div className="text-xs font-semibold text-cyan-400 mb-1">ACHETEUR(S)</div>
-                              <div className="text-sm text-white">
-                                {renderPersonNames(acte.acheteurs)}
-                              </div>
-                            </div>
-
-                            {/* Info de l'acte avec flèche */}
-                            <div className="flex flex-col items-center my-3">
-                              <div className="w-full text-center space-y-1 p-3 bg-slate-700/50 rounded-lg">
-                                <div className="font-mono font-bold text-white text-sm">
-                                  {acte.numero_acte}
-                                </div>
-                                <div className="text-xs text-slate-400">
-                                  {format(new Date(acte.date_bpd), "dd MMM yyyy", { locale: fr })}
-                                </div>
-                                <Badge 
-                                  variant="secondary"
-                                  className={`${typeColors[acte.type_acte] || typeColors["Vente"]} border text-xs`}
-                                >
-                                  {acte.type_acte}
-                                </Badge>
-                              </div>
-                              <div className="text-emerald-400 text-2xl my-1">↓</div>
-                            </div>
-
-                            {/* Vendeurs */}
-                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-                              <div className="text-xs font-semibold text-emerald-400 mb-1">VENDEUR(S)</div>
-                              <div className="text-sm text-white">
-                                {renderPersonNames(acte.vendeurs)}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+                    {placedActes.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <Link2 className="w-16 h-16 text-slate-700 mb-4" />
+                        <p className="text-slate-500 text-lg font-medium">
+                          Glissez des actes ici pour créer votre chaine de titre
+                        </p>
+                        <p className="text-slate-600 text-sm mt-2">
+                          Utilisez Ctrl + Molette pour zoomer
+                        </p>
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      placedActes.map((acteData, index) => (
+                        <React.Fragment key={acteData.id}>
+                          {/* Acheteurs Block */}
+                          <div
+                            className="absolute"
+                            style={{ 
+                              left: acteData.acheteurs.x, 
+                              top: acteData.acheteurs.y,
+                              width: '250px',
+                              zIndex: 10
+                            }}
+                          >
+                            <Card className="border-cyan-500/50 bg-cyan-500/10 backdrop-blur-sm shadow-lg">
+                              <CardContent className="p-3">
+                                <div className="flex justify-between items-center mb-2">
+                                  <button
+                                    onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
+                                    className="cursor-move p-1 hover:bg-cyan-500/20 rounded"
+                                  >
+                                    <MoveIcon className="w-3 h-3 text-cyan-400" />
+                                  </button>
+                                  <div className="text-xs font-semibold text-cyan-400">ACHETEUR(S)</div>
+                                </div>
+                                <div className="space-y-1">
+                                  {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
+                                    <div key={idx} className="text-sm text-white">
+                                      {name}
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Info Block */}
+                          <div
+                            className="absolute"
+                            style={{ 
+                              left: acteData.info.x, 
+                              top: acteData.info.y,
+                              width: '250px',
+                              zIndex: 10
+                            }}
+                          >
+                            <Card className="border-slate-700 bg-slate-800/90 backdrop-blur-sm shadow-xl">
+                              <CardContent className="p-3">
+                                <div className="flex justify-between items-center mb-2">
+                                  <button
+                                    onMouseDown={(e) => startDragging(e, index, 'info')}
+                                    className="cursor-move p-1 hover:bg-slate-700 rounded"
+                                  >
+                                    <MoveIcon className="w-3 h-3 text-slate-400" />
+                                  </button>
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                      onClick={() => connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id)}
+                                      title="Créer une connexion"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                    {connectingArrow && connectingArrow !== acteData.id && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                        onClick={() => completeConnection(acteData.id)}
+                                        title="Connecter ici"
+                                      >
+                                        <Link2 className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      onClick={() => removeActe(index)}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="text-center space-y-1">
+                                  <div className="font-mono font-bold text-white text-sm">
+                                    {acteData.acte.numero_acte}
+                                  </div>
+                                  <div className="text-xs text-slate-400">
+                                    {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
+                                  </div>
+                                  <Badge 
+                                    variant="secondary"
+                                    className={`${typeColors[acteData.acte.type_acte] || typeColors["Vente"]} border text-xs`}
+                                  >
+                                    {acteData.acte.type_acte}
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Vendeurs Block */}
+                          <div
+                            className="absolute"
+                            style={{ 
+                              left: acteData.vendeurs.x, 
+                              top: acteData.vendeurs.y,
+                              width: '250px',
+                              zIndex: 10
+                            }}
+                          >
+                            <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                              <CardContent className="p-3">
+                                <div className="flex justify-between items-center mb-2">
+                                  <button
+                                    onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
+                                    className="cursor-move p-1 hover:bg-emerald-500/20 rounded"
+                                  >
+                                    <MoveIcon className="w-3 h-3 text-emerald-400" />
+                                  </button>
+                                  <div className="text-xs font-semibold text-emerald-400">VENDEUR(S)</div>
+                                </div>
+                                <div className="space-y-1">
+                                  {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
+                                    <div key={idx} className="text-sm text-white">
+                                      {name}
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </React.Fragment>
+                      ))
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -393,9 +529,9 @@ export default function ChaineDeTitre() {
                       return (
                         <div key={idx} className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
                           <div className="text-sm text-slate-300">
-                            <span className="font-mono text-emerald-400">{fromActe?.numero_acte}</span>
+                            <span className="font-mono text-emerald-400">{fromActe?.acte.numero_acte}</span>
                             {" → "}
-                            <span className="font-mono text-cyan-400">{toActe?.numero_acte}</span>
+                            <span className="font-mono text-cyan-400">{toActe?.acte.numero_acte}</span>
                           </div>
                           <Button
                             variant="ghost"
