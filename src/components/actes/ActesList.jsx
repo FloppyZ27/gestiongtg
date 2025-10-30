@@ -42,12 +42,21 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
     </button>
   );
 
-  const formatPartiesNames = (parties) => {
-    if (!parties || parties.length === 0) return "-";
-    return parties
-      .filter(p => p.nom || p.prenom)
-      .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim())
-      .join(', ');
+  const renderPartiesNames = (parties) => {
+    if (!parties || parties.length === 0) return <span className="text-slate-600">-</span>;
+    
+    return (
+      <div className="space-y-1">
+        {parties
+          .filter(p => p.nom || p.prenom)
+          .map((p, idx) => (
+            <div key={idx} className="text-sm">
+              {`${p.prenom || ''} ${p.nom || ''}`.trim()}
+            </div>
+          ))
+        }
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -87,6 +96,9 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
               <SortButton field="type_acte" label="Type" />
             </TableHead>
             <TableHead className="font-semibold text-slate-300">
+              <SortButton field="circonscription_fonciere" label="Circonscription" />
+            </TableHead>
+            <TableHead className="font-semibold text-slate-300">
               <SortButton field="notaire" label="Notaire" />
             </TableHead>
             <TableHead className="font-semibold text-slate-300">Vendeurs</TableHead>
@@ -122,6 +134,9 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
                   {acte.type_acte}
                 </Badge>
               </TableCell>
+              <TableCell className="text-slate-300 text-sm">
+                {acte.circonscription_fonciere || "-"}
+              </TableCell>
               <TableCell className="text-slate-300">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-slate-500" />
@@ -129,14 +144,10 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
                 </div>
               </TableCell>
               <TableCell className="text-slate-300 max-w-xs">
-                <div className="truncate text-sm">
-                  {formatPartiesNames(acte.vendeurs)}
-                </div>
+                {renderPartiesNames(acte.vendeurs)}
               </TableCell>
               <TableCell className="text-slate-300 max-w-xs">
-                <div className="truncate text-sm">
-                  {formatPartiesNames(acte.acheteurs)}
-                </div>
+                {renderPartiesNames(acte.acheteurs)}
               </TableCell>
               <TableCell>
                 {acte.document_pdf_url ? (

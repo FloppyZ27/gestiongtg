@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, Save, X, UserPlus, FileText, Upload, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, X, UserPlus, FileText, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const TYPES_ACTES = [
@@ -20,16 +20,23 @@ const TYPES_ACTES = [
   "Autre"
 ];
 
+const CIRCONSCRIPTIONS = [
+  "Lac-Saint-Jean-Est",
+  "Lac-Saint-Jean-Ouest",
+  "Chicoutimi"
+];
+
 export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
   const [formData, setFormData] = useState(acte || {
     numero_acte: "",
-    numero_acte_anterieur: "",
+    numeros_actes_anterieurs: [""],
     date_bpd: "",
     type_acte: "",
+    circonscription_fonciere: "",
     notaire: "",
     document_pdf_url: "",
-    vendeurs: [{ nom: "", prenom: "", adresse: "" }],
-    acheteurs: [{ nom: "", prenom: "", adresse: "" }],
+    vendeurs: [{ nom: "", prenom: "" }],
+    acheteurs: [{ nom: "", prenom: "" }],
   });
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
@@ -70,7 +77,7 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
   const addPerson = (type) => {
     setFormData(prev => ({
       ...prev,
-      [type]: [...prev[type], { nom: "", prenom: "", adresse: "" }]
+      [type]: [...prev[type], { nom: "", prenom: "" }]
     }));
   };
 
@@ -83,9 +90,39 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
     }
   };
 
+  const handleActeAnterieurChange = (index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      numeros_actes_anterieurs: prev.numeros_actes_anterieurs.map((num, i) => 
+        i === index ? value : num
+      )
+    }));
+  };
+
+  const addActeAnterieur = () => {
+    setFormData(prev => ({
+      ...prev,
+      numeros_actes_anterieurs: [...prev.numeros_actes_anterieurs, ""]
+    }));
+  };
+
+  const removeActeAnterieur = (index) => {
+    if (formData.numeros_actes_anterieurs.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        numeros_actes_anterieurs: prev.numeros_actes_anterieurs.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Filter out empty acte anterieurs
+    const cleanedData = {
+      ...formData,
+      numeros_actes_anterieurs: formData.numeros_actes_anterieurs.filter(num => num.trim() !== "")
+    };
+    onSubmit(cleanedData);
   };
 
   return (
@@ -109,16 +146,60 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="numero_acte_anterieur" className="text-slate-300">
-              N° d'acte antérieur
+            <Label htmlFor="circonscription_fonciere" className="text-slate-300">
+              Circonscription foncière <span className="text-red-400">*</span>
             </Label>
-            <Input
-              id="numero_acte_anterieur"
-              value={formData.numero_acte_anterieur || ""}
-              onChange={(e) => handleInputChange('numero_acte_anterieur', e.target.value)}
-              placeholder="Ex: ACT-2023-999"
-              className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-            />
+            <Select
+              value={formData.circonscription_fonciere}
+              onValueChange={(value) => handleInputChange('circonscription_fonciere', value)}
+              required
+            >
+              <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                <SelectValue placeholder="Sélectionner une circonscription" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                {CIRCONSCRIPTIONS.map((circ) => (
+                  <SelectItem key={circ} value={circ} className="text-white">
+                    {circ}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label className="text-slate-300">N° d'actes antérieurs</Label>
+            {formData.numeros_actes_anterieurs.map((num, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={num}
+                  onChange={(e) => handleActeAnterieurChange(index, e.target.value)}
+                  placeholder="Ex: ACT-2023-999"
+                  className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                />
+                {formData.numeros_actes_anterieurs.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeActeAnterieur(index)}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addActeAnterieur}
+              className="gap-2 bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+            >
+              <Plus className="w-4 h-4" />
+              Ajouter un acte antérieur
+            </Button>
           </div>
 
           <div className="space-y-2">
@@ -245,15 +326,6 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Nom</Label>
-                  <Input
-                    value={vendeur.nom}
-                    onChange={(e) => handlePersonChange('vendeurs', index, 'nom', e.target.value)}
-                    placeholder="Nom"
-                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Prénom</Label>
                   <Input
                     value={vendeur.prenom}
@@ -262,15 +334,15 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
                     className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Adresse</Label>
-                <Input
-                  value={vendeur.adresse}
-                  onChange={(e) => handlePersonChange('vendeurs', index, 'adresse', e.target.value)}
-                  placeholder="Adresse complète"
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
-                />
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Nom</Label>
+                  <Input
+                    value={vendeur.nom}
+                    onChange={(e) => handlePersonChange('vendeurs', index, 'nom', e.target.value)}
+                    placeholder="Nom"
+                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -318,15 +390,6 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-sm">Nom</Label>
-                  <Input
-                    value={acheteur.nom}
-                    onChange={(e) => handlePersonChange('acheteurs', index, 'nom', e.target.value)}
-                    placeholder="Nom"
-                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-slate-400 text-sm">Prénom</Label>
                   <Input
                     value={acheteur.prenom}
@@ -335,15 +398,15 @@ export default function ActeForm({ acte, onSubmit, onCancel, isSubmitting }) {
                     className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-400 text-sm">Adresse</Label>
-                <Input
-                  value={acheteur.adresse}
-                  onChange={(e) => handlePersonChange('acheteurs', index, 'adresse', e.target.value)}
-                  placeholder="Adresse complète"
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
-                />
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Nom</Label>
+                  <Input
+                    value={acheteur.nom}
+                    onChange={(e) => handlePersonChange('acheteurs', index, 'nom', e.target.value)}
+                    placeholder="Nom"
+                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-600"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

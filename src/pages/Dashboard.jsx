@@ -24,10 +24,26 @@ export default function Dashboard() {
 
   const filteredActes = actes.filter(acte => {
     const searchLower = searchTerm.toLowerCase();
+    
+    // Recherche dans les vendeurs
+    const vendeursMatch = acte.vendeurs?.some(v => 
+      v.nom?.toLowerCase().includes(searchLower) || 
+      v.prenom?.toLowerCase().includes(searchLower)
+    );
+    
+    // Recherche dans les acheteurs
+    const acheteursMatch = acte.acheteurs?.some(a => 
+      a.nom?.toLowerCase().includes(searchLower) || 
+      a.prenom?.toLowerCase().includes(searchLower)
+    );
+    
     return (
       acte.numero_acte?.toLowerCase().includes(searchLower) ||
       acte.notaire?.toLowerCase().includes(searchLower) ||
-      acte.type_acte?.toLowerCase().includes(searchLower)
+      acte.type_acte?.toLowerCase().includes(searchLower) ||
+      acte.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
+      vendeursMatch ||
+      acheteursMatch
     );
   });
 
@@ -152,7 +168,7 @@ export default function Dashboard() {
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
-                  placeholder="Rechercher un acte..."
+                  placeholder="Rechercher par acte, notaire, vendeur, acheteur..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"

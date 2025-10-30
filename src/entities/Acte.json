@@ -6,9 +6,12 @@
       "type": "string",
       "description": "Num\u00e9ro unique de l'acte"
     },
-    "numero_acte_anterieur": {
-      "type": "string",
-      "description": "Num\u00e9ro de l'acte ant\u00e9rieur"
+    "numeros_actes_anterieurs": {
+      "type": "array",
+      "description": "Liste des num\u00e9ros d'actes ant\u00e9rieurs",
+      "items": {
+        "type": "string"
+      }
     },
     "date_bpd": {
       "type": "string",
@@ -30,6 +33,15 @@
       ],
       "description": "Type d'acte notari\u00e9"
     },
+    "circonscription_fonciere": {
+      "type": "string",
+      "enum": [
+        "Lac-Saint-Jean-Est",
+        "Lac-Saint-Jean-Ouest",
+        "Chicoutimi"
+      ],
+      "description": "Circonscription fonci\u00e8re"
+    },
     "notaire": {
       "type": "string",
       "description": "Nom du notaire responsable"
@@ -49,9 +61,6 @@
           },
           "prenom": {
             "type": "string"
-          },
-          "adresse": {
-            "type": "string"
           }
         }
       }
@@ -67,9 +76,6 @@
           },
           "prenom": {
             "type": "string"
-          },
-          "adresse": {
-            "type": "string"
           }
         }
       }
@@ -79,6 +85,7 @@
     "numero_acte",
     "date_bpd",
     "type_acte",
+    "circonscription_fonciere",
     "notaire"
   ]
 }

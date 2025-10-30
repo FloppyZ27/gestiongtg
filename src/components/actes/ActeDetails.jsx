@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, FileText, Calendar, User, Users, Edit, Hash, ExternalLink } from "lucide-react";
+import { X, FileText, Calendar, User, Users, Edit, Hash, ExternalLink, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Separator } from "@/components/ui/separator";
@@ -84,13 +84,29 @@ export default function ActeDetails({ acte, onClose }) {
             <p className="text-lg font-semibold text-white">{acte.notaire}</p>
           </div>
 
-          {acte.numero_acte_anterieur && (
+          {acte.circonscription_fonciere && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <MapPin className="w-4 h-4" />
+                <span className="font-medium">Circonscription foncière</span>
+              </div>
+              <p className="text-lg font-semibold text-white">{acte.circonscription_fonciere}</p>
+            </div>
+          )}
+
+          {acte.numeros_actes_anterieurs && acte.numeros_actes_anterieurs.length > 0 && (
             <div className="space-y-2 md:col-span-2">
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <Hash className="w-4 h-4" />
-                <span className="font-medium">N° d'acte antérieur</span>
+                <span className="font-medium">N° d'actes antérieurs</span>
               </div>
-              <p className="text-lg font-semibold text-emerald-400 font-mono">{acte.numero_acte_anterieur}</p>
+              <div className="flex flex-wrap gap-2">
+                {acte.numeros_actes_anterieurs.map((num, idx) => (
+                  <span key={idx} className="text-base font-semibold text-emerald-400 font-mono bg-emerald-500/10 px-3 py-1 rounded border border-emerald-500/30">
+                    {num}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
@@ -133,13 +149,10 @@ export default function ActeDetails({ acte, onClose }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.vendeurs.map((vendeur, index) => (
                 <Card key={index} className="border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm">
-                  <CardContent className="p-4 space-y-2">
+                  <CardContent className="p-4">
                     <p className="font-semibold text-white">
                       {vendeur.prenom} {vendeur.nom}
                     </p>
-                    {vendeur.adresse && (
-                      <p className="text-sm text-slate-400">{vendeur.adresse}</p>
-                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -165,13 +178,10 @@ export default function ActeDetails({ acte, onClose }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {acte.acheteurs.map((acheteur, index) => (
                 <Card key={index} className="border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm">
-                  <CardContent className="p-4 space-y-2">
+                  <CardContent className="p-4">
                     <p className="font-semibold text-white">
                       {acheteur.prenom} {acheteur.nom}
                     </p>
-                    {acheteur.adresse && (
-                      <p className="text-sm text-slate-400">{acheteur.adresse}</p>
-                    )}
                   </CardContent>
                 </Card>
               ))}
