@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown, Anchor } from "lucide-react";
+import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -27,6 +27,7 @@ export default function ChaineDeTitre() {
   const [filterTypeActe, setFilterTypeActe] = useState("all");
   const [filterCirconscription, setFilterCirconscription] = useState("all");
   const [placedActes, setPlacedActes] = useState([]);
+  const [servitudes, setServitudes] = useState([]);
   const [arrows, setArrows] = useState([]);
   const [draggingItem, setDraggingItem] = useState(null);
   const [connectingArrow, setConnectingArrow] = useState(null);
@@ -52,6 +53,41 @@ export default function ChaineDeTitre() {
       acte.type_acte?.toLowerCase().includes(searchLower))
     );
   });
+
+  // Check for servitudes when placedActes changes
+  useEffect(() => {
+    const checkServitudes = () => {
+      const newServitudes = [];
+      const placedActesNumeros = placedActes.map(pa => pa.acte.numero_acte);
+      
+      // Find all servitude acts
+      const servitudeActes = actes.filter(acte => acte.type_acte === "Servitude");
+      
+      servitudeActes.forEach(servitude => {
+        if (servitude.numeros_actes_anterieurs && servitude.numeros_actes_anterieurs.length > 0) {
+          servitude.numeros_actes_anterieurs.forEach(numeroAnterieur => {
+            // Check if the anterior act is in the canvas
+            if (placedActesNumeros.includes(numeroAnterieur)) {
+              const anteriorActeData = placedActes.find(pa => pa.acte.numero_acte === numeroAnterieur);
+              if (anteriorActeData) {
+                newServitudes.push({
+                  id: `servitude-${servitude.id}-${Date.now()}`,
+                  servitude: servitude,
+                  linkedToActeId: anteriorActeData.id,
+                  x: anteriorActeData.info.x + 350,
+                  y: anteriorActeData.info.y
+                });
+              }
+            }
+          });
+        }
+      });
+      
+      setServitudes(newServitudes);
+    };
+    
+    checkServitudes();
+  }, [placedActes, actes]);
 
   const handleWheel = (e) => {
     if (e.shiftKey) {
@@ -81,6 +117,17 @@ export default function ChaineDeTitre() {
       
       addActeToCanvas(acte, x, y, true);
     }
+  };
+
+  const getVendeursToDisplay = (acte) => {
+    // Check if this act has anterior acts
+    if (acte.numeros_actes_anterieurs && acte.numeros_actes_anterieurs.length > 0) {
+      const anteriorActe = findActeByNumero(acte.numeros_actes_anterieurs[0]);
+      if (anteriorActe && anteriorActe.acheteurs) {
+        return anteriorActe.acheteurs;
+      }
+    }
+    return acte.vendeurs;
   };
 
   const addActeToCanvas = (acte, x, y, showAcheteurs = true) => {
@@ -226,6 +273,7 @@ export default function ChaineDeTitre() {
   const clearCanvas = () => {
     setPlacedActes([]);
     setArrows([]);
+    setServitudes([]);
   };
 
   const renderPersonNames = (parties) => {
@@ -246,7 +294,7 @@ export default function ChaineDeTitre() {
     }
   };
 
-  const getInfoBottomEdge = (position, width = 300, height = 70) => {
+  const getInfoBottomEdge = (position, width = 350, height = 60) => {
     return { x: position.x + width / 2, y: position.y + height };
   };
 
@@ -458,7 +506,7 @@ export default function ChaineDeTitre() {
                         // Line from acheteurs to info (if acheteurs exists and is visible)
                         if (acteData.acheteurs && acteData.acheteurs.visible) {
                           const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs', 250, 100);
-                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 300, 70);
+                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 350, 60);
                           lines.push(
                             <line
                               key={`acheteur-info-${idx}`}
@@ -504,7 +552,7 @@ export default function ChaineDeTitre() {
                         const from = fromActe.vendeurs && fromActe.vendeurs.visible 
                           ? getVendeurBottomEdge(fromActe.vendeurs) 
                           : getInfoBottomEdge(fromActe.info);
-                        const to = getBlockEdge(toActe.info, 'info', 300, 70);
+                        const to = getBlockEdge(toActe.info, 'info', 350, 60);
 
                         return (
                           <line
@@ -532,208 +580,204 @@ export default function ChaineDeTitre() {
                         </p>
                       </div>
                     ) : (
-                      placedActes.map((acteData, index) => (
-                        <React.Fragment key={acteData.id}>
-                          {/* Acheteurs Block */}
-                          {acteData.acheteurs && acteData.acheteurs.visible && (
+                      <>
+                        {placedActes.map((acteData, index) => (
+                          <React.Fragment key={acteData.id}>
+                            {/* Acheteurs Block */}
+                            {acteData.acheteurs && acteData.acheteurs.visible && (
+                              <div
+                                className="absolute cursor-move"
+                                style={{ 
+                                  left: acteData.acheteurs.x, 
+                                  top: acteData.acheteurs.y,
+                                  width: '250px',
+                                  zIndex: 10
+                                }}
+                                onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
+                              >
+                                <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                                  <CardContent className="p-4">
+                                    <div className="space-y-1 text-center">
+                                      {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
+                                        <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
+                                          {name}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            )}
+
+                            {/* Info Block */}
                             <div
-                              className="absolute cursor-move"
+                              className="absolute"
                               style={{ 
-                                left: acteData.acheteurs.x, 
-                                top: acteData.acheteurs.y,
-                                width: '250px',
+                                left: acteData.info.x, 
+                                top: acteData.info.y,
+                                width: '350px',
                                 zIndex: 10
                               }}
-                              onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
                             >
-                              <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
-                                <CardContent className="p-4">
-                                  <div className="space-y-1 text-center">
-                                    {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
-                                      <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
-                                        {name}
-                                      </div>
-                                    ))}
+                              <Card className="border-purple-500/50 bg-purple-500/10 backdrop-blur-sm shadow-xl">
+                                <CardContent className="p-3">
+                                  {/* Bouton Acheteur en haut */}
+                                  <div className="flex justify-center mb-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => toggleSection(index, 'acheteurs')}
+                                      className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                                    >
+                                      <ArrowUp className="w-3 h-3 mr-1" />
+                                      Acheteur
+                                    </Button>
                                   </div>
-                                  {/* Anchor point at bottom */}
+
+                                  <div 
+                                    className="cursor-move"
+                                    onMouseDown={(e) => startDragging(e, index, 'info')}
+                                  >
+                                    <div className="flex justify-end items-center mb-2">
+                                      <div className="flex gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id);
+                                          }}
+                                          title="Créer une connexion"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                        </Button>
+                                        {connectingArrow && connectingArrow !== acteData.id && (
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-5 w-5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              completeConnection(acteData.id);
+                                            }}
+                                            title="Connecter ici"
+                                          >
+                                            <Link2 className="w-3 h-3" />
+                                          </Button>
+                                        )}
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeActe(index);
+                                          }}
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                      <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
+                                        N° {acteData.acte.numero_acte}
+                                      </div>
+                                      <div className="text-slate-300" style={{ fontSize: getFontSize(12) }}>
+                                        {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
+                                      </div>
+                                      <Badge 
+                                        variant="secondary"
+                                        className={`${typeColors[acteData.acte.type_acte] || typeColors["Vente"]} border text-xs`}
+                                      >
+                                        {acteData.acte.type_acte}
+                                      </Badge>
+                                    </div>
+                                  </div>
+
+                                  {/* Bouton Vendeur en bas */}
                                   <div className="flex justify-center mt-2">
                                     <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startConnectingArrow(`${acteData.id}-acheteurs-bottom`);
-                                      }}
-                                      title="Point d'ancrage"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => toggleSection(index, 'vendeurs')}
+                                      className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                     >
-                                      <Anchor className="w-3 h-3" />
+                                      <ArrowDown className="w-3 h-3 mr-1" />
+                                      Vendeur
                                     </Button>
                                   </div>
                                 </CardContent>
                               </Card>
                             </div>
-                          )}
 
-                          {/* Info Block */}
+                            {/* Vendeurs Block */}
+                            {acteData.vendeurs && acteData.vendeurs.visible && (
+                              <div
+                                className="absolute cursor-move"
+                                style={{ 
+                                  left: acteData.vendeurs.x, 
+                                  top: acteData.vendeurs.y,
+                                  width: '250px',
+                                  zIndex: 10
+                                }}
+                                onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
+                              >
+                                <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                                  <CardContent className="p-4">
+                                    <div className="space-y-1 text-center">
+                                      {renderPersonNames(getVendeursToDisplay(acteData.acte)).map((name, idx) => (
+                                        <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
+                                          {name}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        ))}
+
+                        {/* Servitudes Blocks */}
+                        {servitudes.map((servitudeData) => (
                           <div
+                            key={servitudeData.id}
                             className="absolute"
                             style={{ 
-                              left: acteData.info.x, 
-                              top: acteData.info.y,
-                              width: '300px',
+                              left: servitudeData.x, 
+                              top: servitudeData.y,
+                              width: '280px',
                               zIndex: 10
                             }}
                           >
-                            <Card className="border-purple-500/50 bg-purple-500/10 backdrop-blur-sm shadow-xl">
+                            <Card className="border-orange-500/50 bg-orange-500/10 backdrop-blur-sm shadow-lg">
                               <CardContent className="p-3">
-                                {/* Bouton Acheteur en haut */}
-                                <div className="flex justify-center mb-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => toggleSection(index, 'acheteurs')}
-                                    className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
-                                  >
-                                    <ArrowUp className="w-3 h-3 mr-1" />
-                                    Acheteur
-                                  </Button>
-                                </div>
-
-                                <div 
-                                  className="cursor-move"
-                                  onMouseDown={(e) => startDragging(e, index, 'info')}
-                                >
-                                  <div className="flex justify-end items-center mb-2">
-                                    <div className="flex gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id);
-                                        }}
-                                        title="Créer une connexion"
-                                      >
-                                        <Plus className="w-3 h-3" />
-                                      </Button>
-                                      {connectingArrow && connectingArrow !== acteData.id && (
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-5 w-5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            completeConnection(acteData.id);
-                                          }}
-                                          title="Connecter ici"
-                                        >
-                                          <Link2 className="w-3 h-3" />
-                                        </Button>
-                                      )}
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          removeActe(index);
-                                        }}
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
-                                    </div>
+                                <div className="text-center space-y-1">
+                                  <div className="text-orange-400 font-semibold text-xs mb-2">SERVITUDE</div>
+                                  <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(13) }}>
+                                    N° {servitudeData.servitude.numero_acte}
                                   </div>
-                                  <div className="text-center space-y-1">
-                                    <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
-                                      N° {acteData.acte.numero_acte}
-                                    </div>
-                                    <div className="text-slate-300" style={{ fontSize: getFontSize(12) }}>
-                                      {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
-                                    </div>
-                                    <Badge 
-                                      variant="secondary"
-                                      className={`${typeColors[acteData.acte.type_acte] || typeColors["Vente"]} border text-xs`}
-                                    >
-                                      {acteData.acte.type_acte}
-                                    </Badge>
+                                  <div className="text-slate-300" style={{ fontSize: getFontSize(11) }}>
+                                    {format(new Date(servitudeData.servitude.date_bpd), "dd MMM yyyy", { locale: fr })}
                                   </div>
-                                </div>
-
-                                {/* Bouton Vendeur en bas */}
-                                <div className="flex justify-center mt-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => toggleSection(index, 'vendeurs')}
-                                    className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                                  <Badge 
+                                    variant="secondary"
+                                    className="bg-orange-500/20 text-orange-400 border-orange-500/30 border text-xs"
                                   >
-                                    <ArrowDown className="w-3 h-3 mr-1" />
-                                    Vendeur
-                                  </Button>
+                                    {servitudeData.servitude.type_acte}
+                                  </Badge>
+                                  {servitudeData.servitude.type_servitude && (
+                                    <div className="text-slate-300 text-xs mt-1">
+                                      {servitudeData.servitude.type_servitude}
+                                    </div>
+                                  )}
                                 </div>
                               </CardContent>
                             </Card>
                           </div>
-
-                          {/* Vendeurs Block */}
-                          {acteData.vendeurs && acteData.vendeurs.visible && (
-                            <div
-                              className="absolute cursor-move"
-                              style={{ 
-                                left: acteData.vendeurs.x, 
-                                top: acteData.vendeurs.y,
-                                width: '250px',
-                                zIndex: 10
-                              }}
-                              onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
-                            >
-                              <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
-                                <CardContent className="p-4">
-                                  {/* Anchor point at top */}
-                                  <div className="flex justify-center mb-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startConnectingArrow(`${acteData.id}-vendeurs-top`);
-                                      }}
-                                      title="Point d'ancrage"
-                                    >
-                                      <Anchor className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                  <div className="space-y-1 text-center">
-                                    {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
-                                      <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
-                                        {name}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  {/* Anchor point at bottom */}
-                                  <div className="flex justify-center mt-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startConnectingArrow(`${acteData.id}-vendeurs-bottom`);
-                                      }}
-                                      title="Point d'ancrage"
-                                    >
-                                      <Anchor className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          )}
-                        </React.Fragment>
-                      ))
+                        ))}
+                      </>
                     )}
                   </div>
                 </div>
