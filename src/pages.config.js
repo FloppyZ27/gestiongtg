@@ -7,6 +7,7 @@ import Clients from './pages/Clients';
 import Profil from './pages/Profil';
 import Calendrier from './pages/Calendrier';
 import TableauDeBord from './pages/TableauDeBord';
+import Dossiers from './pages/Dossiers';
 import Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "Profil": Profil,
     "Calendrier": Calendrier,
     "TableauDeBord": TableauDeBord,
+    "Dossiers": Dossiers,
 }
 
 export const pagesConfig = {
