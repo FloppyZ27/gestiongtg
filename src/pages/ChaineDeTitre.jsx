@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, MoveIcon, ZoomIn, ZoomOut, Eye, EyeOff, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -23,6 +24,8 @@ const typeColors = {
 
 export default function ChaineDeTitre() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterTypeActe, setFilterTypeActe] = useState("all");
+  const [filterCirconscription, setFilterCirconscription] = useState("all");
   const [placedActes, setPlacedActes] = useState([]);
   const [arrows, setArrows] = useState([]);
   const [draggingItem, setDraggingItem] = useState(null);
@@ -38,10 +41,15 @@ export default function ChaineDeTitre() {
 
   const filteredActes = actes.filter(acte => {
     const searchLower = searchTerm.toLowerCase();
+    const typeMatch = filterTypeActe === "all" || acte.type_acte === filterTypeActe;
+    const circonscriptionMatch = filterCirconscription === "all" || acte.circonscription_fonciere === filterCirconscription;
+    
     return (
-      acte.numero_acte?.toLowerCase().includes(searchLower) ||
+      typeMatch &&
+      circonscriptionMatch &&
+      (acte.numero_acte?.toLowerCase().includes(searchLower) ||
       acte.notaire?.toLowerCase().includes(searchLower) ||
-      acte.type_acte?.toLowerCase().includes(searchLower)
+      acte.type_acte?.toLowerCase().includes(searchLower))
     );
   });
 
@@ -232,7 +240,7 @@ export default function ChaineDeTitre() {
   };
 
   const getBlockEdge = (position, section, width = 250, height = 80) => {
-    // Return edge points for connections
+    // Return edge points for connections - top or bottom center
     if (section === 'acheteurs') {
       return { x: position.x + width / 2, y: position.y + height }; // Bottom center
     } else if (section === 'info') {
@@ -246,12 +254,19 @@ export default function ChaineDeTitre() {
     return { x: position.x + width / 2, y: position.y + height };
   };
 
+  const getVendeurBottomEdge = (position, width = 250, height = 80) => {
+    return { x: position.x + width / 2, y: position.y + height };
+  };
+
   // Calculate font size based on zoom
   const getFontSize = (baseSize) => {
     if (zoom < 0.5) return `${baseSize * 1.5}px`;
     if (zoom < 0.7) return `${baseSize * 1.2}px`;
     return `${baseSize}px`;
   };
+
+  const typesActes = ["Vente", "Cession", "Donation", "Déclaration de Transmission", "Jugement", "Rectification", "Retrocession", "Servitude", "Bornage"];
+  const circonscriptions = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -281,9 +296,40 @@ export default function ChaineDeTitre() {
                     className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
                   />
                 </div>
+                
+                {/* Filtres */}
+                <div className="space-y-3 mt-4">
+                  <Select value={filterTypeActe} onValueChange={setFilterTypeActe}>
+                    <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type d'acte" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                      {typesActes.map((type) => (
+                        <SelectItem key={type} value={type} className="text-white">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
+                    <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Circonscription" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes</SelectItem>
+                      {circonscriptions.map((circ) => (
+                        <SelectItem key={circ} value={circ} className="text-white">
+                          {circ}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="max-h-[calc(100vh-300px)] overflow-y-auto p-4 space-y-3">
+                <div className="max-h-[calc(100vh-450px)] overflow-y-auto p-4 space-y-3">
                   {filteredActes.map((acte) => (
                     <div
                       key={acte.id}
@@ -458,8 +504,8 @@ export default function ChaineDeTitre() {
                         if (!fromActe || !toActe) return null;
 
                         // For chain connections: from vendeur bottom to info top
-                        const from = arrow.type === 'chain' 
-                          ? (fromActe.vendeurs && fromActe.vendeurs.visible ? getBlockEdge(fromActe.vendeurs, 'acheteurs') : getInfoBottomEdge(fromActe.info))
+                        const from = fromActe.vendeurs && fromActe.vendeurs.visible 
+                          ? getVendeurBottomEdge(fromActe.vendeurs) 
                           : getInfoBottomEdge(fromActe.info);
                         const to = getBlockEdge(toActe.info, 'info');
 
@@ -494,32 +540,17 @@ export default function ChaineDeTitre() {
                           {/* Acheteurs Block */}
                           {acteData.acheteurs && acteData.acheteurs.visible && (
                             <div
-                              className="absolute"
+                              className="absolute cursor-move"
                               style={{ 
                                 left: acteData.acheteurs.x, 
                                 top: acteData.acheteurs.y,
                                 width: '250px',
                                 zIndex: 10
                               }}
+                              onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
                             >
                               <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
                                 <CardContent className="p-3">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <button
-                                      onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
-                                      className="cursor-move p-1 hover:bg-blue-500/20 rounded"
-                                    >
-                                      <MoveIcon className="w-3 h-3 text-blue-400" />
-                                    </button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      onClick={() => removeSection(index, 'acheteurs')}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
                                   <div className="space-y-1 text-center">
                                     {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
                                       <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
@@ -557,57 +588,65 @@ export default function ChaineDeTitre() {
                                   </Button>
                                 </div>
 
-                                <div className="flex justify-between items-center mb-2">
-                                  <button
-                                    onMouseDown={(e) => startDragging(e, index, 'info')}
-                                    className="cursor-move p-1 hover:bg-purple-500/20 rounded"
-                                  >
-                                    <MoveIcon className="w-3 h-3 text-purple-400" />
-                                  </button>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                                      onClick={() => connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id)}
-                                      title="Créer une connexion"
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </Button>
-                                    {connectingArrow && connectingArrow !== acteData.id && (
+                                <div 
+                                  className="cursor-move"
+                                  onMouseDown={(e) => startDragging(e, index, 'info')}
+                                >
+                                  <div className="flex justify-end items-center mb-2">
+                                    <div className="flex gap-1">
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-5 w-5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                        onClick={() => completeConnection(acteData.id)}
-                                        title="Connecter ici"
+                                        className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          connectingArrow === acteData.id ? setConnectingArrow(null) : startConnectingArrow(acteData.id);
+                                        }}
+                                        title="Créer une connexion"
                                       >
-                                        <Link2 className="w-3 h-3" />
+                                        <Plus className="w-3 h-3" />
                                       </Button>
-                                    )}
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      onClick={() => removeActe(index)}
+                                      {connectingArrow && connectingArrow !== acteData.id && (
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-5 w-5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            completeConnection(acteData.id);
+                                          }}
+                                          title="Connecter ici"
+                                        >
+                                          <Link2 className="w-3 h-3" />
+                                        </Button>
+                                      )}
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          removeActe(index);
+                                        }}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="text-center space-y-1">
+                                    <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
+                                      N° {acteData.acte.numero_acte}
+                                    </div>
+                                    <div className="text-slate-300" style={{ fontSize: getFontSize(12) }}>
+                                      {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
+                                    </div>
+                                    <Badge 
+                                      variant="secondary"
+                                      className={`${typeColors[acteData.acte.type_acte] || typeColors["Vente"]} border text-xs`}
                                     >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
+                                      {acteData.acte.type_acte}
+                                    </Badge>
                                   </div>
-                                </div>
-                                <div className="text-center space-y-1">
-                                  <div className="font-mono font-bold text-white" style={{ fontSize: getFontSize(14) }}>
-                                    N° {acteData.acte.numero_acte}
-                                  </div>
-                                  <div className="text-slate-300" style={{ fontSize: getFontSize(12) }}>
-                                    {format(new Date(acteData.acte.date_bpd), "dd MMM yyyy", { locale: fr })}
-                                  </div>
-                                  <Badge 
-                                    variant="secondary"
-                                    className={`${typeColors[acteData.acte.type_acte] || typeColors["Vente"]} border text-xs`}
-                                  >
-                                    {acteData.acte.type_acte}
-                                  </Badge>
                                 </div>
 
                                 {/* Bouton Vendeur en bas */}
@@ -629,32 +668,17 @@ export default function ChaineDeTitre() {
                           {/* Vendeurs Block */}
                           {acteData.vendeurs && acteData.vendeurs.visible && (
                             <div
-                              className="absolute"
+                              className="absolute cursor-move"
                               style={{ 
                                 left: acteData.vendeurs.x, 
                                 top: acteData.vendeurs.y,
                                 width: '250px',
                                 zIndex: 10
                               }}
+                              onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
                             >
                               <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
                                 <CardContent className="p-3">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <button
-                                      onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
-                                      className="cursor-move p-1 hover:bg-blue-500/20 rounded"
-                                    >
-                                      <MoveIcon className="w-3 h-3 text-blue-400" />
-                                    </button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      onClick={() => removeSection(index, 'vendeurs')}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
                                   <div className="space-y-1 text-center">
                                     {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
                                       <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
