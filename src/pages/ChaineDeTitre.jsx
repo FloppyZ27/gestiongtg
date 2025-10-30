@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, MoveIcon, ZoomIn, ZoomOut } from "lucide-react";
+import { Search, Link2, Trash2, Plus, MoveIcon, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -71,52 +71,56 @@ export default function ChaineDeTitre() {
       const x = (e.clientX - rect.left) / zoom;
       const y = (e.clientY - rect.top) / zoom;
       
-      addActeToCanvas(acte, x, y);
+      addActeToCanvas(acte, x, y, true);
     }
   };
 
-  const addActeToCanvas = (acte, x, y) => {
+  const addActeToCanvas = (acte, x, y, showAcheteurs = true) => {
     const acteId = `${acte.numero_acte}-${Date.now()}`;
     const newActe = {
       id: acteId,
       acte: acte,
-      acheteurs: { x: x, y: y },
-      info: { x: x, y: y + 100 },
-      vendeurs: { x: x, y: y + 200 }
+      acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
+      info: { x: x, y: showAcheteurs ? y + 100 : y },
+      vendeurs: { x: x, y: showAcheteurs ? y + 200 : y + 100, visible: true }
     };
 
     setPlacedActes(prev => {
       const updated = [...prev, newActe];
       
-      // Automatically add previous acts if they exist
-      if (acte.numeros_actes_anterieurs && acte.numeros_actes_anterieurs.length > 0) {
-        let offsetY = 400;
-        acte.numeros_actes_anterieurs.forEach((numeroAnterieur, idx) => {
-          const acteAnterieur = findActeByNumero(numeroAnterieur);
-          if (acteAnterieur) {
-            // Check if this acte is not already placed
-            const alreadyPlaced = updated.some(pa => pa.acte.numero_acte === acteAnterieur.numero_acte);
-            if (!alreadyPlaced) {
-              const anteriorActeId = `${acteAnterieur.numero_acte}-${Date.now()}-${idx}`;
-              const anteriorActe = {
-                id: anteriorActeId,
-                acte: acteAnterieur,
-                acheteurs: { x: x, y: y + offsetY },
-                info: { x: x, y: y + offsetY + 100 },
-                vendeurs: { x: x, y: y + offsetY + 200 }
-              };
-              updated.push(anteriorActe);
-              
-              // Create arrow from vendeur of current acte to acheteur of anterior acte
-              setTimeout(() => {
-                setArrows(prevArrows => [...prevArrows, { from: acteId, to: anteriorActeId, type: 'chain' }]);
-              }, 100);
-              
-              offsetY += 400;
+      // Recursively add previous acts
+      const addPreviousActes = (currentActe, currentId, baseX, baseY) => {
+        if (currentActe.numeros_actes_anterieurs && currentActe.numeros_actes_anterieurs.length > 0) {
+          let offsetY = baseY + 300;
+          currentActe.numeros_actes_anterieurs.forEach((numeroAnterieur, idx) => {
+            const acteAnterieur = findActeByNumero(numeroAnterieur);
+            if (acteAnterieur) {
+              const alreadyPlaced = updated.some(pa => pa.acte.numero_acte === acteAnterieur.numero_acte);
+              if (!alreadyPlaced) {
+                const anteriorActeId = `${acteAnterieur.numero_acte}-${Date.now()}-${idx}`;
+                const anteriorActe = {
+                  id: anteriorActeId,
+                  acte: acteAnterieur,
+                  acheteurs: null,
+                  info: { x: baseX, y: offsetY },
+                  vendeurs: { x: baseX, y: offsetY + 100, visible: true }
+                };
+                updated.push(anteriorActe);
+                
+                setTimeout(() => {
+                  setArrows(prevArrows => [...prevArrows, { from: currentId, to: anteriorActeId, type: 'chain' }]);
+                }, 100);
+                
+                // Recursively add previous acts for this anterior act
+                addPreviousActes(acteAnterieur, anteriorActeId, baseX, offsetY);
+                offsetY += 300;
+              }
             }
-          }
-        });
-      }
+          });
+        }
+      };
+
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 200 : y + 100);
       
       return updated;
     });
@@ -128,6 +132,7 @@ export default function ChaineDeTitre() {
 
   const startDragging = (e, acteIndex, section) => {
     const acte = placedActes[acteIndex];
+    if (!acte[section]) return;
     setDraggingItem({ 
       acteIndex, 
       section,
@@ -144,7 +149,7 @@ export default function ChaineDeTitre() {
       
       setPlacedActes(prev => prev.map((acte, idx) => 
         idx === draggingItem.acteIndex 
-          ? { ...acte, [draggingItem.section]: { x, y } }
+          ? { ...acte, [draggingItem.section]: { ...acte[draggingItem.section], x, y } }
           : acte
       ));
     }
@@ -158,6 +163,36 @@ export default function ChaineDeTitre() {
     const acteId = placedActes[index].id;
     setPlacedActes(prev => prev.filter((_, i) => i !== index));
     setArrows(prev => prev.filter(arrow => arrow.from !== acteId && arrow.to !== acteId));
+  };
+
+  const removeSection = (index, section) => {
+    setPlacedActes(prev => prev.map((acte, idx) => 
+      idx === index ? { ...acte, [section]: null } : acte
+    ));
+  };
+
+  const toggleSection = (index, section) => {
+    setPlacedActes(prev => prev.map((acte, idx) => {
+      if (idx === index) {
+        if (acte[section]) {
+          // Hide section
+          return { ...acte, [section]: { ...acte[section], visible: false } };
+        } else {
+          // Show section - create it at a default position
+          const infoY = acte.info.y;
+          const infoX = acte.info.x;
+          return {
+            ...acte,
+            [section]: {
+              x: infoX,
+              y: section === 'acheteurs' ? infoY - 100 : infoY + 100,
+              visible: true
+            }
+          };
+        }
+      }
+      return acte;
+    }));
   };
 
   const startConnectingArrow = (acteId) => {
@@ -187,16 +222,19 @@ export default function ChaineDeTitre() {
       .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim());
   };
 
-  const getBlockCenter = (position, width = 250, height = 80) => {
-    return { x: position.x + width / 2, y: position.y + height / 2 };
+  const getBlockEdge = (position, section, width = 250, height = 80) => {
+    // Return edge points for connections
+    if (section === 'acheteurs') {
+      return { x: position.x + width / 2, y: position.y + height }; // Bottom center
+    } else if (section === 'info') {
+      return { x: position.x + width / 2, y: position.y }; // Top center
+    } else if (section === 'vendeurs') {
+      return { x: position.x + width / 2, y: position.y }; // Top center
+    }
   };
 
-  const getVendeurBottom = (position, height = 80) => {
-    return { x: position.x + 125, y: position.y + height };
-  };
-
-  const getAcheteurTop = (position) => {
-    return { x: position.x + 125, y: position.y };
+  const getInfoBottomEdge = (position, width = 250, height = 80) => {
+    return { x: position.x + width / 2, y: position.y + height };
   };
 
   return (
@@ -356,34 +394,45 @@ export default function ChaineDeTitre() {
                     <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
                       {/* Lines connecting the 3 blocks of each acte */}
                       {placedActes.map((acteData, idx) => {
-                        const acheteurCenter = getBlockCenter(acteData.acheteurs);
-                        const infoCenter = getBlockCenter(acteData.info);
-                        const vendeurCenter = getBlockCenter(acteData.vendeurs);
+                        const lines = [];
                         
-                        return (
-                          <g key={`lines-${idx}`}>
-                            {/* Line from acheteurs to info */}
+                        // Line from acheteurs to info (if acheteurs exists and is visible)
+                        if (acteData.acheteurs && acteData.acheteurs.visible) {
+                          const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs');
+                          const infoTopEdge = getBlockEdge(acteData.info, 'info');
+                          lines.push(
                             <line
-                              x1={acheteurCenter.x}
-                              y1={acheteurCenter.y}
-                              x2={infoCenter.x}
-                              y2={infoCenter.y}
+                              key={`acheteur-info-${idx}`}
+                              x1={acheteurEdge.x}
+                              y1={acheteurEdge.y}
+                              x2={infoTopEdge.x}
+                              y2={infoTopEdge.y}
                               stroke="#64748b"
                               strokeWidth="2"
                               strokeDasharray="5,5"
                             />
-                            {/* Line from info to vendeurs */}
+                          );
+                        }
+                        
+                        // Line from info to vendeurs (if vendeurs exists and is visible)
+                        if (acteData.vendeurs && acteData.vendeurs.visible) {
+                          const infoBottomEdge = getInfoBottomEdge(acteData.info);
+                          const vendeurTopEdge = getBlockEdge(acteData.vendeurs, 'vendeurs');
+                          lines.push(
                             <line
-                              x1={infoCenter.x}
-                              y1={infoCenter.y}
-                              x2={vendeurCenter.x}
-                              y2={vendeurCenter.y}
+                              key={`info-vendeur-${idx}`}
+                              x1={infoBottomEdge.x}
+                              y1={infoBottomEdge.y}
+                              x2={vendeurTopEdge.x}
+                              y2={vendeurTopEdge.y}
                               stroke="#64748b"
                               strokeWidth="2"
                               strokeDasharray="5,5"
                             />
-                          </g>
-                        );
+                          );
+                        }
+                        
+                        return <g key={`lines-${idx}`}>{lines}</g>;
                       })}
                       
                       {/* Arrows between different actes */}
@@ -392,13 +441,11 @@ export default function ChaineDeTitre() {
                         const toActe = placedActes.find(a => a.id === arrow.to);
                         if (!fromActe || !toActe) return null;
 
-                        // For chain connections: from vendeur bottom to acheteur top
+                        // For chain connections: from vendeur bottom to info top
                         const from = arrow.type === 'chain' 
-                          ? getVendeurBottom(fromActe.vendeurs) 
-                          : getBlockCenter(fromActe.info);
-                        const to = arrow.type === 'chain'
-                          ? getAcheteurTop(toActe.acheteurs)
-                          : getBlockCenter(toActe.info);
+                          ? (fromActe.vendeurs && fromActe.vendeurs.visible ? getBlockEdge(fromActe.vendeurs, 'acheteurs') : getInfoBottomEdge(fromActe.info))
+                          : getInfoBottomEdge(fromActe.info);
+                        const to = getBlockEdge(toActe.info, 'info');
 
                         return (
                           <g key={idx}>
@@ -411,7 +458,7 @@ export default function ChaineDeTitre() {
                                 refY="3"
                                 orient="auto"
                               >
-                                <polygon points="0 0, 10 3, 0 6" fill={arrow.type === 'chain' ? "#10b981" : "#34d399"} />
+                                <polygon points="0 0, 10 3, 0 6" fill="#64748b" />
                               </marker>
                             </defs>
                             <line
@@ -419,8 +466,9 @@ export default function ChaineDeTitre() {
                               y1={from.y}
                               x2={to.x}
                               y2={to.y}
-                              stroke={arrow.type === 'chain' ? "#10b981" : "#34d399"}
-                              strokeWidth="3"
+                              stroke="#64748b"
+                              strokeWidth="2"
+                              strokeDasharray="5,5"
                               markerEnd={`url(#arrowhead-${idx})`}
                             />
                           </g>
@@ -442,35 +490,45 @@ export default function ChaineDeTitre() {
                       placedActes.map((acteData, index) => (
                         <React.Fragment key={acteData.id}>
                           {/* Acheteurs Block */}
-                          <div
-                            className="absolute"
-                            style={{ 
-                              left: acteData.acheteurs.x, 
-                              top: acteData.acheteurs.y,
-                              width: '250px',
-                              zIndex: 10
-                            }}
-                          >
-                            <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
-                              <CardContent className="p-3">
-                                <div className="flex justify-end items-center mb-2">
-                                  <button
-                                    onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
-                                    className="cursor-move p-1 hover:bg-blue-500/20 rounded"
-                                  >
-                                    <MoveIcon className="w-3 h-3 text-blue-400" />
-                                  </button>
-                                </div>
-                                <div className="space-y-1 text-center">
-                                  {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
-                                    <div key={idx} className="text-sm text-white font-medium">
-                                      {name}
-                                    </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
+                          {acteData.acheteurs && acteData.acheteurs.visible && (
+                            <div
+                              className="absolute"
+                              style={{ 
+                                left: acteData.acheteurs.x, 
+                                top: acteData.acheteurs.y,
+                                width: '250px',
+                                zIndex: 10
+                              }}
+                            >
+                              <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
+                                <CardContent className="p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <button
+                                      onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
+                                      className="cursor-move p-1 hover:bg-blue-500/20 rounded"
+                                    >
+                                      <MoveIcon className="w-3 h-3 text-blue-400" />
+                                    </button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      onClick={() => removeSection(index, 'acheteurs')}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <div className="space-y-1 text-center">
+                                    {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
+                                      <div key={idx} className="text-sm text-white font-medium">
+                                        {name}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
 
                           {/* Info Block */}
                           <div
@@ -522,7 +580,7 @@ export default function ChaineDeTitre() {
                                     </Button>
                                   </div>
                                 </div>
-                                <div className="text-center space-y-1">
+                                <div className="text-center space-y-2">
                                   <div className="font-mono font-bold text-white text-sm">
                                     N° {acteData.acte.numero_acte}
                                   </div>
@@ -535,41 +593,71 @@ export default function ChaineDeTitre() {
                                   >
                                     {acteData.acte.type_acte}
                                   </Badge>
+                                  <div className="flex gap-2 justify-center pt-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => toggleSection(index, 'acheteurs')}
+                                      className="text-xs h-6 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                                    >
+                                      {acteData.acheteurs && acteData.acheteurs.visible ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
+                                      Acheteur
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => toggleSection(index, 'vendeurs')}
+                                      className="text-xs h-6 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                                    >
+                                      {acteData.vendeurs && acteData.vendeurs.visible ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
+                                      Vendeur
+                                    </Button>
+                                  </div>
                                 </div>
                               </CardContent>
                             </Card>
                           </div>
 
                           {/* Vendeurs Block */}
-                          <div
-                            className="absolute"
-                            style={{ 
-                              left: acteData.vendeurs.x, 
-                              top: acteData.vendeurs.y,
-                              width: '250px',
-                              zIndex: 10
-                            }}
-                          >
-                            <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
-                              <CardContent className="p-3">
-                                <div className="flex justify-end items-center mb-2">
-                                  <button
-                                    onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
-                                    className="cursor-move p-1 hover:bg-blue-500/20 rounded"
-                                  >
-                                    <MoveIcon className="w-3 h-3 text-blue-400" />
-                                  </button>
-                                </div>
-                                <div className="space-y-1 text-center">
-                                  {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
-                                    <div key={idx} className="text-sm text-white font-medium">
-                                      {name}
-                                    </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
+                          {acteData.vendeurs && acteData.vendeurs.visible && (
+                            <div
+                              className="absolute"
+                              style={{ 
+                                left: acteData.vendeurs.x, 
+                                top: acteData.vendeurs.y,
+                                width: '250px',
+                                zIndex: 10
+                              }}
+                            >
+                              <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
+                                <CardContent className="p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <button
+                                      onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
+                                      className="cursor-move p-1 hover:bg-blue-500/20 rounded"
+                                    >
+                                      <MoveIcon className="w-3 h-3 text-blue-400" />
+                                    </button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      onClick={() => removeSection(index, 'vendeurs')}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <div className="space-y-1 text-center">
+                                    {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
+                                      <div key={idx} className="text-sm text-white font-medium">
+                                        {name}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
                         </React.Fragment>
                       ))
                     )}
