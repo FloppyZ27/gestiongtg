@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Link2, Trash2, Plus, ZoomIn, ZoomOut, ArrowUp, ArrowDown, Anchor } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -54,9 +54,11 @@ export default function ChaineDeTitre() {
   });
 
   const handleWheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom(prev => Math.max(0.3, Math.min(2, prev + delta)));
+    if (e.shiftKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(prev => Math.max(0.3, Math.min(2, prev + delta)));
+    }
   };
 
   const findActeByNumero = (numeroActe) => {
@@ -87,8 +89,8 @@ export default function ChaineDeTitre() {
       id: acteId,
       acte: acte,
       acheteurs: showAcheteurs ? { x: x, y: y, visible: true } : null,
-      info: { x: x, y: showAcheteurs ? y + 120 : y },
-      vendeurs: { x: x, y: showAcheteurs ? y + 240 : y + 120, visible: true }
+      info: { x: x, y: showAcheteurs ? y + 130 : y },
+      vendeurs: { x: x, y: showAcheteurs ? y + 230 : y + 100, visible: true }
     };
 
     setPlacedActes(prev => {
@@ -97,7 +99,7 @@ export default function ChaineDeTitre() {
       // Recursively add previous acts
       const addPreviousActes = (currentActe, currentId, baseX, baseY) => {
         if (currentActe.numeros_actes_anterieurs && currentActe.numeros_actes_anterieurs.length > 0) {
-          let offsetY = baseY + 400;
+          let offsetY = baseY + 450;
           currentActe.numeros_actes_anterieurs.forEach((numeroAnterieur, idx) => {
             const acteAnterieur = findActeByNumero(numeroAnterieur);
             if (acteAnterieur) {
@@ -109,7 +111,7 @@ export default function ChaineDeTitre() {
                   acte: acteAnterieur,
                   acheteurs: null,
                   info: { x: baseX, y: offsetY },
-                  vendeurs: { x: baseX, y: offsetY + 120, visible: true }
+                  vendeurs: { x: baseX, y: offsetY + 100, visible: true }
                 };
                 updated.push(anteriorActe);
                 
@@ -119,14 +121,14 @@ export default function ChaineDeTitre() {
                 
                 // Recursively add previous acts for this anterior act
                 addPreviousActes(acteAnterieur, anteriorActeId, baseX, offsetY);
-                offsetY += 400;
+                offsetY += 450;
               }
             }
           });
         }
       };
 
-      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 240 : y + 120);
+      addPreviousActes(acte, acteId, x, showAcheteurs ? y + 230 : y + 100);
       
       return updated;
     });
@@ -179,12 +181,6 @@ export default function ChaineDeTitre() {
     setArrows(prev => prev.filter(arrow => arrow.from !== acteId && arrow.to !== acteId));
   };
 
-  const removeSection = (index, section) => {
-    setPlacedActes(prev => prev.map((acte, idx) => 
-      idx === index ? { ...acte, [section]: null } : acte
-    ));
-  };
-
   const toggleSection = (index, section) => {
     setPlacedActes(prev => prev.map((acte, idx) => {
       if (idx === index) {
@@ -202,7 +198,7 @@ export default function ChaineDeTitre() {
             ...acte,
             [section]: {
               x: infoX,
-              y: section === 'acheteurs' ? infoY - 120 : infoY + 120,
+              y: section === 'acheteurs' ? infoY - 130 : infoY + 100,
               visible: true
             }
           };
@@ -239,7 +235,7 @@ export default function ChaineDeTitre() {
       .map(p => `${p.prenom || ''} ${p.nom || ''}`.trim());
   };
 
-  const getBlockEdge = (position, section, width = 250, height = 80) => {
+  const getBlockEdge = (position, section, width, height) => {
     // Return edge points for connections - top or bottom center
     if (section === 'acheteurs') {
       return { x: position.x + width / 2, y: position.y + height }; // Bottom center
@@ -250,11 +246,11 @@ export default function ChaineDeTitre() {
     }
   };
 
-  const getInfoBottomEdge = (position, width = 250, height = 80) => {
+  const getInfoBottomEdge = (position, width = 300, height = 70) => {
     return { x: position.x + width / 2, y: position.y + height };
   };
 
-  const getVendeurBottomEdge = (position, width = 250, height = 80) => {
+  const getVendeurBottomEdge = (position, width = 250, height = 100) => {
     return { x: position.x + width / 2, y: position.y + height };
   };
 
@@ -434,9 +430,9 @@ export default function ChaineDeTitre() {
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onWheel={handleWheel}
-                  className="relative w-full h-[calc(100vh-250px)] overflow-auto"
+                  className="relative w-full h-[calc(100vh-200px)] overflow-auto"
                   style={{ 
-                    minHeight: '600px',
+                    minHeight: '900px',
                     backgroundImage: `
                       linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px)
@@ -450,7 +446,8 @@ export default function ChaineDeTitre() {
                     transformOrigin: '0 0',
                     width: `${100 / zoom}%`,
                     height: `${100 / zoom}%`,
-                    position: 'relative'
+                    position: 'relative',
+                    minHeight: '3000px'
                   }}>
                     {/* SVG for connections between blocks and arrows */}
                     <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
@@ -460,8 +457,8 @@ export default function ChaineDeTitre() {
                         
                         // Line from acheteurs to info (if acheteurs exists and is visible)
                         if (acteData.acheteurs && acteData.acheteurs.visible) {
-                          const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs');
-                          const infoTopEdge = getBlockEdge(acteData.info, 'info');
+                          const acheteurEdge = getBlockEdge(acteData.acheteurs, 'acheteurs', 250, 100);
+                          const infoTopEdge = getBlockEdge(acteData.info, 'info', 300, 70);
                           lines.push(
                             <line
                               key={`acheteur-info-${idx}`}
@@ -479,7 +476,7 @@ export default function ChaineDeTitre() {
                         // Line from info to vendeurs (if vendeurs exists and is visible)
                         if (acteData.vendeurs && acteData.vendeurs.visible) {
                           const infoBottomEdge = getInfoBottomEdge(acteData.info);
-                          const vendeurTopEdge = getBlockEdge(acteData.vendeurs, 'vendeurs');
+                          const vendeurTopEdge = getBlockEdge(acteData.vendeurs, 'vendeurs', 250, 100);
                           lines.push(
                             <line
                               key={`info-vendeur-${idx}`}
@@ -507,7 +504,7 @@ export default function ChaineDeTitre() {
                         const from = fromActe.vendeurs && fromActe.vendeurs.visible 
                           ? getVendeurBottomEdge(fromActe.vendeurs) 
                           : getInfoBottomEdge(fromActe.info);
-                        const to = getBlockEdge(toActe.info, 'info');
+                        const to = getBlockEdge(toActe.info, 'info', 300, 70);
 
                         return (
                           <line
@@ -531,7 +528,7 @@ export default function ChaineDeTitre() {
                           Glissez des actes ici pour créer votre chaine de titre
                         </p>
                         <p className="text-slate-600 text-sm mt-2">
-                          Utilisez la molette pour zoomer
+                          Utilisez Shift + Molette pour zoomer
                         </p>
                       </div>
                     ) : (
@@ -549,14 +546,29 @@ export default function ChaineDeTitre() {
                               }}
                               onMouseDown={(e) => startDragging(e, index, 'acheteurs')}
                             >
-                              <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
-                                <CardContent className="p-3">
+                              <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                                <CardContent className="p-4">
                                   <div className="space-y-1 text-center">
                                     {renderPersonNames(acteData.acte.acheteurs).map((name, idx) => (
                                       <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
                                         {name}
                                       </div>
                                     ))}
+                                  </div>
+                                  {/* Anchor point at bottom */}
+                                  <div className="flex justify-center mt-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startConnectingArrow(`${acteData.id}-acheteurs-bottom`);
+                                      }}
+                                      title="Point d'ancrage"
+                                    >
+                                      <Anchor className="w-3 h-3" />
+                                    </Button>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -569,7 +581,7 @@ export default function ChaineDeTitre() {
                             style={{ 
                               left: acteData.info.x, 
                               top: acteData.info.y,
-                              width: '250px',
+                              width: '300px',
                               zIndex: 10
                             }}
                           >
@@ -581,7 +593,7 @@ export default function ChaineDeTitre() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => toggleSection(index, 'acheteurs')}
-                                    className="text-xs h-6 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                                    className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                   >
                                     <ArrowUp className="w-3 h-3 mr-1" />
                                     Acheteur
@@ -655,7 +667,7 @@ export default function ChaineDeTitre() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => toggleSection(index, 'vendeurs')}
-                                    className="text-xs h-6 bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                                    className="text-xs h-6 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
                                   >
                                     <ArrowDown className="w-3 h-3 mr-1" />
                                     Vendeur
@@ -677,14 +689,44 @@ export default function ChaineDeTitre() {
                               }}
                               onMouseDown={(e) => startDragging(e, index, 'vendeurs')}
                             >
-                              <Card className="border-blue-500/50 bg-blue-500/10 backdrop-blur-sm shadow-lg">
-                                <CardContent className="p-3">
+                              <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg">
+                                <CardContent className="p-4">
+                                  {/* Anchor point at top */}
+                                  <div className="flex justify-center mb-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startConnectingArrow(`${acteData.id}-vendeurs-top`);
+                                      }}
+                                      title="Point d'ancrage"
+                                    >
+                                      <Anchor className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                   <div className="space-y-1 text-center">
                                     {renderPersonNames(acteData.acte.vendeurs).map((name, idx) => (
                                       <div key={idx} className="text-white font-medium" style={{ fontSize: getFontSize(14) }}>
                                         {name}
                                       </div>
                                     ))}
+                                  </div>
+                                  {/* Anchor point at bottom */}
+                                  <div className="flex justify-center mt-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startConnectingArrow(`${acteData.id}-vendeurs-bottom`);
+                                      }}
+                                      title="Point d'ancrage"
+                                    >
+                                      <Anchor className="w-3 h-3" />
+                                    </Button>
                                   </div>
                                 </CardContent>
                               </Card>
