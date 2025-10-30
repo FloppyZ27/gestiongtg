@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Clock, FileText, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -18,7 +18,8 @@ export default function Profil() {
   const [isRendezVousDialogOpen, setIsRendezVousDialogOpen] = useState(false);
   const [editingRendezVous, setEditingRendezVous] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState('month'); // 'month' or 'week'
 
   const queryClient = useQueryClient();
 
@@ -174,11 +175,19 @@ export default function Profil() {
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
 
   // Calendar logic
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const startDate = startOfWeek(monthStart, { locale: fr });
-  const endDate = endOfWeek(monthEnd, { locale: fr });
-  const daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+  let startDate, endDate, daysInView;
+  
+  if (viewMode === 'month') {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    startDate = startOfWeek(monthStart, { locale: fr });
+    endDate = endOfWeek(monthEnd, { locale: fr });
+    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+  } else {
+    startDate = startOfWeek(currentDate, { locale: fr });
+    endDate = endOfWeek(currentDate, { locale: fr });
+    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
+  }
 
   const getEventsForDay = (day) => {
     return rendezVous.filter(rdv => {
@@ -187,8 +196,31 @@ export default function Profil() {
     });
   };
 
-  const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const previousPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(subMonths(currentDate, 1));
+    } else {
+      setCurrentDate(subWeeks(currentDate, 1));
+    }
+  };
+
+  const nextPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(addMonths(currentDate, 1));
+    } else {
+      setCurrentDate(addWeeks(currentDate, 1));
+    }
+  };
+
+  const getPeriodLabel = () => {
+    if (viewMode === 'month') {
+      return format(currentDate, "MMMM yyyy", { locale: fr });
+    } else {
+      const weekStart = startOfWeek(currentDate, { locale: fr });
+      const weekEnd = endOfWeek(currentDate, { locale: fr });
+      return `${format(weekStart, "d MMM", { locale: fr })} - ${format(weekEnd, "d MMM yyyy", { locale: fr })}`;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -354,80 +386,100 @@ export default function Profil() {
                     <Calendar className="w-5 h-5 text-emerald-400" />
                     Calendrier
                   </CardTitle>
-                  <Dialog open={isRendezVousDialogOpen} onOpenChange={(open) => {
-                    setIsRendezVousDialogOpen(open);
-                    if (!open) resetRendezVousForm();
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
-                        <Plus className="w-4 h-4" />
+                  <div className="flex gap-2">
+                    <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1">
+                      <Button
+                        size="sm"
+                        variant={viewMode === 'month' ? 'default' : 'ghost'}
+                        onClick={() => setViewMode('month')}
+                        className={viewMode === 'month' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                      >
+                        Mois
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-slate-900 border-slate-800 text-white">
-                      <DialogHeader>
-                        <DialogTitle>{editingRendezVous ? "Modifier" : "Nouveau rendez-vous"}</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleRendezVousSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Titre</Label>
-                          <Input
-                            value={rendezVousForm.titre}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, titre: e.target.value})}
-                            required
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Type</Label>
-                          <select
-                            value={rendezVousForm.type}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, type: e.target.value})}
-                            className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
-                          >
-                            <option value="rendez-vous">Rendez-vous</option>
-                            <option value="absence">Absence</option>
-                          </select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
+                      <Button
+                        size="sm"
+                        variant={viewMode === 'week' ? 'default' : 'ghost'}
+                        onClick={() => setViewMode('week')}
+                        className={viewMode === 'week' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}
+                      >
+                        Semaine
+                      </Button>
+                    </div>
+                    <Dialog open={isRendezVousDialogOpen} onOpenChange={(open) => {
+                      setIsRendezVousDialogOpen(open);
+                      if (!open) resetRendezVousForm();
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-slate-900 border-slate-800 text-white">
+                        <DialogHeader>
+                          <DialogTitle>{editingRendezVous ? "Modifier" : "Nouveau rendez-vous"}</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleRendezVousSubmit} className="space-y-4">
                           <div className="space-y-2">
-                            <Label>Date début</Label>
+                            <Label>Titre</Label>
                             <Input
-                              type="datetime-local"
-                              value={rendezVousForm.date_debut}
-                              onChange={(e) => setRendezVousForm({...rendezVousForm, date_debut: e.target.value})}
+                              value={rendezVousForm.titre}
+                              onChange={(e) => setRendezVousForm({...rendezVousForm, titre: e.target.value})}
                               required
                               className="bg-slate-800 border-slate-700"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Date fin</Label>
-                            <Input
-                              type="datetime-local"
-                              value={rendezVousForm.date_fin}
-                              onChange={(e) => setRendezVousForm({...rendezVousForm, date_fin: e.target.value})}
+                            <Label>Type</Label>
+                            <select
+                              value={rendezVousForm.type}
+                              onChange={(e) => setRendezVousForm({...rendezVousForm, type: e.target.value})}
+                              className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
+                            >
+                              <option value="rendez-vous">Rendez-vous</option>
+                              <option value="absence">Absence</option>
+                            </select>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Date début</Label>
+                              <Input
+                                type="datetime-local"
+                                value={rendezVousForm.date_debut}
+                                onChange={(e) => setRendezVousForm({...rendezVousForm, date_debut: e.target.value})}
+                                required
+                                className="bg-slate-800 border-slate-700"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Date fin</Label>
+                              <Input
+                                type="datetime-local"
+                                value={rendezVousForm.date_fin}
+                                onChange={(e) => setRendezVousForm({...rendezVousForm, date_fin: e.target.value})}
+                                className="bg-slate-800 border-slate-700"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Description</Label>
+                            <Textarea
+                              value={rendezVousForm.description}
+                              onChange={(e) => setRendezVousForm({...rendezVousForm, description: e.target.value})}
                               className="bg-slate-800 border-slate-700"
                             />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Description</Label>
-                          <Textarea
-                            value={rendezVousForm.description}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, description: e.target.value})}
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button type="button" variant="outline" onClick={() => setIsRendezVousDialogOpen(false)}>
-                            Annuler
-                          </Button>
-                          <Button type="submit" className="bg-emerald-500">
-                            {editingRendezVous ? "Modifier" : "Créer"}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                          <div className="flex justify-end gap-2">
+                            <Button type="button" variant="outline" onClick={() => setIsRendezVousDialogOpen(false)}>
+                              Annuler
+                            </Button>
+                            <Button type="submit" className="bg-emerald-500">
+                              {editingRendezVous ? "Modifier" : "Créer"}
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-4">
@@ -436,18 +488,18 @@ export default function Profil() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={previousMonth}
+                    onClick={previousPeriod}
                     className="text-slate-400 hover:text-white"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
                   <h3 className="text-lg font-semibold text-white">
-                    {format(currentMonth, "MMMM yyyy", { locale: fr })}
+                    {getPeriodLabel()}
                   </h3>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={nextMonth}
+                    onClick={nextPeriod}
                     className="text-slate-400 hover:text-white"
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -467,14 +519,14 @@ export default function Profil() {
                 <div className="grid grid-cols-7 gap-1">
                   {daysInView.map((day, index) => {
                     const events = getEventsForDay(day);
-                    const isCurrentMonth = isSameMonth(day, currentMonth);
+                    const isCurrentMonth = viewMode === 'month' ? isSameMonth(day, currentDate) : true;
                     const isToday = isSameDay(day, new Date());
 
                     return (
                       <div
                         key={index}
                         className={`
-                          min-h-[80px] p-2 rounded-lg border transition-colors
+                          ${viewMode === 'week' ? 'min-h-[120px]' : 'min-h-[80px]'} p-2 rounded-lg border transition-colors
                           ${isCurrentMonth ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-slate-800'}
                           ${isToday ? 'border-emerald-500 border-2' : ''}
                         `}

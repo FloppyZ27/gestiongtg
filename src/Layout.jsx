@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { FileText, User, Link2, MapPin, Compass } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,11 @@ const navigationItems = [
     title: "Profil",
     url: createPageUrl("Profil"),
     icon: User,
+  },
+  {
+    title: "Calendrier",
+    url: createPageUrl("Calendrier"),
+    icon: Calendar,
   },
   {
     title: "Clients",
@@ -147,3 +152,4 @@ export default function Layout({ children, currentPageName }) {
     </SidebarProvider>
   );
 }
+
