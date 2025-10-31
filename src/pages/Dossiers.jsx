@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import ClientDetailView from "../components/clients/ClientDetailView";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
@@ -51,7 +52,6 @@ export default function Dossiers() {
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
-    date_livraison: "",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
@@ -178,7 +178,6 @@ export default function Dossiers() {
       numero_dossier: "",
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
-      date_livraison: "",
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
@@ -206,7 +205,6 @@ export default function Dossiers() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      date_livraison: dossier.date_livraison || "",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -248,6 +246,9 @@ export default function Dossiers() {
         adresse_travaux: "",
         lots: [],
         prix_estime: 0,
+        date_livraison: "",
+        date_signature: "",
+        date_debut_travaux: "",
         notes: ""
       }]
     }));
@@ -386,7 +387,7 @@ export default function Dossiers() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>N° de dossier <span className="text-red-400">*</span></Label>
                     <Input
@@ -419,15 +420,6 @@ export default function Dossiers() {
                       value={formData.date_ouverture}
                       onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
                       required
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Date de livraison</Label>
-                    <Input
-                      type="date"
-                      value={formData.date_livraison}
-                      onChange={(e) => setFormData({...formData, date_livraison: e.target.value})}
                       className="bg-slate-800 border-slate-700"
                     />
                   </div>
@@ -567,8 +559,8 @@ export default function Dossiers() {
 
                         <div className="space-y-2">
                           <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                          <Select
-                            value={mandat.type_mandat}
+                          <Select 
+                            value={mandat.type_mandat} 
                             onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
                           >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
@@ -592,6 +584,36 @@ export default function Dossiers() {
                             placeholder="Adresse complète"
                             className="bg-slate-700 border-slate-600"
                           />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-2">
+                            <Label>Date de signature</Label>
+                            <Input
+                              type="date"
+                              value={mandat.date_signature || ""}
+                              onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                              className="bg-slate-700 border-slate-600"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Début des travaux</Label>
+                            <Input
+                              type="date"
+                              value={mandat.date_debut_travaux || ""}
+                              onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                              className="bg-slate-700 border-slate-600"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date de livraison</Label>
+                            <Input
+                              type="date"
+                              value={mandat.date_livraison || ""}
+                              onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                              className="bg-slate-700 border-slate-600"
+                            />
+                          </div>
                         </div>
 
                         <div className="space-y-2">
@@ -905,62 +927,17 @@ export default function Dossiers() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
             {viewingClientDetails && (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-slate-400">Type</Label>
-                  <p className="text-white font-medium">{viewingClientDetails.type_client || "Client"}</p>
-                </div>
-
-                {viewingClientDetails.adresses && viewingClientDetails.adresses.length > 0 && (
-                  <div>
-                    <Label className="text-slate-400 mb-2 block">Adresses</Label>
-                    {viewingClientDetails.adresses.map((addr, idx) => (
-                      <div key={idx} className="text-sm mb-1">
-                        <span className="text-white">{addr.adresse}</span>
-                        {addr.actuelle && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuelle</Badge>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {viewingClientDetails.courriels && viewingClientDetails.courriels.length > 0 && (
-                  <div>
-                    <Label className="text-slate-400 mb-2 block">Courriels</Label>
-                    {viewingClientDetails.courriels.map((email, idx) => (
-                      <div key={idx} className="text-sm mb-1">
-                        <span className="text-white">{email.courriel}</span>
-                        {email.actuel && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuel</Badge>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {viewingClientDetails.telephones && viewingClientDetails.telephones.length > 0 && (
-                  <div>
-                    <Label className="text-slate-400 mb-2 block">Téléphones</Label>
-                    {viewingClientDetails.telephones.map((tel, idx) => (
-                      <div key={idx} className="text-sm mb-1">
-                        <span className="text-white">{tel.telephone}</span>
-                        {tel.actuel && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuel</Badge>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {viewingClientDetails.notes && (
-                  <div>
-                    <Label className="text-slate-400 mb-2 block">Notes</Label>
-                    <p className="text-slate-300 text-sm">{viewingClientDetails.notes}</p>
-                  </div>
-                )}
-              </div>
+              <ClientDetailView 
+                client={viewingClientDetails} 
+                onClose={() => setViewingClientDetails(null)}
+              />
             )}
           </DialogContent>
         </Dialog>
