@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, Users, User, Briefcase, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,23 +15,28 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
-const MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
 
 export default function Dossiers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
+  const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
+  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
+
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     date_livraison: "",
-    statut: "en_cours",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
     mandats: [],
-    titre: "",
     description: ""
   });
 
@@ -84,10 +89,21 @@ export default function Dossiers() {
     const searchLower = searchTerm.toLowerCase();
     return (
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      dossier.titre?.toLowerCase().includes(searchLower) ||
       dossier.arpenteur_geometre?.toLowerCase().includes(searchLower)
     );
   });
+
+  const filteredClientsForSelector = clientsReguliers.filter(c => 
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase())
+  );
+
+  const filteredNotairesForSelector = notaires.filter(n => 
+    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase())
+  );
+
+  const filteredCourtiersForSelector = courtiers.filter(c => 
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -104,12 +120,10 @@ export default function Dossiers() {
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_livraison: "",
-      statut: "en_cours",
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
       mandats: [],
-      titre: "",
       description: ""
     });
     setEditingDossier(null);
@@ -122,12 +136,10 @@ export default function Dossiers() {
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
       date_livraison: dossier.date_livraison || "",
-      statut: dossier.statut || "en_cours",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats || [],
-      titre: dossier.titre || "",
       description: dossier.description || ""
     });
     setIsDialogOpen(true);
@@ -137,15 +149,6 @@ export default function Dossiers() {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
       deleteDossierMutation.mutate(id);
     }
-  };
-
-  const toggleMandat = (mandat) => {
-    setFormData(prev => ({
-      ...prev,
-      mandats: prev.mandats.includes(mandat)
-        ? prev.mandats.filter(m => m !== mandat)
-        : [...prev.mandats, mandat]
-    }));
   };
 
   const toggleClient = (clientId, type) => {
@@ -158,14 +161,61 @@ export default function Dossiers() {
     }));
   };
 
-  const getStatusColor = (statut) => {
-    const colors = {
-      'en_cours': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      'en_attente': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      'terminé': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      'archivé': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-    };
-    return colors[statut] || colors['en_cours'];
+  const removeClient = (clientId, type) => {
+    const field = `${type}_ids`;
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].filter(id => id !== clientId)
+    }));
+  };
+
+  const addMandat = () => {
+    setFormData(prev => ({
+      ...prev,
+      mandats: [...prev.mandats, {
+        type_mandat: "",
+        adresse_travaux: "",
+        lots: [],
+        prix_estime: 0,
+        notes: ""
+      }]
+    }));
+  };
+
+  const updateMandat = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      mandats: prev.mandats.map((m, i) => 
+        i === index ? { ...m, [field]: value } : m
+      )
+    }));
+  };
+
+  const removeMandat = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      mandats: prev.mandats.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addLotToMandat = (mandatIndex, lot) => {
+    if (lot.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) => 
+          i === mandatIndex ? { ...m, lots: [...(m.lots || []), lot.trim()] } : m
+        )
+      }));
+    }
+  };
+
+  const removeLotFromMandat = (mandatIndex, lotIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      mandats: prev.mandats.map((m, i) => 
+        i === mandatIndex ? { ...m, lots: m.lots.filter((_, li) => li !== lotIndex) } : m
+      )
+    }));
   };
 
   const statsCards = [
@@ -176,16 +226,14 @@ export default function Dossiers() {
       gradient: "from-emerald-500 to-teal-600",
     },
     {
-      title: "En cours",
-      value: dossiers.filter(d => d.statut === 'en_cours').length,
-      icon: Briefcase,
-      gradient: "from-cyan-500 to-blue-600",
-    },
-    {
-      title: "Terminés",
-      value: dossiers.filter(d => d.statut === 'terminé').length,
+      title: "Ce mois",
+      value: dossiers.filter(d => {
+        const dossierDate = new Date(d.created_date);
+        const now = new Date();
+        return dossierDate.getMonth() === now.getMonth() && dossierDate.getFullYear() === now.getFullYear();
+      }).length,
       icon: Calendar,
-      gradient: "from-purple-500 to-pink-600",
+      gradient: "from-cyan-500 to-blue-600",
     },
   ];
 
@@ -213,7 +261,7 @@ export default function Dossiers() {
                 Nouveau dossier
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -270,113 +318,210 @@ export default function Dossiers() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Titre</Label>
-                    <Input
-                      value={formData.titre}
-                      onChange={(e) => setFormData({...formData, titre: e.target.value})}
-                      placeholder="Titre du dossier"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Statut</Label>
-                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="en_cours" className="text-white">En cours</SelectItem>
-                        <SelectItem value="en_attente" className="text-white">En attente</SelectItem>
-                        <SelectItem value="terminé" className="text-white">Terminé</SelectItem>
-                        <SelectItem value="archivé" className="text-white">Archivé</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
+                {/* Clients */}
                 <div className="space-y-2">
-                  <Label>Mandats</Label>
+                  <div className="flex justify-between items-center">
+                    <Label>Clients associés</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setIsClientSelectorOpen(true)}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
                   <div className="flex flex-wrap gap-2">
-                    {MANDATS.map((mandat) => (
-                      <Badge
-                        key={mandat}
-                        onClick={() => toggleMandat(mandat)}
-                        className={`cursor-pointer ${
-                          formData.mandats.includes(mandat)
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                            : 'bg-slate-700/50 text-slate-400 border-slate-600'
-                        } border hover:scale-105 transition-transform`}
-                      >
-                        {mandat}
-                      </Badge>
-                    ))}
+                    {formData.clients_ids.map(clientId => {
+                      const client = getClientById(clientId);
+                      return client ? (
+                        <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border flex items-center gap-2">
+                          {client.prenom} {client.nom}
+                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(clientId, 'clients')} />
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </div>
 
+                {/* Notaires */}
                 <div className="space-y-2">
-                  <Label>Clients associés</Label>
-                  <div className="max-h-40 overflow-y-auto bg-slate-800/30 rounded-lg p-3 space-y-2">
-                    {clientsReguliers.map((client) => (
-                      <div key={client.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.clients_ids.includes(client.id)}
-                          onChange={() => toggleClient(client.id, 'clients')}
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span className="text-white text-sm">{client.prenom} {client.nom}</span>
-                      </div>
-                    ))}
-                    {clientsReguliers.length === 0 && (
-                      <p className="text-slate-500 text-sm">Aucun client disponible</p>
-                    )}
+                  <div className="flex justify-between items-center">
+                    <Label>Notaires associés</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setIsNotaireSelectorOpen(true)}
+                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.notaires_ids.map(notaireId => {
+                      const notaire = getClientById(notaireId);
+                      return notaire ? (
+                        <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border flex items-center gap-2">
+                          {notaire.prenom} {notaire.nom}
+                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(notaireId, 'notaires')} />
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </div>
 
+                {/* Courtiers */}
                 <div className="space-y-2">
-                  <Label>Notaires associés</Label>
-                  <div className="max-h-40 overflow-y-auto bg-slate-800/30 rounded-lg p-3 space-y-2">
-                    {notaires.map((notaire) => (
-                      <div key={notaire.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.notaires_ids.includes(notaire.id)}
-                          onChange={() => toggleClient(notaire.id, 'notaires')}
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span className="text-white text-sm">{notaire.prenom} {notaire.nom}</span>
-                      </div>
-                    ))}
-                    {notaires.length === 0 && (
-                      <p className="text-slate-500 text-sm">Aucun notaire disponible</p>
-                    )}
+                  <div className="flex justify-between items-center">
+                    <Label>Courtiers immobiliers associés</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setIsCourtierSelectorOpen(true)}
+                      className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Ajouter
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.courtiers_ids.map(courtierId => {
+                      const courtier = getClientById(courtierId);
+                      return courtier ? (
+                        <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border flex items-center gap-2">
+                          {courtier.prenom} {courtier.nom}
+                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(courtierId, 'courtiers')} />
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Courtiers immobiliers associés</Label>
-                  <div className="max-h-40 overflow-y-auto bg-slate-800/30 rounded-lg p-3 space-y-2">
-                    {courtiers.map((courtier) => (
-                      <div key={courtier.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.courtiers_ids.includes(courtier.id)}
-                          onChange={() => toggleClient(courtier.id, 'courtiers')}
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span className="text-white text-sm">{courtier.prenom} {courtier.nom}</span>
-                      </div>
-                    ))}
-                    {courtiers.length === 0 && (
-                      <p className="text-slate-500 text-sm">Aucun courtier disponible</p>
-                    )}
+                {/* Mandats */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label>Mandats</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={addMandat}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Ajouter un mandat
+                    </Button>
                   </div>
+                  {formData.mandats.map((mandat, index) => (
+                    <Card key={index} className="border-slate-700 bg-slate-800/30">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-semibold text-emerald-400">Mandat {index + 1}</h4>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeMandat(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                          <Select 
+                            value={mandat.type_mandat} 
+                            onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {TYPES_MANDATS.map((type) => (
+                                <SelectItem key={type} value={type} className="text-white">
+                                  {type}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Adresse des travaux</Label>
+                          <Input
+                            value={mandat.adresse_travaux}
+                            onChange={(e) => updateMandat(index, 'adresse_travaux', e.target.value)}
+                            placeholder="Adresse complète"
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Lots</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Ex: 1234-5678"
+                              className="bg-slate-700 border-slate-600"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  addLotToMandat(index, e.target.value);
+                                  e.target.value = '';
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={(e) => {
+                                const input = e.target.closest('.space-y-2').querySelector('input');
+                                addLotToMandat(index, input.value);
+                                input.value = '';
+                              }}
+                              className="bg-emerald-500/20 text-emerald-400"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {mandat.lots?.map((lot, lotIndex) => (
+                              <Badge key={lotIndex} className="bg-slate-700 text-white flex items-center gap-2">
+                                {lot}
+                                <X className="w-3 h-3 cursor-pointer" onClick={() => removeLotFromMandat(index, lotIndex)} />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Prix estimé ($)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={mandat.prix_estime}
+                            onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Notes</Label>
+                          <Textarea
+                            value={mandat.notes}
+                            onChange={(e) => updateMandat(index, 'notes', e.target.value)}
+                            className="bg-slate-700 border-slate-600 h-20"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>Description générale</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -397,8 +542,131 @@ export default function Dossiers() {
           </Dialog>
         </div>
 
+        {/* Client Selector Dialog */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des clients</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un client..."
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {filteredClientsForSelector.map((client) => (
+                  <div
+                    key={client.id}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      formData.clients_ids.includes(client.id)
+                        ? 'bg-blue-500/20 border border-blue-500/30'
+                        : 'bg-slate-800/50 hover:bg-slate-800'
+                    }`}
+                    onClick={() => toggleClient(client.id, 'clients')}
+                  >
+                    <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                    {client.courriels?.find(c => c.actuel)?.courriel && (
+                      <p className="text-sm text-slate-400">{client.courriels.find(c => c.actuel).courriel}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notaire Selector Dialog */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un notaire..."
+                  value={notaireSearchTerm}
+                  onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {filteredNotairesForSelector.map((notaire) => (
+                  <div
+                    key={notaire.id}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      formData.notaires_ids.includes(notaire.id)
+                        ? 'bg-purple-500/20 border border-purple-500/30'
+                        : 'bg-slate-800/50 hover:bg-slate-800'
+                    }`}
+                    onClick={() => toggleClient(notaire.id, 'notaires')}
+                  >
+                    <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                    {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                      <p className="text-sm text-slate-400">{notaire.courriels.find(c => c.actuel).courriel}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Courtier Selector Dialog */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un courtier..."
+                  value={courtierSearchTerm}
+                  onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {filteredCourtiersForSelector.map((courtier) => (
+                  <div
+                    key={courtier.id}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      formData.courtiers_ids.includes(courtier.id)
+                        ? 'bg-orange-500/20 border border-orange-500/30'
+                        : 'bg-slate-800/50 hover:bg-slate-800'
+                    }`}
+                    onClick={() => toggleClient(courtier.id, 'courtiers')}
+                  >
+                    <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                    {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                      <p className="text-sm text-slate-400">{courtier.courriels.find(c => c.actuel).courriel}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {statsCards.map((stat, index) => (
             <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader>
@@ -440,11 +708,9 @@ export default function Dossiers() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">N° Dossier</TableHead>
-                    <TableHead className="text-slate-300">Titre</TableHead>
                     <TableHead className="text-slate-300">Arpenteur</TableHead>
                     <TableHead className="text-slate-300">Date ouverture</TableHead>
                     <TableHead className="text-slate-300">Mandats</TableHead>
-                    <TableHead className="text-slate-300">Statut</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -453,9 +719,6 @@ export default function Dossiers() {
                     <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium text-white">
                         {dossier.numero_dossier}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {dossier.titre || "-"}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         <div className="flex items-center gap-2">
@@ -470,7 +733,7 @@ export default function Dossiers() {
                         <div className="flex flex-wrap gap-1">
                           {dossier.mandats?.slice(0, 2).map((mandat, idx) => (
                             <Badge key={idx} variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
-                              {mandat}
+                              {mandat.type_mandat}
                             </Badge>
                           ))}
                           {dossier.mandats?.length > 2 && (
@@ -479,11 +742,6 @@ export default function Dossiers() {
                             </Badge>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`${getStatusColor(dossier.statut)} border`}>
-                          {dossier.statut}
-                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
