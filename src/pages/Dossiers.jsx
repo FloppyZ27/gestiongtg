@@ -20,7 +20,7 @@ const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage"
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
-  
+
   const mapping = {
     "Samuel Guay": "SG-",
     "Dany Gaboury": "DG-",
@@ -28,7 +28,7 @@ const getArpenteurInitials = (arpenteur) => {
     "Benjamin Larouche": "BL-",
     "Frédéric Gilbert": "FG-"
   };
-  
+
   return mapping[arpenteur] || "";
 };
 
@@ -42,6 +42,7 @@ export default function Dossiers() {
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
   const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
   const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
+  const [viewingClientDetails, setViewingClientDetails] = useState(null); // New state for viewing client details
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
@@ -134,19 +135,19 @@ export default function Dossiers() {
     );
   });
 
-  const filteredClientsForSelector = clientsReguliers.filter(c => 
+  const filteredClientsForSelector = clientsReguliers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
   );
 
-  const filteredNotairesForSelector = notaires.filter(n => 
+  const filteredNotairesForSelector = notaires.filter(n =>
     `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
     n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
     n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
   );
 
-  const filteredCourtiersForSelector = courtiers.filter(c => 
+  const filteredCourtiersForSelector = courtiers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
@@ -255,7 +256,7 @@ export default function Dossiers() {
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      mandats: prev.mandats.map((m, i) => 
+      mandats: prev.mandats.map((m, i) =>
         i === index ? { ...m, [field]: value } : m
       )
     }));
@@ -272,7 +273,7 @@ export default function Dossiers() {
     if (lot.trim()) {
       setFormData(prev => ({
         ...prev,
-        mandats: prev.mandats.map((m, i) => 
+        mandats: prev.mandats.map((m, i) =>
           i === mandatIndex ? { ...m, lots: [...(m.lots || []), lot.trim()] } : m
         )
       }));
@@ -282,7 +283,7 @@ export default function Dossiers() {
   const removeLotFromMandat = (mandatIndex, lotIndex) => {
     setFormData(prev => ({
       ...prev,
-      mandats: prev.mandats.map((m, i) => 
+      mandats: prev.mandats.map((m, i) =>
         i === mandatIndex ? { ...m, lots: m.lots.filter((_, li) => li !== lotIndex) } : m
       )
     }));
@@ -314,7 +315,7 @@ export default function Dossiers() {
   const updateClientField = (fieldName, index, key, value) => {
     setNewClientForm(prev => ({
       ...prev,
-      [fieldName]: prev[fieldName].map((item, i) => 
+      [fieldName]: prev[fieldName].map((item, i) =>
         i === index ? { ...item, [key]: value } : item
       )
     }));
@@ -367,7 +368,7 @@ export default function Dossiers() {
             </div>
             <p className="text-slate-400">Gestion de vos dossiers d'arpentage</p>
           </div>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) resetForm();
@@ -385,7 +386,7 @@ export default function Dossiers() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label>N° de dossier <span className="text-red-400">*</span></Label>
                     <Input
@@ -411,9 +412,6 @@ export default function Dossiers() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
                     <Input
@@ -453,9 +451,16 @@ export default function Dossiers() {
                     {formData.clients_ids.map(clientId => {
                       const client = getClientById(clientId);
                       return client ? (
-                        <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border flex items-center gap-2">
+                        <Badge
+                          key={clientId}
+                          className="bg-blue-500/20 text-blue-400 border-blue-500/30 border flex items-center gap-2 cursor-pointer hover:bg-blue-500/30"
+                          onClick={() => setViewingClientDetails(client)}
+                        >
                           {client.prenom} {client.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(clientId, 'clients')} />
+                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            removeClient(clientId, 'clients');
+                          }} />
                         </Badge>
                       ) : null;
                     })}
@@ -480,9 +485,16 @@ export default function Dossiers() {
                     {formData.notaires_ids.map(notaireId => {
                       const notaire = getClientById(notaireId);
                       return notaire ? (
-                        <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border flex items-center gap-2">
+                        <Badge
+                          key={notaireId}
+                          className="bg-purple-500/20 text-purple-400 border-purple-500/30 border flex items-center gap-2 cursor-pointer hover:bg-purple-500/30"
+                          onClick={() => setViewingClientDetails(notaire)}
+                        >
                           {notaire.prenom} {notaire.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(notaireId, 'notaires')} />
+                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            removeClient(notaireId, 'notaires');
+                          }} />
                         </Badge>
                       ) : null;
                     })}
@@ -507,9 +519,16 @@ export default function Dossiers() {
                     {formData.courtiers_ids.map(courtierId => {
                       const courtier = getClientById(courtierId);
                       return courtier ? (
-                        <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border flex items-center gap-2">
+                        <Badge
+                          key={courtierId}
+                          className="bg-orange-500/20 text-orange-400 border-orange-500/30 border flex items-center gap-2 cursor-pointer hover:bg-orange-500/30"
+                          onClick={() => setViewingClientDetails(courtier)}
+                        >
                           {courtier.prenom} {courtier.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={() => removeClient(courtierId, 'courtiers')} />
+                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            removeClient(courtierId, 'courtiers');
+                          }} />
                         </Badge>
                       ) : null;
                     })}
@@ -548,8 +567,8 @@ export default function Dossiers() {
 
                         <div className="space-y-2">
                           <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                          <Select 
-                            value={mandat.type_mandat} 
+                          <Select
+                            value={mandat.type_mandat}
                             onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
                           >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
@@ -645,7 +664,7 @@ export default function Dossiers() {
                     className="bg-slate-800 border-slate-700 h-24"
                   />
                 </div>
-                
+
                 <div className="flex justify-end gap-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Annuler
@@ -661,7 +680,7 @@ export default function Dossiers() {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -688,31 +707,44 @@ export default function Dossiers() {
                   Nouveau
                 </Button>
               </div>
-              <div className="max-h-96 overflow-y-auto space-y-2">
-                {filteredClientsForSelector.map((client) => (
-                  <div
-                    key={client.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      formData.clients_ids.includes(client.id)
-                        ? 'bg-blue-500/20 border border-blue-500/30'
-                        : 'bg-slate-800/50 hover:bg-slate-800'
-                    }`}
-                    onClick={() => toggleClient(client.id, 'clients')}
-                  >
-                    <p className="text-white font-medium">{client.prenom} {client.nom}</p>
-                    <div className="text-sm text-slate-400 space-y-1 mt-1">
-                      {getCurrentValue(client.adresses, 'adresse') && (
-                        <p>📍 {getCurrentValue(client.adresses, 'adresse')}</p>
-                      )}
-                      {getCurrentValue(client.courriels, 'courriel') && (
-                        <p>✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
-                      )}
-                      {getCurrentValue(client.telephones, 'telephone') && (
-                        <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
-                      )}
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredClientsForSelector.map((client) => (
+                    <div
+                      key={client.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.clients_ids.includes(client.id)
+                          ? 'bg-blue-500/20 border border-blue-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800'
+                      }`}
+                      onClick={() => toggleClient(client.id, 'clients')}
+                    >
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(client.adresses, 'adresse') && (
+                          <p className="truncate">📍 {getCurrentValue(client.adresses, 'adresse')}</p>
+                        )}
+                        {getCurrentValue(client.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(client.telephones, 'telephone') && (
+                          <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingClientDetails(client);
+                        }}
+                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
+                      >
+                        Voir fiche
+                      </Button>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
               <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider
@@ -723,7 +755,7 @@ export default function Dossiers() {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -750,31 +782,44 @@ export default function Dossiers() {
                   Nouveau
                 </Button>
               </div>
-              <div className="max-h-96 overflow-y-auto space-y-2">
-                {filteredNotairesForSelector.map((notaire) => (
-                  <div
-                    key={notaire.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      formData.notaires_ids.includes(notaire.id)
-                        ? 'bg-purple-500/20 border border-purple-500/30'
-                        : 'bg-slate-800/50 hover:bg-slate-800'
-                    }`}
-                    onClick={() => toggleClient(notaire.id, 'notaires')}
-                  >
-                    <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
-                    <div className="text-sm text-slate-400 space-y-1 mt-1">
-                      {getCurrentValue(notaire.adresses, 'adresse') && (
-                        <p>📍 {getCurrentValue(notaire.adresses, 'adresse')}</p>
-                      )}
-                      {getCurrentValue(notaire.courriels, 'courriel') && (
-                        <p>✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
-                      )}
-                      {getCurrentValue(notaire.telephones, 'telephone') && (
-                        <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
-                      )}
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.map((notaire) => (
+                    <div
+                      key={notaire.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.notaires_ids.includes(notaire.id)
+                          ? 'bg-purple-500/20 border border-purple-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800'
+                      }`}
+                      onClick={() => toggleClient(notaire.id, 'notaires')}
+                    >
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(notaire.adresses, 'adresse') && (
+                          <p className="truncate">📍 {getCurrentValue(notaire.adresses, 'adresse')}</p>
+                        )}
+                        {getCurrentValue(notaire.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(notaire.telephones, 'telephone') && (
+                          <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingClientDetails(notaire);
+                        }}
+                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
+                      >
+                        Voir fiche
+                      </Button>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
               <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
                 Valider
@@ -785,7 +830,7 @@ export default function Dossiers() {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
@@ -812,36 +857,111 @@ export default function Dossiers() {
                   Nouveau
                 </Button>
               </div>
-              <div className="max-h-96 overflow-y-auto space-y-2">
-                {filteredCourtiersForSelector.map((courtier) => (
-                  <div
-                    key={courtier.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      formData.courtiers_ids.includes(courtier.id)
-                        ? 'bg-orange-500/20 border border-orange-500/30'
-                        : 'bg-slate-800/50 hover:bg-slate-800'
-                    }`}
-                    onClick={() => toggleClient(courtier.id, 'courtiers')}
-                  >
-                    <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
-                    <div className="text-sm text-slate-400 space-y-1 mt-1">
-                      {getCurrentValue(courtier.adresses, 'adresse') && (
-                        <p>📍 {getCurrentValue(courtier.adresses, 'adresse')}</p>
-                      )}
-                      {getCurrentValue(courtier.courriels, 'courriel') && (
-                        <p>✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
-                      )}
-                      {getCurrentValue(courtier.telephones, 'telephone') && (
-                        <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
-                      )}
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.map((courtier) => (
+                    <div
+                      key={courtier.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.courtiers_ids.includes(courtier.id)
+                          ? 'bg-orange-500/20 border border-orange-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800'
+                      }`}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}
+                    >
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(courtier.adresses, 'adresse') && (
+                          <p className="truncate">📍 {getCurrentValue(courtier.adresses, 'adresse')}</p>
+                        )}
+                        {getCurrentValue(courtier.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(courtier.telephones, 'telephone') && (
+                          <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingClientDetails(courtier);
+                        }}
+                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
+                      >
+                        Voir fiche
+                      </Button>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
               <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
                 Valider
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Details Dialog */}
+        <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
+              </DialogTitle>
+            </DialogHeader>
+            {viewingClientDetails && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-slate-400">Type</Label>
+                  <p className="text-white font-medium">{viewingClientDetails.type_client || "Client"}</p>
+                </div>
+
+                {viewingClientDetails.adresses && viewingClientDetails.adresses.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Adresses</Label>
+                    {viewingClientDetails.adresses.map((addr, idx) => (
+                      <div key={idx} className="text-sm mb-1">
+                        <span className="text-white">{addr.adresse}</span>
+                        {addr.actuelle && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuelle</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {viewingClientDetails.courriels && viewingClientDetails.courriels.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Courriels</Label>
+                    {viewingClientDetails.courriels.map((email, idx) => (
+                      <div key={idx} className="text-sm mb-1">
+                        <span className="text-white">{email.courriel}</span>
+                        {email.actuel && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuel</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {viewingClientDetails.telephones && viewingClientDetails.telephones.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Téléphones</Label>
+                    {viewingClientDetails.telephones.map((tel, idx) => (
+                      <div key={idx} className="text-sm mb-1">
+                        <span className="text-white">{tel.telephone}</span>
+                        {tel.actuel && <Badge className="ml-2 bg-green-500/20 text-green-400 text-xs">Actuel</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {viewingClientDetails.notes && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Notes</Label>
+                    <p className="text-slate-300 text-sm">{viewingClientDetails.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
@@ -1030,9 +1150,9 @@ export default function Dossiers() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setIsNewClientDialogOpen(false);
                     setIsNewNotaireDialogOpen(false);
