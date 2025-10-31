@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,20 @@ import { fr } from "date-fns/locale";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
 
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  
+  const mapping = {
+    "Samuel Guay": "SG-",
+    "Dany Gaboury": "DG-",
+    "Pierre-Luc Pilote": "PLP-",
+    "Benjamin Larouche": "BL-",
+    "Frédéric Gilbert": "FG-"
+  };
+  
+  return mapping[arpenteur] || "";
+};
+
 export default function Dossiers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -24,6 +39,9 @@ export default function Dossiers() {
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
   const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
+  const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
+  const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
@@ -38,6 +56,16 @@ export default function Dossiers() {
     courtiers_ids: [],
     mandats: [],
     description: ""
+  });
+
+  const [newClientForm, setNewClientForm] = useState({
+    prenom: "",
+    nom: "",
+    type_client: "Client",
+    adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+    courriels: [{ courriel: "", actuel: true }],
+    telephones: [{ telephone: "", actuel: true }],
+    notes: ""
   });
 
   const queryClient = useQueryClient();
@@ -79,6 +107,17 @@ export default function Dossiers() {
     },
   });
 
+  const createClientMutation = useMutation({
+    mutationFn: (clientData) => base44.entities.Client.create(clientData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      setIsNewClientDialogOpen(false);
+      setIsNewNotaireDialogOpen(false);
+      setIsNewCourtierDialogOpen(false);
+      resetClientForm();
+    },
+  });
+
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
@@ -87,22 +126,30 @@ export default function Dossiers() {
 
   const filteredDossiers = dossiers.filter(dossier => {
     const searchLower = searchTerm.toLowerCase();
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
     return (
+      fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
       dossier.arpenteur_geometre?.toLowerCase().includes(searchLower)
     );
   });
 
   const filteredClientsForSelector = clientsReguliers.filter(c => 
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase())
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
   );
 
   const filteredNotairesForSelector = notaires.filter(n => 
-    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase())
+    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
+    n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+    n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
   );
 
   const filteredCourtiersForSelector = courtiers.filter(c => 
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
+    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
 
   const handleSubmit = (e) => {
@@ -112,6 +159,17 @@ export default function Dossiers() {
     } else {
       createDossierMutation.mutate(formData);
     }
+  };
+
+  const handleNewClientSubmit = (e) => {
+    e.preventDefault();
+    const cleanedData = {
+      ...newClientForm,
+      adresses: newClientForm.adresses.filter(a => a.adresse.trim() !== ""),
+      courriels: newClientForm.courriels.filter(c => c.courriel.trim() !== ""),
+      telephones: newClientForm.telephones.filter(t => t.telephone.trim() !== "")
+    };
+    createClientMutation.mutate(cleanedData);
   };
 
   const resetForm = () => {
@@ -127,6 +185,18 @@ export default function Dossiers() {
       description: ""
     });
     setEditingDossier(null);
+  };
+
+  const resetClientForm = () => {
+    setNewClientForm({
+      prenom: "",
+      nom: "",
+      type_client: "Client",
+      adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+      courriels: [{ courriel: "", actuel: true }],
+      telephones: [{ telephone: "", actuel: true }],
+      notes: ""
+    });
   };
 
   const handleEdit = (dossier) => {
@@ -216,6 +286,53 @@ export default function Dossiers() {
         i === mandatIndex ? { ...m, lots: m.lots.filter((_, li) => li !== lotIndex) } : m
       )
     }));
+  };
+
+  const addClientField = (fieldName) => {
+    if (fieldName === 'adresses') {
+      setNewClientForm(prev => ({
+        ...prev,
+        adresses: [...prev.adresses, { adresse: "", latitude: null, longitude: null, actuelle: false }]
+      }));
+    } else {
+      setNewClientForm(prev => ({
+        ...prev,
+        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+      }));
+    }
+  };
+
+  const removeClientField = (fieldName, index) => {
+    if (newClientForm[fieldName].length > 1) {
+      setNewClientForm(prev => ({
+        ...prev,
+        [fieldName]: prev[fieldName].filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updateClientField = (fieldName, index, key, value) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => 
+        i === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const toggleActuel = (fieldName, index) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => ({
+        ...item,
+        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
+      }))
+    }));
+  };
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "";
   };
 
   const statsCards = [
@@ -321,7 +438,7 @@ export default function Dossiers() {
                 {/* Clients */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label>Clients associés</Label>
+                    <Label>Clients</Label>
                     <Button
                       type="button"
                       size="sm"
@@ -348,7 +465,7 @@ export default function Dossiers() {
                 {/* Notaires */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label>Notaires associés</Label>
+                    <Label>Notaires</Label>
                     <Button
                       type="button"
                       size="sm"
@@ -375,7 +492,7 @@ export default function Dossiers() {
                 {/* Courtiers */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label>Courtiers immobiliers associés</Label>
+                    <Label>Courtiers immobiliers</Label>
                     <Button
                       type="button"
                       size="sm"
@@ -549,14 +666,27 @@ export default function Dossiers() {
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un client..."
-                  value={clientSearchTerm}
-                  onChange={(e) => setClientSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un client..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Client"});
+                    setIsNewClientDialogOpen(true);
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {filteredClientsForSelector.map((client) => (
@@ -570,9 +700,17 @@ export default function Dossiers() {
                     onClick={() => toggleClient(client.id, 'clients')}
                   >
                     <p className="text-white font-medium">{client.prenom} {client.nom}</p>
-                    {client.courriels?.find(c => c.actuel)?.courriel && (
-                      <p className="text-sm text-slate-400">{client.courriels.find(c => c.actuel).courriel}</p>
-                    )}
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {getCurrentValue(client.adresses, 'adresse') && (
+                        <p>📍 {getCurrentValue(client.adresses, 'adresse')}</p>
+                      )}
+                      {getCurrentValue(client.courriels, 'courriel') && (
+                        <p>✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(client.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -590,14 +728,27 @@ export default function Dossiers() {
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un notaire..."
-                  value={notaireSearchTerm}
-                  onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un notaire..."
+                    value={notaireSearchTerm}
+                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Notaire"});
+                    setIsNewNotaireDialogOpen(true);
+                  }}
+                  className="bg-purple-500 hover:bg-purple-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {filteredNotairesForSelector.map((notaire) => (
@@ -611,9 +762,17 @@ export default function Dossiers() {
                     onClick={() => toggleClient(notaire.id, 'notaires')}
                   >
                     <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
-                    {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                      <p className="text-sm text-slate-400">{notaire.courriels.find(c => c.actuel).courriel}</p>
-                    )}
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {getCurrentValue(notaire.adresses, 'adresse') && (
+                        <p>📍 {getCurrentValue(notaire.adresses, 'adresse')}</p>
+                      )}
+                      {getCurrentValue(notaire.courriels, 'courriel') && (
+                        <p>✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(notaire.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -631,14 +790,27 @@ export default function Dossiers() {
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un courtier..."
-                  value={courtierSearchTerm}
-                  onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un courtier..."
+                    value={courtierSearchTerm}
+                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Courtier immobilier"});
+                    setIsNewCourtierDialogOpen(true);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {filteredCourtiersForSelector.map((courtier) => (
@@ -652,9 +824,17 @@ export default function Dossiers() {
                     onClick={() => toggleClient(courtier.id, 'courtiers')}
                   >
                     <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
-                    {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                      <p className="text-sm text-slate-400">{courtier.courriels.find(c => c.actuel).courriel}</p>
-                    )}
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {getCurrentValue(courtier.adresses, 'adresse') && (
+                        <p>📍 {getCurrentValue(courtier.adresses, 'adresse')}</p>
+                      )}
+                      {getCurrentValue(courtier.courriels, 'courriel') && (
+                        <p>✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(courtier.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -662,6 +842,211 @@ export default function Dossiers() {
                 Valider
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Client Dialog (Generic for Client/Notaire/Courtier) */}
+        <Dialog open={isNewClientDialogOpen || isNewNotaireDialogOpen || isNewCourtierDialogOpen} onOpenChange={(open) => {
+          if (!open) {
+            setIsNewClientDialogOpen(false);
+            setIsNewNotaireDialogOpen(false);
+            setIsNewCourtierDialogOpen(false);
+            resetClientForm();
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nouveau {newClientForm.type_client}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewClientSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Prénom <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newClientForm.prenom}
+                    onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
+                    required
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nom <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newClientForm.nom}
+                    onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
+                    required
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              {/* Adresses */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Adresses</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('adresses')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.adresses.map((item, index) => (
+                  <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                    <div className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={item.adresse}
+                          onChange={(e) => updateClientField('adresses', index, 'adresse', e.target.value)}
+                          placeholder="Adresse complète"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => toggleActuel('adresses', index)}
+                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      {newClientForm.adresses.length > 1 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeClientField('adresses', index)}
+                          className="text-red-400"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Courriels */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Courriels</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('courriels')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.courriels.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={item.courriel}
+                      onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
+                      placeholder="Courriel"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => toggleActuel('courriels', index)}
+                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    {newClientForm.courriels.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeClientField('courriels', index)}
+                        className="text-red-400"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Téléphones */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Téléphones</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('telephones')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.telephones.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={item.telephone}
+                      onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
+                      placeholder="Téléphone"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => toggleActuel('telephones', index)}
+                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    {newClientForm.telephones.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeClientField('telephones', index)}
+                        className="text-red-400"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={newClientForm.notes}
+                  onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
+                  className="bg-slate-800 border-slate-700 h-20"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsNewClientDialogOpen(false);
+                    setIsNewNotaireDialogOpen(false);
+                    setIsNewCourtierDialogOpen(false);
+                    resetClientForm();
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -718,7 +1103,7 @@ export default function Dossiers() {
                   {filteredDossiers.map((dossier) => (
                     <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium text-white">
-                        {dossier.numero_dossier}
+                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         <div className="flex items-center gap-2">
