@@ -9,6 +9,7 @@ import Calendrier from './pages/Calendrier';
 import TableauDeBord from './pages/TableauDeBord';
 import Dossiers from './pages/Dossiers';
 import Lots from './pages/Lots';
+import CeduleTerrain from './pages/CeduleTerrain';
 import Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "TableauDeBord": TableauDeBord,
     "Dossiers": Dossiers,
     "Lots": Lots,
+    "CeduleTerrain": CeduleTerrain,
 }
 
 export const pagesConfig = {

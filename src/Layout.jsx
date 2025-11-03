@@ -43,6 +43,11 @@ const navigationItems = [
     icon: Calendar,
   },
   {
+    title: "Cédule Terrain",
+    url: createPageUrl("CeduleTerrain"),
+    icon: MapPin,
+  },
+  {
     title: "Dossiers",
     url: createPageUrl("Dossiers"),
     icon: FolderOpen,
