@@ -1,10 +1,9 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Sun, Moon } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -78,22 +77,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [theme, setTheme] = useState('dark');
   const queryClient = useQueryClient();
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle('light-mode', savedTheme === 'light');
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('light-mode', newTheme === 'light');
-  };
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -154,94 +138,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <SidebarProvider>
-      <style>{`
-        :root {
-          --background: 222.2 84% 4.9%;
-          --foreground: 210 40% 98%;
-          --card: 222.2 84% 4.9%;
-          --card-foreground: 210 40% 98%;
-          --popover: 222.2 84% 4.9%;
-          --popover-foreground: 210 40% 98%;
-          --primary: 217.2 91.2% 59.8%;
-          --primary-foreground: 222.2 47.4% 11.2%;
-          --secondary: 217.2 32.6% 17.5%;
-          --secondary-foreground: 210 40% 98%;
-          --muted: 217.2 32.6% 17.5%;
-          --muted-foreground: 215 20.2% 65.1%;
-          --accent: 217.2 32.6% 17.5%;
-          --accent-foreground: 210 40% 98%;
-          --destructive: 0 62.8% 30.6%;
-          --destructive-foreground: 210 40% 98%;
-          --border: 217.2 32.6% 17.5%;
-          --input: 217.2 32.6% 17.5%;
-          --ring: 224.3 76.3% 48%;
-        }
-
-        .light-mode {
-          --background: 0 0% 100%;
-          --foreground: 222.2 84% 4.9%;
-          --card: 0 0% 100%;
-          --card-foreground: 222.2 84% 4.9%;
-          --popover: 0 0% 100%;
-          --popover-foreground: 222.2 84% 4.9%;
-          --primary: 217.2 91.2% 59.8%;
-          --primary-foreground: 210 40% 98%;
-          --secondary: 210 40% 96.1%;
-          --secondary-foreground: 222.2 47.4% 11.2%;
-          --muted: 210 40% 96.1%;
-          --muted-foreground: 215.4 16.3% 46.9%;
-          --accent: 210 40% 96.1%;
-          --accent-foreground: 222.2 47.4% 11.2%;
-          --destructive: 0 84.2% 60.2%;
-          --destructive-foreground: 210 40% 98%;
-          --border: 214.3 31.8% 91.4%;
-          --input: 214.3 31.8% 91.4%;
-          --ring: 217.2 91.2% 59.8%;
-        }
-
-        .light-mode .bg-slate-950,
-        .light-mode .from-slate-950,
-        .light-mode .via-slate-900,
-        .light-mode .to-slate-950 {
-          background: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e2e8f0) !important;
-        }
-
-        .light-mode .bg-slate-900,
-        .light-mode .bg-slate-900\/50 {
-          background: rgba(255, 255, 255, 0.8) !important;
-          border-color: #e2e8f0 !important;
-        }
-
-        .light-mode .bg-slate-800,
-        .light-mode .bg-slate-800\/50,
-        .light-mode .bg-slate-800\/30 {
-          background: rgba(241, 245, 249, 0.8) !important;
-          border-color: #cbd5e1 !important;
-        }
-
-        .light-mode .text-white {
-          color: #0f172a !important;
-        }
-
-        .light-mode .text-slate-300,
-        .light-mode .text-slate-400 {
-          color: #475569 !important;
-        }
-
-        .light-mode .text-slate-500,
-        .light-mode .text-slate-600 {
-          color: #64748b !important;
-        }
-
-        .light-mode .border-slate-700,
-        .light-mode .border-slate-800 {
-          border-color: #cbd5e1 !important;
-        }
-
-        .light-mode .hover\\:bg-slate-800:hover {
-          background: #f1f5f9 !important;
-        }
-      `}</style>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Sidebar className={`border-r border-slate-950 bg-slate-950 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
           <SidebarHeader className="border-b border-slate-900 p-6 bg-slate-950">
@@ -426,26 +322,10 @@ export default function Layout({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4 md:hidden">
+          <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between md:hidden">
+            <div className="flex items-center gap-4">
               <SidebarTrigger className="hover:bg-slate-800 p-2 rounded-lg transition-colors duration-200 text-white" />
               <h1 className="text-xl font-bold text-white">GestionGTG</h1>
-            </div>
-            
-            <div className="ml-auto">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="text-slate-400 hover:text-white hover:bg-slate-800"
-                title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-5 h-5" />
-                ) : (
-                  <Moon className="w-5 h-5" />
-                )}
-              </Button>
             </div>
           </header>
 
