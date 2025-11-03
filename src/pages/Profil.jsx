@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +67,7 @@ export default function Profil() {
     type: "rendez-vous"
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setProfileForm({
         full_name: user.full_name || "",
