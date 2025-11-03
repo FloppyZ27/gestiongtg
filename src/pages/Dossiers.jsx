@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ClientDetailView from "../components/clients/ClientDetailView";
+import AddressInput from "../components/shared/AddressInput";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
@@ -44,6 +45,7 @@ export default function Dossiers() {
   const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
   const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
   const [viewingClientDetails, setViewingClientDetails] = useState(null); // New state for viewing client details
+  const [viewingDossierDetails, setViewingDossierDetails] = useState(null);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
@@ -208,7 +210,21 @@ export default function Dossiers() {
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
-      mandats: dossier.mandats || [],
+      mandats: dossier.mandats?.map(m => ({
+        ...m,
+        adresse_travaux: m.adresse_travaux
+          ? (typeof m.adresse_travaux === 'string'
+            ? {
+                rue: m.adresse_travaux,
+                numeros_civiques: [],
+                ville: "",
+                code_postal: "",
+                province: ""
+              }
+            : m.adresse_travaux
+          )
+          : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }
+      })) || [],
       description: dossier.description || ""
     });
     setIsDialogOpen(true);
@@ -243,7 +259,13 @@ export default function Dossiers() {
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
-        adresse_travaux: "",
+        adresse_travaux: {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: ""
+        },
         lots: [],
         prix_estime: 0,
         date_livraison: "",
@@ -252,6 +274,28 @@ export default function Dossiers() {
         notes: ""
       }]
     }));
+  };
+
+  const updateMandatAddress = (mandatIndex, newAddresses) => {
+    setFormData(prev => ({
+      ...prev,
+      mandats: prev.mandats.map((m, i) =>
+        i === mandatIndex ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
+      )
+    }));
+  };
+
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
   };
 
   const updateMandat = (index, field, value) => {
@@ -576,15 +620,19 @@ export default function Dossiers() {
                           </Select>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label>Adresse des travaux</Label>
-                          <Input
-                            value={mandat.adresse_travaux}
-                            onChange={(e) => updateMandat(index, 'adresse_travaux', e.target.value)}
-                            placeholder="Adresse complète"
-                            className="bg-slate-700 border-slate-600"
-                          />
-                        </div>
+                        <AddressInput
+                          addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
+                            ville: "",
+                            numeros_civiques: [""],
+                            rue: "",
+                            code_postal: "",
+                            province: ""
+                          }]}
+                          onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                          showActuelle={false}
+                          label="Adresse des travaux"
+                          singleAddress={true}
+                        />
 
                         <div className="grid grid-cols-3 gap-3">
                           <div className="space-y-2">
@@ -937,7 +985,151 @@ export default function Dossiers() {
               <ClientDetailView 
                 client={viewingClientDetails} 
                 onClose={() => setViewingClientDetails(null)}
+                onViewDossier={(dossier) => {
+                  setViewingClientDetails(null);
+                  setViewingDossierDetails(dossier);
+                }}
               />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Dossier Details Dialog */}
+        <Dialog open={!!viewingDossierDetails} onOpenChange={(open) => !open && setViewingDossierDetails(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                Détails du dossier {getArpenteurInitials(viewingDossierDetails?.arpenteur_geometre)}{viewingDossierDetails?.numero_dossier}
+              </DialogTitle>
+            </DialogHeader>
+            {viewingDossierDetails && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-slate-400">Arpenteur-géomètre</Label>
+                    <p className="text-white font-medium">{viewingDossierDetails.arpenteur_geometre}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400">Date d'ouverture</Label>
+                    <p className="text-white font-medium">
+                      {format(new Date(viewingDossierDetails.date_ouverture), "dd MMMM yyyy", { locale: fr })}
+                    </p>
+                  </div>
+                </div>
+
+                {viewingDossierDetails.clients_ids && viewingDossierDetails.clients_ids.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Clients</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingDossierDetails.clients_ids.map(id => {
+                        const client = getClientById(id);
+                        return client ? (
+                          <Badge 
+                            key={id} 
+                            className="bg-blue-500/20 text-blue-400 border-blue-500/30 border cursor-pointer hover:bg-blue-500/30"
+                            onClick={() => {
+                              setViewingDossierDetails(null);
+                              setViewingClientDetails(client);
+                            }}
+                          >
+                            {client.prenom} {client.nom}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossierDetails.notaires_ids && viewingDossierDetails.notaires_ids.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Notaires</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingDossierDetails.notaires_ids.map(id => {
+                        const notaire = getClientById(id);
+                        return notaire ? (
+                          <Badge 
+                            key={id} 
+                            className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer hover:bg-purple-500/30"
+                            onClick={() => {
+                              setViewingDossierDetails(null);
+                              setViewingClientDetails(notaire);
+                            }}
+                          >
+                            {notaire.prenom} {notaire.nom}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossierDetails.courtiers_ids && viewingDossierDetails.courtiers_ids.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Courtiers immobiliers</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingDossierDetails.courtiers_ids.map(id => {
+                        const courtier = getClientById(id);
+                        return courtier ? (
+                          <Badge 
+                            key={id} 
+                            className="bg-orange-500/20 text-orange-400 border-orange-500/30 border cursor-pointer hover:bg-orange-500/30"
+                            onClick={() => {
+                              setViewingDossierDetails(null);
+                              setViewingClientDetails(courtier);
+                            }}
+                          >
+                            {courtier.prenom} {courtier.nom}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossierDetails.mandats && viewingDossierDetails.mandats.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Mandats</Label>
+                    <div className="space-y-3">
+                      {viewingDossierDetails.mandats.map((mandat, idx) => (
+                        <Card key={idx} className="border-slate-700 bg-slate-800/30">
+                          <CardContent className="p-3">
+                            <h5 className="font-semibold text-emerald-400 mb-2">{mandat.type_mandat}</h5>
+                            {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                              <p className="text-sm text-slate-300 mb-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                            )}
+                            {mandat.lots && mandat.lots.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {mandat.lots.map((lot, li) => (
+                                  <Badge key={li} variant="outline" className="text-xs">{lot}</Badge>
+                                ))}
+                              </div>
+                            )}
+                            {mandat.date_signature && (
+                              <p className="text-sm text-slate-400">Signature: {format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
+                            )}
+                            {mandat.date_livraison && (
+                              <p className="text-sm text-slate-400">Livraison: {format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
+                            )}
+                            {mandat.prix_estime > 0 && (
+                              <p className="text-sm text-slate-300">Prix estimé: {mandat.prix_estime.toFixed(2)} $</p>
+                            )}
+                            {mandat.notes && (
+                              <p className="text-sm text-slate-400 mt-1 italic">{mandat.notes}</p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossierDetails.description && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Description</Label>
+                    <p className="text-slate-300">{viewingDossierDetails.description}</p>
+                  </div>
+                )}
+              </div>
             )}
           </DialogContent>
         </Dialog>

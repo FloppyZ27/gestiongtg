@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -8,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, X, Check, Edit, Save, FolderOpen } from "lucide-react";
+import { Plus, X, Check, Edit, Save, FolderOpen, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import AddressInput from "../shared/AddressInput";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -24,7 +24,7 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
-export default function ClientDetailView({ client, onClose }) {
+export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     prenom: client?.prenom || "",
@@ -97,24 +97,10 @@ export default function ClientDetailView({ client, onClose }) {
   };
 
   const addField = (fieldName) => {
-    if (fieldName === 'adresses') {
-      setFormData(prev => ({
-        ...prev,
-        adresses: [...prev.adresses, {
-          ville: "",
-          numeros_civiques: [""],
-          rue: "",
-          code_postal: "",
-          province: "",
-          actuelle: false
-        }]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+    }));
   };
 
   const removeField = (fieldName, index) => {
@@ -135,43 +121,12 @@ export default function ClientDetailView({ client, onClose }) {
     }));
   };
 
-  const addNumeroCivique = (addrIndex) => {
-    setFormData(prev => ({
-      ...prev,
-      adresses: prev.adresses.map((addr, i) =>
-        i === addrIndex ? { ...addr, numeros_civiques: [...(addr.numeros_civiques || []), ""] } : addr
-      )
-    }));
-  };
-
-  const removeNumeroCivique = (addrIndex, numIndex) => {
-    setFormData(prev => ({
-      ...prev,
-      adresses: prev.adresses.map((addr, i) =>
-        i === addrIndex && addr.numeros_civiques.length > 1
-          ? { ...addr, numeros_civiques: addr.numeros_civiques.filter((_, ni) => ni !== numIndex) }
-          : addr
-      )
-    }));
-  };
-
-  const updateNumeroCivique = (addrIndex, numIndex, value) => {
-    setFormData(prev => ({
-      ...prev,
-      adresses: prev.adresses.map((addr, i) =>
-        i === addrIndex
-          ? { ...addr, numeros_civiques: addr.numeros_civiques.map((n, ni) => ni === numIndex ? value : n) }
-          : addr
-      )
-    }));
-  };
-
   const toggleActuel = (fieldName, index) => {
     setFormData(prev => ({
       ...prev,
       [fieldName]: prev[fieldName].map((item, i) => ({
         ...item,
-        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
+        actuel: i === index
       }))
     }));
   };
@@ -270,10 +225,14 @@ export default function ClientDetailView({ client, onClose }) {
             </Label>
             <div className="space-y-2">
               {clientDossiers.map((dossier) => (
-                <Card key={dossier.id} className="border-slate-700 bg-slate-800/30">
+                <Card 
+                  key={dossier.id} 
+                  className="border-slate-700 bg-slate-800/30 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                  onClick={() => onViewDossier && onViewDossier(dossier)}
+                >
                   <CardContent className="p-3">
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-emerald-400">
                           {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                         </p>
@@ -293,6 +252,7 @@ export default function ClientDetailView({ client, onClose }) {
                           </div>
                         )}
                       </div>
+                      <Eye className="w-4 h-4 text-slate-400 ml-2 flex-shrink-0" />
                     </div>
                   </CardContent>
                 </Card>
@@ -337,129 +297,13 @@ export default function ClientDetailView({ client, onClose }) {
         </div>
       </div>
 
-      {/* Adresses */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <Label>Adresses</Label>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => addField('adresses')}
-            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Ajouter
-          </Button>
-        </div>
-        {formData.adresses.map((addr, index) => (
-          <Card key={index} className="border-slate-700 bg-slate-800/30">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <Label className="text-sm">Adresse {index + 1}</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => toggleActuel('adresses', index)}
-                    className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                  >
-                    <Check className="w-4 h-4" />
-                  </Button>
-                  {formData.adresses.length > 1 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeField('adresses', index)}
-                      className="text-red-400"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-xs">Numéros civiques</Label>
-                {addr.numeros_civiques?.map((num, numIndex) => (
-                  <div key={numIndex} className="flex gap-2">
-                    <Input
-                      value={num}
-                      onChange={(e) => updateNumeroCivique(index, numIndex, e.target.value)}
-                      placeholder="Numéro"
-                      className="bg-slate-700 border-slate-600"
-                    />
-                    {addr.numeros_civiques.length > 1 && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeNumeroCivique(index, numIndex)}
-                        className="text-red-400"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => addNumeroCivique(index)}
-                  className="bg-slate-700 hover:bg-slate-600 text-white w-full"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Ajouter un numéro
-                </Button>
-              </div>
+      <AddressInput
+        addresses={formData.adresses}
+        onChange={(newAddresses) => setFormData({...formData, adresses: newAddresses})}
+        showActuelle={true}
+        label="Adresses"
+      />
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-xs">Rue</Label>
-                  <Input
-                    value={addr.rue}
-                    onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
-                    placeholder="Nom de rue"
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Ville</Label>
-                  <Input
-                    value={addr.ville}
-                    onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
-                    placeholder="Ville"
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-xs">Province</Label>
-                  <Input
-                    value={addr.province}
-                    onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
-                    placeholder="Province"
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Code postal</Label>
-                  <Input
-                    value={addr.code_postal}
-                    onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
-                    placeholder="G0W 0A0"
-                    className="bg-slate-700 border-slate-600"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Courriels */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <Label>Courriels</Label>
@@ -505,7 +349,6 @@ export default function ClientDetailView({ client, onClose }) {
         ))}
       </div>
 
-      {/* Téléphones */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <Label>Téléphones</Label>

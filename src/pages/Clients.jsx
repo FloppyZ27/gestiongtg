@@ -227,6 +227,19 @@ export default function Clients() {
 
   const getClientById = (id) => clients.find(c => c.id === id);
 
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0) {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
   const statsCards = [
     {
       title: "Total des clients",
@@ -626,7 +639,11 @@ export default function Clients() {
                 viewingClientDossiers.type_client === 'Notaire' ? 'notaires' :
                 viewingClientDossiers.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients'
               ).map((dossier) => (
-                <Card key={dossier.id} className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors">
+                <Card 
+                  key={dossier.id} 
+                  className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
+                  onClick={() => setViewingDossier(dossier)}
+                >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -653,14 +670,7 @@ export default function Clients() {
                           )}
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => setViewingDossier(dossier)}
-                        className="bg-emerald-500 hover:bg-emerald-600"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Voir détails
-                      </Button>
+                      <Eye className="w-4 h-4 text-slate-400 ml-2 flex-shrink-0" />
                     </div>
                   </CardContent>
                 </Card>
@@ -690,14 +700,6 @@ export default function Clients() {
                       {format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
                     </p>
                   </div>
-                  {viewingDossier.date_livraison && (
-                    <div>
-                      <Label className="text-slate-400">Date de livraison</Label>
-                      <p className="text-white font-medium">
-                        {format(new Date(viewingDossier.date_livraison), "dd MMMM yyyy", { locale: fr })}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
@@ -757,7 +759,7 @@ export default function Clients() {
                           <CardContent className="p-3">
                             <h5 className="font-semibold text-emerald-400 mb-2">{mandat.type_mandat}</h5>
                             {mandat.adresse_travaux && (
-                              <p className="text-sm text-slate-300 mb-1">📍 {mandat.adresse_travaux}</p>
+                              <p className="text-sm text-slate-300 mb-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
                             )}
                             {mandat.lots && mandat.lots.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-1">
@@ -765,6 +767,12 @@ export default function Clients() {
                                   <Badge key={li} variant="outline" className="text-xs">{lot}</Badge>
                                 ))}
                               </div>
+                            )}
+                            {mandat.date_signature && (
+                              <p className="text-sm text-slate-400">Signature: {format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
+                            )}
+                            {mandat.date_livraison && (
+                              <p className="text-sm text-slate-400">Livraison: {format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
                             )}
                             {mandat.prix_estime > 0 && (
                               <p className="text-sm text-slate-300">Prix estimé: {mandat.prix_estime.toFixed(2)} $</p>
