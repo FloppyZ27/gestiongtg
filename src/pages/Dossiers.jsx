@@ -426,7 +426,7 @@ export default function Dossiers() {
         minute: m.minute || "",
         date_minute: m.date_minute || "",
         tache_actuelle: m.tache_actuelle || "",
-        statut_terrain: (m.tache_actuelle === "Cédule" || m.tache_actuelle === "Terrain") ? "a_ceduler" : m.statut_terrain || "", // Initialize statut_terrain
+        statut_terrain: m.statut_terrain || "", // Keep existing statut_terrain or default to ""
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -516,8 +516,8 @@ export default function Dossiers() {
         date_ouverture: "",
         minute: "",
         date_minute: "",
-        tache_actuelle: "Cédule", // Tâche par défaut
-        statut_terrain: "a_ceduler", // Initialize statut_terrain for new mandat
+        tache_actuelle: "", // Vide par défaut pour qu'il n'apparaisse pas automatiquement dans la cédule
+        statut_terrain: "", // Vide par défaut - sera mis à "en_verification" quand tache_actuelle sera "Cédule"
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -576,7 +576,11 @@ export default function Dossiers() {
           const updatedMandat = { ...m, [field]: value };
           // If tache_actuelle changes, update statut_terrain accordingly
           if (field === 'tache_actuelle') {
-            updatedMandat.statut_terrain = (value === "Cédule" || value === "Terrain") ? "a_ceduler" : "";
+            if (value === "Cédule") {
+              updatedMandat.statut_terrain = "en_verification";
+            } else {
+              updatedMandat.statut_terrain = "";
+            }
           }
           return updatedMandat;
         }
@@ -1043,8 +1047,8 @@ export default function Dossiers() {
                                 </div>
                               </div>
 
-                              {/* Section Terrain - Affichée uniquement si statut_terrain est a_ceduler */}
-                              {mandat.statut_terrain === "a_ceduler" && (
+                              {/* Section Terrain - Affichée uniquement si statut_terrain est en_verification */}
+                              {mandat.statut_terrain === "en_verification" && (
                                 <div className="border-t border-slate-700 pt-4 mt-4">
                                   <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
                                   
@@ -1668,8 +1672,8 @@ export default function Dossiers() {
                                 </div>
                               </div>
 
-                              {/* Section Terrain (View Mode) - Affichée uniquement si statut_terrain est a_ceduler */}
-                              {mandat.statut_terrain === "a_ceduler" && (
+                              {/* Section Terrain (View Mode) - Affichée uniquement si statut_terrain est en_verification */}
+                              {mandat.statut_terrain === "en_verification" && (
                                 <div className="border-t border-slate-700 pt-4 mt-4">
                                   <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
                                   <div className="grid grid-cols-2 gap-4">
@@ -1723,7 +1727,7 @@ export default function Dossiers() {
                                       <p className="text-white font-medium mt-1">{mandat.terrain?.dossier_simultane || "-"}</p>
                                     </div>
                                     <div>
-                                      <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                                      <Label className="text-slate-400 text-xs">Temps prévu</                                      >
                                       <p className="text-white font-medium mt-1">{mandat.terrain?.temps_prevu || "-"}</p>
                                     </div>
                                   </div>

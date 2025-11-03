@@ -277,12 +277,71 @@ export default function CeduleTerrain() {
             </Badge>
           </div>
         </div>
+        
         {item.mandat.adresse_travaux && formatAdresse(item.mandat.adresse_travaux) && (
           <p className="text-xs text-slate-400 mt-2 flex items-start gap-1">
             <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
             <span className="line-clamp-2">{formatAdresse(item.mandat.adresse_travaux)}</span>
           </p>
         )}
+
+        {/* Section Terrain Info */}
+        {item.mandat.terrain && (
+          <div className="mt-3 space-y-1.5 border-t border-slate-700 pt-2">
+            {item.mandat.terrain.date_limite_leve && (
+              <div className="text-xs">
+                <span className="text-slate-500">Date limite: </span>
+                <span className="text-slate-300">{format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
+              </div>
+            )}
+            {item.mandat.terrain.instruments_requis && (
+              <div className="text-xs">
+                <span className="text-slate-500">Instruments: </span>
+                <span className="text-slate-300">{item.mandat.terrain.instruments_requis}</span>
+              </div>
+            )}
+            {item.mandat.terrain.a_rendez_vous && (
+              <div className="text-xs">
+                <span className="text-slate-500">RDV: </span>
+                <span className="text-emerald-400">
+                  {item.mandat.terrain.date_rendez_vous && format(new Date(item.mandat.terrain.date_rendez_vous), "dd MMM", { locale: fr })}
+                  {item.mandat.terrain.heure_rendez_vous && ` à ${item.mandat.terrain.heure_rendez_vous}`}
+                </span>
+              </div>
+            )}
+            {item.mandat.terrain.donneur && (
+              <div className="text-xs">
+                <span className="text-slate-500">Donneur: </span>
+                <span className="text-slate-300">{item.mandat.terrain.donneur}</span>
+              </div>
+            )}
+            {item.mandat.terrain.technicien && (
+              <div className="text-xs">
+                <span className="text-slate-500">Technicien: </span>
+                <span className="text-cyan-400">{item.mandat.terrain.technicien}</span>
+              </div>
+            )}
+            {item.mandat.terrain.dossier_simultane && (
+              <div className="text-xs">
+                <span className="text-slate-500">Dossier simultané: </span>
+                <span className="text-purple-400">{item.mandat.terrain.dossier_simultane}</span>
+              </div>
+            )}
+            {item.mandat.terrain.temps_prevu && (
+              <div className="text-xs">
+                <span className="text-slate-500">Temps prévu: </span>
+                <span className="text-slate-300">{item.mandat.terrain.temps_prevu}</span>
+              </div>
+            )}
+            {item.mandat.terrain.notes && (
+              <div className="text-xs mt-2">
+                <span className="text-slate-500">Notes: </span>
+                <p className="text-slate-300 mt-0.5 line-clamp-2">{item.mandat.terrain.notes}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {showActions && (
           <div className="flex gap-2 mt-3">
             <Button
