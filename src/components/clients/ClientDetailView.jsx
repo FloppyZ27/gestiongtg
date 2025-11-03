@@ -1,12 +1,28 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Check, Edit, Save } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, X, Check, Edit, Save, FolderOpen } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  const mapping = {
+    "Samuel Guay": "SG-",
+    "Dany Gaboury": "DG-",
+    "Pierre-Luc Pilote": "PLP-",
+    "Benjamin Larouche": "BL-",
+    "Frédéric Gilbert": "FG-"
+  };
+  return mapping[arpenteur] || "";
+};
 
 export default function ClientDetailView({ client, onClose }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -14,13 +30,26 @@ export default function ClientDetailView({ client, onClose }) {
     prenom: client?.prenom || "",
     nom: client?.nom || "",
     type_client: client?.type_client || "Client",
-    adresses: client?.adresses && client.adresses.length > 0 ? client.adresses : [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+    adresses: client?.adresses && client.adresses.length > 0 ? client.adresses : [{
+      ville: "",
+      numeros_civiques: [""],
+      rue: "",
+      code_postal: "",
+      province: "",
+      actuelle: true
+    }],
     courriels: client?.courriels && client.courriels.length > 0 ? client.courriels : [{ courriel: "", actuel: true }],
     telephones: client?.telephones && client.telephones.length > 0 ? client.telephones : [{ telephone: "", actuel: true }],
     notes: client?.notes || ""
   });
 
   const queryClient = useQueryClient();
+
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list('-date_ouverture'),
+    initialData: [],
+  });
 
   const updateClientMutation = useMutation({
     mutationFn: (clientData) => base44.entities.Client.update(client.id, clientData),
@@ -30,11 +59,37 @@ export default function ClientDetailView({ client, onClose }) {
     },
   });
 
+  const getClientDossiers = () => {
+    const type = client.type_client === 'Notaire' ? 'notaires' :
+                 client.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients';
+    const field = `${type}_ids`;
+    return dossiers
+      .filter(d => d[field]?.includes(client.id))
+      .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture));
+  };
+
+  const formatAdresse = (addr) => {
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques.some(n => n.trim())) {
+      parts.push(addr.numeros_civiques.filter(n => n.trim()).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const cleanedData = {
       ...formData,
-      adresses: formData.adresses.filter(a => a.adresse.trim() !== ""),
+      adresses: formData.adresses.filter(a => 
+        a.ville?.trim() || a.rue?.trim() || (a.numeros_civiques && a.numeros_civiques.some(n => n.trim()))
+      ).map(a => ({
+        ...a,
+        numeros_civiques: a.numeros_civiques.filter(n => n.trim())
+      })),
       courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
     };
@@ -45,7 +100,14 @@ export default function ClientDetailView({ client, onClose }) {
     if (fieldName === 'adresses') {
       setFormData(prev => ({
         ...prev,
-        adresses: [...prev.adresses, { adresse: "", latitude: null, longitude: null, actuelle: false }]
+        adresses: [...prev.adresses, {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "",
+          actuelle: false
+        }]
       }));
     } else {
       setFormData(prev => ({
@@ -73,6 +135,37 @@ export default function ClientDetailView({ client, onClose }) {
     }));
   };
 
+  const addNumeroCivique = (addrIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((addr, i) =>
+        i === addrIndex ? { ...addr, numeros_civiques: [...(addr.numeros_civiques || []), ""] } : addr
+      )
+    }));
+  };
+
+  const removeNumeroCivique = (addrIndex, numIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((addr, i) =>
+        i === addrIndex && addr.numeros_civiques.length > 1
+          ? { ...addr, numeros_civiques: addr.numeros_civiques.filter((_, ni) => ni !== numIndex) }
+          : addr
+      )
+    }));
+  };
+
+  const updateNumeroCivique = (addrIndex, numIndex, value) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((addr, i) =>
+        i === addrIndex
+          ? { ...addr, numeros_civiques: addr.numeros_civiques.map((n, ni) => ni === numIndex ? value : n) }
+          : addr
+      )
+    }));
+  };
+
   const toggleActuel = (fieldName, index) => {
     setFormData(prev => ({
       ...prev,
@@ -82,6 +175,8 @@ export default function ClientDetailView({ client, onClose }) {
       }))
     }));
   };
+
+  const clientDossiers = getClientDossiers();
 
   if (!isEditing) {
     return (
@@ -106,16 +201,19 @@ export default function ClientDetailView({ client, onClose }) {
           <div>
             <Label className="text-slate-400 mb-2 block">Adresses</Label>
             <div className="space-y-2">
-              {client.adresses.map((addr, idx) => (
-                <div key={idx} className="p-3 bg-slate-800/30 rounded-lg">
-                  <p className="text-white">{addr.adresse}</p>
-                  {addr.actuelle && (
-                    <Badge className="mt-2 bg-green-500/20 text-green-400 text-xs">
-                      Actuelle
-                    </Badge>
-                  )}
-                </div>
-              ))}
+              {client.adresses.map((addr, idx) => {
+                const formatted = formatAdresse(addr);
+                return formatted ? (
+                  <div key={idx} className="p-3 bg-slate-800/30 rounded-lg">
+                    <p className="text-white">{formatted}</p>
+                    {addr.actuelle && (
+                      <Badge className="mt-2 bg-green-500/20 text-green-400 text-xs">
+                        Actuelle
+                      </Badge>
+                    )}
+                  </div>
+                ) : null;
+              })}
             </div>
           </div>
         )}
@@ -160,6 +258,46 @@ export default function ClientDetailView({ client, onClose }) {
           <div>
             <Label className="text-slate-400 mb-2 block">Notes</Label>
             <p className="text-slate-300 bg-slate-800/30 p-3 rounded-lg">{client.notes}</p>
+          </div>
+        )}
+
+        {/* Dossiers associés */}
+        {clientDossiers.length > 0 && (
+          <div>
+            <Label className="text-slate-400 mb-3 block flex items-center gap-2">
+              <FolderOpen className="w-4 h-4" />
+              Dossiers associés ({clientDossiers.length})
+            </Label>
+            <div className="space-y-2">
+              {clientDossiers.map((dossier) => (
+                <Card key={dossier.id} className="border-slate-700 bg-slate-800/30">
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-emerald-400">
+                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                        </p>
+                        <p className="text-sm text-slate-400 mt-1">
+                          Arpenteur: {dossier.arpenteur_geometre}
+                        </p>
+                        <p className="text-sm text-slate-400">
+                          Ouvert le: {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
+                        </p>
+                        {dossier.mandats && dossier.mandats.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {dossier.mandats.map((mandat, idx) => (
+                              <Badge key={idx} variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                                {mandat.type_mandat}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
@@ -213,38 +351,111 @@ export default function ClientDetailView({ client, onClose }) {
             Ajouter
           </Button>
         </div>
-        {formData.adresses.map((item, index) => (
-          <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
-            <div className="flex gap-2 items-start">
-              <div className="flex-1">
-                <Input
-                  value={item.adresse}
-                  onChange={(e) => updateField('adresses', index, 'adresse', e.target.value)}
-                  placeholder="Adresse complète"
-                  className="bg-slate-800 border-slate-700"
-                />
+        {formData.adresses.map((addr, index) => (
+          <Card key={index} className="border-slate-700 bg-slate-800/30">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm">Adresse {index + 1}</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => toggleActuel('adresses', index)}
+                    className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                  {formData.adresses.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeField('adresses', index)}
+                      className="text-red-400"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => toggleActuel('adresses', index)}
-                className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-              >
-                <Check className="w-4 h-4" />
-              </Button>
-              {formData.adresses.length > 1 && (
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Numéros civiques</Label>
+                {addr.numeros_civiques?.map((num, numIndex) => (
+                  <div key={numIndex} className="flex gap-2">
+                    <Input
+                      value={num}
+                      onChange={(e) => updateNumeroCivique(index, numIndex, e.target.value)}
+                      placeholder="Numéro"
+                      className="bg-slate-700 border-slate-600"
+                    />
+                    {addr.numeros_civiques.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeNumeroCivique(index, numIndex)}
+                        className="text-red-400"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
                 <Button
                   type="button"
                   size="sm"
-                  variant="ghost"
-                  onClick={() => removeField('adresses', index)}
-                  className="text-red-400"
+                  onClick={() => addNumeroCivique(index)}
+                  className="bg-slate-700 hover:bg-slate-600 text-white w-full"
                 >
-                  <X className="w-4 h-4" />
+                  <Plus className="w-4 h-4 mr-1" />
+                  Ajouter un numéro
                 </Button>
-              )}
-            </div>
-          </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Rue</Label>
+                  <Input
+                    value={addr.rue}
+                    onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
+                    placeholder="Nom de rue"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Ville</Label>
+                  <Input
+                    value={addr.ville}
+                    onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
+                    placeholder="Ville"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Province</Label>
+                  <Input
+                    value={addr.province}
+                    onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
+                    placeholder="Province"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Code postal</Label>
+                  <Input
+                    value={addr.code_postal}
+                    onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
+                    placeholder="G0W 0A0"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
