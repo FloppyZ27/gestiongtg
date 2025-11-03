@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -167,7 +168,7 @@ function LayoutContent({ children, currentPageName }) {
       `}</style>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
-          <SidebarHeader className="border-b border-slate-900 p-6 bg-slate-950">
+          <SidebarHeader className="border-b border-slate-900 p-4 bg-slate-950">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
@@ -189,7 +190,7 @@ function LayoutContent({ children, currentPageName }) {
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-3 bg-slate-950">
+          <SidebarContent className="p-2 bg-slate-950">
             <SidebarGroup>
               {!isCollapsed && (
                 <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
@@ -211,12 +212,12 @@ function LayoutContent({ children, currentPageName }) {
                                   : 'text-slate-400 hover:text-white hover:bg-slate-900'
                               }`}
                             >
-                              <Link to={item.url} className="flex items-center justify-center p-2.5">
+                              <Link to={item.url} className="flex items-center justify-center p-2">
                                 <item.icon className="w-5 h-5" />
                               </Link>
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-800 border-slate-700">
+                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
                             <p>{item.title}</p>
                           </TooltipContent>
                         </Tooltip>
@@ -242,7 +243,7 @@ function LayoutContent({ children, currentPageName }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-900 p-4 bg-slate-950 space-y-3">
+          <SidebarFooter className="border-t border-slate-900 p-3 bg-slate-950 space-y-3">
             <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
               <DialogTrigger asChild>
                 {isCollapsed ? (
@@ -252,7 +253,7 @@ function LayoutContent({ children, currentPageName }) {
                         <Clock className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-slate-800 border-slate-700">
+                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
                       <p>Entrée de temps</p>
                     </TooltipContent>
                   </Tooltip>

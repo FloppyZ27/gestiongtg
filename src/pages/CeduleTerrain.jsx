@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -227,6 +228,15 @@ export default function CeduleTerrain() {
   const supprimerEquipe = (jour, equipe) => {
     const jourKey = jour.toLowerCase();
     if (equipes[jourKey].length <= 1) return;
+    
+    // Vérifier si l'équipe contient des mandats
+    const mandatsCedules = getMandatsCedules();
+    const equipeMandats = mandatsCedules[jourKey]?.[equipe] || [];
+    
+    if (equipeMandats.length > 0) {
+      alert("Impossible de supprimer cette équipe car elle contient déjà des mandats planifiés. Veuillez d'abord retirer les mandats de cette équipe.");
+      return;
+    }
     
     setEquipes(prev => ({
       ...prev,

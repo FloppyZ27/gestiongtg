@@ -437,7 +437,19 @@ export default function Dossiers() {
               }
             : m.adresse_travaux
           )
-          : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }
+          : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        terrain: m.terrain || { // Initialize terrain object
+          date_limite_leve: "",
+          instruments_requis: "",
+          a_rendez_vous: false,
+          date_rendez_vous: "",
+          heure_rendez_vous: "",
+          donneur: "",
+          technicien: "",
+          dossier_simultane: "",
+          temps_prevu: "",
+          notes: ""
+        }
       })) || [],
       description: dossier.description || ""
     });
@@ -510,6 +522,18 @@ export default function Dossiers() {
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
+        terrain: { // Default terrain object for new mandats
+          date_limite_leve: "",
+          instruments_requis: "",
+          a_rendez_vous: false,
+          date_rendez_vous: "",
+          heure_rendez_vous: "",
+          donneur: "",
+          technicien: "",
+          dossier_simultane: "",
+          temps_prevu: "",
+          notes: ""
+        },
         notes: ""
       }]
     }));
@@ -1005,6 +1029,149 @@ export default function Dossiers() {
                                     value={mandat.date_livraison || ""}
                                     onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
                                     className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Section Terrain */}
+                              <div className="border-t border-slate-700 pt-4 mt-4">
+                                <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
+                                
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-2">
+                                    <Label>Date limite levé terrain</Label>
+                                    <Input
+                                      type="date"
+                                      value={mandat.terrain?.date_limite_leve || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        date_limite_leve: e.target.value
+                                      })}
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Instruments requis</Label>
+                                    <Input
+                                      value={mandat.terrain?.instruments_requis || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        instruments_requis: e.target.value
+                                      })}
+                                      placeholder="Ex: GPS, Total Station"
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-3 mt-3">
+                                  <div className="flex items-center gap-3">
+                                    <input
+                                      type="checkbox"
+                                      checked={mandat.terrain?.a_rendez_vous || false}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        a_rendez_vous: e.target.checked
+                                      })}
+                                      className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                                    />
+                                    <Label>Rendez-vous nécessaire</Label>
+                                  </div>
+
+                                  {mandat.terrain?.a_rendez_vous && (
+                                    <div className="grid grid-cols-2 gap-3 ml-7">
+                                      <div className="space-y-2">
+                                        <Label>Date du rendez-vous</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.terrain?.date_rendez_vous || ""}
+                                          onChange={(e) => updateMandat(index, 'terrain', {
+                                            ...mandat.terrain,
+                                            date_rendez_vous: e.target.value
+                                          })}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Heure du rendez-vous</Label>
+                                        <Input
+                                          type="time"
+                                          value={mandat.terrain?.heure_rendez_vous || ""}
+                                          onChange={(e) => updateMandat(index, 'terrain', {
+                                            ...mandat.terrain,
+                                            heure_rendez_vous: e.target.value
+                                          })}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mt-3">
+                                  <div className="space-y-2">
+                                    <Label>Donneur</Label>
+                                    <Input
+                                      value={mandat.terrain?.donneur || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        donneur: e.target.value
+                                      })}
+                                      placeholder="Nom du donneur"
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Technicien assigné</Label>
+                                    <Input
+                                      value={mandat.terrain?.technicien || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        technicien: e.target.value
+                                      })}
+                                      placeholder="Nom du technicien"
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mt-3">
+                                  <div className="space-y-2">
+                                    <Label>Dossier à faire en même temps</Label>
+                                    <Input
+                                      value={mandat.terrain?.dossier_simultane || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        dossier_simultane: e.target.value
+                                      })}
+                                      placeholder="N° de dossier"
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Temps prévu</Label>
+                                    <Input
+                                      value={mandat.terrain?.temps_prevu || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        temps_prevu: e.target.value
+                                      })}
+                                      placeholder="Ex: 2h30"
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 mt-3">
+                                  <Label>Notes terrain</Label>
+                                  <Textarea
+                                    value={mandat.terrain?.notes || ""}
+                                    onChange={(e) => updateMandat(index, 'terrain', {
+                                      ...mandat.terrain,
+                                      notes: e.target.value
+                                    })}
+                                    placeholder="Notes concernant le terrain..."
+                                    className="bg-slate-700 border-slate-600 h-20"
                                   />
                                 </div>
                               </div>
@@ -1594,6 +1761,76 @@ export default function Dossiers() {
                                   </p>
                                 </div>
                               </div>
+
+                              {/* Section Terrain (View Mode) */}
+                              <div className="border-t border-slate-700 pt-4 mt-4">
+                                <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Date limite levé terrain</Label>
+                                    <p className="text-white font-medium mt-1">
+                                      {mandat.terrain?.date_limite_leve ? format(new Date(mandat.terrain.date_limite_leve), "dd MMMM yyyy", { locale: fr }) : "-"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Instruments requis</Label>
+                                    <p className="text-white font-medium mt-1">{mandat.terrain?.instruments_requis || "-"}</p>
+                                  </div>
+                                </div>
+
+                                <div className="mt-4">
+                                  <Label className="text-slate-400 text-xs">Rendez-vous nécessaire</Label>
+                                  <p className="text-white font-medium mt-1">
+                                    {mandat.terrain?.a_rendez_vous ? "Oui" : "Non"}
+                                  </p>
+                                  {mandat.terrain?.a_rendez_vous && (
+                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                                        <p className="text-white font-medium mt-1">
+                                          {mandat.terrain?.date_rendez_vous ? format(new Date(mandat.terrain.date_rendez_vous), "dd MMMM yyyy", { locale: fr }) : "-"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                                        <p className="text-white font-medium mt-1">{mandat.terrain?.heure_rendez_vous || "-"}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Donneur</Label>
+                                    <p className="text-white font-medium mt-1">{mandat.terrain?.donneur || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Technicien assigné</Label>
+                                    <p className="text-white font-medium mt-1">{mandat.terrain?.technicien || "-"}</p>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
+                                    <p className="text-white font-medium mt-1">{mandat.terrain?.dossier_simultane || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                                    <p className="text-white font-medium mt-1">{mandat.terrain?.temps_prevu || "-"}</p>
+                                  </div>
+                                </div>
+
+                                <div className="mt-4">
+                                  <Label className="text-slate-400 text-xs">Notes terrain</Label>
+                                  {mandat.terrain?.notes ? (
+                                    <p className="text-slate-300 mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
+                                  ) : (
+                                    <p className="text-slate-500 text-sm mt-1">Aucune note</p>
+                                  )}
+                                </div>
+                              </div>
+
 
                               <div>
                                 <Label className="text-slate-400 text-xs mb-2 block">Lots sélectionnés</Label>
