@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,7 +117,8 @@ export default function Dossiers() {
   const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
   const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
-  const [viewingDossierDetails, setViewingDossierDetails] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [viewingDossier, setViewingDossier] = useState(null);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
@@ -407,6 +408,9 @@ export default function Dossiers() {
   };
 
   const handleEdit = (dossier) => {
+    setIsViewDialogOpen(false); // Close view dialog if open
+    setViewingDossier(null); // Clear viewing dossier
+
     setEditingDossier(dossier);
     setFormData({
       numero_dossier: dossier.numero_dossier || "",
@@ -439,6 +443,17 @@ export default function Dossiers() {
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
+  };
+
+  const handleView = (dossier) => {
+    setViewingDossier(dossier);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditFromView = () => {
+    if (viewingDossier) {
+      handleEdit(viewingDossier);
+    }
   };
 
   const handleDelete = (id, nom) => {
@@ -709,18 +724,20 @@ export default function Dossiers() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Statut</Label>
-                  <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                      <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {editingDossier && (
+                  <div className="space-y-2">
+                    <Label>Statut</Label>
+                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner le statut" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                        <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Clients */}
                 <div className="space-y-2">
@@ -907,42 +924,46 @@ export default function Dossiers() {
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                  <Label>Minute</Label>
-                                  <Input
-                                    value={mandat.minute || ""}
-                                    onChange={(e) => updateMandat(index, 'minute', e.target.value)}
-                                    placeholder="Ex: 12345"
-                                    className="bg-slate-700 border-slate-600"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Date de minute</Label>
-                                  <Input
-                                    type="date"
-                                    value={mandat.date_minute || ""}
-                                    onChange={(e) => updateMandat(index, 'date_minute', e.target.value)}
-                                    className="bg-slate-700 border-slate-600"
-                                  />
-                                </div>
-                              </div>
+                              {editingDossier && (
+                                <>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-2">
+                                      <Label>Minute</Label>
+                                      <Input
+                                        value={mandat.minute || ""}
+                                        onChange={(e) => updateMandat(index, 'minute', e.target.value)}
+                                        placeholder="Ex: 12345"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Date de minute</Label>
+                                      <Input
+                                        type="date"
+                                        value={mandat.date_minute || ""}
+                                        onChange={(e) => updateMandat(index, 'date_minute', e.target.value)}
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                  </div>
 
-                              <div className="space-y-2">
-                                <Label>Tâche actuelle</Label>
-                                <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                    <SelectValue placeholder="Sélectionner la tâche" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                    {TACHES.map((tache) => (
-                                      <SelectItem key={tache} value={tache} className="text-white">
-                                        {tache}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                                  <div className="space-y-2">
+                                    <Label>Tâche actuelle</Label>
+                                    <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                        <SelectValue placeholder="Sélectionner la tâche" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                        {TACHES.map((tache) => (
+                                          <SelectItem key={tache} value={tache} className="text-white">
+                                            {tache}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </>
+                              )}
 
                               <AddressInput
                                 addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
@@ -1366,55 +1387,56 @@ export default function Dossiers() {
                 onClose={() => setViewingClientDetails(null)}
                 onViewDossier={(dossier) => {
                   setViewingClientDetails(null);
-                  setViewingDossierDetails(dossier);
+                  setViewingDossier(dossier);
+                  setIsViewDialogOpen(true);
                 }}
               />
             )}
           </DialogContent>
         </Dialog>
 
-        {/* Dossier Details Dialog */}
-        <Dialog open={!!viewingDossierDetails} onOpenChange={(open) => !open && setViewingDossierDetails(null)}>
+        {/* View Dossier Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl">
-                Détails du dossier {getArpenteurInitials(viewingDossierDetails?.arpenteur_geometre)}{viewingDossierDetails?.numero_dossier}
+                Dossier {viewingDossier ? `${getArpenteurInitials(viewingDossier.arpenteur_geometre)}${viewingDossier.numero_dossier}` : ''}
               </DialogTitle>
             </DialogHeader>
-            {viewingDossierDetails && (
+            {viewingDossier && (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-slate-400">Arpenteur-géomètre</Label>
-                    <p className="text-white font-medium">{viewingDossierDetails.arpenteur_geometre}</p>
+                    <p className="text-white font-medium">{viewingDossier.arpenteur_geometre}</p>
                   </div>
                   <div>
                     <Label className="text-slate-400">Date d'ouverture</Label>
                     <p className="text-white font-medium">
-                      {format(new Date(viewingDossierDetails.date_ouverture), "dd MMMM yyyy", { locale: fr })}
+                      {format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
                     </p>
                   </div>
                 </div>
 
                 <div>
                   <Label className="text-slate-400">Statut</Label>
-                  <Badge className={`mt-2 ${viewingDossierDetails.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
-                    {viewingDossierDetails.statut || "Ouvert"}
+                  <Badge className={`mt-2 ${viewingDossier.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
+                    {viewingDossier.statut || "Ouvert"}
                   </Badge>
                 </div>
 
-                {viewingDossierDetails.clients_ids && viewingDossierDetails.clients_ids.length > 0 && (
+                {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
                   <div>
                     <Label className="text-slate-400 mb-2 block">Clients</Label>
                     <div className="flex flex-wrap gap-2">
-                      {viewingDossierDetails.clients_ids.map(id => {
+                      {viewingDossier.clients_ids.map(id => {
                         const client = getClientById(id);
                         return client ? (
                           <Badge
                             key={id}
                             className="bg-blue-500/20 text-blue-400 border-blue-500/30 border cursor-pointer hover:bg-blue-500/30"
                             onClick={() => {
-                              setViewingDossierDetails(null);
+                              setIsViewDialogOpen(false);
                               setViewingClientDetails(client);
                             }}
                           >
@@ -1426,18 +1448,18 @@ export default function Dossiers() {
                   </div>
                 )}
 
-                {viewingDossierDetails.notaires_ids && viewingDossierDetails.notaires_ids.length > 0 && (
+                {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
                   <div>
                     <Label className="text-slate-400 mb-2 block">Notaires</Label>
                     <div className="flex flex-wrap gap-2">
-                      {viewingDossierDetails.notaires_ids.map(id => {
+                      {viewingDossier.notaires_ids.map(id => {
                         const notaire = getClientById(id);
                         return notaire ? (
                           <Badge
                             key={id}
                             className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer hover:bg-purple-500/30"
                             onClick={() => {
-                              setViewingDossierDetails(null);
+                              setIsViewDialogOpen(false);
                               setViewingClientDetails(notaire);
                             }}
                           >
@@ -1449,18 +1471,18 @@ export default function Dossiers() {
                   </div>
                 )}
 
-                {viewingDossierDetails.courtiers_ids && viewingDossierDetails.courtiers_ids.length > 0 && (
+                {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
                   <div>
                     <Label className="text-slate-400 mb-2 block">Courtiers immobiliers</Label>
                     <div className="flex flex-wrap gap-2">
-                      {viewingDossierDetails.courtiers_ids.map(id => {
+                      {viewingDossier.courtiers_ids.map(id => {
                         const courtier = getClientById(id);
                         return courtier ? (
                           <Badge
                             key={id}
                             className="bg-orange-500/20 text-orange-400 border-orange-500/30 border cursor-pointer hover:bg-orange-500/30"
                             onClick={() => {
-                              setViewingDossierDetails(null);
+                              setIsViewDialogOpen(false);
                               setViewingClientDetails(courtier);
                             }}
                           >
@@ -1472,11 +1494,11 @@ export default function Dossiers() {
                   </div>
                 )}
 
-                {viewingDossierDetails.mandats && viewingDossierDetails.mandats.length > 0 && (
+                {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
                   <div>
                     <Label className="text-slate-400 mb-2 block">Mandats</Label>
                     <div className="space-y-3">
-                      {viewingDossierDetails.mandats.map((mandat, idx) => (
+                      {viewingDossier.mandats.map((mandat, idx) => (
                         <Card key={idx} className="border-slate-700 bg-slate-800/30">
                           <CardContent className="p-3">
                             <h5 className="font-semibold text-emerald-400 mb-2">{mandat.type_mandat}</h5>
@@ -1487,9 +1509,9 @@ export default function Dossiers() {
                               <p className="text-sm text-slate-400">Minute: {mandat.minute} {mandat.date_minute ? `(du ${format(new Date(mandat.date_minute), "dd MMM yyyy", { locale: fr })})` : ''}</p>
                             )}
                             {mandat.tache_actuelle && (
-                                <Badge className="mt-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border">
-                                  Tâche: {mandat.tache_actuelle}
-                                </Badge>
+                              <Badge className="mt-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border">
+                                Tâche: {mandat.tache_actuelle}
+                              </Badge>
                             )}
                             {mandat.lots && mandat.lots.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-1 mt-2">
@@ -1529,12 +1551,22 @@ export default function Dossiers() {
                   </div>
                 )}
 
-                {viewingDossierDetails.description && (
+                {viewingDossier.description && (
                   <div>
                     <Label className="text-slate-400 mb-2 block">Description</Label>
-                    <p className="text-slate-300">{viewingDossierDetails.description}</p>
+                    <p className="text-slate-300">{viewingDossier.description}</p>
                   </div>
                 )}
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+                  <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    Fermer
+                  </Button>
+                  <Button onClick={handleEditFromView} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>
@@ -2098,10 +2130,10 @@ export default function Dossiers() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEdit(item)}
-                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                            onClick={() => handleView(item)}
+                            className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
                           {item.mandatIndex === 0 && ( // Only show delete for the first instance of a dossier to avoid duplicate buttons
                             <Button
