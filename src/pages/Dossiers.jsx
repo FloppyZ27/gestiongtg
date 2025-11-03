@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,76 @@ import AddressInput from "../components/shared/AddressInput";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Lac-Saint-Jean-Est": [
+    "Québec",
+    "Canton de Caron",
+    "Canton de de l'Île",
+    "Canton de Garnier",
+    "Village d'Héberville",
+    "Canton d'Hébertville-Station",
+    "Canton de Labarre",
+    "Canton de Mésy",
+    "Canton de Métabetchouan",
+    "Canton de Signay",
+    "Canton de Taillon"
+  ],
+  "Lac-Saint-Jean-Ouest": [
+    "Québec",
+    "Canton d'Albanel",
+    "Canton de Charlevoix",
+    "Canton de Dablon",
+    "Canton de Dalmas",
+    "Canton de Demeules",
+    "Canton de Dequen",
+    "Canton de Dolbeau",
+    "Canton de Girard",
+    "Canton de Jogues",
+    "Canton de Malherbe",
+    "Canton de Métabetchouan",
+    "Canton de Milot",
+    "Canton de Normandin",
+    "Canton de Ouiatchouan",
+    "Canton de Racine",
+    "Canton de Roberval",
+    "Canton de Saint-Hilaire"
+  ],
+  "Chicoutimi": [
+    "Québec",
+    "Cité d'Arvida",
+    "Canton de Bagot",
+    "Village de Bagotville",
+    "Canton de Bégin",
+    "Canton de Boileau",
+    "Canton de Bourget",
+    "Canton de Chicoutimi",
+    "Paroisse de Chicoutimi",
+    "Ville de Chicoutimi",
+    "Canton de Dumas",
+    "Canton de Durocher",
+    "Canton de Falardeau",
+    "Canton de Ferland",
+    "Ville de Grande-Baie",
+    "Canton de Harvey",
+    "Canton de Hébert",
+    "Canton de Jonquière",
+    "Canton de Kénogami",
+    "Canton de Labrecque",
+    "Canton de Laterrière",
+    "Canton d'Otis",
+    "Canton de Périgny",
+    "Canton de Rouleau",
+    "Canton de Simard",
+    "Paroisse de Saint-Alexis",
+    "Paroisse de Saint-Alphonse",
+    "Ville de Sainte-Anne-de-Chicoutimi",
+    "Canton de Saint-Germains",
+    "Canton de Saint-Jean",
+    "Canton de Taché",
+    "Canton de Tremblay"
+  ]
+};
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -53,6 +123,17 @@ export default function Dossiers() {
   const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
+  const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
+  const [newLotForm, setNewLotForm] = useState({
+    circonscription_fonciere: "",
+    cadastre: "",
+    rang: "",
+    numero_lot: "",
+    concordance_anterieur: "",
+    document_pdf_url: ""
+  });
+  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -131,19 +212,37 @@ export default function Dossiers() {
     },
   });
 
+  const createLotMutation = useMutation({
+    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetNewLotForm();
+    },
+  });
+
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
 
   const getClientById = (id) => clients.find(c => c.id === id);
+  const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
 
-  const lotsQuebec = lots.filter(lot => lot.cadastre === "Québec");
+  const availableLotCadastres = newLotForm.circonscription_fonciere 
+    ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || []
+    : [];
 
-  const filteredLotsForSelector = lotsQuebec.filter(lot =>
-    lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-    lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-    lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase())
-  );
+  const filteredLotsForSelector = lots.filter(lot => {
+    const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
+    
+    const matchesCirconscription = lotCirconscriptionFilter === "all" || 
+      lot.circonscription_fonciere === lotCirconscriptionFilter;
+
+    return matchesSearch && matchesCirconscription;
+  });
 
   const openLotSelector = (mandatIndex) => {
     setCurrentMandatIndex(mandatIndex);
@@ -157,7 +256,7 @@ export default function Dossiers() {
         mandats: prev.mandats.map((m, i) =>
           i === currentMandatIndex ? {
             ...m,
-            lots: m.lots.includes(numeroLot) ? m.lots : [...(m.lots || []), numeroLot]
+            lots: m.lots.includes(numeroLot) ? m.lots.filter(id => id !== numeroLot) : [...(m.lots || []), numeroLot]
           } : m
         )
       }));
@@ -212,6 +311,35 @@ export default function Dossiers() {
     createClientMutation.mutate(cleanedData);
   };
 
+  const handleNewLotSubmit = (e) => {
+    e.preventDefault();
+    createLotMutation.mutate(newLotForm);
+  };
+
+  const handleLotFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLotPdf(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      setNewLotForm({ ...newLotForm, document_pdf_url: result.file_url });
+    } catch (error) {
+      console.error("Erreur lors de l'upload:", error);
+      // Optionally, show an error message to the user
+    } finally {
+      setUploadingLotPdf(false);
+    }
+  };
+
+  const handleLotCirconscriptionChange = (value) => {
+    setNewLotForm({
+      ...newLotForm,
+      circonscription_fonciere: value,
+      cadastre: "" // Reset cadastre when circonscription changes
+    });
+  };
+
   const resetForm = () => {
     setFormData({
       numero_dossier: "",
@@ -238,6 +366,17 @@ export default function Dossiers() {
     });
   };
 
+  const resetNewLotForm = () => {
+    setNewLotForm({
+      circonscription_fonciere: "",
+      cadastre: "",
+      rang: "",
+      numero_lot: "",
+      concordance_anterieur: "",
+      document_pdf_url: ""
+    });
+  };
+
   const handleEdit = (dossier) => {
     setEditingDossier(dossier);
     setFormData({
@@ -249,6 +388,7 @@ export default function Dossiers() {
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats?.map(m => ({
         ...m,
+        date_ouverture: m.date_ouverture || "", // Ensure date_ouverture is present
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -296,6 +436,7 @@ export default function Dossiers() {
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
+        date_ouverture: "", // Added date_ouverture here
         adresse_travaux: {
           ville: "",
           numeros_civiques: [""],
@@ -351,11 +492,11 @@ export default function Dossiers() {
     }));
   };
 
-  const removeLotFromMandat = (mandatIndex, lotIndex) => {
+  const removeLotFromMandat = (mandatIndex, lotNumero) => {
     setFormData(prev => ({
       ...prev,
       mandats: prev.mandats.map((m, i) =>
-        i === mandatIndex ? { ...m, lots: m.lots.filter((_, li) => li !== lotIndex) } : m
+        i === mandatIndex ? { ...m, lots: m.lots.filter((num) => num !== lotNumero) } : m
       )
     }));
   };
@@ -627,23 +768,34 @@ export default function Dossiers() {
                           </Button>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                          <Select
-                            value={mandat.type_mandat}
-                            onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              {TYPES_MANDATS.map((type) => (
-                                <SelectItem key={type} value={type} className="text-white">
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                            <Select
+                              value={mandat.type_mandat}
+                              onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                <SelectValue placeholder="Sélectionner" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                {TYPES_MANDATS.map((type) => (
+                                  <SelectItem key={type} value={type} className="text-white">
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date d'ouverture</Label>
+                            <Input
+                              type="date"
+                              value={mandat.date_ouverture || ""}
+                              onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                              className="bg-slate-700 border-slate-600"
+                            />
+                          </div>
                         </div>
 
                         <AddressInput
@@ -691,23 +843,63 @@ export default function Dossiers() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label>Lots</Label>
-                          <Button
-                            type="button"
-                            onClick={() => openLotSelector(index)}
-                            className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Sélectionner des lots
-                          </Button>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {mandat.lots?.map((lot, lotIndex) => (
-                              <Badge key={lotIndex} className="bg-slate-700 text-white flex items-center gap-2">
-                                {lot}
-                                <X className="w-3 h-3 cursor-pointer" onClick={() => removeLotFromMandat(index, lotIndex)} />
-                              </Badge>
-                            ))}
+                          <div className="flex justify-between items-center">
+                            <Label>Lots sélectionnés</Label>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => openLotSelector(index)}
+                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Sélectionner des lots
+                            </Button>
                           </div>
+                          {mandat.lots && mandat.lots.length > 0 ? (
+                            <div className="space-y-2 mt-2">
+                              {mandat.lots.map((numeroLot) => {
+                                const lot = getLotById(numeroLot);
+                                return lot ? (
+                                  <div key={lot.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                                    <div className="flex-1">
+                                      <p className="text-white font-medium">{lot.numero_lot}</p>
+                                      <div className="flex gap-3 text-xs text-slate-400 mt-1">
+                                        <span>📍 {lot.circonscription_fonciere}</span>
+                                        {lot.cadastre && <span>• {lot.cadastre}</span>}
+                                        {lot.rang && <span>• Rang {lot.rang}</span>}
+                                      </div>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeLotFromMandat(index, lot.numero_lot)}
+                                      className="text-red-400 hover:text-red-300"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div key={numeroLot} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                                    <p className="text-white font-medium">{numeroLot} (Lot introuvable)</p>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeLotFromMandat(index, numeroLot)}
+                                      className="text-red-400 hover:text-red-300"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                              Aucun lot sélectionné
+                            </p>
+                          )}
                         </div>
 
                         <div className="space-y-2">
@@ -1108,10 +1300,22 @@ export default function Dossiers() {
                             )}
                             {mandat.lots && mandat.lots.length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-1">
-                                {mandat.lots.map((lot, li) => (
-                                  <Badge key={li} variant="outline" className="text-xs">{lot}</Badge>
-                                ))}
+                                {mandat.lots.map((numeroLot, li) => {
+                                  const lot = getLotById(numeroLot);
+                                  return lot ? (
+                                    <Badge key={li} variant="outline" className="text-xs">
+                                      {lot.numero_lot} {lot.rang ? `(Rang ${lot.rang})` : ''} {lot.cadastre ? `(${lot.cadastre})` : ''}
+                                    </Badge>
+                                  ) : (
+                                    <Badge key={li} variant="outline" className="text-xs">
+                                      {numeroLot} (Introuvable)
+                                    </Badge>
+                                  );
+                                })}
                               </div>
+                            )}
+                            {mandat.date_ouverture && (
+                              <p className="text-sm text-slate-400">Ouverture du mandat: {format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
                             )}
                             {mandat.date_signature && (
                               <p className="text-sm text-slate-400">Signature: {format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
@@ -1349,58 +1553,231 @@ export default function Dossiers() {
         </Dialog>
 
         {/* Lot Selector Dialog */}
-        <Dialog open={isLotSelectorOpen} onOpenChange={setIsLotSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
+          setIsLotSelectorOpen(open);
+          if (!open) {
+            setLotCirconscriptionFilter("all");
+            setLotSearchTerm("");
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle>Sélectionner des lots (Cadastre: Québec)</DialogTitle>
+              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un lot..."
-                  value={lotSearchTerm}
-                  onChange={(e) => setLotSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher par numéro, rang ou cadastre..."
+                    value={lotSearchTerm}
+                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                  <SelectTrigger className="w-64 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Filtrer par circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
+                      <SelectItem key={circonscription} value={circonscription} className="text-white">
+                        {circonscription}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={() => setIsNewLotDialogOpen(true)}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau lot
+                </Button>
               </div>
-              <div className="max-h-96 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3">
-                  {filteredLotsForSelector.map((lot) => {
-                    const isSelected = currentMandatIndex !== null &&
-                      formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
-                    return (
-                      <div
-                        key={lot.id}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'bg-emerald-500/20 border border-emerald-500/30'
-                            : 'bg-slate-800/50 hover:bg-slate-800'
-                        }`}
-                        onClick={() => addLotToCurrentMandat(lot.numero_lot)}
-                      >
-                        <p className="text-white font-medium">{lot.numero_lot}</p>
-                        <div className="text-sm text-slate-400 space-y-1 mt-1">
-                          <p>📍 {lot.circonscription_fonciere}</p>
-                          {lot.rang && <p>Rang: {lot.rang}</p>}
+              <div className="flex-1 overflow-y-auto space-y-2">
+                {filteredLotsForSelector.map((lot) => {
+                  const isSelected = currentMandatIndex !== null &&
+                    formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
+                  return (
+                    <div
+                      key={lot.id}
+                      className={`p-4 rounded-lg cursor-pointer transition-colors border ${
+                        isSelected
+                          ? 'bg-emerald-500/20 border-emerald-500/50 hover:bg-emerald-500/30'
+                          : 'bg-slate-800/50 border-slate-700 hover:bg-slate-800'
+                      }`}
+                      onClick={() => addLotToCurrentMandat(lot.numero_lot)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-white font-semibold text-lg mb-2">{lot.numero_lot}</p>
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <div>
+                              <p className="text-slate-500 text-xs">Circonscription</p>
+                              <p className="text-emerald-400">{lot.circonscription_fonciere}</p>
+                            </div>
+                            <div>
+                              <p className="text-slate-500 text-xs">Cadastre</p>
+                              <p className="text-slate-300">{lot.cadastre || "-"}</p>
+                            </div>
+                            <div>
+                              <p className="text-slate-500 text-xs">Rang</p>
+                              <p className="text-slate-300">{lot.rang || "-"}</p>
+                            </div>
+                          </div>
                           {lot.concordance_anterieur && (
-                            <p className="truncate">Concordance: {lot.concordance_anterieur}</p>
+                            <p className="text-slate-400 text-xs mt-2">
+                              Concordance: {lot.concordance_anterieur}
+                            </p>
                           )}
                         </div>
+                        {isSelected && (
+                          <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                            <Check className="w-3 h-3 mr-1" />
+                            Sélectionné
+                          </Badge>
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
                 {filteredLotsForSelector.length === 0 && (
-                  <div className="text-center py-8 text-slate-400">
-                    Aucun lot trouvé dans le cadastre Québec
+                  <div className="text-center py-12 text-slate-400">
+                    <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun lot trouvé</p>
+                    <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
                   </div>
                 )}
               </div>
               <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
-                Valider
+                Valider la sélection
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Lot Dialog */}
+        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
+          setIsNewLotDialogOpen(open);
+          if (!open) resetNewLotForm();
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewLotSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
+                  <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
+                        <SelectItem key={circonscription} value={circonscription} className="text-white">
+                          {circonscription}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Cadastre</Label>
+                  <Select 
+                    value={newLotForm.cadastre} 
+                    onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                    disabled={!newLotForm.circonscription_fonciere}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                      {availableLotCadastres.map((cadastre) => (
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">
+                          {cadastre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newLotForm.numero_lot}
+                    onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
+                    required
+                    placeholder="Ex: 1234-5678"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rang</Label>
+                  <Input
+                    value={newLotForm.rang}
+                    onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
+                    placeholder="Ex: Rang 4"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Concordance antérieur</Label>
+                <Input
+                  value={newLotForm.concordance_anterieur}
+                  onChange={(e) => setNewLotForm({...newLotForm, concordance_anterieur: e.target.value})}
+                  placeholder="Concordance avec l'ancien cadastre"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Document PDF</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleLotFileUpload}
+                    disabled={uploadingLotPdf}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                  {uploadingLotPdf && (
+                    <Button type="button" disabled className="bg-slate-700">
+                      <Upload className="w-4 h-4 mr-2 animate-spin" />
+                      Upload...
+                    </Button>
+                  )}
+                </div>
+                {newLotForm.document_pdf_url && (
+                  <a
+                    href={newLotForm.document_pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Voir le PDF
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
