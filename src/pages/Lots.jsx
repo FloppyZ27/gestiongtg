@@ -14,6 +14,76 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Lac-Saint-Jean-Est": [
+    "Québec",
+    "Canton de Caron",
+    "Canton de de l'Île",
+    "Canton de Garnier",
+    "Village d'Héberville",
+    "Canton d'Hébertville-Station",
+    "Canton de Labarre",
+    "Canton de Mésy",
+    "Canton de Métabetchouan",
+    "Canton de Signay",
+    "Canton de Taillon"
+  ],
+  "Lac-Saint-Jean-Ouest": [
+    "Québec",
+    "Canton d'Albanel",
+    "Canton de Charlevoix",
+    "Canton de Dablon",
+    "Canton de Dalmas",
+    "Canton de Demeules",
+    "Canton de Dequen",
+    "Canton de Dolbeau",
+    "Canton de Girard",
+    "Canton de Jogues",
+    "Canton de Malherbe",
+    "Canton de Métabetchouan",
+    "Canton de Milot",
+    "Canton de Normandin",
+    "Canton de Ouiatchouan",
+    "Canton de Racine",
+    "Canton de Roberval",
+    "Canton de Saint-Hilaire"
+  ],
+  "Chicoutimi": [
+    "Québec",
+    "Cité d'Arvida",
+    "Canton de Bagot",
+    "Village de Bagotville",
+    "Canton de Bégin",
+    "Canton de Boileau",
+    "Canton de Bourget",
+    "Canton de Chicoutimi",
+    "Paroisse de Chicoutimi",
+    "Ville de Chicoutimi",
+    "Canton de Dumas",
+    "Canton de Durocher",
+    "Canton de Falardeau",
+    "Canton de Ferland",
+    "Ville de Grande-Baie",
+    "Canton de Harvey",
+    "Canton de Hébert",
+    "Canton de Jonquière",
+    "Canton de Kénogami",
+    "Canton de Labrecque",
+    "Canton de Laterrière",
+    "Canton d'Otis",
+    "Canton de Périgny",
+    "Canton de Rouleau",
+    "Canton de Simard",
+    "Paroisse de Saint-Alexis",
+    "Paroisse de Saint-Alphonse",
+    "Ville de Sainte-Anne-de-Chicoutimi",
+    "Canton de Saint-Germains",
+    "Canton de Saint-Jean",
+    "Canton de Taché",
+    "Canton de Tremblay"
+  ]
+};
+
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -95,6 +165,14 @@ export default function Lots() {
     }
   };
 
+  const handleCirconscriptionChange = (value) => {
+    setFormData({
+      ...formData,
+      circonscription_fonciere: value,
+      cadastre: "" // Reset cadastre when circonscription changes
+    });
+  };
+
   const resetForm = () => {
     setFormData({
       circonscription_fonciere: "",
@@ -125,6 +203,10 @@ export default function Lots() {
       deleteLotMutation.mutate(id);
     }
   };
+
+  const availableCadastres = formData.circonscription_fonciere 
+    ? CADASTRES_PAR_CIRCONSCRIPTION[formData.circonscription_fonciere] || []
+    : [];
 
   const statsCards = [
     {
@@ -179,7 +261,7 @@ export default function Lots() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
-                    <Select value={formData.circonscription_fonciere} onValueChange={(value) => setFormData({...formData, circonscription_fonciere: value})}>
+                    <Select value={formData.circonscription_fonciere} onValueChange={handleCirconscriptionChange}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -193,24 +275,34 @@ export default function Lots() {
                     </Select>
                   </div>
                   <div className="space-y-2">
+                    <Label>Cadastre</Label>
+                    <Select 
+                      value={formData.cadastre} 
+                      onValueChange={(value) => setFormData({...formData, cadastre: value})}
+                      disabled={!formData.circonscription_fonciere}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder={formData.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                        {availableCadastres.map((cadastre) => (
+                          <SelectItem key={cadastre} value={cadastre} className="text-white">
+                            {cadastre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label>Numéro de lot <span className="text-red-400">*</span></Label>
                     <Input
                       value={formData.numero_lot}
                       onChange={(e) => setFormData({...formData, numero_lot: e.target.value})}
                       required
                       placeholder="Ex: 1234-5678"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Cadastre</Label>
-                    <Input
-                      value={formData.cadastre}
-                      onChange={(e) => setFormData({...formData, cadastre: e.target.value})}
-                      placeholder="Ex: Cadastre de Chicoutimi"
                       className="bg-slate-800 border-slate-700"
                     />
                   </div>
