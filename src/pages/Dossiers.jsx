@@ -1727,7 +1727,7 @@ export default function Dossiers() {
                                       <p className="text-white font-medium mt-1">{mandat.terrain?.dossier_simultane || "-"}</p>
                                     </div>
                                     <div>
-                                      <Label className="text-slate-400 text-xs">Temps prévu</                                      >
+                                      <Label className="text-slate-400 text-xs">Temps prévu</Label>
                                       <p className="text-white font-medium mt-1">{mandat.terrain?.temps_prevu || "-"}</p>
                                     </div>
                                   </div>
