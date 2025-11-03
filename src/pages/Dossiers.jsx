@@ -145,7 +145,6 @@ export default function Dossiers() {
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     statut: "Ouvert",
-    tache_actuelle: "",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
@@ -205,6 +204,20 @@ export default function Dossiers() {
     mutationFn: (id) => base44.entities.Dossier.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    },
+  });
+
+  const deleteClientMutation = useMutation({
+    mutationFn: (id) => base44.entities.Client.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+
+  const deleteLotMutation = useMutation({
+    mutationFn: (id) => base44.entities.Lot.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
     },
   });
 
@@ -277,7 +290,13 @@ export default function Dossiers() {
     return (
       fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      dossier.arpenteur_geometre?.toLowerCase().includes(searchLower)
+      dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some(mandat =>
+        mandat.type_mandat?.toLowerCase().includes(searchLower) ||
+        mandat.tache_actuelle?.toLowerCase().includes(searchLower) ||
+        mandat.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
+        mandat.adresse_travaux?.ville?.toLowerCase().includes(searchLower)
+      )
     );
   });
 
@@ -354,7 +373,6 @@ export default function Dossiers() {
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       statut: "Ouvert",
-      tache_actuelle: "",
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
@@ -395,13 +413,15 @@ export default function Dossiers() {
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
       statut: dossier.statut || "Ouvert",
-      tache_actuelle: dossier.tache_actuelle || "",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats?.map(m => ({
         ...m,
         date_ouverture: m.date_ouverture || "", // Ensure date_ouverture is present
+        minute: m.minute || "",
+        date_minute: m.date_minute || "",
+        tache_actuelle: m.tache_actuelle || "",
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -421,8 +441,8 @@ export default function Dossiers() {
     setActiveTabMandat("0");
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
+  const handleDelete = (id, nom) => {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le dossier ${nom} ? Cette action est irréversible.`)) {
       deleteDossierMutation.mutate(id);
     }
   };
@@ -466,6 +486,9 @@ export default function Dossiers() {
       mandats: [...prev.mandats, {
         type_mandat: "",
         date_ouverture: "",
+        minute: "",
+        date_minute: "",
+        tache_actuelle: "",
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -514,19 +537,23 @@ export default function Dossiers() {
   };
 
   const removeMandat = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      mandats: prev.mandats.filter((_, i) => i !== index)
-    }));
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.")) {
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.filter((_, i) => i !== index)
+      }));
+    }
   };
 
   const removeLotFromMandat = (mandatIndex, lotNumero) => {
-    setFormData(prev => ({
-      ...prev,
-      mandats: prev.mandats.map((m, i) =>
-        i === mandatIndex ? { ...m, lots: m.lots.filter((num) => num !== lotNumero) } : m
-      )
-    }));
+    if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotNumero} de ce mandat ?`)) {
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) =>
+          i === mandatIndex ? { ...m, lots: m.lots.filter((num) => num !== lotNumero) } : m
+        )
+      }));
+    }
   };
 
   const addClientField = (fieldName) => {
@@ -594,6 +621,24 @@ export default function Dossiers() {
       gradient: "from-cyan-500 to-blue-600",
     },
   ];
+
+  // Créer une ligne par mandat dans le tableau
+  const dossiersWithMandats = filteredDossiers.flatMap(dossier => {
+    if (dossier.mandats && dossier.mandats.length > 0) {
+      return dossier.mandats.map((mandat, idx) => ({
+        ...dossier,
+        mandatInfo: mandat,
+        mandatIndex: idx,
+        displayId: `${dossier.id}-${idx}`
+      }));
+    }
+    return [{
+      ...dossier,
+      mandatInfo: null,
+      mandatIndex: null,
+      displayId: dossier.id
+    }];
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -664,34 +709,17 @@ export default function Dossiers() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Statut</Label>
-                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner le statut" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                        <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tâche actuelle</Label>
-                    <Select value={formData.tache_actuelle} onValueChange={(value) => setFormData({...formData, tache_actuelle: value})}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner la tâche" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                        {TACHES.map((tache) => (
-                          <SelectItem key={tache} value={tache} className="text-white">
-                            {tache}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Statut</Label>
+                  <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner le statut" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                      <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Clients */}
@@ -877,6 +905,43 @@ export default function Dossiers() {
                                     className="bg-slate-700 border-slate-600"
                                   />
                                 </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Minute</Label>
+                                  <Input
+                                    value={mandat.minute || ""}
+                                    onChange={(e) => updateMandat(index, 'minute', e.target.value)}
+                                    placeholder="Ex: 12345"
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Date de minute</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_minute || ""}
+                                    onChange={(e) => updateMandat(index, 'date_minute', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label>Tâche actuelle</Label>
+                                <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                    <SelectValue placeholder="Sélectionner la tâche" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                    {TACHES.map((tache) => (
+                                      <SelectItem key={tache} value={tache} className="text-white">
+                                        {tache}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               <AddressInput
@@ -1331,23 +1396,11 @@ export default function Dossiers() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-slate-400">Statut</Label>
-                    <Badge className={`mt-2 ${viewingDossierDetails.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
-                      {viewingDossierDetails.statut || "Ouvert"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400">Tâche actuelle</Label>
-                    {viewingDossierDetails.tache_actuelle ? (
-                      <Badge className="mt-2 bg-cyan-500/20 text-cyan-400 border-cyan-500/30 border">
-                        {viewingDossierDetails.tache_actuelle}
-                      </Badge>
-                    ) : (
-                      <p className="text-slate-500 text-sm mt-2">Non définie</p>
-                    )}
-                  </div>
+                <div>
+                  <Label className="text-slate-400">Statut</Label>
+                  <Badge className={`mt-2 ${viewingDossierDetails.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
+                    {viewingDossierDetails.statut || "Ouvert"}
+                  </Badge>
                 </div>
 
                 {viewingDossierDetails.clients_ids && viewingDossierDetails.clients_ids.length > 0 && (
@@ -1430,8 +1483,16 @@ export default function Dossiers() {
                             {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
                               <p className="text-sm text-slate-300 mb-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
                             )}
+                            {mandat.minute && (
+                              <p className="text-sm text-slate-400">Minute: {mandat.minute} {mandat.date_minute ? `(du ${format(new Date(mandat.date_minute), "dd MMM yyyy", { locale: fr })})` : ''}</p>
+                            )}
+                            {mandat.tache_actuelle && (
+                                <Badge className="mt-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border">
+                                  Tâche: {mandat.tache_actuelle}
+                                </Badge>
+                            )}
                             {mandat.lots && mandat.lots.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mb-1">
+                              <div className="flex flex-wrap gap-1 mb-1 mt-2">
                                 {mandat.lots.map((numeroLot, li) => {
                                   const lot = getLotById(numeroLot);
                                   return lot ? (
@@ -1965,7 +2026,7 @@ export default function Dossiers() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader className="border-b border-slate-800">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-              <CardTitle className="text-xl font-bold text-white">Liste des dossiers</CardTitle>
+              <CardTitle className="text-xl font-bold text-white">Liste des dossiers par mandat</CardTitle>
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
@@ -1986,72 +2047,72 @@ export default function Dossiers() {
                     <TableHead className="text-slate-300">Arpenteur</TableHead>
                     <TableHead className="text-slate-300">Date ouverture</TableHead>
                     <TableHead className="text-slate-300">Statut</TableHead>
+                    <TableHead className="text-slate-300">Type de mandat</TableHead>
                     <TableHead className="text-slate-300">Tâche actuelle</TableHead>
-                    <TableHead className="text-slate-300">Mandats</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDossiers.map((dossier) => (
-                    <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                  {dossiersWithMandats.map((item) => (
+                    <TableRow key={item.displayId} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium text-white">
-                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                        {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
+                        {item.mandatInfo && item.mandats.length > 1 && (
+                          <span className="text-slate-500 text-xs ml-1">({item.mandatIndex + 1}/{item.mandats.length})</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-slate-500" />
-                          {dossier.arpenteur_geometre}
+                          {item.arpenteur_geometre}
                         </div>
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {item.date_ouverture ? format(new Date(item.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border text-xs`}>
-                          {dossier.statut || "Ouvert"}
+                        <Badge className={`${item.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border text-xs`}>
+                          {item.statut || "Ouvert"}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {dossier.tache_actuelle ? (
-                          <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
-                            {dossier.tache_actuelle}
+                        {item.mandatInfo ? (
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                            {item.mandatInfo.type_mandat}
+                          </Badge>
+                        ) : (
+                          <span className="text-slate-600 text-xs">Aucun mandat</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.mandatInfo?.tache_actuelle ? (
+                          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30 text-xs">
+                            {item.mandatInfo.tache_actuelle}
                           </Badge>
                         ) : (
                           <span className="text-slate-600 text-xs">-</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {dossier.mandats?.slice(0, 2).map((mandat, idx) => (
-                            <Badge key={idx} variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
-                              {mandat.type_mandat}
-                            </Badge>
-                          ))}
-                          {dossier.mandats?.length > 2 && (
-                            <Badge variant="outline" className="bg-slate-700/30 text-slate-400 text-xs">
-                              +{dossier.mandats.length - 2}
-                            </Badge>
-                          )}
-                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEdit(dossier)}
+                            onClick={() => handleEdit(item)}
                             className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(dossier.id)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          {item.mandatIndex === 0 && ( // Only show delete for the first instance of a dossier to avoid duplicate buttons
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(item.id, `${getArpenteurInitials(item.arpenteur_geometre)}${item.numero_dossier}`)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
