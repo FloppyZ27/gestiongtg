@@ -20,6 +20,7 @@ import AddressInput from "../components/shared/AddressInput";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": [
@@ -143,6 +144,8 @@ export default function Dossiers() {
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
+    statut: "Ouvert",
+    tache_actuelle: "",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
@@ -350,6 +353,8 @@ export default function Dossiers() {
       numero_dossier: "",
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
+      statut: "Ouvert",
+      tache_actuelle: "",
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
@@ -389,6 +394,8 @@ export default function Dossiers() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+      statut: dossier.statut || "Ouvert",
+      tache_actuelle: dossier.tache_actuelle || "",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -657,6 +664,36 @@ export default function Dossiers() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Statut</Label>
+                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner le statut" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                        <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tâche actuelle</Label>
+                    <Select value={formData.tache_actuelle} onValueChange={(value) => setFormData({...formData, tache_actuelle: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner la tâche" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                        {TACHES.map((tache) => (
+                          <SelectItem key={tache} value={tache} className="text-white">
+                            {tache}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 {/* Clients */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -895,7 +932,7 @@ export default function Dossiers() {
                                     onClick={() => openLotSelector(index)}
                                     className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                                   >
-                                    <Plus className="w-4 h-4 mr-2" />
+                                    <Plus className="w-4 h-4 mr-1" />
                                     Sélectionner des lots
                                   </Button>
                                 </div>
@@ -1291,6 +1328,25 @@ export default function Dossiers() {
                     <p className="text-white font-medium">
                       {format(new Date(viewingDossierDetails.date_ouverture), "dd MMMM yyyy", { locale: fr })}
                     </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-slate-400">Statut</Label>
+                    <Badge className={`mt-2 ${viewingDossierDetails.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
+                      {viewingDossierDetails.statut || "Ouvert"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400">Tâche actuelle</Label>
+                    {viewingDossierDetails.tache_actuelle ? (
+                      <Badge className="mt-2 bg-cyan-500/20 text-cyan-400 border-cyan-500/30 border">
+                        {viewingDossierDetails.tache_actuelle}
+                      </Badge>
+                    ) : (
+                      <p className="text-slate-500 text-sm mt-2">Non définie</p>
+                    )}
                   </div>
                 </div>
 
@@ -1929,6 +1985,8 @@ export default function Dossiers() {
                     <TableHead className="text-slate-300">N° Dossier</TableHead>
                     <TableHead className="text-slate-300">Arpenteur</TableHead>
                     <TableHead className="text-slate-300">Date ouverture</TableHead>
+                    <TableHead className="text-slate-300">Statut</TableHead>
+                    <TableHead className="text-slate-300">Tâche actuelle</TableHead>
                     <TableHead className="text-slate-300">Mandats</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
@@ -1947,6 +2005,20 @@ export default function Dossiers() {
                       </TableCell>
                       <TableCell className="text-slate-300">
                         {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border text-xs`}>
+                          {dossier.statut || "Ouvert"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {dossier.tache_actuelle ? (
+                          <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
+                            {dossier.tache_actuelle}
+                          </Badge>
+                        ) : (
+                          <span className="text-slate-600 text-xs">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
