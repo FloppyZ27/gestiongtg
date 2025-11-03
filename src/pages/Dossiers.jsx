@@ -516,8 +516,8 @@ export default function Dossiers() {
         date_ouverture: "",
         minute: "",
         date_minute: "",
-        tache_actuelle: "", // Vide par défaut pour qu'il n'apparaisse pas automatiquement dans la cédule
-        statut_terrain: "", // Vide par défaut - sera mis à "en_verification" quand tache_actuelle sera "Cédule"
+        tache_actuelle: "Cédule", // Default à "Cédule"
+        statut_terrain: "en_verification", // Automatiquement mis à "en_verification" pour affichage dans la cédule
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
