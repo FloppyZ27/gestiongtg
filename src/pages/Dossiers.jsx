@@ -426,6 +426,7 @@ export default function Dossiers() {
         minute: m.minute || "",
         date_minute: m.date_minute || "",
         tache_actuelle: m.tache_actuelle || "",
+        statut_terrain: (m.tache_actuelle === "Cédule" || m.tache_actuelle === "Terrain") ? "a_ceduler" : m.statut_terrain || "", // Initialize statut_terrain
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -516,6 +517,7 @@ export default function Dossiers() {
         minute: "",
         date_minute: "",
         tache_actuelle: "Cédule", // Tâche par défaut
+        statut_terrain: "a_ceduler", // Initialize statut_terrain for new mandat
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -569,9 +571,17 @@ export default function Dossiers() {
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      mandats: prev.mandats.map((m, i) =>
-        i === index ? { ...m, [field]: value } : m
-      )
+      mandats: prev.mandats.map((m, i) => {
+        if (i === index) {
+          const updatedMandat = { ...m, [field]: value };
+          // If tache_actuelle changes, update statut_terrain accordingly
+          if (field === 'tache_actuelle') {
+            updatedMandat.statut_terrain = (value === "Cédule" || value === "Terrain") ? "a_ceduler" : "";
+          }
+          return updatedMandat;
+        }
+        return m;
+      })
     }));
   };
 
@@ -1033,254 +1043,150 @@ export default function Dossiers() {
                                 </div>
                               </div>
 
-                              {/* Section Terrain */}
-                              <div className="border-t border-slate-700 pt-4 mt-4">
-                                <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div className="space-y-2">
-                                    <Label>Date limite levé terrain</Label>
-                                    <Input
-                                      type="date"
-                                      value={mandat.terrain?.date_limite_leve || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        date_limite_leve: e.target.value
-                                      })}
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Instruments requis</Label>
-                                    <Input
-                                      value={mandat.terrain?.instruments_requis || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        instruments_requis: e.target.value
-                                      })}
-                                      placeholder="Ex: GPS, Total Station"
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="space-y-3 mt-3">
-                                  <div className="flex items-center gap-3">
-                                    <input
-                                      type="checkbox"
-                                      checked={mandat.terrain?.a_rendez_vous || false}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        a_rendez_vous: e.target.checked
-                                      })}
-                                      className="w-4 h-4 rounded bg-slate-700 border-slate-600"
-                                    />
-                                    <Label>Rendez-vous nécessaire</Label>
-                                  </div>
-
-                                  {mandat.terrain?.a_rendez_vous && (
-                                    <div className="grid grid-cols-2 gap-3 ml-7">
-                                      <div className="space-y-2">
-                                        <Label>Date du rendez-vous</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.terrain?.date_rendez_vous || ""}
-                                          onChange={(e) => updateMandat(index, 'terrain', {
-                                            ...mandat.terrain,
-                                            date_rendez_vous: e.target.value
-                                          })}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label>Heure du rendez-vous</Label>
-                                        <Input
-                                          type="time"
-                                          value={mandat.terrain?.heure_rendez_vous || ""}
-                                          onChange={(e) => updateMandat(index, 'terrain', {
-                                            ...mandat.terrain,
-                                            heure_rendez_vous: e.target.value
-                                          })}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mt-3">
-                                  <div className="space-y-2">
-                                    <Label>Donneur</Label>
-                                    <Input
-                                      value={mandat.terrain?.donneur || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        donneur: e.target.value
-                                      })}
-                                      placeholder="Nom du donneur"
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Technicien assigné</Label>
-                                    <Input
-                                      value={mandat.terrain?.technicien || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        technicien: e.target.value
-                                      })}
-                                      placeholder="Nom du technicien"
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mt-3">
-                                  <div className="space-y-2">
-                                    <Label>Dossier à faire en même temps</Label>
-                                    <Input
-                                      value={mandat.terrain?.dossier_simultane || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        dossier_simultane: e.target.value
-                                      })}
-                                      placeholder="N° de dossier"
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Temps prévu</Label>
-                                    <Input
-                                      value={mandat.terrain?.temps_prevu || ""}
-                                      onChange={(e) => updateMandat(index, 'terrain', {
-                                        ...mandat.terrain,
-                                        temps_prevu: e.target.value
-                                      })}
-                                      placeholder="Ex: 2h30"
-                                      className="bg-slate-700 border-slate-600"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2 mt-3">
-                                  <Label>Notes terrain</Label>
-                                  <Textarea
-                                    value={mandat.terrain?.notes || ""}
-                                    onChange={(e) => updateMandat(index, 'terrain', {
-                                      ...mandat.terrain,
-                                      notes: e.target.value
-                                    })}
-                                    placeholder="Notes concernant le terrain..."
-                                    className="bg-slate-700 border-slate-600 h-20"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                  <Label>Lots sélectionnés</Label>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() => openLotSelector(index)}
-                                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                                  >
-                                    <Plus className="w-4 h-4 mr-1" />
-                                    Sélectionner des lots
-                                  </Button>
-                                </div>
-                                {mandat.lots && mandat.lots.length > 0 ? (
-                                  <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                                          <TableHead className="text-slate-300">Circonscription</TableHead>
-                                          <TableHead className="text-slate-300">Cadastre</TableHead>
-                                          <TableHead className="text-slate-300">Rang</TableHead>
-                                          <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        {mandat.lots.map((numeroLot) => {
-                                          const lot = getLotById(numeroLot);
-                                          return lot ? (
-                                            <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
-                                              <TableCell className="font-medium text-white">
-                                                {lot.numero_lot}
-                                              </TableCell>
-                                              <TableCell className="text-slate-300">
-                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                                  {lot.circonscription_fonciere}
-                                                </Badge>
-                                              </TableCell>
-                                              <TableCell className="text-slate-300">
-                                                {lot.cadastre || "-"}
-                                              </TableCell>
-                                              <TableCell className="text-slate-300">
-                                                {lot.rang || "-"}
-                                              </TableCell>
-                                              <TableCell className="text-right">
-                                                <Button
-                                                  type="button"
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() => removeLotFromMandat(index, lot.numero_lot)}
-                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                >
-                                                  <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                              </TableCell>
-                                            </TableRow>
-                                          ) : (
-                                            <TableRow key={numeroLot} className="hover:bg-slate-800/30 border-slate-800">
-                                              <TableCell colSpan={4} className="font-medium text-white">
-                                                {numeroLot} (Lot introuvable)
-                                              </TableCell>
-                                              <TableCell className="text-right">
-                                                <Button
-                                                  type="button"
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() => removeLotFromMandat(index, numeroLot)}
-                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                >
-                                                  <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                              </TableCell>
-                                            </TableRow>
-                                          );
+                              {/* Section Terrain - Affichée uniquement si statut_terrain est a_ceduler */}
+                              {mandat.statut_terrain === "a_ceduler" && (
+                                <div className="border-t border-slate-700 pt-4 mt-4">
+                                  <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
+                                  
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-2">
+                                      <Label>Date limite levé terrain</Label>
+                                      <Input
+                                        type="date"
+                                        value={mandat.terrain?.date_limite_leve || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          date_limite_leve: e.target.value
                                         })}
-                                      </TableBody>
-                                    </Table>
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Instruments requis</Label>
+                                      <Input
+                                        value={mandat.terrain?.instruments_requis || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          instruments_requis: e.target.value
+                                        })}
+                                        placeholder="Ex: GPS, Total Station"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
                                   </div>
-                                ) : (
-                                  <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                                    Aucun lot sélectionné
-                                  </p>
-                                )}
-                              </div>
 
-                              <div className="space-y-2">
-                                <Label>Prix estimé ($)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={mandat.prix_estime}
-                                  onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
-                                  placeholder="0.00"
-                                  className="bg-slate-700 border-slate-600"
-                                />
-                              </div>
+                                  <div className="space-y-3 mt-3">
+                                    <div className="flex items-center gap-3">
+                                      <input
+                                        type="checkbox"
+                                        checked={mandat.terrain?.a_rendez_vous || false}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          a_rendez_vous: e.target.checked
+                                        })}
+                                        className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                                      />
+                                      <Label>Rendez-vous nécessaire</Label>
+                                    </div>
 
-                              <div className="space-y-2">
-                                <Label>Notes</Label>
-                                <Textarea
-                                  value={mandat.notes}
-                                  onChange={(e) => updateMandat(index, 'notes', e.target.value)}
-                                  className="bg-slate-700 border-slate-600 h-20"
-                                />
-                              </div>
+                                    {mandat.terrain?.a_rendez_vous && (
+                                      <div className="grid grid-cols-2 gap-3 ml-7">
+                                        <div className="space-y-2">
+                                          <Label>Date du rendez-vous</Label>
+                                          <Input
+                                            type="date"
+                                            value={mandat.terrain?.date_rendez_vous || ""}
+                                            onChange={(e) => updateMandat(index, 'terrain', {
+                                              ...mandat.terrain,
+                                              date_rendez_vous: e.target.value
+                                            })}
+                                            className="bg-slate-700 border-slate-600"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label>Heure du rendez-vous</Label>
+                                          <Input
+                                            type="time"
+                                            value={mandat.terrain?.heure_rendez_vous || ""}
+                                            onChange={(e) => updateMandat(index, 'terrain', {
+                                              ...mandat.terrain,
+                                              heure_rendez_vous: e.target.value
+                                            })}
+                                            className="bg-slate-700 border-slate-600"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3 mt-3">
+                                    <div className="space-y-2">
+                                      <Label>Donneur</Label>
+                                      <Input
+                                        value={mandat.terrain?.donneur || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          donneur: e.target.value
+                                        })}
+                                        placeholder="Nom du donneur"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Technicien à prioriser</Label>
+                                      <Input
+                                        value={mandat.terrain?.technicien || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          technicien: e.target.value
+                                        })}
+                                        placeholder="Nom du technicien"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3 mt-3">
+                                    <div className="space-y-2">
+                                      <Label>Dossier à faire en même temps</Label>
+                                      <Input
+                                        value={mandat.terrain?.dossier_simultane || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          dossier_simultane: e.target.value
+                                        })}
+                                        placeholder="N° de dossier"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Temps prévu</Label>
+                                      <Input
+                                        value={mandat.terrain?.temps_prevu || ""}
+                                        onChange={(e) => updateMandat(index, 'terrain', {
+                                          ...mandat.terrain,
+                                          temps_prevu: e.target.value
+                                        })}
+                                        placeholder="Ex: 2h30"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-2 mt-3">
+                                    <Label>Notes terrain</Label>
+                                    <Textarea
+                                      value={mandat.terrain?.notes || ""}
+                                      onChange={(e) => updateMandat(index, 'terrain', {
+                                        ...mandat.terrain,
+                                        notes: e.target.value
+                                      })}
+                                      placeholder="Notes concernant le terrain..."
+                                      className="bg-slate-700 border-slate-600 h-20"
+                                    />
+                                  </div>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         </TabsContent>
@@ -1762,74 +1668,76 @@ export default function Dossiers() {
                                 </div>
                               </div>
 
-                              {/* Section Terrain (View Mode) */}
-                              <div className="border-t border-slate-700 pt-4 mt-4">
-                                <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Date limite levé terrain</Label>
-                                    <p className="text-white font-medium mt-1">
-                                      {mandat.terrain?.date_limite_leve ? format(new Date(mandat.terrain.date_limite_leve), "dd MMMM yyyy", { locale: fr }) : "-"}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Instruments requis</Label>
-                                    <p className="text-white font-medium mt-1">{mandat.terrain?.instruments_requis || "-"}</p>
-                                  </div>
-                                </div>
-
-                                <div className="mt-4">
-                                  <Label className="text-slate-400 text-xs">Rendez-vous nécessaire</Label>
-                                  <p className="text-white font-medium mt-1">
-                                    {mandat.terrain?.a_rendez_vous ? "Oui" : "Non"}
-                                  </p>
-                                  {mandat.terrain?.a_rendez_vous && (
-                                    <div className="grid grid-cols-2 gap-4 mt-2">
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
-                                        <p className="text-white font-medium mt-1">
-                                          {mandat.terrain?.date_rendez_vous ? format(new Date(mandat.terrain.date_rendez_vous), "dd MMMM yyyy", { locale: fr }) : "-"}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
-                                        <p className="text-white font-medium mt-1">{mandat.terrain?.heure_rendez_vous || "-"}</p>
-                                      </div>
+                              {/* Section Terrain (View Mode) - Affichée uniquement si statut_terrain est a_ceduler */}
+                              {mandat.statut_terrain === "a_ceduler" && (
+                                <div className="border-t border-slate-700 pt-4 mt-4">
+                                  <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Date limite levé terrain</Label>
+                                      <p className="text-white font-medium mt-1">
+                                        {mandat.terrain?.date_limite_leve ? format(new Date(mandat.terrain.date_limite_leve), "dd MMMM yyyy", { locale: fr }) : "-"}
+                                      </p>
                                     </div>
-                                  )}
-                                </div>
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Instruments requis</Label>
+                                      <p className="text-white font-medium mt-1">{mandat.terrain?.instruments_requis || "-"}</p>
+                                    </div>
+                                  </div>
 
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Donneur</Label>
-                                    <p className="text-white font-medium mt-1">{mandat.terrain?.donneur || "-"}</p>
+                                  <div className="mt-4">
+                                    <Label className="text-slate-400 text-xs">Rendez-vous nécessaire</Label>
+                                    <p className="text-white font-medium mt-1">
+                                      {mandat.terrain?.a_rendez_vous ? "Oui" : "Non"}
+                                    </p>
+                                    {mandat.terrain?.a_rendez_vous && (
+                                      <div className="grid grid-cols-2 gap-4 mt-2">
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                                          <p className="text-white font-medium mt-1">
+                                            {mandat.terrain?.date_rendez_vous ? format(new Date(mandat.terrain.date_rendez_vous), "dd MMMM yyyy", { locale: fr }) : "-"}
+                                          </p>
+                                        </div>
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                                          <p className="text-white font-medium mt-1">{mandat.terrain?.heure_rendez_vous || "-"}</p>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Technicien assigné</Label>
-                                    <p className="text-white font-medium mt-1">{mandat.terrain?.technicien || "-"}</p>
-                                  </div>
-                                </div>
 
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
-                                    <p className="text-white font-medium mt-1">{mandat.terrain?.dossier_simultane || "-"}</p>
+                                  <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Donneur</Label>
+                                      <p className="text-white font-medium mt-1">{mandat.terrain?.donneur || "-"}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Technicien à prioriser</Label>
+                                      <p className="text-white font-medium mt-1">{mandat.terrain?.technicien || "-"}</p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Temps prévu</Label>
-                                    <p className="text-white font-medium mt-1">{mandat.terrain?.temps_prevu || "-"}</p>
-                                  </div>
-                                </div>
 
-                                <div className="mt-4">
-                                  <Label className="text-slate-400 text-xs">Notes terrain</Label>
-                                  {mandat.terrain?.notes ? (
-                                    <p className="text-slate-300 mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
-                                  ) : (
-                                    <p className="text-slate-500 text-sm mt-1">Aucune note</p>
-                                  )}
+                                  <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
+                                      <p className="text-white font-medium mt-1">{mandat.terrain?.dossier_simultane || "-"}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                                      <p className="text-white font-medium mt-1">{mandat.terrain?.temps_prevu || "-"}</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-4">
+                                    <Label className="text-slate-400 text-xs">Notes terrain</Label>
+                                    {mandat.terrain?.notes ? (
+                                      <p className="text-slate-300 mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
+                                    ) : (
+                                      <p className="text-slate-500 text-sm mt-1">Aucune note</p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
 
 
                               <div>
