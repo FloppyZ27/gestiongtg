@@ -3,7 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X, Check } from "lucide-react";
+
+const PROVINCES_CANADIENNES = [
+  "Alberta",
+  "Colombie-Britannique",
+  "Île-du-Prince-Édouard",
+  "Manitoba",
+  "Nouveau-Brunswick",
+  "Nouvelle-Écosse",
+  "Nunavut",
+  "Ontario",
+  "Québec",
+  "Saskatchewan",
+  "Terre-Neuve-et-Labrador",
+  "Territoires du Nord-Ouest",
+  "Yukon"
+];
 
 export default function AddressInput({ 
   addresses, 
@@ -111,37 +128,41 @@ export default function AddressInput({
             </div>
             
             <div className="space-y-2">
-              <Label className="text-xs">Numéros civiques</Label>
-              {addr.numeros_civiques?.map((num, numIndex) => (
-                <div key={numIndex} className="flex gap-2">
-                  <Input
-                    value={num}
-                    onChange={(e) => updateNumeroCivique(index, numIndex, e.target.value)}
-                    placeholder="Numéro"
-                    className="bg-slate-700 border-slate-600"
-                  />
-                  {addr.numeros_civiques.length > 1 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeNumeroCivique(index, numIndex)}
-                      className="text-red-400"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => addNumeroCivique(index)}
-                className="bg-slate-700 hover:bg-slate-600 text-white w-full"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Ajouter un numéro
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => addNumeroCivique(index)}
+                  className="bg-slate-700 hover:bg-slate-600 text-white flex-shrink-0"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  N° civique
+                </Button>
+                <Label className="text-xs text-slate-400">Numéros civiques</Label>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {addr.numeros_civiques?.map((num, numIndex) => (
+                  <div key={numIndex} className="flex gap-1 items-center">
+                    <Input
+                      value={num}
+                      onChange={(e) => updateNumeroCivique(index, numIndex, e.target.value)}
+                      placeholder="Numéro"
+                      className="bg-slate-700 border-slate-600 w-24"
+                    />
+                    {addr.numeros_civiques.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeNumeroCivique(index, numIndex)}
+                        className="text-red-400 p-1 h-8 w-8"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -168,12 +189,21 @@ export default function AddressInput({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label className="text-xs">Province</Label>
-                <Input
-                  value={addr.province}
-                  onChange={(e) => updateAddress(index, 'province', e.target.value)}
-                  placeholder="Province"
-                  className="bg-slate-700 border-slate-600"
-                />
+                <Select 
+                  value={addr.province} 
+                  onValueChange={(value) => updateAddress(index, 'province', value)}
+                >
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    {PROVINCES_CANADIENNES.map((province) => (
+                      <SelectItem key={province} value={province} className="text-white">
+                        {province}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Code postal</Label>
