@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -114,7 +115,7 @@ export default function Dossiers() {
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
   const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
   const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
-  const [viewingClientDetails, setViewingClientDetails] = useState(null); // New state for viewing client details
+  const [viewingClientDetails, setViewingClientDetails] = useState(null);
   const [viewingDossierDetails, setViewingDossierDetails] = useState(null);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
@@ -124,6 +125,7 @@ export default function Dossiers() {
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
   const [newLotForm, setNewLotForm] = useState({
     circonscription_fonciere: "",
@@ -134,6 +136,8 @@ export default function Dossiers() {
     document_pdf_url: ""
   });
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
+  const [activeTabMandat, setActiveTabMandat] = useState("0");
+
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -228,20 +232,21 @@ export default function Dossiers() {
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
 
-  const availableLotCadastres = newLotForm.circonscription_fonciere 
+  const availableLotCadastres = newLotForm.circonscription_fonciere
     ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || []
     : [];
 
   const filteredLotsForSelector = lots.filter(lot => {
     const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
       lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-      lot.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
       lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
-    
-    const matchesCirconscription = lotCirconscriptionFilter === "all" || 
+
+    const matchesCirconscription = lotCirconscriptionFilter === "all" ||
       lot.circonscription_fonciere === lotCirconscriptionFilter;
 
-    return matchesSearch && matchesCirconscription;
+    const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
+
+    return matchesSearch && matchesCirconscription && matchesCadastre;
   });
 
   const openLotSelector = (mandatIndex) => {
@@ -352,6 +357,7 @@ export default function Dossiers() {
       description: ""
     });
     setEditingDossier(null);
+    setActiveTabMandat("0");
   };
 
   const resetClientForm = () => {
@@ -405,6 +411,7 @@ export default function Dossiers() {
       description: dossier.description || ""
     });
     setIsDialogOpen(true);
+    setActiveTabMandat("0");
   };
 
   const handleDelete = (id) => {
@@ -432,11 +439,12 @@ export default function Dossiers() {
   };
 
   const addMandat = () => {
+    const newIndex = formData.mandats.length;
     setFormData(prev => ({
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
-        date_ouverture: "", // Added date_ouverture here
+        date_ouverture: "",
         adresse_travaux: {
           ville: "",
           numeros_civiques: [""],
@@ -452,6 +460,11 @@ export default function Dossiers() {
         notes: ""
       }]
     }));
+    setActiveTabMandat(newIndex.toString());
+  };
+
+  const getMandatTabLabel = (mandat, index) => {
+    return mandat.type_mandat || `Mandat ${index + 1}`;
   };
 
   const updateMandatAddress = (mandatIndex, newAddresses) => {
@@ -752,179 +765,209 @@ export default function Dossiers() {
                       Ajouter un mandat
                     </Button>
                   </div>
-                  {formData.mandats.map((mandat, index) => (
-                    <Card key={index} className="border-slate-700 bg-slate-800/30">
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-semibold text-emerald-400">Mandat {index + 1}</h4>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeMandat(index)}
-                            className="text-red-400 hover:text-red-300"
+
+                  {formData.mandats.length > 0 ? (
+                    <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
+                      <TabsList className="bg-slate-800/50 border border-slate-700 w-full flex-wrap h-auto">
+                        {formData.mandats.map((mandat, index) => (
+                          <TabsTrigger
+                            key={index}
+                            value={index.toString()}
+                            className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-slate-400"
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                            {getMandatTabLabel(mandat, index)}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-2">
-                            <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                            <Select
-                              value={mandat.type_mandat}
-                              onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                <SelectValue placeholder="Sélectionner" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700">
-                                {TYPES_MANDATS.map((type) => (
-                                  <SelectItem key={type} value={type} className="text-white">
-                                    {type}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Date d'ouverture</Label>
-                            <Input
-                              type="date"
-                              value={mandat.date_ouverture || ""}
-                              onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                              className="bg-slate-700 border-slate-600"
-                            />
-                          </div>
-                        </div>
+                      {formData.mandats.map((mandat, index) => (
+                        <TabsContent key={index} value={index.toString()}>
+                          <Card className="border-slate-700 bg-slate-800/30">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex justify-end">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    removeMandat(index);
+                                    if (formData.mandats.length > 1) {
+                                      setActiveTabMandat(Math.max(0, index - 1).toString());
+                                    } else {
+                                      setActiveTabMandat("0");
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Supprimer ce mandat
+                                </Button>
+                              </div>
 
-                        <AddressInput
-                          addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
-                            ville: "",
-                            numeros_civiques: [""],
-                            rue: "",
-                            code_postal: "",
-                            province: ""
-                          }]}
-                          onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
-                          showActuelle={false}
-                          label="Adresse des travaux"
-                          singleAddress={true}
-                        />
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                                  <Select
+                                    value={mandat.type_mandat}
+                                    onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                                  >
+                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                      <SelectValue placeholder="Sélectionner" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      {TYPES_MANDATS.map((type) => (
+                                        <SelectItem key={type} value={type} className="text-white">
+                                          {type}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Date d'ouverture</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_ouverture || ""}
+                                    onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                              </div>
 
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="space-y-2">
-                            <Label>Date de signature</Label>
-                            <Input
-                              type="date"
-                              value={mandat.date_signature || ""}
-                              onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                              className="bg-slate-700 border-slate-600"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Début des travaux</Label>
-                            <Input
-                              type="date"
-                              value={mandat.date_debut_travaux || ""}
-                              onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                              className="bg-slate-700 border-slate-600"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Date de livraison</Label>
-                            <Input
-                              type="date"
-                              value={mandat.date_livraison || ""}
-                              onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                              className="bg-slate-700 border-slate-600"
-                            />
-                          </div>
-                        </div>
+                              <AddressInput
+                                addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
+                                  ville: "",
+                                  numeros_civiques: [""],
+                                  rue: "",
+                                  code_postal: "",
+                                  province: ""
+                                }]}
+                                onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                                showActuelle={false}
+                                label="Adresse des travaux"
+                                singleAddress={true}
+                              />
 
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <Label>Lots sélectionnés</Label>
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={() => openLotSelector(index)}
-                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                            >
-                              <Plus className="w-4 h-4 mr-2" />
-                              Sélectionner des lots
-                            </Button>
-                          </div>
-                          {mandat.lots && mandat.lots.length > 0 ? (
-                            <div className="space-y-2 mt-2">
-                              {mandat.lots.map((numeroLot) => {
-                                const lot = getLotById(numeroLot);
-                                return lot ? (
-                                  <div key={lot.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                                    <div className="flex-1">
-                                      <p className="text-white font-medium">{lot.numero_lot}</p>
-                                      <div className="flex gap-3 text-xs text-slate-400 mt-1">
-                                        <span>📍 {lot.circonscription_fonciere}</span>
-                                        {lot.cadastre && <span>• {lot.cadastre}</span>}
-                                        {lot.rang && <span>• Rang {lot.rang}</span>}
-                                      </div>
-                                    </div>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeLotFromMandat(index, lot.numero_lot)}
-                                      className="text-red-400 hover:text-red-300"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </Button>
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Date de signature</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_signature || ""}
+                                    onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Début des travaux</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_debut_travaux || ""}
+                                    onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Date de livraison</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_livraison || ""}
+                                    onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <Label>Lots sélectionnés</Label>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => openLotSelector(index)}
+                                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Sélectionner des lots
+                                  </Button>
+                                </div>
+                                {mandat.lots && mandat.lots.length > 0 ? (
+                                  <div className="space-y-2 mt-2">
+                                    {mandat.lots.map((numeroLot) => {
+                                      const lot = getLotById(numeroLot);
+                                      return lot ? (
+                                        <div key={lot.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                                          <div className="flex-1">
+                                            <p className="text-white font-medium">{lot.numero_lot}</p>
+                                            <div className="flex gap-3 text-xs text-slate-400 mt-1">
+                                              <span>📍 {lot.circonscription_fonciere}</span>
+                                              {lot.cadastre && <span>• {lot.cadastre}</span>}
+                                              {lot.rang && <span>• Rang {lot.rang}</span>}
+                                            </div>
+                                          </div>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => removeLotFromMandat(index, lot.numero_lot)}
+                                            className="text-red-400 hover:text-red-300"
+                                          >
+                                            <X className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <div key={numeroLot} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                                          <p className="text-white font-medium">{numeroLot} (Lot introuvable)</p>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => removeLotFromMandat(index, numeroLot)}
+                                            className="text-red-400 hover:text-red-300"
+                                          >
+                                            <X className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 ) : (
-                                  <div key={numeroLot} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                                    <p className="text-white font-medium">{numeroLot} (Lot introuvable)</p>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeLotFromMandat(index, numeroLot)}
-                                      className="text-red-400 hover:text-red-300"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                              Aucun lot sélectionné
-                            </p>
-                          )}
-                        </div>
+                                  <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                                    Aucun lot sélectionné
+                                  </p>
+                                )}
+                              </div>
 
-                        <div className="space-y-2">
-                          <Label>Prix estimé ($)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={mandat.prix_estime}
-                            onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
-                            placeholder="0.00"
-                            className="bg-slate-700 border-slate-600"
-                          />
-                        </div>
+                              <div className="space-y-2">
+                                <Label>Prix estimé ($)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={mandat.prix_estime}
+                                  onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                  className="bg-slate-700 border-slate-600"
+                                />
+                              </div>
 
-                        <div className="space-y-2">
-                          <Label>Notes</Label>
-                          <Textarea
-                            value={mandat.notes}
-                            onChange={(e) => updateMandat(index, 'notes', e.target.value)}
-                            className="bg-slate-700 border-slate-600 h-20"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                              <div className="space-y-2">
+                                <Label>Notes</Label>
+                                <Textarea
+                                  value={mandat.notes}
+                                  onChange={(e) => updateMandat(index, 'notes', e.target.value)}
+                                  className="bg-slate-700 border-slate-600 h-20"
+                                />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">
+                      Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -1303,11 +1346,11 @@ export default function Dossiers() {
                                 {mandat.lots.map((numeroLot, li) => {
                                   const lot = getLotById(numeroLot);
                                   return lot ? (
-                                    <Badge key={li} variant="outline" className="text-xs">
+                                    <Badge key={li} variant="outline" className="bg-slate-700/30 text-slate-400 text-xs">
                                       {lot.numero_lot} {lot.rang ? `(Rang ${lot.rang})` : ''} {lot.cadastre ? `(${lot.cadastre})` : ''}
                                     </Badge>
                                   ) : (
-                                    <Badge key={li} variant="outline" className="text-xs">
+                                    <Badge key={li} variant="outline" className="bg-slate-700/30 text-slate-400 text-xs">
                                       {numeroLot} (Introuvable)
                                     </Badge>
                                   );
@@ -1558,9 +1601,10 @@ export default function Dossiers() {
           if (!open) {
             setLotCirconscriptionFilter("all");
             setLotSearchTerm("");
+            setLotCadastreFilter("Québec");
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
@@ -1569,15 +1613,15 @@ export default function Dossiers() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
-                    placeholder="Rechercher par numéro, rang ou cadastre..."
+                    placeholder="Rechercher par numéro, rang..."
                     value={lotSearchTerm}
                     onChange={(e) => setLotSearchTerm(e.target.value)}
                     className="pl-10 bg-slate-800 border-slate-700"
                   />
                 </div>
                 <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                  <SelectTrigger className="w-64 bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Filtrer par circonscription" />
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Circonscription" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
@@ -1586,6 +1630,15 @@ export default function Dossiers() {
                         {circonscription}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Cadastre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
@@ -1597,61 +1650,77 @@ export default function Dossiers() {
                   Nouveau lot
                 </Button>
               </div>
-              <div className="flex-1 overflow-y-auto space-y-2">
-                {filteredLotsForSelector.map((lot) => {
-                  const isSelected = currentMandatIndex !== null &&
-                    formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
-                  return (
-                    <div
-                      key={lot.id}
-                      className={`p-4 rounded-lg cursor-pointer transition-colors border ${
-                        isSelected
-                          ? 'bg-emerald-500/20 border-emerald-500/50 hover:bg-emerald-500/30'
-                          : 'bg-slate-800/50 border-slate-700 hover:bg-slate-800'
-                      }`}
-                      onClick={() => addLotToCurrentMandat(lot.numero_lot)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="text-white font-semibold text-lg mb-2">{lot.numero_lot}</p>
-                          <div className="grid grid-cols-3 gap-3 text-sm">
-                            <div>
-                              <p className="text-slate-500 text-xs">Circonscription</p>
-                              <p className="text-emerald-400">{lot.circonscription_fonciere}</p>
-                            </div>
-                            <div>
-                              <p className="text-slate-500 text-xs">Cadastre</p>
-                              <p className="text-slate-300">{lot.cadastre || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-slate-500 text-xs">Rang</p>
-                              <p className="text-slate-300">{lot.rang || "-"}</p>
-                            </div>
+
+              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                      <TableHead className="text-slate-300">Circonscription</TableHead>
+                      <TableHead className="text-slate-300">Cadastre</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300">Concordance</TableHead>
+                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLotsForSelector.length > 0 ? (
+                      filteredLotsForSelector.map((lot) => {
+                        const isSelected = currentMandatIndex !== null &&
+                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
+                        return (
+                          <TableRow
+                            key={lot.id}
+                            className={`cursor-pointer transition-colors border-slate-800 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                                : 'hover:bg-slate-800/30'
+                            }`}
+                            onClick={() => addLotToCurrentMandat(lot.numero_lot)}
+                          >
+                            <TableCell className="font-medium text-white">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                {lot.circonscription_fonciere}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.concordance_anterieur || "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isSelected && (
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Sélectionné
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <div className="text-slate-400">
+                            <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>Aucun lot trouvé</p>
+                            <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
                           </div>
-                          {lot.concordance_anterieur && (
-                            <p className="text-slate-400 text-xs mt-2">
-                              Concordance: {lot.concordance_anterieur}
-                            </p>
-                          )}
-                        </div>
-                        {isSelected && (
-                          <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
-                            <Check className="w-3 h-3 mr-1" />
-                            Sélectionné
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                {filteredLotsForSelector.length === 0 && (
-                  <div className="text-center py-12 text-slate-400">
-                    <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucun lot trouvé</p>
-                    <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
-                  </div>
-                )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
+
               <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider la sélection
               </Button>
@@ -1687,8 +1756,8 @@ export default function Dossiers() {
                 </div>
                 <div className="space-y-2">
                   <Label>Cadastre</Label>
-                  <Select 
-                    value={newLotForm.cadastre} 
+                  <Select
+                    value={newLotForm.cadastre}
                     onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
                     disabled={!newLotForm.circonscription_fonciere}
                   >
@@ -1768,7 +1837,7 @@ export default function Dossiers() {
                   </a>
                 )}
               </div>
-              
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
                   Annuler
