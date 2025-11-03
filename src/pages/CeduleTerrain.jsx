@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter, Edit2, Check } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, addDays, startOfWeek } from "date-fns";
@@ -44,8 +43,6 @@ export default function CeduleTerrain() {
   const [filterTypeMandat, setFilterTypeMandat] = useState("all");
   const [viewingDossier, setViewingDossier] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [editingEquipe, setEditingEquipe] = useState(null); // { jour: string, equipe: string }
-  const [newEquipeName, setNewEquipeName] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -173,18 +170,6 @@ export default function CeduleTerrain() {
     const sourceId = result.source.droppableId;
     const destinationId = result.destination.droppableId;
 
-    // Parse draggable ID: "dossierId-mandatIndex"
-    const [dossierId, mandatIndexStr] = result.draggableId.split('-').slice(0, 2);
-    const mandatIndex = parseInt(mandatIndexStr);
-    const dossier = dossiers.find(d => d.id === dossierId);
-    if (!dossier) return;
-
-    // If dropped back into "a-ceduler" list
-    if (destinationId === "a-ceduler") {
-      retirerDuCalendrier(dossierId, mandatIndex);
-      return;
-    }
-
     // Parse destination: format "jour-equipe"
     const destParts = destinationId.split('-');
     const jour = destParts[0];
@@ -194,12 +179,17 @@ export default function CeduleTerrain() {
 
     const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
     
+    // Parse draggable ID: "dossierId-mandatIndex"
+    const [dossierId, mandatIndex] = result.draggableId.split('-').slice(0, 2);
+    const dossier = dossiers.find(d => d.id === dossierId);
+    if (!dossier) return;
+
     const updatedMandats = [...dossier.mandats];
-    updatedMandats[mandatIndex] = {
-      ...updatedMandats[mandatIndex],
+    updatedMandats[parseInt(mandatIndex)] = {
+      ...updatedMandats[parseInt(mandatIndex)],
       date_terrain: dateJour,
       equipe_assignee: equipe,
-      statut_terrain: "a_ceduler" // Assuming this status for assigned mandates
+      statut_terrain: "a_ceduler"
     };
 
     updateDossierMutation.mutate({
@@ -242,54 +232,6 @@ export default function CeduleTerrain() {
       ...prev,
       [jourKey]: prev[jourKey].filter(e => e !== equipe)
     }));
-  };
-
-  const startEditEquipe = (jour, equipe) => {
-    setEditingEquipe({ jour, equipe });
-    setNewEquipeName(equipe);
-  };
-
-  const saveEquipeName = (jour, oldName) => {
-    if (!newEquipeName.trim() || newEquipeName === oldName) {
-      setEditingEquipe(null);
-      return;
-    }
-
-    const jourKey = jour.toLowerCase();
-    
-    // Update local state for teams
-    setEquipes(prev => ({
-      ...prev,
-      [jourKey]: prev[jourKey].map(e => e === oldName ? newEquipeName : e)
-    }));
-
-    // Find date for the current day
-    const jourIndex = JOURS_SEMAINE.findIndex(j => j.toLowerCase() === jourKey);
-    const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
-
-    // Iterate through dossiers to update mandates with the old team name for this specific day
-    dossiers.forEach(dossier => {
-      if (dossier.mandats) {
-        let needsUpdate = false;
-        const updatedMandats = dossier.mandats.map(mandat => {
-          // Check if the mandat is assigned to this day and this old team name
-          if (mandat.date_terrain === dateJour && mandat.equipe_assignee === oldName) {
-            needsUpdate = true;
-            return { ...mandat, equipe_assignee: newEquipeName };
-          }
-          return mandat;
-        });
-
-        if (needsUpdate) {
-          updateDossierMutation.mutate({
-            id: dossier.id,
-            dossierData: { ...dossier, mandats: updatedMandats }
-          });
-        }
-      }
-    });
-
-    setEditingEquipe(null);
   };
 
   const formatAdresse = (addr) => {
@@ -462,14 +404,12 @@ export default function CeduleTerrain() {
                     </TabsContent>
 
                     <TabsContent value="a-ceduler" className="mt-4">
-                      <Droppable droppableId="a-ceduler">
-                        {(provided, snapshot) => (
+                      <Droppable droppableId="a-ceduler" isDropDisabled={true}>
+                        {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className={`space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto pr-2 p-2 rounded-lg transition-colors ${
-                              snapshot.isDraggingOver ? 'bg-emerald-500/10 border-2 border-emerald-500/30' : ''
-                            }`}
+                            className="space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto pr-2"
                           >
                             {mandatsACeduler.length > 0 ? (
                               mandatsACeduler.map((item, index) => (
@@ -564,44 +504,11 @@ export default function CeduleTerrain() {
                             {equipes[jourKey]?.map((equipe) => (
                               <div key={equipe} className="bg-slate-800/30 rounded-lg p-2 border border-slate-700/50">
                                 <div className="flex justify-between items-center mb-2">
-                                  <div className="flex items-center gap-1 flex-1">
+                                  <div className="flex items-center gap-1">
                                     <Users className="w-3 h-3 text-cyan-400" />
-                                    {editingEquipe?.jour === jour && editingEquipe?.equipe === equipe ? (
-                                      <div className="flex items-center gap-1 flex-1">
-                                        <Input
-                                          value={newEquipeName}
-                                          onChange={(e) => setNewEquipeName(e.target.value)}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') saveEquipeName(jour, equipe);
-                                            if (e.key === 'Escape') setEditingEquipe(null);
-                                          }}
-                                          className="h-6 text-xs bg-slate-700 border-slate-600 text-white px-2"
-                                          autoFocus
-                                        />
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => saveEquipeName(jour, equipe)}
-                                          className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
-                                        >
-                                          <Check className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <>
-                                        <span className="text-xs font-medium text-cyan-400">{equipe}</span>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => startEditEquipe(jour, equipe)}
-                                          className="h-5 w-5 p-0 text-slate-400 hover:text-cyan-400"
-                                        >
-                                          <Edit2 className="w-3 h-3" />
-                                        </Button>
-                                      </>
-                                    )}
+                                    <span className="text-xs font-medium text-cyan-400">{equipe}</span>
                                   </div>
-                                  {equipes[jourKey].length > 1 && !(editingEquipe?.jour === jour && editingEquipe?.equipe === equipe) && (
+                                  {equipes[jourKey].length > 1 && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
