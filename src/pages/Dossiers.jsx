@@ -440,19 +440,27 @@ export default function Dossiers() {
 
   const addMandat = () => {
     const newIndex = formData.mandats.length;
+    
+    // Copier les infos du premier mandat s'il existe
+    const firstMandat = formData.mandats[0];
+    const defaultAdresse = firstMandat?.adresse_travaux
+      ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) // Deep copy
+      : {
+        ville: "",
+        numeros_civiques: [""],
+        rue: "",
+        code_postal: "",
+        province: ""
+      };
+    const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : []; // Copy lots
+    
     setFormData(prev => ({
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
         date_ouverture: "",
-        adresse_travaux: {
-          ville: "",
-          numeros_civiques: [""],
-          rue: "",
-          code_postal: "",
-          province: ""
-        },
-        lots: [],
+        adresse_travaux: defaultAdresse,
+        lots: defaultLots,
         prix_estime: 0,
         date_livraison: "",
         date_signature: "",
@@ -892,44 +900,69 @@ export default function Dossiers() {
                                   </Button>
                                 </div>
                                 {mandat.lots && mandat.lots.length > 0 ? (
-                                  <div className="space-y-2 mt-2">
-                                    {mandat.lots.map((numeroLot) => {
-                                      const lot = getLotById(numeroLot);
-                                      return lot ? (
-                                        <div key={lot.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                                          <div className="flex-1">
-                                            <p className="text-white font-medium">{lot.numero_lot}</p>
-                                            <div className="flex gap-3 text-xs text-slate-400 mt-1">
-                                              <span>📍 {lot.circonscription_fonciere}</span>
-                                              {lot.cadastre && <span>• {lot.cadastre}</span>}
-                                              {lot.rang && <span>• Rang {lot.rang}</span>}
-                                            </div>
-                                          </div>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => removeLotFromMandat(index, lot.numero_lot)}
-                                            className="text-red-400 hover:text-red-300"
-                                          >
-                                            <X className="w-4 h-4" />
-                                          </Button>
-                                        </div>
-                                      ) : (
-                                        <div key={numeroLot} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
-                                          <p className="text-white font-medium">{numeroLot} (Lot introuvable)</p>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => removeLotFromMandat(index, numeroLot)}
-                                            className="text-red-400 hover:text-red-300"
-                                          >
-                                            <X className="w-4 h-4" />
-                                          </Button>
-                                        </div>
-                                      );
-                                    })}
+                                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                                          <TableHead className="text-slate-300">Circonscription</TableHead>
+                                          <TableHead className="text-slate-300">Cadastre</TableHead>
+                                          <TableHead className="text-slate-300">Rang</TableHead>
+                                          <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {mandat.lots.map((numeroLot) => {
+                                          const lot = getLotById(numeroLot);
+                                          return lot ? (
+                                            <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell className="font-medium text-white">
+                                                {lot.numero_lot}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                                  {lot.circonscription_fonciere}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.cadastre || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.rang || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, lot.numero_lot)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          ) : (
+                                            <TableRow key={numeroLot} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell colSpan={4} className="font-medium text-white">
+                                                {numeroLot} (Lot introuvable)
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, numeroLot)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          );
+                                        })}
+                                      </TableBody>
+                                    </Table>
                                   </div>
                                 ) : (
                                   <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
