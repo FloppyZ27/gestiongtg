@@ -641,38 +641,40 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                  <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {ARPENTEURS.map((arpenteur) => (
-                        <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                          {arpenteur}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                    <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {ARPENTEURS.map((arpenteur) => (
+                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
+                            {arpenteur}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Statut <span className="text-red-400">*</span></Label>
-                  <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner le statut" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
-                      <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                      <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                      <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                      {editingDossier && (
-                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Label>Statut <span className="text-red-400">*</span></Label>
+                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner le statut" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
+                        <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                        <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
+                        <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
+                        {editingDossier && (
+                          <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Champs conditionnels pour statut "Ouvert" */}

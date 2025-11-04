@@ -1,3 +1,4 @@
+
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -80,22 +81,24 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
 
   return (
     <div className="space-y-6">
-      {/* Header - Champs séparés */}
-      <div className="border-b border-slate-700 pb-4 space-y-3">
-        <div>
-          <Label className="text-slate-400 text-sm">Prénom</Label>
-          <p className="text-white font-medium text-lg">{client.prenom}</p>
-        </div>
-        <div>
-          <Label className="text-slate-400 text-sm">Nom</Label>
-          <p className="text-white font-medium text-lg">{client.nom}</p>
-        </div>
-        <div>
-          <Label className="text-slate-400 text-sm">Type</Label>
-          <div className="mt-1">
-            <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
-              {client.type_client || "Client"}
-            </Badge>
+      {/* Header - Champs sur la même ligne */}
+      <div className="border-b border-slate-700 pb-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <Label className="text-slate-400 text-sm">Prénom</Label>
+            <p className="text-white font-medium text-lg">{client.prenom}</p>
+          </div>
+          <div>
+            <Label className="text-slate-400 text-sm">Nom</Label>
+            <p className="text-white font-medium text-lg">{client.nom}</p>
+          </div>
+          <div>
+            <Label className="text-slate-400 text-sm">Type</Label>
+            <div className="mt-1">
+              <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
+                {client.type_client || "Client"}
+              </Badge>
+            </div>
           </div>
         </div>
       </div>

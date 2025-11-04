@@ -107,7 +107,7 @@ export default function Clients() {
     // Filter out empty entries
     const cleanedData = {
       ...formData,
-      adresses: formData.adresses.filter(a => 
+      adresses: formData.adresses.filter(a =>
         (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
         a.rue.trim() !== "" ||
         a.ville.trim() !== "" ||
@@ -117,7 +117,7 @@ export default function Clients() {
       courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
     };
-    
+
     if (editingClient) {
       updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
     } else {
@@ -151,7 +151,7 @@ export default function Clients() {
       prenom: client.prenom || "",
       nom: client.nom || "",
       type_client: client.type_client || "Client",
-      adresses: client.adresses && client.adresses.length > 0 ? 
+      adresses: client.adresses && client.adresses.length > 0 ?
         client.adresses.map(addr => ({
           ville: addr.ville || "",
           numeros_civiques: addr.numeros_civiques && addr.numeros_civiques.length > 0 ? addr.numeros_civiques : [""],
@@ -213,7 +213,7 @@ export default function Clients() {
   const updateField = (fieldName, index, key, value) => {
     setFormData(prev => ({
       ...prev,
-      [fieldName]: prev[fieldName].map((item, i) => 
+      [fieldName]: prev[fieldName].map((item, i) =>
         i === index ? { ...item, [key]: value } : item
       )
     }));
@@ -312,7 +312,8 @@ export default function Clients() {
     if (!addr) return "";
     const parts = [];
     if (addr.numeros_civiques && addr.numeros_civiques.length > 0) {
-      parts.push(addr.numeros_civiques.filter(n => n && n.trim() !== "").join(', '));
+      const nums = addr.numeros_civiques.filter(n => n && n.trim() !== "");
+      if (nums.length > 0) parts.push(nums.join(', '));
     }
     if (addr.rue) parts.push(addr.rue);
     if (addr.ville) parts.push(addr.ville);
@@ -353,7 +354,7 @@ export default function Clients() {
             </div>
             <p className="text-slate-400">Gestion de vos clients</p>
           </div>
-          
+
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) resetForm();
@@ -497,7 +498,7 @@ export default function Clients() {
                                     className="bg-slate-800 border-slate-700"
                                 />
                             </div>
-                            
+
                             {/* Code Postal */}
                             <div className="space-y-2">
                                 <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
@@ -510,7 +511,7 @@ export default function Clients() {
                                 />
                             </div>
                         </div> {/* end of flex-1 grid */}
-                        
+
                         <Button
                           type="button"
                           size="sm"
@@ -632,7 +633,7 @@ export default function Clients() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -642,7 +643,7 @@ export default function Clients() {
                     className="bg-slate-800 border-slate-700 h-24"
                   />
                 </div>
-                
+
                 <div className="flex justify-end gap-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Annuler
@@ -700,6 +701,7 @@ export default function Clients() {
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">Nom complet</TableHead>
                     <TableHead className="text-slate-300">Type</TableHead>
+                    <TableHead className="text-slate-300">Adresse actuelle</TableHead>
                     <TableHead className="text-slate-300">Courriel actuel</TableHead>
                     <TableHead className="text-slate-300">Téléphone actuel</TableHead>
                     <TableHead className="text-slate-300">Dossiers</TableHead>
@@ -709,11 +711,12 @@ export default function Clients() {
                 <TableBody>
                   {filteredClients.map((client) => {
                     const clientDossiers = getClientDossiers(
-                      client.id, 
-                      client.type_client === 'Notaire' ? 'notaires' : 
+                      client.id,
+                      client.type_client === 'Notaire' ? 'notaires' :
                       client.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients'
                     );
-                    
+                    const adresseActuelle = client.adresses?.find(a => a.actuelle);
+
                     return (
                       <TableRow key={client.id} className="hover:bg-slate-800/30 border-slate-800">
                         <TableCell className="font-medium text-white">
@@ -723,6 +726,14 @@ export default function Clients() {
                           <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
                             {client.type_client || "Client"}
                           </Badge>
+                        </TableCell>
+                        <TableCell className="text-slate-300 max-w-xs">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                            <span className="truncate">
+                              {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-slate-300">
                           <div className="flex items-center gap-2">
@@ -753,6 +764,14 @@ export default function Clients() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setViewingClientDossiers(client)}
+                              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -794,8 +813,8 @@ export default function Clients() {
                 viewingClientDossiers.type_client === 'Notaire' ? 'notaires' :
                 viewingClientDossiers.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients'
               ).map((dossier) => (
-                <Card 
-                  key={dossier.id} 
+                <Card
+                  key={dossier.id}
                   className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
                   onClick={() => setViewingDossier(dossier)}
                 >
