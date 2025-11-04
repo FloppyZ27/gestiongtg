@@ -129,6 +129,11 @@ export default function PriseDeMandat() {
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
   const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
 
+  const [filterArpenteur, setFilterArpenteur] = useState("all");
+  const [filterStatut, setFilterStatut] = useState("all");
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
+
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
@@ -212,7 +217,7 @@ export default function PriseDeMandat() {
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
 
   const getClientById = (id) => clients.find(c => c.id === id);
-  const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
+  const getLotById = (numeroLot) => lots.find(l => l.id === numeroLot); // Changed to id
 
   // Filtrer les dossiers pour exclure le statut "Rejeté"
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
@@ -263,22 +268,6 @@ export default function PriseDeMandat() {
     byArpenteur: getCountsByArpenteur(soumissionDossiers)
   };
 
-  const filteredRetourAppel = retourAppelDossiers.filter(dossier => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-      dossier.description?.toLowerCase().includes(searchLower)
-    );
-  });
-
-  const filteredSoumission = soumissionDossiers.filter(dossier => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-      dossier.description?.toLowerCase().includes(searchLower)
-    );
-  });
-
   const formatAdresse = (addr) => {
     if (!addr) return "";
     const parts = [];
@@ -291,6 +280,33 @@ export default function PriseDeMandat() {
     if (addr.code_postal) parts.push(addr.code_postal);
     return parts.filter(p => p).join(', ');
   };
+
+  // New filtering logic
+  const applyFilters = (dossiersList) => {
+    return dossiersList.filter(dossier => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = (
+        dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+        dossier.description?.toLowerCase().includes(searchLower) ||
+        dossier.clients_ids.some(id => {
+          const client = getClientById(id);
+          return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
+        }) ||
+        dossier.mandats?.some(m =>
+          m.type_mandat?.toLowerCase().includes(searchLower) ||
+          formatAdresse(m.adresse_travaux)?.toLowerCase().includes(searchLower)
+        )
+      );
+
+      const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
+      const matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
+
+      return matchesSearch && matchesArpenteur && matchesStatut;
+    });
+  };
+
+  const filteredRetourAppel = applyFilters(retourAppelDossiers);
+  const filteredSoumission = applyFilters(soumissionDossiers);
 
   const filteredClientsForSelector = clientsReguliers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
@@ -331,14 +347,14 @@ export default function PriseDeMandat() {
     setIsLotSelectorOpen(true);
   };
 
-  const addLotToCurrentMandat = (numeroLot) => {
+  const addLotToCurrentMandat = (lotId) => {
     if (currentMandatIndex !== null) {
       setFormData(prev => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
           i === currentMandatIndex ? {
             ...m,
-            lots: m.lots.includes(numeroLot) ? m.lots.filter(id => id !== numeroLot) : [...(m.lots || []), numeroLot]
+            lots: m.lots.includes(lotId) ? m.lots.filter(id => id !== lotId) : [...(m.lots || []), lotId]
           } : m
         )
       }));
@@ -545,12 +561,12 @@ export default function PriseDeMandat() {
     }));
   };
 
-  const removeLotFromMandat = (mandatIndex, lotNumero) => {
-    if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotNumero} de ce mandat ?`)) {
+  const removeLotFromMandat = (mandatIndex, lotId) => {
+    if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotId} de ce mandat ?`)) {
       setFormData(prev => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
-          i === mandatIndex ? { ...m, lots: m.lots.filter((num) => num !== lotNumero) } : m
+          i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m
         )
       }));
     }
@@ -613,6 +629,70 @@ export default function PriseDeMandat() {
     };
     return colors[statut] || colors["Retour d'appel"];
   };
+
+  // New helper function to get client names
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  };
+
+  // New helper function to get the first work address
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
+    return formatAdresse(mandats[0].adresse_travaux);
+  };
+
+  // Sorting logic
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortDossiers = (dossiersList) => {
+    if (!sortField) return dossiersList;
+
+    return [...dossiersList].sort((a, b) => {
+      let aValue;
+      let bValue;
+
+      switch (sortField) {
+        case 'created_date':
+          aValue = new Date(a.created_date || 0).getTime();
+          bValue = new Date(b.created_date || 0).getTime();
+          break;
+        case 'clients':
+          aValue = getClientsNames(a.clients_ids).toLowerCase();
+          bValue = getClientsNames(b.clients_ids).toLowerCase();
+          break;
+        case 'adresse_travaux':
+          aValue = getFirstAdresseTravaux(a.mandats).toLowerCase();
+          bValue = getFirstAdresseTravaux(b.mandats).toLowerCase();
+          break;
+        case 'mandats':
+          aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
+          bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
+          break;
+        default:
+          aValue = (a[sortField] || '').toString().toLowerCase();
+          bValue = (b[sortField] || '').toString().toLowerCase();
+          break;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const sortedRetourAppel = sortDossiers(filteredRetourAppel);
+  const sortedSoumission = sortDossiers(filteredSoumission);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -1049,8 +1129,8 @@ export default function PriseDeMandat() {
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
-                                        {mandat.lots.map((numeroLot) => {
-                                          const lot = getLotById(numeroLot);
+                                        {mandat.lots.map((lotId) => {
+                                          const lot = getLotById(lotId);
                                           return lot ? (
                                             <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
                                               <TableCell className="font-medium text-white">
@@ -1072,7 +1152,7 @@ export default function PriseDeMandat() {
                                                   type="button"
                                                   size="sm"
                                                   variant="ghost"
-                                                  onClick={() => removeLotFromMandat(index, lot.numero_lot)}
+                                                  onClick={() => removeLotFromMandat(index, lot.id)}
                                                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                                 >
                                                   <Trash2 className="w-4 h-4" />
@@ -1080,16 +1160,16 @@ export default function PriseDeMandat() {
                                               </TableCell>
                                             </TableRow>
                                           ) : (
-                                            <TableRow key={numeroLot} className="hover:bg-slate-800/30 border-slate-800">
+                                            <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
                                               <TableCell colSpan={4} className="font-medium text-white">
-                                                {numeroLot} (Lot introuvable)
+                                                {lotId} (Lot introuvable)
                                               </TableCell>
                                               <TableCell className="text-right">
                                                 <Button
                                                   type="button"
                                                   size="sm"
                                                   variant="ghost"
-                                                  onClick={() => removeLotFromMandat(index, numeroLot)}
+                                                  onClick={() => removeLotFromMandat(index, lotId)}
                                                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                                 >
                                                   <Trash2 className="w-4 h-4" />
@@ -1685,7 +1765,7 @@ export default function PriseDeMandat() {
                     {filteredLotsForSelector.length > 0 ? (
                       filteredLotsForSelector.map((lot) => {
                         const isSelected = currentMandatIndex !== null &&
-                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
+                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
                         return (
                           <TableRow
                             key={lot.id}
@@ -1694,7 +1774,7 @@ export default function PriseDeMandat() {
                                 ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
                                 : 'hover:bg-slate-800/30'
                             }`}
-                            onClick={() => addLotToCurrentMandat(lot.numero_lot)}
+                            onClick={() => addLotToCurrentMandat(lot.id)}
                           >
                             <TableCell className="font-medium text-white">
                               {lot.numero_lot}
@@ -1768,6 +1848,119 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
+        {/* View Dossier Dialog (Keep if still needed for other contexts) */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
+            </DialogHeader>
+            {viewingDossier && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-slate-400">Arpenteur-géomètre</p>
+                    <p className="text-white font-medium">{viewingDossier.arpenteur_geometre}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Statut</p>
+                    <Badge variant="outline" className={`${getStatutBadgeColor(viewingDossier.statut)} border`}>
+                      {viewingDossier.statut}
+                    </Badge>
+                  </div>
+                  {viewingDossier.numero_dossier && (
+                    <div>
+                      <p className="text-slate-400">Numéro de dossier</p>
+                      <p className="text-white font-medium">{viewingDossier.numero_dossier}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-slate-400">Date d'ouverture</p>
+                    <p className="text-white font-medium">{viewingDossier.date_ouverture ? format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-slate-400">Clients</p>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingDossier.clients_ids?.map(clientId => {
+                      const client = getClientById(clientId);
+                      return client ? (
+                        <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border">
+                          {client.prenom} {client.nom}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-slate-400">Notaires</p>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingDossier.notaires_ids?.map(notaireId => {
+                      const notaire = getClientById(notaireId);
+                      return notaire ? (
+                        <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                          {notaire.prenom} {notaire.nom}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-slate-400">Courtiers</p>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingDossier.courtiers_ids?.map(courtierId => {
+                      const courtier = getClientById(courtierId);
+                      return courtier ? (
+                        <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border">
+                          {courtier.prenom} {courtier.nom}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-slate-400">Mandats</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {viewingDossier.mandats.map((mandat, index) => (
+                        <Card key={index} className="bg-slate-800/50 border-slate-700">
+                          <CardContent className="p-4 space-y-2">
+                            <p className="text-white font-medium">{mandat.type_mandat || `Mandat ${index + 1}`}</p>
+                            <p className="text-slate-400 text-sm">Adresse: {formatAdresse(mandat.adresse_travaux) || '-'}</p>
+                            <p className="text-slate-400 text-sm">Lots: {mandat.lots && mandat.lots.length > 0 ? mandat.lots.map(id => getLotById(id)?.numero_lot || id).join(', ') : '-'}</p>
+                            <p className="text-slate-400 text-sm">Prix estimé: {mandat.prix_estime ? `${mandat.prix_estime}$` : '-'}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossier.description && (
+                  <div className="space-y-2">
+                    <p className="text-slate-400">Description générale</p>
+                    <p className="text-white">{viewingDossier.description}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    Fermer
+                  </Button>
+                  <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Retours d'appel Stats */}
@@ -1837,31 +2030,77 @@ export default function PriseDeMandat() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <Tabs defaultValue="retour-appel" className="w-full">
             <CardHeader className="border-b border-slate-800">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <TabsList className="bg-slate-800/50 border border-slate-700">
-                  <TabsTrigger 
-                    value="retour-appel"
-                    className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
-                  >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Retours d'appel ({retourAppelDossiers.length})
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="soumission"
-                    className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400"
-                  >
-                    <FileCheck className="w-4 h-4 mr-2" />
-                    Soumissions ({soumissionDossiers.length})
-                  </TabsTrigger>
-                </TabsList>
-                <div className="relative w-full md:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <TabsList className="bg-slate-800/50 border border-slate-700">
+                    <TabsTrigger 
+                      value="retour-appel"
+                      className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      Retours d'appel ({retourAppelDossiers.length})
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="soumission"
+                      className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400"
+                    >
+                      <FileCheck className="w-4 h-4 mr-2" />
+                      Soumissions ({soumissionDossiers.length})
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                </div>
+                
+                {/* Filtres */}
+                <div className="flex flex-wrap gap-3">
+                  <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Arpenteur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                      {ARPENTEURS.map((arp) => (
+                        <SelectItem key={arp} value={arp} className="text-white">
+                          {arp}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterStatut} onValueChange={setFilterStatut}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
+                      <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
+                      <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                      <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
+                      <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {(filterArpenteur !== "all" || filterStatut !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFilterArpenteur("all");
+                        setFilterStatut("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser les filtres
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -1872,17 +2111,53 @@ export default function PriseDeMandat() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Arpenteur</TableHead>
-                        <TableHead className="text-slate-300">Date</TableHead>
-                        <TableHead className="text-slate-300">Statut</TableHead>
-                        <TableHead className="text-slate-300">Clients</TableHead>
-                        <TableHead className="text-slate-300">Mandat</TableHead>
-                        <TableHead className="text-slate-300">Description</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('arpenteur_geometre')}
+                        >
+                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('created_date')}
+                        >
+                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('statut')}
+                        >
+                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('clients')}
+                        >
+                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('adresse_travaux')}
+                        >
+                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('mandats')}
+                        >
+                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('description')}
+                        >
+                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredRetourAppel.map((dossier) => (
+                      {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="text-slate-300">
                             <div className="flex items-center gap-2">
@@ -1898,22 +2173,11 @@ export default function PriseDeMandat() {
                               {dossier.statut}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {dossier.clients_ids?.slice(0, 2).map(id => {
-                                const client = getClientById(id);
-                                return client ? (
-                                  <Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
-                                    {client.prenom} {client.nom}
-                                  </Badge>
-                                ) : null;
-                              })}
-                              {dossier.clients_ids?.length > 2 && (
-                                <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                  +{dossier.clients_ids.length - 2}
-                                </Badge>
-                              )}
-                            </div>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {getFirstAdresseTravaux(dossier.mandats)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.mandats && dossier.mandats.length > 0 ? (
@@ -1941,14 +2205,6 @@ export default function PriseDeMandat() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleView(dossier)}
-                                className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => handleEdit(dossier)}
                                 className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                               >
@@ -1966,9 +2222,9 @@ export default function PriseDeMandat() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredRetourAppel.length === 0 && (
+                      {sortedRetourAppel.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
                           </TableCell>
                         </TableRow>
@@ -1985,16 +2241,53 @@ export default function PriseDeMandat() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">Arpenteur</TableHead>
-                        <TableHead className="text-slate-300">Date</TableHead>
-                        <TableHead className="text-slate-300">Clients</TableHead>
-                        <TableHead className="text-slate-300">Mandat</TableHead>
-                        <TableHead className="text-slate-300">Description</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('arpenteur_geometre')}
+                        >
+                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('created_date')}
+                        >
+                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('statut')}
+                        >
+                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('clients')}
+                        >
+                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('adresse_travaux')}
+                        >
+                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('mandats')}
+                        >
+                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('description')}
+                        >
+                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredSoumission.map((dossier) => (
+                      {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="text-slate-300">
                             <div className="flex items-center gap-2">
@@ -2006,21 +2299,15 @@ export default function PriseDeMandat() {
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {dossier.clients_ids?.slice(0, 2).map(id => {
-                                const client = getClientById(id);
-                                return client ? (
-                                  <Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
-                                    {client.prenom} {client.nom}
-                                  </Badge>
-                                ) : null;
-                              })}
-                              {dossier.clients_ids?.length > 2 && (
-                                <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                  +{dossier.clients_ids.length - 2}
-                                </Badge>
-                              )}
-                            </div>
+                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
+                              {dossier.statut}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {getFirstAdresseTravaux(dossier.mandats)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.mandats && dossier.mandats.length > 0 ? (
@@ -2048,14 +2335,6 @@ export default function PriseDeMandat() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleView(dossier)}
-                                className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => handleEdit(dossier)}
                                 className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                               >
@@ -2073,9 +2352,9 @@ export default function PriseDeMandat() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {filteredSoumission.length === 0 && (
+                      {sortedSoumission.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                             Aucune soumission
                           </TableCell>
                         </TableRow>
