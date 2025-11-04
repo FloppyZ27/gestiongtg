@@ -893,18 +893,23 @@ export default function PriseDeMandat() {
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
                             <TableHead className="text-slate-300">Courriel</TableHead>
                             <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {formData.clients_ids.map(clientId => {
                             const client = getClientById(clientId);
+                            const adresseActuelle = client?.adresses?.find(a => a.actuelle);
                             return client ? (
                               <TableRow key={clientId} className="hover:bg-slate-800/30 border-slate-800">
                                 <TableCell className="text-white font-medium">
                                   {client.prenom} {client.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">
                                   {getCurrentValue(client.courriels, 'courriel') || "-"}
@@ -913,15 +918,26 @@ export default function PriseDeMandat() {
                                   {getCurrentValue(client.telephones, 'telephone') || "-"}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeClient(clientId, 'clients')}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(client)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(clientId, 'clients')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ) : null;
@@ -956,18 +972,23 @@ export default function PriseDeMandat() {
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
                             <TableHead className="text-slate-300">Courriel</TableHead>
                             <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {formData.notaires_ids.map(notaireId => {
                             const notaire = getClientById(notaireId);
+                            const adresseActuelle = notaire?.adresses?.find(a => a.actuelle);
                             return notaire ? (
                               <TableRow key={notaireId} className="hover:bg-slate-800/30 border-slate-800">
                                 <TableCell className="text-white font-medium">
                                   {notaire.prenom} {notaire.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">
                                   {getCurrentValue(notaire.courriels, 'courriel') || "-"}
@@ -976,15 +997,26 @@ export default function PriseDeMandat() {
                                   {getCurrentValue(notaire.telephones, 'telephone') || "-"}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeClient(notaireId, 'notaires')}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(notaire)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(notaireId, 'notaires')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ) : null;
@@ -1019,18 +1051,23 @@ export default function PriseDeMandat() {
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
                             <TableHead className="text-slate-300">Courriel</TableHead>
                             <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {formData.courtiers_ids.map(courtierId => {
                             const courtier = getClientById(courtierId);
+                            const adresseActuelle = courtier?.adresses?.find(a => a.actuelle);
                             return courtier ? (
                               <TableRow key={courtierId} className="hover:bg-slate-800/30 border-slate-800">
                                 <TableCell className="text-white font-medium">
                                   {courtier.prenom} {courtier.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">
                                   {getCurrentValue(courtier.courriels, 'courriel') || "-"}
@@ -1039,15 +1076,26 @@ export default function PriseDeMandat() {
                                   {getCurrentValue(courtier.telephones, 'telephone') || "-"}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeClient(courtierId, 'courtiers')}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(courtier)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(courtierId, 'courtiers')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ) : null;
