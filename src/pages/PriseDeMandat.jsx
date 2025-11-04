@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -213,7 +214,11 @@ export default function PriseDeMandat() {
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
 
-  const retourAppelDossiers = dossiers.filter(d => d.statut === "Retour d'appel");
+  const retourAppelDossiers = dossiers.filter(d => 
+    d.statut === "Retour d'appel" || 
+    d.statut === "Message laissé/Sans réponse" || 
+    d.statut === "Demande d'information"
+  );
   const soumissionDossiers = dossiers.filter(d => d.statut === "Soumission");
 
   const filteredRetourAppel = retourAppelDossiers.filter(dossier => {
@@ -540,6 +545,16 @@ export default function PriseDeMandat() {
     return current?.[key] || "";
   };
 
+  const getStatutBadgeColor = (statut) => {
+    const colors = {
+      "Retour d'appel": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      "Message laissé/Sans réponse": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+      "Demande d'information": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+    };
+    return colors[statut] || colors["Retour d'appel"];
+  };
+
   const statsCards = [
     {
       title: "Retours d'appel",
@@ -622,6 +637,8 @@ export default function PriseDeMandat() {
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
+                      <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                      <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
                       <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
@@ -1633,8 +1650,10 @@ export default function PriseDeMandat() {
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Arpenteur</TableHead>
-                        <TableHead className="text-slate-300">Date ouverture</TableHead>
+                        <TableHead className="text-slate-300">Date</TableHead>
+                        <TableHead className="text-slate-300">Statut</TableHead>
                         <TableHead className="text-slate-300">Clients</TableHead>
+                        <TableHead className="text-slate-300">Mandat</TableHead>
                         <TableHead className="text-slate-300">Description</TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
@@ -1649,7 +1668,12 @@ export default function PriseDeMandat() {
                             </div>
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
+                              {dossier.statut}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
@@ -1667,6 +1691,24 @@ export default function PriseDeMandat() {
                                 </Badge>
                               )}
                             </div>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandats && dossier.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                ))}
+                                {dossier.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{dossier.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-slate-300 max-w-xs truncate">
                             {dossier.description || "-"}
@@ -1703,7 +1745,7 @@ export default function PriseDeMandat() {
                       ))}
                       {filteredRetourAppel.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
                           </TableCell>
                         </TableRow>
@@ -1721,8 +1763,9 @@ export default function PriseDeMandat() {
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead className="text-slate-300">Arpenteur</TableHead>
-                        <TableHead className="text-slate-300">Date ouverture</TableHead>
+                        <TableHead className="text-slate-300">Date</TableHead>
                         <TableHead className="text-slate-300">Clients</TableHead>
+                        <TableHead className="text-slate-300">Mandat</TableHead>
                         <TableHead className="text-slate-300">Description</TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
@@ -1737,7 +1780,7 @@ export default function PriseDeMandat() {
                             </div>
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
+                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
@@ -1755,6 +1798,24 @@ export default function PriseDeMandat() {
                                 </Badge>
                               )}
                             </div>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandats && dossier.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                ))}
+                                {dossier.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{dossier.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-slate-300 max-w-xs truncate">
                             {dossier.description || "-"}
@@ -1791,7 +1852,7 @@ export default function PriseDeMandat() {
                       ))}
                       {filteredSoumission.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
                             Aucune soumission
                           </TableCell>
                         </TableRow>
