@@ -2804,6 +2804,7 @@ export default function Dossiers() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          {/* Original View Button - kept for per-mandate viewing */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -2812,15 +2813,26 @@ export default function Dossiers() {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {item.mandatIndex === 0 && ( // Only show delete for the first instance of a dossier to avoid duplicate buttons
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(item.id, `${getArpenteurInitials(item.arpenteur_geometre)}${item.numero_dossier}`)}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                          {/* New Edit Button and existing Delete Button - conditioned to appear only once per dossier */}
+                          {item.mandatIndex === 0 && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(item)}
+                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(item.id, `${getArpenteurInitials(item.arpenteur_geometre)}${item.numero_dossier}`)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </TableCell>
