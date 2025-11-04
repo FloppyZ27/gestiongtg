@@ -1388,7 +1388,7 @@ export default function PriseDeMandat() {
 
                 {/* Notes générales */}
                 <div className="space-y-2">
-                  <Label>Description générale</Label>
+                  <Label>Notes générales</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}

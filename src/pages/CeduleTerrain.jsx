@@ -45,6 +45,8 @@ export default function CeduleTerrain() {
   const [filterTypeMandat, setFilterTypeMandat] = useState("all");
   const [viewingDossier, setViewingDossier] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [editingEquipe, setEditingEquipe] = useState(null);
+  const [newEquipeName, setNewEquipeName] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -245,6 +247,52 @@ export default function CeduleTerrain() {
     }));
   };
 
+  const renameEquipe = (jour, oldName, newName) => {
+    if (!newName || newName.trim() === "" || oldName === newName) {
+      setEditingEquipe(null);
+      setNewEquipeName("");
+      return;
+    }
+    
+    const jourKey = jour.toLowerCase();
+    
+    // Vérifier si le nouveau nom existe déjà pour cette journée
+    if (equipes[jourKey].includes(newName)) {
+      alert("Ce nom d'équipe existe déjà pour cette journée.");
+      setEditingEquipe(null);
+      setNewEquipeName("");
+      return;
+    }
+    
+    // Mettre à jour les équipes
+    setEquipes(prev => ({
+      ...prev,
+      [jourKey]: prev[jourKey].map(e => e === oldName ? newName : e)
+    }));
+    
+    // Mettre à jour les dossiers qui utilisent cette équipe
+    dossiers.forEach(dossier => {
+      let needsUpdate = false;
+      const updatedMandats = dossier.mandats?.map(mandat => {
+        if (mandat.equipe_assignee === oldName && mandat.date_terrain) { // Only update if assigned to this specific team
+          needsUpdate = true;
+          return { ...mandat, equipe_assignee: newName };
+        }
+        return mandat;
+      });
+      
+      if (needsUpdate) {
+        updateDossierMutation.mutate({
+          id: dossier.id,
+          dossierData: { ...dossier, mandats: updatedMandats }
+        });
+      }
+    });
+    
+    setEditingEquipe(null);
+    setNewEquipeName("");
+  };
+
   const formatAdresse = (addr) => {
     if (!addr) return "";
     const parts = [];
@@ -406,8 +454,8 @@ export default function CeduleTerrain() {
           </div>
 
           <div className="flex gap-6">
-            {/* Panneau de gauche - 20% */}
-            <div style={{ width: '20%' }}>
+            {/* Panneau de gauche - 200px fixe */}
+            <div style={{ width: '200px', flexShrink: 0 }}>
               <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl h-full">
                 <CardHeader className="border-b border-slate-800 pb-3">
                   <CardTitle className="text-white text-lg">Mandats</CardTitle>
@@ -525,8 +573,8 @@ export default function CeduleTerrain() {
               </Card>
             </div>
 
-            {/* Calendrier hebdomadaire - 80% */}
-            <div className="flex-1" style={{ width: '80%' }}>
+            {/* Calendrier hebdomadaire - reste de l'espace */}
+            <div className="flex-1">
               <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
                 <CardHeader className="border-b border-slate-800">
                   <div className="flex justify-between items-center">
@@ -588,9 +636,35 @@ export default function CeduleTerrain() {
                             {equipes[jourKey]?.map((equipe) => (
                               <div key={equipe} className="bg-slate-800/30 rounded-lg p-2 border border-slate-700/50">
                                 <div className="flex justify-between items-center mb-2">
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-1 flex-1">
                                     <Users className="w-3 h-3 text-cyan-400" />
-                                    <span className="text-xs font-medium text-cyan-400">{equipe}</span>
+                                    {editingEquipe === `${jour}-${equipe}` ? (
+                                      <Input
+                                        value={newEquipeName}
+                                        onChange={(e) => setNewEquipeName(e.target.value)}
+                                        onBlur={() => renameEquipe(jour, equipe, newEquipeName)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            renameEquipe(jour, equipe, newEquipeName);
+                                          } else if (e.key === 'Escape') {
+                                            setEditingEquipe(null);
+                                            setNewEquipeName("");
+                                          }
+                                        }}
+                                        autoFocus
+                                        className="bg-slate-700 border-slate-600 text-white h-6 text-xs px-2"
+                                      />
+                                    ) : (
+                                      <span 
+                                        className="text-xs font-medium text-cyan-400 cursor-pointer hover:text-cyan-300"
+                                        onClick={() => {
+                                          setEditingEquipe(`${jour}-${equipe}`);
+                                          setNewEquipeName(equipe);
+                                        }}
+                                      >
+                                        {equipe}
+                                      </span>
+                                    )}
                                   </div>
                                   {equipes[jourKey].length > 1 && (
                                     <Button
