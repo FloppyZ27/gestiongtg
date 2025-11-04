@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, X, Check } from "lucide-react";
 
 const PROVINCES_CANADIENNES = [
+  "Québec",
   "Alberta",
   "Colombie-Britannique",
   "Île-du-Prince-Édouard",
@@ -15,7 +17,6 @@ const PROVINCES_CANADIENNES = [
   "Nouvelle-Écosse",
   "Nunavut",
   "Ontario",
-  "Québec",
   "Saskatchewan",
   "Terre-Neuve-et-Labrador",
   "Territoires du Nord-Ouest",
