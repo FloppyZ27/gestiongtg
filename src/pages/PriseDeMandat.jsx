@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,76 @@ import AddressInput from "../components/shared/AddressInput";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Lac-Saint-Jean-Est": [
+    "Québec",
+    "Canton de Caron",
+    "Canton de de l'Île",
+    "Canton de Garnier",
+    "Village d'Héberville",
+    "Canton d'Hébertville-Station",
+    "Canton de Labarre",
+    "Canton de Mésy",
+    "Canton de Métabetchouan",
+    "Canton de Signay",
+    "Canton de Taillon"
+  ],
+  "Lac-Saint-Jean-Ouest": [
+    "Québec",
+    "Canton d'Albanel",
+    "Canton de Charlevoix",
+    "Canton de Dablon",
+    "Canton de Dalmas",
+    "Canton de Demeules",
+    "Canton de Dequen",
+    "Canton de Dolbeau",
+    "Canton de Girard",
+    "Canton de Jogues",
+    "Canton de Malherbe",
+    "Canton de Métabetchouan",
+    "Canton de Milot",
+    "Canton de Normandin",
+    "Canton de Ouiatchouan",
+    "Canton de Racine",
+    "Canton de Roberval",
+    "Canton de Saint-Hilaire"
+  ],
+  "Chicoutimi": [
+    "Québec",
+    "Cité d'Arvida",
+    "Canton de Bagot",
+    "Village de Bagotville",
+    "Canton de Bégin",
+    "Canton de Boileau",
+    "Canton de Bourget",
+    "Canton de Chicoutimi",
+    "Paroisse de Chicoutimi",
+    "Ville de Chicoutimi",
+    "Canton de Dumas",
+    "Canton de Durocher",
+    "Canton de Falardeau",
+    "Canton de Ferland",
+    "Ville de Grande-Baie",
+    "Canton de Harvey",
+    "Canton de Hébert",
+    "Canton de Jonquière",
+    "Canton de Kénogami",
+    "Canton de Labrecque",
+    "Canton de Laterrière",
+    "Canton d'Otis",
+    "Canton de Périgny",
+    "Canton de Rouleau",
+    "Canton de Simard",
+    "Paroisse de Saint-Alexis",
+    "Paroisse de Saint-Alphonse",
+    "Ville de Sainte-Anne-de-Chicoutimi",
+    "Canton de Saint-Germains",
+    "Canton de Saint-Jean",
+    "Canton de Taché",
+    "Canton de Tremblay"
+  ]
+};
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -51,6 +121,12 @@ export default function PriseDeMandat() {
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
   const [activeTabMandat, setActiveTabMandat] = useState("0");
+
+  const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
+  const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
+  const [lotSearchTerm, setLotSearchTerm] = useState("");
+  const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -85,6 +161,12 @@ export default function PriseDeMandat() {
   const { data: clients } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots'],
+    queryFn: () => base44.entities.Lot.list(),
     initialData: [],
   });
 
@@ -129,6 +211,7 @@ export default function PriseDeMandat() {
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
 
   const getClientById = (id) => clients.find(c => c.id === id);
+  const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
 
   const retourAppelDossiers = dossiers.filter(d => d.statut === "Retour d'appel");
   const soumissionDossiers = dossiers.filter(d => d.statut === "Soumission");
@@ -166,6 +249,38 @@ export default function PriseDeMandat() {
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
+
+  const filteredLotsForSelector = lots.filter(lot => {
+    const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
+
+    const matchesCirconscription = lotCirconscriptionFilter === "all" ||
+      lot.circonscription_fonciere === lotCirconscriptionFilter;
+
+    const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
+
+    return matchesSearch && matchesCirconscription && matchesCadastre;
+  });
+
+  const openLotSelector = (mandatIndex) => {
+    setCurrentMandatIndex(mandatIndex);
+    setIsLotSelectorOpen(true);
+  };
+
+  const addLotToCurrentMandat = (numeroLot) => {
+    if (currentMandatIndex !== null) {
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) =>
+          i === currentMandatIndex ? {
+            ...m,
+            lots: m.lots.includes(numeroLot) ? m.lots.filter(id => id !== numeroLot) : [...(m.lots || []), numeroLot]
+          } : m
+        )
+      }));
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -243,6 +358,7 @@ export default function PriseDeMandat() {
             : m.adresse_travaux
           )
           : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        lots: m.lots || [],
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
@@ -303,6 +419,7 @@ export default function PriseDeMandat() {
         code_postal: "",
         province: ""
       };
+    const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
     
     setFormData(prev => ({
       ...prev,
@@ -310,6 +427,7 @@ export default function PriseDeMandat() {
         type_mandat: "",
         date_ouverture: "",
         adresse_travaux: defaultAdresse,
+        lots: defaultLots,
         prix_estime: 0,
         date_livraison: "",
         date_signature: "",
@@ -360,6 +478,17 @@ export default function PriseDeMandat() {
       setFormData(prev => ({
         ...prev,
         mandats: prev.mandats.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const removeLotFromMandat = (mandatIndex, lotNumero) => {
+    if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotNumero} de ce mandat ?`)) {
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) =>
+          i === mandatIndex ? { ...m, lots: m.lots.filter((num) => num !== lotNumero) } : m
+        )
       }));
     }
   };
@@ -728,6 +857,91 @@ export default function PriseDeMandat() {
                               </div>
 
                               <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <Label>Lots sélectionnés</Label>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => openLotSelector(index)}
+                                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                  >
+                                    <Plus className="w-4 h-4 mr-1" />
+                                    Sélectionner des lots
+                                  </Button>
+                                </div>
+                                {mandat.lots && mandat.lots.length > 0 ? (
+                                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                                          <TableHead className="text-slate-300">Circonscription</TableHead>
+                                          <TableHead className="text-slate-300">Cadastre</TableHead>
+                                          <TableHead className="text-slate-300">Rang</TableHead>
+                                          <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {mandat.lots.map((numeroLot) => {
+                                          const lot = getLotById(numeroLot);
+                                          return lot ? (
+                                            <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell className="font-medium text-white">
+                                                {lot.numero_lot}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                                  {lot.circonscription_fonciere}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.cadastre || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.rang || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, lot.numero_lot)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          ) : (
+                                            <TableRow key={numeroLot} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell colSpan={4} className="font-medium text-white">
+                                                {numeroLot} (Lot introuvable)
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, numeroLot)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          );
+                                        })}
+                                      </TableBody>
+                                    </Table>
+                                  </div>
+                                ) : (
+                                  <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                                    Aucun lot sélectionné
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="space-y-2">
                                 <Label>Prix estimé ($)</Label>
                                 <Input
                                   type="number"
@@ -781,7 +995,7 @@ export default function PriseDeMandat() {
           </Dialog>
         </div>
 
-        {/* Client Selector Dialogs - Same as in Dossiers page */}
+        {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
             <DialogHeader>
@@ -856,7 +1070,485 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
-        {/* Similar dialogs for Notaires, Courtiers, and New Client forms would go here - omitted for brevity */}
+        {/* Notaire Selector Dialog */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un notaire..."
+                    value={notaireSearchTerm}
+                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Notaire"});
+                    setIsNewNotaireDialogOpen(true);
+                  }}
+                  className="bg-purple-500 hover:bg-purple-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.map((notaire) => (
+                    <div
+                      key={notaire.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.notaires_ids.includes(notaire.id)
+                          ? 'bg-purple-500/20 border border-purple-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800'
+                      }`}
+                      onClick={() => toggleClient(notaire.id, 'notaires')}
+                    >
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(notaire.adresses, 'adresse') && (
+                          <p className="truncate">📍 {getCurrentValue(notaire.adresses, 'adresse')}</p>
+                        )}
+                        {getCurrentValue(notaire.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(notaire.telephones, 'telephone') && (
+                          <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingClientDetails(notaire);
+                        }}
+                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
+                      >
+                        Voir fiche
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Courtier Selector Dialog */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un courtier..."
+                    value={courtierSearchTerm}
+                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Courtier immobilier"});
+                    setIsNewCourtierDialogOpen(true);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.map((courtier) => (
+                    <div
+                      key={courtier.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.courtiers_ids.includes(courtier.id)
+                          ? 'bg-orange-500/20 border border-orange-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800'
+                      }`}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}
+                    >
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(courtier.adresses, 'adresse') && (
+                          <p className="truncate">📍 {getCurrentValue(courtier.adresses, 'adresse')}</p>
+                        )}
+                        {getCurrentValue(courtier.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(courtier.telephones, 'telephone') && (
+                          <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setViewingClientDetails(courtier);
+                        }}
+                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
+                      >
+                        Voir fiche
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Client Dialog (Generic for Client/Notaire/Courtier) */}
+        <Dialog open={isNewClientDialogOpen || isNewNotaireDialogOpen || isNewCourtierDialogOpen} onOpenChange={(open) => {
+          if (!open) {
+            setIsNewClientDialogOpen(false);
+            setIsNewNotaireDialogOpen(false);
+            setIsNewCourtierDialogOpen(false);
+            resetClientForm();
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nouveau {newClientForm.type_client}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewClientSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Prénom <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newClientForm.prenom}
+                    onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
+                    required
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nom <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newClientForm.nom}
+                    onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
+                    required
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              {/* Adresses */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Adresses</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('adresses')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.adresses.map((item, index) => (
+                  <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                    <div className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={item.adresse}
+                          onChange={(e) => updateClientField('adresses', index, 'adresse', e.target.value)}
+                          placeholder="Adresse complète"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => toggleActuel('adresses', index)}
+                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      {newClientForm.adresses.length > 1 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeClientField('adresses', index)}
+                          className="text-red-400"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Courriels */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Courriels</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('courriels')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.courriels.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={item.courriel}
+                      onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
+                      placeholder="Courriel"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => toggleActuel('courriels', index)}
+                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    {newClientForm.courriels.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeClientField('courriels', index)}
+                        className="text-red-400"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Téléphones */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Téléphones</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => addClientField('telephones')}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
+                {newClientForm.telephones.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={item.telephone}
+                      onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
+                      placeholder="Téléphone"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => toggleActuel('telephones', index)}
+                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    {newClientForm.telephones.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeClientField('telephones', index)}
+                        className="text-red-400"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={newClientForm.notes}
+                  onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
+                  className="bg-slate-800 border-slate-700 h-20"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsNewClientDialogOpen(false);
+                    setIsNewNotaireDialogOpen(false);
+                    setIsNewCourtierDialogOpen(false);
+                    resetClientForm();
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Lot Selector Dialog */}
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
+          setIsLotSelectorOpen(open);
+          if (!open) {
+            setLotCirconscriptionFilter("all");
+            setLotSearchTerm("");
+            setLotCadastreFilter("Québec");
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher par numéro, rang..."
+                    value={lotSearchTerm}
+                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
+                      <SelectItem key={circonscription} value={circonscription} className="text-white">
+                        {circonscription}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Cadastre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                      <TableHead className="text-slate-300">Circonscription</TableHead>
+                      <TableHead className="text-slate-300">Cadastre</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300">Concordance</TableHead>
+                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLotsForSelector.length > 0 ? (
+                      filteredLotsForSelector.map((lot) => {
+                        const isSelected = currentMandatIndex !== null &&
+                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.numero_lot);
+                        return (
+                          <TableRow
+                            key={lot.id}
+                            className={`cursor-pointer transition-colors border-slate-800 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                                : 'hover:bg-slate-800/30'
+                            }`}
+                            onClick={() => addLotToCurrentMandat(lot.numero_lot)}
+                          >
+                            <TableCell className="font-medium text-white">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                {lot.circonscription_fonciere}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.concordance_anterieur || "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isSelected && (
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Sélectionné
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <div className="text-slate-400">
+                            <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>Aucun lot trouvé</p>
+                            <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
+                Valider la sélection
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
