@@ -703,7 +703,7 @@ export default function PriseDeMandat() {
 
                 {/* Clients */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Clients</Label>
                     <Button
                       type="button"
@@ -715,29 +715,58 @@ export default function PriseDeMandat() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.clients_ids.map(clientId => {
-                      const client = getClientById(clientId);
-                      return client ? (
-                        <Badge
-                          key={clientId}
-                          className="bg-blue-500/20 text-blue-400 border-blue-500/30 border flex items-center gap-2 cursor-pointer hover:bg-blue-500/30"
-                          onClick={() => setViewingClientDetails(client)}
-                        >
-                          {client.prenom} {client.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(clientId, 'clients');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.clients_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.clients_ids.map(clientId => {
+                            const client = getClientById(clientId);
+                            return client ? (
+                              <TableRow key={clientId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {client.prenom} {client.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(client.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(client.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeClient(clientId, 'clients')}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun client sélectionné
+                    </p>
+                  )}
                 </div>
 
                 {/* Notaires */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Notaires</Label>
                     <Button
                       type="button"
@@ -749,29 +778,58 @@ export default function PriseDeMandat() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.notaires_ids.map(notaireId => {
-                      const notaire = getClientById(notaireId);
-                      return notaire ? (
-                        <Badge
-                          key={notaireId}
-                          className="bg-purple-500/20 text-purple-400 border-purple-500/30 border flex items-center gap-2 cursor-pointer hover:bg-purple-500/30"
-                          onClick={() => setViewingClientDetails(notaire)}
-                        >
-                          {notaire.prenom} {notaire.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(notaireId, 'notaires');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.notaires_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.notaires_ids.map(notaireId => {
+                            const notaire = getClientById(notaireId);
+                            return notaire ? (
+                              <TableRow key={notaireId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {notaire.prenom} {notaire.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(notaire.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(notaire.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeClient(notaireId, 'notaires')}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun notaire sélectionné
+                    </p>
+                  )}
                 </div>
 
                 {/* Courtiers */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Courtiers immobiliers</Label>
                     <Button
                       type="button"
@@ -783,24 +841,53 @@ export default function PriseDeMandat() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.courtiers_ids.map(courtierId => {
-                      const courtier = getClientById(courtierId);
-                      return courtier ? (
-                        <Badge
-                          key={courtierId}
-                          className="bg-orange-500/20 text-orange-400 border-orange-500/30 border flex items-center gap-2 cursor-pointer hover:bg-orange-500/30"
-                          onClick={() => setViewingClientDetails(courtier)}
-                        >
-                          {courtier.prenom} {courtier.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(courtierId, 'courtiers');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.courtiers_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.courtiers_ids.map(courtierId => {
+                            const courtier = getClientById(courtierId);
+                            return courtier ? (
+                              <TableRow key={courtierId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {courtier.prenom} {courtier.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(courtier.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(courtier.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeClient(courtierId, 'courtiers')}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun courtier sélectionné
+                    </p>
+                  )}
                 </div>
 
                 {/* Mandats */}
