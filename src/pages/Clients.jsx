@@ -37,7 +37,14 @@ export default function Clients() {
     prenom: "",
     nom: "",
     type_client: "Client",
-    adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+    adresses: [{
+      ville: "",
+      numeros_civiques: [""],
+      rue: "",
+      code_postal: "",
+      province: "",
+      actuelle: true
+    }],
     courriels: [{ courriel: "", actuel: true }],
     telephones: [{ telephone: "", actuel: true }],
     notes: ""
@@ -98,7 +105,13 @@ export default function Clients() {
     // Filter out empty entries
     const cleanedData = {
       ...formData,
-      adresses: formData.adresses.filter(a => a.adresse.trim() !== ""),
+      adresses: formData.adresses.filter(a => 
+        (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
+        a.rue.trim() !== "" ||
+        a.ville.trim() !== "" ||
+        a.code_postal.trim() !== "" ||
+        a.province.trim() !== ""
+      ),
       courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
     };
@@ -115,7 +128,14 @@ export default function Clients() {
       prenom: "",
       nom: "",
       type_client: "Client",
-      adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+      adresses: [{
+        ville: "",
+        numeros_civiques: [""],
+        rue: "",
+        code_postal: "",
+        province: "",
+        actuelle: true
+      }],
       courriels: [{ courriel: "", actuel: true }],
       telephones: [{ telephone: "", actuel: true }],
       notes: ""
@@ -129,7 +149,22 @@ export default function Clients() {
       prenom: client.prenom || "",
       nom: client.nom || "",
       type_client: client.type_client || "Client",
-      adresses: client.adresses && client.adresses.length > 0 ? client.adresses : [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+      adresses: client.adresses && client.adresses.length > 0 ? 
+        client.adresses.map(addr => ({
+          ville: addr.ville || "",
+          numeros_civiques: addr.numeros_civiques && addr.numeros_civiques.length > 0 ? addr.numeros_civiques : [""],
+          rue: addr.rue || "",
+          code_postal: addr.code_postal || "",
+          province: addr.province || "",
+          actuelle: addr.actuelle
+        })) : [{
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "",
+          actuelle: true
+        }],
       courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [{ courriel: "", actuel: true }],
       telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [{ telephone: "", actuel: true }],
       notes: client.notes || ""
@@ -147,7 +182,14 @@ export default function Clients() {
     if (fieldName === 'adresses') {
       setFormData(prev => ({
         ...prev,
-        adresses: [...prev.adresses, { adresse: "", latitude: null, longitude: null, actuelle: false }]
+        adresses: [...prev.adresses, {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "",
+          actuelle: false
+        }]
       }));
     } else {
       setFormData(prev => ({
@@ -175,6 +217,61 @@ export default function Clients() {
     }));
   };
 
+  const updateAddress = (index, newAddresses) => {
+    if (newAddresses && newAddresses[0]) {
+      setFormData(prev => ({
+        ...prev,
+        adresses: prev.adresses.map((item, i) =>
+          i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item
+        )
+      }));
+    }
+  };
+
+  const updateCivicNumber = (addressIndex, civicIndex, value) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((address, aIdx) =>
+        aIdx === addressIndex
+          ? {
+              ...address,
+              numeros_civiques: address.numeros_civiques.map((num, cIdx) =>
+                cIdx === civicIndex ? value : num
+              ),
+            }
+          : address
+      ),
+    }));
+  };
+
+  const addCivicNumber = (addressIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((address, aIdx) =>
+        aIdx === addressIndex
+          ? {
+              ...address,
+              numeros_civiques: [...address.numeros_civiques, ""],
+            }
+          : address
+      ),
+    }));
+  };
+
+  const removeCivicNumber = (addressIndex, civicIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((address, aIdx) =>
+        aIdx === addressIndex
+          ? {
+              ...address,
+              numeros_civiques: address.numeros_civiques.filter((_, cIdx) => cIdx !== civicIndex),
+            }
+          : address
+      ),
+    }));
+  };
+
   const toggleActuel = (fieldName, index) => {
     setFormData(prev => ({
       ...prev,
@@ -183,24 +280,6 @@ export default function Clients() {
         [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
       }))
     }));
-  };
-
-  // Fonction pour géocoder l'adresse (simulation - nécessiterait une vraie API Google Maps)
-  const handleAddressChange = async (index, value) => {
-    updateField('adresses', index, 'adresse', value);
-    
-    // Note: Pour une vraie intégration Google Maps, vous auriez besoin d'ajouter
-    // l'API Google Maps Places et Geocoding. Ceci est une structure de base.
-    // Les coordonnées seraient obtenues via l'API Geocoding de Google.
-    
-    // Pour l'instant, on laisse latitude et longitude null
-    // Exemple de ce qui pourrait être fait avec l'API:
-    // const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(value)}&key=YOUR_API_KEY`);
-    // const data = await response.json();
-    // if (data.results[0]) {
-    //   updateField('adresses', index, 'latitude', data.results[0].geometry.location.lat);
-    //   updateField('adresses', index, 'longitude', data.results[0].geometry.location.lng);
-    // }
   };
 
   const getCurrentValue = (items, key) => {
@@ -231,7 +310,7 @@ export default function Clients() {
     if (!addr) return "";
     const parts = [];
     if (addr.numeros_civiques && addr.numeros_civiques.length > 0) {
-      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+      parts.push(addr.numeros_civiques.filter(n => n && n.trim() !== "").join(', '));
     }
     if (addr.rue) parts.push(addr.rue);
     if (addr.ville) parts.push(addr.ville);
@@ -345,17 +424,91 @@ export default function Clients() {
                   {formData.adresses.map((item, index) => (
                     <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
                       <div className="flex gap-2 items-start">
-                        <div className="flex-1">
-                          <Input
-                            value={item.adresse}
-                            onChange={(e) => handleAddressChange(index, e.target.value)}
-                            placeholder="Entrez une adresse complète"
-                            className="bg-slate-800 border-slate-700"
-                          />
-                          <p className="text-xs text-slate-500 mt-1">
-                            Format recommandé: Numéro, Rue, Ville, Province, Code postal
-                          </p>
-                        </div>
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {/* Numéros Civiques */}
+                            <div className="space-y-2 col-span-2">
+                                <Label>Numéro(s) civique(s)</Label>
+                                {item.numeros_civiques.map((num, civicIdx) => (
+                                    <div key={civicIdx} className="flex gap-2">
+                                        <Input
+                                            value={num}
+                                            onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
+                                            placeholder="Numéro civique"
+                                            className="bg-slate-800 border-slate-700"
+                                        />
+                                        {item.numeros_civiques.length > 1 && (
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => removeCivicNumber(index, civicIdx)}
+                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => addCivicNumber(index)}
+                                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1"
+                                >
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Ajouter un numéro
+                                </Button>
+                            </div>
+
+                            {/* Rue */}
+                            <div className="space-y-2 col-span-2">
+                                <Label htmlFor={`rue-${index}`}>Rue</Label>
+                                <Input
+                                    id={`rue-${index}`}
+                                    value={item.rue}
+                                    onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
+                                    placeholder="Nom de la rue"
+                                    className="bg-slate-800 border-slate-700"
+                                />
+                            </div>
+
+                            {/* Ville */}
+                            <div className="space-y-2">
+                                <Label htmlFor={`ville-${index}`}>Ville</Label>
+                                <Input
+                                    id={`ville-${index}`}
+                                    value={item.ville}
+                                    onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
+                                    placeholder="Ville"
+                                    className="bg-slate-800 border-slate-700"
+                                />
+                            </div>
+
+                            {/* Province */}
+                            <div className="space-y-2">
+                                <Label htmlFor={`province-${index}`}>Province</Label>
+                                <Input
+                                    id={`province-${index}`}
+                                    value={item.province}
+                                    onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
+                                    placeholder="Province (ex: QC)"
+                                    className="bg-slate-800 border-slate-700"
+                                />
+                            </div>
+                            
+                            {/* Code Postal */}
+                            <div className="space-y-2">
+                                <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
+                                <Input
+                                    id={`code-postal-${index}`}
+                                    value={item.code_postal}
+                                    onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
+                                    placeholder="Code postal"
+                                    className="bg-slate-800 border-slate-700"
+                                />
+                            </div>
+                        </div> {/* end of flex-1 grid */}
+                        
                         <Button
                           type="button"
                           size="sm"
@@ -376,7 +529,7 @@ export default function Clients() {
                             <X className="w-4 h-4" />
                           </Button>
                         )}
-                      </div>
+                      </div> {/* end of flex gap-2 items-start */}
                     </div>
                   ))}
                 </div>

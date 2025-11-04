@@ -145,7 +145,7 @@ export default function PriseDeMandat() {
     prenom: "",
     nom: "",
     type_client: "Client",
-    adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+    adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
     courriels: [{ courriel: "", actuel: true }],
     telephones: [{ telephone: "", actuel: true }],
     notes: ""
@@ -279,22 +279,38 @@ export default function PriseDeMandat() {
     );
   });
 
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
   const filteredClientsForSelector = clientsReguliers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
-    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+    (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
   );
 
   const filteredNotairesForSelector = notaires.filter(n =>
     `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
     n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
-    n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+    n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+    (n.adresses?.length > 0 && formatAdresse(n.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
   );
 
   const filteredCourtiersForSelector = courtiers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
 
   const filteredLotsForSelector = lots.filter(lot => {
@@ -342,7 +358,7 @@ export default function PriseDeMandat() {
     e.preventDefault();
     const cleanedData = {
       ...newClientForm,
-      adresses: newClientForm.adresses.filter(a => a.adresse.trim() !== ""),
+      adresses: newClientForm.adresses.filter(a => a.rue?.trim() !== "" || a.numeros_civiques?.[0]?.trim() !== ""),
       courriels: newClientForm.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: newClientForm.telephones.filter(t => t.telephone.trim() !== "")
     };
@@ -370,7 +386,7 @@ export default function PriseDeMandat() {
       prenom: "",
       nom: "",
       type_client: "Client",
-      adresses: [{ adresse: "", latitude: null, longitude: null, actuelle: true }],
+      adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
       courriels: [{ courriel: "", actuel: true }],
       telephones: [{ telephone: "", actuel: true }],
       notes: ""
@@ -498,19 +514,6 @@ export default function PriseDeMandat() {
     }));
   };
 
-  const formatAdresse = (addr) => {
-    if (!addr) return "";
-    const parts = [];
-    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-    }
-    if (addr.rue) parts.push(addr.rue);
-    if (addr.ville) parts.push(addr.ville);
-    if (addr.province) parts.push(addr.province);
-    if (addr.code_postal) parts.push(addr.code_postal);
-    return parts.filter(p => p).join(', ');
-  };
-
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -529,6 +532,15 @@ export default function PriseDeMandat() {
     }
   };
 
+  const updateClientAddress = (index, newAddresses) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((item, i) =>
+        i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item // Preserve 'actuelle' status
+      )
+    }));
+  };
+
   const removeLotFromMandat = (mandatIndex, lotNumero) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotNumero} de ce mandat ?`)) {
       setFormData(prev => ({
@@ -544,7 +556,7 @@ export default function PriseDeMandat() {
     if (fieldName === 'adresses') {
       setNewClientForm(prev => ({
         ...prev,
-        adresses: [...prev.adresses, { adresse: "", latitude: null, longitude: null, actuelle: false }]
+        adresses: [...prev.adresses, { rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: false }]
       }));
     } else {
       setNewClientForm(prev => ({
@@ -1100,8 +1112,8 @@ export default function PriseDeMandat() {
                     >
                       <p className="text-white font-medium">{client.prenom} {client.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {getCurrentValue(client.adresses, 'adresse') && (
-                          <p className="truncate">📍 {getCurrentValue(client.adresses, 'adresse')}</p>
+                        {client.adresses?.length > 0 && formatAdresse(client.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle || a.actuel))}</p>
                         )}
                         {getCurrentValue(client.courriels, 'courriel') && (
                           <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
@@ -1175,8 +1187,8 @@ export default function PriseDeMandat() {
                     >
                       <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {getCurrentValue(notaire.adresses, 'adresse') && (
-                          <p className="truncate">📍 {getCurrentValue(notaire.adresses, 'adresse')}</p>
+                        {notaire.adresses?.length > 0 && formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel))}</p>
                         )}
                         {getCurrentValue(notaire.courriels, 'courriel') && (
                           <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
@@ -1250,8 +1262,8 @@ export default function PriseDeMandat() {
                     >
                       <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {getCurrentValue(courtier.adresses, 'adresse') && (
-                          <p className="truncate">📍 {getCurrentValue(courtier.adresses, 'adresse')}</p>
+                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel))}</p>
                         )}
                         {getCurrentValue(courtier.courriels, 'courriel') && (
                           <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
@@ -1317,7 +1329,7 @@ export default function PriseDeMandat() {
                 </div>
               </div>
 
-              {/* Adresses */}
+              {/* Adresses avec AddressInput */}
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <Label>Adresses</Label>
@@ -1335,18 +1347,18 @@ export default function PriseDeMandat() {
                   <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
                     <div className="flex gap-2 items-start">
                       <div className="flex-1">
-                        <Input
-                          value={item.adresse}
-                          onChange={(e) => updateClientField('adresses', index, 'adresse', e.target.value)}
-                          placeholder="Adresse complète"
-                          className="bg-slate-800 border-slate-700"
+                        <AddressInput
+                          addresses={[item]}
+                          onChange={(newAddresses) => updateClientAddress(index, newAddresses)}
+                          showActuelle={false}
+                          singleAddress={true}
                         />
                       </div>
                       <Button
                         type="button"
                         size="sm"
                         onClick={() => toggleActuel('adresses', index)}
-                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 mt-7`}
                       >
                         <Check className="w-4 h-4" />
                       </Button>
@@ -1356,12 +1368,15 @@ export default function PriseDeMandat() {
                           size="sm"
                           variant="ghost"
                           onClick={() => removeClientField('adresses', index)}
-                          className="text-red-400"
+                          className="text-red-400 mt-7"
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       )}
                     </div>
+                    {item.actuelle && (
+                      <p className="text-xs text-green-400 mt-1">✓ Adresse actuelle</p>
+                    )}
                   </div>
                 ))}
               </div>
