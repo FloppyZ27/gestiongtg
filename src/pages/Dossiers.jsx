@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye } from "lucide-icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -253,18 +253,51 @@ export default function Dossiers() {
     ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || []
     : [];
 
-  const filteredLotsForSelector = lots.filter(lot => {
-    const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-      lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-      lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
+  // Fonction de tri pour mettre les sélectionnés en haut puis ordre alphabétique
+  const sortClientsWithSelected = (clientsList, selectedIds) => {
+    return [...clientsList].sort((a, b) => {
+      const aSelected = selectedIds.includes(a.id);
+      const bSelected = selectedIds.includes(b.id);
 
-    const matchesCirconscription = lotCirconscriptionFilter === "all" ||
-      lot.circonscription_fonciere === lotCirconscriptionFilter;
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
 
-    const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
+      // Ordre alphabétique pour le reste
+      const aName = `${a.prenom} ${a.nom}`.toLowerCase();
+      const bName = `${b.prenom} ${b.nom}`.toLowerCase();
+      return aName.localeCompare(bName);
+    });
+  };
 
-    return matchesSearch && matchesCirconscription && matchesCadastre;
-  });
+  // Fonction de tri pour les lots avec les sélectionnés en haut
+  const sortLotsWithSelected = (lotsList, selectedLots) => {
+    return [...lotsList].sort((a, b) => {
+      const aSelected = selectedLots?.includes(a.numero_lot);
+      const bSelected = selectedLots?.includes(b.numero_lot);
+
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
+
+      // Ordre alphabétique pour le reste
+      return (a.numero_lot || "").localeCompare(b.numero_lot || "");
+    });
+  };
+
+  const filteredLotsForSelector = sortLotsWithSelected(
+    lots.filter(lot => {
+      const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+        lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+        lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
+
+      const matchesCirconscription = lotCirconscriptionFilter === "all" ||
+        lot.circonscription_fonciere === lotCirconscriptionFilter;
+
+      const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
+
+      return matchesSearch && matchesCirconscription && matchesCadastre;
+    }),
+    currentMandatIndex !== null ? formData.mandats[currentMandatIndex]?.lots : []
+  );
 
   const openLotSelector = (mandatIndex) => {
     setCurrentMandatIndex(mandatIndex);
@@ -286,6 +319,11 @@ export default function Dossiers() {
   };
 
   const filteredDossiers = dossiers.filter(dossier => {
+    // Filtrer d'abord par statut
+    if (dossier.statut !== "Ouvert" && dossier.statut !== "Fermé") {
+      return false;
+    }
+
     const searchLower = searchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
     return (
@@ -301,22 +339,31 @@ export default function Dossiers() {
     );
   });
 
-  const filteredClientsForSelector = clientsReguliers.filter(c =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
-    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+  const filteredClientsForSelector = sortClientsWithSelected(
+    clientsReguliers.filter(c =>
+      `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+      c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+      c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+    ),
+    formData.clients_ids
   );
 
-  const filteredNotairesForSelector = notaires.filter(n =>
-    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
-    n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
-    n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+  const filteredNotairesForSelector = sortClientsWithSelected(
+    notaires.filter(n =>
+      `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
+      n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+      n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+    ),
+    formData.notaires_ids
   );
 
-  const filteredCourtiersForSelector = courtiers.filter(c =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
-    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+  const filteredCourtiersForSelector = sortClientsWithSelected(
+    courtiers.filter(c =>
+      `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
+      c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+      c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+    ),
+    formData.courtiers_ids
   );
 
   const handleSubmit = (e) => {
@@ -426,7 +473,7 @@ export default function Dossiers() {
         minute: m.minute || "",
         date_minute: m.date_minute || "",
         tache_actuelle: m.tache_actuelle || "",
-        statut_terrain: m.statut_terrain || "", // Keep existing statut_terrain or default to ""
+        statut_terrain: m.statut_terrain || "",
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -441,6 +488,8 @@ export default function Dossiers() {
           : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
         lots: m.lots || [], // Initialize lots array
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0, // Initialize prix_estime
+        rabais: m.rabais !== undefined ? m.rabais : 0, // Initialize rabais
+        taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false, // Initialize taxes_incluses
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
@@ -501,7 +550,7 @@ export default function Dossiers() {
 
   const addMandat = () => {
     const newIndex = formData.mandats.length;
-    
+
     // Copier les infos du premier mandat s'il existe
     const firstMandat = formData.mandats[0];
     const defaultAdresse = firstMandat?.adresse_travaux
@@ -514,7 +563,7 @@ export default function Dossiers() {
         province: ""
       };
     const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : []; // Copy lots
-    
+
     setFormData(prev => ({
       ...prev,
       mandats: [...prev.mandats, {
@@ -522,11 +571,13 @@ export default function Dossiers() {
         date_ouverture: "",
         minute: "",
         date_minute: "",
-        tache_actuelle: "Cédule", // Default à "Cédule"
-        statut_terrain: "en_verification", // Automatiquement mis à "en_verification" pour affichage dans la cédule
+        tache_actuelle: "", // Default to empty
+        statut_terrain: "", // Default to empty
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
+        rabais: 0,
+        taxes_incluses: false,
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
@@ -792,7 +843,7 @@ export default function Dossiers() {
 
                 {/* Clients */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Clients</Label>
                     <Button
                       type="button"
@@ -804,29 +855,73 @@ export default function Dossiers() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.clients_ids.map(clientId => {
-                      const client = getClientById(clientId);
-                      return client ? (
-                        <Badge
-                          key={clientId}
-                          className="bg-blue-500/20 text-blue-400 border-blue-500/30 border flex items-center gap-2 cursor-pointer hover:bg-blue-500/30"
-                          onClick={() => setViewingClientDetails(client)}
-                        >
-                          {client.prenom} {client.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(clientId, 'clients');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.clients_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.clients_ids.map(clientId => {
+                            const client = getClientById(clientId);
+                            return client ? (
+                              <TableRow key={clientId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {client.prenom} {client.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {getCurrentValue(client.adresses, 'adresse') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(client.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(client.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(client)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(clientId, 'clients')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun client sélectionné
+                    </p>
+                  )}
                 </div>
 
                 {/* Notaires */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Notaires</Label>
                     <Button
                       type="button"
@@ -838,29 +933,73 @@ export default function Dossiers() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.notaires_ids.map(notaireId => {
-                      const notaire = getClientById(notaireId);
-                      return notaire ? (
-                        <Badge
-                          key={notaireId}
-                          className="bg-purple-500/20 text-purple-400 border-purple-500/30 border flex items-center gap-2 cursor-pointer hover:bg-purple-500/30"
-                          onClick={() => setViewingClientDetails(notaire)}
-                        >
-                          {notaire.prenom} {notaire.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(notaireId, 'notaires');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.notaires_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.notaires_ids.map(notaireId => {
+                            const notaire = getClientById(notaireId);
+                            return notaire ? (
+                              <TableRow key={notaireId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {notaire.prenom} {notaire.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {getCurrentValue(notaire.adresses, 'adresse') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(notaire.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(notaire.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(notaire)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(notaireId, 'notaires')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun notaire sélectionné
+                    </p>
+                  )}
                 </div>
 
                 {/* Courtiers */}
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-2">
                     <Label>Courtiers immobiliers</Label>
                     <Button
                       type="button"
@@ -872,24 +1011,78 @@ export default function Dossiers() {
                       Ajouter
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.courtiers_ids.map(courtierId => {
-                      const courtier = getClientById(courtierId);
-                      return courtier ? (
-                        <Badge
-                          key={courtierId}
-                          className="bg-orange-500/20 text-orange-400 border-orange-500/30 border flex items-center gap-2 cursor-pointer hover:bg-orange-500/30"
-                          onClick={() => setViewingClientDetails(courtier)}
-                        >
-                          {courtier.prenom} {courtier.nom}
-                          <X className="w-3 h-3 cursor-pointer" onClick={(e) => {
-                            e.stopPropagation();
-                            removeClient(courtierId, 'courtiers');
-                          }} />
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
+                  {formData.courtiers_ids.length > 0 ? (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Nom</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
+                            <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Téléphone</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {formData.courtiers_ids.map(courtierId => {
+                            const courtier = getClientById(courtierId);
+                            return courtier ? (
+                              <TableRow key={courtierId} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white font-medium">
+                                  {courtier.prenom} {courtier.nom}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {getCurrentValue(courtier.adresses, 'adresse') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(courtier.courriels, 'courriel') || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getCurrentValue(courtier.telephones, 'telephone') || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setViewingClientDetails(courtier)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClient(courtierId, 'courtiers')}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : null;
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
+                      Aucun courtier sélectionné
+                    </p>
+                  )}
+                </div>
+
+                {/* Notes générales */}
+                <div className="space-y-2">
+                  <Label>Notes générales</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="bg-slate-800 border-slate-700 h-24"
+                  />
                 </div>
 
                 {/* Mandats */}
@@ -1145,17 +1338,41 @@ export default function Dossiers() {
                                 )}
                               </div>
 
-                              <div className="space-y-2">
-                                <Label>Prix estimé ($)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={mandat.prix_estime}
-                                  onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
-                                  placeholder="0.00"
-                                  className="bg-slate-700 border-slate-600"
-                                />
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Prix estimé ($)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={mandat.prix_estime}
+                                    onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Rabais ($)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={mandat.rabais}
+                                    onChange={(e) => updateMandat(index, 'rabais', parseFloat(e.target.value) || 0)}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
                               </div>
+                              <div className="flex items-center space-x-2 mt-3">
+                                <input
+                                  type="checkbox"
+                                  id={`taxes-incluses-${index}`}
+                                  checked={mandat.taxes_incluses}
+                                  onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
+                                  className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                                />
+                                <Label htmlFor={`taxes-incluses-${index}`}>Taxes incluses</Label>
+                              </div>
+
 
                               <div className="space-y-2">
                                 <Label>Notes</Label>
@@ -1169,7 +1386,7 @@ export default function Dossiers() {
                               {/* Section Terrain - Toujours affichée */}
                               <div className="border-t border-slate-700 pt-4 mt-4">
                                 <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
-                                
+
                                 <div className="grid grid-cols-2 gap-3">
                                   <div className="space-y-2">
                                     <Label>Date limite levé terrain</Label>
@@ -1318,15 +1535,6 @@ export default function Dossiers() {
                       Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
                     </div>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Description générale</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="bg-slate-800 border-slate-700 h-24"
-                  />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
@@ -1701,6 +1909,16 @@ export default function Dossiers() {
                   )}
                 </div>
 
+                {/* Description générale */}
+                <div>
+                  <Label className="text-slate-400 mb-2 block">Notes générales</Label>
+                  {viewingDossier.description ? (
+                    <p className="text-slate-300 whitespace-pre-wrap">{viewingDossier.description}</p>
+                  ) : (
+                    <p className="text-slate-500 text-sm">Aucune description</p>
+                  )}
+                </div>
+
                 {/* Mandats */}
                 <div>
                   <Label className="text-slate-400 mb-3 block">Mandats</Label>
@@ -1902,10 +2120,24 @@ export default function Dossiers() {
                                 )}
                               </div>
 
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-slate-400 text-xs">Prix estimé</Label>
+                                  <p className="text-white font-medium mt-1">
+                                    {mandat.prix_estime ? `${mandat.prix_estime.toFixed(2)} $` : "0.00 $"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label className="text-slate-400 text-xs">Rabais</Label>
+                                  <p className="text-white font-medium mt-1">
+                                    {mandat.rabais ? `${mandat.rabais.toFixed(2)} $` : "0.00 $"}
+                                  </p>
+                                </div>
+                              </div>
                               <div>
-                                <Label className="text-slate-400 text-xs">Prix estimé</Label>
+                                <Label className="text-slate-400 text-xs">Taxes incluses</Label>
                                 <p className="text-white font-medium mt-1">
-                                  {mandat.prix_estime ? `${mandat.prix_estime.toFixed(2)} $` : "0.00 $"}
+                                  {mandat.taxes_incluses ? "Oui" : "Non"}
                                 </p>
                               </div>
 
@@ -1924,16 +2156,6 @@ export default function Dossiers() {
                     </Tabs>
                   ) : (
                     <p className="text-slate-500 text-sm">Aucun mandat</p>
-                  )}
-                </div>
-
-                {/* Description générale */}
-                <div>
-                  <Label className="text-slate-400 mb-2 block">Description générale</Label>
-                  {viewingDossier.description ? (
-                    <p className="text-slate-300 whitespace-pre-wrap">{viewingDossier.description}</p>
-                  ) : (
-                    <p className="text-slate-500 text-sm">Aucune description</p>
                   )}
                 </div>
 
