@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -81,9 +80,24 @@ const navigationItems = [
   },
 ];
 
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  const mapping = {
+    "Samuel Guay": "SG-",
+    "Dany Gaboury": "DG-",
+    "Pierre-Luc Pilote": "PLP-",
+    "Benjamin Larouche": "BL-",
+    "Frédéric Gilbert": "FG-"
+  };
+  return mapping[arpenteur] || "";
+};
+
 function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
+  const [dossierSearchTerm, setDossierSearchTerm] = useState("");
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -92,9 +106,15 @@ function LayoutContent({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: dossiers } = useQuery({
+  const { data: dossiers = [] } = useQuery({
     queryKey: ['dossiers'],
     queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
     initialData: [],
   });
 
@@ -125,6 +145,7 @@ function LayoutContent({ children, currentPageName }) {
       tache: "",
       description: ""
     });
+    setDossierSearchTerm("");
   };
 
   const handleSubmit = (e) => {
@@ -135,12 +156,36 @@ function LayoutContent({ children, currentPageName }) {
     });
   };
 
+  const getClientById = (id) => clients.find(c => c.id === id);
+
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "";
+    const clientNames = clientIds.map(id => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "";
+    }).filter(name => name);
+    return clientNames.join(", ");
+  };
+
+  const filteredDossiers = dossiers.filter(dossier => {
+    const searchLower = dossierSearchTerm.toLowerCase();
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    return (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const selectedDossier = dossiers.find(d => d.id === entreeForm.dossier_id);
+  const availableMandats = selectedDossier?.mandats || [];
+
   const handleDossierChange = (dossierId) => {
-    const selectedDossier = dossiers.find(d => d.id === dossierId);
     setEntreeForm({
       ...entreeForm,
       dossier_id: dossierId,
-      mandat: selectedDossier?.titre || ""
+      mandat: "" // Reset mandat when dossier changes
     });
   };
 
@@ -302,40 +347,66 @@ function LayoutContent({ children, currentPageName }) {
 
                   <div className="space-y-2">
                     <Label>Dossier</Label>
+                    <div className="relative mb-2">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input
+                        placeholder="Rechercher un dossier..."
+                        value={dossierSearchTerm}
+                        onChange={(e) => setDossierSearchTerm(e.target.value)}
+                        className="pl-10 bg-slate-800 border-slate-700"
+                      />
+                    </div>
                     <Select value={entreeForm.dossier_id} onValueChange={handleDossierChange}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner un dossier" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
                         <SelectItem value="aucun" className="text-white">Aucun dossier</SelectItem>
-                        {dossiers.map((dossier) => (
-                          <SelectItem key={dossier.id} value={dossier.id} className="text-white">
-                            {dossier.numero_dossier} - {dossier.titre}
-                          </SelectItem>
-                        ))}
+                        {filteredDossiers.map((dossier) => {
+                          const clientsNames = getClientsNames(dossier.clients_ids);
+                          const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                          return (
+                            <SelectItem key={dossier.id} value={dossier.id} className="text-white">
+                              {displayText}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Mandat</Label>
-                    <Input
-                      value={entreeForm.mandat}
-                      onChange={(e) => setEntreeForm({...entreeForm, mandat: e.target.value})}
-                      placeholder="Mandat du dossier"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
+                  {entreeForm.dossier_id && entreeForm.dossier_id !== "aucun" && availableMandats.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Mandat</Label>
+                      <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({...entreeForm, mandat: value})}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner un mandat" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {availableMandats.map((mandat, index) => (
+                            <SelectItem key={index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
+                              {mandat.type_mandat || `Mandat ${index + 1}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
-                    <Input
-                      value={entreeForm.tache}
-                      onChange={(e) => setEntreeForm({...entreeForm, tache: e.target.value})}
-                      required
-                      placeholder="Ex: Rédaction du rapport"
-                      className="bg-slate-800 border-slate-700"
-                    />
+                    <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner une tâche" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {TACHES.map((tache) => (
+                          <SelectItem key={tache} value={tache} className="text-white">
+                            {tache}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
