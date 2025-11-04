@@ -1386,6 +1386,7 @@ export default function PriseDeMandat() {
                   )}
                 </div>
 
+                {/* Notes générales */}
                 <div className="space-y-2">
                   <Label>Description générale</Label>
                   <Textarea
