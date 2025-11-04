@@ -50,11 +50,6 @@ const navigationItems = [
     icon: Phone,
   },
   {
-    title: "Cédule Terrain",
-    url: createPageUrl("CeduleTerrain"),
-    icon: MapPin,
-  },
-  {
     title: "Dossiers",
     url: createPageUrl("Dossiers"),
     icon: FolderOpen,
@@ -63,6 +58,11 @@ const navigationItems = [
     title: "Clients",
     url: createPageUrl("Clients"),
     icon: User,
+  },
+  {
+    title: "Cédule Terrain",
+    url: createPageUrl("CeduleTerrain"),
+    icon: MapPin,
   },
   {
     title: "Lots",
