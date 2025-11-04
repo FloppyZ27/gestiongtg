@@ -1206,10 +1206,13 @@ export default function PriseDeMandat() {
                                 <div className="space-y-2">
                                   <Label>Prix estimé ($)</Label>
                                   <Input
-                                    type="number"
-                                    step="0.01"
-                                    value={mandat.prix_estime}
-                                    onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={mandat.prix_estime || ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                                      updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
+                                    }}
                                     placeholder="0.00"
                                     className="bg-slate-700 border-slate-600"
                                   />
@@ -1217,10 +1220,13 @@ export default function PriseDeMandat() {
                                 <div className="space-y-2">
                                   <Label>Rabais ($)</Label>
                                   <Input
-                                    type="number"
-                                    step="0.01"
-                                    value={mandat.rabais}
-                                    onChange={(e) => updateMandat(index, 'rabais', parseFloat(e.target.value) || 0)}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={mandat.rabais || ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                                      updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
+                                    }}
                                     placeholder="0.00"
                                     className="bg-slate-700 border-slate-600"
                                   />
