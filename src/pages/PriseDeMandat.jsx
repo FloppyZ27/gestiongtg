@@ -189,6 +189,18 @@ export default function PriseDeMandat() {
     initialData: [],
   });
 
+  const { data: entreeTemps = [] } = useQuery({
+    queryKey: ['entreeTemps'],
+    queryFn: () => base44.entities.EntreeTemps.list('-date'),
+    initialData: [],
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
+
   const createDossierMutation = useMutation({
     mutationFn: (dossierData) => base44.entities.Dossier.create(dossierData),
     onSuccess: () => {

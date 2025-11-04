@@ -183,6 +183,18 @@ export default function Dossiers() {
     initialData: [],
   });
 
+  const { data: entreeTemps = [] } = useQuery({
+    queryKey: ['timeEntries'],
+    queryFn: () => base44.entities.TimeEntry.list(),
+    initialData: [],
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
+
   const createDossierMutation = useMutation({
     mutationFn: (dossierData) => base44.entities.Dossier.create(dossierData),
     onSuccess: () => {
@@ -248,6 +260,7 @@ export default function Dossiers() {
 
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
+  const getUserByEmail = (email) => users.find(u => u.email === email);
 
   const availableLotCadastres = newLotForm.circonscription_fonciere
     ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || []
@@ -2157,6 +2170,69 @@ export default function Dossiers() {
                   ) : (
                     <p className="text-slate-500 text-sm">Aucun mandat</p>
                   )}
+                </div>
+
+                {/* Entrées de temps pour ce dossier */}
+                <div className="mt-6">
+                  <Label className="text-slate-400 mb-3 block">Entrées de temps</Label>
+                  {(() => {
+                    const dossierEntrees = entreeTemps.filter(e => e.dossier_id === viewingDossier.id);
+                    const tempsTotal = dossierEntrees.reduce((sum, e) => sum + (e.heures || 0), 0);
+                    
+                    return dossierEntrees.length > 0 ? (
+                      <>
+                        <div className="border border-slate-700 rounded-lg overflow-hidden mb-3">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300">Date</TableHead>
+                                <TableHead className="text-slate-300">Employé</TableHead>
+                                <TableHead className="text-slate-300">Tâche accomplie</TableHead>
+                                <TableHead className="text-slate-300">Temps</TableHead>
+                                <TableHead className="text-slate-300">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {dossierEntrees.map((entree) => {
+                                const user = getUserByEmail(entree.utilisateur_email);
+                                return (
+                                  <TableRow key={entree.id} className="border-slate-800">
+                                    <TableCell className="text-white">
+                                      {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300">
+                                      {user?.full_name || entree.utilisateur_email}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30">
+                                        {entree.tache}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-emerald-400 font-semibold">
+                                      {entree.heures}h
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 max-w-xs truncate">
+                                      {entree.description || "-"}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                        <div className="flex justify-end">
+                          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-2">
+                            <span className="text-slate-400 text-sm mr-2">Temps total:</span>
+                            <span className="text-emerald-400 font-bold text-lg">{tempsTotal.toFixed(2)}h</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                        Aucune entrée de temps pour ce dossier
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
