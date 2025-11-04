@@ -45,6 +45,11 @@ const navigationItems = [
     icon: Calendar,
   },
   {
+    title: "Prise de mandat",
+    url: createPageUrl("PriseDeMandat"),
+    icon: Phone,
+  },
+  {
     title: "Cédule Terrain",
     url: createPageUrl("CeduleTerrain"),
     icon: MapPin,
