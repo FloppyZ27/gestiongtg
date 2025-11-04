@@ -129,18 +129,15 @@ export default function AddressInput({
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => addNumeroCivique(index)}
-                  className="bg-slate-700 hover:bg-slate-600 text-white flex-shrink-0"
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                  N° civique
-                </Button>
-                <Label className="text-xs text-slate-400">Numéros civiques</Label>
-              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => addNumeroCivique(index)}
+                className="bg-slate-700 hover:bg-slate-600 text-white flex-shrink-0"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                N° civique
+              </Button>
               <div className="flex flex-wrap gap-2">
                 {addr.numeros_civiques?.map((num, numIndex) => (
                   <div key={numIndex} className="flex gap-1 items-center">

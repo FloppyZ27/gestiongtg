@@ -65,6 +65,25 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
 
   const clientDossiers = getClientDossiers();
 
+  // Créer une liste de mandats avec le dossier associé
+  const mandatsWithDossier = [];
+  clientDossiers.forEach(dossier => {
+    if (dossier.mandats && dossier.mandats.length > 0) {
+      dossier.mandats.forEach(mandat => {
+        mandatsWithDossier.push({
+          dossier,
+          mandat
+        });
+      });
+    } else {
+      // Si pas de mandats, on affiche quand même le dossier
+      mandatsWithDossier.push({
+        dossier,
+        mandat: null
+      });
+    }
+  });
+
   const adresseActuelle = client.adresses?.find(a => a.actuelle);
   const adressesAnciennes = client.adresses?.filter(a => !a.actuelle) || [];
 
@@ -211,12 +230,12 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
         )}
       </div>
 
-      {/* Dossiers associés - Format tableau sans colonne Arpenteur */}
-      {clientDossiers.length > 0 && (
+      {/* Dossiers associés - Format tableau avec séparation par mandat */}
+      {mandatsWithDossier.length > 0 && (
         <div>
           <Label className="text-slate-400 mb-3 block flex items-center gap-2">
             <FolderOpen className="w-4 h-4" />
-            Dossiers associés ({clientDossiers.length})
+            Dossiers associés ({mandatsWithDossier.length} mandat{mandatsWithDossier.length > 1 ? 's' : ''})
           </Label>
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             <Table>
@@ -224,35 +243,35 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                   <TableHead className="text-slate-300">N° Dossier</TableHead>
                   <TableHead className="text-slate-300">Date d'ouverture</TableHead>
-                  <TableHead className="text-slate-300">Mandats</TableHead>
+                  <TableHead className="text-slate-300">Type de mandat</TableHead>
+                  <TableHead className="text-slate-300">Adresse des travaux</TableHead>
                   <TableHead className="text-slate-300 text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clientDossiers.map((dossier) => (
+                {mandatsWithDossier.map((item, idx) => (
                   <TableRow 
-                    key={dossier.id} 
+                    key={`${item.dossier.id}-${idx}`}
                     className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                    onClick={() => handleDossierClick(dossier)}
+                    onClick={() => handleDossierClick(item.dossier)}
                   >
                     <TableCell className="font-medium text-white font-mono">
-                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                      {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
                     </TableCell>
                     <TableCell className="text-slate-300">
-                      {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
+                      {format(new Date(item.dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
                     </TableCell>
                     <TableCell>
-                      {dossier.mandats && dossier.mandats.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {dossier.mandats.map((mandat, idx) => (
-                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-xs">
-                              {mandat.type_mandat}
-                            </Badge>
-                          ))}
-                        </div>
+                      {item.mandat ? (
+                        <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                          {item.mandat.type_mandat}
+                        </Badge>
                       ) : (
-                        <span className="text-slate-600 text-sm">Aucun</span>
+                        <span className="text-slate-600 text-sm">Aucun mandat</span>
                       )}
+                    </TableCell>
+                    <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                      {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
                     </TableCell>
                     <TableCell className="text-center">
                       <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
