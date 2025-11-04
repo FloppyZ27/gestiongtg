@@ -423,6 +423,8 @@ export default function PriseDeMandat() {
           : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
         lots: m.lots || [],
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+        rabais: m.rabais !== undefined ? m.rabais : 0,
+        taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
@@ -492,6 +494,8 @@ export default function PriseDeMandat() {
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
+        rabais: 0,
+        taxes_incluses: false,
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
@@ -1104,17 +1108,43 @@ export default function PriseDeMandat() {
                                 )}
                               </div>
 
-                              <div className="space-y-2">
-                                <Label>Prix estimé ($)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={mandat.prix_estime}
-                                  onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
-                                  placeholder="0.00"
-                                  className="bg-slate-700 border-slate-600"
-                                />
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Prix estimé ($)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={mandat.prix_estime}
+                                    onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Rabais ($)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={mandat.rabais}
+                                    onChange={(e) => updateMandat(index, 'rabais', parseFloat(e.target.value) || 0)}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+                                <div className="space-y-2 flex items-center pt-8">
+                                  <input
+                                    type="checkbox"
+                                    id={`taxes_incluses_${index}`}
+                                    checked={mandat.taxes_incluses}
+                                    onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
+                                    className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
+                                  />
+                                  <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
+                                    Taxes incluses
+                                  </label>
+                                </div>
                               </div>
+
 
                               <div className="space-y-2">
                                 <Label>Notes</Label>
