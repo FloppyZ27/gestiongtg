@@ -214,12 +214,54 @@ export default function PriseDeMandat() {
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.numero_lot === numeroLot);
 
-  const retourAppelDossiers = dossiers.filter(d => 
+  // Filtrer les dossiers pour exclure le statut "Rejeté"
+  const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
+
+  const retourAppelDossiers = dossiersNonRejetes.filter(d => 
     d.statut === "Retour d'appel" || 
     d.statut === "Message laissé/Sans réponse" || 
     d.statut === "Demande d'information"
   );
-  const soumissionDossiers = dossiers.filter(d => d.statut === "Soumission");
+  const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
+
+  // Calcul des périodes
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay()); // Début de la semaine (dimanche)
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  startOfYear.setHours(0, 0, 0, 0);
+
+  const getCountsByPeriod = (dossiersList) => {
+    const byWeek = dossiersList.filter(d => new Date(d.created_date) >= startOfWeek).length;
+    const byMonth = dossiersList.filter(d => new Date(d.created_date) >= startOfMonth).length;
+    const byYear = dossiersList.filter(d => new Date(d.created_date) >= startOfYear).length;
+    return { byWeek, byMonth, byYear };
+  };
+
+  const getCountsByArpenteur = (dossiersList) => {
+    const counts = {};
+    ARPENTEURS.forEach(arp => {
+      counts[arp] = dossiersList.filter(d => d.arpenteur_geometre === arp).length;
+    });
+    return counts;
+  };
+
+  const retourAppelStats = {
+    total: retourAppelDossiers.length,
+    ...getCountsByPeriod(retourAppelDossiers),
+    byArpenteur: getCountsByArpenteur(retourAppelDossiers)
+  };
+
+  const soumissionStats = {
+    total: soumissionDossiers.length,
+    ...getCountsByPeriod(soumissionDossiers),
+    byArpenteur: getCountsByArpenteur(soumissionDossiers)
+  };
 
   const filteredRetourAppel = retourAppelDossiers.filter(dossier => {
     const searchLower = searchTerm.toLowerCase();
@@ -554,21 +596,6 @@ export default function PriseDeMandat() {
     };
     return colors[statut] || colors["Retour d'appel"];
   };
-
-  const statsCards = [
-    {
-      title: "Retours d'appel",
-      value: retourAppelDossiers.length,
-      icon: Phone,
-      gradient: "from-blue-500 to-cyan-600",
-    },
-    {
-      title: "Soumissions",
-      value: soumissionDossiers.length,
-      icon: FileCheck,
-      gradient: "from-purple-500 to-pink-600",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -1248,7 +1275,7 @@ export default function PriseDeMandat() {
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Nouveau {newClientForm.type_client}</DialogTitle>
+              <DialogTitle className="text-2xl">Nouveau {newClientForm.type_client}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleNewClientSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1591,23 +1618,93 @@ export default function PriseDeMandat() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {statsCards.map((stat, index) => (
-            <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-slate-400">{stat.title}</p>
-                    <CardTitle className="text-3xl font-bold mt-2 text-white">
-                      {stat.value}
-                    </CardTitle>
+          {/* Retours d'appel Stats */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-400">Retours d'appel</p>
+                  <CardTitle className="text-3xl font-bold mt-2 text-white">
+                    {retourAppelStats.total}
+                  </CardTitle>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
+                  <Phone className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              
+              <div className="space-y-3 pt-3 border-t border-slate-800">
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Semaine</p>
+                    <p className="text-white font-semibold">{retourAppelStats.byWeek}</p>
                   </div>
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} opacity-20`}>
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Mois</p>
+                    <p className="text-white font-semibold">{retourAppelStats.byMonth}</p>
+                  </div>
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Année</p>
+                    <p className="text-white font-semibold">{retourAppelStats.byYear}</p>
                   </div>
                 </div>
-              </CardHeader>
-            </Card>
-          ))}
+
+                <div className="space-y-1 mt-4">
+                  <p className="text-xs text-slate-500 mb-2">Par arpenteur:</p>
+                  {ARPENTEURS.map(arp => (
+                    <div key={arp} className="flex justify-between items-center text-xs">
+                      <span className="text-slate-400">{arp}</span>
+                      <span className="text-white font-medium">{retourAppelStats.byArpenteur[arp]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          {/* Soumissions Stats */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-400">Soumissions</p>
+                  <CardTitle className="text-3xl font-bold mt-2 text-white">
+                    {soumissionStats.total}
+                  </CardTitle>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
+                  <FileCheck className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              
+              <div className="space-y-3 pt-3 border-t border-slate-800">
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Semaine</p>
+                    <p className="text-white font-semibold">{soumissionStats.byWeek}</p>
+                  </div>
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Mois</p>
+                    <p className="text-white font-semibold">{soumissionStats.byMonth}</p>
+                  </div>
+                  <div className="bg-slate-800/50 p-2 rounded">
+                    <p className="text-slate-500">Année</p>
+                    <p className="text-white font-semibold">{soumissionStats.byYear}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1 mt-4">
+                  <p className="text-xs text-slate-500 mb-2">Par arpenteur:</p>
+                  {ARPENTEURS.map(arp => (
+                    <div key={arp} className="flex justify-between items-center text-xs">
+                      <span className="text-slate-400">{arp}</span>
+                      <span className="text-white font-medium">{soumissionStats.byArpenteur[arp]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         </div>
 
         {/* Tabs for Retour d'appel and Soumission */}
