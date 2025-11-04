@@ -184,8 +184,8 @@ export default function Dossiers() {
   });
 
   const { data: entreeTemps = [] } = useQuery({
-    queryKey: ['timeEntries'],
-    queryFn: () => base44.entities.TimeEntry.list(),
+    queryKey: ['entreeTemps'],
+    queryFn: () => base44.entities.EntreeTemps.list('-date'),
     initialData: [],
   });
 
@@ -2114,7 +2114,7 @@ export default function Dossiers() {
                                                   {lot.circonscription_fonciere}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
+                                              <TableCell className="text-slate-300">{lot.cadastre || "-ండే</TableCell>
                                               <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
                                             </TableRow>
                                           ) : (
