@@ -1638,90 +1638,64 @@ export default function PriseDeMandat() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Retours d'appel Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader>
-              <div className="flex justify-between items-start mb-4">
+            <CardHeader className="pb-2 pt-3">
+              <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Retours d'appel</p>
-                  <CardTitle className="text-3xl font-bold mt-2 text-white">
+                  <p className="text-xs font-medium text-slate-400">Retours d'appel</p>
+                  <CardTitle className="text-2xl font-bold mt-1 text-white">
                     {retourAppelStats.total}
                   </CardTitle>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              
-              <div className="space-y-3 pt-3 border-t border-slate-800">
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Semaine</p>
-                    <p className="text-white font-semibold">{retourAppelStats.byWeek}</p>
-                  </div>
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Mois</p>
-                    <p className="text-white font-semibold">{retourAppelStats.byMonth}</p>
-                  </div>
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Année</p>
-                    <p className="text-white font-semibold">{retourAppelStats.byYear}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-1 mt-4">
-                  <p className="text-xs text-slate-500 mb-2">Par arpenteur:</p>
-                  {ARPENTEURS.map(arp => (
-                    <div key={arp} className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">{arp}</span>
-                      <span className="text-white font-medium">{retourAppelStats.byArpenteur[arp]}</span>
-                    </div>
-                  ))}
+                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
+                  <Phone className="w-5 h-5 text-white" />
                 </div>
               </div>
             </CardHeader>
+            <CardContent className="pt-2 pb-3">
+              <div className="space-y-1">
+                {ARPENTEURS.map(arp => (
+                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
+                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
+                      {arp}
+                    </span>
+                    <span className="text-white font-semibold">
+                      {retourAppelStats.byArpenteur[arp]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
           </Card>
 
           {/* Soumissions Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader>
-              <div className="flex justify-between items-start mb-4">
+            <CardHeader className="pb-2 pt-3">
+              <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Soumissions</p>
-                  <CardTitle className="text-3xl font-bold mt-2 text-white">
+                  <p className="text-xs font-medium text-slate-400">Soumissions</p>
+                  <CardTitle className="text-2xl font-bold mt-1 text-white">
                     {soumissionStats.total}
                   </CardTitle>
                 </div>
-                <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
-                  <FileCheck className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              
-              <div className="space-y-3 pt-3 border-t border-slate-800">
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Semaine</p>
-                    <p className="text-white font-semibold">{soumissionStats.byWeek}</p>
-                  </div>
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Mois</p>
-                    <p className="text-white font-semibold">{soumissionStats.byMonth}</p>
-                  </div>
-                  <div className="bg-slate-800/50 p-2 rounded">
-                    <p className="text-slate-500">Année</p>
-                    <p className="text-white font-semibold">{soumissionStats.byYear}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-1 mt-4">
-                  <p className="text-xs text-slate-500 mb-2">Par arpenteur:</p>
-                  {ARPENTEURS.map(arp => (
-                    <div key={arp} className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400">{arp}</span>
-                      <span className="text-white font-medium">{soumissionStats.byArpenteur[arp]}</span>
-                    </div>
-                  ))}
+                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
+                  <FileCheck className="w-5 h-5 text-white" />
                 </div>
               </div>
             </CardHeader>
+            <CardContent className="pt-2 pb-3">
+              <div className="space-y-1">
+                {ARPENTEURS.map(arp => (
+                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
+                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
+                      {arp}
+                    </span>
+                    <span className="text-white font-semibold">
+                      {soumissionStats.byArpenteur[arp]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
           </Card>
         </div>
 
