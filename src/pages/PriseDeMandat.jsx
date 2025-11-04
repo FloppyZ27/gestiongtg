@@ -1110,6 +1110,16 @@ export default function PriseDeMandat() {
                   )}
                 </div>
 
+                {/* Notes générales */}
+                <div className="space-y-2">
+                  <Label>Notes générales</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="bg-slate-800 border-slate-700 h-24"
+                  />
+                </div>
+
                 {/* Mandats */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -1383,16 +1393,6 @@ export default function PriseDeMandat() {
                       Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
                     </div>
                   )}
-                </div>
-
-                {/* Notes générales */}
-                <div className="space-y-2">
-                  <Label>Notes générales</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="bg-slate-800 border-slate-700 h-24"
-                  />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
