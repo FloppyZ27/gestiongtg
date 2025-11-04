@@ -2114,7 +2114,7 @@ export default function Dossiers() {
                                                   {lot.circonscription_fonciere}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300">{lot.cadastre || "-ండే</TableCell>
+                                              <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
                                               <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
                                             </TableRow>
                                           ) : (
