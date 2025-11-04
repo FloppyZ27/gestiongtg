@@ -128,6 +128,19 @@ export default function PriseDeMandat() {
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
   const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
+  // NEW STATES
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
+  const [newLotForm, setNewLotForm] = useState({
+    numero_lot: "",
+    circonscription_fonciere: "",
+    cadastre: "",
+    rang: "",
+    concordance_anterieur: "",
+    document_url: "", // To store the uploaded file URL
+  });
+  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
+  const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+  // END NEW STATES
 
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
@@ -212,6 +225,17 @@ export default function PriseDeMandat() {
     },
   });
 
+  // NEW MUTATION
+  const createLotMutation = useMutation({
+    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+    },
+  });
+  // END NEW MUTATION
+
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
@@ -222,9 +246,9 @@ export default function PriseDeMandat() {
   // Filtrer les dossiers pour exclure le statut "Rejeté"
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
 
-  const retourAppelDossiers = dossiersNonRejetes.filter(d => 
-    d.statut === "Retour d'appel" || 
-    d.statut === "Message laissé/Sans réponse" || 
+  const retourAppelDossiers = dossiersNonRejetes.filter(d =>
+    d.statut === "Retour d'appel" ||
+    d.statut === "Message laissé/Sans réponse" ||
     d.statut === "Demande d'information"
   );
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
@@ -363,9 +387,9 @@ export default function PriseDeMandat() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     let dataToSubmit = { ...formData };
-    
+
     // Si le statut est "Ouvert", mettre la tâche actuelle de tous les mandats à "Cédule"
     if (formData.statut === "Ouvert") {
       dataToSubmit = {
@@ -376,7 +400,7 @@ export default function PriseDeMandat() {
         }))
       };
     }
-    
+
     if (editingDossier) {
       updateDossierMutation.mutate({ id: editingDossier.id, dossierData: dataToSubmit });
     } else {
@@ -394,6 +418,13 @@ export default function PriseDeMandat() {
     };
     createClientMutation.mutate(cleanedData);
   };
+
+  // NEW FUNCTION
+  const handleNewLotSubmit = (e) => {
+    e.preventDefault();
+    createLotMutation.mutate(newLotForm);
+  };
+  // END NEW FUNCTION
 
   const resetForm = () => {
     setFormData({
@@ -422,6 +453,20 @@ export default function PriseDeMandat() {
       notes: ""
     });
   };
+
+  // NEW FUNCTION
+  const resetLotForm = () => {
+    setNewLotForm({
+      numero_lot: "",
+      circonscription_fonciere: "",
+      cadastre: "",
+      rang: "",
+      concordance_anterieur: "",
+      document_url: "",
+    });
+    setAvailableCadastresForNewLot([]);
+  };
+  // END NEW FUNCTION
 
   const handleEdit = (dossier) => {
     setIsViewDialogOpen(false);
@@ -503,7 +548,7 @@ export default function PriseDeMandat() {
 
   const addMandat = () => {
     const newIndex = formData.mandats.length;
-    
+
     const firstMandat = formData.mandats[0];
     const defaultAdresse = firstMandat?.adresse_travaux
       ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux))
@@ -515,7 +560,7 @@ export default function PriseDeMandat() {
         province: ""
       };
     const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
-    
+
     setFormData(prev => ({
       ...prev,
       mandats: [...prev.mandats, {
@@ -551,7 +596,7 @@ export default function PriseDeMandat() {
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      mandats: prev.mandats.map((m, i) => 
+      mandats: prev.mandats.map((m, i) =>
         i === index ? { ...m, [field]: value } : m
       )
     }));
@@ -627,6 +672,33 @@ export default function PriseDeMandat() {
       }))
     }));
   };
+
+  // NEW FUNCTIONS
+  const handleLotCirconscriptionChange = (value) => {
+    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" })); // Reset cadastre when circonscription changes
+    setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const handleLotFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploadingLotPdf(true);
+    try {
+      const response = await base44.storage.upload({
+        file: file,
+        folder: "lots_documents",
+      });
+      setNewLotForm(prev => ({ ...prev, document_url: response.url }));
+      alert("Fichier PDF téléchargé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du fichier:", error);
+      alert("Échec du téléchargement du fichier PDF.");
+    } finally {
+      setUploadingLotPdf(false);
+    }
+  };
+  // END NEW FUNCTIONS
 
   const getCurrentValue = (items, key) => {
     const current = items?.find(item => item.actuel || item.actuelle);
@@ -1767,6 +1839,14 @@ export default function PriseDeMandat() {
                     <SelectItem value="Québec" className="text-white">Québec</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button
+                  type="button"
+                  onClick={() => setIsNewLotDialogOpen(true)}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau lot
+                </Button>
               </div>
 
               <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
@@ -1843,6 +1923,109 @@ export default function PriseDeMandat() {
                 Valider la sélection
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Lot Dialog */}
+        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
+          setIsNewLotDialogOpen(open);
+          if (!open) resetLotForm();
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewLotSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
+                  <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                        <SelectItem key={circ} value={circ} className="text-white">
+                          {circ}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Cadastre</Label>
+                  <Select
+                    value={newLotForm.cadastre}
+                    onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                    disabled={!newLotForm.circonscription_fonciere}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                      {availableCadastresForNewLot.map((cadastre) => (
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">
+                          {cadastre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
+                  <Input
+                    value={newLotForm.numero_lot}
+                    onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
+                    required
+                    placeholder="Ex: 1234-5678"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rang</Label>
+                  <Input
+                    value={newLotForm.rang}
+                    onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
+                    placeholder="Ex: Rang 4"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Concordance antérieur</Label>
+                <Input
+                  value={newLotForm.concordance_anterieur}
+                  onChange={(e) => setNewLotForm({...newLotForm, concordance_anterieur: e.target.value})}
+                  placeholder="Concordance avec l'ancien cadastre"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Document PDF</Label>
+                <Input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleLotFileUpload}
+                  disabled={uploadingLotPdf}
+                  className="bg-slate-800 border-slate-700"
+                />
+                {uploadingLotPdf && <p className="text-sm text-slate-400">Upload en cours...</p>}
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -2053,14 +2236,14 @@ export default function PriseDeMandat() {
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <TabsList className="bg-slate-800/50 border border-slate-700">
-                    <TabsTrigger 
+                    <TabsTrigger
                       value="retour-appel"
                       className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
                     >
                       <Phone className="w-4 h-4 mr-2" />
                       Retours d'appel ({retourAppelDossiers.length})
                     </TabsTrigger>
-                    <TabsTrigger 
+                    <TabsTrigger
                       value="soumission"
                       className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400"
                     >
@@ -2078,7 +2261,7 @@ export default function PriseDeMandat() {
                     />
                   </div>
                 </div>
-                
+
                 {/* Filtres */}
                 <div className="flex flex-wrap gap-3">
                   <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
@@ -2131,43 +2314,43 @@ export default function PriseDeMandat() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('arpenteur_geometre')}
                         >
                           Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('created_date')}
                         >
                           Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('statut')}
                         >
                           Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
                         >
                           Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('adresse_travaux')}
                         >
                           Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('mandats')}
                         >
                           Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('description')}
                         >
@@ -2261,43 +2444,43 @@ export default function PriseDeMandat() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('arpenteur_geometre')}
                         >
                           Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('created_date')}
                         >
                           Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('statut')}
                         >
                           Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
                         >
                           Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('adresse_travaux')}
                         >
                           Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('mandats')}
                         >
                           Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead 
+                        <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('description')}
                         >

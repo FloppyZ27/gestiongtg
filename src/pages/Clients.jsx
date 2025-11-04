@@ -704,17 +704,11 @@ export default function Clients() {
                     <TableHead className="text-slate-300">Adresse actuelle</TableHead>
                     <TableHead className="text-slate-300">Courriel actuel</TableHead>
                     <TableHead className="text-slate-300">Téléphone actuel</TableHead>
-                    <TableHead className="text-slate-300">Dossiers</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredClients.map((client) => {
-                    const clientDossiers = getClientDossiers(
-                      client.id,
-                      client.type_client === 'Notaire' ? 'notaires' :
-                      client.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients'
-                    );
                     const adresseActuelle = client.adresses?.find(a => a.actuelle);
 
                     return (
@@ -746,21 +740,6 @@ export default function Clients() {
                             <Phone className="w-4 h-4 text-slate-500" />
                             {getCurrentValue(client.telephones, 'telephone')}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          {clientDossiers.length > 0 ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setViewingClientDossiers(client)}
-                              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 flex items-center gap-2"
-                            >
-                              <FolderOpen className="w-4 h-4" />
-                              {clientDossiers.length} dossier{clientDossiers.length > 1 ? 's' : ''}
-                            </Button>
-                          ) : (
-                            <span className="text-slate-600 text-sm">Aucun dossier</span>
-                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
