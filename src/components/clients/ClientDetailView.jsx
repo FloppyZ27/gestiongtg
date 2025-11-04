@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -81,10 +82,10 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
     <div className="space-y-6">
       {/* Header - Centré */}
       <div className="text-center border-b border-slate-700 pb-4">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <h3 className="text-2xl font-bold text-white">
-            {client.prenom} {client.nom}
-          </h3>
+        <h2 className="text-2xl font-bold text-white mb-3">Fiche Client</h2>
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-lg text-white font-medium">{client.prenom}</span>
+          <span className="text-lg text-white font-medium">{client.nom}</span>
           <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
             {client.type_client || "Client"}
           </Badge>
@@ -108,6 +109,9 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                       ? adresseActuelle.adresse 
                       : formatAdresse(adresseActuelle)}
                   </p>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
+                    Actuel
+                  </Badge>
                 </div>
               )}
               {adressesAnciennes.map((addr, idx) => (
@@ -137,6 +141,9 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
               {courrielActuel && (
                 <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                   <p className="text-slate-300 flex-1">{courrielActuel.courriel}</p>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
+                    Actuel
+                  </Badge>
                 </div>
               )}
               {courrielsAnciens.map((courriel, idx) => (
@@ -162,6 +169,9 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
               {telephoneActuel && (
                 <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                   <p className="text-slate-300 flex-1">{telephoneActuel.telephone}</p>
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
+                    Actuel
+                  </Badge>
                 </div>
               )}
               {telephonesAnciens.map((tel, idx) => (
@@ -190,56 +200,60 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
         )}
       </div>
 
-      {/* Dossiers associés */}
+      {/* Dossiers associés - Format tableau */}
       {clientDossiers.length > 0 && (
         <div>
           <Label className="text-slate-400 mb-3 block flex items-center gap-2">
             <FolderOpen className="w-4 h-4" />
             Dossiers associés ({clientDossiers.length})
           </Label>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {clientDossiers.map((dossier) => (
-              <Card 
-                key={dossier.id} 
-                className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
-                onClick={() => handleDossierClick(dossier)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-white text-lg">
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </h4>
-                        <ExternalLink className="w-4 h-4 text-slate-400" />
-                      </div>
-                      <div className="space-y-1 text-sm">
-                        <p className="text-slate-400">
-                          Arpenteur: <span className="text-white">{dossier.arpenteur_geometre}</span>
-                        </p>
-                        <p className="text-slate-400">
-                          Date d'ouverture: <span className="text-white">
-                            {format(new Date(dossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
-                          </span>
-                        </p>
-                        {dossier.mandats && dossier.mandats.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-slate-400 mb-1">Mandats:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {dossier.mandats.map((mandat, idx) => (
-                                <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                  {mandat.type_mandat}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="border border-slate-700 rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                  <TableHead className="text-slate-300">N° Dossier</TableHead>
+                  <TableHead className="text-slate-300">Arpenteur</TableHead>
+                  <TableHead className="text-slate-300">Date d'ouverture</TableHead>
+                  <TableHead className="text-slate-300">Mandats</TableHead>
+                  <TableHead className="text-slate-300 text-center">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {clientDossiers.map((dossier) => (
+                  <TableRow 
+                    key={dossier.id} 
+                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                    onClick={() => handleDossierClick(dossier)}
+                  >
+                    <TableCell className="font-medium text-white font-mono">
+                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                    </TableCell>
+                    <TableCell className="text-slate-300">
+                      {dossier.arpenteur_geometre}
+                    </TableCell>
+                    <TableCell className="text-slate-300">
+                      {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
+                    </TableCell>
+                    <TableCell>
+                      {dossier.mandats && dossier.mandats.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {dossier.mandats.map((mandat, idx) => (
+                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 text-xs">
+                              {mandat.type_mandat}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-slate-600 text-sm">Aucun</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}
