@@ -363,10 +363,24 @@ export default function PriseDeMandat() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    let dataToSubmit = { ...formData };
+    
+    // Si le statut est "Ouvert", mettre la tâche actuelle de tous les mandats à "Cédule"
+    if (formData.statut === "Ouvert") {
+      dataToSubmit = {
+        ...formData,
+        mandats: formData.mandats.map(m => ({
+          ...m,
+          tache_actuelle: "Cédule"
+        }))
+      };
+    }
+    
     if (editingDossier) {
-      updateDossierMutation.mutate({ id: editingDossier.id, dossierData: formData });
+      updateDossierMutation.mutate({ id: editingDossier.id, dossierData: dataToSubmit });
     } else {
-      createDossierMutation.mutate(formData);
+      createDossierMutation.mutate(dataToSubmit);
     }
   };
 
