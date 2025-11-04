@@ -80,15 +80,23 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
 
   return (
     <div className="space-y-6">
-      {/* Header - Centré */}
-      <div className="text-center border-b border-slate-700 pb-4">
-        <h2 className="text-2xl font-bold text-white mb-3">Fiche Client</h2>
-        <div className="flex items-center justify-center gap-3">
-          <span className="text-lg text-white font-medium">{client.prenom}</span>
-          <span className="text-lg text-white font-medium">{client.nom}</span>
-          <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
-            {client.type_client || "Client"}
-          </Badge>
+      {/* Header - Champs séparés */}
+      <div className="border-b border-slate-700 pb-4 space-y-3">
+        <div>
+          <Label className="text-slate-400 text-sm">Prénom</Label>
+          <p className="text-white font-medium text-lg">{client.prenom}</p>
+        </div>
+        <div>
+          <Label className="text-slate-400 text-sm">Nom</Label>
+          <p className="text-white font-medium text-lg">{client.nom}</p>
+        </div>
+        <div>
+          <Label className="text-slate-400 text-sm">Type</Label>
+          <div className="mt-1">
+            <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
+              {client.type_client || "Client"}
+            </Badge>
+          </div>
         </div>
       </div>
 
@@ -200,7 +208,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
         )}
       </div>
 
-      {/* Dossiers associés - Format tableau */}
+      {/* Dossiers associés - Format tableau sans colonne Arpenteur */}
       {clientDossiers.length > 0 && (
         <div>
           <Label className="text-slate-400 mb-3 block flex items-center gap-2">
@@ -212,7 +220,6 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
               <TableHeader>
                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                   <TableHead className="text-slate-300">N° Dossier</TableHead>
-                  <TableHead className="text-slate-300">Arpenteur</TableHead>
                   <TableHead className="text-slate-300">Date d'ouverture</TableHead>
                   <TableHead className="text-slate-300">Mandats</TableHead>
                   <TableHead className="text-slate-300 text-center">Action</TableHead>
@@ -227,9 +234,6 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   >
                     <TableCell className="font-medium text-white font-mono">
                       {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                    </TableCell>
-                    <TableCell className="text-slate-300">
-                      {dossier.arpenteur_geometre}
                     </TableCell>
                     <TableCell className="text-slate-300">
                       {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
