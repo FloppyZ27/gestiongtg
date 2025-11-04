@@ -629,32 +629,20 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {ARPENTEURS.map((arpenteur) => (
-                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                            {arpenteur}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                    <Input
-                      type="date"
-                      value={formData.date_ouverture}
-                      onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
-                      required
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                  <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {ARPENTEURS.map((arpenteur) => (
+                        <SelectItem key={arpenteur} value={arpenteur} className="text-white">
+                          {arpenteur}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -674,6 +662,32 @@ export default function PriseDeMandat() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Champs conditionnels pour statut "Ouvert" */}
+                {formData.statut === "Ouvert" && (
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="space-y-2">
+                      <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                      <Input
+                        value={formData.numero_dossier}
+                        onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})}
+                        required
+                        placeholder="Ex: SG-2024-001"
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="date"
+                        value={formData.date_ouverture}
+                        onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
+                        required
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Clients */}
                 <div className="space-y-2">
