@@ -1129,6 +1129,17 @@ export default function PriseDeMandat() {
                           </Select>
                         </div>
                       )}
+
+                      {/* General description for all other cases */}
+                      <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData({...formData, description: e.target.value})}
+                          className="bg-slate-800 border-slate-700 min-h-[120px]"
+                          placeholder="Ajouter une description ou des notes générales pour ce dossier..."
+                        />
+                      </div>
                     </>
                   )}
 
