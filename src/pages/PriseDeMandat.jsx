@@ -162,7 +162,7 @@ export default function PriseDeMandat() {
     notaires_ids: [],
     courtiers_ids: [],
     mandats: [],
-    notes_retour_appel: ""
+    description: ""
   });
 
   const [newClientForm, setNewClientForm] = useState({
@@ -322,11 +322,11 @@ export default function PriseDeMandat() {
         date_livraison: "", // Reset for new mandat
         date_signature: "", // Reset for new mandat
         date_debut_travaux: "", // Reset for new mandat
-        notes: m.notes || "", // Keep notes from original mandate
+        // notes: m.notes || "", // Removed as per changes
         tache_actuelle: "" // Reset task
       })) || [],
       utilisateur_assigne: dossier.utilisateur_assigne || "",
-      notes_retour_appel: "" // Reset/add new field
+      description: dossier.description || "" // Changed from notes_retour_appel
     });
     setActiveTabMandat("0");
     setDossierReferenceId(dossierId);
@@ -532,7 +532,7 @@ export default function PriseDeMandat() {
       notaires_ids: [],
       courtiers_ids: [],
       mandats: [],
-      notes_retour_appel: ""
+      description: ""
     });
     setEditingDossier(null);
     setActiveTabMandat("0");
@@ -602,10 +602,10 @@ export default function PriseDeMandat() {
         taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
-        date_debut_travaux: m.date_debut_travaux || "",
-        notes: m.notes || ""
+        date_debut_travaux: m.date_debut_travaux || ""
+        // notes: m.notes || "" // Removed as per changes
       })) || [],
-      notes_retour_appel: dossier.notes_retour_appel || ""
+      description: dossier.description || ""
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
@@ -673,8 +673,8 @@ export default function PriseDeMandat() {
         taxes_incluses: false,
         date_livraison: "",
         date_signature: "",
-        date_debut_travaux: "",
-        notes: ""
+        date_debut_travaux: ""
+        // notes: "" // Removed as per changes
       }]
     }));
     setActiveTabMandat(newIndex.toString());
@@ -1043,8 +1043,8 @@ export default function PriseDeMandat() {
                       <div className="space-y-2">
                         <Label>Notes de retour d'appel</Label>
                         <Textarea
-                          value={formData.notes_retour_appel}
-                          onChange={(e) => setFormData({...formData, notes_retour_appel: e.target.value})}
+                          value={formData.description}
+                          onChange={(e) => setFormData({...formData, description: e.target.value})}
                           className="bg-slate-800 border-slate-700 h-full min-h-[300px]"
                           placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
                         />
@@ -1118,18 +1118,6 @@ export default function PriseDeMandat() {
                               ))}
                             </SelectContent>
                           </Select>
-                        </div>
-                      )}
-
-                      {formData.statut === "Retour d'appel" && (
-                        <div className="space-y-2">
-                          <Label>Notes de retour d'appel</Label>
-                          <Textarea
-                            value={formData.notes_retour_appel}
-                            onChange={(e) => setFormData({...formData, notes_retour_appel: e.target.value})}
-                            className="bg-slate-800 border-slate-700 h-20"
-                            placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
-                          />
                         </div>
                       )}
                     </>
@@ -1375,7 +1363,7 @@ export default function PriseDeMandat() {
                         {formData.mandats.map((mandat, index) => (
                           <TabsContent key={index} value={index.toString()}>
                             <Card className="border-slate-700 bg-slate-800/30">
-                              <CardContent className="p-4 space-y-3">
+                              <CardContent className="p-4 space-y-4">
                                 <div className="flex justify-end">
                                   <Button
                                     type="button"
@@ -1621,16 +1609,6 @@ export default function PriseDeMandat() {
                                     </div>
                                   </div>
                                 </div>
-
-                                <div className="space-y-2">
-                                  <Label>Notes</Label>
-                                  <Textarea
-                                    value={mandat.notes}
-                                    onChange={(e) => updateMandat(index, 'notes', e.target.value)}
-                                    className="bg-slate-700 border-slate-600 h-20"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </div>
                               </CardContent>
                             </Card>
                           </TabsContent>
@@ -1864,8 +1842,8 @@ export default function PriseDeMandat() {
                     >
                       <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel)) && (
-                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel))}</p>
+                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel)) && (
+                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel))}</p>
                         )}
                         {getCurrentValue(courtier.courriels, 'courriel') && (
                           <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
@@ -2397,10 +2375,10 @@ export default function PriseDeMandat() {
                   )}
                 </div>
 
-                {viewingDossier.notes_retour_appel && ( // ADDED: Display notes de retour d'appel
+                {viewingDossier.description && ( // Changed from notes_retour_appel
                   <div className="space-y-2">
-                    <p className="text-slate-400">Notes de retour d'appel</p>
-                    <p className="text-white">{viewingDossier.notes_retour_appel}</p>
+                    <p className="text-slate-400">Description</p> {/* Changed label */}
+                    <p className="text-white">{viewingDossier.description}</p> {/* Changed field */}
                   </div>
                 )}
 
