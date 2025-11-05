@@ -826,7 +826,8 @@ export default function PriseDeMandat() {
       "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
       "Nouveau mandat/Demande d'information": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // Added for combined status
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-      "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
+      "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30",
+      "Fermé": "bg-slate-500/20 text-slate-400 border-slate-500/30"
     };
     return colors[statut] || colors["Retour d'appel"];
   };
@@ -1027,11 +1028,12 @@ export default function PriseDeMandat() {
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                           <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
+                          <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                           {editingDossier && (
                             <>
                               <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                               <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                              <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                              <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
                             </>
                           )}
                         </SelectContent>
