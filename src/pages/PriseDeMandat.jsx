@@ -1407,83 +1407,91 @@ export default function PriseDeMandat() {
                                 </Button>
                               </div>
 
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                  <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                  <Select
-                                    value={mandat.type_mandat}
-                                    onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                                    disabled={!!dossierReferenceId}
-                                  >
-                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                      <SelectValue placeholder="Sélectionner" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700">
-                                      {TYPES_MANDATS.map((type) => (
-                                        <SelectItem key={type} value={type} className="text-white">
-                                          {type}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Date d'ouverture</Label>
-                                  <Input
-                                    type="date"
-                                    value={mandat.date_ouverture || ""}
-                                    onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                    className="bg-slate-700 border-slate-600"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </div>
-                              </div>
+                              {/* Nouvelle mise en page : 70% gauche / 30% droite */}
+                              <div className="grid grid-cols-[70%_30%] gap-4">
+                                {/* Colonne gauche - Type de mandat et Adresse */}
+                                <div className="space-y-3">
+                                  <div className="space-y-2">
+                                    <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                                    <Select
+                                      value={mandat.type_mandat}
+                                      onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                                      disabled={!!dossierReferenceId}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                        <SelectValue placeholder="Sélectionner" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        {TYPES_MANDATS.map((type) => (
+                                          <SelectItem key={type} value={type} className="text-white">
+                                            {type}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
 
-                              <AddressInput
-                                addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
-                                  ville: "",
-                                  numeros_civiques: [""],
-                                  rue: "",
-                                  code_postal: "",
-                                  province: ""
-                                }]}
-                                onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
-                                showActuelle={false}
-                                label="Adresse des travaux"
-                                singleAddress={true}
-                                disabled={!!dossierReferenceId}
-                              />
+                                  <AddressInput
+                                    addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
+                                      ville: "",
+                                      numeros_civiques: [""],
+                                      rue: "",
+                                      code_postal: "",
+                                      province: ""
+                                    }]}
+                                    onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                                    showActuelle={false}
+                                    label="Adresse des travaux"
+                                    singleAddress={true}
+                                    disabled={!!dossierReferenceId}
+                                  />
+                                </div>
 
-                              <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-2">
-                                  <Label>Date de signature</Label>
-                                  <Input
-                                    type="date"
-                                    value={mandat.date_signature || ""}
-                                    onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                    className="bg-slate-700 border-slate-600"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Début des travaux</Label>
-                                  <Input
-                                    type="date"
-                                    value={mandat.date_debut_travaux || ""}
-                                    onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                    className="bg-slate-700 border-slate-600"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Date de livraison</Label>
-                                  <Input
-                                    type="date"
-                                    value={mandat.date_livraison || ""}
-                                    onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                    className="bg-slate-700 border-slate-600"
-                                    disabled={!!dossierReferenceId}
-                                  />
+                                {/* Colonne droite - Dates */}
+                                <div className="space-y-3">
+                                  <div className="space-y-2">
+                                    <Label>Date d'ouverture</Label>
+                                    <Input
+                                      type="date"
+                                      value={mandat.date_ouverture || ""}
+                                      onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                                      className="bg-slate-700 border-slate-600"
+                                      disabled={!!dossierReferenceId}
+                                    />
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label>Date de signature</Label>
+                                    <Input
+                                      type="date"
+                                      value={mandat.date_signature || ""}
+                                      onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                      className="bg-slate-700 border-slate-600"
+                                      disabled={!!dossierReferenceId}
+                                    />
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label>Début des travaux</Label>
+                                    <Input
+                                      type="date"
+                                      value={mandat.date_debut_travaux || ""}
+                                      onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                      className="bg-slate-700 border-slate-600"
+                                      disabled={!!dossierReferenceId}
+                                    />
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label>Date de livraison</Label>
+                                    <Input
+                                      type="date"
+                                      value={mandat.date_livraison || ""}
+                                      onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                      className="bg-slate-700 border-slate-600"
+                                      disabled={!!dossierReferenceId}
+                                    />
+                                  </div>
                                 </div>
                               </div>
 
@@ -1510,7 +1518,6 @@ export default function PriseDeMandat() {
                                           <TableHead className="text-slate-300">Circonscription</TableHead>
                                           <TableHead className="text-slate-300">Cadastre</TableHead>
                                           <TableHead className="text-slate-300">Rang</TableHead>
-                                          <TableHead className="text-slate-300">Concordance</TableHead>
                                           <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                         </TableRow>
                                       </TableHeader>
@@ -1532,9 +1539,6 @@ export default function PriseDeMandat() {
                                               </TableCell>
                                               <TableCell className="text-slate-300">
                                                 {lot.rang || "-"}
-                                              </TableCell>
-                                              <TableCell className="text-slate-300">
-                                                {lot.concordance_anterieur || "-"}
                                               </TableCell>
                                               <TableCell className="text-right">
                                                 <Button
@@ -2156,7 +2160,6 @@ export default function PriseDeMandat() {
                       <TableHead className="text-slate-300">Circonscription</TableHead>
                       <TableHead className="text-slate-300">Cadastre</TableHead>
                       <TableHead className="text-slate-300">Rang</TableHead>
-                      <TableHead className="text-slate-300">Concordance</TableHead>
                       <TableHead className="text-slate-300 text-right">Sélection</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -2189,9 +2192,6 @@ export default function PriseDeMandat() {
                             <TableCell className="text-slate-300">
                               {lot.rang || "-"}
                             </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.concordance_anterieur || "-"}
-                            </TableCell>
                             <TableCell className="text-right">
                               {isSelected && (
                                 <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
@@ -2205,7 +2205,7 @@ export default function PriseDeMandat() {
                       })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12">
+                        <TableCell colSpan={5} className="text-center py-12">
                           <div className="text-slate-400">
                             <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                             <p>Aucun lot trouvé</p>
