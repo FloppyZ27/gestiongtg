@@ -347,8 +347,7 @@ export default function PriseDeMandat() {
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
 
   const retourAppelDossiers = dossiersNonRejetes.filter(d => d.statut === "Retour d'appel");
-  // Updated filter to include new combined status and old separate ones
-  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Demande d'information" || d.statut === "Nouveau mandat" || d.statut === "Nouveau mandat/Demande d'information");
+  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Nouveau mandat/Demande d'information" || d.statut === "Demande d'information" || d.statut === "Nouveau mandat");
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
 
   // Calcul des périodes
