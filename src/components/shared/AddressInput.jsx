@@ -1,91 +1,217 @@
-
-import React from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MapPin, Plus, X, Check } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
-export default function AddressInput({
-  addresses,
-  onChange,
-  showActuelle = true,
-  label = "Adresse", // Changed default label from "Adresses"
-  singleAddress = false, // Still passed, but its effect on UI (add/remove address buttons) is gone based on outline
-  disabled = false // Added disabled prop
+const PROVINCES_CANADIENNES = [
+  "Québec",
+  "Alberta",
+  "Colombie-Britannique",
+  "Île-du-Prince-Édouard",
+  "Manitoba",
+  "Nouveau-Brunswick",
+  "Nouvelle-Écosse",
+  "Nunavut",
+  "Ontario",
+  "Saskatchewan",
+  "Terre-Neuve-et-Labrador",
+  "Territoires du Nord-Ouest",
+  "Yukon"
+];
+
+export default function AddressInput({ 
+  addresses, 
+  onChange, 
+  showActuelle = true, 
+  label = "Adresses",
+  singleAddress = false,
+  disabled = false 
 }) {
+  const [addressSuggestions, setAddressSuggestions] = useState({});
+  const [loadingSuggestions, setLoadingSuggestions] = useState({});
 
-  // The 'addAddress' and 'removeAddress' functions for managing entire address blocks
-  // are no longer directly used by the provided JSX outline, as the UI buttons for them
-  // have been removed. The parent component is now expected to manage the addition/removal
-  // of addresses in the 'addresses' array.
-
-  const updateField = (index, field, value) => {
-    if (disabled) return; // Prevent changes if disabled
-    onChange(addresses.map((addr, i) =>
-      i === index ? { ...addr, [field]: value } : addr
-    ));
+  const handleAddressChange = (index, field, value) => {
+    const updatedAddresses = [...addresses];
+    updatedAddresses[index] = {
+      ...updatedAddresses[index],
+      [field]: value
+    };
+    onChange(updatedAddresses);
   };
 
-  const addCivicNumber = (addrIndex) => {
-    if (disabled) return; // Prevent changes if disabled
-    onChange(addresses.map((addr, i) =>
-      i === addrIndex ? { ...addr, numeros_civiques: [...(addr.numeros_civiques || []), ""] } : addr
-    ));
+  const handleCivicNumberChange = (addressIndex, civicIndex, value) => {
+    const updatedAddresses = [...addresses];
+    const currentCivics = updatedAddresses[addressIndex].numeros_civiques || [""];
+    currentCivics[civicIndex] = value;
+    updatedAddresses[addressIndex] = {
+      ...updatedAddresses[addressIndex],
+      numeros_civiques: currentCivics
+    };
+    onChange(updatedAddresses);
   };
 
-  const removeCivicNumber = (addrIndex, numIndex) => {
-    if (disabled) return; // Prevent changes if disabled
-    onChange(addresses.map((addr, i) =>
-      i === addrIndex && (addr.numeros_civiques?.length || 0) > 1 // Ensure at least one civic number remains
-        ? { ...addr, numeros_civiques: addr.numeros_civiques.filter((_, ni) => ni !== numIndex) }
-        : addr
-    ));
+  const addCivicNumber = (addressIndex) => {
+    const updatedAddresses = [...addresses];
+    const currentCivics = updatedAddresses[addressIndex].numeros_civiques || [""];
+    updatedAddresses[addressIndex] = {
+      ...updatedAddresses[addressIndex],
+      numeros_civiques: [...currentCivics, ""]
+    };
+    onChange(updatedAddresses);
   };
 
-  const updateCivicNumber = (addrIndex, numIndex, value) => {
-    if (disabled) return; // Prevent changes if disabled
-    onChange(addresses.map((addr, i) =>
-      i === addrIndex
-        ? { ...addr, numeros_civiques: addr.numeros_civiques.map((n, ni) => ni === numIndex ? value : n) }
-        : addr
-    ));
+  const removeCivicNumber = (addressIndex, civicIndex) => {
+    const updatedAddresses = [...addresses];
+    const currentCivics = updatedAddresses[addressIndex].numeros_civiques || [""];
+    if (currentCivics.length > 1) {
+      currentCivics.splice(civicIndex, 1);
+      updatedAddresses[addressIndex] = {
+        ...updatedAddresses[addressIndex],
+        numeros_civiques: currentCivics
+      };
+      onChange(updatedAddresses);
+    }
+  };
+
+  const addAddress = () => {
+    onChange([...addresses, {
+      ville: "",
+      numeros_civiques: [""],
+      rue: "",
+      code_postal: "",
+      province: "Québec",
+      latitude: null,
+      longitude: null,
+      actuelle: false
+    }]);
+  };
+
+  const removeAddress = (index) => {
+    if (addresses.length > 1) {
+      const updatedAddresses = addresses.filter((_, i) => i !== index);
+      onChange(updatedAddresses);
+    }
   };
 
   const toggleActuelle = (index) => {
-    if (disabled) return; // Prevent changes if disabled
-    // This logic ensures only one address can be 'actuelle' at a time.
-    // Clicking an already 'actuelle' address will re-set it to 'actuelle' and others to false,
-    // effectively maintaining its status as the sole 'actuelle' address.
-    onChange(addresses.map((addr, i) => ({
+    const updatedAddresses = addresses.map((addr, i) => ({
       ...addr,
       actuelle: i === index
-    })));
+    }));
+    onChange(updatedAddresses);
+  };
+
+  const searchAddress = async (addressIndex) => {
+    const address = addresses[addressIndex];
+    const civicNumbers = address.numeros_civiques?.filter(n => n.trim() !== "") || [];
+    const civicNumber = civicNumbers.length > 0 ? civicNumbers[0] : "";
+    
+    if (!civicNumber || !address.rue || !address.ville) {
+      return;
+    }
+
+    const searchQuery = `${civicNumber} ${address.rue}, ${address.ville}, ${address.province || 'QC'}, Canada`;
+    setLoadingSuggestions(prev => ({ ...prev, [addressIndex]: true }));
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=ca&limit=5`
+      );
+      const data = await response.json();
+      setAddressSuggestions(prev => ({ ...prev, [addressIndex]: data }));
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+    } finally {
+      setLoadingSuggestions(prev => ({ ...prev, [addressIndex]: false }));
+    }
+  };
+
+  const selectSuggestion = (addressIndex, suggestion) => {
+    const updatedAddresses = [...addresses];
+    updatedAddresses[addressIndex] = {
+      ...updatedAddresses[addressIndex],
+      latitude: parseFloat(suggestion.lat),
+      longitude: parseFloat(suggestion.lon)
+    };
+    onChange(updatedAddresses);
+    setAddressSuggestions(prev => ({ ...prev, [addressIndex]: [] }));
   };
 
   return (
-    <div className="space-y-3">
-      {label && <Label>{label}</Label>}
-      {addresses.map((address, index) => (
-        <div key={index} className="space-y-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* Numéros Civiques */}
-            <div className="space-y-2 col-span-2">
-              <Label>Numéro(s) civique(s)</Label>
-              {address.numeros_civiques?.map((num, civicIdx) => (
-                <div key={civicIdx} className="flex gap-2 items-center">
+    <div className="space-y-4">
+      {!singleAddress && (
+        <div className="flex justify-between items-center">
+          <Label className="text-slate-300">{label}</Label>
+          <Button
+            type="button"
+            size="sm"
+            onClick={addAddress}
+            disabled={disabled}
+            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Ajouter
+          </Button>
+        </div>
+      )}
+
+      {addresses.map((address, addressIndex) => (
+        <div key={addressIndex} className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
+          {!singleAddress && (
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-slate-300">Adresse {addressIndex + 1}</span>
+              <div className="flex gap-2">
+                {showActuelle && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => toggleActuelle(addressIndex)}
+                    disabled={disabled}
+                    className={`${address.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                    title={address.actuelle ? "Actuelle" : "Marquer comme actuelle"}
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                )}
+                {addresses.length > 1 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeAddress(addressIndex)}
+                    disabled={disabled}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Numéro civique et Rue sur la même ligne */}
+          <div className="grid grid-cols-[200px_1fr] gap-3">
+            <div className="space-y-2">
+              <Label className="text-slate-300">Numéro(s) civique(s)</Label>
+              {(address.numeros_civiques || [""]).map((num, civicIdx) => (
+                <div key={civicIdx} className="flex gap-2">
                   <Input
                     value={num}
-                    onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
-                    placeholder="Numéro civique"
-                    className="bg-slate-800 border-slate-700"
+                    onChange={(e) => handleCivicNumberChange(addressIndex, civicIdx, e.target.value)}
+                    placeholder="Ex: 123"
                     disabled={disabled}
+                    className="bg-slate-700 border-slate-600 text-white"
                   />
-                  {address.numeros_civiques.length > 1 && !disabled && (
+                  {(address.numeros_civiques || [""]).length > 1 && (
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => removeCivicNumber(index, civicIdx)}
+                      onClick={() => removeCivicNumber(addressIndex, civicIdx)}
+                      disabled={disabled}
                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     >
                       <X className="w-4 h-4" />
@@ -93,81 +219,114 @@ export default function AddressInput({
                   )}
                 </div>
               ))}
-              {!disabled && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => addCivicNumber(index)}
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Ajouter un numéro
-                </Button>
-              )}
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => addCivicNumber(addressIndex)}
+                disabled={disabled}
+                className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Ajouter un numéro
+              </Button>
             </div>
 
-            {/* Rue */}
-            <div className="space-y-2 col-span-2">
-              <Label>Rue</Label>
+            <div className="space-y-2">
+              <Label className="text-slate-300">Rue</Label>
               <Input
-                value={address.rue}
-                onChange={(e) => updateField(index, 'rue', e.target.value)}
+                value={address.rue || ""}
+                onChange={(e) => handleAddressChange(addressIndex, 'rue', e.target.value)}
                 placeholder="Nom de la rue"
-                className="bg-slate-800 border-slate-700"
                 disabled={disabled}
-              />
-            </div>
-
-            {/* Ville */}
-            <div className="space-y-2">
-              <Label>Ville</Label>
-              <Input
-                value={address.ville}
-                onChange={(e) => updateField(index, 'ville', e.target.value)}
-                placeholder="Ville"
-                className="bg-slate-800 border-slate-700"
-                disabled={disabled}
-              />
-            </div>
-
-            {/* Province */}
-            <div className="space-y-2">
-              <Label>Province</Label>
-              <Input
-                value={address.province}
-                onChange={(e) => updateField(index, 'province', e.target.value)}
-                placeholder="Province (ex: QC)"
-                className="bg-slate-800 border-slate-700"
-                disabled={disabled}
-              />
-            </div>
-
-            {/* Code Postal */}
-            <div className="space-y-2">
-              <Label>Code Postal</Label>
-              <Input
-                value={address.code_postal}
-                onChange={(e) => updateField(index, 'code_postal', e.target.value)}
-                placeholder="Code postal"
-                className="bg-slate-800 border-slate-700"
-                disabled={disabled}
+                className="bg-slate-700 border-slate-600 text-white"
               />
             </div>
           </div>
 
-          {showActuelle && (
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                id={`actuelle-${index}`}
-                checked={address.actuelle}
-                onChange={() => toggleActuelle(index)}
-                className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
+          {/* Ville et Province */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="text-slate-300">Ville</Label>
+              <Input
+                value={address.ville || ""}
+                onChange={(e) => handleAddressChange(addressIndex, 'ville', e.target.value)}
+                placeholder="Ville"
                 disabled={disabled}
+                className="bg-slate-700 border-slate-600 text-white"
               />
-              <label htmlFor={`actuelle-${index}`} className="text-slate-300 text-sm">
-                Adresse actuelle
-              </label>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-slate-300">Province</Label>
+              <Select 
+                value={address.province || "Québec"} 
+                onValueChange={(value) => handleAddressChange(addressIndex, 'province', value)}
+                disabled={disabled}
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="Sélectionner une province" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {PROVINCES_CANADIENNES.map((province) => (
+                    <SelectItem key={province} value={province} className="text-white">
+                      {province}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Code postal */}
+          <div className="space-y-2">
+            <Label className="text-slate-300">Code postal</Label>
+            <Input
+              value={address.code_postal || ""}
+              onChange={(e) => handleAddressChange(addressIndex, 'code_postal', e.target.value)}
+              placeholder="Code postal"
+              disabled={disabled}
+              className="bg-slate-700 border-slate-600 text-white"
+            />
+          </div>
+
+          {/* Geolocalisation button */}
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => searchAddress(addressIndex)}
+            disabled={disabled || loadingSuggestions[addressIndex]}
+            className="w-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            {loadingSuggestions[addressIndex] ? "Recherche..." : "Géolocaliser l'adresse"}
+          </Button>
+
+          {/* Address suggestions */}
+          {addressSuggestions[addressIndex] && addressSuggestions[addressIndex].length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-slate-300">Suggestions d'adresses</Label>
+              <div className="space-y-1">
+                {addressSuggestions[addressIndex].map((suggestion, idx) => (
+                  <Button
+                    key={idx}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selectSuggestion(addressIndex, suggestion)}
+                    disabled={disabled}
+                    className="w-full justify-start text-left bg-slate-700 border-slate-600 hover:bg-slate-600 text-white text-xs"
+                  >
+                    {suggestion.display_name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Coordinates display */}
+          {address.latitude && address.longitude && (
+            <div className="text-xs text-slate-400">
+              📍 Coordonnées: {address.latitude.toFixed(6)}, {address.longitude.toFixed(6)}
             </div>
           )}
         </div>

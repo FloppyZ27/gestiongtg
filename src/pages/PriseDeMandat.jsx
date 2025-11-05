@@ -1370,7 +1370,7 @@ export default function PriseDeMandat() {
 
                   {formData.mandats.length > 0 ? (
                     <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
-                      <TabsList className="bg-slate-800/50 border border-slate-700 w-full flex-wrap h-auto">
+                      <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start">
                         {formData.mandats.map((mandat, index) => (
                           <TabsTrigger
                             key={index}
@@ -1450,7 +1450,7 @@ export default function PriseDeMandat() {
                                 {/* Colonne droite - Dates */}
                                 <div className="space-y-3">
                                   <div className="space-y-2">
-                                    <Label>Date d'ouverture</Label>
+                                    <Label className="text-right block">Date d'ouverture</Label>
                                     <Input
                                       type="date"
                                       value={mandat.date_ouverture || ""}
@@ -1461,7 +1461,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   <div className="space-y-2">
-                                    <Label>Date de signature</Label>
+                                    <Label className="text-right block">Date de signature</Label>
                                     <Input
                                       type="date"
                                       value={mandat.date_signature || ""}
@@ -1472,7 +1472,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   <div className="space-y-2">
-                                    <Label>Début des travaux</Label>
+                                    <Label className="text-right block">Début des travaux</Label>
                                     <Input
                                       type="date"
                                       value={mandat.date_debut_travaux || ""}
@@ -1483,7 +1483,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   <div className="space-y-2">
-                                    <Label>Date de livraison</Label>
+                                    <Label className="text-right block">Date de livraison</Label>
                                     <Input
                                       type="date"
                                       value={mandat.date_livraison || ""}
