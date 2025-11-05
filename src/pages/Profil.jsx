@@ -194,6 +194,7 @@ export default function Profil() {
   const getClientsNames = (clients_data) => {
     if (!clients_data || clients_data.length === 0) return 'N/A';
     // Assumes clients_data is an array of objects with 'full_name' or an array of strings (names)
+    // or IDs that can be directly joined if no name lookup is desired here.
     return clients_data.map(item => typeof item === 'object' && item !== null && 'full_name' in item ? item.full_name : item).filter(Boolean).join(', ');
   };
 
@@ -224,7 +225,7 @@ export default function Profil() {
 
   // Calendar logic
   let startDate, endDate, daysInView;
-  
+
   if (viewMode === 'month') {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
@@ -452,7 +453,10 @@ export default function Profil() {
                 </div>
               </CardContent>
             </Card>
+          </div>
 
+          {/* Right Column - Retours d'appel & Calendar */}
+          <div className="space-y-6">
             {/* Retours d'appel assignés */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader>
@@ -479,7 +483,7 @@ export default function Profil() {
                                   </Badge>
                                 </div>
                                 <p className="text-sm text-slate-400">
-                                  Clients: {getClientsNames(dossier.clients)} {/* Assuming dossier.clients is available */}
+                                  Clients: {getClientsNames(dossier.clients_ids)}
                                 </p>
                                 {dossier.mandats && dossier.mandats.length > 0 && (
                                   <p className="text-sm text-slate-400">
@@ -512,10 +516,8 @@ export default function Profil() {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right Column - Calendar */}
-          <div className="space-y-6">
+            {/* Calendar */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
@@ -678,8 +680,8 @@ export default function Profil() {
                               onClick={() => event.type !== 'holiday' && event.type !== 'birthday' && handleEditRendezVous(event)}
                               className={`
                                 text-xs p-1 rounded truncate
-                                ${event.type === 'absence' 
-                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer' 
+                                ${event.type === 'absence'
+                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer'
                                   : event.type === 'holiday'
                                   ? 'bg-blue-500/20 text-blue-400 cursor-default'
                                   : event.type === 'birthday'
