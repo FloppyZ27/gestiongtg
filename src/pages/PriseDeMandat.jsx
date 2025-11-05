@@ -287,6 +287,14 @@ export default function PriseDeMandat() {
     return formatAdresse(mandats[0].adresse_travaux);
   };
 
+  // Function to map old statuses to new combined status for form display
+  const mapOldStatusToCombined = (status) => {
+    if (status === "Demande d'information" || status === "Nouveau mandat") {
+      return "Nouveau mandat/Demande d'information";
+    }
+    return status;
+  };
+
   // NEW FUNCTION: Load data from reference dossier
   const loadDossierReference = (dossierId) => {
     const dossier = dossiers.find(d => d.id === dossierId);
@@ -296,7 +304,7 @@ export default function PriseDeMandat() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: "Retour d'appel",
+      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -339,7 +347,8 @@ export default function PriseDeMandat() {
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
 
   const retourAppelDossiers = dossiersNonRejetes.filter(d => d.statut === "Retour d'appel");
-  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Demande d'information" || d.statut === "Nouveau mandat");
+  // Updated filter to include new combined status and old separate ones
+  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Demande d'information" || d.statut === "Nouveau mandat" || d.statut === "Nouveau mandat/Demande d'information");
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
 
   // Calcul des périodes
@@ -405,7 +414,11 @@ export default function PriseDeMandat() {
       );
 
       const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
-      const matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
+      
+      let matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
+      if (filterStatut === "Nouveau mandat/Demande d'information") {
+        matchesStatut = matchesStatut || dossier.statut === "Demande d'information" || dossier.statut === "Nouveau mandat";
+      }
 
       return matchesSearch && matchesArpenteur && matchesStatut;
     });
@@ -577,7 +590,7 @@ export default function PriseDeMandat() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: dossier.statut || "Retour d'appel",
+      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
       utilisateur_assigne: dossier.utilisateur_assigne || "",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
@@ -812,6 +825,7 @@ export default function PriseDeMandat() {
       "Message laissé/Sans réponse": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
       "Demande d'information": "bg-orange-500/20 text-orange-400 border-orange-500/30",
       "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+      "Nouveau mandat/Demande d'information": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // Added for combined status
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
     };
@@ -941,7 +955,7 @@ export default function PriseDeMandat() {
                               >
                                 <div>
                                   <p className="font-medium text-white">
-                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{dossier.numero_dossier || ""}
+                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
                                     {d.numero_dossier && d.arpenteur_geometre && " - "}
                                     {getClientsNames(d.clients_ids)}
                                   </p>
@@ -1009,8 +1023,7 @@ export default function PriseDeMandat() {
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
-                          <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                          <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
+                          <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
                           {editingDossier && (
                             <>
                               <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
@@ -1069,7 +1082,7 @@ export default function PriseDeMandat() {
                   )}
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
-                  {(formData.statut === "Ouvert" || formData.statut === "Nouveau mandat") && ( // Modified: also show for "Nouveau mandat"
+                  {(formData.statut === "Ouvert" || formData.statut === "Nouveau mandat/Demande d'information") && ( // Modified condition
                     <div className={`grid grid-cols-2 gap-4 p-4 ${formData.statut === "Ouvert" ? "bg-green-500/10 border border-green-500/30" : "bg-cyan-500/10 border border-cyan-500/30"} rounded-lg`}>
                       <div className="space-y-2">
                         <Label>N° de dossier <span className="text-red-400">*</span></Label>
@@ -1354,7 +1367,6 @@ export default function PriseDeMandat() {
                                       }]}
                                       onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
                                       showActuelle={false}
-                                      label="Adresse des travaux"
                                       singleAddress={true}
                                       disabled={!!dossierReferenceId}
                                     />
@@ -2553,8 +2565,7 @@ export default function PriseDeMandat() {
                       <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                       <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                      <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                      <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
+                      <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
                       <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
