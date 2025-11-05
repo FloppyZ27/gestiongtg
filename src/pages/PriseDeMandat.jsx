@@ -393,6 +393,7 @@ export default function PriseDeMandat() {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = (
         dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+        dossier.numero_dossier?.toLowerCase().includes(searchLower) || // Added numero_dossier to search
         dossier.clients_ids.some(id => {
           const client = getClientById(id);
           return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
@@ -835,6 +836,10 @@ export default function PriseDeMandat() {
       let bValue;
 
       switch (sortField) {
+        case 'numero_dossier': // Added case for numero_dossier
+          aValue = (getArpenteurInitials(a.arpenteur_geometre) + (a.numero_dossier || '')).toLowerCase();
+          bValue = (getArpenteurInitials(b.arpenteur_geometre) + (b.numero_dossier || '')).toLowerCase();
+          break;
         case 'created_date':
           aValue = new Date(a.created_date || 0).getTime();
           bValue = new Date(b.created_date || 0).getTime();
@@ -857,9 +862,13 @@ export default function PriseDeMandat() {
           break;
       }
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      }
     });
   };
 
@@ -2553,36 +2562,37 @@ export default function PriseDeMandat() {
           </Card>
         </div>
 
-        {/* Tabs for Nouveau mandat, Soumission and Retour d'appel */}
+        {/* Tabs and Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <Tabs defaultValue="nouveau-mandat" className="w-full">
-            <CardHeader className="border-b border-slate-800">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <TabsList className="bg-slate-800/50 border border-slate-700">
-                    <TabsTrigger
-                      value="nouveau-mandat"
-                      className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
-                    >
-                      <FileCheck className="w-4 h-4 mr-2" />
-                      Nouveaux mandats ({nouveauMandatDossiers.length})
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="soumission"
-                      className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400"
-                    >
-                      <FileCheck className="w-4 h-4 mr-2" />
-                      Soumissions ({soumissionDossiers.length})
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="retour-appel"
-                      className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      Retours d'appel ({retourAppelDossiers.length})
-                    </TabsTrigger>
-                  </TabsList>
-                  <div className="relative w-full md:w-80">
+            <CardHeader className="border-b border-slate-800 pb-0">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto">
+                <TabsTrigger
+                  value="nouveau-mandat"
+                  className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 py-3"
+                >
+                  <FileCheck className="w-4 h-4 mr-2" />
+                  Nouveaux mandats ({nouveauMandatDossiers.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="soumission"
+                  className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
+                >
+                  <FileCheck className="w-4 h-4 mr-2" />
+                  Soumissions ({soumissionDossiers.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="retour-appel"
+                  className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Retours d'appel ({retourAppelDossiers.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="flex flex-col gap-4 pt-4 pb-4">
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[250px]">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                     <Input
                       placeholder="Rechercher..."
@@ -2591,10 +2601,7 @@ export default function PriseDeMandat() {
                       className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                     />
                   </div>
-                </div>
 
-                {/* Filtres */}
-                <div className="flex flex-wrap gap-3">
                   <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
                     <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Arpenteur" />
@@ -2648,9 +2655,9 @@ export default function PriseDeMandat() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('arpenteur_geometre')}
+                          onClick={() => handleSort('numero_dossier')}
                         >
-                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
@@ -2688,11 +2695,8 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="text-slate-300">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-500" />
-                              {dossier.arpenteur_geometre}
-                            </div>
+                          <TableCell className="font-medium text-white font-mono">
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
@@ -2761,7 +2765,6 @@ export default function PriseDeMandat() {
               </CardContent>
             </TabsContent>
 
-            {/* Nouveau Mandat TabsContent - ADDED */}
             <TabsContent value="nouveau-mandat" className="p-0">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
@@ -2770,9 +2773,9 @@ export default function PriseDeMandat() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('arpenteur_geometre')}
+                          onClick={() => handleSort('numero_dossier')}
                         >
-                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
@@ -2810,11 +2813,8 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedNouveauMandat.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="text-slate-300">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-500" />
-                              {dossier.arpenteur_geometre}
-                            </div>
+                          <TableCell className="font-medium text-white font-mono">
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
@@ -2891,9 +2891,9 @@ export default function PriseDeMandat() {
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('arpenteur_geometre')}
+                          onClick={() => handleSort('numero_dossier')}
                         >
-                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
@@ -2931,11 +2931,8 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="text-slate-300">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-slate-500" />
-                              {dossier.arpenteur_geometre}
-                            </div>
+                          <TableCell className="font-medium text-white font-mono">
+                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
