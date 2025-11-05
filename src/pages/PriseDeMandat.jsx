@@ -21,7 +21,7 @@ import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection"; // Added import
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
-const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": [
