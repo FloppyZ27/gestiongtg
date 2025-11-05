@@ -18,6 +18,7 @@ import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
+import CommentairesSection from "../components/dossiers/CommentairesSection"; // Added import
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
@@ -161,8 +162,7 @@ export default function PriseDeMandat() {
     notaires_ids: [],
     courtiers_ids: [],
     mandats: [],
-    // description: "", // Removed as per change request
-    notes_retour_appel: "" // This was already present
+    notes_retour_appel: ""
   });
 
   const [newClientForm, setNewClientForm] = useState({
@@ -325,7 +325,6 @@ export default function PriseDeMandat() {
         notes: m.notes || "", // Keep notes from original mandate
         tache_actuelle: "" // Reset task
       })) || [],
-      // description: dossier.description || "", // Removed as per change request
       utilisateur_assigne: dossier.utilisateur_assigne || "",
       notes_retour_appel: "" // Reset/add new field
     });
@@ -394,7 +393,6 @@ export default function PriseDeMandat() {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = (
         dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-        // dossier.description?.toLowerCase().includes(searchLower) || // Removed as per change request
         dossier.clients_ids.some(id => {
           const client = getClientById(id);
           return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
@@ -425,7 +423,6 @@ export default function PriseDeMandat() {
       fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
       clientsNames.toLowerCase().includes(searchLower) ||
-      // dossier.description?.toLowerCase().includes(searchLower) || // Removed as per change request
       dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
     );
   });
@@ -449,7 +446,7 @@ export default function PriseDeMandat() {
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
     c.courriels?.some(courcourriel => courcourriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-    (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+    (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actel))?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
 
   const filteredLotsForSelector = lots.filter(lot => {
@@ -488,12 +485,10 @@ export default function PriseDeMandat() {
     e.preventDefault();
 
     let dataToSubmit = { ...formData };
-    // The description field is no longer part of formData, so no need to explicitly remove it from dataToSubmit here.
 
-    // Si le statut est "Ouvert", mettre la tâche actuelle de tous les mandats à "Cédule"
     if (formData.statut === "Ouvert") {
       dataToSubmit = {
-        ...dataToSubmit, // Use dataToSubmit here, not formData
+        ...dataToSubmit,
         mandats: formData.mandats.map(m => ({
           ...m,
           tache_actuelle: "Cédule"
@@ -537,8 +532,7 @@ export default function PriseDeMandat() {
       notaires_ids: [],
       courtiers_ids: [],
       mandats: [],
-      // description: "", // Removed as per change request
-      notes_retour_appel: "" // Already present
+      notes_retour_appel: ""
     });
     setEditingDossier(null);
     setActiveTabMandat("0");
@@ -611,8 +605,7 @@ export default function PriseDeMandat() {
         date_debut_travaux: m.date_debut_travaux || "",
         notes: m.notes || ""
       })) || [],
-      // description: dossier.description || "", // Removed as per change request
-      notes_retour_appel: dossier.notes_retour_appel || "" // Already present
+      notes_retour_appel: dossier.notes_retour_appel || ""
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
@@ -681,7 +674,7 @@ export default function PriseDeMandat() {
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
-        notes: "" // Keep notes here
+        notes: ""
       }]
     }));
     setActiveTabMandat(newIndex.toString());
@@ -858,12 +851,6 @@ export default function PriseDeMandat() {
           aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
           bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
           break;
-        case 'description':
-            // Removed description, so this case is no longer relevant for the sortable fields
-            // keeping it for now just in case for existing data, but it won't be in form
-            aValue = (a.description || '').toLowerCase();
-            bValue = (b.description || '').toLowerCase();
-            break;
         default:
           aValue = (a[sortField] || '').toString().toLowerCase();
           bValue = (b[sortField] || '').toString().toLowerCase();
@@ -910,7 +897,7 @@ export default function PriseDeMandat() {
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="flex h-[90vh]">
                 {/* Main form content - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
@@ -919,7 +906,7 @@ export default function PriseDeMandat() {
                       {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
                     </h2>
                   </div>
-                  
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Section pour les champs de base - 2 colonnes */}
                   {!editingDossier && formData.statut === "Retour d'appel" ? (
@@ -1586,49 +1573,52 @@ export default function PriseDeMandat() {
                                   )}
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-3">
-                                  <div className="space-y-2">
-                                    <Label>Prix estimé ($)</Label>
-                                    <Input
-                                      type="text"
-                                      inputMode="decimal"
-                                      value={mandat.prix_estime || ""}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/[^0-9.]/g, '');
-                                        updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
-                                      }}
-                                      placeholder="0.00"
-                                      className="bg-slate-700 border-slate-600"
-                                      disabled={!!dossierReferenceId}
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Rabais ($)</Label>
-                                    <Input
-                                      type="text"
-                                      inputMode="decimal"
-                                      value={mandat.rabais || ""}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/[^0-9.]/g, '');
-                                        updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
-                                      }}
-                                      placeholder="0.00"
-                                      className="bg-slate-700 border-slate-600"
-                                      disabled={!!dossierReferenceId}
-                                    />
-                                  </div>
-                                  <div className="space-y-2 flex items-center pt-8">
-                                    <input
-                                      type="checkbox"
-                                      id={`taxes_incluses_${index}`}
-                                      checked={mandat.taxes_incluses}
-                                      onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
-                                      className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
-                                      disabled={!!dossierReferenceId}
-                                    />
-                                    <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
-                                      Taxes incluses
-                                    </label>
+                                <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                  <h4 className="text-sm font-semibold text-slate-300">Tarification</h4>
+                                  <div className="grid grid-cols-3 gap-3">
+                                    <div className="space-y-2">
+                                      <Label>Prix estimé ($)</Label>
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={mandat.prix_estime || ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                                          updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
+                                        }}
+                                        placeholder="0.00"
+                                        className="bg-slate-700 border-slate-600"
+                                        disabled={!!dossierReferenceId}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Rabais ($)</Label>
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={mandat.rabais || ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                                          updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
+                                        }}
+                                        placeholder="0.00"
+                                        className="bg-slate-700 border-slate-600"
+                                        disabled={!!dossierReferenceId}
+                                      />
+                                    </div>
+                                    <div className="space-y-2 flex items-center pt-8">
+                                      <input
+                                        type="checkbox"
+                                        id={`taxes_incluses_${index}`}
+                                        checked={mandat.taxes_incluses}
+                                        onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
+                                        className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
+                                        disabled={!!dossierReferenceId}
+                                      />
+                                      <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
+                                        Taxes incluses
+                                      </label>
+                                    </div>
                                   </div>
                                 </div>
 
@@ -1670,9 +1660,9 @@ export default function PriseDeMandat() {
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
                   <div className="flex-1 overflow-hidden p-6">
-                    <CommentairesSection 
-                      dossierId={editingDossier?.id} 
-                      dossierTemporaire={!editingDossier} // Changed prop name and logic
+                    <CommentairesSection
+                      dossierId={editingDossier?.id}
+                      dossierTemporaire={!editingDossier}
                     />
                   </div>
                 </div>
@@ -2474,8 +2464,6 @@ export default function PriseDeMandat() {
                   </div>
                 )}
 
-                {/* Removed description from view */}
-
                 <div className="flex justify-end gap-3 pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                     Fermer
@@ -2492,7 +2480,7 @@ export default function PriseDeMandat() {
 
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> {/* Adjusted to lg:grid-cols-3 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Retours d'appel Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="pb-2 pt-3">
@@ -2652,7 +2640,7 @@ export default function PriseDeMandat() {
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                       <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                       <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                      <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem> {/* ADDED */}
+                      <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
                       <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
@@ -3039,188 +3027,6 @@ export default function PriseDeMandat() {
             </TabsContent>
           </Tabs>
         </Card>
-      </div>
-    </div>
-  );
-}
-
-// Commentaires Section Component
-function CommentairesSection({ dossierId, dossierTemporaire }) {
-  const [nouveauCommentaire, setNouveauCommentaire] = useState("");
-  const [commentairesTemp, setCommentairesTemp] = useState([]);
-  const queryClient = useQueryClient();
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  });
-
-  const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
-    initialData: [],
-  });
-
-  const { data: commentaires = [] } = useQuery({
-    queryKey: ['commentaires', dossierId],
-    queryFn: () => dossierId ? base44.entities.CommentaireDossier.filter({ dossier_id: dossierId }, '-created_date') : [],
-    enabled: !!dossierId && !dossierTemporaire,
-    initialData: [],
-  });
-
-  const createCommentaireMutation = useMutation({
-    mutationFn: (commentaireData) => base44.entities.CommentaireDossier.create(commentaireData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
-      setNouveauCommentaire("");
-    },
-  });
-
-  const handleSubmitCommentaire = (e) => {
-    e.preventDefault();
-    if (!nouveauCommentaire.trim() || !user) return;
-
-    if (dossierTemporaire) {
-      // Ajouter au state local pour dossier non enregistré
-      const tempComment = {
-        id: `temp-${Date.now()}`,
-        contenu: nouveauCommentaire,
-        utilisateur_email: user.email,
-        utilisateur_nom: user.full_name,
-        created_date: new Date().toISOString()
-      };
-      setCommentairesTemp([tempComment, ...commentairesTemp]);
-      setNouveauCommentaire("");
-    } else if (dossierId) {
-      createCommentaireMutation.mutate({
-        dossier_id: dossierId,
-        contenu: nouveauCommentaire,
-        utilisateur_email: user.email,
-        utilisateur_nom: user.full_name
-      });
-    }
-  };
-
-  const getUserPhoto = (email) => {
-    const foundUser = users.find(u => u.email === email);
-    return foundUser?.photo_url;
-  };
-
-  const getInitials = (name) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
-  };
-
-  const handleTagUser = (userEmail) => {
-    setNouveauCommentaire(prev => prev + `@${userEmail} `);
-  };
-
-  const renderCommentaireContent = (contenu) => {
-    const emailRegex = /@([^\s]+)/g;
-    const parts = contenu.split(emailRegex);
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        // C'est un email tagué
-        const taggedUser = users.find(u => u.email === part);
-        return (
-          <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
-            @{taggedUser?.full_name || part}
-          </span>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
-  const allCommentaires = dossierTemporaire ? commentairesTemp : commentaires;
-
-  if (dossierTemporaire) {
-    return (
-      <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg p-6 flex items-center justify-center">
-        <p className="text-slate-500 text-center">Enregistrez d'abord le dossier pour ajouter des commentaires</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
-      {/* Liste des commentaires */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {allCommentaires.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center">
-            <div>
-              <p className="text-slate-500">Aucun commentaire pour le moment</p>
-              <p className="text-slate-600 text-sm mt-1">Soyez le premier à commenter</p>
-            </div>
-          </div>
-        ) : (
-          allCommentaires.map((commentaire) => (
-            <div key={commentaire.id} className="flex gap-3">
-              <Avatar className="w-8 h-8 flex-shrink-0">
-                {getUserPhoto(commentaire.utilisateur_email) ? (
-                  <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
-                ) : null}
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
-                  {getInitials(commentaire.utilisateur_nom)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
-                  <span className="text-xs text-slate-400">
-                    {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
-                  </span>
-                </div>
-                <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                  {renderCommentaireContent(commentaire.contenu)}
-                </p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Formulaire d'ajout de commentaire */}
-      <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0">
-        <form onSubmit={handleSubmitCommentaire} className="space-y-2">
-          <Textarea
-            value={nouveauCommentaire}
-            onChange={(e) => setNouveauCommentaire(e.target.value)}
-            placeholder="Ajouter un commentaire... (utilisez @ pour taguer quelqu'un)"
-            className="bg-slate-700 border-slate-600 text-white resize-none h-20"
-            disabled={createCommentaireMutation.isPending}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmitCommentaire(e);
-              }
-            }}
-          />
-          <div className="flex justify-between items-center">
-            <div className="flex gap-1 flex-wrap">
-              {users.slice(0, 5).map((u) => (
-                <Button
-                  key={u.email}
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleTagUser(u.email)}
-                  className="text-xs text-slate-400 hover:text-white h-6 px-2"
-                >
-                  @{u.full_name}
-                </Button>
-              ))}
-            </div>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!nouveauCommentaire.trim() || createCommentaireMutation.isPending}
-              className="bg-emerald-500 hover:bg-emerald-600"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </form>
       </div>
     </div>
   );
