@@ -1299,7 +1299,27 @@ export default function PriseDeMandat() {
                           <TabsContent key={index} value={index.toString()}>
                             <Card className="border-slate-700 bg-slate-800/30">
                               <CardContent className="p-4 space-y-4">
-                                <div className="flex justify-end">
+                                {/* Type de mandat et bouton supprimer sur la même ligne */}
+                                <div className="flex gap-4 items-start">
+                                  <div className="flex-1 space-y-2">
+                                    <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                                    <Select
+                                      value={mandat.type_mandat}
+                                      onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                                      disabled={!!dossierReferenceId}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                        <SelectValue placeholder="Sélectionner" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        {TYPES_MANDATS.map((type) => (
+                                          <SelectItem key={type} value={type} className="text-white">
+                                            {type}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                   <Button
                                     type="button"
                                     size="sm"
@@ -1312,7 +1332,7 @@ export default function PriseDeMandat() {
                                         setActiveTabMandat("0");
                                       }
                                     }}
-                                    className="text-red-400 hover:text-red-300"
+                                    className="text-red-400 hover:text-red-300 mt-8"
                                     disabled={!!dossierReferenceId}
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" />
@@ -1322,28 +1342,8 @@ export default function PriseDeMandat() {
 
                                 {/* Nouvelle mise en page : 70% gauche / 30% droite */}
                                 <div className="grid grid-cols-[70%_30%] gap-4">
-                                  {/* Colonne gauche - Type de mandat et Adresse */}
+                                  {/* Colonne gauche - Adresse */}
                                   <div className="space-y-3">
-                                    <div className="space-y-2">
-                                      <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                      <Select
-                                        value={mandat.type_mandat}
-                                        onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                                        disabled={!!dossierReferenceId}
-                                      >
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                          <SelectValue placeholder="Sélectionner" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          {TYPES_MANDATS.map((type) => (
-                                            <SelectItem key={type} value={type} className="text-white">
-                                              {type}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-
                                     <AddressInput
                                       addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
                                         ville: "",
@@ -2655,7 +2655,7 @@ export default function PriseDeMandat() {
                                 )}
                               </div>
                             ) : (
-                              <span className="text-slate-600 text-xs">Aucun</span>
+                              <span className="text-slate-600  text-xs">Aucun</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
