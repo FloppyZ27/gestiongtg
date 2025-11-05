@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 
@@ -819,7 +820,7 @@ export default function PriseDeMandat() {
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
     };
-    return colors[statut] || colors["Retour d'appel"];
+    return colors[statut] || colors["Retour d'appel'];
   };
 
   // Sorting logic
@@ -1341,14 +1342,12 @@ export default function PriseDeMandat() {
                   </div>
                 </div>
 
-                {/* Notes générales */}
+                {/* Commentaires du dossier - Sidebar style */}
                 <div className="space-y-2">
-                  <Label>Notes générales</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="bg-slate-800 border-slate-700 h-24"
-                    disabled={!!dossierReferenceId}
+                  <Label>Commentaires</Label>
+                  <CommentairesSection 
+                    dossierId={editingDossier?.id} 
+                    disabled={!editingDossier}
                   />
                 </div>
 
@@ -1455,7 +1454,7 @@ export default function PriseDeMandat() {
                                       type="date"
                                       value={mandat.date_ouverture || ""}
                                       onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                      className="bg-slate-700 border-slate-600"
+                                      className="bg-slate-700 border-slate-600 text-right"
                                       disabled={!!dossierReferenceId}
                                     />
                                   </div>
@@ -1466,7 +1465,7 @@ export default function PriseDeMandat() {
                                       type="date"
                                       value={mandat.date_signature || ""}
                                       onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                      className="bg-slate-700 border-slate-600"
+                                      className="bg-slate-700 border-slate-600 text-right"
                                       disabled={!!dossierReferenceId}
                                     />
                                   </div>
@@ -1477,7 +1476,7 @@ export default function PriseDeMandat() {
                                       type="date"
                                       value={mandat.date_debut_travaux || ""}
                                       onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                      className="bg-slate-700 border-slate-600"
+                                      className="bg-slate-700 border-slate-600 text-right"
                                       disabled={!!dossierReferenceId}
                                     />
                                   </div>
@@ -1488,7 +1487,7 @@ export default function PriseDeMandat() {
                                       type="date"
                                       value={mandat.date_livraison || ""}
                                       onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                      className="bg-slate-700 border-slate-600"
+                                      className="bg-slate-700 border-slate-600 text-right"
                                       disabled={!!dossierReferenceId}
                                     />
                                   </div>
@@ -2377,7 +2376,7 @@ export default function PriseDeMandat() {
                   )}
                   <div>
                     <p className="text-slate-400">Date d'ouverture</p>
-                    <p className="text-white font-medium">{viewingDossier.date_ouverture ? format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
+                    <p className="text-white font-medium">{viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
                   </div>
                   {viewingDossier.utilisateur_assigne && ( // NEW: Display assigned user
                     <div>
@@ -3026,6 +3025,110 @@ export default function PriseDeMandat() {
             </TabsContent>
           </Tabs>
         </Card>
+      </div>
+    </div>
+  );
+}
+
+// Add this new component at the end of the file before the export
+function CommentairesSection({ dossierId, disabled }) {
+  const [nouveauCommentaire, setNouveauCommentaire] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: commentaires = [] } = useQuery({
+    queryKey: ['commentaires', dossierId],
+    queryFn: () => dossierId ? base44.entities.CommentaireDossier.filter({ dossier_id: dossierId }, '-created_date') : [],
+    enabled: !!dossierId,
+    initialData: [],
+  });
+
+  const createCommentaireMutation = useMutation({
+    mutationFn: (commentaireData) => base44.entities.CommentaireDossier.create(commentaireData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+      setNouveauCommentaire("");
+    },
+  });
+
+  const handleSubmitCommentaire = (e) => {
+    e.preventDefault();
+    if (!nouveauCommentaire.trim() || !dossierId) return;
+
+    createCommentaireMutation.mutate({
+      dossier_id: dossierId,
+      contenu: nouveauCommentaire,
+      utilisateur_email: user?.email,
+      utilisateur_nom: user?.full_name
+    });
+  };
+
+  const getInitials = (name) => {
+    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+  };
+
+  if (disabled) {
+    return (
+      <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-6 text-center">
+        <p className="text-slate-500">Enregistrez d'abord le dossier pour ajouter des commentaires</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden">
+      {/* Liste des commentaires */}
+      <div className="max-h-[400px] overflow-y-auto p-4 space-y-3">
+        {commentaires.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-slate-500">Aucun commentaire pour le moment</p>
+            <p className="text-slate-600 text-sm mt-1">Soyez le premier à commenter</p>
+          </div>
+        ) : (
+          commentaires.map((commentaire) => (
+            <div key={commentaire.id} className="flex gap-3">
+              <Avatar className="w-8 h-8 flex-shrink-0">
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                  {getInitials(commentaire.utilisateur_nom)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
+                <div className="flex justify-between items-start mb-1">
+                  <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
+                  <span className="text-xs text-slate-400">
+                    {format(new Date(commentaire.created_date), "dd MMM yyyy à HH:mm", { locale: fr })}
+                  </span>
+                </div>
+                <p className="text-slate-300 text-sm whitespace-pre-wrap">{commentaire.contenu}</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Formulaire d'ajout de commentaire */}
+      <div className="border-t border-slate-700 p-3 bg-slate-800/50">
+        <form onSubmit={handleSubmitCommentaire} className="flex gap-2">
+          <Textarea
+            value={nouveauCommentaire}
+            onChange={(e) => setNouveauCommentaire(e.target.value)}
+            placeholder="Ajouter un commentaire..."
+            className="bg-slate-700 border-slate-600 text-white resize-none h-20"
+            disabled={createCommentaireMutation.isPending}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!nouveauCommentaire.trim() || createCommentaireMutation.isPending}
+            className="bg-emerald-500 hover:bg-emerald-600 flex-shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </form>
       </div>
     </div>
   );
