@@ -944,7 +944,7 @@ export default function PriseDeMandat() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
+                    <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})} disabled={!!dossierReferenceId}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -981,7 +981,7 @@ export default function PriseDeMandat() {
                 {formData.statut === "Retour d'appel" && (
                   <div className="space-y-2">
                     <Label>Utilisateur assigné</Label>
-                    <Select value={formData.utilisateur_assigne || ""} onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}>
+                    <Select value={formData.utilisateur_assigne || ""} onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})} disabled={!!dossierReferenceId}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner un utilisateur" />
                       </SelectTrigger>
@@ -1031,6 +1031,7 @@ export default function PriseDeMandat() {
                         required
                         placeholder="Ex: SG-2024-001"
                         className="bg-slate-800 border-slate-700"
+                        disabled={!!dossierReferenceId}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1041,6 +1042,7 @@ export default function PriseDeMandat() {
                         onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
                         required
                         className="bg-slate-800 border-slate-700"
+                        disabled={!!dossierReferenceId}
                       />
                     </div>
                   </div>
@@ -1055,6 +1057,7 @@ export default function PriseDeMandat() {
                       size="sm"
                       onClick={() => setIsClientSelectorOpen(true)}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      disabled={!!dossierReferenceId}
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
                       Ajouter
@@ -1107,6 +1110,7 @@ export default function PriseDeMandat() {
                                       variant="ghost"
                                       onClick={() => removeClient(clientId, 'clients')}
                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      disabled={!!dossierReferenceId}
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -1134,6 +1138,7 @@ export default function PriseDeMandat() {
                       size="sm"
                       onClick={() => setIsNotaireSelectorOpen(true)}
                       className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                      disabled={!!dossierReferenceId}
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
                       Ajouter
@@ -1186,6 +1191,7 @@ export default function PriseDeMandat() {
                                       variant="ghost"
                                       onClick={() => removeClient(notaireId, 'notaires')}
                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      disabled={!!dossierReferenceId}
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -1213,6 +1219,7 @@ export default function PriseDeMandat() {
                       size="sm"
                       onClick={() => setIsCourtierSelectorOpen(true)}
                       className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
+                      disabled={!!dossierReferenceId}
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
                       Ajouter
@@ -1265,6 +1272,7 @@ export default function PriseDeMandat() {
                                       variant="ghost"
                                       onClick={() => removeClient(courtierId, 'courtiers')}
                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      disabled={!!dossierReferenceId}
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -1290,6 +1298,7 @@ export default function PriseDeMandat() {
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="bg-slate-800 border-slate-700 h-24"
+                    disabled={!!dossierReferenceId}
                   />
                 </div>
 
@@ -1302,6 +1311,7 @@ export default function PriseDeMandat() {
                       size="sm"
                       onClick={addMandat}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      disabled={!!dossierReferenceId}
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Ajouter un mandat
@@ -1340,6 +1350,7 @@ export default function PriseDeMandat() {
                                     }
                                   }}
                                   className="text-red-400 hover:text-red-300"
+                                  disabled={!!dossierReferenceId}
                                 >
                                   <Trash2 className="w-4 h-4 mr-2" />
                                   Supprimer ce mandat
@@ -1352,6 +1363,7 @@ export default function PriseDeMandat() {
                                   <Select
                                     value={mandat.type_mandat}
                                     onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                                    disabled={!!dossierReferenceId}
                                   >
                                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                                       <SelectValue placeholder="Sélectionner" />
@@ -1372,6 +1384,7 @@ export default function PriseDeMandat() {
                                     value={mandat.date_ouverture || ""}
                                     onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                               </div>
@@ -1388,6 +1401,7 @@ export default function PriseDeMandat() {
                                 showActuelle={false}
                                 label="Adresse des travaux"
                                 singleAddress={true}
+                                disabled={!!dossierReferenceId}
                               />
 
                               <div className="grid grid-cols-3 gap-3">
@@ -1398,6 +1412,7 @@ export default function PriseDeMandat() {
                                     value={mandat.date_signature || ""}
                                     onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -1407,6 +1422,7 @@ export default function PriseDeMandat() {
                                     value={mandat.date_debut_travaux || ""}
                                     onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -1416,6 +1432,7 @@ export default function PriseDeMandat() {
                                     value={mandat.date_livraison || ""}
                                     onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                               </div>
@@ -1428,6 +1445,7 @@ export default function PriseDeMandat() {
                                     size="sm"
                                     onClick={() => openLotSelector(index)}
                                     className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                    disabled={!!dossierReferenceId}
                                   >
                                     <Plus className="w-4 h-4 mr-1" />
                                     Sélectionner des lots
@@ -1471,6 +1489,7 @@ export default function PriseDeMandat() {
                                                   variant="ghost"
                                                   onClick={() => removeLotFromMandat(index, lot.id)}
                                                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                  disabled={!!dossierReferenceId}
                                                 >
                                                   <Trash2 className="w-4 h-4" />
                                                 </Button>
@@ -1488,6 +1507,7 @@ export default function PriseDeMandat() {
                                                   variant="ghost"
                                                   onClick={() => removeLotFromMandat(index, lotId)}
                                                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                  disabled={!!dossierReferenceId}
                                                 >
                                                   <Trash2 className="w-4 h-4" />
                                                 </Button>
@@ -1518,6 +1538,7 @@ export default function PriseDeMandat() {
                                     }}
                                     placeholder="0.00"
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -1532,6 +1553,7 @@ export default function PriseDeMandat() {
                                     }}
                                     placeholder="0.00"
                                     className="bg-slate-700 border-slate-600"
+                                    disabled={!!dossierReferenceId}
                                   />
                                 </div>
                                 <div className="space-y-2 flex items-center pt-8">
@@ -1541,6 +1563,7 @@ export default function PriseDeMandat() {
                                     checked={mandat.taxes_incluses}
                                     onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
                                     className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
+                                    disabled={!!dossierReferenceId}
                                   />
                                   <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
                                     Taxes incluses
@@ -1554,6 +1577,7 @@ export default function PriseDeMandat() {
                                   value={mandat.notes}
                                   onChange={(e) => updateMandat(index, 'notes', e.target.value)}
                                   className="bg-slate-700 border-slate-600 h-20"
+                                  disabled={!!dossierReferenceId}
                                 />
                               </div>
                             </CardContent>
