@@ -1,5 +1,4 @@
 
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -156,6 +155,7 @@ export default function PriseDeMandat() {
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     statut: "Retour d'appel",
+    utilisateur_assigne: "", // NEW FIELD
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
@@ -295,6 +295,7 @@ export default function PriseDeMandat() {
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: new Date().toISOString().split('T')[0], // New date
       statut: "Retour d'appel", // Default status for new
+      utilisateur_assigne: dossier.utilisateur_assigne || "", // NEW: Load assigned user
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -423,7 +424,7 @@ export default function PriseDeMandat() {
 
   const filteredCourtiersForSelector = courtiers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
-    c.courriels?.some(courriel => courcourriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    c.courriels?.some(courcourriel => courcourriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
@@ -522,6 +523,7 @@ export default function PriseDeMandat() {
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       statut: "Retour d'appel",
+      utilisateur_assigne: "", // NEW: Reset assigned user
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
@@ -570,6 +572,7 @@ export default function PriseDeMandat() {
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
       statut: dossier.statut || "Retour d'appel",
+      utilisateur_assigne: dossier.utilisateur_assigne || "", // NEW: Load assigned user
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -842,6 +845,10 @@ export default function PriseDeMandat() {
           aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
           bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
           break;
+        case 'description':
+            aValue = (a.description || '').toLowerCase();
+            bValue = (b.description || '').toLowerCase();
+            break;
         default:
           aValue = (a[sortField] || '').toString().toLowerCase();
           bValue = (b[sortField] || '').toString().toLowerCase();
@@ -888,8 +895,8 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Reference Dossier Selector */}
-                {!editingDossier && !dossierReferenceId && ( // Only show if creating new and no reference selected yet
+                {/* Reference Dossier Selector - Only visible for "Retour d'appel" status */}
+                {!editingDossier && !dossierReferenceId && formData.statut === "Retour d'appel" && (
                   <div className="space-y-2 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
                     <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
                     <div className="flex gap-2">
@@ -933,7 +940,6 @@ export default function PriseDeMandat() {
                   </div>
                 )}
 
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
@@ -953,7 +959,7 @@ export default function PriseDeMandat() {
 
                   <div className="space-y-2">
                     <Label>Statut <span className="text-red-400">*</span></Label>
-                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne})}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner le statut" />
                       </SelectTrigger>
@@ -969,6 +975,26 @@ export default function PriseDeMandat() {
                     </Select>
                   </div>
                 </div>
+
+                {/* Utilisateur assigné - Only visible for "Retour d'appel" status */}
+                {formData.statut === "Retour d'appel" && (
+                  <div className="space-y-2">
+                    <Label>Utilisateur assigné</Label>
+                    <Select value={formData.utilisateur_assigne || ""} onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner un utilisateur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem> {/* Changed null to empty string for consistency */}
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.email} className="text-white">
+                            {user.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Champs conditionnels pour statut "Ouvert" */}
                 {formData.statut === "Ouvert" && (
@@ -2244,13 +2270,21 @@ export default function PriseDeMandat() {
                   {viewingDossier.numero_dossier && (
                     <div>
                       <p className="text-slate-400">Numéro de dossier</p>
-                      <p className="text-white font-medium">{viewingDossier.numero_dossier}</p>
+                      <p className="text-white font-medium">{getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}</p>
                     </div>
                   )}
                   <div>
                     <p className="text-slate-400">Date d'ouverture</p>
                     <p className="text-white font-medium">{viewingDossier.date_ouverture ? format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
                   </div>
+                  {viewingDossier.utilisateur_assigne && ( // NEW: Display assigned user
+                    <div>
+                      <p className="text-slate-400">Utilisateur assigné</p>
+                      <p className="text-white font-medium">
+                        {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -2744,4 +2778,3 @@ export default function PriseDeMandat() {
     </div>
   );
 }
-
