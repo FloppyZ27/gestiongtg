@@ -1554,19 +1554,6 @@ export default function PriseDeMandat() {
                     )}
                   </div>
 
-                  {/* Notes de retour d'appel - Moved to bottom, only for Retour d'appel status */}
-                  {formData.statut === "Retour d'appel" && (
-                    <div className="space-y-2">
-                      <Label>Notes de retour d'appel</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="bg-slate-800 border-slate-700 min-h-[300px]" // Reverting to original height for "Retour d'appel"
-                        placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
-                      />
-                    </div>
-                  )}
-
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 -mx-6 px-6 mt-6">
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Annuler
