@@ -1568,7 +1568,8 @@ export default function PriseDeMandat() {
                         Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
                       </div>
                     )}
-                  </Form>
+                  </div>
+                </form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
                 <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
@@ -2445,7 +2446,7 @@ export default function PriseDeMandat() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-xs font-medium text-slate-400">Nouveaux mandats</p>
-                  <CardTitle className="text-2xl font-bold mt-1 text-white">
+                  <CardTitle className="2xl font-bold mt-1 text-white">
                     {nouveauMandatStats.total}
                   </CardTitle>
                 </div>
