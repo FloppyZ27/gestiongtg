@@ -1081,8 +1081,8 @@ export default function PriseDeMandat() {
                   )}
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
-                  {(formData.statut === "Ouvert" || formData.statut === "Nouveau mandat/Demande d'information") && ( // Modified condition
-                    <div className={`grid grid-cols-2 gap-4 p-4 ${formData.statut === "Ouvert" ? "bg-green-500/10 border border-green-500/30" : "bg-cyan-500/10 border border-cyan-500/30"} rounded-lg`}>
+                  {formData.statut === "Ouvert" && (
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
                       <div className="space-y-2">
                         <Label>N° de dossier <span className="text-red-400">*</span></Label>
                         <Input
@@ -1419,7 +1419,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }</div>
+                                </div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
