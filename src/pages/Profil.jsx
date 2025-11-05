@@ -30,10 +30,9 @@ export default function Profil() {
   });
 
   const { data: dossiers } = useQuery({
-    queryKey: ['dossiers', user?.email],
-    queryFn: () => base44.entities.Dossier.filter({ responsable_email: user?.email }),
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list('-created_date'),
     initialData: [],
-    enabled: !!user,
   });
 
   const { data: entreeTemps } = useQuery({
@@ -203,9 +202,8 @@ export default function Profil() {
     return mandats[0].adresse_travaux;
   };
 
-
   const dossiersEnCours = dossiers.filter(d => d.statut === 'en_cours');
-  const retoursAppel = dossiers.filter(d => d.statut === 'Retour d\'appel' && d.utilisateur_assigne === user?.email);
+  const retoursAppel = dossiers.filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email);
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
 
   // Jours fériés Canada/Québec 2025 (placeholder year for example)

@@ -1185,247 +1185,160 @@ export default function PriseDeMandat() {
                   </div>
                 )}
 
-                {/* Clients */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <Label>Clients</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setIsClientSelectorOpen(true)}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                      disabled={!!dossierReferenceId}
-                    >
-                      <UserPlus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
-                  {formData.clients_ids.length > 0 ? (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Nom</TableHead>
-                            <TableHead className="text-slate-300">Adresse</TableHead>
-                            <TableHead className="text-slate-300">Courriel</TableHead>
-                            <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.clients_ids.map(clientId => {
-                            const client = getClientById(clientId);
-                            const adresseActuelle = client?.adresses?.find(a => a.actuelle);
-                            return client ? (
-                              <TableRow key={clientId} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-white font-medium">
-                                  {client.prenom} {client.nom}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(client.courriels, 'courriel') || "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(client.telephones, 'telephone') || "-"}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setViewingClientDetails(client)}
-                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClient(clientId, 'clients')}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      disabled={!!dossierReferenceId}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ) : null;
-                          })}
-                        </TableBody>
-                      </Table>
+                {/* Clients, Notaires et Courtiers - 3 colonnes */}
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Clients */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <Label>Clients</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setIsClientSelectorOpen(true)}
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                        disabled={!!dossierReferenceId}
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
                     </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
-                      Aucun client sélectionné
-                    </p>
-                  )}
-                </div>
+                    {formData.clients_ids.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        {formData.clients_ids.map(clientId => {
+                          const client = getClientById(clientId);
+                          return client ? (
+                            <Badge
+                              key={clientId}
+                              variant="outline"
+                              className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8"
+                            >
+                              <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer">
+                                {client.prenom} {client.nom}
+                              </span>
+                              {!dossierReferenceId && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeClient(clientId, 'clients');
+                                  }}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              )}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                        Aucun client
+                      </p>
+                    )}
+                  </div>
 
-                {/* Notaires */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <Label>Notaires</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setIsNotaireSelectorOpen(true)}
-                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                      disabled={!!dossierReferenceId}
-                    >
-                      <UserPlus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
-                  {formData.notaires_ids.length > 0 ? (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Nom</TableHead>
-                            <TableHead className="text-slate-300">Adresse</TableHead>
-                            <TableHead className="text-slate-300">Courriel</TableHead>
-                            <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.notaires_ids.map(notaireId => {
-                            const notaire = getClientById(notaireId);
-                            const adresseActuelle = notaire?.adresses?.find(a => a.actuelle);
-                            return notaire ? (
-                              <TableRow key={notaireId} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-white font-medium">
-                                  {notaire.prenom} {notaire.nom}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(notaire.courriels, 'courriel') || "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(notaire.telephones, 'telephone') || "-"}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setViewingClientDetails(notaire)}
-                                      className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClient(notaireId, 'notaires')}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      disabled={!!dossierReferenceId}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ) : null;
-                          })}
-                        </TableBody>
-                      </Table>
+                  {/* Notaires */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <Label>Notaires</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setIsNotaireSelectorOpen(true)}
+                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                        disabled={!!dossierReferenceId}
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
                     </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
-                      Aucun notaire sélectionné
-                    </p>
-                  )}
-                </div>
+                    {formData.notaires_ids.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        {formData.notaires_ids.map(notaireId => {
+                          const notaire = getClientById(notaireId);
+                          return notaire ? (
+                            <Badge
+                              key={notaireId}
+                              variant="outline"
+                              className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8"
+                            >
+                              <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer">
+                                {notaire.prenom} {notaire.nom}
+                              </span>
+                              {!dossierReferenceId && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeClient(notaireId, 'notaires');
+                                  }}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              )}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                        Aucun notaire
+                      </p>
+                    )}
+                  </div>
 
-                {/* Courtiers */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <Label>Courtiers immobiliers</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setIsCourtierSelectorOpen(true)}
-                      className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
-                      disabled={!!dossierReferenceId}
-                    >
-                      <UserPlus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
-                  {formData.courtiers_ids.length > 0 ? (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Nom</TableHead>
-                            <TableHead className="text-slate-300">Adresse</TableHead>
-                            <TableHead className="text-slate-300">Courriel</TableHead>
-                            <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.courtiers_ids.map(courtierId => {
-                            const courtier = getClientById(courtierId);
-                            const adresseActuelle = courtier?.adresses?.find(a => a.actuelle);
-                            return courtier ? (
-                              <TableRow key={courtierId} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-white font-medium">
-                                  {courtier.prenom} {courtier.nom}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {adresseActuelle ? formatAdresse(adresseActuelle) : "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(courtier.courriels, 'courriel') || "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getCurrentValue(courtier.telephones, 'telephone') || "-"}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setViewingClientDetails(courtier)}
-                                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClient(courtierId, 'courtiers')}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      disabled={!!dossierReferenceId}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ) : null;
-                          })}
-                        </TableBody>
-                      </Table>
+                  {/* Courtiers */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <Label>Courtiers immobiliers</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setIsCourtierSelectorOpen(true)}
+                        className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
+                        disabled={!!dossierReferenceId}
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
                     </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
-                      Aucun courtier sélectionné
-                    </p>
-                  )}
+                    {formData.courtiers_ids.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        {formData.courtiers_ids.map(courtierId => {
+                          const courtier = getClientById(courtierId);
+                          return courtier ? (
+                            <Badge
+                              key={courtierId}
+                              variant="outline"
+                              className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8"
+                            >
+                              <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer">
+                                {courtier.prenom} {courtier.nom}
+                              </span>
+                              {!dossierReferenceId && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeClient(courtierId, 'courtiers');
+                                  }}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              )}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                        Aucun courtier
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Notes générales */}
@@ -1597,6 +1510,7 @@ export default function PriseDeMandat() {
                                           <TableHead className="text-slate-300">Circonscription</TableHead>
                                           <TableHead className="text-slate-300">Cadastre</TableHead>
                                           <TableHead className="text-slate-300">Rang</TableHead>
+                                          <TableHead className="text-slate-300">Concordance</TableHead>
                                           <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                         </TableRow>
                                       </TableHeader>
@@ -1618,6 +1532,9 @@ export default function PriseDeMandat() {
                                               </TableCell>
                                               <TableCell className="text-slate-300">
                                                 {lot.rang || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.concordance_anterieur || "-"}
                                               </TableCell>
                                               <TableCell className="text-right">
                                                 <Button
