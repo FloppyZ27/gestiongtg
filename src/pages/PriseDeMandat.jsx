@@ -1015,7 +1015,6 @@ export default function PriseDeMandat() {
                     <Select
                       value={formData.utilisateur_assigne || ""}
                       onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                      disabled={!!dossierReferenceId}
                     >
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner un utilisateur" />
@@ -1040,7 +1039,6 @@ export default function PriseDeMandat() {
                       value={formData.notes_retour_appel}
                       onChange={(e) => setFormData({...formData, notes_retour_appel: e.target.value})}
                       className="bg-slate-800 border-slate-700 h-20"
-                      disabled={!!dossierReferenceId}
                       placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
                     />
                   </div>
