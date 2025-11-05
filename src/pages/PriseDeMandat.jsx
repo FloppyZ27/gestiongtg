@@ -18,7 +18,7 @@ import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
-import CommentairesSection from "../components/dossiers/CommentairesSection"; // Added import
+import CommentairesSection from "../components/dossiers/CommentairesSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -1009,12 +1009,14 @@ export default function PriseDeMandat() {
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
-                          <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                           <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
                           <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
-                          <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                           {editingDossier && (
-                            <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                            <>
+                              <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                              <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
+                              <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                            </>
                           )}
                         </SelectContent>
                       </Select>
