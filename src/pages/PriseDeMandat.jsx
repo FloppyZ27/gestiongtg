@@ -338,13 +338,9 @@ export default function PriseDeMandat() {
   // Filtrer les dossiers pour exclure le statut "Rejeté"
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
 
-  const retourAppelDossiers = dossiersNonRejetes.filter(d =>
-    d.statut === "Retour d'appel" ||
-    d.statut === "Message laissé/Sans réponse" ||
-    d.statut === "Demande d'information"
-  );
+  const retourAppelDossiers = dossiersNonRejetes.filter(d => d.statut === "Retour d'appel");
+  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Demande d'information");
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
-  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Nouveau mandat"); // NEW LINE
 
   // Calcul des périodes
   const now = new Date();
@@ -419,6 +415,21 @@ export default function PriseDeMandat() {
   const filteredSoumission = applyFilters(soumissionDossiers);
   const filteredNouveauMandat = applyFilters(nouveauMandatDossiers); // NEW LINE
 
+  // NEW: Filter dossiers for reference selector
+  const filteredDossiersForReference = dossiers.filter(dossier => {
+    const searchLower = dossierSearchForReference.toLowerCase();
+    const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    return (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.description?.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+    );
+  });
+  // END NEW
+
   const filteredClientsForSelector = clientsReguliers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
@@ -452,21 +463,6 @@ export default function PriseDeMandat() {
 
     return matchesSearch && matchesCirconscription && matchesCadastre;
   });
-
-  // NEW: Filter dossiers for reference selector
-  const filteredDossiersForReference = dossiers.filter(dossier => {
-    const searchLower = dossierSearchForReference.toLowerCase();
-    const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
-    const clientsNames = getClientsNames(dossier.clients_ids);
-    return (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      dossier.description?.toLowerCase().includes(searchLower) ||
-      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
-    );
-  });
-  // END NEW
 
   const openLotSelector = (mandatIndex) => {
     setCurrentMandatIndex(mandatIndex);
