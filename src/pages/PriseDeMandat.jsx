@@ -917,12 +917,9 @@ export default function PriseDeMandat() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Section pour les champs de base - 2 colonnes */}
                   {!editingDossier && formData.statut === "Retour d'appel" ? (
                     <div className="grid grid-cols-2 gap-6">
-                      {/* Colonne gauche - Informations du dossier */}
                       <div className="space-y-4">
-                        {/* Créer à partir d'un dossier existant */}
                         <div className="space-y-2">
                           <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
                           <div className="relative">
@@ -979,7 +976,6 @@ export default function PriseDeMandat() {
                           )}
                         </div>
 
-                        {/* Arpenteur-géomètre */}
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                           <Select
@@ -1000,7 +996,6 @@ export default function PriseDeMandat() {
                           </Select>
                         </div>
 
-                        {/* Statut */}
                         <div className="space-y-2">
                           <Label>Statut <span className="text-red-400">*</span></Label>
                           <Select value={formData.statut} onValueChange={(value) => {
@@ -1026,7 +1021,6 @@ export default function PriseDeMandat() {
                           </Select>
                         </div>
 
-                        {/* Utilisateur assigné */}
                         <div className="space-y-2">
                           <Label>Utilisateur assigné</Label>
                           <Select
@@ -1048,7 +1042,6 @@ export default function PriseDeMandat() {
                         </div>
                       </div>
 
-                      {/* Colonne droite - Notes de retour d'appel */}
                       <div className="space-y-2">
                         <Label>Notes de retour d'appel</Label>
                         <Textarea
@@ -1130,7 +1123,6 @@ export default function PriseDeMandat() {
                         </div>
                       )}
 
-                      {/* General description for all other cases */}
                       <div className="space-y-2">
                         <Label>Description</Label>
                         <Textarea
