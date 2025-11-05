@@ -999,7 +999,7 @@ export default function PriseDeMandat() {
                       <Label>Statut <span className="text-red-400">*</span></Label>
                       <Select value={formData.statut} onValueChange={(value) => {
                         setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
-                        if (value !== "Retour d'appel') {
+                        if (value !== "Retour d'appel") {
                           setDossierReferenceId(null);
                           setDossierSearchForReference("");
                         }
