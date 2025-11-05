@@ -941,7 +941,7 @@ export default function PriseDeMandat() {
                               >
                                 <div>
                                   <p className="font-medium text-white">
-                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
+                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{dossier.numero_dossier || ""}
                                     {d.numero_dossier && d.arpenteur_geometre && " - "}
                                     {getClientsNames(d.clients_ids)}
                                   </p>
