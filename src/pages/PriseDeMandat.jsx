@@ -1012,7 +1012,11 @@ export default function PriseDeMandat() {
                 {formData.statut === "Retour d'appel" && (
                   <div className="space-y-2">
                     <Label>Utilisateur assigné</Label>
-                    <Select value={formData.utilisateur_assigne || ""} onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})} disabled={!!dossierReferenceId}>
+                    <Select
+                      value={formData.utilisateur_assigne || ""}
+                      onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                      disabled={!!dossierReferenceId}
+                    >
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner un utilisateur" />
                       </SelectTrigger>
