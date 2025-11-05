@@ -917,222 +917,142 @@ export default function PriseDeMandat() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
-                  {!editingDossier && formData.statut === "Retour d'appel" ? (
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                            <Input
-                              placeholder="Rechercher un dossier par numéro, client, etc."
-                              value={dossierSearchForReference}
-                              onChange={(e) => setDossierSearchForReference(e.target.value)}
-                              className="pl-10 bg-slate-700 border-slate-600"
-                            />
-                          </div>
-                          {dossierSearchForReference && (
-                            <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
-                              {filteredDossiersForReference.length > 0 ? (
-                                filteredDossiersForReference.map(d => (
-                                  <div
-                                    key={d.id}
-                                    className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
-                                    onClick={() => loadDossierReference(d.id)}
-                                  >
-                                    <div>
-                                      <p className="font-medium text-white">
-                                        {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
-                                        {d.numero_dossier && d.arpenteur_geometre && " - "}
-                                        {getClientsNames(d.clients_ids)}
-                                      </p>
-                                      <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
-                                    </div>
-                                    <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
-                                      <Plus className="w-4 h-4 mr-1" /> Sélectionner
-                                    </Button>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
-                              )}
-                            </div>
-                          )}
-                          {dossierReferenceId && (
-                            <div className="mt-2">
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setDossierReferenceId(null);
-                                  resetForm();
-                                }}
-                                className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
-                              >
-                                Effacer le dossier de référence
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                          <Select
-                            value={formData.arpenteur_geometre}
-                            onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
-                            disabled={!!dossierReferenceId}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              {ARPENTEURS.map((arpenteur) => (
-                                <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                                  {arpenteur}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Statut <span className="text-red-400">*</span></Label>
-                          <Select value={formData.statut} onValueChange={(value) => {
-                            setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
-                            if (value !== "Retour d'appel") {
-                              setDossierReferenceId(null);
-                              setDossierSearchForReference("");
-                            }
-                          }}>
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner le statut" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
-                              <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                              <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                              <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
-                              <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                              {editingDossier && (
-                                <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Utilisateur assigné</Label>
-                          <Select
-                            value={formData.utilisateur_assigne || ""}
-                            onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner un utilisateur" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                              {users.map((user) => (
-                                <SelectItem key={user.id} value={user.email} className="text-white">
-                                  {user.full_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Notes de retour d'appel</Label>
-                        <Textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                          className="bg-slate-800 border-slate-700 h-full min-h-[300px]"
-                          placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
+                  {/* Section pour les champs de base - tous en une seule colonne */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          placeholder="Rechercher un dossier par numéro, client, etc."
+                          value={dossierSearchForReference}
+                          onChange={(e) => setDossierSearchForReference(e.target.value)}
+                          className="pl-10 bg-slate-700 border-slate-600"
                         />
                       </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                          <Select
-                            value={formData.arpenteur_geometre}
-                            onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
-                            disabled={!!dossierReferenceId}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              {ARPENTEURS.map((arpenteur) => (
-                                <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                                  {arpenteur}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Statut <span className="text-red-400">*</span></Label>
-                          <Select value={formData.statut} onValueChange={(value) => {
-                            setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
-                            if (value !== "Retour d'appel") {
-                              setDossierReferenceId(null);
-                              setDossierSearchForReference("");
-                            }
-                          }}>
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner le statut" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
-                              <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                              <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                              <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
-                              <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                              {editingDossier && (
-                                <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {formData.statut === "Retour d'appel" && (
-                        <div className="space-y-2">
-                          <Label>Utilisateur assigné</Label>
-                          <Select
-                            value={formData.utilisateur_assigne || ""}
-                            onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner un utilisateur" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                              {users.map((user) => (
-                                <SelectItem key={user.id} value={user.email} className="text-white">
-                                  {user.full_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      {dossierSearchForReference && (
+                        <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
+                          {filteredDossiersForReference.length > 0 ? (
+                            filteredDossiersForReference.map(d => (
+                              <div
+                                key={d.id}
+                                className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
+                                onClick={() => loadDossierReference(d.id)}
+                              >
+                                <div>
+                                  <p className="font-medium text-white">
+                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
+                                    {d.numero_dossier && d.arpenteur_geometre && " - "}
+                                    {getClientsNames(d.clients_ids)}
+                                  </p>
+                                  <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
+                                </div>
+                                <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
+                                  <Plus className="w-4 h-4 mr-1" /> Sélectionner
+                                </Button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
+                          )}
                         </div>
                       )}
+                      {dossierReferenceId && (
+                        <div className="mt-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setDossierReferenceId(null);
+                              resetForm();
+                            }}
+                            className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                          >
+                            Effacer le dossier de référence
+                          </Button>
+                        </div>
+                      )}
+                    </div>
 
+                    <div className="space-y-2">
+                      <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                      <Select
+                        value={formData.arpenteur_geometre}
+                        onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                        disabled={!!dossierReferenceId}
+                      >
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {ARPENTEURS.map((arpenteur) => (
+                            <SelectItem key={arpenteur} value={arpenteur} className="text-white">
+                              {arpenteur}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Statut <span className="text-red-400">*</span></Label>
+                      <Select value={formData.statut} onValueChange={(value) => {
+                        setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
+                        if (value !== "Retour d'appel') {
+                          setDossierReferenceId(null);
+                          setDossierSearchForReference("");
+                        }
+                      }}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner le statut" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
+                          <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                          <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
+                          <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
+                          <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
+                          {editingDossier && (
+                            <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.statut === "Retour d'appel" && (
                       <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Textarea
-                          value={formData.description}
-                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                          className="bg-slate-800 border-slate-700 min-h-[120px]"
-                          placeholder="Ajouter une description ou des notes générales pour ce dossier..."
-                        />
+                        <Label>Utilisateur assigné</Label>
+                        <Select
+                          value={formData.utilisateur_assigne || ""}
+                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner un utilisateur" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.email} className="text-white">
+                                {user.full_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                    </>
+                    )}
+                  </div>
+
+                  {formData.statut !== "Retour d'appel" && (
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="bg-slate-800 border-slate-700 min-h-[120px]"
+                        placeholder="Ajouter une description ou des notes générales pour ce dossier..."
+                      />
+                    </div>
                   )}
 
                   {/* Informations du dossier de référence - Only visible for "Retour d'appel" with reference dossier */}
@@ -1632,6 +1552,19 @@ export default function PriseDeMandat() {
                       </div>
                     )}
                   </div>
+
+                  {/* Notes de retour d'appel - Moved to bottom, only for Retour d'appel status */}
+                  {formData.statut === "Retour d'appel" && (
+                    <div className="space-y-2">
+                      <Label>Notes de retour d'appel</Label>
+                      <Textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="bg-slate-800 border-slate-700 min-h-[300px]" // Reverting to original height for "Retour d'appel"
+                        placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
+                      />
+                    </div>
+                  )}
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 -mx-6 px-6 mt-6">
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
