@@ -816,11 +816,11 @@ export default function PriseDeMandat() {
       "Retour d'appel": "bg-blue-500/20 text-blue-400 border-blue-500/30",
       "Message laissé/Sans réponse": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
       "Demande d'information": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-      "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // ADDED
+      "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
     };
-    return colors[statut] || colors["Retour d'appel'];
+    return colors[statut] || colors["Retour d'appel"];
   };
 
   // Sorting logic
