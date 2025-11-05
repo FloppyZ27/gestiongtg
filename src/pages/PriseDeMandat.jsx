@@ -1043,18 +1043,6 @@ export default function PriseDeMandat() {
                     )}
                   </div>
 
-                  {formData.statut !== "Retour d'appel" && (
-                    <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="bg-slate-800 border-slate-700 min-h-[120px]"
-                        placeholder="Ajouter une description ou des notes générales pour ce dossier..."
-                      />
-                    </div>
-                  )}
-
                   {/* Informations du dossier de référence - Only visible for "Retour d'appel" with reference dossier */}
                   {formData.statut === "Retour d'appel" && dossierReferenceId && (
                     <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
@@ -1103,6 +1091,19 @@ export default function PriseDeMandat() {
                           disabled={!!dossierReferenceId}
                         />
                       </div>
+                    </div>
+                  )}
+
+                  {/* Description field for statuses other than "Retour d'appel" */}
+                  {formData.statut !== "Retour d'appel" && (
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="bg-slate-800 border-slate-700 min-h-[120px]"
+                        placeholder="Ajouter une description ou des notes générales pour ce dossier..."
+                      />
                     </div>
                   )}
 
