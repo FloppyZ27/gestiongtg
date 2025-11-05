@@ -45,6 +45,11 @@ const navigationItems = [
     icon: Calendar,
   },
   {
+    title: "Clavardage",
+    url: createPageUrl("Clavardage"),
+    icon: MessageCircle,
+  },
+  {
     title: "Prise de mandat",
     url: createPageUrl("PriseDeMandat"),
     icon: Phone,
