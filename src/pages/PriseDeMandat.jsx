@@ -1028,13 +1028,8 @@ export default function PriseDeMandat() {
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                           <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
-                          <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                           {editingDossier && (
-                            <>
-                              <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                              <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                              <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                            </>
+                            <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -1573,8 +1568,7 @@ export default function PriseDeMandat() {
                         Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
                       </div>
                     )}
-                  </div>
-                </form>
+                  </Form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
                 <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
