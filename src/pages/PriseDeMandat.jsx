@@ -1320,7 +1320,7 @@ export default function PriseDeMandat() {
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => setViewingClientDetails(courtier)}
-                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                      className="text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
                                     >
                                       <Eye className="w-4 h-4" />
                                     </Button>
@@ -2126,9 +2126,9 @@ export default function PriseDeMandat() {
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
-                      <SelectItem key={circonscription} value={circonscription} className="text-white">
-                        {circonscription}
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                      <SelectItem key={circ} value={circ} className="text-white">
+                        {circ}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -2707,12 +2707,6 @@ export default function PriseDeMandat() {
                         >
                           Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('description')}
-                        >
-                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -2757,9 +2751,6 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300 max-w-xs truncate">
-                            {dossier.description || "-"}
-                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -2784,7 +2775,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedRetourAppel.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
                           </TableCell>
                         </TableRow>
@@ -2838,12 +2829,6 @@ export default function PriseDeMandat() {
                         >
                           Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('description')}
-                        >
-                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -2888,9 +2873,6 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300 max-w-xs truncate">
-                            {dossier.description || "-"}
-                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -2915,7 +2897,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedNouveauMandat.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                             Aucun nouveau mandat
                           </TableCell>
                         </TableRow>
@@ -2968,12 +2950,6 @@ export default function PriseDeMandat() {
                         >
                           Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('description')}
-                        >
-                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -3018,9 +2994,6 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300 max-w-xs truncate">
-                            {dossier.description || "-"}
-                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -3045,7 +3018,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedSoumission.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                             Aucune soumission
                           </TableCell>
                         </TableRow>
