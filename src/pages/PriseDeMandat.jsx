@@ -1360,48 +1360,50 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Dates */}
                                   <div className="space-y-3">
-                                    <div className="space-y-2">
-                                      <Label className="text-right block">Date d'ouverture</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_ouverture || ""}
-                                        onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                        className="bg-slate-700 border-slate-600 text-right"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                    </div>
+                                    <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-left block">Date d'ouverture</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_ouverture || ""}
+                                          onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                          disabled={!!dossierReferenceId}
+                                        />
+                                      </div>
 
-                                    <div className="space-y-2">
-                                      <Label className="text-right block">Date de signature</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_signature || ""}
-                                        onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                        className="bg-slate-700 border-slate-600 text-right"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                    </div>
+                                      <div className="space-y-2">
+                                        <Label className="text-left block">Date de signature</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_signature || ""}
+                                          onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                          disabled={!!dossierReferenceId}
+                                        />
+                                      </div>
 
-                                    <div className="space-y-2">
-                                      <Label className="text-right block">Début des travaux</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_debut_travaux || ""}
-                                        onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                        className="bg-slate-700 border-slate-600 text-right"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                    </div>
+                                      <div className="space-y-2">
+                                        <Label className="text-left block">Début des travaux</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_debut_travaux || ""}
+                                          onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                          disabled={!!dossierReferenceId}
+                                        />
+                                      </div>
 
-                                    <div className="space-y-2">
-                                      <Label className="text-right block">Date de livraison</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_livraison || ""}
-                                        onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                        className="bg-slate-700 border-slate-600 text-right"
-                                        disabled={!!dossierReferenceId}
-                                      />
+                                      <div className="space-y-2">
+                                        <Label className="text-left block">Date de livraison</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_livraison || ""}
+                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                          disabled={!!dossierReferenceId}
+                                        />
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
