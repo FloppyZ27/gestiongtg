@@ -901,13 +901,22 @@ export default function PriseDeMandat() {
                 Nouveau dossier
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] max-h-[90vh] overflow-hidden flex">
+              <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* Main form content - 70% */}
+              <div className="flex-1 overflow-y-auto pr-6">
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
+                  </h2>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Section pour les champs de base - 2 colonnes */}
                 {!editingDossier && formData.statut === "Retour d'appel" ? (
                   <div className="grid grid-cols-2 gap-6">
@@ -1342,15 +1351,6 @@ export default function PriseDeMandat() {
                   </div>
                 </div>
 
-                {/* Commentaires du dossier - Sidebar style */}
-                <div className="space-y-2">
-                  <Label>Commentaires</Label>
-                  <CommentairesSection 
-                    dossierId={editingDossier?.id} 
-                    disabled={!editingDossier}
-                  />
-                </div>
-
                 {/* Mandats */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -1658,6 +1658,20 @@ export default function PriseDeMandat() {
                   </Button>
                 </div>
               </form>
+              </div>
+
+              {/* Commentaires Sidebar - 30% */}
+              <div className="w-[30%] border-l border-slate-800 pl-6 flex flex-col">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <CommentairesSection 
+                    dossierId={editingDossier?.id} 
+                    disabled={!editingDossier}
+                  />
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -3073,16 +3087,16 @@ function CommentairesSection({ dossierId, disabled }) {
 
   if (disabled) {
     return (
-      <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-6 text-center">
+      <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-6 text-center h-full flex flex-col justify-center items-center">
         <p className="text-slate-500">Enregistrez d'abord le dossier pour ajouter des commentaires</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden">
+    <div className="bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden h-full flex flex-col">
       {/* Liste des commentaires */}
-      <div className="max-h-[400px] overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {commentaires.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-slate-500">Aucun commentaire pour le moment</p>

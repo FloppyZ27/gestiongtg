@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +31,7 @@ export default function AddressInput({
   singleAddress = false,
   disabled = false 
 }) {
-  const [addressSuggestions, setAddressSuggestions] = useState({});
-  const [loadingSuggestions, setLoadingSuggestions] = useState({});
+  // Removed addressSuggestions and loadingSuggestions as they are no longer used for geolocation.
 
   const handleAddressChange = (index, field, value) => {
     const updatedAddresses = [...addresses];
@@ -104,41 +104,7 @@ export default function AddressInput({
     onChange(updatedAddresses);
   };
 
-  const searchAddress = async (addressIndex) => {
-    const address = addresses[addressIndex];
-    const civicNumbers = address.numeros_civiques?.filter(n => n.trim() !== "") || [];
-    const civicNumber = civicNumbers.length > 0 ? civicNumbers[0] : "";
-    
-    if (!civicNumber || !address.rue || !address.ville) {
-      return;
-    }
-
-    const searchQuery = `${civicNumber} ${address.rue}, ${address.ville}, ${address.province || 'QC'}, Canada`;
-    setLoadingSuggestions(prev => ({ ...prev, [addressIndex]: true }));
-
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=ca&limit=5`
-      );
-      const data = await response.json();
-      setAddressSuggestions(prev => ({ ...prev, [addressIndex]: data }));
-    } catch (error) {
-      console.error("Error fetching address suggestions:", error);
-    } finally {
-      setLoadingSuggestions(prev => ({ ...prev, [addressIndex]: false }));
-    }
-  };
-
-  const selectSuggestion = (addressIndex, suggestion) => {
-    const updatedAddresses = [...addresses];
-    updatedAddresses[addressIndex] = {
-      ...updatedAddresses[addressIndex],
-      latitude: parseFloat(suggestion.lat),
-      longitude: parseFloat(suggestion.lon)
-    };
-    onChange(updatedAddresses);
-    setAddressSuggestions(prev => ({ ...prev, [addressIndex]: [] }));
-  };
+  // Removed searchAddress and selectSuggestion functions as they are no longer used for geolocation.
 
   return (
     <div className="space-y-4">
@@ -288,40 +254,6 @@ export default function AddressInput({
               className="bg-slate-700 border-slate-600 text-white"
             />
           </div>
-
-          {/* Geolocalisation button */}
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => searchAddress(addressIndex)}
-            disabled={disabled || loadingSuggestions[addressIndex]}
-            className="w-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
-          >
-            <MapPin className="w-4 h-4 mr-2" />
-            {loadingSuggestions[addressIndex] ? "Recherche..." : "Géolocaliser l'adresse"}
-          </Button>
-
-          {/* Address suggestions */}
-          {addressSuggestions[addressIndex] && addressSuggestions[addressIndex].length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-slate-300">Suggestions d'adresses</Label>
-              <div className="space-y-1">
-                {addressSuggestions[addressIndex].map((suggestion, idx) => (
-                  <Button
-                    key={idx}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selectSuggestion(addressIndex, suggestion)}
-                    disabled={disabled}
-                    className="w-full justify-start text-left bg-slate-700 border-slate-600 hover:bg-slate-600 text-white text-xs"
-                  >
-                    {suggestion.display_name}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Coordinates display */}
           {address.latitude && address.longitude && (
