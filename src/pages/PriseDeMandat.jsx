@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -128,7 +129,6 @@ export default function PriseDeMandat() {
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
   const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
-  // NEW STATES
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
   const [newLotForm, setNewLotForm] = useState({
     numero_lot: "",
@@ -136,10 +136,14 @@ export default function PriseDeMandat() {
     cadastre: "",
     rang: "",
     concordance_anterieur: "",
-    document_url: "", // To store the uploaded file URL
+    document_url: "",
   });
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
   const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+
+  // NEW STATES FOR DOSSIER REFERENCE
+  const [dossierReferenceId, setDossierReferenceId] = useState(null);
+  const [dossierSearchForReference, setDossierSearchForReference] = useState("");
   // END NEW STATES
 
   const [filterArpenteur, setFilterArpenteur] = useState("all");
@@ -237,7 +241,6 @@ export default function PriseDeMandat() {
     },
   });
 
-  // NEW MUTATION
   const createLotMutation = useMutation({
     mutationFn: (lotData) => base44.entities.Lot.create(lotData),
     onSuccess: () => {
@@ -246,7 +249,6 @@ export default function PriseDeMandat() {
       resetLotForm();
     },
   });
-  // END NEW MUTATION
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -254,6 +256,52 @@ export default function PriseDeMandat() {
 
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.id === numeroLot); // Changed to id
+
+  // NEW FUNCTION: Load data from reference dossier
+  const loadDossierReference = (dossierId) => {
+    const dossier = dossiers.find(d => d.id === dossierId);
+    if (!dossier) return;
+
+    setFormData({
+      numero_dossier: "", // Keep empty for new dossier
+      arpenteur_geometre: dossier.arpenteur_geometre || "",
+      date_ouverture: new Date().toISOString().split('T')[0], // New date
+      statut: "Retour d'appel", // Default status for new
+      clients_ids: dossier.clients_ids || [],
+      notaires_ids: dossier.notaires_ids || [],
+      courtiers_ids: dossier.courtiers_ids || [],
+      mandats: dossier.mandats?.map(m => ({
+        ...m,
+        date_ouverture: m.date_ouverture || "", // Should be empty for new mandat, or use a default? Assuming empty for new
+        adresse_travaux: m.adresse_travaux
+          ? (typeof m.adresse_travaux === 'string'
+            ? {
+                rue: m.adresse_travaux,
+                numeros_civiques: [],
+                ville: "",
+                code_postal: "",
+                province: ""
+              }
+            : m.adresse_travaux
+          )
+          : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        lots: m.lots || [],
+        prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+        rabais: m.rabais !== undefined ? m.rabais : 0,
+        taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
+        date_livraison: "", // Reset for new mandat
+        date_signature: "", // Reset for new mandat
+        date_debut_travaux: "", // Reset for new mandat
+        notes: m.notes || "",
+        tache_actuelle: "" // Reset task
+      })) || [],
+      description: dossier.description || ""
+    });
+    setActiveTabMandat("0");
+    setDossierReferenceId(dossierId); // Set the reference ID
+    setIsDialogOpen(true); // Open the dialog to edit the new form
+  };
+  // END NEW FUNCTION
 
   // Filtrer les dossiers pour exclure le statut "Rejeté"
   const dossiersNonRejetes = dossiers.filter(d => d.statut !== "Rejeté");
@@ -378,6 +426,21 @@ export default function PriseDeMandat() {
     return matchesSearch && matchesCirconscription && matchesCadastre;
   });
 
+  // NEW: Filter dossiers for reference selector
+  const filteredDossiersForReference = dossiers.filter(dossier => {
+    const searchLower = dossierSearchForReference.toLowerCase();
+    const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    return (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.description?.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+    );
+  });
+  // END NEW
+
   const openLotSelector = (mandatIndex) => {
     setCurrentMandatIndex(mandatIndex);
     setIsLotSelectorOpen(true);
@@ -452,6 +515,8 @@ export default function PriseDeMandat() {
     });
     setEditingDossier(null);
     setActiveTabMandat("0");
+    setDossierReferenceId(null); // NEW: Reset reference
+    setDossierSearchForReference(""); // NEW: Reset search
   };
 
   const resetClientForm = () => {
@@ -823,6 +888,52 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Reference Dossier Selector */}
+                {!editingDossier && !dossierReferenceId && ( // Only show if creating new and no reference selected yet
+                  <div className="space-y-2 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+                    <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          placeholder="Rechercher un dossier par numéro, client, etc."
+                          value={dossierSearchForReference}
+                          onChange={(e) => setDossierSearchForReference(e.target.value)}
+                          className="pl-10 bg-slate-700 border-slate-600"
+                        />
+                      </div>
+                    </div>
+                    {dossierSearchForReference && (
+                      <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
+                        {filteredDossiersForReference.length > 0 ? (
+                          filteredDossiersForReference.map(d => (
+                            <div
+                              key={d.id}
+                              className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
+                              onClick={() => loadDossierReference(d.id)}
+                            >
+                              <div>
+                                <p className="font-medium text-white">
+                                  {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
+                                  {d.numero_dossier && d.arpenteur_geometre && " - "}
+                                  {getClientsNames(d.clients_ids)}
+                                </p>
+                                <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
+                              </div>
+                              <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
+                                <Plus className="w-4 h-4 mr-1" /> Sélectionner
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
