@@ -1359,7 +1359,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Dates */}
-                                  <div className="space-y-3">
+                                  <div className="space-y-3 pr-4">
                                     <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
                                       <div className="space-y-2">
                                         <Label className="text-left block">Date d'ouverture</Label>
