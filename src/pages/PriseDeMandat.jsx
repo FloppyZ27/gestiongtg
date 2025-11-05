@@ -2578,9 +2578,9 @@ export default function PriseDeMandat() {
           </Card>
         </div>
 
-        {/* Tabs for Retour d'appel and Soumission */}
+        {/* Tabs for Nouveau mandat, Soumission and Retour d'appel */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <Tabs defaultValue="retour-appel" className="w-full">
+          <Tabs defaultValue="nouveau-mandat" className="w-full">
             <CardHeader className="border-b border-slate-800">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
