@@ -344,6 +344,7 @@ export default function PriseDeMandat() {
     d.statut === "Demande d'information"
   );
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
+  const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Nouveau mandat"); // NEW LINE
 
   // Calcul des périodes
   const now = new Date();
@@ -378,6 +379,12 @@ export default function PriseDeMandat() {
     byArpenteur: getCountsByArpenteur(retourAppelDossiers)
   };
 
+  const nouveauMandatStats = {
+    total: nouveauMandatDossiers.length,
+    ...getCountsByPeriod(nouveauMandatDossiers),
+    byArpenteur: getCountsByArpenteur(nouveauMandatDossiers)
+  };
+
   const soumissionStats = {
     total: soumissionDossiers.length,
     ...getCountsByPeriod(soumissionDossiers),
@@ -410,6 +417,7 @@ export default function PriseDeMandat() {
 
   const filteredRetourAppel = applyFilters(retourAppelDossiers);
   const filteredSoumission = applyFilters(soumissionDossiers);
+  const filteredNouveauMandat = applyFilters(nouveauMandatDossiers); // NEW LINE
 
   const filteredClientsForSelector = clientsReguliers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
@@ -811,6 +819,7 @@ export default function PriseDeMandat() {
       "Retour d'appel": "bg-blue-500/20 text-blue-400 border-blue-500/30",
       "Message laissé/Sans réponse": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
       "Demande d'information": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // ADDED
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
     };
@@ -869,6 +878,7 @@ export default function PriseDeMandat() {
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
   const sortedSoumission = sortDossiers(filteredSoumission);
+  const sortedNouveauMandat = sortDossiers(filteredNouveauMandat); // NEW LINE
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -999,6 +1009,7 @@ export default function PriseDeMandat() {
                         <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                         <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                         <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
+                        <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem> {/* ADDED */}
                         <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                         {editingDossier && (
                           <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
@@ -1068,8 +1079,8 @@ export default function PriseDeMandat() {
                 )}
 
                 {/* Champs conditionnels pour statut "Ouvert" */}
-                {formData.statut === "Ouvert" && (
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                {(formData.statut === "Ouvert" || formData.statut === "Nouveau mandat") && ( // Modified: also show for "Nouveau mandat"
+                  <div className={`grid grid-cols-2 gap-4 p-4 ${formData.statut === "Ouvert" ? "bg-green-500/10 border border-green-500/30" : "bg-cyan-500/10 border border-cyan-500/30"} rounded-lg`}>
                     <div className="space-y-2">
                       <Label>N° de dossier <span className="text-red-400">*</span></Label>
                       <Input
@@ -2472,7 +2483,7 @@ export default function PriseDeMandat() {
 
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> {/* Adjusted to lg:grid-cols-3 */}
           {/* Retours d'appel Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
             <CardHeader className="pb-2 pt-3">
@@ -2497,6 +2508,37 @@ export default function PriseDeMandat() {
                     </span>
                     <span className="text-white font-semibold">
                       {retourAppelStats.byArpenteur[arp]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Nouveau Mandat Stats - ADDED */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <CardHeader className="pb-2 pt-3">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs font-medium text-slate-400">Nouveaux mandats</p>
+                  <CardTitle className="text-2xl font-bold mt-1 text-white">
+                    {nouveauMandatStats.total}
+                  </CardTitle>
+                </div>
+                <div className="p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 opacity-20">
+                  <FileCheck className="w-5 h-5 text-white" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-2 pb-3">
+              <div className="space-y-1">
+                {ARPENTEURS.map(arp => (
+                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
+                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
+                      {arp}
+                    </span>
+                    <span className="text-white font-semibold">
+                      {nouveauMandatStats.byArpenteur[arp]}
                     </span>
                   </div>
                 ))}
@@ -2551,6 +2593,13 @@ export default function PriseDeMandat() {
                       Retours d'appel ({retourAppelDossiers.length})
                     </TabsTrigger>
                     <TabsTrigger
+                      value="nouveau-mandat" // ADDED
+                      className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" // ADDED
+                    >
+                      <FileCheck className="w-4 h-4 mr-2" /> {/* Icon for new tab */}
+                      Nouveaux mandats ({nouveauMandatDossiers.length}) {/* Count from new list */}
+                    </TabsTrigger>
+                    <TabsTrigger
                       value="soumission"
                       className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400"
                     >
@@ -2594,6 +2643,7 @@ export default function PriseDeMandat() {
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                       <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                       <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
+                      <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem> {/* ADDED */}
                       <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
@@ -2736,6 +2786,137 @@ export default function PriseDeMandat() {
                         <TableRow>
                           <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </TabsContent>
+
+            {/* Nouveau Mandat TabsContent - ADDED */}
+            <TabsContent value="nouveau-mandat" className="p-0">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('arpenteur_geometre')}
+                        >
+                          Arpenteur {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('created_date')}
+                        >
+                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('statut')}
+                        >
+                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('clients')}
+                        >
+                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('adresse_travaux')}
+                        >
+                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('mandats')}
+                        >
+                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('description')}
+                        >
+                          Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedNouveauMandat.map((dossier) => (
+                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="text-slate-300">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-slate-500" />
+                              {dossier.arpenteur_geometre}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
+                              {dossier.statut}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {getFirstAdresseTravaux(dossier.mandats)}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandats && dossier.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                ))}
+                                {dossier.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{dossier.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-300 max-w-xs truncate">
+                            {dossier.description || "-"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(dossier)}
+                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(dossier.id)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {sortedNouveauMandat.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                            Aucun nouveau mandat
                           </TableCell>
                         </TableRow>
                       )}
