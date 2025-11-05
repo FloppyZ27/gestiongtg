@@ -301,7 +301,7 @@ export default function PriseDeMandat() {
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats?.map(m => ({
         ...m,
-        date_ouverture: m.date_ouverture || "", // Should be empty for new mandat, or use a default? Assuming empty for new
+        date_ouverture: "", // Should be empty for new mandat, or use a default? Assuming empty for new
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -896,8 +896,8 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Reference Dossier Selector - Only visible for "Retour d'appel" status */}
-                {!editingDossier && !dossierReferenceId && formData.statut === "Retour d'appel" && (
+                {/* Reference Dossier Selector - Always visible for "Retour d'appel" status */}
+                {!editingDossier && formData.statut === "Retour d'appel" && (
                   <div className="space-y-2 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
                     <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
                     <div className="flex gap-2">
@@ -938,13 +938,33 @@ export default function PriseDeMandat() {
                         )}
                       </div>
                     )}
+                    {dossierReferenceId && (
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setDossierReferenceId(null);
+                            resetForm();
+                          }}
+                          className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                        >
+                          Effacer le dossier de référence
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})} disabled={!!dossierReferenceId}>
+                    <Select
+                      value={formData.arpenteur_geometre}
+                      onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                      disabled={!!dossierReferenceId}
+                    >
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
@@ -960,7 +980,13 @@ export default function PriseDeMandat() {
 
                   <div className="space-y-2">
                     <Label>Statut <span className="text-red-400">*</span></Label>
-                    <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne})}>
+                    <Select value={formData.statut} onValueChange={(value) => {
+                      setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
+                      if (value !== "Retour d'appel") {
+                        setDossierReferenceId(null);
+                        setDossierSearchForReference("");
+                      }
+                    }}>
                       <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                         <SelectValue placeholder="Sélectionner le statut" />
                       </SelectTrigger>
@@ -1001,7 +1027,7 @@ export default function PriseDeMandat() {
                 {formData.statut === "Retour d'appel" && dossierReferenceId && (
                   <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                     <div className="space-y-2">
-                      <Label>N° de dossier (référence)</Label>
+                      <Label>N° de dossier</Label>
                       <Input
                         value={formData.numero_dossier}
                         className="bg-slate-800 border-slate-700"
@@ -1009,7 +1035,7 @@ export default function PriseDeMandat() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Date d'ouverture (référence)</Label>
+                      <Label>Date d'ouverture</Label>
                       <Input
                         type="date"
                         value={formData.date_ouverture}
