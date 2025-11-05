@@ -186,7 +186,7 @@ export default function Profil() {
       case 'en_cours': return 'bg-emerald-500/20 text-emerald-400';
       case 'termine': return 'bg-blue-500/20 text-blue-400';
       case 'annule': return 'bg-red-500/20 text-red-400';
-      case 'a_rappeler': return 'bg-orange-500/20 text-orange-400'; // Specific color for 'a_rappeler'
+      case 'Retour d\'appel': return 'bg-orange-500/20 text-orange-400'; // Specific color for 'a_rappeler'
       default: return 'bg-slate-500/20 text-slate-400';
     }
   };
@@ -205,7 +205,7 @@ export default function Profil() {
 
 
   const dossiersEnCours = dossiers.filter(d => d.statut === 'en_cours');
-  const retoursAppel = dossiers.filter(d => d.statut === 'a_rappeler'); // Filter dossiers for 'a_rappeler' status
+  const retoursAppel = dossiers.filter(d => d.statut === 'Retour d\'appel' && d.utilisateur_assigne === user?.email);
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
 
   // Jours fériés Canada/Québec 2025 (placeholder year for example)
