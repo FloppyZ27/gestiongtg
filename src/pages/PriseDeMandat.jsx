@@ -869,6 +869,10 @@ export default function PriseDeMandat() {
           aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
           bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
           break;
+        case 'statut': // Retaining this for global filter and form, but removing from tables below.
+          aValue = (a[sortField] || '').toString().toLowerCase();
+          bValue = (b[sortField] || '').toString().toLowerCase();
+          break;
         default:
           aValue = (a[sortField] || '').toString().toLowerCase();
           bValue = (b[sortField] || '').toString().toLowerCase();
@@ -2606,12 +2610,6 @@ export default function PriseDeMandat() {
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('statut')}
-                        >
-                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
                         >
                           Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -2634,16 +2632,13 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white font-mono">
-                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
+                          <TableCell className="font-medium text-white">
+                            {dossier.numero_dossier 
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
-                              {dossier.statut}
-                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {getClientsNames(dossier.clients_ids)}
@@ -2666,7 +2661,7 @@ export default function PriseDeMandat() {
                                 )}
                               </div>
                             ) : (
-                              <span className="text-slate-600  text-xs">Aucun</span>
+                              <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
@@ -2693,7 +2688,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedRetourAppel.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
                           </TableCell>
                         </TableRow>
@@ -2724,12 +2719,6 @@ export default function PriseDeMandat() {
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('statut')}
-                        >
-                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
                         >
                           Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -2752,16 +2741,13 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedNouveauMandat.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white font-mono">
-                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
+                          <TableCell className="font-medium text-white">
+                            {dossier.numero_dossier 
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
-                              {dossier.statut}
-                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {getClientsNames(dossier.clients_ids)}
@@ -2811,7 +2797,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedNouveauMandat.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
                             Aucun nouveau mandat
                           </TableCell>
                         </TableRow>
@@ -2842,12 +2828,6 @@ export default function PriseDeMandat() {
                         </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('statut')}
-                        >
-                          Statut {sortField === 'statut' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
                         >
                           Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -2870,16 +2850,13 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white font-mono">
-                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || dossier.arpenteur_geometre}
+                          <TableCell className="font-medium text-white">
+                            {dossier.numero_dossier 
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
-                              {dossier.statut}
-                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {getClientsNames(dossier.clients_ids)}
@@ -2929,7 +2906,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedSoumission.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
                             Aucune soumission
                           </TableCell>
                         </TableRow>
