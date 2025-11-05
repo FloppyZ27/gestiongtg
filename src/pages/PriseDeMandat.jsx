@@ -257,6 +257,34 @@ export default function PriseDeMandat() {
   const getClientById = (id) => clients.find(c => c.id === id);
   const getLotById = (numeroLot) => lots.find(l => l.id === numeroLot); // Changed to id
 
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
+  // Helper function to get client names - MOVED UP BEFORE USE
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  };
+
+  // Helper function to get the first work address
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
+    return formatAdresse(mandats[0].adresse_travaux);
+  };
+
   // NEW FUNCTION: Load data from reference dossier
   const loadDossierReference = (dossierId) => {
     const dossier = dossiers.find(d => d.id === dossierId);
@@ -352,19 +380,6 @@ export default function PriseDeMandat() {
     byArpenteur: getCountsByArpenteur(soumissionDossiers)
   };
 
-  const formatAdresse = (addr) => {
-    if (!addr) return "";
-    const parts = [];
-    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-    }
-    if (addr.rue) parts.push(addr.rue);
-    if (addr.ville) parts.push(addr.ville);
-    if (addr.province) parts.push(addr.province);
-    if (addr.code_postal) parts.push(addr.code_postal);
-    return parts.filter(p => p).join(', ');
-  };
-
   // New filtering logic
   const applyFilters = (dossiersList) => {
     return dossiersList.filter(dossier => {
@@ -408,7 +423,7 @@ export default function PriseDeMandat() {
 
   const filteredCourtiersForSelector = courtiers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
-    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    c.courriels?.some(courriel => courcourriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     (c.adresses?.length > 0 && formatAdresse(c.adresses.find(a => a.actuelle || a.actuel))?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
   );
@@ -791,21 +806,6 @@ export default function PriseDeMandat() {
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30"
     };
     return colors[statut] || colors["Retour d'appel"];
-  };
-
-  // New helper function to get client names
-  const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
-      const client = getClientById(id);
-      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
-    }).join(", ");
-  };
-
-  // New helper function to get the first work address
-  const getFirstAdresseTravaux = (mandats) => {
-    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
-    return formatAdresse(mandats[0].adresse_travaux);
   };
 
   // Sorting logic
@@ -2744,3 +2744,4 @@ export default function PriseDeMandat() {
     </div>
   );
 }
+
