@@ -291,9 +291,9 @@ export default function PriseDeMandat() {
     if (!dossier) return;
 
     setFormData({
-      numero_dossier: "", // Keep empty for new dossier
+      numero_dossier: dossier.numero_dossier || "", // Keep the original dossier number for display in reference block
       arpenteur_geometre: dossier.arpenteur_geometre || "",
-      date_ouverture: new Date().toISOString().split('T')[0], // New date
+      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0], // Use original date for reference block
       statut: "Retour d'appel", // Default status for new
       utilisateur_assigne: dossier.utilisateur_assigne || "", // NEW: Load assigned user
       clients_ids: dossier.clients_ids || [],
@@ -327,7 +327,7 @@ export default function PriseDeMandat() {
       description: dossier.description || ""
     });
     setActiveTabMandat("0");
-    setDossierReferenceId(dossierId); // Set the reference ID
+    setDossierReferenceId(dossier.id); // Set the reference ID
     setIsDialogOpen(true); // Open the dialog to edit the new form
   };
   // END NEW FUNCTION
@@ -565,6 +565,7 @@ export default function PriseDeMandat() {
   const handleEdit = (dossier) => {
     setIsViewDialogOpen(false);
     setViewingDossier(null);
+    setDossierReferenceId(null); // Clear reference ID when editing existing dossier
 
     setEditingDossier(dossier);
     setFormData({
@@ -985,7 +986,7 @@ export default function PriseDeMandat() {
                         <SelectValue placeholder="Sélectionner un utilisateur" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem> {/* Changed null to empty string for consistency */}
+                        <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.email} className="text-white">
                             {user.full_name}
@@ -993,6 +994,29 @@ export default function PriseDeMandat() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+
+                {/* Informations du dossier de référence - Only visible for "Retour d'appel" with reference dossier */}
+                {formData.statut === "Retour d'appel" && dossierReferenceId && (
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="space-y-2">
+                      <Label>N° de dossier (référence)</Label>
+                      <Input
+                        value={formData.numero_dossier}
+                        className="bg-slate-800 border-slate-700"
+                        disabled
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Date d'ouverture (référence)</Label>
+                      <Input
+                        type="date"
+                        value={formData.date_ouverture}
+                        className="bg-slate-800 border-slate-700"
+                        disabled
+                      />
+                    </div>
                   </div>
                 )}
 
