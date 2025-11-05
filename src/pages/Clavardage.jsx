@@ -9,7 +9,6 @@ import { MessageCircle, Send, Users, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Clavardage() {
   const [message, setMessage] = useState("");
@@ -133,7 +132,7 @@ export default function Clavardage() {
 
           <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
             {/* Messages Area */}
-            <ScrollArea className="flex-1 p-6">
+            <div className="flex-1 p-6 overflow-y-auto">
               <div className="space-y-4">
                 {sortedMessages.map((msg) => {
                   const isOwnMessage = msg.utilisateur_email === user?.email;
@@ -202,7 +201,7 @@ export default function Clavardage() {
                 
                 <div ref={messagesEndRef} />
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Input Area */}
             <div className="border-t border-slate-800 p-4 bg-slate-900/50">
