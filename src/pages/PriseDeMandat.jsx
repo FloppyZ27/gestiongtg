@@ -2582,18 +2582,11 @@ export default function PriseDeMandat() {
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                   <TabsList className="bg-slate-800/50 border border-slate-700">
                     <TabsTrigger
-                      value="retour-appel"
-                      className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+                      value="nouveau-mandat"
+                      className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
                     >
-                      <Phone className="w-4 h-4 mr-2" />
-                      Retours d'appel ({retourAppelDossiers.length})
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="nouveau-mandat" // ADDED
-                      className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" // ADDED
-                    >
-                      <FileCheck className="w-4 h-4 mr-2" /> {/* Icon for new tab */}
-                      Nouveaux mandats ({nouveauMandatDossiers.length}) {/* Count from new list */}
+                      <FileCheck className="w-4 h-4 mr-2" />
+                      Nouveaux mandats ({nouveauMandatDossiers.length})
                     </TabsTrigger>
                     <TabsTrigger
                       value="soumission"
@@ -2601,6 +2594,13 @@ export default function PriseDeMandat() {
                     >
                       <FileCheck className="w-4 h-4 mr-2" />
                       Soumissions ({soumissionDossiers.length})
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="retour-appel"
+                      className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400"
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      Retours d'appel ({retourAppelDossiers.length})
                     </TabsTrigger>
                   </TabsList>
                   <div className="relative w-full md:w-80">
