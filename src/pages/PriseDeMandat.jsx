@@ -1109,8 +1109,8 @@ export default function PriseDeMandat() {
                     </div>
                   )}
 
-                  {/* Description field for statuses other than "Retour d'appel" */}
-                  {formData.statut !== "Retour d'appel" && (
+                  {/* Description field for statuses other than "Retour d'appel" and "Nouveau mandat/Demande d'information" */}
+                  {formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && (
                     <div className="space-y-2">
                       <Label>Description</Label>
                       <Textarea
