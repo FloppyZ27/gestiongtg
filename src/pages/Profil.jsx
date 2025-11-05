@@ -174,7 +174,37 @@ export default function Profil() {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
+  // New utility functions for 'Retours d'appel' section
+  const getArpenteurInitials = (name) => {
+    if (!name) return 'AG';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const getStatutBadgeColor = (statut) => {
+    switch (statut) {
+      case 'en_attente': return 'bg-yellow-500/20 text-yellow-400';
+      case 'en_cours': return 'bg-emerald-500/20 text-emerald-400';
+      case 'termine': return 'bg-blue-500/20 text-blue-400';
+      case 'annule': return 'bg-red-500/20 text-red-400';
+      case 'a_rappeler': return 'bg-orange-500/20 text-orange-400'; // Specific color for 'a_rappeler'
+      default: return 'bg-slate-500/20 text-slate-400';
+    }
+  };
+
+  const getClientsNames = (clients_data) => {
+    if (!clients_data || clients_data.length === 0) return 'N/A';
+    // Assumes clients_data is an array of objects with 'full_name' or an array of strings (names)
+    return clients_data.map(item => typeof item === 'object' && item !== null && 'full_name' in item ? item.full_name : item).filter(Boolean).join(', ');
+  };
+
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return 'Non spécifiée';
+    return mandats[0].adresse_travaux;
+  };
+
+
   const dossiersEnCours = dossiers.filter(d => d.statut === 'en_cours');
+  const retoursAppel = dossiers.filter(d => d.statut === 'a_rappeler'); // Filter dossiers for 'a_rappeler' status
   const totalHeures = entreeTemps.reduce((sum, e) => sum + (e.heures || 0), 0);
 
   // Jours fériés Canada/Québec 2025 (placeholder year for example)
@@ -418,6 +448,66 @@ export default function Profil() {
                   ))}
                   {dossiersEnCours.length === 0 && (
                     <p className="text-center text-slate-500 py-4">Aucun dossier en cours</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Retours d'appel assignés */}
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Phone className="w-5 h-5 text-blue-400" />
+                  Mes retours d'appel ({retoursAppel.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  {retoursAppel.length > 0 ? (
+                    <div className="divide-y divide-slate-800">
+                      {retoursAppel.map((dossier) => (
+                        <div key={dossier.id} className="p-4 hover:bg-slate-800/30 transition-colors">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold text-white">
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier || "Nouveau"}
+                                  </h4>
+                                  <Badge variant="outline" className={`${getStatutBadgeColor(dossier.statut)} border text-xs`}>
+                                    {dossier.statut}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-slate-400">
+                                  Clients: {getClientsNames(dossier.clients)} {/* Assuming dossier.clients is available */}
+                                </p>
+                                {dossier.mandats && dossier.mandats.length > 0 && (
+                                  <p className="text-sm text-slate-400">
+                                    Adresse: {getFirstAdresseTravaux(dossier.mandats)}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="text-right ml-4">
+                                <p className="text-xs text-slate-500">
+                                  {format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr })}
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                  {format(new Date(dossier.created_date), "HH:mm", { locale: fr })}
+                                </p>
+                              </div>
+                            </div>
+                            {dossier.notes_retour_appel && (
+                              <div className="mt-2 p-2 bg-slate-800/50 rounded">
+                                <p className="text-xs text-slate-400 mb-1">Notes:</p>
+                                <p className="text-sm text-slate-300">{dossier.notes_retour_appel}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-slate-500 py-8">Aucun retour d'appel assigné</p>
                   )}
                 </div>
               </CardContent>

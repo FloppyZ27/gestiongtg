@@ -155,12 +155,13 @@ export default function PriseDeMandat() {
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     statut: "Retour d'appel",
-    utilisateur_assigne: "", // NEW FIELD
+    utilisateur_assigne: "",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
     mandats: [],
-    description: ""
+    description: "",
+    notes_retour_appel: "" // ADDED: New field for notes on return call
   });
 
   const [newClientForm, setNewClientForm] = useState({
@@ -291,17 +292,16 @@ export default function PriseDeMandat() {
     if (!dossier) return;
 
     setFormData({
-      numero_dossier: dossier.numero_dossier || "", // Keep the original dossier number for display in reference block
+      numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
-      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0], // Use original date for reference block
-      statut: "Retour d'appel", // Default status for new
-      utilisateur_assigne: dossier.utilisateur_assigne || "", // NEW: Load assigned user
+      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+      statut: "Retour d'appel",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats?.map(m => ({
         ...m,
-        date_ouverture: "", // Should be empty for new mandat, or use a default? Assuming empty for new
+        date_ouverture: m.date_ouverture || "", // Keeps the original mandat's open date from reference dossier
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -324,11 +324,14 @@ export default function PriseDeMandat() {
         notes: m.notes || "",
         tache_actuelle: "" // Reset task
       })) || [],
-      description: dossier.description || ""
+      description: dossier.description || "",
+      utilisateur_assigne: dossier.utilisateur_assigne || "",
+      notes_retour_appel: "" // NEW FIELD ADDED
     });
     setActiveTabMandat("0");
-    setDossierReferenceId(dossier.id); // Set the reference ID
-    setIsDialogOpen(true); // Open the dialog to edit the new form
+    setDossierReferenceId(dossierId);
+    setDossierSearchForReference(""); // Clear search field
+    setIsDialogOpen(true);
   };
   // END NEW FUNCTION
 
@@ -523,17 +526,18 @@ export default function PriseDeMandat() {
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       statut: "Retour d'appel",
-      utilisateur_assigne: "", // NEW: Reset assigned user
+      utilisateur_assigne: "",
       clients_ids: [],
       notaires_ids: [],
       courtiers_ids: [],
       mandats: [],
-      description: ""
+      description: "",
+      notes_retour_appel: "" // ADDED: Reset new field
     });
     setEditingDossier(null);
     setActiveTabMandat("0");
-    setDossierReferenceId(null); // NEW: Reset reference
-    setDossierSearchForReference(""); // NEW: Reset search
+    setDossierReferenceId(null);
+    setDossierSearchForReference("");
   };
 
   const resetClientForm = () => {
@@ -573,7 +577,7 @@ export default function PriseDeMandat() {
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
       statut: dossier.statut || "Retour d'appel",
-      utilisateur_assigne: dossier.utilisateur_assigne || "", // NEW: Load assigned user
+      utilisateur_assigne: dossier.utilisateur_assigne || "",
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -601,7 +605,8 @@ export default function PriseDeMandat() {
         date_debut_travaux: m.date_debut_travaux || "",
         notes: m.notes || ""
       })) || [],
-      description: dossier.description || ""
+      description: dossier.description || "",
+      notes_retour_appel: dossier.notes_retour_appel || "" // ADDED: Load existing notes
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
@@ -1023,11 +1028,25 @@ export default function PriseDeMandat() {
                   </div>
                 )}
 
+                {/* Notes de retour d'appel - Only visible for "Retour d'appel" status */}
+                {formData.statut === "Retour d'appel" && (
+                  <div className="space-y-2">
+                    <Label>Notes de retour d'appel</Label>
+                    <Textarea
+                      value={formData.notes_retour_appel}
+                      onChange={(e) => setFormData({...formData, notes_retour_appel: e.target.value})}
+                      className="bg-slate-800 border-slate-700 h-20"
+                      disabled={!!dossierReferenceId}
+                      placeholder="Ajouter des notes spécifiques à ce retour d'appel..."
+                    />
+                  </div>
+                )}
+
                 {/* Informations du dossier de référence - Only visible for "Retour d'appel" with reference dossier */}
                 {formData.statut === "Retour d'appel" && dossierReferenceId && (
                   <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                     <div className="space-y-2">
-                      <Label>N° de dossier</Label>
+                      <Label>N° de dossier de référence</Label>
                       <Input
                         value={formData.numero_dossier}
                         className="bg-slate-800 border-slate-700"
@@ -1035,7 +1054,7 @@ export default function PriseDeMandat() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Date d'ouverture</Label>
+                      <Label>Date d'ouverture du dossier de référence</Label>
                       <Input
                         type="date"
                         value={formData.date_ouverture}
@@ -2360,6 +2379,13 @@ export default function PriseDeMandat() {
                     </div>
                   )}
                 </div>
+
+                {viewingDossier.notes_retour_appel && ( // ADDED: Display notes de retour d'appel
+                  <div className="space-y-2">
+                    <p className="text-slate-400">Notes de retour d'appel</p>
+                    <p className="text-white">{viewingDossier.notes_retour_appel}</p>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <p className="text-slate-400">Clients</p>
