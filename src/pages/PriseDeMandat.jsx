@@ -1139,16 +1139,16 @@ export default function PriseDeMandat() {
                         </Button>
                       </div>
                       {formData.clients_ids.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                           {formData.clients_ids.map(clientId => {
                             const client = getClientById(clientId);
                             return client ? (
                               <Badge
                                 key={clientId}
                                 variant="outline"
-                                className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8"
+                                className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start"
                               >
-                                <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer">
+                                <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">
                                   {client.prenom} {client.nom}
                                 </span>
                                 {!dossierReferenceId && (
@@ -1190,16 +1190,16 @@ export default function PriseDeMandat() {
                         </Button>
                       </div>
                       {formData.notaires_ids.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                           {formData.notaires_ids.map(notaireId => {
                             const notaire = getClientById(notaireId);
                             return notaire ? (
                               <Badge
                                 key={notaireId}
                                 variant="outline"
-                                className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8"
+                                className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
                               >
-                                <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer">
+                                <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">
                                   {notaire.prenom} {notaire.nom}
                                 </span>
                                 {!dossierReferenceId && (
@@ -1241,16 +1241,16 @@ export default function PriseDeMandat() {
                         </Button>
                       </div>
                       {formData.courtiers_ids.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                           {formData.courtiers_ids.map(courtierId => {
                             const courtier = getClientById(courtierId);
                             return courtier ? (
                               <Badge
                                 key={courtierId}
                                 variant="outline"
-                                className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8"
+                                className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
                               >
-                                <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer">
+                                <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">
                                   {courtier.prenom} {courtier.nom}
                                 </span>
                                 {!dossierReferenceId && (
