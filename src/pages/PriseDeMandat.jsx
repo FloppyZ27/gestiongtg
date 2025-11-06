@@ -370,7 +370,7 @@ export default function PriseDeMandat() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel'), // Apply mapping here
+      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -2625,7 +2625,7 @@ export default function PriseDeMandat() {
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette année</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
+                  <p className="2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
                   {nouveauMandatStats.percentages.year !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
