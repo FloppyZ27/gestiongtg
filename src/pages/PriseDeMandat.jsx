@@ -2613,7 +2613,7 @@ export default function PriseDeMandat() {
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Ce mois</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
+                  <p className="2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
                   {nouveauMandatStats.percentages.month !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
