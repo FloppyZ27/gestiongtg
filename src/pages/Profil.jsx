@@ -474,7 +474,7 @@ export default function Profil() {
                   </div>
                 </div>
 
-                {/* Ligne 2: Adresse, Téléphone, Rôle */}
+                {/* Ligne 2: Adresse, Téléphone, Ancienneté */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
                   <div>
                     <Label className="text-slate-400 text-xs">Adresse</Label>
@@ -491,17 +491,17 @@ export default function Profil() {
                     </p>
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs">Rôle</Label>
-                    <div className="mt-1">
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        {user?.role}
-                      </Badge>
-                    </div>
+                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Briefcase className="w-3 h-3 text-slate-500" />
+                      {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
+                      {user?.date_embauche && <span className="text-slate-400">({calculateSeniority()})</span>}
+                    </p>
                   </div>
                 </div>
 
-                {/* Ligne 3: Date anniversaire et Ancienneté */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                {/* Ligne 3: Date anniversaire et Rôle */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
                   <div>
                     <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
                     <p className="text-white font-medium text-sm flex items-center gap-1">
@@ -510,12 +510,15 @@ export default function Profil() {
                     </p>
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Briefcase className="w-3 h-3 text-slate-500" />
-                      {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
-                      {user?.date_embauche && <span className="text-slate-400">({calculateSeniority()})</span>}
-                    </p>
+                    <Label className="text-slate-400 text-xs">Rôle</Label>
+                    <div className="mt-1">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        {user?.role}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    {/* Colonne vide pour l'alignement */}
                   </div>
                 </div>
               </div>

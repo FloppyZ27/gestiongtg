@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,12 +10,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search } from "lucide-react"; // Added Search icon
+import { Plus, X, Trash2, UserPlus, Search, UploadCloud } from "lucide-react"; // Added Search and UploadCloud icon
 import CommentairesSection from "./CommentairesSection";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"; // New imports
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+// New constant for cadastres per circonscription
+const CADASTRES_PAR_CIRCONSCRIPTION = {
+  "Québec": ["Québec", "Montréal", "Laval"], // Example values, adjust as needed
+  "Lac-Saint-Jean-Est": ["Lac-Saint-Jean-Est 1", "Lac-Saint-Jean-Est 2"],
+  "Lac-Saint-Jean-Ouest": ["Lac-Saint-Jean-Ouest 1"],
+  "Chicoutimi": ["Chicoutimi"],
+};
 
 export default function EditDossierDialog({
   isOpen,
@@ -65,53 +72,21 @@ export default function EditDossierDialog({
   const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
-  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec"); // Initial value "Québec" as per outline
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("all"); // Changed initial value to "all" to match filter options
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null); // To know which mandat we are editing lots for
 
-  const filteredLotsForSelector = allLots.filter(lot => {
-    const matchesSearchTerm =
-      lot.numero_lot.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-      lot.circonscription_fonciere.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-      (lot.cadastre && lot.cadastre.toLowerCase().includes(lotSearchTerm.toLowerCase())) ||
-      (lot.rang && lot.rang.toLowerCase().includes(lotSearchTerm.toLowerCase()));
-
-    const matchesCirconscription =
-      lotCirconscriptionFilter === "all" || lot.circonscription_fonciere === lotCirconscriptionFilter;
-
-    // Assuming lot.cadastre can be null or undefined
-    const matchesCadastre =
-      lotCadastreFilter === "all" || (lot.cadastre && lot.cadastre === lotCadastreFilter);
-
-    return matchesSearchTerm && matchesCirconscription && matchesCadastre;
+  // New states for Lot creation dialog
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
+  const [newLotForm, setNewLotForm] = useState({
+    numero_lot: "",
+    circonscription_fonciere: "",
+    cadastre: "",
+    rang: "",
+    concordances_anterieures: [],
+    document_pdf_url: "",
   });
-
-  const openLotSelector = (index) => {
-    setCurrentMandatIndex(index);
-    setIsLotSelectorOpen(true);
-  };
-
-  const addLotToCurrentMandat = (lotId) => {
-    if (currentMandatIndex === null) return;
-
-    const updatedMandats = [...dossierForm.mandats];
-    const currentMandat = updatedMandats[currentMandatIndex];
-    const currentLots = currentMandat.lots || [];
-
-    if (currentLots.includes(lotId)) {
-      // Remove lot if already present
-      updatedMandats[currentMandatIndex] = {
-        ...currentMandat,
-        lots: currentLots.filter(id => id !== lotId)
-      };
-    } else {
-      // Add lot if not present
-      updatedMandats[currentMandatIndex] = {
-        ...currentMandat,
-        lots: [...currentLots, lotId]
-      };
-    }
-    setDossierForm({...dossierForm, mandats: updatedMandats});
-  };
+  const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
 
   useEffect(() => {
     if (dossier) {
@@ -237,11 +212,124 @@ export default function EditDossierDialog({
     if (activeTabMandat === index.toString() && updatedMandats.length > 0) {
       setActiveTabMandat(Math.max(0, index - 1).toString());
     }
+    // If the removed tab was the last one, and there are still tabs, activate the new last tab
+    if (updatedMandats.length > 0 && index === dossierForm.mandats.length - 1) {
+      setActiveTabMandat((updatedMandats.length - 1).toString());
+    } else if (updatedMandats.length === 0) {
+      setActiveTabMandat("0"); // Or handle state appropriately if no mandats
+    }
   };
 
   const getMandatTabLabel = (mandat, index) => {
     return mandat.type_mandat || `Mandat ${index + 1}`;
   };
+
+  const getLotById = (lotId) => allLots.find(l => l.id === lotId);
+
+  const filteredLotsForSelector = allLots.filter(lot => {
+    const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
+
+    const matchesCirconscription = lotCirconscriptionFilter === "all" ||
+      lot.circonscription_fonciere === lotCirconscriptionFilter;
+
+    const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
+
+    return matchesSearch && matchesCirconscription && matchesCadastre;
+  });
+
+  const openLotSelector = (mandatIndex) => {
+    setCurrentMandatIndex(mandatIndex);
+    setIsLotSelectorOpen(true);
+  };
+
+  const addLotToCurrentMandat = (lotId) => {
+    if (currentMandatIndex !== null) {
+      setDossierForm(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) =>
+          i === currentMandatIndex ? {
+            ...m,
+            lots: m.lots.includes(lotId) ? m.lots.filter(id => id !== lotId) : [...(m.lots || []), lotId]
+          } : m
+        )
+      }));
+    }
+  };
+
+  const removeLotFromMandat = (mandatIndex, lotId) => {
+    if (confirm(`Êtes-vous sûr de vouloir retirer ce lot de ce mandat ?`)) {
+      setDossierForm(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) =>
+          i === mandatIndex ? { ...m, lots: (m.lots || []).filter((id) => id !== lotId) } : m
+        )
+      }));
+    }
+  };
+
+  const createLotMutation = useMutation({
+    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+      // After creating a lot, add it to the current mandat if a mandat is selected
+      if (currentMandatIndex !== null && createLotMutation.data?.id) {
+        addLotToCurrentMandat(createLotMutation.data.id);
+      }
+    },
+  });
+
+  const resetLotForm = () => {
+    setNewLotForm({
+      numero_lot: "",
+      circonscription_fonciere: "",
+      cadastre: "",
+      rang: "",
+      concordances_anterieures: [],
+      document_pdf_url: "",
+    });
+    setAvailableCadastresForNewLot([]);
+  };
+
+  const handleLotCirconscriptionChange = (value) => {
+    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
+    setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const handleNewLotSubmit = (e) => {
+    e.preventDefault();
+    createLotMutation.mutate(newLotForm);
+  };
+
+  const handleLotFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploadingLotPdf(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setNewLotForm(prev => ({ ...prev, document_pdf_url: file_url }));
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      // Optionally show an error message to the user
+    } finally {
+      setUploadingLotPdf(false);
+    }
+  };
+
+  // Dynamically get unique circonscriptions and cadastres for filters
+  const uniqueCirconscriptions = useMemo(() => {
+    const circoSet = new Set(allLots.map(lot => lot.circonscription_fonciere).filter(Boolean));
+    return Array.from(circoSet).sort();
+  }, [allLots]);
+
+  const uniqueCadastres = useMemo(() => {
+    const cadastreSet = new Set(allLots.map(lot => lot.cadastre).filter(Boolean));
+    return Array.from(cadastreSet).sort();
+  }, [allLots]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -765,13 +853,13 @@ export default function EditDossierDialog({
                                 <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
                                   <div className="flex flex-wrap gap-2">
                                     {mandat.lots.map((lotId) => {
-                                      const lot = allLots.find(l => l.id === lotId); // Find the actual lot object
+                                      const lot = getLotById(lotId); // Use new getLotById function
                                       return lot ? (
                                         <Badge key={lotId} variant="outline" className="bg-slate-700 relative pr-8">
                                           {lot.numero_lot}
                                           <button
                                             type="button"
-                                            onClick={() => addLotToCurrentMandat(lotId)} // Use add/remove logic
+                                            onClick={() => removeLotFromMandat(index, lotId)} // Use removeLotFromMandat
                                             className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
                                           >
                                             <X className="w-3 h-3" />
@@ -887,7 +975,7 @@ export default function EditDossierDialog({
             setLotSearchTerm("");
             setCurrentMandatIndex(null);
             setLotCirconscriptionFilter("all"); // Reset filter
-            setLotCadastreFilter("Québec"); // Reset filter
+            setLotCadastreFilter("all"); // Reset filter
           }
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -911,9 +999,11 @@ export default function EditDossierDialog({
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    <SelectItem value="Lac-Saint-Jean-Est" className="text-white">Lac-Saint-Jean-Est</SelectItem>
-                    <SelectItem value="Lac-Saint-Jean-Ouest" className="text-white">Lac-Saint-Jean-Ouest</SelectItem>
-                    <SelectItem value="Chicoutimi" className="text-white">Chicoutimi</SelectItem>
+                    {uniqueCirconscriptions.map(circo => (
+                      <SelectItem key={circo} value={circo} className="text-white">
+                        {circo}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
@@ -922,15 +1012,31 @@ export default function EditDossierDialog({
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
                     <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
-                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                    {uniqueCadastres.map(cadastre => (
+                      <SelectItem key={cadastre} value={cadastre} className="text-white">
+                        {cadastre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  onClick={() => {
+                    setIsLotSelectorOpen(false); // Close lot selector
+                    setIsNewLotDialogOpen(true); // Open new lot dialog
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Créer un nouveau lot
+                </Button>
               </div>
 
               <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700 sticky top-0 z-10">
                       <TableHead className="text-slate-300">Numéro de lot</TableHead>
                       <TableHead className="text-slate-300">Circonscription</TableHead>
                       <TableHead className="text-slate-300">Cadastre</TableHead>
@@ -995,6 +1101,134 @@ export default function EditDossierDialog({
                 Valider la sélection
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Lot Creation Dialog */}
+        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
+          setIsNewLotDialogOpen(open);
+          if (!open) resetLotForm();
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Créer un nouveau lot</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewLotSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="numero_lot">Numéro de lot <span className="text-red-400">*</span></Label>
+                <Input
+                  id="numero_lot"
+                  value={newLotForm.numero_lot}
+                  onChange={(e) => setNewLotForm({ ...newLotForm, numero_lot: e.target.value })}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="circonscription_fonciere">Circonscription foncière <span className="text-red-400">*</span></Label>
+                <Select
+                  value={newLotForm.circonscription_fonciere}
+                  onValueChange={handleLotCirconscriptionChange}
+                  required
+                >
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner une circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circo) => (
+                      <SelectItem key={circo} value={circo} className="text-white">
+                        {circo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {newLotForm.circonscription_fonciere && (
+                <div className="space-y-2">
+                  <Label htmlFor="cadastre">Cadastre</Label>
+                  <Select
+                    value={newLotForm.cadastre}
+                    onValueChange={(value) => setNewLotForm({ ...newLotForm, cadastre: value })}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner un cadastre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                      {availableCadastresForNewLot.map((cadastre) => (
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">
+                          {cadastre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="rang">Rang</Label>
+                <Input
+                  id="rang"
+                  value={newLotForm.rang}
+                  onChange={(e) => setNewLotForm({ ...newLotForm, rang: e.target.value })}
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="document_pdf_url">Document PDF (Certificat de localisation, etc.)</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="file"
+                    id="document_pdf_upload"
+                    accept=".pdf"
+                    onChange={handleLotFileUpload}
+                    className="hidden"
+                    disabled={uploadingLotPdf}
+                  />
+                  <Label
+                    htmlFor="document_pdf_upload"
+                    className="flex-1 flex items-center justify-center p-2 border-2 border-dashed rounded-md cursor-pointer text-slate-400 border-slate-700 hover:border-emerald-500 hover:text-emerald-400 transition-colors"
+                  >
+                    {uploadingLotPdf ? (
+                      <span>Chargement...</span>
+                    ) : newLotForm.document_pdf_url ? (
+                      <span className="text-emerald-400">Fichier PDF chargé ({newLotForm.document_pdf_url.split('/').pop()})</span>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-4 h-4 mr-2" />
+                        Choisir un fichier PDF
+                      </>
+                    )}
+                  </Label>
+                  {newLotForm.document_pdf_url && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setNewLotForm(prev => ({ ...prev, document_pdf_url: "" }))}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsNewLotDialogOpen(false)}
+                  className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                  disabled={createLotMutation.isPending || uploadingLotPdf || !newLotForm.numero_lot || !newLotForm.circonscription_fonciere}
+                >
+                  {createLotMutation.isPending ? "Création..." : "Créer le lot"}
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
       </DialogContent>
