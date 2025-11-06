@@ -310,7 +310,8 @@ export default function Profil() {
     setIsEditingDossierDialogOpen(true);
   };
 
-  const handleSaveDossier = () => {
+  const handleSaveDossier = (e) => {
+    e.preventDefault(); // Prevent default form submission if triggered by button
     if (editingDossier) {
       // Filter out mandats that are completely empty if needed, or let backend handle validation
       const cleanedMandats = dossierForm.mandats.filter(mandat =>
@@ -1066,27 +1067,23 @@ export default function Profil() {
 
         {/* Edit Dossier Dialog */}
         <Dialog open={isEditingDossierDialogOpen} onOpenChange={setIsEditingDossierDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
-            <div className="flex h-[95vh]">
-              {/* Left side - Form */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <DialogHeader className="mb-6">
-                  <DialogTitle className="text-2xl font-bold">Modifier le dossier</DialogTitle>
-                </DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
+            </DialogHeader>
 
-                <div className="space-y-6">
-                  {/* Informations générales */}
+            <div className="flex h-[90vh]">
+              {/* Main form content - 70% */}
+              <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-white">Modifier le dossier</h2>
+                </div>
+
+                <form id="dossier-form-edit" onSubmit={handleSaveDossier} className="space-y-6">
+                  {/* Première ligne: Arpenteur et Statut */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-300">Numéro de dossier</Label>
-                      <Input
-                        value={dossierForm.numero_dossier}
-                        onChange={(e) => setDossierForm({...dossierForm, numero_dossier: e.target.value})}
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                      <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                       <select
                         value={dossierForm.arpenteur_geometre}
                         onChange={(e) => setDossierForm({...dossierForm, arpenteur_geometre: e.target.value})}
@@ -1100,40 +1097,28 @@ export default function Profil() {
                         <option value="Frédéric Gilbert">Frédéric Gilbert</option>
                       </select>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-300">Date d'ouverture <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="date"
-                        value={dossierForm.date_ouverture}
-                        onChange={(e) => setDossierForm({...dossierForm, date_ouverture: e.target.value})}
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Statut <span className="text-red-400">*</span></Label>
+                      <Label>Statut <span className="text-red-400">*</span></Label>
                       <select
                         value={dossierForm.statut}
                         onChange={(e) => setDossierForm({...dossierForm, statut: e.target.value})}
                         className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-md text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       >
+                        <option value="Retour d'appel">Retour d'appel</option>
+                        <option value="Soumission">Soumission</option>
                         <option value="Ouvert">Ouvert</option>
                         <option value="Fermé">Fermé</option>
-                        <option value="Retour d'appel">Retour d'appel</option>
                         <option value="Message laissé/Sans réponse">Message laissé/Sans réponse</option>
                         <option value="Demande d'information">Demande d'information</option>
                         <option value="Nouveau mandat">Nouveau mandat</option>
-                        <option value="Soumission">Soumission</option>
-                        <option value="Rejeté">Rejeté</option>
                       </select>
                     </div>
                   </div>
 
+                  {/* Utilisateur assigné */}
                   {dossierForm.statut === "Retour d'appel" && (
                     <div className="space-y-2">
-                      <Label className="text-slate-300">Utilisateur assigné</Label>
+                      <Label>Utilisateur assigné</Label>
                       <select
                         value={dossierForm.utilisateur_assigne}
                         onChange={(e) => setDossierForm({...dossierForm, utilisateur_assigne: e.target.value})}
@@ -1147,182 +1132,200 @@ export default function Profil() {
                     </div>
                   )}
 
-                  {/* Clients */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-slate-300">Clients</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 border border-slate-700 rounded-lg min-h-[60px]">
-                      {dossierForm.clients_ids.map(id => {
-                        const client = clientsOnly.find(c => c.id === id);
-                        return client ? (
-                          <Badge key={id} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border px-3 py-1">
-                            {client.prenom} {client.nom}
-                            <X
-                              className="w-3 h-3 ml-2 cursor-pointer hover:text-emerald-300"
-                              onClick={() => setDossierForm({
+                  {/* Clients, Notaires et Courtiers - 3 colonnes */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* Clients */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <Label>Clients</Label>
+                        {/* The outline removed the client select input, but kept the add button. I'm putting the select back for functionality */}
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value && !dossierForm.clients_ids.includes(e.target.value)) {
+                              setDossierForm({
                                 ...dossierForm,
-                                clients_ids: dossierForm.clients_ids.filter(cid => cid !== id)
-                              })}
-                            />
-                          </Badge>
-                        ) : null;
-                      })}
-                      {dossierForm.clients_ids.length === 0 && (
-                        <p className="text-slate-500 text-sm">Aucun client sélectionné</p>
+                                clients_ids: [...dossierForm.clients_ids, e.target.value]
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                          value="" // Set value to empty string to allow re-selecting the same option (if it were re-added to list)
+                          className="w-fit p-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded-md text-sm cursor-pointer"
+                        >
+                          <option value="">+ Ajouter</option>
+                          {clientsOnly
+                            .filter(c => !dossierForm.clients_ids.includes(c.id))
+                            .map(client => (
+                              <option key={client.id} value={client.id}>
+                                {client.prenom} {client.nom}
+                              </option>
+                            ))
+                          }
+                        </select>
+                      </div>
+                      {dossierForm.clients_ids.length > 0 ? (
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                          {dossierForm.clients_ids.map(clientId => {
+                            const client = clientsOnly.find(c => c.id === clientId);
+                            return client ? (
+                              <Badge
+                                key={clientId}
+                                variant="outline"
+                                className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 cursor-pointer hover:bg-emerald-500/30 relative pr-8 w-full justify-start"
+                              >
+                                <span className="flex-1">
+                                  {client.prenom} {client.nom}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setDossierForm({
+                                    ...dossierForm,
+                                    clients_ids: dossierForm.clients_ids.filter(cid => cid !== clientId)
+                                  })}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                          Aucun client
+                        </p>
                       )}
                     </div>
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value && !dossierForm.clients_ids.includes(e.target.value)) {
-                          setDossierForm({
-                            ...dossierForm,
-                            clients_ids: [...dossierForm.clients_ids, e.target.value]
-                          });
-                        }
-                        e.target.value = "";
-                      }}
-                      value="" // Set value to empty string to allow re-selecting the same option (if it were re-added to list)
-                      className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                    >
-                      <option value="">Sélectionner un client...</option>
-                      {clientsOnly
-                        .filter(c => !dossierForm.clients_ids.includes(c.id))
-                        .map(client => (
-                          <option key={client.id} value={client.id}>
-                            {client.prenom} {client.nom}
-                          </option>
-                        ))
-                      }
-                    </select>
-                  </div>
 
-                  {/* Notaires */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-slate-300">Notaires</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 border border-slate-700 rounded-lg min-h-[60px]">
-                      {dossierForm.notaires_ids.map(id => {
-                        const notaire = notaires.find(n => n.id === id);
-                        return notaire ? (
-                          <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border px-3 py-1">
-                            {notaire.prenom} {notaire.nom}
-                            <X
-                              className="w-3 h-3 ml-2 cursor-pointer hover:text-purple-300"
-                              onClick={() => setDossierForm({
+                    {/* Notaires */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <Label>Notaires</Label>
+                        {/* The outline removed the notaire select input, but kept the add button. I'm putting the select back for functionality */}
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value && !dossierForm.notaires_ids.includes(e.target.value)) {
+                              setDossierForm({
                                 ...dossierForm,
-                                notaires_ids: dossierForm.notaires_ids.filter(nid => nid !== id)
-                              })}
-                            />
-                          </Badge>
-                        ) : null;
-                      })}
-                      {dossierForm.notaires_ids.length === 0 && (
-                        <p className="text-slate-500 text-sm">Aucun notaire sélectionné</p>
+                                notaires_ids: [...dossierForm.notaires_ids, e.target.value]
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                          value=""
+                          className="w-fit p-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 rounded-md text-sm cursor-pointer"
+                        >
+                          <option value="">+ Ajouter</option>
+                          {notaires
+                            .filter(n => !dossierForm.notaires_ids.includes(n.id))
+                            .map(notaire => (
+                              <option key={notaire.id} value={notaire.id}>
+                                {notaire.prenom} {notaire.nom}
+                              </option>
+                            ))
+                          }
+                        </select>
+                      </div>
+                      {dossierForm.notaires_ids.length > 0 ? (
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                          {dossierForm.notaires_ids.map(notaireId => {
+                            const notaire = notaires.find(n => n.id === notaireId);
+                            return notaire ? (
+                              <Badge
+                                key={notaireId}
+                                variant="outline"
+                                className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
+                              >
+                                <span className="flex-1">
+                                  {notaire.prenom} {notaire.nom}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setDossierForm({
+                                    ...dossierForm,
+                                    notaires_ids: dossierForm.notaires_ids.filter(nid => nid !== notaireId)
+                                  })}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                          Aucun notaire
+                        </p>
                       )}
                     </div>
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value && !dossierForm.notaires_ids.includes(e.target.value)) {
-                          setDossierForm({
-                            ...dossierForm,
-                            notaires_ids: [...dossierForm.notaires_ids, e.target.value]
-                          });
-                        }
-                        e.target.value = "";
-                      }}
-                      value=""
-                      className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                    >
-                      <option value="">Sélectionner un notaire...</option>
-                      {notaires
-                        .filter(n => !dossierForm.notaires_ids.includes(n.id))
-                        .map(notaire => (
-                          <option key={notaire.id} value={notaire.id}>
-                            {notaire.prenom} {notaire.nom}
-                          </option>
-                        ))
-                      }
-                    </select>
-                  </div>
 
-                  {/* Courtiers */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label className="text-slate-300">Courtiers immobiliers</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 p-3 bg-slate-800/30 border border-slate-700 rounded-lg min-h-[60px]">
-                      {dossierForm.courtiers_ids.map(id => {
-                        const courtier = courtiers.find(c => c.id === id);
-                        return courtier ? (
-                          <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border px-3 py-1">
-                            {courtier.prenom} {courtier.nom}
-                            <X
-                              className="w-3 h-3 ml-2 cursor-pointer hover:text-orange-300"
-                              onClick={() => setDossierForm({
+                    {/* Courtiers */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <Label>Courtiers immobiliers</Label>
+                        {/* The outline removed the courtier select input, but kept the add button. I'm putting the select back for functionality */}
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value && !dossierForm.courtiers_ids.includes(e.target.value)) {
+                              setDossierForm({
                                 ...dossierForm,
-                                courtiers_ids: dossierForm.courtiers_ids.filter(cid => cid !== id)
-                              })}
-                            />
-                          </Badge>
-                        ) : null;
-                      })}
-                      {dossierForm.courtiers_ids.length === 0 && (
-                        <p className="text-slate-500 text-sm">Aucun courtier sélectionné</p>
+                                courtiers_ids: [...dossierForm.courtiers_ids, e.target.value]
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                          value=""
+                          className="w-fit p-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 rounded-md text-sm cursor-pointer"
+                        >
+                          <option value="">+ Ajouter</option>
+                          {courtiers
+                            .filter(c => !dossierForm.courtiers_ids.includes(c.id))
+                            .map(courtier => (
+                              <option key={courtier.id} value={courtier.id}>
+                                {courtier.prenom} {courtier.nom}
+                              </option>
+                            ))
+                          }
+                        </select>
+                      </div>
+                      {dossierForm.courtiers_ids.length > 0 ? (
+                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                          {dossierForm.courtiers_ids.map(courtierId => {
+                            const courtier = courtiers.find(c => c.id === courtierId);
+                            return courtier ? (
+                              <Badge
+                                key={courtierId}
+                                variant="outline"
+                                className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
+                              >
+                                <span className="flex-1">
+                                  {courtier.prenom} {courtier.nom}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setDossierForm({
+                                    ...dossierForm,
+                                    courtiers_ids: dossierForm.courtiers_ids.filter(cid => cid !== courtierId)
+                                  })}
+                                  className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
+                          Aucun courtier
+                        </p>
                       )}
                     </div>
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value && !dossierForm.courtiers_ids.includes(e.target.value)) {
-                          setDossierForm({
-                            ...dossierForm,
-                            courtiers_ids: [...dossierForm.courtiers_ids, e.target.value]
-                          });
-                        }
-                        e.target.value = "";
-                      }}
-                      value=""
-                      className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                    >
-                      <option value="">Sélectionner un courtier...</option>
-                      {courtiers
-                        .filter(c => !dossierForm.courtiers_ids.includes(c.id))
-                        .map(courtier => (
-                          <option key={courtier.id} value={courtier.id}>
-                            {courtier.prenom} {courtier.nom}
-                          </option>
-                        ))
-                      }
-                    </select>
                   </div>
 
-                  {/* Mandats */}
-                  <div className="space-y-4">
+                  {/* Mandats Section */}
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <Label className="text-xl font-semibold text-white">Mandats</Label>
                       <Button
@@ -1359,8 +1362,9 @@ export default function Profil() {
                         </div>
 
                         <div className="p-4 space-y-4">
+                          {/* Type de mandat */}
                           <div className="space-y-2">
-                            <Label className="text-slate-300">Type de mandat <span className="text-red-400">*</span></Label>
+                            <Label>Type de mandat <span className="text-red-400">*</span></Label>
                             <select
                               value={mandat.type_mandat}
                               onChange={(e) => updateMandat(index, 'type_mandat', e.target.value)}
@@ -1375,41 +1379,22 @@ export default function Profil() {
                             </select>
                           </div>
 
-                          {/* Address section */}
-                          <div className="space-y-3">
-                            <Label className="text-slate-300">Adresse des travaux</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-2">
-                                <Label className="text-slate-300 text-sm">Numéro(s) civique(s)</Label>
-                                {(mandat.adresse_travaux?.numeros_civiques || [""]).map((num, civicIdx) => (
-                                  <div key={civicIdx} className="flex gap-2 items-center">
-                                    <Input
-                                      value={num}
-                                      onChange={(e) => {
-                                        const updated = [...dossierForm.mandats];
-                                        const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                        civics[civicIdx] = e.target.value;
-                                        updated[index] = {
-                                          ...updated[index],
-                                          adresse_travaux: {
-                                            ...updated[index].adresse_travaux,
-                                            numeros_civiques: civics
-                                          }
-                                        };
-                                        setDossierForm({...dossierForm, mandats: updated});
-                                      }}
-                                      placeholder="Ex: 1850"
-                                      className="bg-slate-700 border-slate-600 text-white"
-                                    />
-                                    {civicIdx > 0 && (
-                                      <Button
-                                        type="button"
-                                        size="icon"
-                                        variant="ghost"
-                                        onClick={() => {
+                          {/* Nouvelle mise en page : 70% gauche / 30% droite */}
+                          <div className="grid grid-cols-[70%_30%] gap-4">
+                            {/* Colonne gauche - Adresse */}
+                            <div className="space-y-3">
+                              <Label className="text-slate-300">Adresse des travaux</Label>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label className="text-slate-300 text-sm">Numéro(s) civique(s)</Label>
+                                  {(mandat.adresse_travaux?.numeros_civiques || [""]).map((num, civicIdx) => (
+                                    <div key={civicIdx} className="flex gap-2 items-center">
+                                      <Input
+                                        value={num}
+                                        onChange={(e) => {
                                           const updated = [...dossierForm.mandats];
                                           const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                          civics.splice(civicIdx, 1);
+                                          civics[civicIdx] = e.target.value;
                                           updated[index] = {
                                             ...updated[index],
                                             adresse_travaux: {
@@ -1419,158 +1404,182 @@ export default function Profil() {
                                           };
                                           setDossierForm({...dossierForm, mandats: updated});
                                         }}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
-                                      >
-                                        <X className="w-4 h-4" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                ))}
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => {
-                                    const updated = [...dossierForm.mandats];
-                                    const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                    updated[index] = {
-                                      ...updated[index],
-                                      adresse_travaux: {
-                                        ...updated[index].adresse_travaux,
-                                        numeros_civiques: [...civics, ""]
-                                      }
-                                    };
-                                    setDossierForm({...dossierForm, mandats: updated});
-                                  }}
-                                  className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
-                                >
-                                  <Plus className="w-3 h-3 mr-1" />
-                                  Ajouter un numéro
-                                </Button>
+                                        placeholder="Ex: 1850"
+                                        className="bg-slate-700 border-slate-600 text-white"
+                                      />
+                                      {civicIdx > 0 && (
+                                        <Button
+                                          type="button"
+                                          size="icon"
+                                          variant="ghost"
+                                          onClick={() => {
+                                            const updated = [...dossierForm.mandats];
+                                            const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
+                                            civics.splice(civicIdx, 1);
+                                            updated[index] = {
+                                              ...updated[index],
+                                              adresse_travaux: {
+                                                ...updated[index].adresse_travaux,
+                                                numeros_civiques: civics
+                                              }
+                                            };
+                                            setDossierForm({...dossierForm, mandats: updated});
+                                          }}
+                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => {
+                                      const updated = [...dossierForm.mandats];
+                                      const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        adresse_travaux: {
+                                          ...updated[index].adresse_travaux,
+                                          numeros_civiques: [...civics, ""]
+                                        }
+                                      };
+                                      setDossierForm({...dossierForm, mandats: updated});
+                                    }}
+                                    className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+                                  >
+                                    <Plus className="w-3 h-3 mr-1" />
+                                    Ajouter un numéro
+                                  </Button>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-slate-300 text-sm">Rue</Label>
+                                  <Input
+                                    value={mandat.adresse_travaux?.rue || ""}
+                                    onChange={(e) => {
+                                      const updated = [...dossierForm.mandats];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        adresse_travaux: {
+                                          ...updated[index].adresse_travaux,
+                                          rue: e.target.value
+                                        }
+                                      };
+                                      setDossierForm({...dossierForm, mandats: updated});
+                                    }}
+                                    placeholder="Nom de la rue"
+                                    className="bg-slate-700 border-slate-600 text-white"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label className="text-slate-300 text-sm">Ville</Label>
+                                  <Input
+                                    value={mandat.adresse_travaux?.ville || ""}
+                                    onChange={(e) => {
+                                      const updated = [...dossierForm.mandats];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        adresse_travaux: {
+                                          ...updated[index].adresse_travaux,
+                                          ville: e.target.value
+                                        }
+                                      };
+                                      setDossierForm({...dossierForm, mandats: updated});
+                                    }}
+                                    placeholder="Ville"
+                                    className="bg-slate-700 border-slate-600 text-white"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-slate-300 text-sm">Province</Label>
+                                  <Input
+                                    value={mandat.adresse_travaux?.province || "Québec"}
+                                    onChange={(e) => {
+                                      const updated = [...dossierForm.mandats];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        adresse_travaux: {
+                                          ...updated[index].adresse_travaux,
+                                          province: e.target.value
+                                        }
+                                      };
+                                      setDossierForm({...dossierForm, mandats: updated});
+                                    }}
+                                    placeholder="Province"
+                                    className="bg-slate-700 border-slate-600 text-white"
+                                  />
+                                </div>
                               </div>
 
                               <div className="space-y-2">
-                                <Label className="text-slate-300 text-sm">Rue</Label>
+                                <Label className="text-slate-300 text-sm">Code postal</Label>
                                 <Input
-                                  value={mandat.adresse_travaux?.rue || ""}
+                                  value={mandat.adresse_travaux?.code_postal || ""}
                                   onChange={(e) => {
                                     const updated = [...dossierForm.mandats];
                                     updated[index] = {
                                       ...updated[index],
                                       adresse_travaux: {
                                         ...updated[index].adresse_travaux,
-                                        rue: e.target.value
+                                        code_postal: e.target.value
                                       }
                                     };
                                     setDossierForm({...dossierForm, mandats: updated});
                                   }}
-                                  placeholder="Nom de la rue"
+                                  placeholder="Code postal"
                                   className="bg-slate-700 border-slate-600 text-white"
                                 />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-2">
-                                <Label className="text-slate-300 text-sm">Ville</Label>
-                                <Input
-                                  value={mandat.adresse_travaux?.ville || ""}
-                                  onChange={(e) => {
-                                    const updated = [...dossierForm.mandats];
-                                    updated[index] = {
-                                      ...updated[index],
-                                      adresse_travaux: {
-                                        ...updated[index].adresse_travaux,
-                                        ville: e.target.value
-                                      }
-                                    };
-                                    setDossierForm({...dossierForm, mandats: updated});
-                                  }}
-                                  placeholder="Ville"
-                                  className="bg-slate-700 border-slate-600 text-white"
-                                />
+                            {/* Colonne droite - Dates */}
+                            <div className="space-y-3 pr-4">
+                              <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                <div className="space-y-2">
+                                  <Label className="text-left block">Date d'ouverture</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_ouverture || ""}
+                                    onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-left block">Date de signature</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_signature || ""}
+                                    onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-left block">Début des travaux</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_debut_travaux || ""}
+                                    onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-left block">Date de livraison</Label>
+                                  <Input
+                                    type="date"
+                                    value={mandat.date_livraison || ""}
+                                    onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                    className="bg-slate-700 border-slate-600"
+                                  />
+                                </div>
                               </div>
-                              <div className="space-y-2">
-                                <Label className="text-slate-300 text-sm">Province</Label>
-                                <Input
-                                  value={mandat.adresse_travaux?.province || "Québec"}
-                                  onChange={(e) => {
-                                    const updated = [...dossierForm.mandats];
-                                    updated[index] = {
-                                      ...updated[index],
-                                      adresse_travaux: {
-                                        ...updated[index].adresse_travaux,
-                                        province: e.target.value
-                                      }
-                                    };
-                                    setDossierForm({...dossierForm, mandats: updated});
-                                  }}
-                                  placeholder="Province"
-                                  className="bg-slate-700 border-slate-600 text-white"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-slate-300 text-sm">Code postal</Label>
-                              <Input
-                                value={mandat.adresse_travaux?.code_postal || ""}
-                                onChange={(e) => {
-                                  const updated = [...dossierForm.mandats];
-                                  updated[index] = {
-                                    ...updated[index],
-                                    adresse_travaux: {
-                                      ...updated[index].adresse_travaux,
-                                      code_postal: e.target.value
-                                    }
-                                  };
-                                  setDossierForm({...dossierForm, mandats: updated});
-                                }}
-                                placeholder="Code postal"
-                                className="bg-slate-700 border-slate-600 text-white"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Dates */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-2">
-                              <Label className="text-slate-300">Date d'ouverture</Label>
-                              <Input
-                                type="date"
-                                value={mandat.date_ouverture || ""}
-                                onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                className="bg-slate-700 border-slate-600 text-white"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-300">Date de signature</Label>
-                              <Input
-                                type="date"
-                                value={mandat.date_signature || ""}
-                                onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                className="bg-slate-700 border-slate-600 text-white"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-2">
-                              <Label className="text-slate-300">Début des travaux</Label>
-                              <Input
-                                type="date"
-                                value={mandat.date_debut_travaux || ""}
-                                onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                className="bg-slate-700 border-slate-600 text-white"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-300">Date de livraison</Label>
-                              <Input
-                                type="date"
-                                value={mandat.date_livraison || ""}
-                                onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                className="bg-slate-700 border-slate-600 text-white"
-                              />
                             </div>
                           </div>
 
@@ -1622,17 +1631,6 @@ export default function Profil() {
                               </div>
                             </div>
                           </div>
-
-                          {/* Notes */}
-                          <div className="space-y-2">
-                            <Label className="text-slate-300">Notes</Label>
-                            <Textarea
-                              value={mandat.notes || ""}
-                              onChange={(e) => updateMandat(index, 'notes', e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white"
-                              rows={3}
-                            />
-                          </div>
                         </div>
                       </div>
                     ))}
@@ -1648,33 +1646,38 @@ export default function Profil() {
                       rows={4}
                     />
                   </div>
+                </form>
 
-                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
-                    <Button 
-                      type="button" 
-                      variant="outline"
-                      onClick={() => setIsEditingDossierDialogOpen(false)}
-                      className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white"
-                    >
-                      Annuler
-                    </Button>
-                    <Button 
-                      onClick={handleSaveDossier}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white"
-                    >
-                      Modifier
-                    </Button>
-                  </div>
+                {/* Boutons Annuler/Modifier tout en bas */}
+                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => setIsEditingDossierDialogOpen(false)}
+                    className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white"
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
+                    type="submit"
+                    form="dossier-form-edit"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                  >
+                    Modifier
+                  </Button>
                 </div>
               </div>
 
-              {/* Right side - Commentaires */}
-              <div className="w-[400px] border-l border-slate-800 bg-slate-950/50 flex flex-col">
-                <div className="p-4 border-b border-slate-800">
-                  <h3 className="font-semibold text-white">Commentaires</h3>
+              {/* Right side - Commentaires Sidebar - 30% */}
+              <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
+                <div className="p-6 border-b border-slate-800 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-white">Commentaires</h3>
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                  <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={false} />
+                <div className="flex-1 overflow-hidden p-6">
+                  <CommentairesSection
+                    dossierId={editingDossier?.id}
+                    dossierTemporaire={false}
+                  />
                 </div>
               </div>
             </div>
