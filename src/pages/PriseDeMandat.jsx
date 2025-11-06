@@ -370,7 +370,7 @@ export default function PriseDeMandat() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
+      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel'), // Apply mapping here
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
@@ -757,7 +757,8 @@ export default function PriseDeMandat() {
         taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
-        date_debut_travaux: m.date_debut_travaux || ""
+        date_debut_travaux: m.date_debut_travaux || "",
+        tache_actuelle: m.tache_actuelle || "" // Added for editing
         // notes: m.notes || "" // Removed as per changes
       })) || [],
       description: dossier.description || ""
@@ -828,7 +829,8 @@ export default function PriseDeMandat() {
         taxes_incluses: false,
         date_livraison: "",
         date_signature: "",
-        date_debut_travaux: ""
+        date_debut_travaux: "",
+        tache_actuelle: "" // NEWLY ADDED
         // notes: "" // Removed as per changes
       }]
     }));
@@ -1597,6 +1599,7 @@ export default function PriseDeMandat() {
                                       Sélectionner des lots
                                     </Button>
                                   </div>
+
                                   {mandat.lots && mandat.lots.length > 0 ? (
                                     <div className="border border-slate-700 rounded-lg overflow-hidden">
                                       <Table>
