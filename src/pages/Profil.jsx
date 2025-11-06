@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -700,6 +700,16 @@ export default function Profil() {
                           />
                         </div>
                         <div className="flex justify-end gap-2">
+                          {editingRendezVous && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => deleteRendezVousMutation.mutate(editingRendezVous.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Supprimer
+                            </Button>
+                          )}
                           <Button type="button" variant="outline" onClick={() => {
                             setIsRendezVousDialogOpen(false);
                             resetRendezVousForm();
