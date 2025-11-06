@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Trash2, UserPlus, Search } from "lucide-react"; // Added Search icon
 import CommentairesSection from "./CommentairesSection";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"; // New imports
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -63,14 +64,26 @@ export default function EditDossierDialog({
   // State for Lot Selector Dialog
   const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
+  const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec"); // Initial value "Québec" as per outline
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null); // To know which mandat we are editing lots for
 
-  const filteredLotsForSelector = allLots.filter(lot =>
-    lot.numero_lot.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-    lot.circonscription_fonciere.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
-    (lot.cadastre && lot.cadastre.toLowerCase().includes(lotSearchTerm.toLowerCase())) ||
-    (lot.rang && lot.rang.toLowerCase().includes(lotSearchTerm.toLowerCase()))
-  );
+  const filteredLotsForSelector = allLots.filter(lot => {
+    const matchesSearchTerm =
+      lot.numero_lot.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      lot.circonscription_fonciere.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+      (lot.cadastre && lot.cadastre.toLowerCase().includes(lotSearchTerm.toLowerCase())) ||
+      (lot.rang && lot.rang.toLowerCase().includes(lotSearchTerm.toLowerCase()));
+
+    const matchesCirconscription =
+      lotCirconscriptionFilter === "all" || lot.circonscription_fonciere === lotCirconscriptionFilter;
+
+    // Assuming lot.cadastre can be null or undefined
+    const matchesCadastre =
+      lotCadastreFilter === "all" || (lot.cadastre && lot.cadastre === lotCadastreFilter);
+
+    return matchesSearchTerm && matchesCirconscription && matchesCadastre;
+  });
 
   const openLotSelector = (index) => {
     setCurrentMandatIndex(index);
@@ -873,70 +886,109 @@ export default function EditDossierDialog({
           if (!open) {
             setLotSearchTerm("");
             setCurrentMandatIndex(null);
+            setLotCirconscriptionFilter("all"); // Reset filter
+            setLotCadastreFilter("Québec"); // Reset filter
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher par numéro, rang, circonscription..."
-                  value={lotSearchTerm}
-                  onChange={(e) => setLotSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher par numéro, rang..."
+                    value={lotSearchTerm}
+                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    <SelectItem value="Lac-Saint-Jean-Est" className="text-white">Lac-Saint-Jean-Est</SelectItem>
+                    <SelectItem value="Lac-Saint-Jean-Ouest" className="text-white">Lac-Saint-Jean-Ouest</SelectItem>
+                    <SelectItem value="Chicoutimi" className="text-white">Chicoutimi</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Cadastre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-                <div className="divide-y divide-slate-800">
-                  {filteredLotsForSelector.length > 0 ? (
-                    filteredLotsForSelector.map((lot) => {
-                      const isSelected = currentMandatIndex !== null &&
-                        dossierForm.mandats[currentMandatIndex]?.lots?.includes(lot.id);
-                      return (
-                        <div
-                          key={lot.id}
-                          className={`p-4 cursor-pointer transition-colors ${
-                            isSelected
-                              ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
-                              : 'hover:bg-slate-800/30'
-                          }`}
-                          onClick={() => addLotToCurrentMandat(lot.id)}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-medium text-white">{lot.numero_lot}</p>
-                              <div className="flex gap-2 mt-1">
-                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
-                                  {lot.circonscription_fonciere}
-                                </Badge>
-                                {lot.cadastre && (
-                                  <span className="text-slate-400 text-xs">{lot.cadastre}</span>
-                                )}
-                                {lot.rang && (
-                                  <span className="text-slate-400 text-xs">{lot.rang}</span>
-                                )}
-                              </div>
-                            </div>
-                            {isSelected && (
-                              <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
-                                Sélectionné
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                      <TableHead className="text-slate-300">Circonscription</TableHead>
+                      <TableHead className="text-slate-300">Cadastre</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLotsForSelector.length > 0 ? (
+                      filteredLotsForSelector.map((lot) => {
+                        const isSelected = currentMandatIndex !== null &&
+                          dossierForm.mandats[currentMandatIndex]?.lots?.includes(lot.id);
+                        return (
+                          <TableRow
+                            key={lot.id}
+                            className={`cursor-pointer transition-colors border-slate-800 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                                : 'hover:bg-slate-800/30'
+                            }`}
+                            onClick={() => addLotToCurrentMandat(lot.id)}
+                          >
+                            <TableCell className="font-medium text-white">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                {lot.circonscription_fonciere}
                               </Badge>
-                            )}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isSelected && (
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  Sélectionné
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-12">
+                          <div className="text-slate-400">
+                            <p>Aucun lot trouvé</p>
+                            <p className="text-sm mt-2">Essayez de modifier vos filtres</p>
                           </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="p-12 text-center">
-                      <p className="text-slate-400">Aucun lot trouvé</p>
-                      <p className="text-slate-500 text-sm mt-2">Essayez de modifier vos critères de recherche</p>
-                    </div>
-                  )}
-                </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
 
               <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500 hover:bg-emerald-600">
