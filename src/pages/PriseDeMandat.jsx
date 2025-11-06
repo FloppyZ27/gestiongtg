@@ -352,8 +352,11 @@ export default function PriseDeMandat() {
 
   // Calcul des périodes
   const now = new Date();
+  const startOfDay = new Date(now);
+  startOfDay.setHours(0, 0, 0, 0);
+
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay()); // Début de la semaine (dimanche)
+  startOfWeek.setDate(now.getDate() - now.getDay());
   startOfWeek.setHours(0, 0, 0, 0);
 
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -362,11 +365,64 @@ export default function PriseDeMandat() {
   const startOfYear = new Date(now.getFullYear(), 0, 1);
   startOfYear.setHours(0, 0, 0, 0);
 
-  const getCountsByPeriod = (dossiersList) => {
+  // Périodes précédentes pour calculer le % de variation
+  const startOfPreviousDay = new Date(startOfDay);
+  startOfPreviousDay.setDate(startOfPreviousDay.getDate() - 1);
+
+  const startOfPreviousWeek = new Date(startOfWeek);
+  startOfPreviousWeek.setDate(startOfPreviousWeek.getDate() - 7);
+
+  const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  endOfPreviousMonth.setHours(23, 59, 59, 999);
+
+  const startOfPreviousYear = new Date(now.getFullYear() - 1, 0, 1);
+  const endOfPreviousYear = new Date(now.getFullYear() - 1, 11, 31);
+  endOfPreviousYear.setHours(23, 59, 59, 999);
+
+  const getCountsByPeriodWithComparison = (dossiersList) => {
+    const byDay = dossiersList.filter(d => new Date(d.created_date) >= startOfDay).length;
     const byWeek = dossiersList.filter(d => new Date(d.created_date) >= startOfWeek).length;
     const byMonth = dossiersList.filter(d => new Date(d.created_date) >= startOfMonth).length;
     const byYear = dossiersList.filter(d => new Date(d.created_date) >= startOfYear).length;
-    return { byWeek, byMonth, byYear };
+
+    const previousDay = dossiersList.filter(d => {
+      const date = new Date(d.created_date);
+      return date >= startOfPreviousDay && date < startOfDay;
+    }).length;
+
+    const previousWeek = dossiersList.filter(d => {
+      const date = new Date(d.created_date);
+      return date >= startOfPreviousWeek && date < startOfWeek;
+    }).length;
+
+    const previousMonth = dossiersList.filter(d => {
+      const date = new Date(d.created_date);
+      return date >= startOfPreviousMonth && date <= endOfPreviousMonth;
+    }).length;
+
+    const previousYear = dossiersList.filter(d => {
+      const date = new Date(d.created_date);
+      return date >= startOfPreviousYear && date <= endOfPreviousYear;
+    }).length;
+
+    const calculatePercentage = (current, previous) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    return {
+      byDay,
+      byWeek,
+      byMonth,
+      byYear,
+      percentages: {
+        day: calculatePercentage(byDay, previousDay),
+        week: calculatePercentage(byWeek, previousWeek),
+        month: calculatePercentage(byMonth, previousMonth),
+        year: calculatePercentage(byYear, previousYear)
+      }
+    };
   };
 
   const getCountsByArpenteur = (dossiersList) => {
@@ -379,19 +435,19 @@ export default function PriseDeMandat() {
 
   const retourAppelStats = {
     total: retourAppelDossiers.length,
-    ...getCountsByPeriod(retourAppelDossiers),
+    ...getCountsByPeriodWithComparison(retourAppelDossiers),
     byArpenteur: getCountsByArpenteur(retourAppelDossiers)
   };
 
   const nouveauMandatStats = {
     total: nouveauMandatDossiers.length,
-    ...getCountsByPeriod(nouveauMandatDossiers),
+    ...getCountsByPeriodWithComparison(nouveauMandatDossiers),
     byArpenteur: getCountsByArpenteur(nouveauMandatDossiers)
   };
 
   const soumissionStats = {
     total: soumissionDossiers.length,
-    ...getCountsByPeriod(soumissionDossiers),
+    ...getCountsByPeriodWithComparison(soumissionDossiers),
     byArpenteur: getCountsByArpenteur(soumissionDossiers)
   };
 
@@ -413,7 +469,7 @@ export default function PriseDeMandat() {
       );
 
       const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
-      
+
       let matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
       if (filterStatut === "Nouveau mandat/Demande d'information") {
         matchesStatut = matchesStatut || dossier.statut === "Demande d'information" || dossier.statut === "Nouveau mandat";
@@ -2407,97 +2463,220 @@ export default function PriseDeMandat() {
         </Dialog>
 
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {/* Stats Cards - Nouvelles statistiques détaillées */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Retours d'appel Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-2 pt-3">
-              <div className="flex justify-between items-center">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center mb-2">
                 <div>
-                  <p className="text-xs font-medium text-slate-400">Retours d'appel</p>
-                  <CardTitle className="text-2xl font-bold mt-1 text-white">
+                  <p className="text-sm font-medium text-slate-400">Retours d'appel</p>
+                  <CardTitle className="text-3xl font-bold mt-1 text-white">
                     {retourAppelStats.total}
                   </CardTitle>
                 </div>
-                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
-                  <Phone className="w-5 h-5 text-white" />
+                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
+                  <Phone className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-2 pb-3">
-              <div className="space-y-1">
-                {ARPENTEURS.map(arp => (
-                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
-                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
-                      {arp}
-                    </span>
-                    <span className="text-white font-semibold">
-                      {retourAppelStats.byArpenteur[arp]}
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Aujourd'hui</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{retourAppelStats.byDay}</p>
+                    <span className={`text-xs font-medium ${retourAppelStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {retourAppelStats.percentages.day > 0 ? '+' : ''}{retourAppelStats.percentages.day}%
                     </span>
                   </div>
-                ))}
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette semaine</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{retourAppelStats.byWeek}</p>
+                    <span className={`text-xs font-medium ${retourAppelStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {retourAppelStats.percentages.week > 0 ? '+' : ''}{retourAppelStats.percentages.week}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Ce mois</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{retourAppelStats.byMonth}</p>
+                    <span className={`text-xs font-medium ${retourAppelStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {retourAppelStats.percentages.month > 0 ? '+' : ''}{retourAppelStats.percentages.month}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette année</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{retourAppelStats.byYear}</p>
+                    <span className={`text-xs font-medium ${retourAppelStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {retourAppelStats.percentages.year > 0 ? '+' : ''}{retourAppelStats.percentages.year}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-700 pt-2">
+                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
+                <div className="space-y-1">
+                  {ARPENTEURS.map(arp => (
+                    <div key={arp} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
+                        {arp}
+                      </span>
+                      <span className="text-white font-semibold">
+                        {retourAppelStats.byArpenteur[arp]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Nouveau Mandat Stats - ADDED */}
+          {/* Nouveau Mandat Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-2 pt-3">
-              <div className="flex justify-between items-center">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center mb-2">
                 <div>
-                  <p className="text-xs font-medium text-slate-400">Nouveaux mandats</p>
-                  <CardTitle className="2xl font-bold mt-1 text-white">
+                  <p className="text-sm font-medium text-slate-400">Nouveaux mandats</p>
+                  <CardTitle className="text-3xl font-bold mt-1 text-white">
                     {nouveauMandatStats.total}
                   </CardTitle>
                 </div>
-                <div className="p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 opacity-20">
-                  <FileCheck className="w-5 h-5 text-white" />
+                <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 opacity-20">
+                  <FileCheck className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-2 pb-3">
-              <div className="space-y-1">
-                {ARPENTEURS.map(arp => (
-                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
-                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
-                      {arp}
-                    </span>
-                    <span className="text-white font-semibold">
-                      {nouveauMandatStats.byArpenteur[arp]}
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Aujourd'hui</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byDay}</p>
+                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
                     </span>
                   </div>
-                ))}
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette semaine</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byWeek}</p>
+                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Ce mois</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byMonth}</p>
+                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette année</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byYear}</p>
+                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-700 pt-2">
+                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
+                <div className="space-y-1">
+                  {ARPENTEURS.map(arp => (
+                    <div key={arp} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
+                        {arp}
+                      </span>
+                      <span className="text-white font-semibold">
+                        {nouveauMandatStats.byArpenteur[arp]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Soumissions Stats */}
           <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-2 pt-3">
-              <div className="flex justify-between items-center">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center mb-2">
                 <div>
-                  <p className="text-xs font-medium text-slate-400">Soumissions</p>
-                  <CardTitle className="text-2xl font-bold mt-1 text-white">
+                  <p className="text-sm font-medium text-slate-400">Soumissions</p>
+                  <CardTitle className="text-3xl font-bold mt-1 text-white">
                     {soumissionStats.total}
                   </CardTitle>
                 </div>
-                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
-                  <FileCheck className="w-5 h-5 text-white" />
+                <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
+                  <FileCheck className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-2 pb-3">
-              <div className="space-y-1">
-                {ARPENTEURS.map(arp => (
-                  <div key={arp} className="flex items-center justify-between text-xs py-0.5">
-                    <span className="text-slate-400 truncate max-w-[180px]" title={arp}>
-                      {arp}
-                    </span>
-                    <span className="text-white font-semibold">
-                      {soumissionStats.byArpenteur[arp]}
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Aujourd'hui</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{soumissionStats.byDay}</p>
+                    <span className={`text-xs font-medium ${soumissionStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {soumissionStats.percentages.day > 0 ? '+' : ''}{soumissionStats.percentages.day}%
                     </span>
                   </div>
-                ))}
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette semaine</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{soumissionStats.byWeek}</p>
+                    <span className={`text-xs font-medium ${soumissionStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {soumissionStats.percentages.week > 0 ? '+' : ''}{soumissionStats.percentages.week}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Ce mois</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{soumissionStats.byMonth}</p>
+                    <span className={`text-xs font-medium ${soumissionStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {soumissionStats.percentages.month > 0 ? '+' : ''}{soumissionStats.percentages.month}%
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-slate-800/30 rounded-lg p-2">
+                  <p className="text-xs text-slate-400">Cette année</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-lg font-bold text-white">{soumissionStats.byYear}</p>
+                    <span className={`text-xs font-medium ${soumissionStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {soumissionStats.percentages.year > 0 ? '+' : ''}{soumissionStats.percentages.year}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-slate-700 pt-2">
+                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
+                <div className="space-y-1">
+                  {ARPENTEURS.map(arp => (
+                    <div key={arp} className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
+                        {arp}
+                      </span>
+                      <span className="text-white font-semibold">
+                        {soumissionStats.byArpenteur[arp]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -2605,6 +2784,7 @@ export default function PriseDeMandat() {
                         >
                           Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
+                        <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
@@ -2630,12 +2810,17 @@ export default function PriseDeMandat() {
                       {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier 
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                            {dossier.numero_dossier
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                               : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {dossier.utilisateur_assigne
+                              ? (users.find(u => u.email === dossier.utilisateur_assigne)?.full_name || dossier.utilisateur_assigne)
+                              : "-"}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {getClientsNames(dossier.clients_ids)}
@@ -2685,7 +2870,7 @@ export default function PriseDeMandat() {
                       ))}
                       {sortedRetourAppel.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                             Aucun retour d'appel
                           </TableCell>
                         </TableRow>
@@ -2739,8 +2924,8 @@ export default function PriseDeMandat() {
                       {sortedNouveauMandat.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier 
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                            {dossier.numero_dossier
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                               : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
@@ -2848,8 +3033,8 @@ export default function PriseDeMandat() {
                       {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier 
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` 
+                            {dossier.numero_dossier
+                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                               : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                           </TableCell>
                           <TableCell className="text-slate-300">
