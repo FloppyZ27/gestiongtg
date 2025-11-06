@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -35,6 +36,13 @@ const getArpenteurColor = (arpenteur) => {
     "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
   };
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
+const createPageUrl = (pageName) => {
+  // This is a placeholder for actual routing logic. 
+  // In a Next.js or similar framework, you might use router.push or a known base URL.
+  // For demonstration, it constructs a simple URL.
+  return `/${pageName.toLowerCase()}`; 
 };
 
 export default function Profil() {
@@ -398,63 +406,61 @@ export default function Profil() {
                 )}
               </div>
 
-              {/* Information Table */}
+              {/* Information Table - 2 columns, 4 rows */}
               <div className="flex-1">
-                <Table>
-                  <TableBody>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400 w-1/3">Nom complet</TableCell>
-                      <TableCell className="text-white">{user?.full_name || "-"}</TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Poste</TableCell>
-                      <TableCell className="text-white">{user?.poste || "-"}</TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Adresse courriel</TableCell>
-                      <TableCell className="text-white flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-slate-500" />
-                        {user?.email}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Téléphone</TableCell>
-                      <TableCell className="text-white flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-slate-500" />
-                        {user?.telephone || "-"}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Adresse</TableCell>
-                      <TableCell className="text-white flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-slate-500" />
-                        {user?.adresse || "-"}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Date d'anniversaire</TableCell>
-                      <TableCell className="text-white flex items-center gap-2">
-                        <Cake className="w-4 h-4 text-slate-500" />
-                        {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMMM yyyy", { locale: fr }) : "-"}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Ancienneté</TableCell>
-                      <TableCell className="text-white flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-slate-500" />
-                        {calculateSeniority()}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-slate-800">
-                      <TableCell className="font-medium text-slate-400">Rôle</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                          {user?.role}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <Label className="text-slate-400 text-sm">Nom complet</Label>
+                    <p className="text-white font-medium">{user?.full_name || "-"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Poste</Label>
+                    <p className="text-white font-medium">{user?.poste || "-"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Adresse courriel</Label>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-slate-500" />
+                      <span className="truncate">{user?.email}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Téléphone</Label>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-slate-500" />
+                      {user?.telephone || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Adresse</Label>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-slate-500" />
+                      <span className="truncate">{user?.adresse || "-"}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Date d'anniversaire</Label>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      <Cake className="w-4 h-4 text-slate-500" />
+                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMMM yyyy", { locale: fr }) : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Ancienneté</Label>
+                    <p className="text-white font-medium flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-slate-500" />
+                      {calculateSeniority()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-sm">Rôle</Label>
+                    <div className="mt-1">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        {user?.role}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -469,19 +475,20 @@ export default function Profil() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
                     <TableHead className="text-slate-300">Dossier</TableHead>
                     <TableHead className="text-slate-300">Date</TableHead>
                     <TableHead className="text-slate-300">Clients</TableHead>
                     <TableHead className="text-slate-300">Adresse travaux</TableHead>
                     <TableHead className="text-slate-300">Mandat</TableHead>
+                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {retoursAppel.map((dossier) => (
+                  {retoursAppel.slice(0, 8).map((dossier) => (
                     <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium">
                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
@@ -517,11 +524,24 @@ export default function Profil() {
                           <span className="text-slate-600 text-xs">Aucun</span>
                         )}
                       </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
+                            window.open(url, '_blank');
+                          }}
+                          className="gap-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                        >
+                          Voir
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {retoursAppel.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
                         Aucun retour d'appel assigné
                       </TableCell>
                     </TableRow>
@@ -542,15 +562,14 @@ export default function Profil() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                 <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                  <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                    <TableRow className="hover:bg-slate-800/95 border-slate-700">
                       <TableHead className="text-slate-300">Date</TableHead>
                       <TableHead className="text-slate-300">Heures</TableHead>
                       <TableHead className="text-slate-300">Tâche</TableHead>
                       <TableHead className="text-slate-300">Dossier</TableHead>
-                      <TableHead className="text-slate-300">Description</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -574,15 +593,12 @@ export default function Profil() {
                               ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                               : "-"}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {entree.description || "-"}
-                          </TableCell>
                         </TableRow>
                       );
                     })}
                     {entreeTemps.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                           Aucune entrée de temps
                         </TableCell>
                       </TableRow>
