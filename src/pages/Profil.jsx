@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -45,6 +46,8 @@ export default function Profil() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('month');
+  const [editingDossier, setEditingDossier] = useState(null);
+  const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -93,6 +96,19 @@ export default function Profil() {
     date_debut: "",
     date_fin: "",
     type: "rendez-vous"
+  });
+
+  const [dossierForm, setDossierForm] = useState({
+    numero_dossier: "",
+    arpenteur_geometre: "",
+    date_ouverture: "",
+    statut: "Ouvert",
+    utilisateur_assigne: "",
+    clients_ids: [],
+    notaires_ids: [],
+    courtiers_ids: [],
+    mandats: [],
+    description: ""
   });
 
   useEffect(() => {
@@ -160,6 +176,15 @@ export default function Profil() {
     },
   });
 
+  const updateDossierMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      setIsEditingDossierDialogOpen(false);
+      setEditingDossier(null);
+    },
+  });
+
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -209,6 +234,32 @@ export default function Profil() {
       type: rdv.type
     });
     setIsRendezVousDialogOpen(true);
+  };
+
+  const handleEditDossier = (dossier) => {
+    setEditingDossier(dossier);
+    setDossierForm({
+      numero_dossier: dossier.numero_dossier || "",
+      arpenteur_geometre: dossier.arpenteur_geometre || "",
+      date_ouverture: dossier.date_ouverture || "",
+      statut: dossier.statut || "Ouvert",
+      utilisateur_assigne: dossier.utilisateur_assigne || "",
+      clients_ids: dossier.clients_ids || [],
+      notaires_ids: dossier.notaires_ids || [],
+      courtiers_ids: dossier.courtiers_ids || [],
+      mandats: dossier.mandats || [],
+      description: dossier.description || ""
+    });
+    setIsEditingDossierDialogOpen(true);
+  };
+
+  const handleSaveDossier = () => {
+    if (editingDossier) {
+      updateDossierMutation.mutate({
+        id: editingDossier.id,
+        data: dossierForm
+      });
+    }
   };
 
   const getInitials = (name) => {
@@ -410,56 +461,70 @@ export default function Profil() {
                 </Button>
               </div>
 
-              {/* Information grid - plus compact */}
-              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
-                <div>
-                  <Label className="text-slate-400 text-xs">Nom complet</Label>
-                  <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+              {/* Information grid - 3 lignes */}
+              <div className="flex-1 space-y-3">
+                {/* Ligne 1: Nom, Courriel, Poste */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
+                  <div>
+                    <Label className="text-slate-400 text-xs">Nom complet</Label>
+                    <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Adresse courriel</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-2">
+                      <Mail className="w-3 h-3 text-slate-500" />
+                      <span className="truncate">{user?.email}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Poste</Label>
+                    <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-slate-400 text-xs">Poste</Label>
-                  <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+
+                {/* Ligne 2: Adresse, Téléphone, Date anniversaire */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
+                  <div>
+                    <Label className="text-slate-400 text-xs">Adresse</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-2">
+                      <MapPin className="w-3 h-3 text-slate-500" />
+                      <span className="truncate">{user?.adresse || "-"}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Téléphone</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-slate-500" />
+                      {user?.telephone || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Cake className="w-3 h-3 text-slate-500" />
+                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-slate-400 text-xs">Rôle</Label>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
-                    {user?.role}
-                  </Badge>
-                </div>
-                <div>
-                  <Label className="text-slate-400 text-xs">Ancienneté</Label>
-                  <p className="text-white font-medium text-sm flex items-center gap-1">
-                    <Briefcase className="w-3 h-3 text-slate-500" />
-                    {calculateSeniority()}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <Label className="text-slate-400 text-xs">Adresse courriel</Label>
-                  <p className="text-white font-medium text-sm flex items-center gap-2">
-                    <Mail className="w-3 h-3 text-slate-500" />
-                    <span className="truncate">{user?.email}</span>
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-slate-400 text-xs">Téléphone</Label>
-                  <p className="text-white font-medium text-sm flex items-center gap-1">
-                    <Phone className="w-3 h-3 text-slate-500" />
-                    {user?.telephone || "-"}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
-                  <p className="text-white font-medium text-sm flex items-center gap-1">
-                    <Cake className="w-3 h-3 text-slate-500" />
-                    {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <Label className="text-slate-400 text-xs">Adresse</Label>
-                  <p className="text-white font-medium text-sm flex items-center gap-2">
-                    <MapPin className="w-3 h-3 text-slate-500" />
-                    <span className="truncate">{user?.adresse || "-"}</span>
-                  </p>
+
+                {/* Ligne 3: Ancienneté et Rôle */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                  <div>
+                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Briefcase className="w-3 h-3 text-slate-500" />
+                      {user?.created_date ? format(new Date(user.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                      {user?.created_date && <span className="text-slate-400">({calculateSeniority()})</span>}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Rôle</Label>
+                    <div className="mt-1">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        {user?.role}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -529,10 +594,7 @@ export default function Profil() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {
-                              const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
-                              window.open(url, '_blank');
-                            }}
+                            onClick={() => handleEditDossier(dossier)}
                             className="gap-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
                           >
                             <Edit className="w-4 h-4" />
@@ -659,7 +721,7 @@ export default function Profil() {
                     if (!open) resetRendezVousForm();
                   }}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
+                      <Button size="sm" className="bg-purple-500 hover:bg-purple-600">
                         RDV/Absence
                       </Button>
                     </DialogTrigger>
@@ -883,6 +945,71 @@ export default function Profil() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Dossier Dialog */}
+        <Dialog open={isEditingDossierDialogOpen} onOpenChange={setIsEditingDossierDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-400 text-sm">
+                Pour modifier les détails complets du dossier, veuillez utiliser l'onglet Prise de mandat ou Dossiers.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Numéro de dossier</Label>
+                  <Input
+                    value={dossierForm.numero_dossier}
+                    onChange={(e) => setDossierForm({...dossierForm, numero_dossier: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Statut <span className="text-red-400">*</span></Label>
+                  <select
+                    value={dossierForm.statut}
+                    onChange={(e) => setDossierForm({...dossierForm, statut: e.target.value})}
+                    className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
+                  >
+                    <option value="Ouvert">Ouvert</option>
+                    <option value="Fermé">Fermé</option>
+                    <option value="Retour d'appel">Retour d'appel</option>
+                    <option value="Message laissé/Sans réponse">Message laissé/Sans réponse</option>
+                    <option value="Demande d'information">Demande d'information</option>
+                    <option value="Nouveau mandat">Nouveau mandat</option>
+                    <option value="Soumission">Soumission</option>
+                    <option value="Rejeté">Rejeté</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={dossierForm.description}
+                  onChange={(e) => setDossierForm({...dossierForm, description: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  rows={4}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditingDossierDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  onClick={handleSaveDossier}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
