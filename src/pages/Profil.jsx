@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -70,6 +70,15 @@ export default function Profil() {
   const [viewMode, setViewMode] = useState('month');
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
+
+  // States for adding clients/notaires/courtiers in dossier dialog
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false);
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [showAddNotaireDialog, setShowAddNotaireDialog] = useState(false);
+  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
+  const [showAddCourtierDialog, setShowAddCourtierDialog] = useState(false);
+  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
+
 
   const queryClient = useQueryClient();
 
@@ -526,6 +535,56 @@ export default function Profil() {
       return `${format(weekStart, "d MMM", { locale: fr })} - ${format(weekEnd, "d MMM yyyy", { locale: fr })}`;
     }
   };
+
+
+  const handleAddClient = (clientId) => {
+    if (clientId && !dossierForm.clients_ids.includes(clientId)) {
+      setDossierForm({
+        ...dossierForm,
+        clients_ids: [...dossierForm.clients_ids, clientId]
+      });
+    }
+    setShowAddClientDialog(false);
+    setClientSearchTerm(""); // Reset search term
+  };
+
+  const handleAddNotaire = (notaireId) => {
+    if (notaireId && !dossierForm.notaires_ids.includes(notaireId)) {
+      setDossierForm({
+        ...dossierForm,
+        notaires_ids: [...dossierForm.notaires_ids, notaireId]
+      });
+    }
+    setShowAddNotaireDialog(false);
+    setNotaireSearchTerm(""); // Reset search term
+  };
+
+  const handleAddCourtier = (courtierId) => {
+    if (courtierId && !dossierForm.courtiers_ids.includes(courtierId)) {
+      setDossierForm({
+        ...dossierForm,
+        courtiers_ids: [...dossierForm.courtiers_ids, courtierId]
+      });
+    }
+    setShowAddCourtierDialog(false);
+    setCourtierSearchTerm(""); // Reset search term
+  };
+
+  const filteredClients = clientsOnly.filter(client =>
+    !dossierForm.clients_ids.includes(client.id) &&
+    `${client.prenom} ${client.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase())
+  );
+
+  const filteredNotaires = notaires.filter(notaire =>
+    !dossierForm.notaires_ids.includes(notaire.id) &&
+    `${notaire.prenom} ${notaire.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase())
+  );
+
+  const filteredCourtiers = courtiers.filter(courtier =>
+    !dossierForm.courtiers_ids.includes(courtier.id) &&
+    `${courtier.prenom} ${courtier.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
+  );
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -1170,14 +1229,43 @@ export default function Profil() {
                           type="button"
                           size="sm"
                           className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                          onClick={() => {
-                            const select = document.getElementById('select-client-profil');
-                            if (select) select.focus();
-                          }}
+                          onClick={() => setShowAddClientDialog(true)}
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
                         </Button>
+                        <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
+                          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
+                            <DialogHeader>
+                              <DialogTitle>Ajouter un client</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex items-center space-x-2 mb-4">
+                              <Search className="w-4 h-4 text-slate-400" />
+                              <Input
+                                placeholder="Rechercher un client..."
+                                value={clientSearchTerm}
+                                onChange={(e) => setClientSearchTerm(e.target.value)}
+                                className="flex-1 bg-slate-800 border-slate-700 text-white"
+                              />
+                            </div>
+                            <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                              {filteredClients.length > 0 ? (
+                                filteredClients.map(client => (
+                                  <Button
+                                    key={client.id}
+                                    variant="ghost"
+                                    className="justify-start w-full text-white hover:bg-slate-700"
+                                    onClick={() => handleAddClient(client.id)}
+                                  >
+                                    {client.prenom} {client.nom} ({client.email})
+                                  </Button>
+                                ))
+                              ) : (
+                                <p className="text-slate-500 text-sm text-center py-4">Aucun client trouvé.</p>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                       {dossierForm.clients_ids.length > 0 ? (
                         <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
@@ -1211,30 +1299,6 @@ export default function Profil() {
                           Aucun client
                         </p>
                       )}
-                      <select
-                        id="select-client-profil"
-                        onChange={(e) => {
-                          if (e.target.value && !dossierForm.clients_ids.includes(e.target.value)) {
-                            setDossierForm({
-                              ...dossierForm,
-                              clients_ids: [...dossierForm.clients_ids, e.target.value]
-                            });
-                          }
-                          e.target.value = "";
-                        }}
-                        value=""
-                        className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                      >
-                        <option value="">Sélectionner un client...</option>
-                        {clientsOnly
-                          .filter(c => !dossierForm.clients_ids.includes(c.id))
-                          .map(client => (
-                            <option key={client.id} value={client.id}>
-                              {client.prenom} {client.nom}
-                            </option>
-                          ))
-                        }
-                      </select>
                     </div>
 
                     {/* Notaires */}
@@ -1245,14 +1309,43 @@ export default function Profil() {
                           type="button"
                           size="sm"
                           className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
-                          onClick={() => {
-                            const select = document.getElementById('select-notaire-profil');
-                            if (select) select.focus();
-                          }}
+                          onClick={() => setShowAddNotaireDialog(true)}
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
                         </Button>
+                        <Dialog open={showAddNotaireDialog} onOpenChange={setShowAddNotaireDialog}>
+                          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
+                            <DialogHeader>
+                              <DialogTitle>Ajouter un notaire</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex items-center space-x-2 mb-4">
+                              <Search className="w-4 h-4 text-slate-400" />
+                              <Input
+                                placeholder="Rechercher un notaire..."
+                                value={notaireSearchTerm}
+                                onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                                className="flex-1 bg-slate-800 border-slate-700 text-white"
+                              />
+                            </div>
+                            <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                              {filteredNotaires.length > 0 ? (
+                                filteredNotaires.map(notaire => (
+                                  <Button
+                                    key={notaire.id}
+                                    variant="ghost"
+                                    className="justify-start w-full text-white hover:bg-slate-700"
+                                    onClick={() => handleAddNotaire(notaire.id)}
+                                  >
+                                    {notaire.prenom} {notaire.nom} ({notaire.email})
+                                  </Button>
+                                ))
+                              ) : (
+                                <p className="text-slate-500 text-sm text-center py-4">Aucun notaire trouvé.</p>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                       {dossierForm.notaires_ids.length > 0 ? (
                         <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
@@ -1286,30 +1379,6 @@ export default function Profil() {
                           Aucun notaire
                         </p>
                       )}
-                      <select
-                        id="select-notaire-profil"
-                        onChange={(e) => {
-                          if (e.target.value && !dossierForm.notaires_ids.includes(e.target.value)) {
-                            setDossierForm({
-                              ...dossierForm,
-                              notaires_ids: [...dossierForm.notaires_ids, e.target.value]
-                            });
-                          }
-                          e.target.value = "";
-                        }}
-                        value=""
-                        className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                      >
-                        <option value="">Sélectionner un notaire...</option>
-                        {notaires
-                          .filter(n => !dossierForm.notaires_ids.includes(n.id))
-                          .map(notaire => (
-                            <option key={notaire.id} value={notaire.id}>
-                              {notaire.prenom} {notaire.nom}
-                            </option>
-                          ))
-                        }
-                      </select>
                     </div>
 
                     {/* Courtiers */}
@@ -1320,14 +1389,43 @@ export default function Profil() {
                           type="button"
                           size="sm"
                           className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30"
-                          onClick={() => {
-                            const select = document.getElementById('select-courtier-profil');
-                            if (select) select.focus();
-                          }}
+                          onClick={() => setShowAddCourtierDialog(true)}
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
                         </Button>
+                        <Dialog open={showAddCourtierDialog} onOpenChange={setShowAddCourtierDialog}>
+                          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
+                            <DialogHeader>
+                              <DialogTitle>Ajouter un courtier</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex items-center space-x-2 mb-4">
+                              <Search className="w-4 h-4 text-slate-400" />
+                              <Input
+                                placeholder="Rechercher un courtier..."
+                                value={courtierSearchTerm}
+                                onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                className="flex-1 bg-slate-800 border-slate-700 text-white"
+                              />
+                            </div>
+                            <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                              {filteredCourtiers.length > 0 ? (
+                                filteredCourtiers.map(courtier => (
+                                  <Button
+                                    key={courtier.id}
+                                    variant="ghost"
+                                    className="justify-start w-full text-white hover:bg-slate-700"
+                                    onClick={() => handleAddCourtier(courtier.id)}
+                                  >
+                                    {courtier.prenom} {courtier.nom} ({courtier.email})
+                                  </Button>
+                                ))
+                              ) : (
+                                <p className="text-slate-500 text-sm text-center py-4">Aucun courtier trouvé.</p>
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                       {dossierForm.courtiers_ids.length > 0 ? (
                         <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
@@ -1361,30 +1459,6 @@ export default function Profil() {
                           Aucun courtier
                         </p>
                       )}
-                      <select
-                        id="select-courtier-profil"
-                        onChange={(e) => {
-                          if (e.target.value && !dossierForm.courtiers_ids.includes(e.target.value)) {
-                            setDossierForm({
-                              ...dossierForm,
-                              courtiers_ids: [...dossierForm.courtiers_ids, e.target.value]
-                            });
-                          }
-                          e.target.value = "";
-                        }}
-                        value=""
-                        className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm"
-                      >
-                        <option value="">Sélectionner un courtier...</option>
-                        {courtiers
-                          .filter(c => !dossierForm.courtiers_ids.includes(c.id))
-                          .map(courtier => (
-                            <option key={courtier.id} value={courtier.id}>
-                              {courtier.prenom} {courtier.nom}
-                            </option>
-                          ))
-                        }
-                      </select>
                     </div>
                   </div>
 
