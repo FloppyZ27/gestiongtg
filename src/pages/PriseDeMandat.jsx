@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, TrendingUp, TrendingDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -2489,6 +2489,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{retourAppelStats.byDay}</p>
                     <span className={`text-xs font-medium ${retourAppelStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {retourAppelStats.percentages.day > 0 ? '+' : ''}{retourAppelStats.percentages.day}%
+                      {retourAppelStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2498,6 +2499,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{retourAppelStats.byWeek}</p>
                     <span className={`text-xs font-medium ${retourAppelStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {retourAppelStats.percentages.week > 0 ? '+' : ''}{retourAppelStats.percentages.week}%
+                      {retourAppelStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2507,6 +2509,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{retourAppelStats.byMonth}</p>
                     <span className={`text-xs font-medium ${retourAppelStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {retourAppelStats.percentages.month > 0 ? '+' : ''}{retourAppelStats.percentages.month}%
+                      {retourAppelStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2516,6 +2519,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{retourAppelStats.byYear}</p>
                     <span className={`text-xs font-medium ${retourAppelStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {retourAppelStats.percentages.year > 0 ? '+' : ''}{retourAppelStats.percentages.year}%
+                      {retourAppelStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2534,7 +2538,8 @@ export default function PriseDeMandat() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
+              </div>
+            </CardContent>
           </Card>
 
           {/* Nouveau Mandat Stats */}
@@ -2560,6 +2565,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{nouveauMandatStats.byDay}</p>
                     <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
+                      {nouveauMandatStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2569,6 +2575,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{nouveauMandatStats.byWeek}</p>
                     <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
+                      {nouveauMandatStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2578,6 +2585,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{nouveauMandatStats.byMonth}</p>
                     <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
+                      {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2587,6 +2595,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{nouveauMandatStats.byYear}</p>
                     <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
+                      {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2632,6 +2641,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{soumissionStats.byDay}</p>
                     <span className={`text-xs font-medium ${soumissionStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {soumissionStats.percentages.day > 0 ? '+' : ''}{soumissionStats.percentages.day}%
+                      {soumissionStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2641,6 +2651,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{soumissionStats.byWeek}</p>
                     <span className={`text-xs font-medium ${soumissionStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {soumissionStats.percentages.week > 0 ? '+' : ''}{soumissionStats.percentages.week}%
+                      {soumissionStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2650,6 +2661,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{soumissionStats.byMonth}</p>
                     <span className={`text-xs font-medium ${soumissionStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {soumissionStats.percentages.month > 0 ? '+' : ''}{soumissionStats.percentages.month}%
+                      {soumissionStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
@@ -2659,6 +2671,7 @@ export default function PriseDeMandat() {
                     <p className="text-lg font-bold text-white">{soumissionStats.byYear}</p>
                     <span className={`text-xs font-medium ${soumissionStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {soumissionStats.percentages.year > 0 ? '+' : ''}{soumissionStats.percentages.year}%
+                      {soumissionStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
                     </span>
                   </div>
                 </div>
