@@ -9,13 +9,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus } from "lucide-react"; // Added UserPlus
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { createPageUrl } from "@/utils";
-// import AddressInput from "../components/shared/AddressInput"; // AddressInput is no longer directly used in the dialog, removed if not used elsewhere
+// New imports for Tabs and Select components
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -78,6 +81,8 @@ export default function Profil() {
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [showAddCourtierDialog, setShowAddCourtierDialog] = useState(false);
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
+  // New state for active mandat tab
+  const [activeTabMandat, setActiveTabMandat] = useState("0");
 
 
   const queryClient = useQueryClient();
@@ -320,6 +325,7 @@ export default function Profil() {
       }],
       description: dossier.description || ""
     });
+    setActiveTabMandat("0"); // Set the first mandat as active when opening
     setIsEditingDossierDialogOpen(true);
   };
 
@@ -357,31 +363,28 @@ export default function Profil() {
     setDossierForm({...dossierForm, mandats: updatedMandats});
   };
 
-  // Removed updateMandatAddress as AddressInput is no longer used for the dialog.
-
   const addMandat = () => {
-    setDossierForm({
-      ...dossierForm,
-      mandats: [...dossierForm.mandats, {
-        type_mandat: "",
-        date_ouverture: "",
-        adresse_travaux: {
-          ville: "",
-          numeros_civiques: [""],
-          rue: "",
-          code_postal: "",
-          province: "Québec"
-        },
-        lots: [],
-        prix_estime: 0,
-        date_signature: "",
-        date_livraison: "",
-        date_debut_travaux: "", // New field
-        rabais: 0, // New field
-        taxes_incluses: false, // New field
-        notes: ""
-      }]
-    });
+    const newMandats = [...dossierForm.mandats, {
+      type_mandat: "",
+      date_ouverture: "",
+      adresse_travaux: {
+        ville: "",
+        numeros_civiques: [""],
+        rue: "",
+        code_postal: "",
+        province: "Québec"
+      },
+      lots: [],
+      prix_estime: 0,
+      date_signature: "",
+      date_livraison: "",
+      date_debut_travaux: "", // New field
+      rabais: 0, // New field
+      taxes_incluses: false, // New field
+      notes: ""
+    }];
+    setDossierForm({...dossierForm, mandats: newMandats});
+    setActiveTabMandat((newMandats.length - 1).toString()); // Activate the newly added tab
   };
 
   const removeMandat = (index) => {
@@ -584,6 +587,17 @@ export default function Profil() {
     !dossierForm.courtiers_ids.includes(courtier.id) &&
     `${courtier.prenom} ${courtier.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
   );
+
+  // Helper for Mandat Tab Label
+  const getMandatTabLabel = (mandat, index) => {
+    if (mandat.type_mandat) {
+      return mandat.type_mandat;
+    }
+    if (mandat.adresse_travaux?.rue && mandat.adresse_travaux?.numeros_civiques?.[0]) {
+      return `${mandat.adresse_travaux.numeros_civiques[0]} ${mandat.adresse_travaux.rue}`;
+    }
+    return `Mandat ${index + 1}`;
+  };
 
 
   return (
@@ -1228,10 +1242,10 @@ export default function Profil() {
                         <Button
                           type="button"
                           size="sm"
-                          className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                           onClick={() => setShowAddClientDialog(true)}
                         >
-                          <Plus className="w-3 h-3 mr-1" />
+                          <UserPlus className="w-4 h-4 mr-1" />
                           Ajouter
                         </Button>
                         <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
@@ -1308,10 +1322,10 @@ export default function Profil() {
                         <Button
                           type="button"
                           size="sm"
-                          className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
+                          className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
                           onClick={() => setShowAddNotaireDialog(true)}
                         >
-                          <Plus className="w-3 h-3 mr-1" />
+                          <UserPlus className="w-4 h-4 mr-1" />
                           Ajouter
                         </Button>
                         <Dialog open={showAddNotaireDialog} onOpenChange={setShowAddNotaireDialog}>
@@ -1388,10 +1402,10 @@ export default function Profil() {
                         <Button
                           type="button"
                           size="sm"
-                          className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30"
+                          className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
                           onClick={() => setShowAddCourtierDialog(true)}
                         >
-                          <Plus className="w-3 h-3 mr-1" />
+                          <UserPlus className="w-4 h-4 mr-1" />
                           Ajouter
                         </Button>
                         <Dialog open={showAddCourtierDialog} onOpenChange={setShowAddCourtierDialog}>
@@ -1462,123 +1476,94 @@ export default function Profil() {
                     </div>
                   </div>
 
-                  {/* Mandats Section avec Tabs */}
+                  {/* Mandats Section avec Tabs comme dans PriseDeMandat */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <Label className="text-xl font-semibold text-white">Mandats</Label>
                       <Button
                         type="button"
+                        size="sm"
                         onClick={addMandat}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                       >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-4 h-4 mr-1" />
                         Ajouter un mandat
                       </Button>
                     </div>
 
                     {dossierForm.mandats.length > 0 ? (
-                      <div className="space-y-3">
-                        {/* Tabs pour les mandats */}
-                        <div className="flex gap-2 flex-wrap border-b border-slate-700 pb-2">
+                      <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
+                        <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start">
                           {dossierForm.mandats.map((mandat, index) => (
-                            <button
+                            <TabsTrigger
                               key={index}
-                              type="button"
-                              onClick={() => {
-                                // Scroll to the mandat
-                                document.getElementById(`mandat-${index}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                              }}
-                              className={`px-4 py-2 rounded-t-lg transition-colors ${
-                                index === 0
-                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border'
-                                  : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700'
-                              }`}
+                              value={index.toString()}
+                              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-slate-400"
                             >
-                              {mandat.type_mandat || `Mandat ${index + 1}`}
-                            </button>
+                              {getMandatTabLabel(mandat, index)}
+                            </TabsTrigger>
                           ))}
-                        </div>
+                        </TabsList>
 
                         {dossierForm.mandats.map((mandat, index) => (
-                          <div key={index} id={`mandat-${index}`} className="border-2 border-slate-700 bg-slate-800/30 rounded-lg overflow-hidden">
-                            {/* Mandat header */}
-                            <div className="bg-emerald-500/10 border-b border-emerald-500/30 p-4">
-                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-base px-3 py-1">
-                                {mandat.type_mandat || `Mandat ${index + 1}`}
-                              </Badge>
-                            </div>
-
-                            <div className="p-4 space-y-4">
-                              {/* Type de mandat et Supprimer sur la même ligne */}
-                              <div className="grid grid-cols-[1fr_auto] gap-4">
-                                <div className="space-y-2">
-                                  <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                  <select
-                                    value={mandat.type_mandat}
-                                    onChange={(e) => updateMandat(index, 'type_mandat', e.target.value)}
-                                    className="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-md text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                  >
-                                    <option value="">Sélectionner</option>
-                                    <option value="Certificat de localisation">Certificat de localisation</option>
-                                    <option value="Implantation">Implantation</option>
-                                    <option value="Piquetage">Piquetage</option>
-                                    <option value="OCTR">OCTR</option>
-                                    <option value="Projet de lotissement">Projet de lotissement</option>
-                                  </select>
-                                </div>
-                                {dossierForm.mandats.length > 0 && (
-                                  <div className="flex items-end">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeMandat(index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          <TabsContent key={index} value={index.toString()}>
+                            <Card className="border-slate-700 bg-slate-800/30">
+                              <CardContent className="p-4 space-y-4">
+                                {/* Type de mandat et bouton supprimer sur la même ligne */}
+                                <div className="flex gap-4 items-start">
+                                  <div className="flex-1 space-y-2">
+                                    <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                                    <Select
+                                      value={mandat.type_mandat}
+                                      onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
                                     >
-                                      <Trash2 className="w-4 h-4 mr-2" />
-                                      Supprimer ce mandat
-                                    </Button>
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                        <SelectValue placeholder="Sélectionner" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectItem value="Certificat de localisation" className="text-white">Certificat de localisation</SelectItem>
+                                        <SelectItem value="Implantation" className="text-white">Implantation</SelectItem>
+                                        <SelectItem value="Piquetage" className="text-white">Piquetage</SelectItem>
+                                        <SelectItem value="OCTR" className="text-white">OCTR</SelectItem>
+                                        <SelectItem value="Projet de lotissement" className="text-white">Projet de lotissement</SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </div>
-                                )}
-                              </div>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      removeMandat(index);
+                                      if (dossierForm.mandats.length > 1) {
+                                        setActiveTabMandat(Math.max(0, index - 1).toString());
+                                      } else {
+                                        setActiveTabMandat("0");
+                                      }
+                                    }}
+                                    className="text-red-400 hover:text-red-300 mt-8"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Supprimer ce mandat
+                                  </Button>
+                                </div>
 
-                              {/* Nouvelle mise en page : 70% gauche / 30% droite */}
-                              <div className="grid grid-cols-[70%_30%] gap-4">
-                                {/* Colonne gauche - Adresse dans un encadré */}
-                                <div className="space-y-3 p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
-                                  <Label className="text-slate-300 font-semibold">Adresse des travaux</Label>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-2">
-                                      <Label className="text-slate-300 text-sm">Numéro(s) civique(s)</Label>
-                                      {(mandat.adresse_travaux?.numeros_civiques || [""]).map((num, civicIdx) => (
-                                        <div key={civicIdx} className="flex gap-2 items-center">
-                                          <Input
-                                            value={num}
-                                            onChange={(e) => {
-                                              const updated = [...dossierForm.mandats];
-                                              const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                              civics[civicIdx] = e.target.value;
-                                              updated[index] = {
-                                                ...updated[index],
-                                                adresse_travaux: {
-                                                  ...updated[index].adresse_travaux,
-                                                  numeros_civiques: civics
-                                                }
-                                              };
-                                              setDossierForm({...dossierForm, mandats: updated});
-                                            }}
-                                            placeholder="Ex: 1850"
-                                            className="bg-slate-700 border-slate-600 text-white"
-                                          />
-                                          {civicIdx > 0 && (
-                                            <Button
-                                              type="button"
-                                              size="icon"
-                                              variant="ghost"
-                                              onClick={() => {
+                                {/* Nouvelle mise en page : 70% gauche / 30% droite */}
+                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                  {/* Colonne gauche - Adresse dans un encadré */}
+                                  <div className="space-y-3 p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
+                                    <Label className="text-slate-300 font-semibold">Adresse des travaux</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-slate-300 text-sm">Numéro(s) civique(s)</Label>
+                                        {(mandat.adresse_travaux?.numeros_civiques || [""]).map((num, civicIdx) => (
+                                          <div key={civicIdx} className="flex gap-2 items-center">
+                                            <Input
+                                              value={num}
+                                              onChange={(e) => {
                                                 const updated = [...dossierForm.mandats];
                                                 const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                                civics.splice(civicIdx, 1);
+                                                civics[civicIdx] = e.target.value;
                                                 updated[index] = {
                                                   ...updated[index],
                                                   adresse_travaux: {
@@ -1588,227 +1573,263 @@ export default function Profil() {
                                                 };
                                                 setDossierForm({...dossierForm, mandats: updated});
                                               }}
-                                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
-                                            >
-                                              <X className="w-4 h-4" />
-                                            </Button>
-                                          )}
-                                        </div>
-                                      ))}
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => {
-                                          const updated = [...dossierForm.mandats];
-                                          const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
-                                          updated[index] = {
-                                            ...updated[index],
-                                            adresse_travaux: {
-                                              ...updated[index].adresse_travaux,
-                                              numeros_civiques: [...civics, ""]
-                                            }
-                                          };
-                                          setDossierForm({...dossierForm, mandats: updated});
-                                        }}
-                                        className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
-                                      >
-                                        <Plus className="w-3 h-3 mr-1" />
-                                        Ajouter un numéro
-                                      </Button>
+                                              placeholder="Ex: 1850"
+                                              className="bg-slate-700 border-slate-600 text-white"
+                                            />
+                                            {civicIdx > 0 && (
+                                              <Button
+                                                type="button"
+                                                size="icon"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                  const updated = [...dossierForm.mandats];
+                                                  const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
+                                                  civics.splice(civicIdx, 1);
+                                                  updated[index] = {
+                                                    ...updated[index],
+                                                    adresse_travaux: {
+                                                      ...updated[index].adresse_travaux,
+                                                      numeros_civiques: civics
+                                                    }
+                                                  };
+                                                  setDossierForm({...dossierForm, mandats: updated});
+                                                }}
+                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
+                                              >
+                                                <X className="w-4 h-4" />
+                                              </Button>
+                                            )}
+                                          </div>
+                                        ))}
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => {
+                                            const updated = [...dossierForm.mandats];
+                                            const civics = updated[index].adresse_travaux?.numeros_civiques || [""];
+                                            updated[index] = {
+                                              ...updated[index],
+                                              adresse_travaux: {
+                                                ...updated[index].adresse_travaux,
+                                                numeros_civiques: [...civics, ""]
+                                              }
+                                            };
+                                            setDossierForm({...dossierForm, mandats: updated});
+                                          }}
+                                          className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+                                        >
+                                          <Plus className="w-3 h-3 mr-1" />
+                                          Ajouter un numéro
+                                        </Button>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <Label className="text-slate-300 text-sm">Rue</Label>
+                                        <Input
+                                          value={mandat.adresse_travaux?.rue || ""}
+                                          onChange={(e) => {
+                                            const updated = [...dossierForm.mandats];
+                                            updated[index] = {
+                                              ...updated[index],
+                                              adresse_travaux: {
+                                                ...updated[index].adresse_travaux,
+                                                rue: e.target.value
+                                              }
+                                            };
+                                            setDossierForm({...dossierForm, mandats: updated});
+                                          }}
+                                          placeholder="Nom de la rue"
+                                          className="bg-slate-700 border-slate-600 text-white"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-slate-300 text-sm">Ville</Label>
+                                        <Input
+                                          value={mandat.adresse_travaux?.ville || ""}
+                                          onChange={(e) => {
+                                            const updated = [...dossierForm.mandats];
+                                            updated[index] = {
+                                              ...updated[index],
+                                              adresse_travaux: {
+                                                ...updated[index].adresse_travaux,
+                                                ville: e.target.value
+                                              }
+                                            };
+                                            setDossierForm({...dossierForm, mandats: updated});
+                                          }}
+                                          placeholder="Ville"
+                                          className="bg-slate-700 border-slate-600 text-white"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label className="text-slate-300 text-sm">Province</Label>
+                                        <Input
+                                          value={mandat.adresse_travaux?.province || "Québec"}
+                                          onChange={(e) => {
+                                            const updated = [...dossierForm.mandats];
+                                            updated[index] = {
+                                              ...updated[index],
+                                              adresse_travaux: {
+                                                ...updated[index].adresse_travaux,
+                                                province: e.target.value
+                                              }
+                                            };
+                                            setDossierForm({...dossierForm, mandats: updated});
+                                          }}
+                                          placeholder="Province"
+                                          className="bg-slate-700 border-slate-600 text-white"
+                                        />
+                                      </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                      <Label className="text-slate-300 text-sm">Rue</Label>
+                                      <Label className="text-slate-300 text-sm">Code postal</Label>
                                       <Input
-                                        value={mandat.adresse_travaux?.rue || ""}
+                                        value={mandat.adresse_travaux?.code_postal || ""}
                                         onChange={(e) => {
                                           const updated = [...dossierForm.mandats];
                                           updated[index] = {
                                             ...updated[index],
                                             adresse_travaux: {
                                               ...updated[index].adresse_travaux,
-                                              rue: e.target.value
+                                              code_postal: e.target.value
                                             }
                                           };
                                           setDossierForm({...dossierForm, mandats: updated});
                                         }}
-                                        placeholder="Nom de la rue"
+                                        placeholder="Code postal"
                                         className="bg-slate-700 border-slate-600 text-white"
                                       />
                                     </div>
                                   </div>
 
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-2">
-                                      <Label className="text-slate-300 text-sm">Ville</Label>
-                                      <Input
-                                        value={mandat.adresse_travaux?.ville || ""}
-                                        onChange={(e) => {
-                                          const updated = [...dossierForm.mandats];
-                                          updated[index] = {
-                                            ...updated[index],
-                                            adresse_travaux: {
-                                              ...updated[index].adresse_travaux,
-                                              ville: e.target.value
-                                            }
-                                          };
-                                          setDossierForm({...dossierForm, mandats: updated});
-                                        }}
-                                        placeholder="Ville"
-                                        className="bg-slate-700 border-slate-600 text-white"
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label className="text-slate-300 text-sm">Province</Label>
-                                      <Input
-                                        value={mandat.adresse_travaux?.province || "Québec"}
-                                        onChange={(e) => {
-                                          const updated = [...dossierForm.mandats];
-                                          updated[index] = {
-                                            ...updated[index],
-                                            adresse_travaux: {
-                                              ...updated[index].adresse_travaux,
-                                              province: e.target.value
-                                            }
-                                          };
-                                          setDossierForm({...dossierForm, mandats: updated});
-                                        }}
-                                        placeholder="Province"
-                                        className="bg-slate-700 border-slate-600 text-white"
-                                      />
-                                    </div>
-                                  </div>
+                                  {/* Colonne droite - Dates */}
+                                  <div className="space-y-3 pr-4">
+                                    <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-left block text-sm">Date d'ouverture</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_ouverture || ""}
+                                          onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="text-slate-300 text-sm">Code postal</Label>
-                                    <Input
-                                      value={mandat.adresse_travaux?.code_postal || ""}
-                                      onChange={(e) => {
-                                        const updated = [...dossierForm.mandats];
-                                        updated[index] = {
-                                          ...updated[index],
-                                          adresse_travaux: {
-                                            ...updated[index].adresse_travaux,
-                                            code_postal: e.target.value
-                                          }
-                                        };
-                                        setDossierForm({...dossierForm, mandats: updated});
-                                      }}
-                                      placeholder="Code postal"
-                                      className="bg-slate-700 border-slate-600 text-white"
-                                    />
+                                      <div className="space-y-2">
+                                        <Label className="text-left block text-sm">Date de signature</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_signature || ""}
+                                          onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <Label className="text-left block text-sm">Début des travaux</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_debut_travaux || ""}
+                                          onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <Label className="text-left block text-sm">Date de livraison</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_livraison || ""}
+                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
 
-                                {/* Colonne droite - Dates */}
-                                <div className="space-y-3 pr-4">
-                                  <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
-                                    <div className="space-y-2">
-                                      <Label className="text-left block text-sm">Date d'ouverture</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_ouverture || ""}
-                                        onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                        className="bg-slate-700 border-slate-600"
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label className="text-left block text-sm">Date de signature</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_signature || ""}
-                                        onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                        className="bg-slate-700 border-slate-600"
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label className="text-left block text-sm">Début des travaux</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_debut_travaux || ""}
-                                        onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                        className="bg-slate-700 border-slate-600"
-                                      />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label className="text-left block text-sm">Date de livraison</Label>
-                                      <Input
-                                        type="date"
-                                        value={mandat.date_livraison || ""}
-                                        onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                        className="bg-slate-700 border-slate-600"
-                                      />
-                                    </div>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <Label>Lots sélectionnés</Label>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                    >
+                                      <Plus className="w-4 h-4 mr-1" />
+                                      Sélectionner des lots
+                                    </Button>
                                   </div>
-                                </div>
-                              </div>
 
-                              {/* Lots */}
-                              <div className="space-y-2">
-                                <Label className="text-slate-300">Lots sélectionnés</Label>
-                                <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg min-h-[80px] flex items-center justify-center">
                                   {mandat.lots && mandat.lots.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2">
-                                      {mandat.lots.map((lot, li) => (
-                                        <Badge key={li} variant="outline" className="bg-slate-700">{lot}</Badge>
-                                      ))}
+                                    <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
+                                      <div className="flex flex-wrap gap-2">
+                                        {mandat.lots.map((lot, li) => (
+                                          <Badge key={li} variant="outline" className="bg-slate-700">{lot}</Badge>
+                                        ))}
+                                      </div>
                                     </div>
                                   ) : (
-                                    <p className="text-slate-500 text-sm">Aucun lot sélectionné</p>
+                                    <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                                      Aucun lot sélectionné
+                                    </p>
                                   )}
                                 </div>
-                                <Input
-                                  value={mandat.lots?.join(", ") || ""}
-                                  onChange={(e) => updateMandat(index, 'lots', e.target.value.split(",").map(l => l.trim()).filter(l => l))}
-                                  placeholder="Ex: 1234, 5678"
-                                  className="bg-slate-700 border-slate-600 text-white"
-                                />
-                              </div>
 
-                              {/* Tarification avec Taxes incluses */}
-                              <div className="space-y-3 p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
-                                <h4 className="font-semibold text-white">Tarification</h4>
-                                <div className="grid grid-cols-3 gap-3">
-                                  <div className="space-y-2">
-                                    <Label className="text-slate-300">Prix estimé ($)</Label>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      value={mandat.prix_estime || 0}
-                                      onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value))}
-                                      className="bg-slate-700 border-slate-600 text-white"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label className="text-slate-300">Rabais ($)</Label>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      value={mandat.rabais || 0}
-                                      onChange={(e) => updateMandat(index, 'rabais', parseFloat(e.target.value))}
-                                      className="bg-slate-700 border-slate-600 text-white"
-                                    />
-                                  </div>
-                                  <div className="space-y-2 flex items-end pb-2">
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                  <h4 className="text-sm font-semibold text-slate-300">Tarification</h4>
+                                  <div className="grid grid-cols-3 gap-3">
+                                    <div className="space-y-2">
+                                      <Label>Prix estimé ($)</Label>
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={mandat.prix_estime || ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                                          updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
+                                        }}
+                                        placeholder="0.00"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Rabais ($)</Label>
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={mandat.rabais || ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                                          updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
+                                        }}
+                                        placeholder="0.00"
+                                        className="bg-slate-700 border-slate-600"
+                                      />
+                                    </div>
+                                    <div className="space-y-2 flex items-center pt-8">
                                       <input
                                         type="checkbox"
-                                        checked={mandat.taxes_incluses || false}
+                                        id={`taxes_incluses_${index}`}
+                                        checked={mandat.taxes_incluses}
                                         onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
                                         className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
                                       />
-                                      <span className="text-slate-300 text-sm">Taxes incluses</span>
-                                    </label>
+                                      <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
+                                        Taxes incluses
+                                      </label>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          </div>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
                         ))}
-                      </div>
+                      </Tabs>
                     ) : (
                       <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">
                         Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
@@ -1830,15 +1851,15 @@ export default function Profil() {
 
                 {/* Boutons Annuler/Modifier tout en bas */}
                 <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={() => setIsEditingDossierDialogOpen(false)}
                     className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white"
                   >
                     Annuler
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
                     form="dossier-form-edit"
                     className="bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -1849,11 +1870,11 @@ export default function Profil() {
               </div>
 
               {/* Right side - Commentaires Sidebar - 30% */}
-              <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                 <div className="p-4 border-b border-slate-800 flex-shrink-0">
                   <h3 className="text-lg font-bold text-white">Commentaires</h3>
                 </div>
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
                   <CommentairesSection
                     dossierId={editingDossier?.id}
                     dossierTemporaire={false}
