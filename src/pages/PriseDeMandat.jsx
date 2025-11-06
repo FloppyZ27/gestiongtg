@@ -149,6 +149,7 @@ export default function PriseDeMandat() {
 
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
+  const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
 
@@ -201,6 +202,12 @@ export default function PriseDeMandat() {
     initialData: [],
   });
 
+  const { data: compteurs = [] } = useQuery({
+    queryKey: ['compteursMandats'],
+    queryFn: () => base44.entities.CompteurMandat.list('-date_creation'),
+    initialData: [],
+  });
+
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
@@ -208,18 +215,59 @@ export default function PriseDeMandat() {
   });
 
   const createDossierMutation = useMutation({
-    mutationFn: (dossierData) => base44.entities.Dossier.create(dossierData),
+    mutationFn: async (dossierData) => {
+      const newDossier = await base44.entities.Dossier.create(dossierData);
+      
+      // Créer un compteur pour chaque nouveau mandat
+      if (dossierData.statut === "Nouveau mandat/Demande d'information" && newDossier.mandats && newDossier.mandats.length > 0) {
+        const compteurPromises = newDossier.mandats.map(mandat => 
+          base44.entities.CompteurMandat.create({
+            dossier_id: newDossier.id,
+            arpenteur_geometre: dossierData.arpenteur_geometre,
+            type_mandat: mandat.type_mandat,
+            date_creation: new Date().toISOString().split('T')[0]
+          })
+        );
+        await Promise.all(compteurPromises);
+      }
+      
+      return newDossier;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['compteursMandats'] });
       setIsDialogOpen(false);
       resetForm();
     },
   });
 
   const updateDossierMutation = useMutation({
-    mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
+    mutationFn: async ({ id, dossierData }) => {
+      const oldDossier = dossiers.find(d => d.id === id);
+      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      // Si le statut passe à "Nouveau mandat/Demande d'information" et qu'il y a des mandats
+      if (dossierData.statut === "Nouveau mandat/Demande d'information" && 
+          oldDossier?.statut !== "Nouveau mandat/Demande d'information" &&
+          oldDossier?.statut !== "Nouveau mandat" &&
+          oldDossier?.statut !== "Demande d'information" &&
+          updatedDossier.mandats && updatedDossier.mandats.length > 0) {
+        const compteurPromises = updatedDossier.mandats.map(mandat => 
+          base44.entities.CompteurMandat.create({
+            dossier_id: updatedDossier.id,
+            arpenteur_geometre: dossierData.arpenteur_geometre,
+            type_mandat: mandat.type_mandat,
+            date_creation: new Date().toISOString().split('T')[0]
+          })
+        );
+        await Promise.all(compteurPromises);
+      }
+      
+      return updatedDossier;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['compteursMandats'] });
       setIsDialogOpen(false);
       resetForm();
     },
@@ -380,29 +428,29 @@ export default function PriseDeMandat() {
   const endOfPreviousYear = new Date(now.getFullYear() - 1, 11, 31);
   endOfPreviousYear.setHours(23, 59, 59, 999);
 
-  const getCountsByPeriodWithComparison = (dossiersList) => {
-    const byDay = dossiersList.filter(d => new Date(d.created_date) >= startOfDay).length;
-    const byWeek = dossiersList.filter(d => new Date(d.created_date) >= startOfWeek).length;
-    const byMonth = dossiersList.filter(d => new Date(d.created_date) >= startOfMonth).length;
-    const byYear = dossiersList.filter(d => new Date(d.created_date) >= startOfYear).length;
+  const getCountsByPeriodWithComparison = (list, dateKey) => {
+    const byDay = list.filter(item => new Date(item[dateKey]) >= startOfDay).length;
+    const byWeek = list.filter(item => new Date(item[dateKey]) >= startOfWeek).length;
+    const byMonth = list.filter(item => new Date(item[dateKey]) >= startOfMonth).length;
+    const byYear = list.filter(item => new Date(item[dateKey]) >= startOfYear).length;
 
-    const previousDay = dossiersList.filter(d => {
-      const date = new Date(d.created_date);
+    const previousDay = list.filter(item => {
+      const date = new Date(item[dateKey]);
       return date >= startOfPreviousDay && date < startOfDay;
     }).length;
 
-    const previousWeek = dossiersList.filter(d => {
-      const date = new Date(d.created_date);
+    const previousWeek = list.filter(item => {
+      const date = new Date(item[dateKey]);
       return date >= startOfPreviousWeek && date < startOfWeek;
     }).length;
 
-    const previousMonth = dossiersList.filter(d => {
-      const date = new Date(d.created_date);
+    const previousMonth = list.filter(item => {
+      const date = new Date(item[dateKey]);
       return date >= startOfPreviousMonth && date <= endOfPreviousMonth;
     }).length;
 
-    const previousYear = dossiersList.filter(d => {
-      const date = new Date(d.created_date);
+    const previousYear = list.filter(item => {
+      const date = new Date(item[dateKey]);
       return date >= startOfPreviousYear && date <= endOfPreviousYear;
     }).length;
 
@@ -435,19 +483,15 @@ export default function PriseDeMandat() {
 
   const retourAppelStats = {
     total: retourAppelDossiers.length,
-    ...getCountsByPeriodWithComparison(retourAppelDossiers),
+    ...getCountsByPeriodWithComparison(retourAppelDossiers, 'created_date'),
     byArpenteur: getCountsByArpenteur(retourAppelDossiers)
   };
 
-  const nouveauMandatStats = {
-    total: nouveauMandatDossiers.length,
-    ...getCountsByPeriodWithComparison(nouveauMandatDossiers),
-    byArpenteur: getCountsByArpenteur(nouveauMandatDossiers)
-  };
+  const nouveauMandatStats = getCountsByPeriodWithComparison(compteurs, 'date_creation');
 
   const soumissionStats = {
     total: soumissionDossiers.length,
-    ...getCountsByPeriodWithComparison(soumissionDossiers),
+    ...getCountsByPeriodWithComparison(soumissionDossiers, 'created_date'),
     byArpenteur: getCountsByArpenteur(soumissionDossiers)
   };
 
@@ -470,12 +514,21 @@ export default function PriseDeMandat() {
 
       const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
 
+      let matchesUtilisateurAssigne;
+      if (filterUtilisateurAssigne === "all") {
+        matchesUtilisateurAssigne = true;
+      } else if (filterUtilisateurAssigne === "non-assigne") {
+        matchesUtilisateurAssigne = !dossier.utilisateur_assigne;
+      } else {
+        matchesUtilisateurAssigne = dossier.utilisateur_assigne === filterUtilisateurAssigne;
+      }
+
       let matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
       if (filterStatut === "Nouveau mandat/Demande d'information") {
         matchesStatut = matchesStatut || dossier.statut === "Demande d'information" || dossier.statut === "Nouveau mandat";
       }
 
-      return matchesSearch && matchesArpenteur && matchesStatut;
+      return matchesSearch && matchesArpenteur && matchesStatut && matchesUtilisateurAssigne;
     });
   };
 
@@ -925,6 +978,10 @@ export default function PriseDeMandat() {
         case 'mandats':
           aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
           bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
+          break;
+        case 'utilisateur_assigne':
+          aValue = (a.utilisateur_assigne || '').toLowerCase();
+          bValue = (b.utilisateur_assigne || '').toLowerCase();
           break;
         case 'statut': // Retaining this for global filter and form, but removing from tables below.
           aValue = (a[sortField] || '').toString().toLowerCase();
@@ -2473,7 +2530,7 @@ export default function PriseDeMandat() {
               </div>
               <div>
                 <CardTitle className="text-xl text-white">Nouveaux mandats</CardTitle>
-                <p className="text-sm text-slate-400">Statistiques des créations par période</p>
+                <p className="text-sm text-slate-400">Compteur permanent des créations par période</p>
               </div>
             </div>
           </CardHeader>
@@ -2483,36 +2540,48 @@ export default function PriseDeMandat() {
                 <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{nouveauMandatStats.byDay}</p>
-                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
-                  </span>
+                  {nouveauMandatStats.percentages.day !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
-                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
-                  </span>
+                  {nouveauMandatStats.percentages.week !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Ce mois</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
-                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
-                  </span>
+                  {nouveauMandatStats.percentages.month !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette année</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
-                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
-                  </span>
+                  {nouveauMandatStats.percentages.year !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -2573,6 +2642,21 @@ export default function PriseDeMandat() {
                     </SelectContent>
                   </Select>
 
+                  <Select value={filterUtilisateurAssigne} onValueChange={setFilterUtilisateurAssigne}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Utilisateur assigné" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
+                      <SelectItem value="non-assigne" className="text-white">Non assigné</SelectItem>
+                      {users.map((user) => (
+                        <SelectItem key={user.email} value={user.email} className="text-white">
+                          {user.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
                   <Select value={filterStatut} onValueChange={setFilterStatut}>
                     <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Statut" />
@@ -2586,13 +2670,14 @@ export default function PriseDeMandat() {
                     </SelectContent>
                   </Select>
 
-                  {(filterArpenteur !== "all" || filterStatut !== "all") && (
+                  {(filterArpenteur !== "all" || filterStatut !== "all" || filterUtilisateurAssigne !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setFilterArpenteur("all");
                         setFilterStatut("all");
+                        setFilterUtilisateurAssigne("all");
                       }}
                       className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                     >
@@ -2621,7 +2706,12 @@ export default function PriseDeMandat() {
                         >
                           Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                         </TableHead>
-                        <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('utilisateur_assigne')}
+                        >
+                          Utilisateur assigné {sortField === 'utilisateur_assigne' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
                         <TableHead
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('clients')}
