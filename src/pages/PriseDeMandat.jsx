@@ -2464,60 +2464,60 @@ export default function PriseDeMandat() {
         </Dialog>
 
 
-        {/* Stats compactes - Une seule ligne */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {/* Aujourd'hui */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Aujourd'hui</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byDay}</p>
-                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
-                </span>
+        {/* Stats compactes - Un seul encadré */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-cyan-500/20 to-teal-600/20">
+                <FileCheck className="w-5 h-5 text-cyan-400" />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Cette semaine */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Cette semaine</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
-                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
-                </span>
+              <div>
+                <CardTitle className="text-xl text-white">Nouveaux mandats</CardTitle>
+                <p className="text-sm text-slate-400">Statistiques des créations par période</p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Ce mois */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Ce mois</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
-                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
-                </span>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byDay}</p>
+                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
+                  </span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Cette année */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Cette année</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
-                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
-                </span>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
+                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
+                  </span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Ce mois</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
+                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
+                  </span>
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette année</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
+                  <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs and Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
