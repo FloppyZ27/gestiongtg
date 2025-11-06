@@ -10,7 +10,6 @@ import TableauDeBord from './pages/TableauDeBord';
 import Dossiers from './pages/Dossiers';
 import Lots from './pages/Lots';
 import CeduleTerrain from './pages/CeduleTerrain';
-import PriseDeMandat from './pages/PriseDeMandat';
 import Clavardage from './pages/Clavardage';
 import Layout from './Layout.jsx';
 
@@ -28,7 +27,6 @@ export const PAGES = {
     "Dossiers": Dossiers,
     "Lots": Lots,
     "CeduleTerrain": CeduleTerrain,
-    "PriseDeMandat": PriseDeMandat,
     "Clavardage": Clavardage,
 }
 
