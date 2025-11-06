@@ -15,6 +15,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameM
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { createPageUrl } from "@/utils";
+import AddressInput from "../components/shared/AddressInput";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -65,6 +66,12 @@ export default function Profil() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
     initialData: [],
   });
 
@@ -247,7 +254,22 @@ export default function Profil() {
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
-      mandats: dossier.mandats || [],
+      mandats: dossier.mandats && dossier.mandats.length > 0 ? dossier.mandats : [{ // Ensure at least one empty mandat for new dossiers or if mandats array is empty
+        type_mandat: "",
+        date_ouverture: "",
+        adresse_travaux: {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "Québec"
+        },
+        lots: [],
+        prix_estime: 0,
+        date_signature: "",
+        date_livraison: "",
+        notes: ""
+      }],
       description: dossier.description || ""
     });
     setIsEditingDossierDialogOpen(true);
@@ -255,12 +277,73 @@ export default function Profil() {
 
   const handleSaveDossier = () => {
     if (editingDossier) {
+      // Filter out mandats that are completely empty if needed, or let backend handle validation
+      const cleanedMandats = dossierForm.mandats.filter(mandat => 
+        mandat.type_mandat || 
+        mandat.prix_estime || 
+        mandat.date_ouverture || 
+        mandat.date_signature || 
+        mandat.date_livraison || 
+        (mandat.adresse_travaux && (mandat.adresse_travaux.rue || mandat.adresse_travaux.ville || mandat.adresse_travaux.code_postal)) ||
+        (mandat.lots && mandat.lots.length > 0) ||
+        mandat.notes
+      );
+
       updateDossierMutation.mutate({
         id: editingDossier.id,
-        data: dossierForm
+        data: { ...dossierForm, mandats: cleanedMandats }
       });
     }
   };
+
+  const updateMandat = (index, field, value) => {
+    const updatedMandats = [...dossierForm.mandats];
+    updatedMandats[index] = {
+      ...updatedMandats[index],
+      [field]: value
+    };
+    setDossierForm({...dossierForm, mandats: updatedMandats});
+  };
+
+  const updateMandatAddress = (index, newAddresses) => {
+    const updatedMandats = [...dossierForm.mandats];
+    updatedMandats[index] = {
+      ...updatedMandats[index],
+      adresse_travaux: newAddresses[0] // Assuming AddressInput handles single address for this context
+    };
+    setDossierForm({...dossierForm, mandats: updatedMandats});
+  };
+
+  const addMandat = () => {
+    setDossierForm({
+      ...dossierForm,
+      mandats: [...dossierForm.mandats, {
+        type_mandat: "",
+        date_ouverture: "",
+        adresse_travaux: {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "Québec"
+        },
+        lots: [],
+        prix_estime: 0,
+        date_signature: "",
+        date_livraison: "",
+        notes: ""
+      }]
+    });
+  };
+
+  const removeMandat = (index) => {
+    const updatedMandats = dossierForm.mandats.filter((_, i) => i !== index);
+    setDossierForm({...dossierForm, mandats: updatedMandats});
+  };
+
+  const notaires = clients.filter(c => c.type_client === "Notaire");
+  const courtiers = clients.filter(c => c.type_client === "Courtier immobilier");
+  const clientsOnly = clients.filter(c => c.type_client === "Client");
 
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -950,20 +1033,45 @@ export default function Profil() {
 
         {/* Edit Dossier Dialog */}
         <Dialog open={isEditingDossierDialogOpen} onOpenChange={setIsEditingDossierDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-400 text-sm">
-                Pour modifier les détails complets du dossier, veuillez utiliser l'onglet Prise de mandat ou Dossiers.
-              </p>
+            <div className="space-y-6">
+              {/* Informations générales */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Numéro de dossier</Label>
                   <Input
                     value={dossierForm.numero_dossier}
                     onChange={(e) => setDossierForm({...dossierForm, numero_dossier: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                  <select
+                    value={dossierForm.arpenteur_geometre}
+                    onChange={(e) => setDossierForm({...dossierForm, arpenteur_geometre: e.target.value})}
+                    className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
+                  >
+                    <option value="">Sélectionner un arpenteur</option>
+                    <option value="Samuel Guay">Samuel Guay</option>
+                    <option value="Dany Gaboury">Dany Gaboury</option>
+                    <option value="Pierre-Luc Pilote">Pierre-Luc Pilote</option>
+                    <option value="Benjamin Larouche">Benjamin Larouche</option>
+                    <option value="Frédéric Gilbert">Frédéric Gilbert</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
+                  <Input
+                    type="date"
+                    value={dossierForm.date_ouverture}
+                    onChange={(e) => setDossierForm({...dossierForm, date_ouverture: e.target.value})}
                     className="bg-slate-800 border-slate-700"
                   />
                 </div>
@@ -985,8 +1093,215 @@ export default function Profil() {
                   </select>
                 </div>
               </div>
+
+              {dossierForm.statut === "Retour d'appel" && (
+                <div className="space-y-2">
+                  <Label>Utilisateur assigné</Label>
+                  <select
+                    value={dossierForm.utilisateur_assigne}
+                    onChange={(e) => setDossierForm({...dossierForm, utilisateur_assigne: e.target.value})}
+                    className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
+                  >
+                    <option value="">Sélectionner un utilisateur</option>
+                    {users.map((u) => (
+                      <option key={u.email} value={u.email}>{u.full_name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Clients */}
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>Clients</Label>
+                <select
+                  multiple
+                  value={dossierForm.clients_ids}
+                  onChange={(e) => {
+                    const selected = Array.from(e.target.selectedOptions, option => option.value);
+                    setDossierForm({...dossierForm, clients_ids: selected});
+                  }}
+                  className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white h-32"
+                >
+                  {clientsOnly.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.prenom} {client.nom}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-400">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs clients</p>
+              </div>
+
+              {/* Notaires */}
+              <div className="space-y-2">
+                <Label>Notaires</Label>
+                <select
+                  multiple
+                  value={dossierForm.notaires_ids}
+                  onChange={(e) => {
+                    const selected = Array.from(e.target.selectedOptions, option => option.value);
+                    setDossierForm({...dossierForm, notaires_ids: selected});
+                  }}
+                  className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white h-24"
+                >
+                  {notaires.map((notaire) => (
+                    <option key={notaire.id} value={notaire.id}>
+                      {notaire.prenom} {notaire.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Courtiers */}
+              <div className="space-y-2">
+                <Label>Courtiers immobiliers</Label>
+                <select
+                  multiple
+                  value={dossierForm.courtiers_ids}
+                  onChange={(e) => {
+                    const selected = Array.from(e.target.selectedOptions, option => option.value);
+                    setDossierForm({...dossierForm, courtiers_ids: selected});
+                  }}
+                  className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white h-24"
+                >
+                  {courtiers.map((courtier) => (
+                    <option key={courtier.id} value={courtier.id}>
+                      {courtier.prenom} {courtier.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Mandats */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-lg">Mandats</Label>
+                  <Button
+                    type="button"
+                    onClick={addMandat}
+                    className="bg-emerald-500 hover:bg-emerald-600"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Ajouter un mandat
+                  </Button>
+                </div>
+
+                {dossierForm.mandats.map((mandat, index) => (
+                  <Card key={index} className="border-slate-700 bg-slate-800/50">
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-lg font-semibold text-emerald-400">Mandat {index + 1}</h4>
+                        {dossierForm.mandats.length > 1 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeMandat(index)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Type de mandat</Label>
+                          <select
+                            value={mandat.type_mandat}
+                            onChange={(e) => updateMandat(index, 'type_mandat', e.target.value)}
+                            className="w-full p-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+                          >
+                            <option value="">Sélectionner</option>
+                            <option value="Certificat de localisation">Certificat de localisation</option>
+                            <option value="Implantation">Implantation</option>
+                            <option value="Piquetage">Piquetage</option>
+                            <option value="OCTR">OCTR</option>
+                            <option value="Projet de lotissement">Projet de lotissement</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Prix estimé</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={mandat.prix_estime || 0}
+                            onChange={(e) => updateMandat(index, 'prix_estime', parseFloat(e.target.value))}
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      <AddressInput
+                        addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
+                          ville: "",
+                          numeros_civiques: [""],
+                          rue: "",
+                          code_postal: "",
+                          province: "Québec"
+                        }]}
+                        onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                        showActuelle={false}
+                        singleAddress={true}
+                        label="Adresse des travaux"
+                      />
+
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label>Date de signature</Label>
+                          <Input
+                            type="date"
+                            value={mandat.date_signature || ""}
+                            onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Date de livraison</Label>
+                          <Input
+                            type="date"
+                            value={mandat.date_livraison || ""}
+                            onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Date d'ouverture (du mandat)</Label>
+                          <Input
+                            type="date"
+                            value={mandat.date_ouverture || ""}
+                            onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
+                            className="bg-slate-700 border-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Lots (séparés par des virgules)</Label>
+                        <Input
+                          value={mandat.lots?.join(", ") || ""}
+                          onChange={(e) => updateMandat(index, 'lots', e.target.value.split(",").map(l => l.trim()).filter(l => l))}
+                          placeholder="Ex: 1234, 5678"
+                          className="bg-slate-700 border-slate-600"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Notes</Label>
+                        <Textarea
+                          value={mandat.notes || ""}
+                          onChange={(e) => updateMandat(index, 'notes', e.target.value)}
+                          className="bg-slate-700 border-slate-600"
+                          rows={3}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label>Description du dossier</Label>
                 <Textarea
                   value={dossierForm.description}
                   onChange={(e) => setDossierForm({...dossierForm, description: e.target.value})}
@@ -994,6 +1309,7 @@ export default function Profil() {
                   rows={4}
                 />
               </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button 
                   type="button" 
