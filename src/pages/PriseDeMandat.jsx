@@ -218,7 +218,7 @@ export default function PriseDeMandat() {
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
       
-      // Créer un compteur pour chaque nouveau mandat
+      // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information"
       if (dossierData.statut === "Nouveau mandat/Demande d'information" && newDossier.mandats && newDossier.mandats.length > 0) {
         const compteurPromises = newDossier.mandats.map(mandat => 
           base44.entities.CompteurMandat.create({
@@ -246,7 +246,7 @@ export default function PriseDeMandat() {
       const oldDossier = dossiers.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
       
-      // Si le statut passe à "Nouveau mandat/Demande d'information" et qu'il y a des mandats
+      // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information"
       if (dossierData.statut === "Nouveau mandat/Demande d'information" && 
           oldDossier?.statut !== "Nouveau mandat/Demande d'information" &&
           oldDossier?.statut !== "Nouveau mandat" &&
@@ -1223,8 +1223,8 @@ export default function PriseDeMandat() {
                     </div>
                   )}
 
-                  {/* Description field for statuses other than "Retour d'appel" and "Nouveau mandat/Demande d'information" */}
-                  {formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && (
+                  {/* Description field - CACHER pour Soumission et Ouvert, Retour d'appel, Nouveau mandat/Demande d'information */}
+                  {formData.statut !== "Soumission" && formData.statut !== "Ouvert" && formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && (
                     <div className="space-y-2">
                       <Label>Description</Label>
                       <Textarea
