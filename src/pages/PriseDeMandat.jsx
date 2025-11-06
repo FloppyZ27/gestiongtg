@@ -1084,6 +1084,7 @@ export default function PriseDeMandat() {
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                           <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
+                          <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                           {editingDossier && (
                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                           )}
@@ -2533,8 +2534,7 @@ export default function PriseDeMandat() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
           </Card>
 
           {/* Nouveau Mandat Stats */}
