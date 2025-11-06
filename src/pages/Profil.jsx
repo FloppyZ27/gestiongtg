@@ -116,6 +116,7 @@ export default function Profil() {
     adresse: "",
     poste: "",
     date_naissance: "",
+    date_embauche: "",
   });
 
   const [rendezVousForm, setRendezVousForm] = useState({
@@ -147,6 +148,7 @@ export default function Profil() {
         adresse: user.adresse || "",
         poste: user.poste || "",
         date_naissance: user.date_naissance || "",
+        date_embauche: user.date_embauche || "",
       });
     }
   }, [user]);
@@ -417,11 +419,11 @@ export default function Profil() {
   const retoursAppel = dossiers.filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email);
 
   const calculateSeniority = () => {
-    if (!user?.created_date) return "N/A";
-    const createdDate = new Date(user.created_date);
+    if (!user?.date_embauche) return "N/A";
+    const embaucheDate = new Date(user.date_embauche);
     const now = new Date();
-    const years = now.getFullYear() - createdDate.getFullYear();
-    const months = now.getMonth() - createdDate.getMonth();
+    const years = now.getFullYear() - embaucheDate.getFullYear();
+    const months = now.getMonth() - embaucheDate.getMonth();
     
     let totalMonths = years * 12 + months;
     if (totalMonths < 0) totalMonths = 0;
@@ -603,7 +605,7 @@ export default function Profil() {
                   </div>
                 </div>
 
-                {/* Ligne 2: Adresse, Téléphone, Date anniversaire */}
+                {/* Ligne 2: Adresse, Téléphone, Rôle */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
                   <div>
                     <Label className="text-slate-400 text-xs">Adresse</Label>
@@ -620,31 +622,31 @@ export default function Profil() {
                     </p>
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Cake className="w-3 h-3 text-slate-500" />
-                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Ligne 3: Ancienneté et Rôle */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-                  <div>
-                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Briefcase className="w-3 h-3 text-slate-500" />
-                      {user?.created_date ? format(new Date(user.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                      {user?.created_date && <span className="text-slate-400">({calculateSeniority()})</span>}
-                    </p>
-                  </div>
-                  <div>
                     <Label className="text-slate-400 text-xs">Rôle</Label>
                     <div className="mt-1">
                       <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
                         {user?.role}
                       </Badge>
                     </div>
+                  </div>
+                </div>
+
+                {/* Ligne 3: Date anniversaire et Ancienneté */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                  <div>
+                    <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Cake className="w-3 h-3 text-slate-500" />
+                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
+                    <p className="text-white font-medium text-sm flex items-center gap-1">
+                      <Briefcase className="w-3 h-3 text-slate-500" />
+                      {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
+                      {user?.date_embauche && <span className="text-slate-400">({calculateSeniority()})</span>}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1032,14 +1034,25 @@ export default function Profil() {
                   className="bg-slate-800 border-slate-700"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Date de naissance</Label>
-                <Input
-                  type="date"
-                  value={profileForm.date_naissance}
-                  onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date de naissance</Label>
+                  <Input
+                    type="date"
+                    value={profileForm.date_naissance}
+                    onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date d'embauche</Label>
+                  <Input
+                    type="date"
+                    value={profileForm.date_embauche}
+                    onChange={(e) => setProfileForm({...profileForm, date_embauche: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Téléphone</Label>
