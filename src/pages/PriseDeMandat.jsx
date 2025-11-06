@@ -1583,7 +1583,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                </div>
+                                }</div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
@@ -2616,7 +2616,7 @@ export default function PriseDeMandat() {
                   <p className="2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
                   {nouveauMandatStats.percentages.month !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.month > 0 ? '<TrendingUp className="w-3 h-3" />' : '<TrendingDown className="w-3 h-3" />'}
+                      {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
                     </span>
                   )}
@@ -2628,7 +2628,7 @@ export default function PriseDeMandat() {
                   <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
                   {nouveauMandatStats.percentages.year !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.year > 0 ? '<TrendingUp className="w-3 h-3" />' : '<TrendingDown className="w-3 h-3" />}
+                      {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
                     </span>
                   )}
