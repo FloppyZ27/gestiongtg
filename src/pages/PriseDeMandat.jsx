@@ -219,15 +219,19 @@ export default function PriseDeMandat() {
       const newDossier = await base44.entities.Dossier.create(dossierData);
       
       // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information"
-      if (dossierData.statut === "Nouveau mandat/Demande d'information" && newDossier.mandats && newDossier.mandats.length > 0) {
-        const compteurPromises = newDossier.mandats.map(mandat => 
-          base44.entities.CompteurMandat.create({
-            dossier_id: newDossier.id,
-            arpenteur_geometre: dossierData.arpenteur_geometre,
-            type_mandat: mandat.type_mandat,
-            date_creation: new Date().toISOString().split('T')[0]
-          })
-        );
+      if (dossierData.statut === "Nouveau mandat/Demande d'information") {
+        const nbMandats = newDossier.mandats?.length || 1;
+        const compteurPromises = [];
+        for (let i = 0; i < nbMandats; i++) {
+          compteurPromises.push(
+            base44.entities.CompteurMandat.create({
+              dossier_id: newDossier.id,
+              arpenteur_geometre: dossierData.arpenteur_geometre,
+              type_mandat: newDossier.mandats?.[i]?.type_mandat || "",
+              date_creation: new Date().toISOString().split('T')[0]
+            })
+          );
+        }
         await Promise.all(compteurPromises);
       }
       
@@ -250,16 +254,19 @@ export default function PriseDeMandat() {
       if (dossierData.statut === "Nouveau mandat/Demande d'information" && 
           oldDossier?.statut !== "Nouveau mandat/Demande d'information" &&
           oldDossier?.statut !== "Nouveau mandat" &&
-          oldDossier?.statut !== "Demande d'information" &&
-          updatedDossier.mandats && updatedDossier.mandats.length > 0) {
-        const compteurPromises = updatedDossier.mandats.map(mandat => 
-          base44.entities.CompteurMandat.create({
-            dossier_id: updatedDossier.id,
-            arpenteur_geometre: dossierData.arpenteur_geometre,
-            type_mandat: mandat.type_mandat,
-            date_creation: new Date().toISOString().split('T')[0]
-          })
-        );
+          oldDossier?.statut !== "Demande d'information") {
+        const nbMandats = updatedDossier.mandats?.length || 1;
+        const compteurPromises = [];
+        for (let i = 0; i < nbMandats; i++) {
+          compteurPromises.push(
+            base44.entities.CompteurMandat.create({
+              dossier_id: updatedDossier.id,
+              arpenteur_geometre: dossierData.arpenteur_geometre,
+              type_mandat: updatedDossier.mandats?.[i]?.type_mandat || "",
+              date_creation: new Date().toISOString().split('T')[0]
+            })
+          );
+        }
         await Promise.all(compteurPromises);
       }
       
@@ -1073,10 +1080,20 @@ export default function PriseDeMandat() {
                     <div className="space-y-2">
                       <Label>Statut <span className="text-red-400">*</span></Label>
                       <Select value={formData.statut} onValueChange={(value) => {
-                        setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
-                        if (value !== "Retour d'appel") {
-                          setDossierReferenceId(null);
-                          setDossierSearchForReference("");
+                        // Si on change le statut et qu'on avait un dossier de référence, reset tout
+                        if (dossierReferenceId && value !== "Retour d'appel") {
+                          resetForm();
+                          setFormData(prev => ({
+                            ...prev,
+                            statut: value,
+                            arpenteur_geometre: formData.arpenteur_geometre
+                          }));
+                        } else {
+                          setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
+                          if (value !== "Retour d'appel") {
+                            setDossierReferenceId(null);
+                            setDossierSearchForReference("");
+                          }
                         }
                       }}>
                         <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
@@ -2608,7 +2625,7 @@ export default function PriseDeMandat() {
                   value="soumission"
                   className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
                 >
-                  <FileCheck className="w-4 h-4 mr-2" />
+                  <Send className="w-4 h-4 mr-2" />
                   Soumissions ({soumissionDossiers.length})
                 </TabsTrigger>
                 <TabsTrigger
