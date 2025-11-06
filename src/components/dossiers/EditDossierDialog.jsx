@@ -10,9 +10,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search, UploadCloud } from "lucide-react"; // Added Search and UploadCloud icon
+import { Plus, X, Trash2, UserPlus, Search, UploadCloud } from "lucide-react";
 import CommentairesSection from "./CommentairesSection";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"; // New imports
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -87,6 +87,11 @@ export default function EditDossierDialog({
   });
   const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
+
+  // New states for Client/Notaire/Courtier selection search terms
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
+  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
 
   useEffect(() => {
     if (dossier) {
@@ -257,6 +262,52 @@ export default function EditDossierDialog({
       }));
     }
   };
+
+  const toggleClient = (clientId, type) => {
+    const field = `${type}_ids`;
+    setDossierForm(prev => ({
+      ...prev,
+      [field]: prev[field].includes(clientId)
+        ? prev[field].filter(id => id !== clientId)
+        : [...prev[field], clientId]
+    }));
+  };
+
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "";
+  };
+
+  const filteredClientsForSelector = useMemo(() => clientsOnly.filter(c =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+  ), [clientsOnly, clientSearchTerm]);
+
+  const filteredNotairesForSelector = useMemo(() => notaires.filter(n =>
+    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
+    n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+    n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+  ), [notaires, notaireSearchTerm]);
+
+  const filteredCourtiersForSelector = useMemo(() => courtiers.filter(c =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
+    c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+  ), [courtiers, courtierSearchTerm]);
 
   const removeLotFromMandat = (mandatIndex, lotId) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer ce lot de ce mandat ?`)) {

@@ -619,269 +619,69 @@ export default function Profil() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Entrées de temps */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Clock className="w-5 h-5 text-emerald-400" />
-                Mes entrées de temps
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
-                    <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                      <TableHead className="text-slate-300">Dossier</TableHead>
-                      <TableHead className="text-slate-300">Mandat</TableHead>
-                      <TableHead className="text-slate-300">Date</TableHead>
-                      <TableHead className="text-slate-300">Heures</TableHead>
-                      <TableHead className="text-slate-300">Tâche</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {entreeTemps.map((entree) => {
-                      const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                      return (
-                        <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium">
-                            {dossier ? (
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
-                            ) : (
-                              <span className="text-slate-600">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
-                            {entree.mandat || "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
-                          </TableCell>
-                          <TableCell className="text-emerald-400 font-semibold">
-                            {entree.heures}h
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
-                              {entree.tache}
+        {/* Entrées de temps - pleine largeur */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="border-b border-slate-800">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-400" />
+              Mes entrées de temps
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                    <TableHead className="text-slate-300">Dossier</TableHead>
+                    <TableHead className="text-slate-300">Mandat</TableHead>
+                    <TableHead className="text-slate-300">Date</TableHead>
+                    <TableHead className="text-slate-300">Heures</TableHead>
+                    <TableHead className="text-slate-300">Tâche</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {entreeTemps.map((entree) => {
+                    const dossier = dossiers.find(d => d.id === entree.dossier_id);
+                    return (
+                      <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableCell className="font-medium">
+                          {dossier ? (
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                             </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {entreeTemps.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                          Aucune entrée de temps
+                          ) : (
+                            <span className="text-slate-600">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-sm">
+                          {entree.mandat || "-"}
+                        </TableCell>
+                        <TableCell className="text-slate-300">
+                          {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
+                        </TableCell>
+                        <TableCell className="text-emerald-400 font-semibold">
+                          {entree.heures}h
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
+                            {entree.tache}
+                          </Badge>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Calendar */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="border-b border-slate-800">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-emerald-400" />
-                  Mon calendrier
-                </CardTitle>
-                <div className="flex gap-2">
-                  <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1">
-                    <Button
-                      size="sm"
-                      variant={viewMode === 'month' ? 'default' : 'ghost'}
-                      onClick={() => setViewMode('month')}
-                      className={viewMode === 'month' ? 'bg-emerald-500 hover:bg-emerald-600' : 'text-slate-400'}
-                    >
-                      Mois
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={viewMode === 'week' ? 'default' : 'ghost'}
-                      onClick={() => setViewMode('week')}
-                      className={viewMode === 'week' ? 'bg-emerald-500 hover:bg-emerald-600' : 'text-slate-400'}
-                    >
-                      Semaine
-                    </Button>
-                  </div>
-                  <Dialog open={isRendezVousDialogOpen} onOpenChange={(open) => {
-                    setIsRendezVousDialogOpen(open);
-                    if (!open) resetRendezVousForm();
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="bg-purple-500 hover:bg-purple-600">
-                        RDV/Absence
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-slate-900 border-slate-800 text-white">
-                      <DialogHeader>
-                        <DialogTitle>{editingRendezVous ? "Modifier" : "Nouveau rendez-vous"}</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleRendezVousSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Titre <span className="text-red-400">*</span></Label>
-                          <Input
-                            value={rendezVousForm.titre}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, titre: e.target.value})}
-                            required
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Type</Label>
-                          <select
-                            value={rendezVousForm.type}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, type: e.target.value})}
-                            className="w-full p-2 bg-slate-800 border border-slate-700 rounded-md text-white"
-                          >
-                            <option value="rendez-vous">Rendez-vous</option>
-                            <option value="absence">Absence</option>
-                          </select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Date début <span className="text-red-400">*</span></Label>
-                            <Input
-                              type="datetime-local"
-                              value={rendezVousForm.date_debut}
-                              onChange={(e) => setRendezVousForm({...rendezVousForm, date_debut: e.target.value})}
-                              required
-                              className="bg-slate-800 border-slate-700"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Date fin</Label>
-                            <Input
-                              type="datetime-local"
-                              value={rendezVousForm.date_fin}
-                              onChange={(e) => setRendezVousForm({...rendezVousForm, date_fin: e.target.value})}
-                              className="bg-slate-800 border-slate-700"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Description</Label>
-                          <Textarea
-                            value={rendezVousForm.description}
-                            onChange={(e) => setRendezVousForm({...rendezVousForm, description: e.target.value})}
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          {editingRendezVous && (
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              onClick={() => deleteRendezVousMutation.mutate(editingRendezVous.id)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Supprimer
-                            </Button>
-                          )}
-                          <Button type="button" variant="outline" onClick={() => {
-                            setIsRendezVousDialogOpen(false);
-                            resetRendezVousForm();
-                          }}>
-                            Annuler
-                          </Button>
-                          <Button type="submit" className="bg-emerald-500">
-                            {editingRendezVous ? "Modifier" : "Créer"}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4">
-              {/* Calendar Header */}
-              <div className="flex justify-between items-center mb-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={previousPeriod}
-                  className="text-slate-400 hover:text-white"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <h3 className="text-lg font-semibold text-white">
-                  {getPeriodLabel()}
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={nextPeriod}
-                  className="text-slate-400 hover:text-white"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Day names */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-                  <div key={day} className="text-center text-xs font-semibold text-slate-500 p-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Calendar grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {daysInView.map((day, index) => {
-                  const events = getEventsForDay(day);
-                  const isCurrentMonth = viewMode === 'month' ? isSameMonth(day, currentDate) : true;
-                  const isToday = isSameDay(day, new Date());
-
-                  return (
-                    <div
-                      key={index}
-                      className={`
-                        ${viewMode === 'week' ? 'min-h-[120px]' : 'min-h-[80px]'} p-2 rounded-lg border transition-colors
-                        ${isCurrentMonth ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-900/30 border-slate-800'}
-                        ${isToday ? 'border-emerald-500 border-2' : ''}
-                      `}
-                    >
-                      <div className={`text-sm mb-1 font-semibold ${isCurrentMonth ? 'text-white' : 'text-slate-600'}`}>
-                        {format(day, 'd')}
-                      </div>
-                      <div className="space-y-1">
-                        {events.map(event => (
-                          <div
-                            key={event.id}
-                            onClick={() => event.type !== 'holiday' && event.type !== 'birthday' && handleEditRendezVous(event)}
-                            className={`
-                              text-xs p-1 rounded truncate
-                              ${event.type === 'absence'
-                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer'
-                                : event.type === 'holiday'
-                                ? 'bg-blue-500/20 text-blue-400 cursor-default'
-                                : event.type === 'birthday'
-                                ? 'bg-purple-500/20 text-purple-400 cursor-default'
-                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer'
-                              }
-                            `}
-                            title={event.titre}
-                          >
-                            {event.titre}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                    );
+                  })}
+                  {entreeTemps.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                        Aucune entrée de temps
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Edit Profile Dialog */}
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
