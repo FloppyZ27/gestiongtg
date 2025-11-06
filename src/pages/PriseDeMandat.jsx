@@ -1581,7 +1581,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }</div>
+                                </div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
@@ -2784,7 +2784,7 @@ export default function PriseDeMandat() {
                       {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
                                 ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                                 : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
@@ -2900,7 +2900,7 @@ export default function PriseDeMandat() {
                       {sortedNouveauMandat.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
                                 ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                                 : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
@@ -3011,7 +3011,7 @@ export default function PriseDeMandat() {
                       {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
                                 ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
                                 : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
