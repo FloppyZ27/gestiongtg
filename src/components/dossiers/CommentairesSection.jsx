@@ -4,13 +4,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
+import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export default function CommentairesSection({ dossierId, dossierTemporaire }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [commentairesTemp, setCommentairesTemp] = useState([]);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState("");
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -39,6 +41,22 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     },
   });
 
+  const updateCommentaireMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.CommentaireDossier.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+      setEditingCommentId(null);
+      setEditingContent("");
+    },
+  });
+
+  const deleteCommentaireMutation = useMutation({
+    mutationFn: (id) => base44.entities.CommentaireDossier.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+    },
+  });
+
   const handleSubmitCommentaire = (e) => {
     e.preventDefault();
     if (!nouveauCommentaire.trim() || !user) return;
@@ -60,6 +78,43 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
         utilisateur_email: user.email,
         utilisateur_nom: user.full_name
       });
+    }
+  };
+
+  const handleEditCommentaire = (commentaire) => {
+    setEditingCommentId(commentaire.id);
+    setEditingContent(commentaire.contenu);
+  };
+
+  const handleSaveEdit = (commentaire) => {
+    if (!editingContent.trim()) return;
+    
+    if (dossierTemporaire) {
+      setCommentairesTemp(commentairesTemp.map(c => 
+        c.id === commentaire.id ? { ...c, contenu: editingContent } : c
+      ));
+      setEditingCommentId(null);
+      setEditingContent("");
+    } else {
+      updateCommentaireMutation.mutate({
+        id: commentaire.id,
+        data: { contenu: editingContent }
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingContent("");
+  };
+
+  const handleDeleteCommentaire = (commentaire) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) return;
+
+    if (dossierTemporaire) {
+      setCommentairesTemp(commentairesTemp.filter(c => c.id !== commentaire.id));
+    } else {
+      deleteCommentaireMutation.mutate(commentaire.id);
     }
   };
 
@@ -106,29 +161,85 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
             </div>
           </div>
         ) : (
-          allCommentaires.map((commentaire) => (
-            <div key={commentaire.id} className="flex gap-3">
-              <Avatar className="w-8 h-8 flex-shrink-0">
-                {getUserPhoto(commentaire.utilisateur_email) ? (
-                  <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
-                ) : null}
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
-                  {getInitials(commentaire.utilisateur_nom)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
-                  <span className="text-xs text-slate-400">
-                    {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
-                  </span>
+          allCommentaires.map((commentaire) => {
+            const isOwnComment = commentaire.utilisateur_email === user?.email;
+            const isEditing = editingCommentId === commentaire.id;
+
+            return (
+              <div key={commentaire.id} className="flex gap-3">
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  {getUserPhoto(commentaire.utilisateur_email) ? (
+                    <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
+                  ) : null}
+                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                    {getInitials(commentaire.utilisateur_nom)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">
+                        {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
+                      </span>
+                      {isOwnComment && !isEditing && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditCommentaire(commentaire)}
+                            className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteCommentaire(commentaire)}
+                            className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editingContent}
+                        onChange={(e) => setEditingContent(e.target.value)}
+                        className="bg-slate-800 border-slate-600 text-white text-sm min-h-[60px]"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleCancelEdit}
+                          className="h-7 text-xs text-slate-400 hover:text-white"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Annuler
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSaveEdit(commentaire)}
+                          className="h-7 text-xs bg-emerald-500 hover:bg-emerald-600"
+                        >
+                          <Check className="w-3 h-3 mr-1" />
+                          Enregistrer
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-slate-300 text-sm whitespace-pre-wrap">
+                      {renderCommentaireContent(commentaire.contenu)}
+                    </p>
+                  )}
                 </div>
-                <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                  {renderCommentaireContent(commentaire.contenu)}
-                </p>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

@@ -2464,232 +2464,56 @@ export default function PriseDeMandat() {
         </Dialog>
 
 
-        {/* Stats Cards - Nouvelles statistiques détaillées */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Retours d'appel Stats */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">Retours d'appel</p>
-                  <CardTitle className="text-3xl font-bold mt-1 text-white">
-                    {retourAppelStats.total}
-                  </CardTitle>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 opacity-20">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Aujourd'hui</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{retourAppelStats.byDay}</p>
-                    <span className={`text-xs font-medium ${retourAppelStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {retourAppelStats.percentages.day > 0 ? '+' : ''}{retourAppelStats.percentages.day}%
-                      {retourAppelStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette semaine</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{retourAppelStats.byWeek}</p>
-                    <span className={`text-xs font-medium ${retourAppelStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {retourAppelStats.percentages.week > 0 ? '+' : ''}{retourAppelStats.percentages.week}%
-                      {retourAppelStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Ce mois</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{retourAppelStats.byMonth}</p>
-                    <span className={`text-xs font-medium ${retourAppelStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {retourAppelStats.percentages.month > 0 ? '+' : ''}{retourAppelStats.percentages.month}%
-                      {retourAppelStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette année</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{retourAppelStats.byYear}</p>
-                    <span className={`text-xs font-medium ${retourAppelStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {retourAppelStats.percentages.year > 0 ? '+' : ''}{retourAppelStats.percentages.year}%
-                      {retourAppelStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-slate-700 pt-2">
-                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
-                <div className="space-y-1">
-                  {ARPENTEURS.map(arp => (
-                    <div key={arp} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
-                        {arp}
-                      </span>
-                      <span className="text-white font-semibold">
-                        {retourAppelStats.byArpenteur[arp]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+        {/* Stats compactes - Une seule ligne */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {/* Aujourd'hui */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Aujourd'hui</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byDay}</p>
+                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Nouveau Mandat Stats */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">Nouveaux mandats</p>
-                  <CardTitle className="text-3xl font-bold mt-1 text-white">
-                    {nouveauMandatStats.total}
-                  </CardTitle>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 opacity-20">
-                  <FileCheck className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Aujourd'hui</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byDay}</p>
-                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
-                      {nouveauMandatStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette semaine</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byWeek}</p>
-                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
-                      {nouveauMandatStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Ce mois</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byMonth}</p>
-                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
-                      {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette année</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{nouveauMandatStats.byYear}</p>
-                    <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
-                      {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-slate-700 pt-2">
-                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
-                <div className="space-y-1">
-                  {ARPENTEURS.map(arp => (
-                    <div key={arp} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
-                        {arp}
-                      </span>
-                      <span className="text-white font-semibold">
-                        {nouveauMandatStats.byArpenteur[arp]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Cette semaine */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Cette semaine</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
+                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Soumissions Stats */}
-          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">Soumissions</p>
-                  <CardTitle className="text-3xl font-bold mt-1 text-white">
-                    {soumissionStats.total}
-                  </CardTitle>
-                </div>
-                <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 opacity-20">
-                  <FileCheck className="w-6 h-6 text-white" />
-                </div>
+          {/* Ce mois */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Ce mois</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
+                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
+                </span>
               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Aujourd'hui</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{soumissionStats.byDay}</p>
-                    <span className={`text-xs font-medium ${soumissionStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {soumissionStats.percentages.day > 0 ? '+' : ''}{soumissionStats.percentages.day}%
-                      {soumissionStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette semaine</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{soumissionStats.byWeek}</p>
-                    <span className={`text-xs font-medium ${soumissionStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {soumissionStats.percentages.week > 0 ? '+' : ''}{soumissionStats.percentages.week}%
-                      {soumissionStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Ce mois</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{soumissionStats.byMonth}</p>
-                    <span className={`text-xs font-medium ${soumissionStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {soumissionStats.percentages.month > 0 ? '+' : ''}{soumissionStats.percentages.month}%
-                      {soumissionStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-slate-800/30 rounded-lg p-2">
-                  <p className="text-xs text-slate-400">Cette année</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-lg font-bold text-white">{soumissionStats.byYear}</p>
-                    <span className={`text-xs font-medium ${soumissionStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {soumissionStats.percentages.year > 0 ? '+' : ''}{soumissionStats.percentages.year}%
-                      {soumissionStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3 inline-block ml-1" /> : <TrendingDown className="w-3 h-3 inline-block ml-1" />}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-slate-700 pt-2">
-                <p className="text-xs text-slate-500 mb-2">Par arpenteur</p>
-                <div className="space-y-1">
-                  {ARPENTEURS.map(arp => (
-                    <div key={arp} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 truncate max-w-[150px]" title={arp}>
-                        {arp}
-                      </span>
-                      <span className="text-white font-semibold">
-                        {soumissionStats.byArpenteur[arp]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            </CardContent>
+          </Card>
+
+          {/* Cette année */}
+          <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-lg">
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-slate-400 mb-1">Nouveaux mandats - Cette année</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
+                <span className={`text-xs font-medium ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
+                </span>
               </div>
             </CardContent>
           </Card>
