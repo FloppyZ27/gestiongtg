@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,17 +10,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus } from "lucide-react";
+import { Plus, X, Trash2, UserPlus, Search } from "lucide-react"; // Added Search icon
 import CommentairesSection from "./CommentairesSection";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 
-export default function EditDossierDialog({ 
-  isOpen, 
-  onClose, 
+export default function EditDossierDialog({
+  isOpen,
+  onClose,
   dossier,
-  onSuccess 
+  onSuccess
 }) {
   const queryClient = useQueryClient();
   const [activeTabMandat, setActiveTabMandat] = useState("0");
@@ -33,6 +34,12 @@ export default function EditDossierDialog({
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: allLots = [] } = useQuery({ // Fetch all lots
+    queryKey: ['lots'],
+    queryFn: () => base44.entities.Lot.list(),
     initialData: [],
   });
 
@@ -52,6 +59,46 @@ export default function EditDossierDialog({
     mandats: [],
     description: ""
   });
+
+  // State for Lot Selector Dialog
+  const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
+  const [lotSearchTerm, setLotSearchTerm] = useState("");
+  const [currentMandatIndex, setCurrentMandatIndex] = useState(null); // To know which mandat we are editing lots for
+
+  const filteredLotsForSelector = allLots.filter(lot =>
+    lot.numero_lot.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+    lot.circonscription_fonciere.toLowerCase().includes(lotSearchTerm.toLowerCase()) ||
+    (lot.cadastre && lot.cadastre.toLowerCase().includes(lotSearchTerm.toLowerCase())) ||
+    (lot.rang && lot.rang.toLowerCase().includes(lotSearchTerm.toLowerCase()))
+  );
+
+  const openLotSelector = (index) => {
+    setCurrentMandatIndex(index);
+    setIsLotSelectorOpen(true);
+  };
+
+  const addLotToCurrentMandat = (lotId) => {
+    if (currentMandatIndex === null) return;
+
+    const updatedMandats = [...dossierForm.mandats];
+    const currentMandat = updatedMandats[currentMandatIndex];
+    const currentLots = currentMandat.lots || [];
+
+    if (currentLots.includes(lotId)) {
+      // Remove lot if already present
+      updatedMandats[currentMandatIndex] = {
+        ...currentMandat,
+        lots: currentLots.filter(id => id !== lotId)
+      };
+    } else {
+      // Add lot if not present
+      updatedMandats[currentMandatIndex] = {
+        ...currentMandat,
+        lots: [...currentLots, lotId]
+      };
+    }
+    setDossierForm({...dossierForm, mandats: updatedMandats});
+  };
 
   useEffect(() => {
     if (dossier) {
@@ -693,6 +740,7 @@ export default function EditDossierDialog({
                                 <Button
                                   type="button"
                                   size="sm"
+                                  onClick={() => openLotSelector(index)} // Open lot selector for this mandat
                                   className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                                 >
                                   <Plus className="w-4 h-4 mr-1" />
@@ -703,9 +751,21 @@ export default function EditDossierDialog({
                               {mandat.lots && mandat.lots.length > 0 ? (
                                 <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
                                   <div className="flex flex-wrap gap-2">
-                                    {mandat.lots.map((lot, li) => (
-                                      <Badge key={li} variant="outline" className="bg-slate-700">{lot}</Badge>
-                                    ))}
+                                    {mandat.lots.map((lotId) => {
+                                      const lot = allLots.find(l => l.id === lotId); // Find the actual lot object
+                                      return lot ? (
+                                        <Badge key={lotId} variant="outline" className="bg-slate-700 relative pr-8">
+                                          {lot.numero_lot}
+                                          <button
+                                            type="button"
+                                            onClick={() => addLotToCurrentMandat(lotId)} // Use add/remove logic
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </Badge>
+                                      ) : null;
+                                    })}
                                   </div>
                                 </div>
                               ) : (
@@ -775,15 +835,15 @@ export default function EditDossierDialog({
 
             {/* Boutons Annuler/Modifier tout en bas */}
             <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 variant="outline"
                 onClick={onClose}
                 className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white"
               >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 type="submit"
                 form="dossier-form-edit"
                 className="bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -806,6 +866,85 @@ export default function EditDossierDialog({
             </div>
           </div>
         </div>
+
+        {/* Lot Selector Dialog */}
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
+          setIsLotSelectorOpen(open);
+          if (!open) {
+            setLotSearchTerm("");
+            setCurrentMandatIndex(null);
+          }
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher par numéro, rang, circonscription..."
+                  value={lotSearchTerm}
+                  onChange={(e) => setLotSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                <div className="divide-y divide-slate-800">
+                  {filteredLotsForSelector.length > 0 ? (
+                    filteredLotsForSelector.map((lot) => {
+                      const isSelected = currentMandatIndex !== null &&
+                        dossierForm.mandats[currentMandatIndex]?.lots?.includes(lot.id);
+                      return (
+                        <div
+                          key={lot.id}
+                          className={`p-4 cursor-pointer transition-colors ${
+                            isSelected
+                              ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                              : 'hover:bg-slate-800/30'
+                          }`}
+                          onClick={() => addLotToCurrentMandat(lot.id)}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-white">{lot.numero_lot}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                                  {lot.circonscription_fonciere}
+                                </Badge>
+                                {lot.cadastre && (
+                                  <span className="text-slate-400 text-xs">{lot.cadastre}</span>
+                                )}
+                                {lot.rang && (
+                                  <span className="text-slate-400 text-xs">{lot.rang}</span>
+                                )}
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                Sélectionné
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="p-12 text-center">
+                      <p className="text-slate-400">Aucun lot trouvé</p>
+                      <p className="text-slate-500 text-sm mt-2">Essayez de modifier vos critères de recherche</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500 hover:bg-emerald-600">
+                Valider la sélection
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
