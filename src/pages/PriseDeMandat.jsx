@@ -93,6 +93,17 @@ const CADASTRES_PAR_CIRCONSCRIPTION = {
   ]
 };
 
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
 
@@ -436,28 +447,43 @@ export default function PriseDeMandat() {
   endOfPreviousYear.setHours(23, 59, 59, 999);
 
   const getCountsByPeriodWithComparison = (list, dateKey) => {
-    const byDay = list.filter(item => new Date(item[dateKey]) >= startOfDay).length;
-    const byWeek = list.filter(item => new Date(item[dateKey]) >= startOfWeek).length;
-    const byMonth = list.filter(item => new Date(item[dateKey]) >= startOfMonth).length;
-    const byYear = list.filter(item => new Date(item[dateKey]) >= startOfYear).length;
+    const byDay = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfDay;
+    }).length;
+    
+    const byWeek = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfWeek;
+    }).length;
+    
+    const byMonth = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfMonth;
+    }).length;
+    
+    const byYear = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfYear;
+    }).length;
 
     const previousDay = list.filter(item => {
-      const date = new Date(item[dateKey]);
+      const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousDay && date < startOfDay;
     }).length;
 
     const previousWeek = list.filter(item => {
-      const date = new Date(item[dateKey]);
+      const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousWeek && date < startOfWeek;
     }).length;
 
     const previousMonth = list.filter(item => {
-      const date = new Date(item[dateKey]);
+      const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousMonth && date <= endOfPreviousMonth;
     }).length;
 
     const previousYear = list.filter(item => {
-      const date = new Date(item[dateKey]);
+      const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousYear && date <= endOfPreviousYear;
     }).length;
 
@@ -2757,10 +2783,12 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedRetourAppel.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                              {dossier.numero_dossier
+                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
@@ -2871,10 +2899,12 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedNouveauMandat.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                              {dossier.numero_dossier
+                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
@@ -2980,10 +3010,12 @@ export default function PriseDeMandat() {
                     <TableBody>
                       {sortedSoumission.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white">
-                            {dossier.numero_dossier
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                              : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border font-mono`}>
+                              {dossier.numero_dossier
+                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
