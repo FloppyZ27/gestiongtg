@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,9 +10,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks, differenceInDays } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { createPageUrl } from "@/utils";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -36,13 +36,6 @@ const getArpenteurColor = (arpenteur) => {
     "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
   };
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-};
-
-const createPageUrl = (pageName) => {
-  // This is a placeholder for actual routing logic. 
-  // In a Next.js or similar framework, you might use router.push or a known base URL.
-  // For demonstration, it constructs a simple URL.
-  return `/${pageName.toLowerCase()}`; 
 };
 
 export default function Profil() {
@@ -155,6 +148,15 @@ export default function Profil() {
     mutationFn: (id) => base44.entities.RendezVous.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rendezVous'] });
+      setIsRendezVousDialogOpen(false);
+      resetRendezVousForm();
+    },
+  });
+
+  const deleteDossierMutation = useMutation({
+    mutationFn: (id) => base44.entities.Dossier.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
     },
   });
 
@@ -177,6 +179,12 @@ export default function Profil() {
       updateRendezVousMutation.mutate({ id: editingRendezVous.id, data: rendezVousForm });
     } else {
       createRendezVousMutation.mutate(rendezVousForm);
+    }
+  };
+
+  const handleDeleteDossier = (id) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
+      deleteDossierMutation.mutate(id);
     }
   };
 
@@ -237,7 +245,6 @@ export default function Profil() {
 
   const retoursAppel = dossiers.filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email);
 
-  // Calculate seniority
   const calculateSeniority = () => {
     if (!user?.created_date) return "N/A";
     const createdDate = new Date(user.created_date);
@@ -257,7 +264,6 @@ export default function Profil() {
     return `${displayYears} an${displayYears > 1 ? 's' : ''} et ${displayMonths} mois`;
   };
 
-  // Holidays
   const getHolidays = (year) => {
     return [
       { date: `${year}-01-01`, name: "Jour de l'an" },
@@ -363,25 +369,15 @@ export default function Profil() {
         {/* Personal Information Card */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader className="border-b border-slate-800">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-white flex items-center gap-2">
-                <User className="w-5 h-5 text-emerald-400" />
-                Informations personnelles
-              </CardTitle>
-              <Button
-                size="sm"
-                onClick={() => setIsEditingProfile(true)}
-                className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Modifier
-              </Button>
-            </div>
+            <CardTitle className="text-white flex items-center gap-2">
+              <User className="w-5 h-5 text-emerald-400" />
+              Informations personnelles
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Photo */}
-              <div className="flex flex-col items-center">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Photo avec bouton en dessous */}
+              <div className="flex flex-col items-center gap-3">
                 <div className="relative">
                   <Avatar className="w-32 h-32 border-4 border-emerald-500/50">
                     <AvatarImage src={user?.photo_url} />
@@ -402,64 +398,68 @@ export default function Profil() {
                   </label>
                 </div>
                 {uploadingPhoto && (
-                  <p className="text-xs text-slate-400 mt-2">Téléchargement...</p>
+                  <p className="text-xs text-slate-400">Téléchargement...</p>
                 )}
+                <Button
+                  size="sm"
+                  onClick={() => setIsEditingProfile(true)}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Modifier
+                </Button>
               </div>
 
-              {/* Information Table - 2 columns, 4 rows */}
-              <div className="flex-1">
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                  <div>
-                    <Label className="text-slate-400 text-sm">Nom complet</Label>
-                    <p className="text-white font-medium">{user?.full_name || "-"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Poste</Label>
-                    <p className="text-white font-medium">{user?.poste || "-"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Adresse courriel</Label>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-slate-500" />
-                      <span className="truncate">{user?.email}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Téléphone</Label>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-slate-500" />
-                      {user?.telephone || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Adresse</Label>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-slate-500" />
-                      <span className="truncate">{user?.adresse || "-"}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Date d'anniversaire</Label>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      <Cake className="w-4 h-4 text-slate-500" />
-                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMMM yyyy", { locale: fr }) : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Ancienneté</Label>
-                    <p className="text-white font-medium flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-slate-500" />
-                      {calculateSeniority()}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-sm">Rôle</Label>
-                    <div className="mt-1">
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        {user?.role}
-                      </Badge>
-                    </div>
-                  </div>
+              {/* Information grid - plus compact */}
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3">
+                <div>
+                  <Label className="text-slate-400 text-xs">Nom complet</Label>
+                  <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Poste</Label>
+                  <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Rôle</Label>
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+                    {user?.role}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Ancienneté</Label>
+                  <p className="text-white font-medium text-sm flex items-center gap-1">
+                    <Briefcase className="w-3 h-3 text-slate-500" />
+                    {calculateSeniority()}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-slate-400 text-xs">Adresse courriel</Label>
+                  <p className="text-white font-medium text-sm flex items-center gap-2">
+                    <Mail className="w-3 h-3 text-slate-500" />
+                    <span className="truncate">{user?.email}</span>
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Téléphone</Label>
+                  <p className="text-white font-medium text-sm flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-slate-500" />
+                    {user?.telephone || "-"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
+                  <p className="text-white font-medium text-sm flex items-center gap-1">
+                    <Cake className="w-3 h-3 text-slate-500" />
+                    {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-slate-400 text-xs">Adresse</Label>
+                  <p className="text-white font-medium text-sm flex items-center gap-2">
+                    <MapPin className="w-3 h-3 text-slate-500" />
+                    <span className="truncate">{user?.adresse || "-"}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -525,17 +525,27 @@ export default function Profil() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
-                            window.open(url, '_blank');
-                          }}
-                          className="gap-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                        >
-                          Voir
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
+                              window.open(url, '_blank');
+                            }}
+                            className="gap-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteDossier(dossier.id)}
+                            className="gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -566,10 +576,11 @@ export default function Profil() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
                     <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                      <TableHead className="text-slate-300">Dossier</TableHead>
+                      <TableHead className="text-slate-300">Mandat</TableHead>
                       <TableHead className="text-slate-300">Date</TableHead>
                       <TableHead className="text-slate-300">Heures</TableHead>
                       <TableHead className="text-slate-300">Tâche</TableHead>
-                      <TableHead className="text-slate-300">Dossier</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -577,6 +588,18 @@ export default function Profil() {
                       const dossier = dossiers.find(d => d.id === entree.dossier_id);
                       return (
                         <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium">
+                            {dossier ? (
+                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                              </Badge>
+                            ) : (
+                              <span className="text-slate-600">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {entree.mandat || "-"}
+                          </TableCell>
                           <TableCell className="text-slate-300">
                             {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
                           </TableCell>
@@ -588,17 +611,12 @@ export default function Profil() {
                               {entree.tache}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
-                            {dossier 
-                              ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                              : "-"}
-                          </TableCell>
                         </TableRow>
                       );
                     })}
                     {entreeTemps.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                        <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                           Aucune entrée de temps
                         </TableCell>
                       </TableRow>
@@ -642,7 +660,7 @@ export default function Profil() {
                   }}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600">
-                        <Plus className="w-4 h-4" />
+                        RDV/Absence
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-slate-900 border-slate-800 text-white">
