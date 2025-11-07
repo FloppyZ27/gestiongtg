@@ -229,6 +229,22 @@ export default function PriseDeMandat() {
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
       
+      // Créer une notification si un utilisateur est assigné pour un retour d'appel
+      if (dossierData.statut === "Retour d'appel" && dossierData.utilisateur_assigne) {
+        const assignedUser = users.find(u => u.email === dossierData.utilisateur_assigne);
+        if (assignedUser) {
+          const clientsNames = getClientsNames(dossierData.clients_ids);
+          await base44.entities.Notification.create({
+            utilisateur_email: dossierData.utilisateur_assigne,
+            titre: "Nouveau retour d'appel assigné",
+            message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+            type: "retour_appel",
+            dossier_id: newDossier.id,
+            lue: false
+          });
+        }
+      }
+      
       // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information"
       if (dossierData.statut === "Nouveau mandat/Demande d'information") {
         const nbMandats = newDossier.mandats?.length || 1;
@@ -251,6 +267,7 @@ export default function PriseDeMandat() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['compteursMandats'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
       setIsDialogOpen(false);
       resetForm();
     },
@@ -260,6 +277,24 @@ export default function PriseDeMandat() {
     mutationFn: async ({ id, dossierData }) => {
       const oldDossier = dossiers.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      // Créer une notification si un nouvel utilisateur est assigné pour un retour d'appel
+      if (dossierData.statut === "Retour d'appel" && 
+          dossierData.utilisateur_assigne && 
+          oldDossier?.utilisateur_assigne !== dossierData.utilisateur_assigne) {
+        const assignedUser = users.find(u => u.email === dossierData.utilisateur_assigne);
+        if (assignedUser) {
+          const clientsNames = getClientsNames(dossierData.clients_ids);
+          await base44.entities.Notification.create({
+            utilisateur_email: dossierData.utilisateur_assigne,
+            titre: "Nouveau retour d'appel assigné",
+            message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+            type: "retour_appel",
+            dossier_id: updatedDossier.id,
+            lue: false
+          });
+        }
+      }
       
       // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information"
       if (dossierData.statut === "Nouveau mandat/Demande d'information" && 
@@ -286,6 +321,7 @@ export default function PriseDeMandat() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['compteursMandats'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
       setIsDialogOpen(false);
       resetForm();
     },
@@ -1210,7 +1246,7 @@ export default function PriseDeMandat() {
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
                           {users.map((user) => (
-                            <SelectItem key={user.id} value={user.email} className="text-white">
+                            <SelectItem key={user.email} value={user.email} className="text-white">
                               {user.full_name}
                             </SelectItem>
                           ))}

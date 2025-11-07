@@ -143,9 +143,37 @@ export default function EditDossierDialog({
   }, [dossier]);
 
   const updateDossierMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const oldDossier = dossier;
+      const updatedDossier = await base44.entities.Dossier.update(id, data);
+      
+      // Créer une notification si un nouvel utilisateur est assigné pour un retour d'appel
+      if (data.statut === "Retour d'appel" && 
+          data.utilisateur_assigne && 
+          oldDossier?.utilisateur_assigne !== data.utilisateur_assigne) {
+        const assignedUser = users.find(u => u.email === data.utilisateur_assigne);
+        if (assignedUser) {
+          const clientsNames = data.clients_ids?.map(cid => {
+            const client = clientsOnly.find(c => c.id === cid);
+            return client ? `${client.prenom} ${client.nom}` : "";
+          }).filter(n => n).join(", ");
+          
+          await base44.entities.Notification.create({
+            utilisateur_email: data.utilisateur_assigne,
+            titre: "Nouveau retour d'appel assigné",
+            message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+            type: "retour_appel",
+            dossier_id: updatedDossier.id,
+            lue: false
+          });
+        }
+      }
+      
+      return updatedDossier;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       if (onSuccess) onSuccess();
       onClose();
     },
@@ -322,13 +350,13 @@ export default function EditDossierDialog({
 
   const createLotMutation = useMutation({
     mutationFn: (lotData) => base44.entities.Lot.create(lotData),
-    onSuccess: () => {
+    onSuccess: (newLot) => { // Access the created lot directly from onSuccess
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       setIsNewLotDialogOpen(false);
       resetLotForm();
       // After creating a lot, add it to the current mandat if a mandat is selected
-      if (currentMandatIndex !== null && createLotMutation.data?.id) {
-        addLotToCurrentMandat(createLotMutation.data.id);
+      if (currentMandatIndex !== null && newLot?.id) {
+        addLotToCurrentMandat(newLot.id);
       }
     },
   });

@@ -26,7 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+
+import NotificationBanner from "@/components/shared/NotificationBanner";
 
 const navigationItems = [
   {
@@ -212,6 +214,10 @@ function LayoutContent({ children, currentPageName }) {
           --ring: 224.3 76.3% 48%;
         }
       `}</style>
+      
+      {/* Notification Banner */}
+      <NotificationBanner user={user} />
+      
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
           <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
@@ -380,7 +386,7 @@ function LayoutContent({ children, currentPageName }) {
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {availableMandats.map((mandat, index) => (
-                            <SelectItem key={index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
+                            <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
                               {mandat.type_mandat || `Mandat ${index + 1}`}
                             </SelectItem>
                           ))}
