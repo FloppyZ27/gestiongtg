@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,9 +35,40 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
   });
 
   const createCommentaireMutation = useMutation({
-    mutationFn: (commentaireData) => base44.entities.CommentaireDossier.create(commentaireData),
+    mutationFn: async (commentaireData) => {
+      const newComment = await base44.entities.CommentaireDossier.create(commentaireData);
+      
+      // Détecter les tags (@email) dans le contenu et créer des notifications
+      const emailRegex = /@([^\s]+)/g;
+      const matches = commentaireData.contenu.match(emailRegex);
+      
+      if (matches) {
+        const taggedEmails = matches.map(match => match.substring(1)); // Retirer le @
+        const uniqueEmails = [...new Set(taggedEmails)]; // Éviter les doublons
+        
+        // Créer une notification pour chaque utilisateur taggé (sauf soi-même)
+        for (const email of uniqueEmails) {
+          if (email !== user?.email) {
+            const taggedUser = users.find(u => u.email === email);
+            if (taggedUser) {
+              await base44.entities.Notification.create({
+                utilisateur_email: email,
+                titre: "Vous avez été mentionné dans un commentaire",
+                message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier.`,
+                type: "dossier",
+                dossier_id: dossierId,
+                lue: false
+              });
+            }
+          }
+        }
+      }
+      
+      return newComment;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
       setNouveauCommentaire("");
     },
   });
