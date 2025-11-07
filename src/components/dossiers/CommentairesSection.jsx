@@ -42,22 +42,31 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
 
   const createCommentaireMutation = useMutation({
     mutationFn: async (commentaireData) => {
+      console.log("Creating comment:", commentaireData);
       const newComment = await base44.entities.CommentaireDossier.create(commentaireData);
+      console.log("Comment created:", newComment);
       
       // Détecter les tags (@email) dans le contenu et créer des notifications
       const emailRegex = /@([^\s]+)/g;
       const matches = commentaireData.contenu.match(emailRegex);
+      console.log("Regex matches:", matches);
       
       if (matches) {
         const taggedEmails = matches.map(match => match.substring(1)); // Retirer le @
         const uniqueEmails = [...new Set(taggedEmails)]; // Éviter les doublons
+        console.log("Tagged emails:", uniqueEmails);
+        console.log("All users:", users);
+        console.log("Current user:", user);
         
         // Créer une notification pour chaque utilisateur taggé (sauf soi-même)
         for (const email of uniqueEmails) {
+          console.log(`Processing email: ${email}`);
           if (email !== user?.email) {
             const taggedUser = users.find(u => u.email === email);
+            console.log(`Found user for ${email}:`, taggedUser);
             if (taggedUser) {
-              await base44.entities.Notification.create({
+              console.log("Creating notification for:", email);
+              const notification = await base44.entities.Notification.create({
                 utilisateur_email: email,
                 titre: "Vous avez été mentionné dans un commentaire",
                 message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier.`,
@@ -65,9 +74,16 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
                 dossier_id: dossierId,
                 lue: false
               });
+              console.log("Notification created:", notification);
+            } else {
+              console.log(`No user found for email: ${email}`);
             }
+          } else {
+            console.log("Skipping self-mention");
           }
         }
+      } else {
+        console.log("No @ mentions found in comment");
       }
       
       return newComment;
@@ -104,6 +120,13 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     u.email?.toLowerCase().includes(mentionSearch.toLowerCase()))
   ).slice(0, 5);
 
+  // Debug
+  useEffect(() => {
+    console.log("showMentionMenu:", showMentionMenu);
+    console.log("mentionSearch:", mentionSearch);
+    console.log("filteredUsersForMention:", filteredUsersForMention);
+  }, [showMentionMenu, mentionSearch, filteredUsersForMention]);
+
   // Gérer le changement de texte et détecter @
   const handleTextChange = (e) => {
     const value = e.target.value;
@@ -111,23 +134,31 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     setNouveauCommentaire(value);
     setCursorPosition(cursorPos);
 
+    console.log("Text changed:", value, "cursor:", cursorPos);
+
     // Chercher le dernier @ avant le curseur
     const textBeforeCursor = value.substring(0, cursorPos);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
     
+    console.log("Last @ index:", lastAtIndex);
+    
     if (lastAtIndex !== -1) {
       const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
-      // Only show mention menu if there's no space between @ and current cursor,
+      console.log("Text after @:", textAfterAt);
+      // Only show mention menu if there's no space or newline between @ and current cursor,
       // and if there's text after @ (or it's just '@')
-      if (!textAfterAt.includes(' ')) {
+      if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+        console.log("Showing mention menu with search:", textAfterAt);
         setMentionSearch(textAfterAt);
         setShowMentionMenu(true);
         setSelectedMentionIndex(0); // Reset selection when search changes
       } else {
+        console.log("Hiding mention menu - space or newline found");
         setShowMentionMenu(false);
         setMentionSearch("");
       }
     } else {
+      console.log("No @ found");
       setShowMentionMenu(false);
       setMentionSearch("");
     }
@@ -379,40 +410,45 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
 
       <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0 relative">
         {/* Menu d'autocomplétion */}
-        {showMentionMenu && filteredUsersForMention.length > 0 && (
+        {showMentionMenu && (
           <div 
             ref={mentionMenuRef}
-            className="absolute bottom-full left-3 right-3 mb-2 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden z-50"
-            style={{ maxHeight: '200px' }}
+            className="absolute bottom-full left-3 right-3 mb-2 bg-slate-800 border-2 border-emerald-500 rounded-lg shadow-2xl overflow-hidden z-[9999]"
           >
-            <div className="p-2 text-xs text-slate-400 border-b border-slate-700">
-              Mentionner quelqu'un
+            <div className="p-2 text-xs text-slate-400 border-b border-slate-700 bg-slate-900">
+              Mentionner quelqu'un ({filteredUsersForMention.length} résultat{filteredUsersForMention.length > 1 ? 's' : ''})
             </div>
-            <div className="overflow-y-auto max-h-40">
-              {filteredUsersForMention.map((u, index) => (
-                <div
-                  key={u.email}
-                  className={`px-3 py-2 cursor-pointer transition-colors flex items-center gap-2 ${
-                    index === selectedMentionIndex 
-                      ? 'bg-emerald-500/20 text-emerald-400' 
-                      : 'text-slate-300 hover:bg-slate-700'
-                  }`}
-                  onClick={() => selectUser(u)}
-                  onMouseEnter={() => setSelectedMentionIndex(index)}
-                >
-                  <Avatar className="w-6 h-6">
-                    {u.photo_url ? <AvatarImage src={u.photo_url} /> : null}
-                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
-                      {getInitials(u.full_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{u.full_name}</p>
-                    <p className="text-xs text-slate-500 truncate">{u.email}</p>
+            {filteredUsersForMention.length > 0 ? (
+              <div className="overflow-y-auto max-h-60">
+                {filteredUsersForMention.map((u, index) => (
+                  <div
+                    key={u.email}
+                    className={`px-3 py-2 cursor-pointer transition-colors flex items-center gap-2 ${
+                      index === selectedMentionIndex 
+                        ? 'bg-emerald-500/30 text-emerald-400' 
+                        : 'text-slate-300 hover:bg-slate-700'
+                    }`}
+                    onClick={() => selectUser(u)}
+                    onMouseEnter={() => setSelectedMentionIndex(index)}
+                  >
+                    <Avatar className="w-6 h-6">
+                      {u.photo_url ? <AvatarImage src={u.photo_url} /> : null}
+                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                        {getInitials(u.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{u.full_name}</p>
+                      <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center text-slate-500 text-sm">
+                Aucun utilisateur trouvé
+              </div>
+            )}
           </div>
         )}
 
@@ -431,7 +467,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
                 handleSubmitCommentaire(e);
               }
             }}
-            placeholder="Ajouter un commentaire... (utilisez @ pour mentionner)"
+            placeholder="Ajouter un commentaire... (tapez @ pour mentionner)"
             className="bg-slate-700 border-slate-600 text-white resize-none h-20"
             disabled={createCommentaireMutation.isPending}
           />
