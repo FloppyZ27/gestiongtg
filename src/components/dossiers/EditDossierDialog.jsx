@@ -10,8 +10,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search, UploadCloud } from "lucide-react";
+import { Plus, X, Trash2, UserPlus, Search, UploadCloud, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import CommentairesSection from "./CommentairesSection";
+import AddressInput from "../shared/AddressInput";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -61,6 +63,20 @@ export default function EditDossierDialog({
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
 
+  // NEW STATES for creating new client/notaire/courtier
+  const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
+  const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
+  const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({
+    prenom: "",
+    nom: "",
+    type_client: "Client",
+    adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "Québec", latitude: null, longitude: null, actuelle: true }],
+    courriels: [{ courriel: "", actuel: true }],
+    telephones: [{ telephone: "", actuel: true }],
+    notes: ""
+  });
+
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
@@ -79,7 +95,7 @@ export default function EditDossierDialog({
     initialData: [],
   });
 
-  const clientsOnly = clients.filter(c => c.type_client === "Client");
+  const clientsOnly = clients.filter(c => c.type_client === "Client" || !c.type_client);
   const notaires = clients.filter(c => c.type_client === "Notaire");
   const courtiers = clients.filter(c => c.type_client === "Courtier immobilier");
 
@@ -203,6 +219,37 @@ export default function EditDossierDialog({
       resetLotForm();
       if (currentMandatIndex !== null && newLot?.id) {
         addLotToCurrentMandat(newLot.id);
+      }
+    },
+  });
+
+  // NEW MUTATION for creating client
+  const createClientMutation = useMutation({
+    mutationFn: (clientData) => base44.entities.Client.create(clientData),
+    onSuccess: (newClient) => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      setIsNewClientDialogOpen(false);
+      setIsNewNotaireDialogOpen(false);
+      setIsNewCourtierDialogOpen(false);
+      resetClientForm();
+      // Optionally add the newly created client to the current dossier form
+      if (newClient) {
+        if (newClient.type_client === "Client" || !newClient.type_client) {
+          setDossierForm(prev => ({
+            ...prev,
+            clients_ids: [...new Set([...prev.clients_ids, newClient.id])]
+          }));
+        } else if (newClient.type_client === "Notaire") {
+          setDossierForm(prev => ({
+            ...prev,
+            notaires_ids: [...new Set([...prev.notaires_ids, newClient.id])]
+          }));
+        } else if (newClient.type_client === "Courtier immobilier") {
+          setDossierForm(prev => ({
+            ...prev,
+            courtiers_ids: [...new Set([...prev.courtiers_ids, newClient.id])]
+          }));
+        }
       }
     },
   });
@@ -412,6 +459,81 @@ export default function EditDossierDialog({
     } finally {
       setUploadingLotPdf(false);
     }
+  };
+
+  // NEW FUNCTIONS for client creation
+  const handleNewClientSubmit = (e) => {
+    e.preventDefault();
+    const cleanedData = {
+      ...newClientForm,
+      adresses: newClientForm.adresses.filter(a => a.rue?.trim() !== "" || (a.numeros_civiques?.[0]?.trim() !== "" && a.numeros_civiques?.[0] !== undefined)),
+      courriels: newClientForm.courriels.filter(c => c.courriel.trim() !== ""),
+      telephones: newClientForm.telephones.filter(t => t.telephone.trim() !== "")
+    };
+    createClientMutation.mutate(cleanedData);
+  };
+
+  const resetClientForm = () => {
+    setNewClientForm({
+      prenom: "",
+      nom: "",
+      type_client: "Client",
+      adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "Québec", latitude: null, longitude: null, actuelle: true }],
+      courriels: [{ courriel: "", actuel: true }],
+      telephones: [{ telephone: "", actuel: true }],
+      notes: ""
+    });
+  };
+
+  const addClientField = (fieldName) => {
+    if (fieldName === 'adresses') {
+      setNewClientForm(prev => ({
+        ...prev,
+        adresses: [...prev.adresses, { rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "Québec", latitude: null, longitude: null, actuelle: false }]
+      }));
+    } else {
+      setNewClientForm(prev => ({
+        ...prev,
+        [fieldName]: [...prev[fieldName], { [fieldName === 'courriels' ? 'courriel' : 'telephone']: "", actuel: false }]
+      }));
+    }
+  };
+
+  const removeClientField = (fieldName, index) => {
+    if (newClientForm[fieldName].length > 1) {
+      setNewClientForm(prev => ({
+        ...prev,
+        [fieldName]: prev[fieldName].filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updateClientField = (fieldName, index, key, value) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) =>
+        i === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const toggleActuel = (fieldName, index) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) => ({
+        ...item,
+        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
+      }))
+    }));
+  };
+
+  const updateClientAddress = (index, newAddresses) => {
+    setNewClientForm(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((item, i) =>
+        i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item
+      )
+    }));
   };
 
   // Dynamically get unique circonscriptions and cadastres for filters
@@ -1385,14 +1507,27 @@ export default function EditDossierDialog({
               <DialogTitle className="text-2xl">Sélectionner des clients</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un client..."
-                  value={clientSearchTerm}
-                  onChange={(e) => setClientSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un client..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Client"});
+                    setIsNewClientDialogOpen(true);
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="flex-1 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
@@ -1447,14 +1582,27 @@ export default function EditDossierDialog({
               <DialogTitle className="text-2xl">Sélectionner des notaires</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un notaire..."
-                  value={notaireSearchTerm}
-                  onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un notaire..."
+                    value={notaireSearchTerm}
+                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Notaire"});
+                    setIsNewNotaireDialogOpen(true);
+                  }}
+                  className="bg-purple-500 hover:bg-purple-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="flex-1 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
@@ -1509,14 +1657,27 @@ export default function EditDossierDialog({
               <DialogTitle className="text-2xl">Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un courtier..."
-                  value={courtierSearchTerm}
-                  onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un courtier..."
+                    value={courtierSearchTerm}
+                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setNewClientForm({...newClientForm, type_client: "Courtier immobilier"});
+                    setIsNewCourtierDialogOpen(true);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
               </div>
               <div className="flex-1 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
@@ -1559,6 +1720,225 @@ export default function EditDossierDialog({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* New Client Dialog (Generic for Client/Notaire/Courtier) */}
+      <Dialog open={isNewClientDialogOpen || isNewNotaireDialogOpen || isNewCourtierDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsNewClientDialogOpen(false);
+          setIsNewNotaireDialogOpen(false);
+          setIsNewCourtierDialogOpen(false);
+          resetClientForm();
+        }
+      }}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Nouveau {newClientForm.type_client}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleNewClientSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Prénom <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newClientForm.prenom}
+                  onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
+                  required
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nom <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newClientForm.nom}
+                  onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
+                  required
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Adresses avec AddressInput */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label>Adresses</Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => addClientField('adresses')}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Ajouter
+                </Button>
+              </div>
+              {newClientForm.adresses.map((item, index) => (
+                <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <AddressInput
+                        addresses={[item]}
+                        onChange={(newAddresses) => updateClientAddress(index, newAddresses)}
+                        showActuelle={false}
+                        singleAddress={true}
+                      />
+                    </div>
+                    {/* Toggle current address status */}
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => toggleActuel('adresses', index)}
+                      className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 mt-7`}
+                      title={item.actuelle ? "Définir comme non-actuelle" : "Définir comme actuelle"}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    {newClientForm.adresses.length > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeClientField('adresses', index)}
+                        className="text-red-400 mt-7"
+                        title="Supprimer cette adresse"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {item.actuelle && (
+                    <p className="text-xs text-green-400 mt-1">✓ Adresse actuelle</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Courriels */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label>Courriels</Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => addClientField('courriels')}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Ajouter
+                </Button>
+              </div>
+              {newClientForm.courriels.map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    type="email"
+                    value={item.courriel}
+                    onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
+                    placeholder="Courriel"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => toggleActuel('courriels', index)}
+                    className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    title={item.actuel ? "Définir comme non-actuel" : "Définir comme actuel"}
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                  {newClientForm.courriels.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeClientField('courriels', index)}
+                      className="text-red-400"
+                      title="Supprimer ce courriel"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Téléphones */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <Label>Téléphones</Label>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => addClientField('telephones')}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Ajouter
+                </Button>
+              </div>
+              {newClientForm.telephones.map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={item.telephone}
+                    onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
+                    placeholder="Téléphone"
+                    className="bg-slate-800 border-slate-700"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => toggleActuel('telephones', index)}
+                    className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                    title={item.actuel ? "Définir comme non-actuel" : "Définir comme actuel"}
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                  {newClientForm.telephones.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeClientField('telephones', index)}
+                      className="text-red-400"
+                      title="Supprimer ce numéro de téléphone"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                value={newClientForm.notes}
+                onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
+                className="bg-slate-800 border-slate-700 h-20"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsNewClientDialogOpen(false);
+                  setIsNewNotaireDialogOpen(false);
+                  setIsNewCourtierDialogOpen(false);
+                  resetClientForm();
+                }}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                disabled={createClientMutation.isPending || !newClientForm.prenom || !newClientForm.nom}
+              >
+                {createClientMutation.isPending ? "Création..." : "Créer"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
