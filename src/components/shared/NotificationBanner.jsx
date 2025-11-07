@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +16,7 @@ export default function NotificationBanner({ user }) {
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
-    queryFn: () => base44.entities.Notification.filter({ utilisateur_email: user?.email, lue: false }, '-created_date', 3),
+    queryFn: () => base44.entities.Notification.filter({ utilisateur_email: user?.email, lue: false }, '-created_date', 1),
     initialData: [],
     enabled: !!user,
     refetchInterval: 30000,
@@ -28,7 +29,7 @@ export default function NotificationBanner({ user }) {
     );
     
     if (newNotifications.length > 0) {
-      setVisibleNotifications(prev => [...newNotifications, ...prev].slice(0, 3));
+      setVisibleNotifications(prev => [...newNotifications, ...prev].slice(0, 1));
       
       // Supprimer chaque notification après 5 secondes
       newNotifications.forEach(notif => {

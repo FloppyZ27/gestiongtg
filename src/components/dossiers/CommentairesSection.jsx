@@ -40,6 +40,18 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     initialData: [],
   });
 
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
   const createCommentaireMutation = useMutation({
     mutationFn: async (commentaireData) => {
       console.log("Creating comment:", commentaireData);
@@ -52,13 +64,33 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
       console.log("Regex matches:", matches);
       
       if (matches) {
-        const taggedEmails = matches.map(match => match.substring(1)); // Retirer le @
-        const uniqueEmails = [...new Set(taggedEmails)]; // Éviter les doublons
+        const taggedEmails = matches.map(match => match.substring(1));
+        const uniqueEmails = [...new Set(taggedEmails)];
         console.log("Tagged emails:", uniqueEmails);
         console.log("All users:", users);
         console.log("Current user:", user);
         
-        // Créer une notification pour chaque utilisateur taggé (y compris soi-même)
+        // Obtenir le dossier pour extraire les informations
+        const dossier = dossiers.find(d => d.id === dossierId);
+        const getArpenteurInitials = (arpenteur) => {
+          if (!arpenteur) return "";
+          const mapping = {
+            "Samuel Guay": "SG-",
+            "Dany Gaboury": "DG-",
+            "Pierre-Luc Pilote": "PLP-",
+            "Benjamin Larouche": "BL-",
+            "Frédéric Gilbert": "FG-"
+          };
+          return mapping[arpenteur] || "";
+        };
+        
+        const numeroDossierComplet = dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
+        
+        const clientsNames = dossier?.clients_ids?.map(cid => {
+          const client = clients.find(c => c.id === cid);
+          return client ? `${client.prenom} ${client.nom}` : "";
+        }).filter(n => n).join(", ");
+        
         for (const email of uniqueEmails) {
           console.log(`Processing email: ${email}`);
           const taggedUser = users.find(u => u.email === email);
@@ -68,7 +100,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
             const notification = await base44.entities.Notification.create({
               utilisateur_email: email,
               titre: "Vous avez été mentionné dans un commentaire",
-              message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier.`,
+              message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier ${numeroDossierComplet}${clientsNames ? ` - ${clientsNames}` : ''}.`,
               type: "dossier",
               dossier_id: dossierId,
               lue: false
@@ -88,7 +120,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setNouveauCommentaire("");
-      setShowMentionMenu(false); // Close menu after submission
+      setShowMentionMenu(false);
       setMentionSearch("");
     },
   });

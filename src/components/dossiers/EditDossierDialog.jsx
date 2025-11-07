@@ -160,10 +160,24 @@ export default function EditDossierDialog({
             return client ? `${client.prenom} ${client.nom}` : "";
           }).filter(n => n).join(", ");
           
+          const getArpenteurInitials = (arpenteur) => {
+            if (!arpenteur) return "";
+            const mapping = {
+              "Samuel Guay": "SG-",
+              "Dany Gaboury": "DG-",
+              "Pierre-Luc Pilote": "PLP-",
+              "Benjamin Larouche": "BL-",
+              "Frédéric Gilbert": "FG-"
+            };
+            return mapping[arpenteur] || "";
+          };
+          
+          const numeroDossierComplet = `${getArpenteurInitials(data.arpenteur_geometre)}${data.numero_dossier}`;
+          
           await base44.entities.Notification.create({
             utilisateur_email: data.utilisateur_assigne,
             titre: "Nouveau retour d'appel assigné",
-            message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+            message: `Dossier ${numeroDossierComplet}${clientsNames ? ` - ${clientsNames}` : ''} vous a été assigné.`,
             type: "retour_appel",
             dossier_id: updatedDossier.id,
             lue: false
