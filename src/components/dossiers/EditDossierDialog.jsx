@@ -468,11 +468,9 @@ export default function EditDossierDialog({
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                         <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                        <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                        <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
                         <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
-                        <SelectItem value="Demande d'information" className="text-white">Demande d'information</SelectItem>
-                        <SelectItem value="Nouveau mandat" className="text-white">Nouveau mandat</SelectItem>
+                        <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
