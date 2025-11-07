@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
   const [commentairesTemp, setCommentairesTemp] = useState([]);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const textareaRef = useRef(null);
+  const mentionMenuRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -70,6 +76,8 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setNouveauCommentaire("");
+      setShowMentionMenu(false); // Close menu after submission
+      setMentionSearch("");
     },
   });
 
@@ -88,6 +96,104 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
     },
   });
+
+  // Filtrer les utilisateurs pour la mention
+  const filteredUsersForMention = users.filter(u => 
+    u.email !== user?.email && // Don't allow tagging self
+    (u.full_name?.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+    u.email?.toLowerCase().includes(mentionSearch.toLowerCase()))
+  ).slice(0, 5);
+
+  // Gérer le changement de texte et détecter @
+  const handleTextChange = (e) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    setNouveauCommentaire(value);
+    setCursorPosition(cursorPos);
+
+    // Chercher le dernier @ avant le curseur
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      // Only show mention menu if there's no space between @ and current cursor,
+      // and if there's text after @ (or it's just '@')
+      if (!textAfterAt.includes(' ')) {
+        setMentionSearch(textAfterAt);
+        setShowMentionMenu(true);
+        setSelectedMentionIndex(0); // Reset selection when search changes
+      } else {
+        setShowMentionMenu(false);
+        setMentionSearch("");
+      }
+    } else {
+      setShowMentionMenu(false);
+      setMentionSearch("");
+    }
+  };
+
+  // Gérer les touches du clavier dans le menu de mention
+  const handleMentionKeyDown = (e) => {
+    if (!showMentionMenu || filteredUsersForMention.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedMentionIndex(prev => 
+        Math.min(prev + 1, filteredUsersForMention.length - 1)
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedMentionIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      if (filteredUsersForMention[selectedMentionIndex]) {
+        selectUser(filteredUsersForMention[selectedMentionIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setShowMentionMenu(false);
+    }
+  };
+
+  // Sélectionner un utilisateur
+  const selectUser = (selectedUser) => {
+    const textBeforeCursor = nouveauCommentaire.substring(0, cursorPosition);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    const textAfterCursor = nouveauCommentaire.substring(cursorPosition);
+    
+    const newText = 
+      nouveauCommentaire.substring(0, lastAtIndex) + 
+      `@${selectedUser.email} ` + 
+      textAfterCursor;
+    
+    setNouveauCommentaire(newText);
+    setShowMentionMenu(false);
+    setMentionSearch("");
+    
+    // Remettre le focus sur le textarea et positionner le curseur
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newCursorPos = lastAtIndex + selectedUser.email.length + 2; // +1 for @, +1 for space
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  // Close mention menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mentionMenuRef.current && !mentionMenuRef.current.contains(event.target) &&
+          textareaRef.current && !textareaRef.current.contains(event.target)) {
+        setShowMentionMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmitCommentaire = (e) => {
     e.preventDefault();
@@ -159,16 +265,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
-  const handleTagUser = (userEmail) => {
-    setNouveauCommentaire(prev => prev + `@${userEmail} `);
-  };
-
   const renderCommentaireContent = (contenu) => {
     const emailRegex = /@([^\s]+)/g;
     const parts = contenu.split(emailRegex);
     
     return parts.map((part, index) => {
-      if (index % 2 === 1) {
+      if (index % 2 === 1) { // This part is an email (the matched group from regex)
         const taggedUser = users.find(u => u.email === part);
         return (
           <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
@@ -275,36 +377,65 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
         )}
       </div>
 
-      <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0">
+      <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0 relative">
+        {/* Menu d'autocomplétion */}
+        {showMentionMenu && filteredUsersForMention.length > 0 && (
+          <div 
+            ref={mentionMenuRef}
+            className="absolute bottom-full left-3 right-3 mb-2 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden z-50"
+            style={{ maxHeight: '200px' }}
+          >
+            <div className="p-2 text-xs text-slate-400 border-b border-slate-700">
+              Mentionner quelqu'un
+            </div>
+            <div className="overflow-y-auto max-h-40">
+              {filteredUsersForMention.map((u, index) => (
+                <div
+                  key={u.email}
+                  className={`px-3 py-2 cursor-pointer transition-colors flex items-center gap-2 ${
+                    index === selectedMentionIndex 
+                      ? 'bg-emerald-500/20 text-emerald-400' 
+                      : 'text-slate-300 hover:bg-slate-700'
+                  }`}
+                  onClick={() => selectUser(u)}
+                  onMouseEnter={() => setSelectedMentionIndex(index)}
+                >
+                  <Avatar className="w-6 h-6">
+                    {u.photo_url ? <AvatarImage src={u.photo_url} /> : null}
+                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                      {getInitials(u.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{u.full_name}</p>
+                    <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmitCommentaire} className="space-y-2">
           <Textarea
+            ref={textareaRef}
             value={nouveauCommentaire}
-            onChange={(e) => setNouveauCommentaire(e.target.value)}
-            placeholder="Ajouter un commentaire... (utilisez @ pour taguer quelqu'un)"
-            className="bg-slate-700 border-slate-600 text-white resize-none h-20"
-            disabled={createCommentaireMutation.isPending}
+            onChange={handleTextChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (showMentionMenu && filteredUsersForMention.length > 0) {
+                // If mention menu is active and has suggestions, handle navigation/selection
+                handleMentionKeyDown(e);
+              } else if (e.key === 'Enter' && !e.shiftKey) {
+                // Otherwise, if Enter (without Shift) is pressed, submit the form
                 e.preventDefault();
                 handleSubmitCommentaire(e);
               }
             }}
+            placeholder="Ajouter un commentaire... (utilisez @ pour mentionner)"
+            className="bg-slate-700 border-slate-600 text-white resize-none h-20"
+            disabled={createCommentaireMutation.isPending}
           />
-          <div className="flex justify-between items-center">
-            <div className="flex gap-1 flex-wrap">
-              {users.slice(0, 5).map((u) => (
-                <Button
-                  key={u.email}
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleTagUser(u.email)}
-                  className="text-xs text-slate-400 hover:text-white h-6 px-2"
-                >
-                  @{u.full_name}
-                </Button>
-              ))}
-            </div>
+          <div className="flex justify-end">
             <Button
               type="submit"
               size="sm"
