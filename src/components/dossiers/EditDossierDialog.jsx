@@ -941,24 +941,69 @@ export default function EditDossierDialog({
                                 </div>
 
                                 {mandat.lots && mandat.lots.length > 0 ? (
-                                  <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
-                                    <div className="flex flex-wrap gap-2">
-                                      {mandat.lots.map((lotId) => {
-                                        const lot = getLotById(lotId); // Use new getLotById function
-                                        return lot ? (
-                                          <Badge key={lotId} variant="outline" className="bg-slate-700 relative pr-8">
-                                            {lot.numero_lot}
-                                            <button
-                                              type="button"
-                                              onClick={() => removeLotFromMandat(index, lotId)} // Use removeLotFromMandat
-                                              className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                            >
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                          </Badge>
-                                        ) : null;
-                                      })}
-                                    </div>
+                                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                    <Table>
+                                      <TableHeader>
+                                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                                          <TableHead className="text-slate-300">Circonscription</TableHead>
+                                          <TableHead className="text-slate-300">Cadastre</TableHead>
+                                          <TableHead className="text-slate-300">Rang</TableHead>
+                                          <TableHead className="text-slate-300 text-right">Action</TableHead> {/* Changed "Sélection" to "Action" for the Trash2 button */}
+                                        </TableRow>
+                                      </TableHeader>
+                                      <TableBody>
+                                        {mandat.lots.map((lotId) => {
+                                          const lot = getLotById(lotId);
+                                          return lot ? (
+                                            <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell className="font-medium text-white">
+                                                {lot.numero_lot}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                                  {lot.circonscription_fonciere}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.cadastre || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-slate-300">
+                                                {lot.rang || "-"}
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, lotId)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          ) : (
+                                            <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
+                                              <TableCell colSpan={4} className="font-medium text-white">
+                                                {lotId} (Lot introuvable)
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  onClick={() => removeLotFromMandat(index, lotId)}
+                                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          );
+                                        })}
+                                      </TableBody>
+                                    </Table>
                                   </div>
                                 ) : (
                                   <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
@@ -1118,12 +1163,12 @@ export default function EditDossierDialog({
                   size="sm"
                   className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                   onClick={() => {
-                    setIsLotSelectorOpen(false); // Close lot selector
-                    setIsNewLotDialogOpen(true); // Open new lot dialog
+                    setIsLotSelectorOpen(false);
+                    setIsNewLotDialogOpen(true);
                   }}
                 >
                   <Plus className="w-4 h-4 mr-1" />
-                  Créer un nouveau lot
+                  Nouveau lot
                 </Button>
               </div>
 

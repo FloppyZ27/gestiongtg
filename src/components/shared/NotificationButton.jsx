@@ -78,9 +78,9 @@ export default function NotificationButton({ user }) {
         <Button
           variant="ghost"
           size="icon"
-          className="relative text-slate-400 hover:text-white hover:bg-slate-800"
+          className="relative bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
         >
-          <Bell className="w-5 h-5" />
+          <Bell className="w-5 h-5 text-white" />
           {notifications.length > 0 && (
             <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
               {notifications.length > 9 ? '9+' : notifications.length}
