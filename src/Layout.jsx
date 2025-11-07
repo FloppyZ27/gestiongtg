@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 import NotificationBanner from "@/components/shared/NotificationBanner";
+import NotificationButton from "@/components/shared/NotificationButton";
 
 const navigationItems = [
   {
@@ -463,10 +464,15 @@ function LayoutContent({ children, currentPageName }) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 md:hidden">
-            <div className="flex items-center gap-4">
+          <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4 md:hidden">
               <SidebarTrigger className="hover:bg-slate-800 p-2 rounded-lg transition-colors duration-200 text-white" />
               <h1 className="text-xl font-bold text-white">GestionGTG</h1>
+            </div>
+            
+            {/* Notification button - visible on all screen sizes */}
+            <div className="ml-auto">
+              <NotificationButton user={user} />
             </div>
           </header>
 
