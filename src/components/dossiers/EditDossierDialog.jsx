@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +33,34 @@ export default function EditDossierDialog({
   const queryClient = useQueryClient();
   const [activeTabMandat, setActiveTabMandat] = useState("0");
 
+  // States for lot selector
+  const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
+  const [lotSearchTerm, setLotSearchTerm] = useState("");
+  const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("all");
+  const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
+
+  // States for new lot creation
+  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
+  const [newLotForm, setNewLotForm] = useState({
+    numero_lot: "",
+    circonscription_fonciere: "",
+    cadastre: "",
+    rang: "",
+    concordances_anterieures: [],
+    document_pdf_url: "",
+  });
+  const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
+
+  // States for client/notaire/courtier selectors
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
+  const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
+  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
+
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
@@ -45,7 +73,7 @@ export default function EditDossierDialog({
     initialData: [],
   });
 
-  const { data: allLots = [] } = useQuery({ // Fetch all lots
+  const { data: allLots = [] } = useQuery({
     queryKey: ['lots'],
     queryFn: () => base44.entities.Lot.list(),
     initialData: [],
@@ -67,31 +95,6 @@ export default function EditDossierDialog({
     mandats: [],
     description: ""
   });
-
-  // State for Lot Selector Dialog
-  const [isLotSelectorOpen, setIsLotSelectorOpen] = useState(false);
-  const [lotSearchTerm, setLotSearchTerm] = useState("");
-  const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
-  const [lotCadastreFilter, setLotCadastreFilter] = useState("all"); // Changed initial value to "all" to match filter options
-  const [currentMandatIndex, setCurrentMandatIndex] = useState(null); // To know which mandat we are editing lots for
-
-  // New states for Lot creation dialog
-  const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
-  const [newLotForm, setNewLotForm] = useState({
-    numero_lot: "",
-    circonscription_fonciere: "",
-    cadastre: "",
-    rang: "",
-    concordances_anterieures: [],
-    document_pdf_url: "",
-  });
-  const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
-  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
-
-  // New states for Client/Notaire/Courtier selection search terms
-  const [clientSearchTerm, setClientSearchTerm] = useState("");
-  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
-  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
 
   useEffect(() => {
     if (dossier) {
@@ -147,7 +150,6 @@ export default function EditDossierDialog({
       const oldDossier = dossier;
       const updatedDossier = await base44.entities.Dossier.update(id, data);
       
-      // Créer une notification si un nouvel utilisateur est assigné pour un retour d'appel
       if (data.statut === "Retour d'appel" && 
           data.utilisateur_assigne && 
           oldDossier?.utilisateur_assigne !== data.utilisateur_assigne) {
@@ -176,6 +178,18 @@ export default function EditDossierDialog({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       if (onSuccess) onSuccess();
       onClose();
+    },
+  });
+
+  const createLotMutation = useMutation({
+    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    onSuccess: (newLot) => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+      if (currentMandatIndex !== null && newLot?.id) {
+        addLotToCurrentMandat(newLot.id);
+      }
     },
   });
 
@@ -319,23 +333,23 @@ export default function EditDossierDialog({
     return current?.[key] || "";
   };
 
-  const filteredClientsForSelector = useMemo(() => clientsOnly.filter(c =>
+  const filteredClientsForSelector = clientsOnly.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
-  ), [clientsOnly, clientSearchTerm]);
+  );
 
-  const filteredNotairesForSelector = useMemo(() => notaires.filter(n =>
+  const filteredNotairesForSelector = notaires.filter(n =>
     `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
     n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
     n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
-  ), [notaires, notaireSearchTerm]);
+  );
 
-  const filteredCourtiersForSelector = useMemo(() => courtiers.filter(c =>
+  const filteredCourtiersForSelector = courtiers.filter(c =>
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
     c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
     c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
-  ), [courtiers, courtierSearchTerm]);
+  );
 
   const removeLotFromMandat = (mandatIndex, lotId) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer ce lot de ce mandat ?`)) {
@@ -347,19 +361,6 @@ export default function EditDossierDialog({
       }));
     }
   };
-
-  const createLotMutation = useMutation({
-    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
-    onSuccess: (newLot) => { // Access the created lot directly from onSuccess
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
-      setIsNewLotDialogOpen(false);
-      resetLotForm();
-      // After creating a lot, add it to the current mandat if a mandat is selected
-      if (currentMandatIndex !== null && newLot?.id) {
-        addLotToCurrentMandat(newLot.id);
-      }
-    },
-  });
 
   const resetLotForm = () => {
     setNewLotForm({
@@ -400,15 +401,8 @@ export default function EditDossierDialog({
   };
 
   // Dynamically get unique circonscriptions and cadastres for filters
-  const uniqueCirconscriptions = useMemo(() => {
-    const circoSet = new Set(allLots.map(lot => lot.circonscription_fonciere).filter(Boolean));
-    return Array.from(circoSet).sort();
-  }, [allLots]);
-
-  const uniqueCadastres = useMemo(() => {
-    const cadastreSet = new Set(allLots.map(lot => lot.cadastre).filter(Boolean));
-    return Array.from(cadastreSet).sort();
-  }, [allLots]);
+  const uniqueCirconscriptions = Array.from(new Set(allLots.map(lot => lot.circonscription_fonciere).filter(Boolean))).sort();
+  const uniqueCadastres = Array.from(new Set(allLots.map(lot => lot.cadastre).filter(Boolean))).sort();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -510,6 +504,7 @@ export default function EditDossierDialog({
                     <Button
                       type="button"
                       size="sm"
+                      onClick={() => setIsClientSelectorOpen(true)}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
@@ -557,6 +552,7 @@ export default function EditDossierDialog({
                     <Button
                       type="button"
                       size="sm"
+                      onClick={() => setIsNotaireSelectorOpen(true)}
                       className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
@@ -604,6 +600,7 @@ export default function EditDossierDialog({
                     <Button
                       type="button"
                       size="sm"
+                      onClick={() => setIsCourtierSelectorOpen(true)}
                       className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
@@ -1308,6 +1305,186 @@ export default function EditDossierDialog({
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Selector Dialog */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={(open) => {
+            setIsClientSelectorOpen(open);
+            if (!open) setClientSearchTerm(""); // Reset search term
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des clients</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un client..."
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredClientsForSelector.length > 0 ? (
+                    filteredClientsForSelector.map((client) => (
+                      <div
+                        key={client.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          dossierForm.clients_ids.includes(client.id)
+                            ? 'bg-blue-500/20 border border-blue-500/30'
+                            : 'bg-slate-800/50 hover:bg-slate-800'
+                        }`}
+                        onClick={() => toggleClient(client.id, 'clients')}
+                      >
+                        <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {client.adresses?.length > 0 && formatAdresse(client.adresses.find(a => a.actuelle || a.actuel)) && (
+                            <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle || a.actuel))}</p>
+                          )}
+                          {getCurrentValue(client.courriels, 'courriel') && (
+                            <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                          )}
+                          {getCurrentValue(client.telephones, 'telephone') && (
+                            <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-400">
+                      Aucun client trouvé.
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500 hover:bg-emerald-600">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notaire Selector Dialog */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={(open) => {
+            setIsNotaireSelectorOpen(open);
+            if (!open) setNotaireSearchTerm(""); // Reset search term
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un notaire..."
+                  value={notaireSearchTerm}
+                  onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.length > 0 ? (
+                    filteredNotairesForSelector.map((notaire) => (
+                      <div
+                        key={notaire.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          dossierForm.notaires_ids.includes(notaire.id)
+                            ? 'bg-purple-500/20 border border-purple-500/30'
+                            : 'bg-slate-800/50 hover:bg-slate-800'
+                        }`}
+                        onClick={() => toggleClient(notaire.id, 'notaires')}
+                      >
+                        <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {notaire.adresses?.length > 0 && formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel)) && (
+                            <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel))}</p>
+                          )}
+                          {getCurrentValue(notaire.courriels, 'courriel') && (
+                            <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                          )}
+                          {getCurrentValue(notaire.telephones, 'telephone') && (
+                            <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-400">
+                      Aucun notaire trouvé.
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500 hover:bg-purple-600">
+                Valider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Courtier Selector Dialog */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={(open) => {
+            setIsCourtierSelectorOpen(open);
+            if (!open) setCourtierSearchTerm(""); // Reset search term
+        }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un courtier..."
+                  value={courtierSearchTerm}
+                  onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.length > 0 ? (
+                    filteredCourtiersForSelector.map((courtier) => (
+                      <div
+                        key={courtier.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          dossierForm.courtiers_ids.includes(courtier.id)
+                            ? 'bg-orange-500/20 border border-orange-500/30'
+                            : 'bg-slate-800/50 hover:bg-slate-800'
+                        }`}
+                        onClick={() => toggleClient(courtier.id, 'courtiers')}
+                      >
+                        <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel)) && (
+                            <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actuel))}</p>
+                          )}
+                          {getCurrentValue(courtier.courriels, 'courriel') && (
+                            <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                          )}
+                          {getCurrentValue(courtier.telephones, 'telephone') && (
+                            <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-400">
+                      Aucun courtier trouvé.
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500 hover:bg-orange-600">
+                Valider
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </DialogContent>
