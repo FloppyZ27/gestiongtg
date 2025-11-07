@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -456,11 +456,11 @@ function LayoutContent({ children, currentPageName }) {
             <div className="ml-auto flex items-center gap-2">
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
-                size="sm"
+                size="icon"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg relative"
               >
-                <Clock className="w-4 h-4 mr-2" />
-                Entrée de temps
+                <Clock className="w-5 h-5" />
+                <Plus className="w-3 h-3 absolute -top-1 -right-1 bg-white text-emerald-600 rounded-full" />
               </Button>
               <NotificationButton user={user} />
             </div>
