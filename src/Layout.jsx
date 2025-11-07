@@ -346,7 +346,7 @@ function LayoutContent({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-24 h-auto"
+                  className="w-16 h-auto"
                 />
                 <div>
                   <h2 className="font-bold text-white text-lg">GestionGTG</h2>
@@ -357,7 +357,7 @@ function LayoutContent({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-10 h-auto"
+                  className="w-8 h-auto"
                 />
               </div>
             )}
@@ -419,16 +419,14 @@ function LayoutContent({ children, currentPageName }) {
           <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
             <Button
               onClick={() => setOpen(!open)}
+              variant="ghost"
+              size="icon"
               className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300"
-              size="sm"
             >
               {isCollapsed ? (
                 <ChevronRight className="w-4 h-4" />
               ) : (
-                <>
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Réduire
-                </>
+                <ChevronLeft className="w-4 h-4" />
               )}
             </Button>
           </SidebarFooter>
