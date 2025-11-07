@@ -58,28 +58,24 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
         console.log("All users:", users);
         console.log("Current user:", user);
         
-        // Créer une notification pour chaque utilisateur taggé (sauf soi-même)
+        // Créer une notification pour chaque utilisateur taggé (y compris soi-même)
         for (const email of uniqueEmails) {
           console.log(`Processing email: ${email}`);
-          if (email !== user?.email) {
-            const taggedUser = users.find(u => u.email === email);
-            console.log(`Found user for ${email}:`, taggedUser);
-            if (taggedUser) {
-              console.log("Creating notification for:", email);
-              const notification = await base44.entities.Notification.create({
-                utilisateur_email: email,
-                titre: "Vous avez été mentionné dans un commentaire",
-                message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier.`,
-                type: "dossier",
-                dossier_id: dossierId,
-                lue: false
-              });
-              console.log("Notification created:", notification);
-            } else {
-              console.log(`No user found for email: ${email}`);
-            }
+          const taggedUser = users.find(u => u.email === email);
+          console.log(`Found user for ${email}:`, taggedUser);
+          if (taggedUser) {
+            console.log("Creating notification for:", email);
+            const notification = await base44.entities.Notification.create({
+              utilisateur_email: email,
+              titre: "Vous avez été mentionné dans un commentaire",
+              message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier.`,
+              type: "dossier",
+              dossier_id: dossierId,
+              lue: false
+            });
+            console.log("Notification created:", notification);
           } else {
-            console.log("Skipping self-mention");
+            console.log(`No user found for email: ${email}`);
           }
         }
       } else {
