@@ -344,7 +344,7 @@ function LayoutContent({ children, currentPageName }) {
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <img 
-                  src="https://static.wixstatic.com/media/e35ed0_68de6af823e0440f8a31d3c15a6d0aae~mv2.png/v1/fill/w_560,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/GTG%20Logo%20Couleur%20300ppp.png"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-24 h-auto"
                 />
@@ -355,7 +355,7 @@ function LayoutContent({ children, currentPageName }) {
             ) : (
               <div className="flex justify-center py-1">
                 <img 
-                  src="https://static.wixstatic.com/media/e35ed0_68de6af823e0440f8a31d3c15a6d0aae~mv2.png/v1/fill/w_560,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/GTG%20Logo%20Couleur%20300ppp.png"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-10 h-auto"
                 />
