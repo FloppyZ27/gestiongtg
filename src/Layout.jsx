@@ -219,6 +219,125 @@ function LayoutContent({ children, currentPageName }) {
       {/* Notification Banner */}
       <NotificationBanner user={user} />
       
+      {/* Dialog for Entrée de temps, moved outside of sidebar for better modal behavior */}
+      <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Nouvelle entrée de temps</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Date <span className="text-red-400">*</span></Label>
+                <Input
+                  type="date"
+                  value={entreeForm.date}
+                  onChange={(e) => setEntreeForm({...entreeForm, date: e.target.value})}
+                  required
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Heures <span className="text-red-400">*</span></Label>
+                <Input
+                  type="number"
+                  step="0.25"
+                  min="0"
+                  value={entreeForm.heures}
+                  onChange={(e) => setEntreeForm({...entreeForm, heures: e.target.value})}
+                  required
+                  placeholder="Ex: 2.5"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Dossier</Label>
+              <div className="relative mb-2">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher un dossier..."
+                  value={dossierSearchTerm}
+                  onChange={(e) => setDossierSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                />
+              </div>
+              <Select value={entreeForm.dossier_id} onValueChange={handleDossierChange}>
+                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectValue placeholder="Sélectionner un dossier" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                  <SelectItem value="aucun" className="text-white">Aucun dossier</SelectItem>
+                  {filteredDossiers.map((dossier) => {
+                    const clientsNames = getClientsNames(dossier.clients_ids);
+                    const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                    return (
+                      <SelectItem key={dossier.id} value={dossier.id} className="text-white">
+                        {displayText}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {entreeForm.dossier_id && entreeForm.dossier_id !== "aucun" && availableMandats.length > 0 && (
+              <div className="space-y-2">
+                <Label>Mandat</Label>
+                <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({...entreeForm, mandat: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner un mandat" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {availableMandats.map((mandat, index) => (
+                      <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
+                        {mandat.type_mandat || `Mandat ${index + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
+              <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
+                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectValue placeholder="Sélectionner une tâche" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {TACHES.map((tache) => (
+                    <SelectItem key={tache} value={tache} className="text-white">
+                      {tache}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={entreeForm.description}
+                onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
+                placeholder="Détails supplémentaires..."
+                className="bg-slate-800 border-slate-700 h-24"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                Enregistrer
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
           <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
@@ -297,143 +416,6 @@ function LayoutContent({ children, currentPageName }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
-            <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
-              <DialogTrigger asChild>
-                {isCollapsed ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg p-2">
-                        <Clock className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                      <p>Entrée de temps</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg">
-                    <Clock className="w-4 h-4 mr-2" />
-                    Entrée de temps
-                  </Button>
-                )}
-              </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Nouvelle entrée de temps</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Date <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="date"
-                        value={entreeForm.date}
-                        onChange={(e) => setEntreeForm({...entreeForm, date: e.target.value})}
-                        required
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Heures <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="number"
-                        step="0.25"
-                        min="0"
-                        value={entreeForm.heures}
-                        onChange={(e) => setEntreeForm({...entreeForm, heures: e.target.value})}
-                        required
-                        placeholder="Ex: 2.5"
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Dossier</Label>
-                    <div className="relative mb-2">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                      <Input
-                        placeholder="Rechercher un dossier..."
-                        value={dossierSearchTerm}
-                        onChange={(e) => setDossierSearchTerm(e.target.value)}
-                        className="pl-10 bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <Select value={entreeForm.dossier_id} onValueChange={handleDossierChange}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner un dossier" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                        <SelectItem value="aucun" className="text-white">Aucun dossier</SelectItem>
-                        {filteredDossiers.map((dossier) => {
-                          const clientsNames = getClientsNames(dossier.clients_ids);
-                          const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
-                          return (
-                            <SelectItem key={dossier.id} value={dossier.id} className="text-white">
-                              {displayText}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {entreeForm.dossier_id && entreeForm.dossier_id !== "aucun" && availableMandats.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Mandat</Label>
-                      <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({...entreeForm, mandat: value})}>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner un mandat" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {availableMandats.map((mandat, index) => (
-                            <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
-                              {mandat.type_mandat || `Mandat ${index + 1}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
-                    <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner une tâche" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {TACHES.map((tache) => (
-                          <SelectItem key={tache} value={tache} className="text-white">
-                            {tache}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea
-                      value={entreeForm.description}
-                      onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
-                      placeholder="Détails supplémentaires..."
-                      className="bg-slate-800 border-slate-700 h-24"
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
-                      Annuler
-                    </Button>
-                    <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      Enregistrer
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-
             {!isCollapsed && (
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
@@ -470,8 +452,16 @@ function LayoutContent({ children, currentPageName }) {
               <h1 className="text-xl font-bold text-white">GestionGTG</h1>
             </div>
             
-            {/* Notification button - visible on all screen sizes */}
-            <div className="ml-auto">
+            {/* Boutons à droite - Entrée de temps et Notification */}
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                onClick={() => setIsEntreeTempsOpen(true)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg"
+                size="sm"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Entrée de temps
+              </Button>
               <NotificationButton user={user} />
             </div>
           </header>
