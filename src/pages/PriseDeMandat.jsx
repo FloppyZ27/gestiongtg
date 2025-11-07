@@ -370,13 +370,14 @@ export default function PriseDeMandat() {
       numero_dossier: dossier.numero_dossier || "",
       arpenteur_geometre: dossier.arpenteur_geometre || "",
       date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
+      statut: "Retour d'appel", // FORCE le statut à "Retour d'appel"
+      utilisateur_assigne: formData.utilisateur_assigne || "", // Garde l'utilisateur assigné actuel
       clients_ids: dossier.clients_ids || [],
       notaires_ids: dossier.notaires_ids || [],
       courtiers_ids: dossier.courtiers_ids || [],
       mandats: dossier.mandats?.map(m => ({
         ...m,
-        date_ouverture: m.date_ouverture || "", // Keeps the original mandat's open date from reference dossier
+        date_ouverture: m.date_ouverture || "",
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -393,19 +394,16 @@ export default function PriseDeMandat() {
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
         rabais: m.rabais !== undefined ? m.rabais : 0,
         taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
-        date_livraison: "", // Reset for new mandat
-        date_signature: "", // Reset for new mandat
-        date_debut_travaux: "", // Reset for new mandat
-        // notes: m.notes || "", // Removed as per changes
-        tache_actuelle: "" // Reset task
+        date_livraison: "",
+        date_signature: "",
+        date_debut_travaux: "",
+        tache_actuelle: ""
       })) || [],
-      utilisateur_assigne: dossier.utilisateur_assigne || "",
-      description: dossier.description || "" // Changed from notes_retour_appel
+      description: dossier.description || ""
     });
     setActiveTabMandat("0");
     setDossierReferenceId(dossierId);
-    setDossierSearchForReference(""); // Clear search field
-    setIsDialogOpen(true);
+    setDossierSearchForReference("");
   };
   // END NEW FUNCTION
 
