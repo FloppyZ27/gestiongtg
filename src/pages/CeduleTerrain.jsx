@@ -393,35 +393,23 @@ export default function CeduleTerrain() {
 
         {showActions && (
           <div className="flex gap-2 mt-3">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "a_ceduler")}
-                  className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8 p-0"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-slate-800 border-slate-700 text-white">
-                <p>Marquer à céduler</p>
-              </TooltipContent>
-            </Tooltip>
+            <Button
+              size="sm"
+              onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "a_ceduler")}
+              className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8 p-0"
+              title="Marquer à céduler"
+            >
+              <CheckCircle className="w-4 h-4" />
+            </Button>
             
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain")}
-                  className="flex-1 bg-slate-600 hover:bg-slate-500 text-white text-xs h-8 p-0"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-slate-800 border-slate-700 text-white">
-                <p>Pas de terrain</p>
-              </TooltipContent>
-            </Tooltip>
+            <Button
+              size="sm"
+              onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain")}
+              className="flex-1 bg-slate-600 hover:bg-slate-500 text-white text-xs h-8 p-0"
+              title="Pas de terrain"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
         )}
         {!showActions && (
@@ -439,8 +427,8 @@ export default function CeduleTerrain() {
   );
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <TooltipProvider>
+    <TooltipProvider>
+      <DragDropContext onDragEnd={onDragEnd}>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
         <div className="max-w-[1800px] mx-auto">
           <div className="flex items-center gap-3 mb-6">
@@ -794,7 +782,7 @@ export default function CeduleTerrain() {
           )}
         </DialogContent>
       </Dialog>
-      </TooltipProvider>
-    </DragDropContext>
+      </DragDropContext>
+    </TooltipProvider>
   );
 }
