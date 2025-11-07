@@ -448,6 +448,7 @@ export default function PriseDeMandat() {
 
   const retourAppelDossiers = dossiersNonRejetes.filter(d => d.statut === "Retour d'appel");
   const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Nouveau mandat/Demande d'information" || d.statut === "Demande d'information" || d.statut === "Nouveau mandat");
+  const mandatNonOctroyeDossiers = dossiersNonRejetes.filter(d => d.statut === "Mandat non octroyé");
   const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
 
   // Calcul des périodes
@@ -600,8 +601,9 @@ export default function PriseDeMandat() {
   };
 
   const filteredRetourAppel = applyFilters(retourAppelDossiers);
+  const filteredMandatNonOctroye = applyFilters(mandatNonOctroyeDossiers);
   const filteredSoumission = applyFilters(soumissionDossiers);
-  const filteredNouveauMandat = applyFilters(nouveauMandatDossiers); // NEW LINE
+  const filteredNouveauMandat = applyFilters(nouveauMandatDossiers);
 
   // NEW: Filter dossiers for reference selector
   const filteredDossiersForReference = dossiers.filter(dossier => {
@@ -1003,6 +1005,7 @@ export default function PriseDeMandat() {
       "Demande d'information": "bg-orange-500/20 text-orange-400 border-orange-500/30",
       "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
       "Nouveau mandat/Demande d'information": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // Added for combined status
+      "Mandat non octroyé": "bg-orange-500/20 text-orange-400 border-orange-500/30", // New status
       "Soumission": "bg-purple-500/20 text-purple-400 border-purple-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30",
       "Fermé": "bg-slate-500/20 text-slate-400 border-slate-500/30"
@@ -1073,8 +1076,9 @@ export default function PriseDeMandat() {
   };
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
+  const sortedMandatNonOctroye = sortDossiers(filteredMandatNonOctroye);
   const sortedSoumission = sortDossiers(filteredSoumission);
-  const sortedNouveauMandat = sortDossiers(filteredNouveauMandat); // NEW LINE
+  const sortedNouveauMandat = sortDossiers(filteredNouveauMandat);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -1164,6 +1168,7 @@ export default function PriseDeMandat() {
                         <SelectContent className="bg-slate-800 border-slate-700">
                           <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                           <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
+                          <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
                           <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                           {editingDossier && (
                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
@@ -1307,7 +1312,7 @@ export default function PriseDeMandat() {
                   )}
 
                   {/* Description field - CACHER pour Soumission, Ouvert, Retour d'appel et Nouveau mandat */}
-                  {formData.statut !== "Soumission" && formData.statut !== "Ouvert" && formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && (
+                  {formData.statut !== "Soumission" && formData.statut !== "Ouvert" && formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && formData.statut !== "Mandat non octroyé" && (
                     <div className="space-y-2">
                       <Label>Description</Label>
                       <Textarea
@@ -2659,7 +2664,7 @@ export default function PriseDeMandat() {
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette année</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
+                  <p className="2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
                   {nouveauMandatStats.percentages.year !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -2676,13 +2681,20 @@ export default function PriseDeMandat() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <Tabs defaultValue="nouveau-mandat" className="w-full">
             <CardHeader className="border-b border-slate-800 pb-0">
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 h-auto">
                 <TabsTrigger
                   value="nouveau-mandat"
                   className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 py-3"
                 >
                   <FileCheck className="w-4 h-4 mr-2" />
                   Nouveaux mandats ({nouveauMandatDossiers.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mandat-non-octroye"
+                  className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400 py-3"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Mandats non octroyés ({mandatNonOctroyeDossiers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="soumission"
@@ -2750,6 +2762,7 @@ export default function PriseDeMandat() {
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                       <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                       <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
+                      <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
                       <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
@@ -2996,6 +3009,117 @@ export default function PriseDeMandat() {
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-12 text-slate-500">
                             Aucun nouveau mandat
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </TabsContent>
+
+            <TabsContent value="mandat-non-octroye" className="p-0">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('numero_dossier')}
+                        >
+                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('created_date')}
+                        >
+                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('clients')}
+                        >
+                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('adresse_travaux')}
+                        >
+                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('mandats')}
+                        >
+                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                        </TableHead>
+                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedMandatNonOctroye.map((dossier) => (
+                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                              {dossier.numero_dossier
+                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {getFirstAdresseTravaux(dossier.mandats)}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandats && dossier.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                ))}
+                                {dossier.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{dossier.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(dossier)}
+                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(dossier.id)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {sortedMandatNonOctroye.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                            Aucun mandat non octroyé
                           </TableCell>
                         </TableRow>
                       )}
