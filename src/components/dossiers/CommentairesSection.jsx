@@ -68,7 +68,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setNouveauCommentaire("");
     },
   });
