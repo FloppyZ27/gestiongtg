@@ -219,7 +219,7 @@ function LayoutContent({ children, currentPageName }) {
       {/* Notification Banner */}
       <NotificationBanner user={user} />
       
-      {/* Dialog for Entrée de temps, moved outside of sidebar for better modal behavior */}
+      {/* Dialog pour l'entrée de temps */}
       <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
           <DialogHeader>
@@ -343,21 +343,22 @@ function LayoutContent({ children, currentPageName }) {
           <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                  <MapPin className="w-5 h-5 text-white absolute" />
-                  <Compass className="w-6 h-6 text-white opacity-60" />
-                </div>
+                <img 
+                  src="https://static.wixstatic.com/media/e35ed0_68de6af823e0440f8a31d3c15a6d0aae~mv2.png/v1/fill/w_560,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/GTG%20Logo%20Couleur%20300ppp.png"
+                  alt="GTG Logo"
+                  className="w-24 h-auto"
+                />
                 <div>
                   <h2 className="font-bold text-white text-lg">GestionGTG</h2>
-                  <p className="text-xs text-slate-400">Arpentage & Géomatique</p>
                 </div>
               </div>
             ) : (
               <div className="flex justify-center py-1">
-                <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                  <MapPin className="w-5 h-5 text-white absolute" />
-                  <Compass className="w-6 h-6 text-white opacity-60" />
-                </div>
+                <img 
+                  src="https://static.wixstatic.com/media/e35ed0_68de6af823e0440f8a31d3c15a6d0aae~mv2.png/v1/fill/w_560,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/GTG%20Logo%20Couleur%20300ppp.png"
+                  alt="GTG Logo"
+                  className="w-10 h-auto"
+                />
               </div>
             )}
           </SidebarHeader>
@@ -416,18 +417,6 @@ function LayoutContent({ children, currentPageName }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
-            {!isCollapsed && (
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white text-sm truncate">GestionGTG</p>
-                  <p className="text-xs text-slate-400 truncate">Version 2.0</p>
-                </div>
-              </div>
-            )}
-
             <Button
               onClick={() => setOpen(!open)}
               className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300"

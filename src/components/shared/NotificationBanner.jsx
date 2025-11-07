@@ -11,6 +11,7 @@ import { createPageUrl } from "@/utils";
 
 export default function NotificationBanner({ user }) {
   const navigate = useNavigate();
+  const [visibleNotifications, setVisibleNotifications] = useState([]);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
@@ -20,8 +21,27 @@ export default function NotificationBanner({ user }) {
     refetchInterval: 30000,
   });
 
+  useEffect(() => {
+    // Quand de nouvelles notifications arrivent, les ajouter à visibleNotifications
+    const newNotifications = notifications.filter(
+      notif => !visibleNotifications.find(v => v.id === notif.id)
+    );
+    
+    if (newNotifications.length > 0) {
+      setVisibleNotifications(prev => [...newNotifications, ...prev]);
+      
+      // Supprimer chaque notification après 5 secondes
+      newNotifications.forEach(notif => {
+        setTimeout(() => {
+          setVisibleNotifications(prev => prev.filter(n => n.id !== notif.id));
+        }, 5000);
+      });
+    }
+  }, [notifications]);
+
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
+    setVisibleNotifications(prev => prev.filter(n => n.id !== notificationId));
   };
 
   const handleClick = (notification) => {
@@ -45,7 +65,7 @@ export default function NotificationBanner({ user }) {
   return (
     <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4">
       <AnimatePresence>
-        {notifications.map((notification, index) => (
+        {visibleNotifications.map((notification, index) => (
           <motion.div
             key={notification.id}
             initial={{ opacity: 0, y: -50, scale: 0.95 }}

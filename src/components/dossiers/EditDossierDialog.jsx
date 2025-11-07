@@ -63,7 +63,11 @@ export default function EditDossierDialog({
   const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
   const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
 
-  // NEW STATES for creating new client/notaire/courtier
+  // NEW STATES for dossier reference
+  const [dossierReferenceId, setDossierReferenceId] = useState(null);
+  const [dossierSearchForReference, setDossierSearchForReference] = useState("");
+
+  // States for new client/notaire/courtier
   const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
   const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
   const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
@@ -92,6 +96,12 @@ export default function EditDossierDialog({
   const { data: allLots = [] } = useQuery({
     queryKey: ['lots'],
     queryFn: () => base44.entities.Lot.list(),
+    initialData: [],
+  });
+
+  const { data: allDossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
     initialData: [],
   });
 
@@ -536,6 +546,114 @@ export default function EditDossierDialog({
     }));
   };
 
+  // Helper functions for dossier reference
+  const getArpenteurInitials = (arpenteur) => {
+    if (!arpenteur) return "";
+    const mapping = {
+      "Samuel Guay": "SG-",
+      "Dany Gaboury": "DG-",
+      "Pierre-Luc Pilote": "PLP-",
+      "Benjamin Larouche": "BL-",
+      "Frédéric Gilbert": "FG-"
+    };
+    return mapping[arpenteur] || "";
+  };
+
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return ""; // Changed from "-" to "" for better display in search results
+    return clientIds.map(id => {
+      const client = clientsOnly.find(c => c.id === id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  };
+
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return ""; // Changed from "-" to ""
+    return formatAdresse(mandats[0].adresse_travaux);
+  };
+
+  const loadDossierReference = (dossierId) => {
+    const refDossier = allDossiers.find(d => d.id === dossierId);
+    if (!refDossier) return;
+
+    setDossierForm(prevDossierForm => {
+      // Merge client/notaire/courtier IDs, avoiding duplicates
+      const newClientsIds = [...new Set([...prevDossierForm.clients_ids, ...(refDossier.clients_ids || [])])];
+      const newNotairesIds = [...new Set([...prevDossierForm.notaires_ids, ...(refDossier.notaires_ids || [])])];
+      const newCourtiersIds = [...new Set([...prevDossierForm.courtiers_ids, ...(refDossier.courtiers_ids || [])])];
+
+      // Prepare mandats from the reference dossier
+      const newMandatsFromRef = refDossier.mandats?.map(m => ({
+        ...m,
+        // Ensure adresse_travaux is an object, handling potential string format from older data
+        adresse_travaux: m.adresse_travaux
+          ? (typeof m.adresse_travaux === 'string'
+            ? {
+                rue: m.adresse_travaux,
+                numeros_civiques: [], // Assuming old string format didn't parse civics
+                ville: "",
+                code_postal: "",
+                province: "Québec"
+              }
+            : m.adresse_travaux
+          )
+          : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "Québec" },
+        lots: m.lots || [],
+        prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+        rabais: m.rabais !== undefined ? m.rabais : 0,
+        taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
+        // Clear dates for mandates copied from a reference dossier
+        date_ouverture: "",
+        date_signature: "",
+        date_livraison: "",
+        date_debut_travaux: "",
+        notes: "" // Clear notes specific to old mandate
+      })) || [];
+
+      // Append new mandates to existing ones. If prevDossierForm had only the initial empty mandate,
+      // it will be kept, and new ones appended.
+      const combinedMandats = [...(prevDossierForm.mandats || []), ...newMandatsFromRef];
+
+      // Set active tab to the first newly added mandate, or the first existing one if no new ones.
+      let newActiveTab = prevDossierForm.mandats.length; // Index for the first new mandate
+      if (newMandatsFromRef.length === 0 && prevDossierForm.mandats.length > 0) {
+        newActiveTab = parseInt(activeTabMandat); // No new mandates, keep current tab
+      } else if (newMandatsFromRef.length > 0 && prevDossierForm.mandats.length === 0) {
+        newActiveTab = 0; // If original was empty, and now we have new ones, activate the first.
+      }
+
+
+      setActiveTabMandat(newActiveTab.toString());
+      setDossierReferenceId(refDossier.id);
+      setDossierSearchForReference("");
+
+      return {
+        ...prevDossierForm, // Keep existing main dossier details
+        clients_ids: newClientsIds,
+        notaires_ids: newNotairesIds,
+        courtiers_ids: newCourtiersIds,
+        mandats: combinedMandats,
+      };
+    });
+  };
+
+  const filteredDossiersForReference = allDossiers.filter(d => {
+    // Exclude the current dossier being edited from the reference list
+    if (dossier && d.id === dossier.id) return false;
+    const searchLower = dossierSearchForReference.toLowerCase();
+    const fullNumber = (d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : "") + (d.numero_dossier || "");
+    const clientsNames = getClientsNames(d.clients_ids); // Use helper for client names
+    const adresseTravaux = getFirstAdresseTravaux(d.mandats); // Use helper for first address
+
+    return (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      (d.numero_dossier && d.numero_dossier.toLowerCase().includes(searchLower)) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      adresseTravaux.toLowerCase().includes(searchLower) ||
+      d.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+    );
+  });
+
   // Dynamically get unique circonscriptions and cadastres for filters
   const uniqueCirconscriptions = Array.from(new Set(allLots.map(lot => lot.circonscription_fonciere).filter(Boolean))).sort();
   const uniqueCadastres = Array.from(new Set(allLots.map(lot => lot.cadastre).filter(Boolean))).sort();
@@ -601,12 +719,58 @@ export default function EditDossierDialog({
                 {/* Créer à partir d'un dossier existant */}
                 <div className="space-y-2">
                   <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
-                  <Input
-                    placeholder="Rechercher un dossier par numéro, client, etc."
-                    className="bg-slate-800 border-slate-700"
-                    disabled
-                  />
-                  <p className="text-xs text-slate-500">Cette fonctionnalité n'est pas disponible en mode édition</p>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher un dossier par numéro, client, etc."
+                      value={dossierSearchForReference}
+                      onChange={(e) => setDossierSearchForReference(e.target.value)}
+                      className="pl-10 bg-slate-700 border-slate-600"
+                    />
+                  </div>
+                  {dossierSearchForReference && (
+                    <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
+                      {filteredDossiersForReference.length > 0 ? (
+                        filteredDossiersForReference.map(d => (
+                          <div
+                            key={d.id}
+                            className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
+                            onClick={() => loadDossierReference(d.id)}
+                          >
+                            <div>
+                              <p className="font-medium text-white">
+                                {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier || ""}
+                                {d.numero_dossier && d.arpenteur_geometre && " - "}
+                                {getClientsNames(d.clients_ids)}
+                              </p>
+                              <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
+                            </div>
+                            <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
+                              <Plus className="w-4 h-4 mr-1" /> Sélectionner
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
+                      )}
+                    </div>
+                  )}
+                  {dossierReferenceId && (
+                    <div className="mt-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setDossierReferenceId(null);
+                          setDossierSearchForReference("");
+                        }}
+                        className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                      >
+                        Effacer le dossier de référence
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Utilisateur assigné */}
@@ -1071,7 +1235,7 @@ export default function EditDossierDialog({
                                           <TableHead className="text-slate-300">Circonscription</TableHead>
                                           <TableHead className="text-slate-300">Cadastre</TableHead>
                                           <TableHead className="text-slate-300">Rang</TableHead>
-                                          <TableHead className="text-slate-300 text-right">Action</TableHead> {/* Changed "Sélection" to "Action" for the Trash2 button */}
+                                          <TableHead className="text-slate-300 text-right">Action</TableHead>
                                         </TableRow>
                                       </TableHeader>
                                       <TableBody>
