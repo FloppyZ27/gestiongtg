@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -11,37 +10,18 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function NotificationBanner({ user }) {
-  const [visibleNotifications, setVisibleNotifications] = useState([]);
   const navigate = useNavigate();
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
-    queryFn: () => base44.entities.Notification.filter({ utilisateur_email: user?.email, lue: false }, '-created_date', 1),
+    queryFn: () => base44.entities.Notification.filter({ utilisateur_email: user?.email, lue: false }, '-created_date'),
     initialData: [],
     enabled: !!user,
     refetchInterval: 30000,
   });
 
-  useEffect(() => {
-    // Quand de nouvelles notifications arrivent, les ajouter à visibleNotifications
-    const newNotifications = notifications.filter(
-      notif => !visibleNotifications.find(v => v.id === notif.id)
-    );
-    
-    if (newNotifications.length > 0) {
-      setVisibleNotifications(prev => [...newNotifications, ...prev].slice(0, 1));
-      
-      // Supprimer chaque notification après 5 secondes
-      newNotifications.forEach(notif => {
-        setTimeout(() => {
-          setVisibleNotifications(prev => prev.filter(n => n.id !== notif.id));
-        }, 5000);
-      });
-    }
-  }, [notifications]);
-
-  const handleDismiss = (notificationId) => {
-    setVisibleNotifications(prev => prev.filter(n => n.id !== notificationId));
+  const handleDismiss = async (notificationId) => {
+    await base44.entities.Notification.update(notificationId, { lue: true });
   };
 
   const handleClick = (notification) => {
@@ -65,7 +45,7 @@ export default function NotificationBanner({ user }) {
   return (
     <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4">
       <AnimatePresence>
-        {visibleNotifications.map((notification, index) => (
+        {notifications.map((notification, index) => (
           <motion.div
             key={notification.id}
             initial={{ opacity: 0, y: -50, scale: 0.95 }}
