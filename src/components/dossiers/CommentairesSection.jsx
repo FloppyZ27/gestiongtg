@@ -115,7 +115,6 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
 
   // Filtrer les utilisateurs pour la mention
   const filteredUsersForMention = users.filter(u => 
-    u.email !== user?.email && // Don't allow tagging self
     (u.full_name?.toLowerCase().includes(mentionSearch.toLowerCase()) ||
     u.email?.toLowerCase().includes(mentionSearch.toLowerCase()))
   ).slice(0, 5);
