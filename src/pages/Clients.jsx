@@ -800,35 +800,35 @@ export default function Clients() {
 
         {/* Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-              <CardTitle className="text-xl font-bold text-white">Liste des clients</CardTitle>
-              <div className="flex gap-3 w-full md:w-auto">
-                <div className="relative flex-1 md:flex-initial md:w-64">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
+          <CardContent className="p-0">
+            <div className="p-6 border-b border-slate-800">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <CardTitle className="text-xl font-bold text-white">Liste des clients</CardTitle>
+                <div className="flex gap-3 w-full md:w-auto">
+                  <div className="relative flex-1 md:flex-initial md:w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                      <SelectItem value="Client" className="text-white">Client</SelectItem>
+                      <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                      <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                      <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                    <SelectItem value="Client" className="text-white">Client</SelectItem>
-                    <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                    <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                    <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
