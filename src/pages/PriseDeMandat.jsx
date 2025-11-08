@@ -1103,7 +1103,7 @@ export default function PriseDeMandat() {
               </h1>
               <Phone className="w-6 h-6 text-emerald-400" />
             </div>
-            <p className="text-slate-400">Gestion des retours d'appel et soumissions</p>
+            <p className="text-slate-400">Gestion des prise de mandat et retours d'appel</p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -2632,7 +2632,7 @@ export default function PriseDeMandat() {
               </div>
               <div>
                 <CardTitle className="text-xl text-white">Nouveaux mandats</CardTitle>
-                <p className="text-sm text-slate-400">Compteur permanent des créations par période</p>
+                <p className="text-sm text-slate-400">Statistique par période</p>
               </div>
             </div>
           </CardHeader>

@@ -285,7 +285,9 @@ export default function Profil() {
     return formatAdresse(mandats[0].adresse_travaux);
   };
 
-  const retoursAppel = dossiers.filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email);
+  const retoursAppel = dossiers
+    .filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email)
+    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
   const calculateSeniority = () => {
     if (!user?.date_embauche) return "N/A";
@@ -399,14 +401,13 @@ export default function Profil() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <User className="w-8 h-8 text-emerald-400" />
-          <div>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
               Mon Profil
             </h1>
-            <p className="text-slate-400">Votre espace personnel</p>
           </div>
+          <User className="w-8 h-8 text-emerald-400" />
         </div>
 
         {/* Personal Information Card */}
