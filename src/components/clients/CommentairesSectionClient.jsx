@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export default function CommentairesSectionClient({ clientId, clientTemporaire }) {
+export default function CommentairesSectionClient({ clientId, clientTemporaire, clientNom }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [commentairesTemp, setCommentairesTemp] = useState([]);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -57,7 +58,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire }
             await base44.entities.Notification.create({
               utilisateur_email: email,
               titre: "Vous avez été mentionné dans un commentaire",
-              message: `${user?.full_name} vous a mentionné dans un commentaire sur un client.`,
+              message: `${user?.full_name} vous a mentionné dans un commentaire sur la fiche client de ${clientNom}.`,
               type: "general",
               lue: false
             });
