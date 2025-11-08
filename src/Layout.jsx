@@ -349,7 +349,7 @@ function LayoutContent({ children, currentPageName }) {
                   className="w-16 h-auto"
                 />
                 <div>
-                  <h2 className="font-bold text-white text-lg">GestionGTG</h2>
+                  <h2 className="font-bold text-white text-2xl">GestionGTG</h2>
                 </div>
               </div>
             ) : (

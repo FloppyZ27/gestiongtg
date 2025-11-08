@@ -245,8 +245,8 @@ export default function PriseDeMandat() {
         }
       }
       
-      // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information"
-      if (dossierData.statut === "Nouveau mandat/Demande d'information") {
+      // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information" ou "Mandats à ouvrir"
+      if (dossierData.statut === "Nouveau mandat/Demande d'information" || dossierData.statut === "Mandats à ouvrir") {
         const nbMandats = newDossier.mandats?.length || 1;
         const compteurPromises = [];
         for (let i = 0; i < nbMandats; i++) {
@@ -296,11 +296,16 @@ export default function PriseDeMandat() {
         }
       }
       
-      // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information"
-      if (dossierData.statut === "Nouveau mandat/Demande d'information" && 
-          oldDossier?.statut !== "Nouveau mandat/Demande d'information" &&
-          oldDossier?.statut !== "Nouveau mandat" &&
-          oldDossier?.statut !== "Demande d'information") {
+      // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information" ou "Mandats à ouvrir"
+      // et que l'ancien statut n'était pas l'un de ceux-là
+      const oldStatusIsCounted = oldDossier?.statut === "Nouveau mandat/Demande d'information" || 
+                                oldDossier?.statut === "Demande d'information" || 
+                                oldDossier?.statut === "Nouveau mandat" ||
+                                oldDossier?.statut === "Mandats à ouvrir";
+      const newStatusIsCounted = dossierData.statut === "Nouveau mandat/Demande d'information" ||
+                                 dossierData.statut === "Mandats à ouvrir";
+
+      if (newStatusIsCounted && !oldStatusIsCounted) {
         const nbMandats = updatedDossier.mandats?.length || 1;
         const compteurPromises = [];
         for (let i = 0; i < nbMandats; i++) {
@@ -449,8 +454,7 @@ export default function PriseDeMandat() {
   const retourAppelDossiers = dossiersNonRejetes.filter(d => d.statut === "Retour d'appel");
   const nouveauMandatDossiers = dossiersNonRejetes.filter(d => d.statut === "Nouveau mandat/Demande d'information" || d.statut === "Demande d'information" || d.statut === "Nouveau mandat");
   const mandatNonOctroyeDossiers = dossiersNonRejetes.filter(d => d.statut === "Mandat non octroyé");
-  const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission");
-  const mandatsAOuvrirDossiers = dossiersNonRejetes.filter(d => d.statut === "Mandats à ouvrir"); // New status
+  const soumissionDossiers = dossiersNonRejetes.filter(d => d.statut === "Soumission" || d.statut === "Mandats à ouvrir"); // Combined soumission and mandats à ouvrir
 
   // Calcul des périodes
   const now = new Date();
@@ -595,6 +599,8 @@ export default function PriseDeMandat() {
       let matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
       if (filterStatut === "Nouveau mandat/Demande d'information") {
         matchesStatut = matchesStatut || dossier.statut === "Demande d'information" || dossier.statut === "Nouveau mandat";
+      } else if (filterStatut === "Soumission") { // New condition to combine Soumission and Mandats à ouvrir
+          matchesStatut = matchesStatut || dossier.statut === "Mandats à ouvrir";
       }
 
       return matchesSearch && matchesArpenteur && matchesStatut && matchesUtilisateurAssigne;
@@ -603,9 +609,8 @@ export default function PriseDeMandat() {
 
   const filteredRetourAppel = applyFilters(retourAppelDossiers);
   const filteredMandatNonOctroye = applyFilters(mandatNonOctroyeDossiers);
-  const filteredSoumission = applyFilters(soumissionDossiers);
+  const filteredSoumission = applyFilters(soumissionDossiers); // Now includes "Mandats à ouvrir"
   const filteredNouveauMandat = applyFilters(nouveauMandatDossiers);
-  const filteredMandatsAOuvrir = applyFilters(mandatsAOuvrirDossiers); // New filter
 
   // NEW: Filter dossiers for reference selector
   const filteredDossiersForReference = dossiers.filter(dossier => {
@@ -797,7 +802,7 @@ export default function PriseDeMandat() {
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
         tache_actuelle: m.tache_actuelle || "" // Added for editing
-        // notes: m.notes || "" // Removed as per changes
+        // notes: "" // Removed as per changes
       })) || [],
       description: dossier.description || ""
     });
@@ -1008,11 +1013,15 @@ export default function PriseDeMandat() {
       "Nouveau mandat": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
       "Nouveau mandat/Demande d'information": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30", // Added for combined status
       "Mandats à ouvrir": "bg-purple-500/20 text-purple-400 border-purple-500/30", // New status
-      "Mandat non octroyé": "bg-orange-500/20 text-orange-400 border-orange-500/30", // New status
+      "Mandat non octroyé": "bg-red-500/20 text-red-400 border-red-500/30", // Changed to red for consistency with outline
       "Soumission": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
       "Ouvert": "bg-green-500/20 text-green-400 border-green-500/30",
       "Fermé": "bg-slate-500/20 text-slate-400 border-slate-500/30"
     };
+    // If the dossier is Mandats à ouvrir, it should appear with soumission color on the dashboard
+    if (statut === "Mandats à ouvrir" && colors["Soumission"]) {
+        return colors["Soumission"];
+    }
     return colors[statut] || colors["Retour d'appel"];
   };
 
@@ -1082,7 +1091,6 @@ export default function PriseDeMandat() {
   const sortedMandatNonOctroye = sortDossiers(filteredMandatNonOctroye);
   const sortedSoumission = sortDossiers(filteredSoumission);
   const sortedNouveauMandat = sortDossiers(filteredNouveauMandat);
-  const sortedMandatsAOuvrir = sortDossiers(filteredMandatsAOuvrir); // New sorted list
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
@@ -1627,7 +1635,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }</div>
+                                </div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
@@ -2686,7 +2694,7 @@ export default function PriseDeMandat() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <Tabs defaultValue="nouveau-mandat" className="w-full">
             <CardHeader className="border-b border-slate-800 pb-0">
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-5 h-auto">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 h-auto">
                 <TabsTrigger
                   value="nouveau-mandat"
                   className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 py-3"
@@ -2695,25 +2703,18 @@ export default function PriseDeMandat() {
                   Nouveaux mandats ({nouveauMandatDossiers.length})
                 </TabsTrigger>
                 <TabsTrigger
-                  value="mandat-non-octroye"
-                  className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400 py-3"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Mandats non octroyés ({mandatNonOctroyeDossiers.length})
-                </TabsTrigger>
-                <TabsTrigger
                   value="soumission"
-                  className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-400 py-3"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Soumissions ({soumissionDossiers.length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="mandats-a-ouvrir"
                   className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
                 >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Mandats à ouvrir ({mandatsAOuvrirDossiers.length})
+                  <Send className="w-4 h-4 mr-2" />
+                  Mandats à ouvrir/Soumissions ({soumissionDossiers.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mandat-non-octroye"
+                  className="data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 py-3"
+                >
+                  <X className="w-5 h-5 mr-2" />
+                  Mandats non octroyés ({mandatNonOctroyeDossiers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="retour-appel"
@@ -2774,9 +2775,8 @@ export default function PriseDeMandat() {
                       <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                       <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
                       <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
-                      <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
+                      <SelectItem value="Soumission" className="text-white">Soumission / Mandats à ouvrir</SelectItem>
                       <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
-                      <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -3243,118 +3243,7 @@ export default function PriseDeMandat() {
                       {sortedSoumission.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-12 text-slate-500">
-                            Aucune soumission
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </TabsContent>
-            
-            <TabsContent value="mandats-a-ouvrir" className="p-0">
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('numero_dossier')}
-                        >
-                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('created_date')}
-                        >
-                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('clients')}
-                        >
-                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('adresse_travaux')}
-                        >
-                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('mandats')}
-                        >
-                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedMandatsAOuvrir.map((dossier) => (
-                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                              {dossier.numero_dossier
-                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
-                            {getClientsNames(dossier.clients_ids)}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {getFirstAdresseTravaux(dossier.mandats)}
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.mandats && dossier.mandats.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                    {mandat.type_mandat}
-                                  </Badge>
-                                ))}
-                                {dossier.mandats.length > 2 && (
-                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                    +{dossier.mandats.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-600 text-xs">Aucun</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(dossier)}
-                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(dossier.id)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {sortedMandatsAOuvrir.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-12 text-slate-500">
-                            Aucun mandat à ouvrir
+                            Aucune soumission ou mandat à ouvrir
                           </TableCell>
                         </TableRow>
                       )}

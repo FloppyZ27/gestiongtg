@@ -548,7 +548,7 @@ export default function Profil() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {retoursAppel.slice(0, 8).map((dossier) => (
+                  {retoursAppel.map((dossier) => (
                     <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium">
                         <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
