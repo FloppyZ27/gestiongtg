@@ -228,7 +228,7 @@ export default function PriseDeMandat() {
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
-      
+
       // Créer une notification si un utilisateur est assigné pour un retour d'appel
       if (dossierData.statut === "Retour d'appel" && dossierData.utilisateur_assigne) {
         const assignedUser = users.find(u => u.email === dossierData.utilisateur_assigne);
@@ -244,7 +244,7 @@ export default function PriseDeMandat() {
           });
         }
       }
-      
+
       // Créer un compteur SEULEMENT pour le statut "Nouveau mandat/Demande d'information" ou "Mandats à ouvrir"
       if (dossierData.statut === "Nouveau mandat/Demande d'information" || dossierData.statut === "Mandats à ouvrir") {
         const nbMandats = newDossier.mandats?.length || 1;
@@ -261,7 +261,7 @@ export default function PriseDeMandat() {
         }
         await Promise.all(compteurPromises);
       }
-      
+
       return newDossier;
     },
     onSuccess: () => {
@@ -277,10 +277,10 @@ export default function PriseDeMandat() {
     mutationFn: async ({ id, dossierData }) => {
       const oldDossier = dossiers.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
-      
+
       // Créer une notification si un nouvel utilisateur est assigné pour un retour d'appel
-      if (dossierData.statut === "Retour d'appel" && 
-          dossierData.utilisateur_assigne && 
+      if (dossierData.statut === "Retour d'appel" &&
+          dossierData.utilisateur_assigne &&
           oldDossier?.utilisateur_assigne !== dossierData.utilisateur_assigne) {
         const assignedUser = users.find(u => u.email === dossierData.utilisateur_assigne);
         if (assignedUser) {
@@ -295,11 +295,11 @@ export default function PriseDeMandat() {
           });
         }
       }
-      
+
       // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information" ou "Mandats à ouvrir"
       // et que l'ancien statut n'était pas l'un de ceux-là
-      const oldStatusIsCounted = oldDossier?.statut === "Nouveau mandat/Demande d'information" || 
-                                oldDossier?.statut === "Demande d'information" || 
+      const oldStatusIsCounted = oldDossier?.statut === "Nouveau mandat/Demande d'information" ||
+                                oldDossier?.statut === "Demande d'information" ||
                                 oldDossier?.statut === "Nouveau mandat" ||
                                 oldDossier?.statut === "Mandats à ouvrir";
       const newStatusIsCounted = dossierData.statut === "Nouveau mandat/Demande d'information" ||
@@ -320,7 +320,7 @@ export default function PriseDeMandat() {
         }
         await Promise.all(compteurPromises);
       }
-      
+
       return updatedDossier;
     },
     onSuccess: () => {
@@ -491,17 +491,17 @@ export default function PriseDeMandat() {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfDay;
     }).length;
-    
+
     const byWeek = list.filter(item => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfWeek;
     }).length;
-    
+
     const byMonth = list.filter(item => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfMonth;
     }).length;
-    
+
     const byYear = list.filter(item => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfYear;
@@ -1725,55 +1725,6 @@ export default function PriseDeMandat() {
                                     </p>
                                   )}
                                 </div>
-
-                                <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
-                                  <h4 className="text-sm font-semibold text-slate-300">Tarification</h4>
-                                  <div className="grid grid-cols-3 gap-3">
-                                    <div className="space-y-2">
-                                      <Label>Prix estimé ($)</Label>
-                                      <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        value={mandat.prix_estime || ""}
-                                        onChange={(e) => {
-                                          const value = e.target.value.replace(/[^0-9.]/g, '');
-                                          updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
-                                        }}
-                                        placeholder="0.00"
-                                        className="bg-slate-700 border-slate-600"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Rabais ($)</Label>
-                                      <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        value={mandat.rabais || ""}
-                                        onChange={(e) => {
-                                          const value = e.target.value.replace(/[^0-9.]/g, '');
-                                          updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
-                                        }}
-                                        placeholder="0.00"
-                                        className="bg-slate-700 border-slate-600"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                    </div>
-                                    <div className="space-y-2 flex items-center pt-8">
-                                      <input
-                                        type="checkbox"
-                                        id={`taxes_incluses_${index}`}
-                                        checked={mandat.taxes_incluses}
-                                        onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
-                                        className="form-checkbox h-4 w-4 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
-                                        disabled={!!dossierReferenceId}
-                                      />
-                                      <label htmlFor={`taxes_incluses_${index}`} className="ml-2 text-slate-300 text-sm">
-                                        Taxes incluses
-                                      </label>
-                                    </div>
-                                  </div>
-                                </div>
                               </CardContent>
                             </Card>
                           </TabsContent>
@@ -1785,6 +1736,72 @@ export default function PriseDeMandat() {
                       </div>
                     )}
                   </div>
+
+                  {/* Tableau Tarification - EN BAS */}
+                  {formData.mandats.length > 0 && (
+                    <div className="space-y-3 mt-6">
+                      <Label className="text-lg font-semibold text-slate-300">Tarification</Label>
+                      <div className="border border-slate-700 rounded-lg overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                              <TableHead className="text-slate-300">Type de mandat</TableHead>
+                              <TableHead className="text-slate-300">Prix estimé ($)</TableHead>
+                              <TableHead className="text-slate-300">Rabais ($)</TableHead>
+                              <TableHead className="text-slate-300">Taxes incluses</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {formData.mandats.map((mandat, index) => (
+                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="font-medium text-white">
+                                  {mandat.type_mandat || `Mandat ${index + 1}`}
+                                </TableCell>
+                                <TableCell>
+                                  <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={mandat.prix_estime || ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                                      updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
+                                    }}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600 text-white"
+                                    disabled={!!dossierReferenceId}
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={mandat.rabais || ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                                      updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
+                                    }}
+                                    placeholder="0.00"
+                                    className="bg-slate-700 border-slate-600 text-white"
+                                    disabled={!!dossierReferenceId}
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <input
+                                    type="checkbox"
+                                    id={`taxes_incluses_${index}`}
+                                    checked={mandat.taxes_incluses}
+                                    onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
+                                    className="form-checkbox h-5 w-5 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
+                                    disabled={!!dossierReferenceId}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  )}
                 </form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
