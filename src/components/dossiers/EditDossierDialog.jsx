@@ -710,6 +710,8 @@ export default function EditDossierDialog({
                         <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
                         <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
                         <SelectItem value="Message laissé/Sans réponse" className="text-white">Message laissé/Sans réponse</SelectItem>
+                        <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
+                        <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
                         <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                       </SelectContent>
                     </Select>
