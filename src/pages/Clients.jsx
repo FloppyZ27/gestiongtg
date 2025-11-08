@@ -384,7 +384,8 @@ export default function Clients() {
                   </div>
 
                   <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Prénom, Nom et Type sur la même ligne */}
+                    <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
                         <Input
@@ -405,21 +406,20 @@ export default function Clients() {
                           className="bg-slate-800 border-slate-700"
                         />
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="type_client">Type de client</Label>
-                      <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner le type" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Client" className="text-white">Client</SelectItem>
-                          <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                          <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                          <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        <Label htmlFor="type_client">Type de client</Label>
+                        <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Client" className="text-white">Client</SelectItem>
+                            <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                            <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                            <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {/* Adresses */}
@@ -439,89 +439,107 @@ export default function Clients() {
                       {formData.adresses.map((item, index) => (
                         <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
                           <div className="flex gap-2 items-start">
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {/* Numéros Civiques */}
-                                <div className="space-y-2 col-span-2">
-                                    <Label>Numéro(s) civique(s)</Label>
-                                    {item.numeros_civiques.map((num, civicIdx) => (
-                                        <div key={civicIdx} className="flex gap-2">
-                                            <Input
-                                                value={num}
-                                                onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
-                                                placeholder="Numéro civique"
-                                                className="bg-slate-800 border-slate-700"
-                                            />
-                                            {item.numeros_civiques.length > 1 && (
-                                                <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => removeCivicNumber(index, civicIdx)}
-                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ))}
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => addCivicNumber(index)}
-                                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1"
-                                    >
-                                      <Plus className="w-4 h-4 mr-1" />
-                                      Ajouter un numéro
-                                    </Button>
-                                </div>
-
-                                {/* Rue */}
-                                <div className="space-y-2 col-span-2">
-                                    <Label htmlFor={`rue-${index}`}>Rue</Label>
-                                    <Input
-                                        id={`rue-${index}`}
-                                        value={item.rue}
-                                        onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
-                                        placeholder="Nom de la rue"
-                                        className="bg-slate-800 border-slate-700"
-                                    />
-                                </div>
-
-                                {/* Ville */}
+                            <div className="flex-1 space-y-3">
+                              {/* Numéro civique et Rue sur la même ligne */}
+                              <div className="grid grid-cols-[200px_1fr] gap-3">
                                 <div className="space-y-2">
-                                    <Label htmlFor={`ville-${index}`}>Ville</Label>
-                                    <Input
-                                        id={`ville-${index}`}
-                                        value={item.ville}
-                                        onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
-                                        placeholder="Ville"
+                                  <Label>Numéro(s) civique(s)</Label>
+                                  {item.numeros_civiques.map((num, civicIdx) => (
+                                    <div key={civicIdx} className="flex gap-2">
+                                      <Input
+                                        value={num}
+                                        onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
+                                        placeholder="Numéro civique"
                                         className="bg-slate-800 border-slate-700"
-                                    />
+                                      />
+                                      {item.numeros_civiques.length > 1 && (
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => removeCivicNumber(index, civicIdx)}
+                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => addCivicNumber(index)}
+                                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1 w-full"
+                                  >
+                                    <Plus className="w-4 h-4 mr-1" />
+                                    Ajouter un numéro
+                                  </Button>
                                 </div>
 
-                                {/* Province */}
                                 <div className="space-y-2">
-                                    <Label htmlFor={`province-${index}`}>Province</Label>
-                                    <Input
-                                        id={`province-${index}`}
-                                        value={item.province}
-                                        onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
-                                        placeholder="Province (ex: QC)"
-                                        className="bg-slate-800 border-slate-700"
-                                    />
+                                  <Label htmlFor={`rue-${index}`}>Rue</Label>
+                                  <Input
+                                    id={`rue-${index}`}
+                                    value={item.rue}
+                                    onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
+                                    placeholder="Nom de la rue"
+                                    className="bg-slate-800 border-slate-700"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Ville et Province */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label htmlFor={`ville-${index}`}>Ville</Label>
+                                  <Input
+                                    id={`ville-${index}`}
+                                    value={item.ville}
+                                    onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
+                                    placeholder="Ville"
+                                    className="bg-slate-800 border-slate-700"
+                                  />
                                 </div>
 
-                                {/* Code Postal */}
                                 <div className="space-y-2">
-                                    <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
-                                    <Input
-                                        id={`code-postal-${index}`}
-                                        value={item.code_postal}
-                                        onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
-                                        placeholder="Code postal"
-                                        className="bg-slate-800 border-slate-700"
-                                    />
+                                  <Label htmlFor={`province-${index}`}>Province</Label>
+                                  <Select 
+                                    value={item.province || "Québec"} 
+                                    onValueChange={(value) => updateField('adresses', index, 'province', value)}
+                                  >
+                                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                                      <SelectValue placeholder="Sélectionner une province" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                                      <SelectItem value="Alberta" className="text-white">Alberta</SelectItem>
+                                      <SelectItem value="Colombie-Britannique" className="text-white">Colombie-Britannique</SelectItem>
+                                      <SelectItem value="Île-du-Prince-Édouard" className="text-white">Île-du-Prince-Édouard</SelectItem>
+                                      <SelectItem value="Manitoba" className="text-white">Manitoba</SelectItem>
+                                      <SelectItem value="Nouveau-Brunswick" className="text-white">Nouveau-Brunswick</SelectItem>
+                                      <SelectItem value="Nouvelle-Écosse" className="text-white">Nouvelle-Écosse</SelectItem>
+                                      <SelectItem value="Nunavut" className="text-white">Nunavut</SelectItem>
+                                      <SelectItem value="Ontario" className="text-white">Ontario</SelectItem>
+                                      <SelectItem value="Saskatchewan" className="text-white">Saskatchewan</SelectItem>
+                                      <SelectItem value="Terre-Neuve-et-Labrador" className="text-white">Terre-Neuve-et-Labrador</SelectItem>
+                                      <SelectItem value="Territoires du Nord-Ouest" className="text-white">Territoires du Nord-Ouest</SelectItem>
+                                      <SelectItem value="Yukon" className="text-white">Yukon</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
+                              </div>
+
+                              {/* Code Postal */}
+                              <div className="space-y-2">
+                                <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
+                                <Input
+                                  id={`code-postal-${index}`}
+                                  value={item.code_postal}
+                                  onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
+                                  placeholder="Code postal"
+                                  className="bg-slate-800 border-slate-700"
+                                />
+                              </div>
                             </div>
 
                             <Button
@@ -549,101 +567,104 @@ export default function Clients() {
                       ))}
                     </div>
 
-                    {/* Courriels */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <Label>Courriels</Label>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => addField('courriels')}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Ajouter
-                        </Button>
-                      </div>
-                      {formData.courriels.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-start">
-                          <div className="flex-1">
-                            <Input
-                              type="email"
-                              value={item.courriel}
-                              onChange={(e) => updateField('courriels', index, 'courriel', e.target.value)}
-                              placeholder="Courriel"
-                              className="bg-slate-800 border-slate-700"
-                            />
-                          </div>
+                    {/* Courriels et Téléphones en deux colonnes */}
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Courriels */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <Label>Courriels</Label>
                           <Button
                             type="button"
                             size="sm"
-                            onClick={() => toggleActuel('courriels', index)}
-                            className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                            title={item.actuel ? "Actuel" : "Marquer comme actuel"}
+                            onClick={() => addField('courriels')}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                           >
-                            <Check className="w-4 h-4" />
+                            <Plus className="w-4 h-4 mr-1" />
+                            Ajouter
                           </Button>
-                          {formData.courriels.length > 1 && (
+                        </div>
+                        {formData.courriels.map((item, index) => (
+                          <div key={index} className="flex gap-2 items-start">
+                            <div className="flex-1">
+                              <Input
+                                type="email"
+                                value={item.courriel}
+                                onChange={(e) => updateField('courriels', index, 'courriel', e.target.value)}
+                                placeholder="Courriel"
+                                className="bg-slate-800 border-slate-700"
+                              />
+                            </div>
                             <Button
                               type="button"
                               size="sm"
-                              variant="ghost"
-                              onClick={() => removeField('courriels', index)}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              onClick={() => toggleActuel('courriels', index)}
+                              className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                              title={item.actuel ? "Actuel" : "Marquer comme actuel"}
                             >
-                              <X className="w-4 h-4" />
+                              <Check className="w-4 h-4" />
                             </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                            {formData.courriels.length > 1 && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeField('courriels', index)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-                    {/* Téléphones */}
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <Label>Téléphones</Label>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => addField('telephones')}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Ajouter
-                        </Button>
-                      </div>
-                      {formData.telephones.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-start">
-                          <div className="flex-1">
-                            <Input
-                              value={item.telephone}
-                              onChange={(e) => updateField('telephones', index, 'telephone', e.target.value)}
-                              placeholder="Téléphone"
-                              className="bg-slate-800 border-slate-700"
-                            />
-                          </div>
+                      {/* Téléphones */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <Label>Téléphones</Label>
                           <Button
                             type="button"
                             size="sm"
-                            onClick={() => toggleActuel('telephones', index)}
-                            className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                            title={item.actuel ? "Actuel" : "Marquer comme actuel"}
+                            onClick={() => addField('telephones')}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                           >
-                            <Check className="w-4 h-4" />
+                            <Plus className="w-4 h-4 mr-1" />
+                            Ajouter
                           </Button>
-                          {formData.telephones.length > 1 && (
+                        </div>
+                        {formData.telephones.map((item, index) => (
+                          <div key={index} className="flex gap-2 items-start">
+                            <div className="flex-1">
+                              <Input
+                                value={item.telephone}
+                                onChange={(e) => updateField('telephones', index, 'telephone', e.target.value)}
+                                placeholder="Téléphone"
+                                className="bg-slate-800 border-slate-700"
+                              />
+                            </div>
                             <Button
                               type="button"
                               size="sm"
-                              variant="ghost"
-                              onClick={() => removeField('telephones', index)}
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              onClick={() => toggleActuel('telephones', index)}
+                              className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                              title={item.actuel ? "Actuel" : "Marquer comme actuel"}
                             >
-                              <X className="w-4 h-4" />
+                              <Check className="w-4 h-4" />
                             </Button>
-                          )}
-                        </div>
-                      ))}
+                            {formData.telephones.length > 1 && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeField('telephones', index)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="space-y-2">
