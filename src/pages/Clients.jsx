@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -88,6 +89,45 @@ export default function Clients() {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
   });
+
+  // Helper functions - defined before use
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0) {
+      const nums = addr.numeros_civiques.filter(n => n && n.trim() !== "");
+      if (nums.length > 0) parts.push(nums.join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "-";
+  };
+
+  const getTypeColor = (type) => {
+    const colors = {
+      "Client": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      "Notaire": "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      "Courtier immobilier": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Compagnie": "bg-green-500/20 text-green-400 border-green-500/30"
+    };
+    return colors[type] || colors["Client"];
+  };
+
+  const getClientById = (id) => clients.find(c => c.id === id);
+
+  const getClientDossiers = (clientId, type = 'clients') => {
+    const field = `${type}_ids`;
+    return dossiers
+      .filter(d => d[field]?.includes(clientId))
+      .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture));
+  };
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -281,44 +321,6 @@ export default function Clients() {
         [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
       }))
     }));
-  };
-
-  const getCurrentValue = (items, key) => {
-    const current = items?.find(item => item.actuel || item.actuelle);
-    return current?.[key] || "-";
-  };
-
-  const getTypeColor = (type) => {
-    const colors = {
-      "Client": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-      "Notaire": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-      "Courtier immobilier": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-      "Compagnie": "bg-green-500/20 text-green-400 border-green-500/30"
-    };
-    return colors[type] || colors["Client"];
-  };
-
-  const getClientDossiers = (clientId, type = 'clients') => {
-    const field = `${type}_ids`;
-    return dossiers
-      .filter(d => d[field]?.includes(clientId))
-      .sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture));
-  };
-
-  const getClientById = (id) => clients.find(c => c.id === id);
-
-  const formatAdresse = (addr) => {
-    if (!addr) return "";
-    const parts = [];
-    if (addr.numeros_civiques && addr.numeros_civiques.length > 0) {
-      const nums = addr.numeros_civiques.filter(n => n && n.trim() !== "");
-      if (nums.length > 0) parts.push(nums.join(', '));
-    }
-    if (addr.rue) parts.push(addr.rue);
-    if (addr.ville) parts.push(addr.ville);
-    if (addr.province) parts.push(addr.province);
-    if (addr.code_postal) parts.push(addr.code_postal);
-    return parts.filter(p => p).join(', ');
   };
 
   const statsCards = [
@@ -639,7 +641,7 @@ export default function Clients() {
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                   <TableHead className="text-slate-300">Courriel</TableHead>
                                   <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                                </TableRow>
+                              </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {formData.courriels.map((item, index) => (
