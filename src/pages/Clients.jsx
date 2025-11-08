@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,23 +33,20 @@ export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  // Replaced viewingClientDossiers with viewingClientDetails
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
   const [viewingDossier, setViewingDossier] = useState(null);
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [filterType, setFilterType] = useState("all");
+  const [newCivicNumbers, setNewCivicNumbers] = useState([""]);
+  
   const [formData, setFormData] = useState({
     prenom: "",
     nom: "",
     type_client: "Client",
-    adresses: [{
-      ville: "",
-      numeros_civiques: [""],
-      rue: "",
-      code_postal: "",
-      province: "Québec", // Default to Quebec
-      actuelle: true
-    }],
-    courriels: [{ courriel: "", actuel: true }],
-    telephones: [{ telephone: "", actuel: true }],
+    adresses: [],
+    courriels: [],
+    telephones: [],
     notes: ""
   });
 
@@ -93,16 +89,75 @@ export default function Clients() {
     },
   });
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  const sortClients = (clientsList) => {
+    if (!sortField) return clientsList;
+
+    return [...clientsList].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortField) {
+        case 'nom':
+          aValue = `${a.prenom || ''} ${a.nom || ''}`.toLowerCase();
+          bValue = `${b.prenom || ''} ${b.nom || ''}`.toLowerCase();
+          break;
+        case 'type':
+          aValue = (a.type_client || 'Client').toLowerCase();
+          bValue = (b.type_client || 'Client').toLowerCase();
+          break;
+        case 'adresse':
+          const addrA = a.adresses?.find(addr => addr.actuelle);
+          const addrB = b.adresses?.find(addr => addr.actuelle);
+          aValue = formatAdresse(addrA).toLowerCase();
+          bValue = formatAdresse(addrB).toLowerCase();
+          break;
+        case 'courriel':
+          aValue = getCurrentValue(a.courriels, 'courriel').toLowerCase();
+          bValue = getCurrentValue(b.courriels, 'courriel').toLowerCase();
+          break;
+        case 'telephone':
+          aValue = getCurrentValue(a.telephones, 'telephone').toLowerCase();
+          bValue = getCurrentValue(b.telephones, 'telephone').toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
   const filteredClients = clients.filter(client => {
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       client.nom?.toLowerCase().includes(searchLower) ||
       client.prenom?.toLowerCase().includes(searchLower) ||
       client.type_client?.toLowerCase().includes(searchLower) ||
       client.courriels?.some(c => c.courriel?.toLowerCase().includes(searchLower)) ||
       client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower))
     );
+
+    const matchesType = filterType === "all" || client.type_client === filterType || (!client.type_client && filterType === "Client");
+
+    return matchesSearch && matchesType;
   });
+
+  const sortedClients = sortClients(filteredClients);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,14 +165,14 @@ export default function Clients() {
     const cleanedData = {
       ...formData,
       adresses: formData.adresses.filter(a =>
-        (a.numeros_civiques && a.numeros_civiques.some(n => n && n.trim() !== "")) || // Ensure n is not null/undefined
+        (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
         a.rue.trim() !== "" ||
         a.ville.trim() !== "" ||
         a.code_postal.trim() !== "" ||
         a.province.trim() !== ""
       ),
-      courriels: formData.courriels.filter(c => c.courriel && c.courriel.trim() !== ""), // Ensure c.courriel is not null/undefined
-      telephones: formData.telephones.filter(t => t.telephone && t.telephone.trim() !== "") // Ensure t.telephone is not null/undefined
+      courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
+      telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
     };
 
     if (editingClient) {
@@ -132,18 +187,12 @@ export default function Clients() {
       prenom: "",
       nom: "",
       type_client: "Client",
-      adresses: [{
-        ville: "",
-        numeros_civiques: [""],
-        rue: "",
-        code_postal: "",
-        province: "Québec",
-        actuelle: true
-      }],
-      courriels: [{ courriel: "", actuel: true }],
-      telephones: [{ telephone: "", actuel: true }],
+      adresses: [],
+      courriels: [],
+      telephones: [],
       notes: ""
     });
+    setNewCivicNumbers([""]);
     setEditingClient(null);
   };
 
@@ -159,20 +208,14 @@ export default function Clients() {
           numeros_civiques: addr.numeros_civiques && addr.numeros_civiques.length > 0 ? addr.numeros_civiques : [""],
           rue: addr.rue || "",
           code_postal: addr.code_postal || "",
-          province: addr.province || "Québec",
+          province: addr.province || "",
           actuelle: addr.actuelle
-        })) : [{
-          ville: "",
-          numeros_civiques: [""],
-          rue: "",
-          code_postal: "",
-          province: "Québec",
-          actuelle: true
-        }],
-      courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [{ courriel: "", actuel: true }],
-      telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [{ telephone: "", actuel: true }],
+        })) : [],
+      courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [],
+      telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [],
       notes: client.notes || ""
     });
+    setNewCivicNumbers([""]);
     setIsDialogOpen(true);
   };
 
@@ -182,20 +225,53 @@ export default function Clients() {
     }
   };
 
-  // Simplified removeField: now allows removing the last item, as new UI expects this
+  const addField = (fieldName) => {
+    if (fieldName === 'adresses') {
+      setFormData(prev => ({
+        ...prev,
+        adresses: [...prev.adresses, {
+          ville: "",
+          numeros_civiques: [""],
+          rue: "",
+          code_postal: "",
+          province: "",
+          actuelle: false
+        }]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+      }));
+    }
+  };
+
   const removeField = (fieldName, index) => {
     setFormData(prev => ({
       ...prev,
       [fieldName]: prev[fieldName].filter((_, i) => i !== index)
     }));
   };
-  
-  // The following functions (addField, updateField, updateAddress, updateCivicNumber, addCivicNumber, removeCivicNumber)
-  // are no longer needed for direct interaction in the form, as the UI has changed to use explicit "add" inputs and table displays.
-  // The logic for adding new items is now integrated directly into the "Ajouter cette adresse", "Ajouter" (courriel), and "Ajouter" (téléphone) buttons.
-  // The handleEdit function correctly populates the formData for existing clients, and the tables will display this.
-  // Direct inline editing of individual properties in the list is no longer supported by the new UI.
-  // So, these functions are removed.
+
+  const updateField = (fieldName, index, key, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: prev[fieldName].map((item, i) =>
+        i === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const updateAddress = (index, newAddresses) => {
+    if (newAddresses && newAddresses[0]) {
+      setFormData(prev => ({
+        ...prev,
+        adresses: prev.adresses.map((item, i) =>
+          i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item
+        )
+      }));
+    }
+  };
 
   const toggleActuel = (fieldName, index) => {
     setFormData(prev => ({
@@ -351,15 +427,46 @@ export default function Clients() {
                       <div className="p-3 bg-slate-800/30 rounded-lg space-y-3">
                         <div className="grid grid-cols-[200px_1fr] gap-3">
                           <div className="space-y-2">
-                            <Label htmlFor="new-civic">Numéro(s) civique(s)</Label>
-                            <Input
-                              id="new-civic"
-                              placeholder="Ex: 123"
-                              className="bg-slate-800 border-slate-700"
-                            />
+                            <Label>Numéro(s) civique(s)</Label>
+                            {newCivicNumbers.map((num, idx) => (
+                              <div key={idx} className="flex gap-2 mb-2">
+                                <Input
+                                  value={num}
+                                  onChange={(e) => {
+                                    const updated = [...newCivicNumbers];
+                                    updated[idx] = e.target.value;
+                                    setNewCivicNumbers(updated);
+                                  }}
+                                  placeholder="Ex: 123"
+                                  className="bg-slate-800 border-slate-700"
+                                />
+                                {newCivicNumbers.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setNewCivicNumbers(newCivicNumbers.filter((_, i) => i !== idx));
+                                    }}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => setNewCivicNumbers([...newCivicNumbers, ""])}
+                              className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Ajouter un numéro
+                            </Button>
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="new-rue">Rue</Label>
+                            <Label>Rue</Label>
                             <Input
                               id="new-rue"
                               placeholder="Nom de la rue"
@@ -370,7 +477,7 @@ export default function Clients() {
                         
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
-                            <Label htmlFor="new-ville">Ville</Label>
+                            <Label>Ville</Label>
                             <Input
                               id="new-ville"
                               placeholder="Ville"
@@ -378,10 +485,9 @@ export default function Clients() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="new-province">Province</Label>
-                            {/* To get value from document.getElementById, we add an ID to SelectTrigger */}
-                            <Select defaultValue="Québec">
-                              <SelectTrigger id="new-province-trigger" className="bg-slate-800 border-slate-700 text-white">
+                            <Label>Province</Label>
+                            <Select id="new-province" defaultValue="Québec">
+                              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                                 <SelectValue placeholder="Sélectionner une province" />
                               </SelectTrigger>
                               <SelectContent className="bg-slate-800 border-slate-700">
@@ -404,7 +510,7 @@ export default function Clients() {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor="new-code-postal">Code Postal</Label>
+                          <Label>Code Postal</Label>
                           <Input
                             id="new-code-postal"
                             placeholder="Code postal"
@@ -416,19 +522,18 @@ export default function Clients() {
                           type="button"
                           size="sm"
                           onClick={() => {
-                            const civic = document.getElementById('new-civic').value;
+                            const civicsFiltered = newCivicNumbers.filter(c => c.trim());
                             const rue = document.getElementById('new-rue').value;
                             const ville = document.getElementById('new-ville').value;
-                            // Retrieve the selected value from the SelectTrigger's data-value attribute
-                            const provinceTrigger = document.getElementById('new-province-trigger');
-                            const province = provinceTrigger ? provinceTrigger.dataset.value : "Québec";
+                            const provinceSelect = document.querySelector('[id="new-province"]');
+                            const province = provinceSelect?.textContent || "Québec";
                             const codePostal = document.getElementById('new-code-postal').value;
                             
-                            if (civic.trim() || rue.trim() || ville.trim() || codePostal.trim()) {
+                            if (civicsFiltered.length > 0 || rue || ville) {
                               setFormData(prev => ({
                                 ...prev,
                                 adresses: [...prev.adresses, {
-                                  numeros_civiques: civic ? civic.split(',').map(s => s.trim()).filter(Boolean) : [""],
+                                  numeros_civiques: civicsFiltered.length > 0 ? civicsFiltered : [""],
                                   rue,
                                   ville,
                                   province,
@@ -436,14 +541,11 @@ export default function Clients() {
                                   actuelle: false
                                 }]
                               }));
-                                
+                              
                               // Clear inputs
-                              document.getElementById('new-civic').value = "";
+                              setNewCivicNumbers([""]);
                               document.getElementById('new-rue').value = "";
                               document.getElementById('new-ville').value = "";
-                              // Reset Select component using a temporary state or external reset logic if needed,
-                              // but for this direct DOM manipulation approach, it's harder.
-                              // For simplicity, we just clear other inputs.
                               document.getElementById('new-code-postal').value = "";
                             }
                           }}
@@ -461,36 +563,35 @@ export default function Clients() {
                             <TableHeader>
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                 <TableHead className="text-slate-300">Adresse complète</TableHead>
-                                <TableHead className="text-slate-300 text-center">Actuelle</TableHead>
                                 <TableHead className="text-slate-300 text-right">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {formData.adresses.map((addr, index) => (
                                 <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-white text-sm">
+                                  <TableCell className="text-white">
                                     {formatAdresse(addr) || "-"}
                                   </TableCell>
-                                  <TableCell className="text-center">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => toggleActuel('adresses', index)}
-                                      className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                    >
-                                      <Check className="w-4 h-4" />
-                                    </Button>
-                                  </TableCell>
                                   <TableCell className="text-right">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeField('adresses', index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => toggleActuel('adresses', index)}
+                                        className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => removeField('adresses', index)}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -500,7 +601,7 @@ export default function Clients() {
                       )}
                     </div>
 
-                    {/* Courriels et Téléphones en deux colonnes - JUSTE AVANT LES BOUTONS */}
+                    {/* Courriels et Téléphones en deux colonnes */}
                     <div className="grid grid-cols-2 gap-6">
                       {/* Courriels */}
                       <div className="space-y-3">
@@ -537,7 +638,6 @@ export default function Clients() {
                               <TableHeader>
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                   <TableHead className="text-slate-300">Courriel</TableHead>
-                                  <TableHead className="text-slate-300 text-center">Actuel</TableHead>
                                   <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                 </TableRow>
                               </TableHeader>
@@ -545,26 +645,26 @@ export default function Clients() {
                                 {formData.courriels.map((item, index) => (
                                   <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
                                     <TableCell className="text-white text-sm">{item.courriel}</TableCell>
-                                    <TableCell className="text-center">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('courriels', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
-                                    </TableCell>
                                     <TableCell className="text-right">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeField('courriels', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => toggleActuel('courriels', index)}
+                                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                        >
+                                          <Check className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => removeField('courriels', index)}
+                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -608,7 +708,6 @@ export default function Clients() {
                               <TableHeader>
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                   <TableHead className="text-slate-300">Téléphone</TableHead>
-                                  <TableHead className="text-slate-300 text-center">Actuel</TableHead>
                                   <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                 </TableRow>
                               </TableHeader>
@@ -616,26 +715,26 @@ export default function Clients() {
                                 {formData.telephones.map((item, index) => (
                                   <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
                                     <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                                    <TableCell className="text-center">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('telephones', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
-                                    </TableCell>
                                     <TableCell className="text-right">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeField('telephones', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => toggleActuel('telephones', index)}
+                                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                        >
+                                          <Check className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => removeField('telephones', index)}
+                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -667,6 +766,7 @@ export default function Clients() {
                     <CommentairesSectionClient
                       clientId={editingClient?.id}
                       clientTemporaire={!editingClient}
+                      clientNom={editingClient ? `${editingClient.prenom} ${editingClient.nom}` : `${formData.prenom} ${formData.nom}`.trim() || "Nouveau client"}
                     />
                   </div>
                 </div>
@@ -701,14 +801,28 @@ export default function Clients() {
           <CardHeader className="border-b border-slate-800">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
               <CardTitle className="text-xl font-bold text-white">Liste des clients</CardTitle>
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                />
+              <div className="flex gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:flex-initial md:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                  />
+                </div>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                    <SelectItem value="Client" className="text-white">Client</SelectItem>
+                    <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                    <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                    <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>
@@ -717,20 +831,49 @@ export default function Clients() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300">Nom complet</TableHead>
-                    <TableHead className="text-slate-300">Type</TableHead>
-                    <TableHead className="text-slate-300">Adresse actuelle</TableHead>
-                    <TableHead className="text-slate-300">Courriel actuel</TableHead>
-                    <TableHead className="text-slate-300">Téléphone actuel</TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('nom')}
+                    >
+                      Nom complet {getSortIcon('nom')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('type')}
+                    >
+                      Type {getSortIcon('type')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('adresse')}
+                    >
+                      Adresse actuelle {getSortIcon('adresse')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('courriel')}
+                    >
+                      Courriel actuel {getSortIcon('courriel')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('telephone')}
+                    >
+                      Téléphone actuel {getSortIcon('telephone')}
+                    </TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredClients.map((client) => {
+                  {sortedClients.map((client) => {
                     const adresseActuelle = client.adresses?.find(a => a.actuelle);
 
                     return (
-                      <TableRow key={client.id} className="hover:bg-slate-800/30 border-slate-800">
+                      <TableRow 
+                        key={client.id} 
+                        className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                        onClick={() => setViewingClientDetails(client)}
+                      >
                         <TableCell className="font-medium text-white">
                           {client.prenom} {client.nom}
                         </TableCell>
@@ -759,17 +902,8 @@ export default function Clients() {
                             {getCurrentValue(client.telephones, 'telephone')}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              // Changed from setViewingClientDossiers to setViewingClientDetails
-                              onClick={() => setViewingClientDetails(client)}
-                              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -813,8 +947,6 @@ export default function Clients() {
                   onViewDossier={(dossier) => {
                     setViewingClientDetails(null);
                     setViewingDossier(dossier);
-                    // The line setIsViewDialogOpen(true); was explicitly removed here as 'viewingDossier' state directly controls the dialog open state.
-                    // Adding setIsViewDialogOpen(true) would require defining and managing an unnecessary state variable.
                   }}
                 />
               )}
