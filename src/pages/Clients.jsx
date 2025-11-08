@@ -782,13 +782,13 @@ export default function Clients() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden">
-            <DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            <div className="h-[calc(90vh-120px)] overflow-hidden">
+            <div className="h-[calc(90vh-100px)] overflow-hidden p-6">
               {viewingClientDetails && (
                 <ClientDetailView
                   client={viewingClientDetails}
@@ -796,7 +796,8 @@ export default function Clients() {
                   onViewDossier={(dossier) => {
                     setViewingClientDetails(null);
                     setViewingDossier(dossier);
-                    // No need for setIsViewDialogOpen as viewingDossier directly controls dialog visibility
+                    // The line setIsViewDialogOpen(true); was removed as it refers to an undefined state setter and is not necessary.
+                    // The Dossier Dialog is controlled by the 'viewingDossier' state directly.
                   }}
                 />
               )}
