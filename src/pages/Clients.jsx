@@ -35,7 +35,7 @@ export default function Clients() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   // Replaced viewingClientDossiers with viewingClientDetails
-  const [viewingClientDetails, setViewingClientDetails] = useState(null); 
+  const [viewingClientDetails, setViewingClientDetails] = useState(null);
   const [viewingDossier, setViewingDossier] = useState(null);
   const [formData, setFormData] = useState({
     prenom: "",
@@ -503,8 +503,8 @@ export default function Clients() {
 
                                 <div className="space-y-2">
                                   <Label htmlFor={`province-${index}`}>Province</Label>
-                                  <Select 
-                                    value={item.province || "Québec"} 
+                                  <Select
+                                    value={item.province || "Québec"}
                                     onValueChange={(value) => updateField('adresses', index, 'province', value)}
                                   >
                                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
@@ -567,7 +567,17 @@ export default function Clients() {
                       ))}
                     </div>
 
-                    {/* Courriels et Téléphones en deux colonnes */}
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Notes</Label>
+                      <Textarea
+                        id="notes"
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        className="bg-slate-800 border-slate-700 h-24"
+                      />
+                    </div>
+
+                    {/* Courriels et Téléphones en deux colonnes - JUSTE AVANT LES BOUTONS */}
                     <div className="grid grid-cols-2 gap-6">
                       {/* Courriels */}
                       <div className="space-y-3">
@@ -665,16 +675,6 @@ export default function Clients() {
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Notes</Label>
-                      <Textarea
-                        id="notes"
-                        value={formData.notes}
-                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                        className="bg-slate-800 border-slate-700 h-24"
-                      />
                     </div>
                   </form>
 
