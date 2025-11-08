@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { format } = from "date-fns";
 import { fr } from "date-fns/locale";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
@@ -782,13 +782,13 @@ export default function Clients() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-4 border-b border-slate-800">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            <div className="h-[calc(90vh-100px)] overflow-hidden p-6">
+            <div className="flex-1 overflow-hidden p-6">
               {viewingClientDetails && (
                 <ClientDetailView
                   client={viewingClientDetails}
@@ -796,8 +796,8 @@ export default function Clients() {
                   onViewDossier={(dossier) => {
                     setViewingClientDetails(null);
                     setViewingDossier(dossier);
-                    // The line setIsViewDialogOpen(true); was removed as it refers to an undefined state setter and is not necessary.
-                    // The Dossier Dialog is controlled by the 'viewingDossier' state directly.
+                    // The line setIsViewDialogOpen(true); was explicitly removed here as 'viewingDossier' state directly controls the dialog open state.
+                    // Adding setIsViewDialogOpen(true) would require defining and managing an unnecessary state variable.
                   }}
                 />
               )}
