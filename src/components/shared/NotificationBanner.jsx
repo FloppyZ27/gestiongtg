@@ -12,6 +12,7 @@ import { createPageUrl } from "@/utils";
 export default function NotificationBanner({ user }) {
   const navigate = useNavigate();
   const [visibleNotification, setVisibleNotification] = useState(null);
+  const [dismissedIds, setDismissedIds] = useState(new Set());
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications', user?.email],
@@ -22,8 +23,10 @@ export default function NotificationBanner({ user }) {
   });
 
   useEffect(() => {
-    // Afficher seulement la dernière notification
-    if (notifications.length > 0 && (!visibleNotification || visibleNotification.id !== notifications[0].id)) {
+    // Afficher seulement la dernière notification si elle n'a pas été dismissed
+    if (notifications.length > 0 && 
+        (!visibleNotification || visibleNotification.id !== notifications[0].id) &&
+        !dismissedIds.has(notifications[0].id)) {
       setVisibleNotification(notifications[0]);
       
       // Supprimer la notification après 5 secondes
@@ -31,10 +34,11 @@ export default function NotificationBanner({ user }) {
         setVisibleNotification(null);
       }, 5000);
     }
-  }, [notifications]);
+  }, [notifications, dismissedIds]);
 
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
+    setDismissedIds(prev => new Set([...prev, notificationId]));
     setVisibleNotification(null);
   };
 

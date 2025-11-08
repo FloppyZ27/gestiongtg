@@ -33,7 +33,8 @@ export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [viewingClientDossiers, setViewingClientDossiers] = useState(null);
+  // Replaced viewingClientDossiers with viewingClientDetails
+  const [viewingClientDetails, setViewingClientDetails] = useState(null); 
   const [viewingDossier, setViewingDossier] = useState(null);
   const [formData, setFormData] = useState({
     prenom: "",
@@ -746,7 +747,8 @@ export default function Clients() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setViewingClientDossiers(client)}
+                              // Changed from setViewingClientDossiers to setViewingClientDetails
+                              onClick={() => setViewingClientDetails(client)}
                               className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
                             >
                               <Eye className="w-4 h-4" />
@@ -778,56 +780,26 @@ export default function Clients() {
           </CardContent>
         </Card>
 
-        {/* Client Dossiers Dialog */}
-        <Dialog open={!!viewingClientDossiers} onOpenChange={(open) => !open && setViewingClientDossiers(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+        {/* Client Details Dialog */}
+        <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="text-2xl">
-                Dossiers de {viewingClientDossiers?.prenom} {viewingClientDossiers?.nom}
+                Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              {viewingClientDossiers && getClientDossiers(
-                viewingClientDossiers.id,
-                viewingClientDossiers.type_client === 'Notaire' ? 'notaires' :
-                viewingClientDossiers.type_client === 'Courtier immobilier' ? 'courtiers' : 'clients'
-              ).map((dossier) => (
-                <Card
-                  key={dossier.id}
-                  className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
-                  onClick={() => setViewingDossier(dossier)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-white text-lg mb-2">
-                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                        </h4>
-                        <div className="space-y-1 text-sm">
-                          <p className="text-slate-400">
-                            Arpenteur: <span className="text-white">{dossier.arpenteur_geometre}</span>
-                          </p>
-                          <p className="text-slate-400">
-                            Date d'ouverture: <span className="text-white">
-                              {format(new Date(dossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
-                            </span>
-                          </p>
-                          {dossier.mandats && dossier.mandats.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {dossier.mandats.map((mandat, idx) => (
-                                <Badge key={idx} className="bg-emerald-500/20 text-emerald-400">
-                                  {mandat.type_mandat}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <Eye className="w-4 h-4 text-slate-400 ml-2 flex-shrink-0" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="h-[calc(90vh-120px)] overflow-hidden">
+              {viewingClientDetails && (
+                <ClientDetailView
+                  client={viewingClientDetails}
+                  onClose={() => setViewingClientDetails(null)}
+                  onViewDossier={(dossier) => {
+                    setViewingClientDetails(null);
+                    setViewingDossier(dossier);
+                    // No need for setIsViewDialogOpen as viewingDossier directly controls dialog visibility
+                  }}
+                />
+              )}
             </div>
           </DialogContent>
         </Dialog>
