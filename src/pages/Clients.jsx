@@ -16,6 +16,7 @@ import { format } from "date-fns"; // Corrected import statement
 import { fr } from "date-fns/locale";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
+import CommentairesSectionClient from "../components/clients/CommentairesSectionClient"; // Added import for the new component
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -366,294 +367,320 @@ export default function Clients() {
                 Nouveau client
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+              <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingClient ? "Modifier le client" : "Nouveau client"}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
-                    <Input
-                      id="prenom"
-                      value={formData.prenom}
-                      onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                      required
-                      className="bg-slate-800 border-slate-700"
-                    />
+
+              <div className="flex h-[90vh]">
+                {/* Main form content - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">
+                      {editingClient ? "Modifier le client" : "Nouveau client"}
+                    </h2>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="nom">Nom <span className="text-red-400">*</span></Label>
-                    <Input
-                      id="nom"
-                      value={formData.nom}
-                      onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                      required
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="type_client">Type de client</Label>
-                  <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner le type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Client" className="text-white">Client</SelectItem>
-                      <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                      <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                      <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
+                        <Input
+                          id="prenom"
+                          value={formData.prenom}
+                          onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                          required
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="nom">Nom <span className="text-red-400">*</span></Label>
+                        <Input
+                          id="nom"
+                          value={formData.nom}
+                          onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                          required
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                    </div>
 
-                {/* Adresses */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Adresses</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => addField('adresses')}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
-                  {formData.adresses.map((item, index) => (
-                    <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
-                      <div className="flex gap-2 items-start">
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* Numéros Civiques */}
-                            <div className="space-y-2 col-span-2">
-                                <Label>Numéro(s) civique(s)</Label>
-                                {item.numeros_civiques.map((num, civicIdx) => (
-                                    <div key={civicIdx} className="flex gap-2">
-                                        <Input
-                                            value={num}
-                                            onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
-                                            placeholder="Numéro civique"
-                                            className="bg-slate-800 border-slate-700"
-                                        />
-                                        {item.numeros_civiques.length > 1 && (
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => removeCivicNumber(index, civicIdx)}
-                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                ))}
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => addCivicNumber(index)}
-                                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1"
-                                >
-                                  <Plus className="w-4 h-4 mr-1" />
-                                  Ajouter un numéro
-                                </Button>
-                            </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type_client">Type de client</Label>
+                      <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner le type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="Client" className="text-white">Client</SelectItem>
+                          <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                          <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                          <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                            {/* Rue */}
-                            <div className="space-y-2 col-span-2">
-                                <Label htmlFor={`rue-${index}`}>Rue</Label>
-                                <Input
-                                    id={`rue-${index}`}
-                                    value={item.rue}
-                                    onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
-                                    placeholder="Nom de la rue"
-                                    className="bg-slate-800 border-slate-700"
-                                />
-                            </div>
-
-                            {/* Ville */}
-                            <div className="space-y-2">
-                                <Label htmlFor={`ville-${index}`}>Ville</Label>
-                                <Input
-                                    id={`ville-${index}`}
-                                    value={item.ville}
-                                    onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
-                                    placeholder="Ville"
-                                    className="bg-slate-800 border-slate-700"
-                                />
-                            </div>
-
-                            {/* Province */}
-                            <div className="space-y-2">
-                                <Label htmlFor={`province-${index}`}>Province</Label>
-                                <Input
-                                    id={`province-${index}`}
-                                    value={item.province}
-                                    onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
-                                    placeholder="Province (ex: QC)"
-                                    className="bg-slate-800 border-slate-700"
-                                />
-                            </div>
-
-                            {/* Code Postal */}
-                            <div className="space-y-2">
-                                <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
-                                <Input
-                                    id={`code-postal-${index}`}
-                                    value={item.code_postal}
-                                    onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
-                                    placeholder="Code postal"
-                                    className="bg-slate-800 border-slate-700"
-                                />
-                            </div>
-                        </div> {/* end of flex-1 grid */}
-
+                    {/* Adresses */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label>Adresses</Label>
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => toggleActuel('adresses', index)}
-                          className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                          title={item.actuelle ? "Actuelle" : "Marquer comme actuelle"}
+                          onClick={() => addField('adresses')}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                         >
-                          <Check className="w-4 h-4" />
+                          <Plus className="w-4 h-4 mr-1" />
+                          Ajouter
                         </Button>
-                        {formData.adresses.length > 1 && (
+                      </div>
+                      {formData.adresses.map((item, index) => (
+                        <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                          <div className="flex gap-2 items-start">
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {/* Numéros Civiques */}
+                                <div className="space-y-2 col-span-2">
+                                    <Label>Numéro(s) civique(s)</Label>
+                                    {item.numeros_civiques.map((num, civicIdx) => (
+                                        <div key={civicIdx} className="flex gap-2">
+                                            <Input
+                                                value={num}
+                                                onChange={(e) => updateCivicNumber(index, civicIdx, e.target.value)}
+                                                placeholder="Numéro civique"
+                                                className="bg-slate-800 border-slate-700"
+                                            />
+                                            {item.numeros_civiques.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => removeCivicNumber(index, civicIdx)}
+                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => addCivicNumber(index)}
+                                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 mt-1"
+                                    >
+                                      <Plus className="w-4 h-4 mr-1" />
+                                      Ajouter un numéro
+                                    </Button>
+                                </div>
+
+                                {/* Rue */}
+                                <div className="space-y-2 col-span-2">
+                                    <Label htmlFor={`rue-${index}`}>Rue</Label>
+                                    <Input
+                                        id={`rue-${index}`}
+                                        value={item.rue}
+                                        onChange={(e) => updateField('adresses', index, 'rue', e.target.value)}
+                                        placeholder="Nom de la rue"
+                                        className="bg-slate-800 border-slate-700"
+                                    />
+                                </div>
+
+                                {/* Ville */}
+                                <div className="space-y-2">
+                                    <Label htmlFor={`ville-${index}`}>Ville</Label>
+                                    <Input
+                                        id={`ville-${index}`}
+                                        value={item.ville}
+                                        onChange={(e) => updateField('adresses', index, 'ville', e.target.value)}
+                                        placeholder="Ville"
+                                        className="bg-slate-800 border-slate-700"
+                                    />
+                                </div>
+
+                                {/* Province */}
+                                <div className="space-y-2">
+                                    <Label htmlFor={`province-${index}`}>Province</Label>
+                                    <Input
+                                        id={`province-${index}`}
+                                        value={item.province}
+                                        onChange={(e) => updateField('adresses', index, 'province', e.target.value)}
+                                        placeholder="Province (ex: QC)"
+                                        className="bg-slate-800 border-slate-700"
+                                    />
+                                </div>
+
+                                {/* Code Postal */}
+                                <div className="space-y-2">
+                                    <Label htmlFor={`code-postal-${index}`}>Code Postal</Label>
+                                    <Input
+                                        id={`code-postal-${index}`}
+                                        value={item.code_postal}
+                                        onChange={(e) => updateField('adresses', index, 'code_postal', e.target.value)}
+                                        placeholder="Code postal"
+                                        className="bg-slate-800 border-slate-700"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => toggleActuel('adresses', index)}
+                              className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                              title={item.actuelle ? "Actuelle" : "Marquer comme actuelle"}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            {formData.adresses.length > 1 && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeField('adresses', index)}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Courriels */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label>Courriels</Label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => addField('courriels')}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Ajouter
+                        </Button>
+                      </div>
+                      {formData.courriels.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <Input
+                              type="email"
+                              value={item.courriel}
+                              onChange={(e) => updateField('courriels', index, 'courriel', e.target.value)}
+                              placeholder="Courriel"
+                              className="bg-slate-800 border-slate-700"
+                            />
+                          </div>
                           <Button
                             type="button"
                             size="sm"
-                            variant="ghost"
-                            onClick={() => removeField('adresses', index)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => toggleActuel('courriels', index)}
+                            className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                            title={item.actuel ? "Actuel" : "Marquer comme actuel"}
                           >
-                            <X className="w-4 h-4" />
+                            <Check className="w-4 h-4" />
                           </Button>
-                        )}
-                      </div> {/* end of flex gap-2 items-start */}
+                          {formData.courriels.length > 1 && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeField('courriels', index)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                {/* Courriels */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Courriels</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => addField('courriels')}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
-                  {formData.courriels.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-start">
-                      <div className="flex-1">
-                        <Input
-                          type="email"
-                          value={item.courriel}
-                          onChange={(e) => updateField('courriels', index, 'courriel', e.target.value)}
-                          placeholder="Courriel"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => toggleActuel('courriels', index)}
-                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                        title={item.actuel ? "Actuel" : "Marquer comme actuel"}
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      {formData.courriels.length > 1 && (
+                    {/* Téléphones */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label>Téléphones</Label>
                         <Button
                           type="button"
                           size="sm"
-                          variant="ghost"
-                          onClick={() => removeField('courriels', index)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          onClick={() => addField('telephones')}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                         >
-                          <X className="w-4 h-4" />
+                          <Plus className="w-4 h-4 mr-1" />
+                          Ajouter
                         </Button>
-                      )}
+                      </div>
+                      {formData.telephones.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <Input
+                              value={item.telephone}
+                              onChange={(e) => updateField('telephones', index, 'telephone', e.target.value)}
+                              placeholder="Téléphone"
+                              className="bg-slate-800 border-slate-700"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => toggleActuel('telephones', index)}
+                            className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
+                            title={item.actuel ? "Actuel" : "Marquer comme actuel"}
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          {formData.telephones.length > 1 && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeField('telephones', index)}
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                {/* Téléphones */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Téléphones</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => addField('telephones')}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Notes</Label>
+                      <Textarea
+                        id="notes"
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        className="bg-slate-800 border-slate-700 h-24"
+                      />
+                    </div>
+                  </form>
+
+                  {/* Boutons Annuler/Créer tout en bas */}
+                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      {editingClient ? "Modifier" : "Créer"}
                     </Button>
                   </div>
-                  {formData.telephones.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-start">
-                      <div className="flex-1">
-                        <Input
-                          value={item.telephone}
-                          onChange={(e) => updateField('telephones', index, 'telephone', e.target.value)}
-                          placeholder="Téléphone"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => toggleActuel('telephones', index)}
-                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30`}
-                        title={item.actuel ? "Actuel" : "Marquer comme actuel"}
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      {formData.telephones.length > 1 && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => removeField('telephones', index)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-slate-800 border-slate-700 h-24"
-                  />
+                {/* Right side - Commentaires Sidebar - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    <CommentairesSectionClient
+                      clientId={editingClient?.id}
+                      clientTemporaire={!editingClient}
+                    />
+                  </div>
                 </div>
-
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingClient ? "Modifier" : "Créer"}
-                  </Button>
-                </div>
-              </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
