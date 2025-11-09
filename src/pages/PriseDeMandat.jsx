@@ -1635,6 +1635,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
+                                }
                                 </div>
 
                                 <div className="space-y-2">
@@ -2519,120 +2520,236 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
-        {/* View Dossier Dialog (Keep if still needed for other contexts) */}
+        {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
             {viewingDossier && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-slate-400">Arpenteur-géomètre</p>
-                    <p className="text-white font-medium">{viewingDossier.arpenteur_geometre}</p>
+              <div className="flex h-[90vh]">
+                {/* Main content - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">
+                      Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
+                    </h2>
                   </div>
-                  <div>
-                    <p className="text-slate-400">Statut</p>
-                    <Badge variant="outline" className={`${getStatutBadgeColor(viewingDossier.statut)} border`}>
-                      {viewingDossier.statut}
-                    </Badge>
-                  </div>
-                  {viewingDossier.numero_dossier && (
-                    <div>
-                      <p className="text-slate-400">Numéro de dossier</p>
-                      <p className="text-white font-medium">{getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}</p>
+
+                  <div className="space-y-6">
+                    {/* Informations principales */}
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                      <div>
+                        <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                        <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Statut</Label>
+                        <div className="mt-1">
+                          <Badge variant="outline" className={`${getStatutBadgeColor(viewingDossier.statut)} border`}>
+                            {viewingDossier.statut}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Date de création</Label>
+                        <p className="text-white font-medium mt-1">
+                          {viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                  <div>
-                    <p className="text-slate-400">Date d'ouverture</p>
-                    <p className="text-white font-medium">{viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
-                  </div>
-                  {viewingDossier.utilisateur_assigne && ( // NEW: Display assigned user
-                    <div>
-                      <p className="text-slate-400">Utilisateur assigné</p>
-                      <p className="text-white font-medium">
-                        {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
-                      </p>
+
+                    {viewingDossier.utilisateur_assigne && (
+                      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <Label className="text-slate-400 text-sm">Utilisateur assigné</Label>
+                        <p className="text-white font-medium mt-1">
+                          {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
+                        </p>
+                      </div>
+                    )}
+
+                    {viewingDossier.description && (
+                      <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                        <Label className="text-slate-400 text-sm">Description</Label>
+                        <p className="text-white mt-2 whitespace-pre-wrap">{viewingDossier.description}</p>
+                      </div>
+                    )}
+
+                    {/* Clients, Notaires, Courtiers */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.clients_ids.map(clientId => {
+                              const client = getClientById(clientId);
+                              return client ? (
+                                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start">
+                                  {client.prenom} {client.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.notaires_ids.map(notaireId => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ? (
+                                <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start">
+                                  {notaire.prenom} {notaire.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.courtiers_ids.map(courtierId => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ? (
+                                <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start">
+                                  {courtier.prenom} {courtier.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+
+                    {/* Mandats */}
+                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
+                      <div>
+                        <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
+                        <div className="space-y-3">
+                          {viewingDossier.mandats.map((mandat, index) => (
+                            <Card key={index} className="bg-slate-800/50 border-slate-700">
+                              <CardContent className="p-4 space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
+                                  {mandat.prix_estime > 0 && (
+                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
+                                      {mandat.prix_estime.toFixed(2)} $
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {mandat.lots && mandat.lots.length > 0 && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Lots</Label>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {mandat.lots.map((lotId) => {
+                                          const lot = getLotById(lotId);
+                                          return (
+                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                              {lot?.numero_lot || lotId}
+                                            </Badge>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Dates */}
+                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
+                                  {mandat.date_ouverture && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Ouverture</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_signature && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Signature</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_debut_travaux && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Début travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_livraison && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Livraison</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Tarification */}
+                                {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
+                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
+                                    {mandat.prix_estime > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Prix estimé</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.prix_estime.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    {mandat.rabais > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Rabais</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.rabais.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Taxes</Label>
+                                      <p className="text-slate-300 text-sm mt-1">
+                                        {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Boutons Fermer/Modifier tout en bas */}
+                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                      Fermer
+                    </Button>
+                    <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </Button>
+                  </div>
                 </div>
 
-                {viewingDossier.description && ( // Changed from notes_retour_appel
-                  <div className="space-y-2">
-                    <p className="text-slate-400">Description</p> {/* Changed label */}
-                    <p className="text-white">{viewingDossier.description}</p> {/* Changed field */}
+                {/* Right side - Commentaires Sidebar - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
-                )}
-
-                <div className="space-y-2">
-                  <p className="text-slate-400">Clients</p>
-                  <div className="flex flex-wrap gap-2">
-                    {viewingDossier.clients_ids?.map(clientId => {
-                      const client = getClientById(clientId);
-                      return client ? (
-                        <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border">
-                          {client.prenom} {client.nom}
-                        </Badge>
-                      ) : null;
-                    })}
+                  <div className="flex-1 overflow-hidden">
+                    <CommentairesSection
+                      dossierId={viewingDossier?.id}
+                      dossierTemporaire={false}
+                    />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-slate-400">Notaires</p>
-                  <div className="flex flex-wrap gap-2">
-                    {viewingDossier.notaires_ids?.map(notaireId => {
-                      const notaire = getClientById(notaireId);
-                      return notaire ? (
-                        <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
-                          {notaire.prenom} {notaire.nom}
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-slate-400">Courtiers</p>
-                  <div className="flex flex-wrap gap-2">
-                    {viewingDossier.courtiers_ids?.map(courtierId => {
-                      const courtier = getClientById(courtierId);
-                      return courtier ? (
-                        <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border">
-                          {courtier.prenom} {courtier.nom}
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-
-                {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-slate-400">Mandats</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {viewingDossier.mandats.map((mandat, index) => (
-                        <Card key={index} className="bg-slate-800/50 border-slate-700">
-                          <CardContent className="p-4 space-y-2">
-                            <p className="text-white font-medium">{mandat.type_mandat || `Mandat ${index + 1}`}</p>
-                            <p className="text-slate-400 text-sm">Adresse: {formatAdresse(mandat.adresse_travaux) || '-'}</p>
-                            <p className="text-slate-400 text-sm">Lots: {mandat.lots && mandat.lots.length > 0 ? mandat.lots.map(id => getLotById(id)?.numero_lot || id).join(', ') : '-'}</p>
-                            <p className="text-slate-400 text-sm">Prix estimé: {mandat.prix_estime ? `${mandat.prix_estime}$` : '-'}</p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                    Fermer
-                  </Button>
-                  <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Modifier
-                  </Button>
                 </div>
               </div>
             )}
