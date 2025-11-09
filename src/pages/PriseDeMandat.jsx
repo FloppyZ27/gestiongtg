@@ -2862,7 +2862,11 @@ export default function PriseDeMandat() {
                     </TableHeader>
                     <TableBody>
                       {sortedRetourAppel.map((dossier) => (
-                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableRow 
+                          key={dossier.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleView(dossier)}
+                        >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
@@ -2902,7 +2906,7 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="ghost"
@@ -2978,7 +2982,11 @@ export default function PriseDeMandat() {
                     </TableHeader>
                     <TableBody>
                       {sortedNouveauMandat.map((dossier) => (
-                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableRow 
+                          key={dossier.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleView(dossier)}
+                        >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
@@ -3013,7 +3021,7 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="ghost"
@@ -3089,7 +3097,11 @@ export default function PriseDeMandat() {
                     </TableHeader>
                     <TableBody>
                       {sortedMandatNonOctroye.map((dossier) => (
-                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableRow 
+                          key={dossier.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleView(dossier)}
+                        >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
@@ -3124,7 +3136,7 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="ghost"
@@ -3200,7 +3212,11 @@ export default function PriseDeMandat() {
                     </TableHeader>
                     <TableBody>
                       {sortedSoumission.map((dossier) => (
-                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableRow 
+                          key={dossier.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleView(dossier)}
+                        >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                               {dossier.numero_dossier
@@ -3235,7 +3251,7 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="ghost"
