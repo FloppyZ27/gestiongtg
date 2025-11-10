@@ -158,6 +158,10 @@ export default function PriseDeMandat() {
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
   // END NEW STATES
 
+  // NEW STATE FOR CLIENT EDITING
+  const [editingClient, setEditingClient] = useState(null); // This will hold the client object if we are editing
+  // END NEW STATE
+
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
@@ -349,6 +353,19 @@ export default function PriseDeMandat() {
       resetClientForm();
     },
   });
+
+  // NEW MUTATION FOR UPDATING CLIENTS
+  const updateClientMutation = useMutation({
+    mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      setIsNewClientDialogOpen(false);
+      setIsNewNotaireDialogOpen(false);
+      setIsNewCourtierDialogOpen(false);
+      resetClientForm(); // This will clear editingClient
+    },
+  });
+  // END NEW MUTATION
 
   const createLotMutation = useMutation({
     mutationFn: (lotData) => base44.entities.Lot.create(lotData),
@@ -709,7 +726,13 @@ export default function PriseDeMandat() {
       courriels: newClientForm.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: newClientForm.telephones.filter(t => t.telephone.trim() !== "")
     };
-    createClientMutation.mutate(cleanedData);
+
+    // Check if we are editing an existing client or creating a new one
+    if (editingClient) {
+      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
+    } else {
+      createClientMutation.mutate(cleanedData);
+    }
   };
 
   // NEW FUNCTION
@@ -748,6 +771,7 @@ export default function PriseDeMandat() {
       telephones: [{ telephone: "", actuel: true }],
       notes: ""
     });
+    setEditingClient(null); // Reset editing client when form is cleared
   };
 
   // NEW FUNCTION
@@ -764,22 +788,53 @@ export default function PriseDeMandat() {
   };
   // END NEW FUNCTION
 
-  const handleEdit = (dossier) => {
+  const handleEdit = (entity) => { // Renamed from 'dossier' to 'entity'
+    // Check if the entity is a client (based on type_client property presence)
+    if (entity && entity.type_client) {
+      // It's a client. Open client editing form.
+      setEditingClient(entity);
+      setNewClientForm({
+        prenom: entity.prenom || "",
+        nom: entity.nom || "",
+        type_client: entity.type_client || "Client",
+        adresses: entity.adresses && entity.adresses.length > 0 ? entity.adresses.map(addr => ({ ...addr })) : [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
+        courriels: entity.courriels && entity.courriels.length > 0 ? entity.courriels.map(email => ({ ...email })) : [{ courriel: "", actuel: true }],
+        telephones: entity.telephones && entity.telephones.length > 0 ? entity.telephones.map(tel => ({ ...tel })) : [{ telephone: "", actuel: true }],
+        notes: entity.notes || ""
+      });
+
+      // Close the selector dialog first
+      setIsClientSelectorOpen(false);
+      setIsNotaireSelectorOpen(false);
+      setIsCourtierSelectorOpen(false);
+
+      // Open the appropriate client/notaire/courtier dialog for editing
+      if (entity.type_client === "Notaire") {
+        setIsNewNotaireDialogOpen(true);
+      } else if (entity.type_client === "Courtier immobilier") {
+        setIsNewCourtierDialogOpen(true);
+      } else { // Default to "Client"
+        setIsNewClientDialogOpen(true);
+      }
+      return; // Exit early as it's a client
+    }
+
+    // Original dossier editing logic
     setIsViewDialogOpen(false);
     setViewingDossier(null);
     setDossierReferenceId(null); // Clear reference ID when editing existing dossier
 
-    setEditingDossier(dossier);
+    setEditingDossier(entity); // Now 'entity' is a dossier
     setFormData({
-      numero_dossier: dossier.numero_dossier || "",
-      arpenteur_geometre: dossier.arpenteur_geometre || "",
-      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: mapOldStatusToCombined(dossier.statut || "Retour d'appel"), // Apply mapping here
-      utilisateur_assigne: dossier.utilisateur_assigne || "",
-      clients_ids: dossier.clients_ids || [],
-      notaires_ids: dossier.notaires_ids || [],
-      courtiers_ids: dossier.courtiers_ids || [],
-      mandats: dossier.mandats?.map(m => ({
+      numero_dossier: entity.numero_dossier || "",
+      arpenteur_geometre: entity.arpenteur_geometre || "",
+      date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
+      statut: mapOldStatusToCombined(entity.statut || "Retour d'appel"), // Apply mapping here
+      utilisateur_assigne: entity.utilisateur_assigne || "",
+      clients_ids: entity.clients_ids || [],
+      notaires_ids: entity.notaires_ids || [],
+      courtiers_ids: entity.courtiers_ids || [],
+      mandats: entity.mandats?.map(m => ({
         ...m,
         date_ouverture: m.date_ouverture || "",
         adresse_travaux: m.adresse_travaux
@@ -801,10 +856,9 @@ export default function PriseDeMandat() {
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
-        tache_actuelle: m.tache_actuelle || "" // Added for editing
-        // notes: "" // Removed as per changes
+        tache_actuelle: m.tache_actuelle || ""
       })) || [],
-      description: dossier.description || ""
+      description: entity.description || ""
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
@@ -1635,7 +1689,6 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }
                                 </div>
 
                                 <div className="space-y-2">
@@ -1891,11 +1944,13 @@ export default function PriseDeMandat() {
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setViewingClientDetails(client);
+                          setIsClientSelectorOpen(false);
+                          handleEdit(client);
                         }}
                         className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
                       >
-                        Voir fiche
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
                       </Button>
                     </div>
                   ))}
@@ -1966,11 +2021,13 @@ export default function PriseDeMandat() {
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setViewingClientDetails(notaire);
+                          setIsNotaireSelectorOpen(false);
+                          handleEdit(notaire);
                         }}
                         className="text-purple-400 hover:text-purple-300 mt-2 w-full"
                       >
-                        Voir fiche
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
                       </Button>
                     </div>
                   ))}
@@ -2041,11 +2098,13 @@ export default function PriseDeMandat() {
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setViewingClientDetails(courtier);
+                          setIsCourtierSelectorOpen(false);
+                          handleEdit(courtier);
                         }}
                         className="text-orange-400 hover:text-orange-300 mt-2 w-full"
                       >
-                        Voir fiche
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
                       </Button>
                     </div>
                   ))}
@@ -2069,7 +2128,9 @@ export default function PriseDeMandat() {
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Nouveau {newClientForm.type_client}</DialogTitle>
+              <DialogTitle className="text-2xl">
+                {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleNewClientSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -2259,7 +2320,7 @@ export default function PriseDeMandat() {
                   Annuler
                 </Button>
                 <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  Créer
+                  {editingClient ? "Modifier" : "Créer"}
                 </Button>
               </div>
             </form>
