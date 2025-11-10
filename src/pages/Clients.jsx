@@ -777,7 +777,7 @@ export default function Clients() {
           </Dialog>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - HIDDEN
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {statsCards.map((stat, index) => (
             <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
@@ -797,6 +797,7 @@ export default function Clients() {
             </Card>
           ))}
         </div>
+        */}
 
         {/* Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
