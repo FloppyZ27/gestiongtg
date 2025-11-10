@@ -2196,16 +2196,18 @@ export default function PriseDeMandat() {
                     <div className="p-3 bg-slate-800/30 rounded-lg space-y-3">
                       <div className="grid grid-cols-[200px_1fr] gap-3">
                         <div className="space-y-2">
-                          <Label htmlFor="new-civic">Numéro(s) civique(s)</Label>
-                          <Input
-                            id="new-civic"
-                            defaultValue=""
-                            placeholder="Ex: 123"
-                            className="bg-slate-800 border-slate-700"
-                          />
+                          <Label>Numéro(s) civique(s)</Label>
+                          <div className="flex gap-2 mb-2">
+                            <Input
+                              id="new-civic-0"
+                              defaultValue=""
+                              placeholder="Ex: 123"
+                              className="bg-slate-800 border-slate-700"
+                            />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="new-rue">Rue</Label>
+                          <Label>Rue</Label>
                           <Input
                             id="new-rue"
                             defaultValue=""
@@ -2217,7 +2219,7 @@ export default function PriseDeMandat() {
                       
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2">
-                          <Label htmlFor="new-ville">Ville</Label>
+                          <Label>Ville</Label>
                           <Input
                             id="new-ville"
                             defaultValue=""
@@ -2226,8 +2228,8 @@ export default function PriseDeMandat() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="new-province">Province</Label>
-                          <Select id="new-province-select" defaultValue="Québec">
+                          <Label>Province</Label>
+                          <Select id="new-province" defaultValue="Québec">
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                               <SelectValue placeholder="Sélectionner une province" />
                             </SelectTrigger>
@@ -2251,7 +2253,7 @@ export default function PriseDeMandat() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="new-code-postal">Code Postal</Label>
+                        <Label>Code Postal</Label>
                         <Input
                           id="new-code-postal"
                           defaultValue=""
@@ -2264,16 +2266,20 @@ export default function PriseDeMandat() {
                         type="button"
                         size="sm"
                         onClick={() => {
-                          const civicInput = document.getElementById('new-civic');
+                          const civicInput = document.getElementById('new-civic-0');
                           const rueInput = document.getElementById('new-rue');
                           const villeInput = document.getElementById('new-ville');
-                          const provinceSelectElement = document.getElementById('new-province-select');
+                          const provinceSelectElement = document.getElementById('new-province'); // The shadcn Select root div
                           const codePostalInput = document.getElementById('new-code-postal');
 
                           const civic = civicInput?.value.trim() || "";
                           const rue = rueInput?.value.trim() || "";
                           const ville = villeInput?.value.trim() || "";
-                          const province = provinceSelectElement?.querySelector('[data-state="checked"]')?.textContent || provinceSelectElement?.querySelector('.text-white:not([data-placeholder])')?.textContent || "Québec";
+                          // For shadcn Select, retrieve the value from the current display or state.
+                          // The `SelectValue` component displays the current value.
+                          // A more robust way would be to control it with React state for newAddressProvince.
+                          // For this direct DOM manipulation, we have to parse the text.
+                          const provinceText = provinceSelectElement?.querySelector('[data-state="checked"]')?.textContent || provinceSelectElement?.querySelector('.text-white:not([data-placeholder])')?.textContent || "Québec";
                           const codePostal = codePostalInput?.value.trim() || "";
                           
                           if (civic || rue || ville || codePostal) {
@@ -2283,7 +2289,7 @@ export default function PriseDeMandat() {
                                 numeros_civiques: civic ? [civic] : [],
                                 rue,
                                 ville,
-                                province,
+                                province: provinceText, // Use the parsed text
                                 code_postal: codePostal,
                                 actuelle: false // New addresses are not current by default
                               }]
@@ -2294,7 +2300,8 @@ export default function PriseDeMandat() {
                             if (rueInput) rueInput.value = "";
                             if (villeInput) villeInput.value = "";
                             if (codePostalInput) codePostalInput.value = "";
-                            // Reset province selection to default if needed, or leave it.
+                            // To reset the province select, you'd typically control its value with state,
+                            // but since it's not state-controlled here, it will retain its selection.
                           }
                         }}
                         className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
