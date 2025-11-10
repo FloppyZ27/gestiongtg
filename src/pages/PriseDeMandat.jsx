@@ -19,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
+import CommentairesSectionClient from "../components/clients/CommentairesSectionClient"; // Added new import
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -2126,204 +2127,229 @@ export default function PriseDeMandat() {
             resetClientForm();
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
-              </DialogTitle>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle className="text-2xl">{editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleNewClientSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Prénom <span className="text-red-400">*</span></Label>
-                  <Input
-                    value={newClientForm.prenom}
-                    onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
-                    required
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nom <span className="text-red-400">*</span></Label>
-                  <Input
-                    value={newClientForm.nom}
-                    onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
-                    required
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-              </div>
 
-              {/* Adresses avec AddressInput */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Adresses</Label>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => addClientField('adresses')}
-                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Ajouter
-                  </Button>
+            <div className="flex h-[90vh]">
+              {/* Main form content - 70% */}
+              <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
+                  </h2>
                 </div>
-                {newClientForm.adresses.map((item, index) => (
-                  <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
-                    <div className="flex gap-2 items-start">
-                      <div className="flex-1">
-                        <AddressInput
-                          addresses={[item]}
-                          onChange={(newAddresses) => updateClientAddress(index, newAddresses)}
-                          showActuelle={false}
-                          singleAddress={true}
-                        />
-                      </div>
+
+                <form id="new-client-form" onSubmit={handleNewClientSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Prénom <span className="text-red-400">*</span></Label>
+                      <Input
+                        value={newClientForm.prenom}
+                        onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
+                        required
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Nom <span className="text-red-400">*</span></Label>
+                      <Input
+                        value={newClientForm.nom}
+                        onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
+                        required
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Adresses avec AddressInput */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <Label>Adresses</Label>
                       <Button
                         type="button"
                         size="sm"
-                        onClick={() => toggleActuel('adresses', index)}
-                        className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 mt-7`}
+                        onClick={() => addClientField('adresses')}
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                       >
-                        <Check className="w-4 h-4" />
+                        <Plus className="w-4 h-4 mr-1" />
+                        Ajouter
                       </Button>
-                      {newClientForm.adresses.length > 1 && (
+                    </div>
+                    {newClientForm.adresses.map((item, index) => (
+                      <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
+                        <div className="flex gap-2 items-start">
+                          <div className="flex-1">
+                            <AddressInput
+                              addresses={[item]}
+                              onChange={(newAddresses) => updateClientAddress(index, newAddresses)}
+                              showActuelle={false}
+                              singleAddress={true}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => toggleActuel('adresses', index)}
+                            className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 mt-7`}
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          {newClientForm.adresses.length > 1 && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeClientField('adresses', index)}
+                              className="text-red-400 mt-7"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {item.actuelle && (
+                          <p className="text-xs text-green-400 mt-1">✓ Adresse actuelle</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Courriels */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <Label>Courriels</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => addClientField('courriels')}
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
+                    </div>
+                    {newClientForm.courriels.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          type="email"
+                          value={item.courriel}
+                          onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
+                          placeholder="Courriel"
+                          className="bg-slate-800 border-slate-700"
+                        />
                         <Button
                           type="button"
                           size="sm"
-                          variant="ghost"
-                          onClick={() => removeClientField('adresses', index)}
-                          className="text-red-400 mt-7"
+                          onClick={() => toggleActuel('courriels', index)}
+                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
                         >
-                          <X className="w-4 h-4" />
+                          <Check className="w-4 h-4" />
                         </Button>
-                      )}
+                        {newClientForm.courriels.length > 1 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeClientField('courriels', index)}
+                            className="text-red-400"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Téléphones */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <Label>Téléphones</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => addClientField('telephones')}
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
                     </div>
-                    {item.actuelle && (
-                      <p className="text-xs text-green-400 mt-1">✓ Adresse actuelle</p>
-                    )}
+                    {newClientForm.telephones.map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item.telephone}
+                          onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
+                          placeholder="Téléphone"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => toggleActuel('telephones', index)}
+                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                        {newClientForm.telephones.length > 1 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeClientField('telephones', index)}
+                            className="text-red-400"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Courriels */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Courriels</Label>
+                  <div className="space-y-2">
+                    <Label>Notes</Label>
+                    <Textarea
+                      value={newClientForm.notes}
+                      onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
+                      className="bg-slate-800 border-slate-700 h-20"
+                    />
+                  </div>
+                </form>
+
+                {/* Boutons Annuler/Créer tout en bas */}
+                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
                   <Button
                     type="button"
-                    size="sm"
-                    onClick={() => addClientField('courriels')}
-                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    variant="outline"
+                    onClick={() => {
+                      setIsNewClientDialogOpen(false);
+                      setIsNewNotaireDialogOpen(false);
+                      setIsNewCourtierDialogOpen(false);
+                      resetClientForm();
+                    }}
                   >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Ajouter
+                    Annuler
+                  </Button>
+                  <Button type="submit" form="new-client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {editingClient ? "Modifier" : "Créer"}
                   </Button>
                 </div>
-                {newClientForm.courriels.map((item, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      type="email"
-                      value={item.courriel}
-                      onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
-                      placeholder="Courriel"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => toggleActuel('courriels', index)}
-                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    {newClientForm.courriels.length > 1 && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeClientField('courriels', index)}
-                        className="text-red-400"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
               </div>
 
-              {/* Téléphones */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label>Téléphones</Label>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => addClientField('telephones')}
-                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Ajouter
-                  </Button>
+              {/* Right side - Commentaires Sidebar - 30% */}
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-white">Commentaires</h3>
                 </div>
-                {newClientForm.telephones.map((item, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={item.telephone}
-                      onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
-                      placeholder="Téléphone"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => toggleActuel('telephones', index)}
-                      className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    {newClientForm.telephones.length > 1 && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeClientField('telephones', index)}
-                        className="text-red-400"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                <div className="flex-1 overflow-y-auto">
+                  <CommentairesSectionClient
+                    clientId={null}
+                    clientTemporaire={true}
+                    clientNom={`${newClientForm.prenom} ${newClientForm.nom}`.trim() || "Nouveau client"}
+                  />
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Textarea
-                  value={newClientForm.notes}
-                  onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
-                  className="bg-slate-800 border-slate-700 h-20"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsNewClientDialogOpen(false);
-                    setIsNewNotaireDialogOpen(false);
-                    setIsNewCourtierDialogOpen(false);
-                    resetClientForm();
-                  }}
-                >
-                  Annuler
-                </Button>
-                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  {editingClient ? "Modifier" : "Créer"}
-                </Button>
-              </div>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
 
@@ -2848,7 +2874,7 @@ export default function PriseDeMandat() {
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
+                  <p className="2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
                   {nouveauMandatStats.percentages.week !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -2860,7 +2886,7 @@ export default function PriseDeMandat() {
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Ce mois</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
+                  <p className="2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
                   {nouveauMandatStats.percentages.month !== 0 && (
                     <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
