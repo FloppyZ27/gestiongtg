@@ -1696,7 +1696,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                </div>
+                                }</div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
@@ -3118,7 +3118,7 @@ export default function PriseDeMandat() {
                   value="soumission"
                   className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
                 >
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className="w-5 h-5 mr-2" />
                   Mandats à ouvrir/Soumissions ({soumissionDossiers.length})
                 </TabsTrigger>
                 <TabsTrigger
