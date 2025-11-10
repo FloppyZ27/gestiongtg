@@ -2733,21 +2733,21 @@ export default function Dossiers() {
 
         {/* Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-              <CardTitle className="text-xl font-bold text-white">Liste des dossiers par mandat</CardTitle>
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                />
+          <CardContent className="p-0">
+            <div className="p-6 border-b border-slate-800">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <CardTitle className="text-xl font-bold text-white">Liste des dossiers par mandat</CardTitle>
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                  />
+                </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>

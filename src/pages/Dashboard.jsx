@@ -197,68 +197,69 @@ export default function Dashboard() {
         </div>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <CardTitle className="text-xl font-bold text-white">Liste des actes</CardTitle>
-                <div className="relative w-full md:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher par acte, notaire, vendeur, acheteur..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
-                  />
+          <CardContent className="p-0">
+            <div className="p-6 border-b border-slate-800">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                  <CardTitle className="text-xl font-bold text-white">Liste des actes</CardTitle>
+                  <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher par acte, notaire, vendeur, acheteur..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
+                
+                {/* Filtres */}
+                <div className="flex flex-wrap gap-3">
+                  <Select value={filterTypeActe} onValueChange={setFilterTypeActe}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type d'acte" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                      {typesActes.map((type) => (
+                        <SelectItem key={type} value={type} className="text-white">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Circonscription" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                      {circonscriptions.map((circ) => (
+                        <SelectItem key={circ} value={circ} className="text-white">
+                          {circ}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {(filterTypeActe !== "all" || filterCirconscription !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFilterTypeActe("all");
+                        setFilterCirconscription("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser les filtres
+                    </Button>
+                  )}
                 </div>
               </div>
-              
-              {/* Filtres */}
-              <div className="flex flex-wrap gap-3">
-                <Select value={filterTypeActe} onValueChange={setFilterTypeActe}>
-                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Type d'acte" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                    {typesActes.map((type) => (
-                      <SelectItem key={type} value={type} className="text-white">
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
-                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Circonscription" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    {circonscriptions.map((circ) => (
-                      <SelectItem key={circ} value={circ} className="text-white">
-                        {circ}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {(filterTypeActe !== "all" || filterCirconscription !== "all") && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setFilterTypeActe("all");
-                      setFilterCirconscription("all");
-                    }}
-                    className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
-                  >
-                    Réinitialiser les filtres
-                  </Button>
-                )}
-              </div>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
+
             <ActesList 
               actes={sortedActes}
               isLoading={isLoading}
