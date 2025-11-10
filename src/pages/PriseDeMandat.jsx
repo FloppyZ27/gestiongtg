@@ -186,9 +186,9 @@ export default function PriseDeMandat() {
     prenom: "",
     nom: "",
     type_client: "Client",
-    adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
-    courriels: [{ courriel: "", actuel: true }],
-    telephones: [{ telephone: "", actuel: true }],
+    adresses: [], // Changed to empty array
+    courriels: [], // Changed to empty array
+    telephones: [], // Changed to empty array
     notes: ""
   });
 
@@ -767,9 +767,9 @@ export default function PriseDeMandat() {
       prenom: "",
       nom: "",
       type_client: "Client",
-      adresses: [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
-      courriels: [{ courriel: "", actuel: true }],
-      telephones: [{ telephone: "", actuel: true }],
+      adresses: [], // Changed to empty array
+      courriels: [], // Changed to empty array
+      telephones: [], // Changed to empty array
       notes: ""
     });
     setEditingClient(null); // Reset editing client when form is cleared
@@ -798,9 +798,9 @@ export default function PriseDeMandat() {
         prenom: entity.prenom || "",
         nom: entity.nom || "",
         type_client: entity.type_client || "Client",
-        adresses: entity.adresses && entity.adresses.length > 0 ? entity.adresses.map(addr => ({ ...addr })) : [{ rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: true }],
-        courriels: entity.courriels && entity.courriels.length > 0 ? entity.courriels.map(email => ({ ...email })) : [{ courriel: "", actuel: true }],
-        telephones: entity.telephones && entity.telephones.length > 0 ? entity.telephones.map(tel => ({ ...tel })) : [{ telephone: "", actuel: true }],
+        adresses: entity.adresses && entity.adresses.length > 0 ? entity.adresses.map(addr => ({ ...addr })) : [], // Ensure it's an array
+        courriels: entity.courriels && entity.courriels.length > 0 ? entity.courriels.map(email => ({ ...email })) : [], // Ensure it's an array
+        telephones: entity.telephones && entity.telephones.length > 0 ? entity.telephones.map(tel => ({ ...tel })) : [], // Ensure it's an array
         notes: entity.notes || ""
       });
 
@@ -966,14 +966,17 @@ export default function PriseDeMandat() {
     }
   };
 
-  const updateClientAddress = (index, newAddresses) => {
-    setNewClientForm(prev => ({
-      ...prev,
-      adresses: prev.adresses.map((item, i) =>
-        i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item // Preserve 'actuelle' status
-      )
-    }));
-  };
+  // This function is no longer used for adding addresses in the client form,
+  // but a simplified version might be useful if AddressInput is still used elsewhere.
+  // For the new client form, addresses are added directly to the array.
+  // const updateClientAddress = (index, newAddresses) => {
+  //   setNewClientForm(prev => ({
+  //     ...prev,
+  //     adresses: prev.adresses.map((item, i) =>
+  //       i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item // Preserve 'actuelle' status
+  //     )
+  //   }));
+  // };
 
   const removeLotFromMandat = (mandatIndex, lotId) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotId} de ce mandat ?`)) {
@@ -986,22 +989,23 @@ export default function PriseDeMandat() {
     }
   };
 
-  const addClientField = (fieldName) => {
-    if (fieldName === 'adresses') {
-      setNewClientForm(prev => ({
-        ...prev,
-        adresses: [...prev.adresses, { rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: false }]
-      }));
-    } else {
-      setNewClientForm(prev => ({
-        ...prev,
-        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
-      }));
-    }
-  };
+  // addClientField is no longer used as individual inputs + button handle adding
+  // const addClientField = (fieldName) => {
+  //   if (fieldName === 'adresses') {
+  //     setNewClientForm(prev => ({
+  //       ...prev,
+  //       adresses: [...prev.adresses, { rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: false }]
+  //     }));
+  //   } else {
+  //     setNewClientForm(prev => ({
+  //       ...prev,
+  //       [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
+  //     }));
+  //   }
+  // };
 
   const removeClientField = (fieldName, index) => {
-    if (newClientForm[fieldName].length > 1) {
+    if (newClientForm[fieldName].length > 0) { // Check for > 0 instead of > 1 since the list might become empty
       setNewClientForm(prev => ({
         ...prev,
         [fieldName]: prev[fieldName].filter((_, i) => i !== index)
@@ -1009,14 +1013,16 @@ export default function PriseDeMandat() {
     }
   };
 
-  const updateClientField = (fieldName, index, key, value) => {
-    setNewClientForm(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].map((item, i) =>
-        i === index ? { ...item, [key]: value } : item
-      )
-    }));
-  };
+  // updateClientField is no longer used for emails/phones as they are added as a whole string.
+  // The first name/last name fields are direct updates.
+  // const updateClientField = (fieldName, index, key, value) => {
+  //   setNewClientForm(prev => ({
+  //     ...prev,
+  //     [fieldName]: prev[fieldName].map((item, i) =>
+  //       i === index ? { ...item, [key]: value } : item
+  //     )
+  //   }));
+  // };
 
   const toggleActuel = (fieldName, index) => {
     setNewClientForm(prev => ({
@@ -2129,7 +2135,9 @@ export default function PriseDeMandat() {
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
             <DialogHeader className="sr-only">
-              <DialogTitle className="text-2xl">{editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}</DialogTitle>
+              <DialogTitle className="text-2xl">
+                {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
+              </DialogTitle>
             </DialogHeader>
 
             <div className="flex h-[90vh]">
@@ -2141,11 +2149,13 @@ export default function PriseDeMandat() {
                   </h2>
                 </div>
 
-                <form id="new-client-form" onSubmit={handleNewClientSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <form id="new-client-form" onSubmit={handleNewClientSubmit} className="space-y-6">
+                  {/* Prénom, Nom et Type sur la même ligne */}
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>Prénom <span className="text-red-400">*</span></Label>
+                      <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
                       <Input
+                        id="prenom"
                         value={newClientForm.prenom}
                         onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
                         required
@@ -2153,162 +2163,343 @@ export default function PriseDeMandat() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Nom <span className="text-red-400">*</span></Label>
+                      <Label htmlFor="nom">Nom <span className="text-red-400">*</span></Label>
                       <Input
+                        id="nom"
                         value={newClientForm.nom}
                         onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
                         required
                         className="bg-slate-800 border-slate-700"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type_client">Type de client</Label>
+                      <Select value={newClientForm.type_client} onValueChange={(value) => setNewClientForm({...newClientForm, type_client: value})}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner le type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="Client" className="text-white">Client</SelectItem>
+                          <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                          <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                          <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
-                  {/* Adresses avec AddressInput */}
+                  {/* Adresses */}
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <Label>Adresses</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => addClientField('adresses')}
-                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                    {newClientForm.adresses.map((item, index) => (
-                      <div key={index} className="space-y-2 p-3 bg-slate-800/30 rounded-lg">
-                        <div className="flex gap-2 items-start">
-                          <div className="flex-1">
-                            <AddressInput
-                              addresses={[item]}
-                              onChange={(newAddresses) => updateClientAddress(index, newAddresses)}
-                              showActuelle={false}
-                              singleAddress={true}
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => toggleActuel('adresses', index)}
-                            className={`${item.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 mt-7`}
-                          >
-                            <Check className="w-4 h-4" />
-                          </Button>
-                          {newClientForm.adresses.length > 1 && (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removeClientField('adresses', index)}
-                              className="text-red-400 mt-7"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          )}
+                    <Label>Adresses</Label>
+                    
+                    {/* Formulaire pour nouvelle adresse */}
+                    <div className="p-3 bg-slate-800/30 rounded-lg space-y-3">
+                      <div className="grid grid-cols-[200px_1fr] gap-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-civic">Numéro(s) civique(s)</Label>
+                          <Input
+                            id="new-civic"
+                            defaultValue=""
+                            placeholder="Ex: 123"
+                            className="bg-slate-800 border-slate-700"
+                          />
                         </div>
-                        {item.actuelle && (
-                          <p className="text-xs text-green-400 mt-1">✓ Adresse actuelle</p>
-                        )}
+                        <div className="space-y-2">
+                          <Label htmlFor="new-rue">Rue</Label>
+                          <Input
+                            id="new-rue"
+                            defaultValue=""
+                            placeholder="Nom de la rue"
+                            className="bg-slate-800 border-slate-700"
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Courriels */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <Label>Courriels</Label>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-ville">Ville</Label>
+                          <Input
+                            id="new-ville"
+                            defaultValue=""
+                            placeholder="Ville"
+                            className="bg-slate-800 border-slate-700"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="new-province">Province</Label>
+                          <Select id="new-province-select" defaultValue="Québec">
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Sélectionner une province" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                              <SelectItem value="Alberta" className="text-white">Alberta</SelectItem>
+                              <SelectItem value="Colombie-Britannique" className="text-white">Colombie-Britannique</SelectItem>
+                              <SelectItem value="Île-du-Prince-Édouard" className="text-white">Île-du-Prince-Édouard</SelectItem>
+                              <SelectItem value="Manitoba" className="text-white">Manitoba</SelectItem>
+                              <SelectItem value="Nouveau-Brunswick" className="text-white">Nouveau-Brunswick</SelectItem>
+                              <SelectItem value="Nouvelle-Écosse" className="text-white">Nouvelle-Écosse</SelectItem>
+                              <SelectItem value="Nunavut" className="text-white">Nunavut</SelectItem>
+                              <SelectItem value="Ontario" className="text-white">Ontario</SelectItem>
+                              <SelectItem value="Saskatchewan" className="text-white">Saskatchewan</SelectItem>
+                              <SelectItem value="Terre-Neuve-et-Labrador" className="text-white">Terre-Neuve-et-Labrador</SelectItem>
+                              <SelectItem value="Territoires du Nord-Ouest" className="text-white">Territoires du Nord-Ouest</SelectItem>
+                              <SelectItem value="Yukon" className="text-white">Yukon</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="new-code-postal">Code Postal</Label>
+                        <Input
+                          id="new-code-postal"
+                          defaultValue=""
+                          placeholder="Code postal"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      
                       <Button
                         type="button"
                         size="sm"
-                        onClick={() => addClientField('courriels')}
-                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                        onClick={() => {
+                          const civicInput = document.getElementById('new-civic');
+                          const rueInput = document.getElementById('new-rue');
+                          const villeInput = document.getElementById('new-ville');
+                          const provinceSelectElement = document.getElementById('new-province-select');
+                          const codePostalInput = document.getElementById('new-code-postal');
+
+                          const civic = civicInput?.value.trim() || "";
+                          const rue = rueInput?.value.trim() || "";
+                          const ville = villeInput?.value.trim() || "";
+                          const province = provinceSelectElement?.querySelector('[data-state="checked"]')?.textContent || provinceSelectElement?.querySelector('.text-white:not([data-placeholder])')?.textContent || "Québec";
+                          const codePostal = codePostalInput?.value.trim() || "";
+                          
+                          if (civic || rue || ville || codePostal) {
+                            setNewClientForm(prev => ({
+                              ...prev,
+                              adresses: [...prev.adresses, {
+                                numeros_civiques: civic ? [civic] : [],
+                                rue,
+                                ville,
+                                province,
+                                code_postal: codePostal,
+                                actuelle: false // New addresses are not current by default
+                              }]
+                            }));
+                            
+                            // Clear inputs
+                            if (civicInput) civicInput.value = "";
+                            if (rueInput) rueInput.value = "";
+                            if (villeInput) villeInput.value = "";
+                            if (codePostalInput) codePostalInput.value = "";
+                            // Reset province selection to default if needed, or leave it.
+                          }
+                        }}
+                        className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
+                        Ajouter cette adresse
                       </Button>
                     </div>
-                    {newClientForm.courriels.map((item, index) => (
-                      <div key={index} className="flex gap-2">
+
+                    {/* Liste des adresses */}
+                    {newClientForm.adresses.length > 0 && (
+                      <div className="border border-slate-700 rounded-lg overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                              <TableHead className="text-slate-300">Adresse complète</TableHead>
+                              <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {newClientForm.adresses.map((addr, index) => (
+                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white">
+                                  {formatAdresse(addr) || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => toggleActuel('adresses', index)}
+                                      className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                    >
+                                      <Check className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClientField('adresses', index)}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Courriels et Téléphones en deux colonnes */}
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* Courriels */}
+                    <div className="space-y-3">
+                      <Label>Courriels</Label>
+                      <div className="flex gap-2">
                         <Input
                           type="email"
-                          value={item.courriel}
-                          onChange={(e) => updateClientField('courriels', index, 'courriel', e.target.value)}
+                          id="new-courriel"
+                          defaultValue=""
                           placeholder="Courriel"
                           className="bg-slate-800 border-slate-700"
                         />
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => toggleActuel('courriels', index)}
-                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                          onClick={() => {
+                            const courrielInput = document.getElementById('new-courriel');
+                            const courriel = courrielInput?.value.trim();
+                            if (courriel) {
+                              setNewClientForm(prev => ({
+                                ...prev,
+                                courriels: [...prev.courriels, { courriel, actuel: false }]
+                              }));
+                              courrielInput.value = "";
+                            }
+                          }}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                         >
-                          <Check className="w-4 h-4" />
+                          <Plus className="w-4 h-4" />
                         </Button>
-                        {newClientForm.courriels.length > 1 && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeClientField('courriels', index)}
-                            className="text-red-400"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Téléphones */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <Label>Téléphones</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => addClientField('telephones')}
-                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter
-                      </Button>
+                      
+                      {newClientForm.courriels.length > 0 && (
+                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300">Courriel</TableHead>
+                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                            </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {newClientForm.courriels.map((item, index) => (
+                                <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                  <TableCell className="text-white text-sm">{item.courriel}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => toggleActuel('courriels', index)}
+                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => removeClientField('courriels', index)}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </div>
-                    {newClientForm.telephones.map((item, index) => (
-                      <div key={index} className="flex gap-2">
+
+                    {/* Téléphones */}
+                    <div className="space-y-3">
+                      <Label>Téléphones</Label>
+                      <div className="flex gap-2">
                         <Input
-                          value={item.telephone}
-                          onChange={(e) => updateClientField('telephones', index, 'telephone', e.target.value)}
+                          id="new-telephone"
+                          defaultValue=""
                           placeholder="Téléphone"
                           className="bg-slate-800 border-slate-700"
                         />
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => toggleActuel('telephones', index)}
-                          className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'}`}
+                          onClick={() => {
+                            const telephoneInput = document.getElementById('new-telephone');
+                            const telephone = telephoneInput?.value.trim();
+                            if (telephone) {
+                              setNewClientForm(prev => ({
+                                ...prev,
+                                telephones: [...prev.telephones, { telephone, actuel: false }]
+                              }));
+                              telephoneInput.value = "";
+                            }
+                          }}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                         >
-                          <Check className="w-4 h-4" />
+                          <Plus className="w-4 h-4" />
                         </Button>
-                        {newClientForm.telephones.length > 1 && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeClientField('telephones', index)}
-                            className="text-red-400"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
                       </div>
-                    ))}
+                      
+                      {newClientForm.telephones.length > 0 && (
+                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300">Téléphone</TableHead>
+                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {newClientForm.telephones.map((item, index) => (
+                                <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                  <TableCell className="text-white text-sm">{item.telephone}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => toggleActuel('telephones', index)}
+                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => removeClientField('telephones', index)}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                    </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label>Notes</Label>
+                    <Label htmlFor="notes">Notes</Label>
                     <Textarea
+                      id="notes"
                       value={newClientForm.notes}
                       onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
                       className="bg-slate-800 border-slate-700 h-20"
@@ -2343,9 +2534,9 @@ export default function PriseDeMandat() {
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <CommentairesSectionClient
-                    clientId={null}
-                    clientTemporaire={true}
-                    clientNom={`${newClientForm.prenom} ${newClientForm.nom}`.trim() || "Nouveau client"}
+                    clientId={editingClient?.id}
+                    clientTemporaire={!editingClient}
+                    clientNom={editingClient ? `${editingClient.prenom} ${editingClient.nom}` : `${newClientForm.prenom} ${newClientForm.nom}`.trim() || "Nouveau client"}
                   />
                 </div>
               </div>
