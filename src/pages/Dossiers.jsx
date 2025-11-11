@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -93,6 +94,17 @@ const CADASTRES_PAR_CIRCONSCRIPTION = {
   ]
 };
 
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
 
@@ -141,6 +153,15 @@ export default function Dossiers() {
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+
+  // Filtres et tri
+  const [filterArpenteur, setFilterArpenteur] = useState("all");
+  const [filterVille, setFilterVille] = useState("all");
+  const [filterStatut, setFilterStatut] = useState("all");
+  const [filterMandat, setFilterMandat] = useState("all");
+  const [filterTache, setFilterTache] = useState("all");
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -308,26 +329,6 @@ export default function Dossiers() {
       }));
     }
   };
-
-  const filteredDossiers = dossiers.filter(dossier => {
-    if (dossier.statut !== "Ouvert" && dossier.statut !== "Fermé") {
-      return false;
-    }
-
-    const searchLower = searchTerm.toLowerCase();
-    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
-    return (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-      dossier.mandats?.some(mandat =>
-        mandat.type_mandat?.toLowerCase().includes(searchLower) ||
-        mandat.tache_actuelle?.toLowerCase().includes(searchLower) ||
-        mandat.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
-        mandat.adresse_travaux?.ville?.toLowerCase().includes(searchLower)
-      )
-    );
-  });
 
   const filteredClientsForSelector = sortClientsWithSelected(
     clientsReguliers.filter(c =>
@@ -609,6 +610,11 @@ export default function Dossiers() {
     }).join(", ");
   };
 
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
+    return formatAdresse(mandats[0].adresse_travaux);
+  };
+
   const updateMandat = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -660,26 +666,100 @@ export default function Dossiers() {
     return current?.[key] || "";
   };
 
-  const statsCards = [
-    {
-      title: "Total des dossiers",
-      value: dossiers.length,
-      icon: FolderOpen,
-      gradient: "from-emerald-500 to-teal-600",
-    },
-    {
-      title: "Ce mois",
-      value: dossiers.filter(d => {
-        const dossierDate = new Date(d.created_date);
-        const now = new Date();
-        return dossierDate.getMonth() === now.getMonth() && dossierDate.getFullYear() === now.getFullYear();
-      }).length,
-      icon: Calendar,
-      gradient: "from-cyan-500 to-blue-600",
-    },
-  ];
+  // Calculs des stats par période
+  const now = new Date();
+  const startOfDay = new Date(now);
+  startOfDay.setHours(0, 0, 0, 0);
 
-  const dossiersWithMandats = filteredDossiers.flatMap(dossier => {
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  startOfYear.setHours(0, 0, 0, 0);
+
+  const startOfPreviousDay = new Date(startOfDay);
+  startOfPreviousDay.setDate(startOfPreviousDay.getDate() - 1);
+
+  const startOfPreviousWeek = new Date(startOfWeek);
+  startOfPreviousWeek.setDate(startOfPreviousWeek.getDate() - 7);
+
+  const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  endOfPreviousMonth.setHours(23, 59, 59, 999);
+
+  const startOfPreviousYear = new Date(now.getFullYear() - 1, 0, 1);
+  const endOfPreviousYear = new Date(now.getFullYear() - 1, 11, 31);
+  endOfPreviousYear.setHours(23, 59, 59, 999);
+
+  const getCountsByPeriodWithComparison = (list, dateKey) => {
+    const byDay = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfDay;
+    }).length;
+
+    const byWeek = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfWeek;
+    }).length;
+
+    const byMonth = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfMonth;
+    }).length;
+
+    const byYear = list.filter(item => {
+      const itemDate = new Date(item[dateKey] + 'T00:00:00');
+      return itemDate >= startOfYear;
+    }).length;
+
+    const previousDay = list.filter(item => {
+      const date = new Date(item[dateKey] + 'T00:00:00');
+      return date >= startOfPreviousDay && date < startOfDay;
+    }).length;
+
+    const previousWeek = list.filter(item => {
+      const date = new Date(item[dateKey] + 'T00:00:00');
+      return date >= startOfPreviousWeek && date < startOfWeek;
+    }).length;
+
+    const previousMonth = list.filter(item => {
+      const date = new Date(item[dateKey] + 'T00:00:00');
+      return date >= startOfPreviousMonth && date <= endOfPreviousMonth;
+    }).length;
+
+    const previousYear = list.filter(item => {
+      const date = new Date(item[dateKey] + 'T00:00:00');
+      return date >= startOfPreviousYear && date <= endOfPreviousYear;
+    }).length;
+
+    const calculatePercentage = (current, previous) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    return {
+      byDay,
+      byWeek,
+      byMonth,
+      byYear,
+      percentages: {
+        day: calculatePercentage(byDay, previousDay),
+        week: calculatePercentage(byWeek, previousWeek),
+        month: calculatePercentage(byMonth, previousMonth),
+        year: calculatePercentage(byYear, previousYear)
+      }
+    };
+  };
+
+  const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
+  const dossierStats = getCountsByPeriodWithComparison(dossiersOuverts, 'date_ouverture');
+
+  // Créer une ligne par mandat
+  const dossiersWithMandats = dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé").flatMap(dossier => {
     if (dossier.mandats && dossier.mandats.length > 0) {
       return dossier.mandats.map((mandat, idx) => ({
         ...dossier,
@@ -694,6 +774,100 @@ export default function Dossiers() {
       mandatIndex: null,
       displayId: dossier.id
     }];
+  });
+
+  // Obtenir toutes les villes uniques
+  const uniqueVilles = [...new Set(
+    dossiersWithMandats
+      .filter(item => item.mandatInfo?.adresse_travaux?.ville)
+      .map(item => item.mandatInfo.adresse_travaux.ville)
+  )].sort();
+
+  // Filtrer les dossiers
+  const filteredDossiersWithMandats = dossiersWithMandats.filter(item => {
+    const searchLower = searchTerm.toLowerCase();
+    const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
+    const clientsNames = getClientsNames(item.clients_ids);
+    
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      item.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower)
+    );
+
+    const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
+    const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
+    const matchesStatut = filterStatut === "all" || item.statut === filterStatut;
+    const matchesMandat = filterMandat === "all" || item.mandatInfo?.type_mandat === filterMandat;
+    const matchesTache = filterTache === "all" || item.mandatInfo?.tache_actuelle === filterTache;
+
+    return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
+  });
+
+  // Tri
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  const sortedDossiers = [...filteredDossiersWithMandats].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aValue, bValue;
+
+    switch (sortField) {
+      case 'numero_dossier':
+        aValue = (getArpenteurInitials(a.arpenteur_geometre) + a.numero_dossier).toLowerCase();
+        bValue = (getArpenteurInitials(b.arpenteur_geometre) + b.numero_dossier).toLowerCase();
+        break;
+      case 'clients':
+        aValue = getClientsNames(a.clients_ids).toLowerCase();
+        bValue = getClientsNames(b.clients_ids).toLowerCase();
+        break;
+      case 'date_ouverture':
+        aValue = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
+        bValue = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
+        break;
+      case 'statut':
+        aValue = (a.statut || '').toLowerCase();
+        bValue = (b.statut || '').toLowerCase();
+        break;
+      case 'type_mandat':
+        aValue = (a.mandatInfo?.type_mandat || '').toLowerCase();
+        bValue = (b.mandatInfo?.type_mandat || '').toLowerCase();
+        break;
+      case 'tache_actuelle':
+        aValue = (a.mandatInfo?.tache_actuelle || '').toLowerCase();
+        bValue = (b.mandatInfo?.tache_actuelle || '').toLowerCase();
+        break;
+      case 'ville':
+        aValue = (a.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
+        bValue = (b.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    }
   });
 
   return (
@@ -2328,41 +2502,174 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {statsCards.map((stat, index) => (
-            <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-slate-400">{stat.title}</p>
-                    <CardTitle className="text-3xl font-bold mt-2 text-white">
-                      {stat.value}
-                    </CardTitle>
-                  </div>
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} opacity-20`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
+        {/* Stats Card - Nouveaux dossiers */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-600/20">
+                <FolderOpen className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-white">Nouveaux dossiers</CardTitle>
+                <p className="text-sm text-slate-400">Statistique par période</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byDay}</p>
+                  {dossierStats.percentages.day !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.day > 0 ? '+' : ''}{dossierStats.percentages.day}%
+                    </span>
+                  )}
                 </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byWeek}</p>
+                  {dossierStats.percentages.week !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.week > 0 ? '+' : ''}{dossierStats.percentages.week}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Ce mois</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byMonth}</p>
+                  {dossierStats.percentages.month !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.month > 0 ? '+' : ''}{dossierStats.percentages.month}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette année</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byYear}</p>
+                  {dossierStats.percentages.year !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.year > 0 ? '+' : ''}{dossierStats.percentages.year}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
             <div className="p-6 border-b border-slate-800">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+              <div className="flex flex-col gap-4">
                 <CardTitle className="text-xl font-bold text-white">Liste des dossiers par mandat</CardTitle>
-                <div className="relative w-full md:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
+                
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[250px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+
+                  <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Arpenteur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                      {ARPENTEURS.map((arp) => (
+                        <SelectItem key={arp} value={arp} className="text-white">
+                          {arp}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterVille} onValueChange={setFilterVille}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Ville" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                      {uniqueVilles.map((ville) => (
+                        <SelectItem key={ville} value={ville} className="text-white">
+                          {ville}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterStatut} onValueChange={setFilterStatut}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
+                      <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                      <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterMandat} onValueChange={setFilterMandat}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type de mandat" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
+                      {TYPES_MANDATS.map((type) => (
+                        <SelectItem key={type} value={type} className="text-white">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filterTache} onValueChange={setFilterTache}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Tâche" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
+                      {TACHES.map((tache) => (
+                        <SelectItem key={tache} value={tache} className="text-white">
+                          {tache}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {(filterArpenteur !== "all" || filterVille !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFilterArpenteur("all");
+                        setFilterVille("all");
+                        setFilterStatut("all");
+                        setFilterMandat("all");
+                        setFilterTache("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser les filtres
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -2370,29 +2677,67 @@ export default function Dossiers() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300">N° Dossier</TableHead>
-                    <TableHead className="text-slate-300">Arpenteur</TableHead>
-                    <TableHead className="text-slate-300">Date ouverture</TableHead>
-                    <TableHead className="text-slate-300">Statut</TableHead>
-                    <TableHead className="text-slate-300">Type de mandat</TableHead>
-                    <TableHead className="text-slate-300">Tâche actuelle</TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('numero_dossier')}
+                    >
+                      N° Dossier {getSortIcon('numero_dossier')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('clients')}
+                    >
+                      Clients {getSortIcon('clients')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('ville')}
+                    >
+                      Ville {getSortIcon('ville')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('date_ouverture')}
+                    >
+                      Date ouverture {getSortIcon('date_ouverture')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('statut')}
+                    >
+                      Statut {getSortIcon('statut')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('type_mandat')}
+                    >
+                      Type de mandat {getSortIcon('type_mandat')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('tache_actuelle')}
+                    >
+                      Tâche actuelle {getSortIcon('tache_actuelle')}
+                    </TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dossiersWithMandats.map((item) => (
+                  {sortedDossiers.map((item) => (
                     <TableRow key={item.displayId} className="hover:bg-slate-800/30 border-slate-800">
-                      <TableCell className="font-medium text-white">
-                        {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
-                        {item.mandatInfo && item.mandats.length > 1 && (
-                          <span className="text-slate-500 text-xs ml-1">({item.mandatIndex + 1}/{item.mandats.length})</span>
-                        )}
+                      <TableCell className="font-medium">
+                        <Badge variant="outline" className={`${getArpenteurColor(item.arpenteur_geometre)} border`}>
+                          {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
+                          {item.mandatInfo && item.mandats.length > 1 && (
+                            <span className="ml-1">({item.mandatIndex + 1}/{item.mandats.length})</span>
+                          )}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="text-slate-300">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-slate-500" />
-                          {item.arpenteur_geometre}
-                        </div>
+                      <TableCell className="text-slate-300 text-sm">
+                        {getClientsNames(item.clients_ids)}
+                      </TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {item.mandatInfo?.adresse_travaux?.ville || "-"}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         {item.date_ouverture ? format(new Date(item.date_ouverture), "dd MMM yyyy", { locale: fr }) : "-"}
