@@ -615,8 +615,8 @@ export default function Lots() {
           </Dialog>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Stats Cards - HIDDEN */}
+        <div className="hidden grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {statsCards.map((stat, index) => (
             <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader>
