@@ -1784,7 +1784,6 @@ export default function PriseDeMandat() {
                     <CommentairesSection
                       dossierId={editingDossier?.id}
                       dossierTemporaire={!editingDossier}
-                      commentairesTemp={commentairesTemporaires}
                       onCommentairesTempChange={setCommentairesTemporaires}
                     />
                   </div>
@@ -2342,9 +2341,9 @@ export default function PriseDeMandat() {
                     </div>
 
                     {viewingDossier.utilisateur_assigne && (
-                      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <Label className="text-slate-400 text-sm">Utilisateur assigné</Label>
-                        <p className="text-white font-medium mt-1">
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                        <p className="text-white font-medium mt-1 text-sm">
                           {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
                         </p>
                       </div>
@@ -2547,7 +2546,7 @@ export default function PriseDeMandat() {
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
-                  <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 overflow-hidden p-4 pr-4">
                     <CommentairesSection
                       dossierId={viewingDossier?.id}
                       dossierTemporaire={false}
