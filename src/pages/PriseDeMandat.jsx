@@ -163,6 +163,10 @@ export default function PriseDeMandat() {
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
   // END NEW STATES
 
+  // NEW STATE FOR TEMPORARY COMMENTS
+  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  // END NEW STATE
+
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
@@ -224,6 +228,19 @@ export default function PriseDeMandat() {
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
 
+      // Créer les commentaires temporaires si présents
+      if (commentairesTemporaires.length > 0) {
+        const commentairePromises = commentairesTemporaires.map(comment =>
+          base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
+        );
+        await Promise.all(commentairePromises);
+      }
+
       // Créer une notification si un utilisateur est assigné pour un retour d'appel
       if (dossierData.statut === "Retour d'appel" && dossierData.utilisateur_assigne) {
         const assignedUser = users.find(u => u.email === dossierData.utilisateur_assigne);
@@ -265,6 +282,8 @@ export default function PriseDeMandat() {
       queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
       setIsDialogOpen(false);
       resetForm();
+      // Clear temporary comments after successful submission
+      setCommentairesTemporaires([]);
     },
   });
 
@@ -715,6 +734,7 @@ export default function PriseDeMandat() {
     setActiveTabMandat("0");
     setDossierReferenceId(null);
     setDossierSearchForReference("");
+    setCommentairesTemporaires([]); // Clear temporary comments on form reset
   };
 
   // NEW FUNCTION
@@ -1756,6 +1776,7 @@ export default function PriseDeMandat() {
                     <CommentairesSection
                       dossierId={editingDossier?.id}
                       dossierTemporaire={!editingDossier}
+                      onTemporaryCommentsChange={!editingDossier ? setCommentairesTemporaires : undefined}
                     />
                   </div>
                 </div>

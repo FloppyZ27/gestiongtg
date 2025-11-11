@@ -9,9 +9,8 @@ import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export default function CommentairesSection({ dossierId, dossierTemporaire }) {
+export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
-  const [commentairesTemp, setCommentairesTemp] = useState([]);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [showMentionMenu, setShowMentionMenu] = useState(false);
@@ -265,7 +264,10 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
         utilisateur_nom: user.full_name,
         created_date: new Date().toISOString()
       };
-      setCommentairesTemp([tempComment, ...commentairesTemp]);
+      // Use the provided callback to update temporary comments in the parent
+      if (onCommentairesTempChange) {
+        onCommentairesTempChange([tempComment, ...commentairesTemp]);
+      }
       setNouveauCommentaire("");
     } else if (dossierId) {
       createCommentaireMutation.mutate({
@@ -286,9 +288,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     if (!editingContent.trim()) return;
     
     if (dossierTemporaire) {
-      setCommentairesTemp(commentairesTemp.map(c => 
-        c.id === commentaire.id ? { ...c, contenu: editingContent } : c
-      ));
+      // Use the provided callback to update temporary comments in the parent
+      if (onCommentairesTempChange) {
+        onCommentairesTempChange(commentairesTemp.map(c => 
+          c.id === commentaire.id ? { ...c, contenu: editingContent } : c
+        ));
+      }
       setEditingCommentId(null);
       setEditingContent("");
     } else {
@@ -308,7 +313,10 @@ export default function CommentairesSection({ dossierId, dossierTemporaire }) {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) return;
 
     if (dossierTemporaire) {
-      setCommentairesTemp(commentairesTemp.filter(c => c.id !== commentaire.id));
+      // Use the provided callback to update temporary comments in the parent
+      if (onCommentairesTempChange) {
+        onCommentairesTempChange(commentairesTemp.filter(c => c.id !== commentaire.id));
+      }
     } else {
       deleteCommentaireMutation.mutate(commentaire.id);
     }
