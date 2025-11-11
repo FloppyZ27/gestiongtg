@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { createPageUrl } from "@/utils";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
@@ -96,6 +97,18 @@ const TYPES_OPERATIONS = [
   "Annulation"
 ];
 
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  const mapping = {
+    "Samuel Guay": "SG-",
+    "Dany Gaboury": "DG-",
+    "Pierre-Luc Pilote": "PLP-",
+    "Benjamin Larouche": "BL-",
+    "Frédéric Gilbert": "FG-"
+  };
+  return mapping[arpenteur] || "";
+};
+
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -135,11 +148,22 @@ export default function Lots() {
     initialData: [],
   });
 
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
       const newLot = await base44.entities.Lot.create(lotData);
       
-      // Créer les commentaires temporaires si présents
       if (commentairesTemporaires.length > 0) {
         const commentairePromises = commentairesTemporaires.map(comment =>
           base44.entities.CommentaireLot.create({
@@ -177,6 +201,53 @@ export default function Lots() {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
     },
   });
+
+  const getClientById = (id) => clients.find(c => c.id === id);
+
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  };
+
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    if (addr.province) parts.push(addr.province);
+    if (addr.code_postal) parts.push(addr.code_postal);
+    return parts.filter(p => p).join(', ');
+  };
+
+  const getDossiersWithLot = (lotNumero) => {
+    if (!lotNumero) return [];
+    
+    const dossiersWithMandats = [];
+    dossiers.forEach(dossier => {
+      if (dossier.mandats && dossier.mandats.length > 0) {
+        dossier.mandats.forEach((mandat) => { // Removed mandatIndex as it's not used
+          if (mandat.lots && Array.isArray(mandat.lots) && mandat.lots.includes(lotNumero)) {
+            dossiersWithMandats.push({
+              dossier,
+              mandat,
+            });
+          }
+        });
+      }
+    });
+    return dossiersWithMandats;
+  };
+
+  const handleDossierClick = (dossier) => {
+    const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
+    window.open(url, '_blank');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -664,6 +735,62 @@ export default function Lots() {
                         </div>
                       )}
                     </div>
+
+                    {/* Dossiers/Mandats associés - ONLY for editing */}
+                    {editingLot && (
+                      <div className="space-y-3">
+                        <Label className="text-lg font-semibold">Dossiers/Mandats associés</Label>
+                        {(() => {
+                          const associatedDossiers = getDossiersWithLot(editingLot.numero_lot);
+                          return associatedDossiers.length > 0 ? (
+                            <div className="border border-slate-700 rounded-lg overflow-hidden">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                    <TableHead className="text-slate-300">N° Dossier</TableHead>
+                                    <TableHead className="text-slate-300">Clients</TableHead>
+                                    <TableHead className="text-slate-300">Type de mandat</TableHead>
+                                    <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                                    <TableHead className="text-slate-300 text-center">Action</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {associatedDossiers.map((item, idx) => (
+                                    <TableRow 
+                                      key={`${item.dossier.id}-${idx}`}
+                                      className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                      onClick={() => handleDossierClick(item.dossier)}
+                                    >
+                                      <TableCell className="font-medium text-white font-mono">
+                                        {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                                      </TableCell>
+                                      <TableCell className="text-slate-300 text-sm">
+                                        {getClientsNames(item.dossier.clients_ids)}
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                          {item.mandat.type_mandat}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                        {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          ) : (
+                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                              Aucun dossier associé à ce lot
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </form>
 
                   {/* Boutons Annuler/Créer tout en bas */}
@@ -682,7 +809,7 @@ export default function Lots() {
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-hidden p-4">
                     <CommentairesSectionLot
                       lotId={editingLot?.id}
                       lotTemporaire={!editingLot}
@@ -783,6 +910,60 @@ export default function Lots() {
                         </div>
                       </div>
                     )}
+
+                    {/* Dossiers/Mandats associés */}
+                    <div>
+                      <Label className="text-slate-400 mb-3 block">Dossiers/Mandats associés</Label>
+                      {(() => {
+                        const associatedDossiers = getDossiersWithLot(viewingLot.numero_lot);
+                        return associatedDossiers.length > 0 ? (
+                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                  <TableHead className="text-slate-300">N° Dossier</TableHead>
+                                  <TableHead className="text-slate-300">Clients</TableHead>
+                                  <TableHead className="text-slate-300">Type de mandat</TableHead>
+                                  <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                                  <TableHead className="text-slate-300 text-center">Action</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {associatedDossiers.map((item, idx) => (
+                                  <TableRow 
+                                    key={`${item.dossier.id}-${idx}`}
+                                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                    onClick={() => handleDossierClick(item.dossier)}
+                                  >
+                                    <TableCell className="font-medium text-white font-mono">
+                                      {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-sm">
+                                      {getClientsNames(item.dossier.clients_ids)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                        {item.mandat.type_mandat}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                      {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                      <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                            Aucun dossier associé à ce lot
+                          </p>
+                        );
+                      })()}
+                    </div>
                   </div>
 
                   {/* Boutons Fermer/Modifier tout en bas */}
@@ -802,7 +983,7 @@ export default function Lots() {
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-hidden p-4">
                     <CommentairesSectionLot
                       lotId={viewingLot?.id}
                       lotTemporaire={false}

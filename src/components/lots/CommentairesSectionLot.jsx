@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -136,7 +137,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
 
   return (
     <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-3">
         {allCommentaires.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center">
             <div>
@@ -150,7 +151,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             const isEditing = editingCommentId === commentaire.id;
 
             return (
-              <div key={commentaire.id} className="flex gap-3">
+              <div key={commentaire.id} className="flex gap-3 pr-2">
                 <Avatar className="w-8 h-8 flex-shrink-0">
                   {getUserPhoto(commentaire.utilisateur_email) ? (
                     <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
