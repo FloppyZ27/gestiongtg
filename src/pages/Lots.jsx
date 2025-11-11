@@ -92,10 +92,11 @@ export default function Lots() {
   const [editingLot, setEditingLot] = useState(null);
   const [filterCirconscription, setFilterCirconscription] = useState("all");
   const [filterCadastre, setFilterCadastre] = useState("all");
-  const [availableCadastres, setAvailableCadastres] = useState([]); // For the main form's cadastre
-  const [uploadingPdf, setUploadingPdf] = useState(false); // Kept from original
-  const [concordancesAnterieure, setConcordancesAnterieure] = useState([]); // The actual list of concordances for the current lot
-  const [newConcordance, setNewConcordance] = useState({ // Temporary state for adding a single concordance
+  const [availableCadastres, setAvailableCadastres] = useState([]);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [concordancesAnterieure, setConcordancesAnterieure] = useState([]);
+  const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
+  const [newConcordance, setNewConcordance] = useState({
     circonscription_fonciere: "",
     cadastre: "",
     numero_lot: "",
@@ -109,7 +110,7 @@ export default function Lots() {
     rang: "",
     date_bpd: "",
     type_operation: "",
-    document_pdf_url: "" // Kept from original
+    document_pdf_url: ""
   });
 
   const queryClient = useQueryClient();
@@ -181,7 +182,16 @@ export default function Lots() {
 
   const addConcordance = () => {
     if (newConcordance.numero_lot && newConcordance.circonscription_fonciere) {
-      setConcordancesAnterieure([...concordancesAnterieure, { ...newConcordance }]);
+      if (editingConcordanceIndex !== null) {
+        // Mode édition
+        const updated = [...concordancesAnterieure];
+        updated[editingConcordanceIndex] = { ...newConcordance };
+        setConcordancesAnterieure(updated);
+        setEditingConcordanceIndex(null);
+      } else {
+        // Mode ajout
+        setConcordancesAnterieure([...concordancesAnterieure, { ...newConcordance }]);
+      }
       setNewConcordance({
         circonscription_fonciere: "",
         cadastre: "",
@@ -191,8 +201,29 @@ export default function Lots() {
     }
   };
 
+  const editConcordance = (index) => {
+    setNewConcordance({ ...concordancesAnterieure[index] });
+    setEditingConcordanceIndex(index);
+  };
+
+  const cancelEditConcordance = () => {
+    setNewConcordance({
+      circonscription_fonciere: "",
+      cadastre: "",
+      numero_lot: "",
+      rang: ""
+    });
+    setEditingConcordanceIndex(null);
+  };
+
   const removeConcordance = (index) => {
     setConcordancesAnterieure(concordancesAnterieure.filter((_, i) => i !== index));
+    if (editingConcordanceIndex === index) {
+      cancelEditConcordance();
+    } else if (editingConcordanceIndex !== null && index < editingConcordanceIndex) {
+      // If an item before the currently edited item is removed, adjust the index
+      setEditingConcordanceIndex(editingConcordanceIndex - 1);
+    }
   };
 
   const resetForm = () => {
@@ -214,6 +245,7 @@ export default function Lots() {
     });
     setEditingLot(null);
     setAvailableCadastres([]);
+    setEditingConcordanceIndex(null); // Reset editing concordance index
   };
 
   const handleEdit = (lot) => {
@@ -232,6 +264,7 @@ export default function Lots() {
       setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
     }
     setIsDialogOpen(true);
+    setEditingConcordanceIndex(null); // Ensure no concordance is being edited when opening lot edit form
   };
 
   const handleDelete = (id) => {
@@ -381,16 +414,12 @@ export default function Lots() {
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="Vente" className="text-white">Vente</SelectItem>
-                        <SelectItem value="Cession" className="text-white">Cession</SelectItem>
-                        <SelectItem value="Donation" className="text-white">Donation</SelectItem>
-                        <SelectItem value="Déclaration de Transmission" className="text-white">Déclaration de Transmission</SelectItem>
-                        <SelectItem value="Jugement" className="text-white">Jugement</SelectItem>
-                        <SelectItem value="Rectification" className="text-white">Rectification</SelectItem>
-                        <SelectItem value="Retrocession" className="text-white">Retrocession</SelectItem>
+                        <SelectItem value="Division du territoire" className="text-white">Division du territoire</SelectItem>
                         <SelectItem value="Subdivision" className="text-white">Subdivision</SelectItem>
-                        <SelectItem value="Morcellement" className="text-white">Morcellement</SelectItem>
-                        <SelectItem value="Autre" className="text-white">Autre</SelectItem>
+                        <SelectItem value="Remplacement" className="text-white">Remplacement</SelectItem>
+                        <SelectItem value="Rénovation cadastrale" className="text-white">Rénovation cadastrale</SelectItem>
+                        <SelectItem value="Correction" className="text-white">Correction</SelectItem>
+                        <SelectItem value="Annulation" className="text-white">Annulation</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -400,8 +429,14 @@ export default function Lots() {
                 <div className="space-y-3">
                   <Label className="text-lg font-semibold">Concordances antérieures</Label>
                   
-                  {/* Formulaire d'ajout */}
+                  {/* Formulaire d'ajout/édition */}
                   <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
+                    {editingConcordanceIndex !== null && (
+                      <div className="mb-2 p-2 bg-blue-500/10 border border-blue-500/30 rounded text-blue-400 text-sm">
+                        Mode édition - Modification de la concordance #{editingConcordanceIndex + 1}
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label>Circonscription foncière</Label>
@@ -463,15 +498,27 @@ export default function Lots() {
                       </div>
                     </div>
                     
-                    <Button
-                      type="button"
-                      onClick={addConcordance}
-                      disabled={!newConcordance.numero_lot || !newConcordance.circonscription_fonciere}
-                      className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Ajouter cette concordance
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        onClick={addConcordance}
+                        disabled={!newConcordance.numero_lot || !newConcordance.circonscription_fonciere}
+                        className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        {editingConcordanceIndex !== null ? "Enregistrer les modifications" : "Ajouter cette concordance"}
+                      </Button>
+                      {editingConcordanceIndex !== null && (
+                        <Button
+                          type="button"
+                          onClick={cancelEditConcordance}
+                          variant="outline"
+                          className="bg-slate-700 hover:bg-slate-600 text-white"
+                        >
+                          Annuler
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Tableau des concordances ajoutées */}
@@ -480,9 +527,9 @@ export default function Lots() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Circonscription</TableHead>
-                            <TableHead className="text-slate-300">Cadastre</TableHead>
                             <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                            <TableHead className="text-slate-300">Circonscription</TableHead>
+                            <TableHead className className="text-slate-300">Cadastre</TableHead>
                             <TableHead className="text-slate-300">Rang</TableHead>
                             <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
@@ -490,20 +537,31 @@ export default function Lots() {
                         <TableBody>
                           {concordancesAnterieure.map((concordance, index) => (
                             <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                              <TableCell className="text-white font-medium">{concordance.numero_lot}</TableCell>
                               <TableCell className="text-white">{concordance.circonscription_fonciere}</TableCell>
                               <TableCell className="text-white">{concordance.cadastre || "-"}</TableCell>
-                              <TableCell className="text-white font-medium">{concordance.numero_lot}</TableCell>
                               <TableCell className="text-white">{concordance.rang || "-"}</TableCell>
                               <TableCell className="text-right">
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => removeConcordance(index)}
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => editConcordance(index)}
+                                    className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeConcordance(index)}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -545,7 +603,7 @@ export default function Lots() {
                 </div>
                 
                 <div className="flex justify-end gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="text-white">
                     Annuler
                   </Button>
                   <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
