@@ -192,7 +192,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   };
 
   return (
-    <div className="grid grid-cols-[75%_25%] gap-6 h-full">
+    <div className="grid grid-cols-[70%_30%] gap-6 h-full">
       {/* Colonne gauche - Informations client */}
       <div className="space-y-6 overflow-y-auto pr-4">
         {/* Header */}
@@ -381,7 +381,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
       </div>
 
       {/* Colonne droite - Commentaires */}
-      <div className="flex flex-col h-full border-l border-slate-700 pl-6">
+      <div className="flex flex-col h-full border-l border-slate-700 pl-6 pr-4">
         <div className="mb-4">
           <h3 className="text-lg font-bold text-white">Commentaires</h3>
         </div>
