@@ -1012,7 +1012,7 @@ export default function PriseDeMandat() {
         return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       } else {
         if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : 1;
         return 0;
       }
     });
@@ -1566,7 +1566,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }</div>
+                                </div>
 
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-center">
@@ -1999,16 +1999,16 @@ export default function PriseDeMandat() {
 
         {/* ClientFormDialog (replaces previous New Client Dialogs) */}
         <ClientFormDialog
-          isOpen={isClientFormDialogOpen}
-          onClose={() => {
-            setIsClientFormDialogOpen(false);
-            setEditingClientForForm(null);
+          open={isClientFormDialogOpen}
+          onOpenChange={(open) => {
+            setIsClientFormDialogOpen(open);
+            if (!open) setEditingClientForForm(null);
           }}
-          clientType={clientTypeForForm}
-          initialClientData={editingClientForForm}
-          onSaveSuccess={() => {
+          editingClient={editingClientForForm}
+          defaultType={clientTypeForForm}
+          onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
-            // Optionally re-open the selector if editing from there
+            // Optionally re-open the selector if creating from there
             if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);
             if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
             if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
