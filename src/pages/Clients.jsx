@@ -12,11 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns"; // Corrected import statement
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
-import CommentairesSectionClient from "../components/clients/CommentairesSectionClient"; // Added import for the new component
+import CommentairesSectionClient from "../components/clients/CommentairesSectionClient";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -623,8 +623,8 @@ export default function Clients() {
                       )}
                     </div>
 
-                    {/* Courriels et Téléphones en deux colonnes */}
-                    <div className="grid grid-cols-2 gap-6">
+                    {/* Courriels et Téléphones DÉPLACÉS ICI (en bas) */}
+                    <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-700">
                       {/* Courriels */}
                       <div className="space-y-3">
                         <Label>Courriels</Label>
