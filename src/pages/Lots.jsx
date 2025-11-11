@@ -239,29 +239,31 @@ export default function Lots() {
   const getDossiersWithLot = (lotNumero) => {
     if (!lotNumero) return [];
     
-    const dossiersMap = new Map(); // Use Map to track unique dossier-mandat combinations
+    const seen = new Set(); // Track unique combinations
+    const dossiersWithMandats = [];
     
     dossiers.forEach(dossier => {
       if (dossier.mandats && dossier.mandats.length > 0) {
         dossier.mandats.forEach((mandat, mandatIndex) => {
           if (mandat.lots && Array.isArray(mandat.lots)) {
-            // Check both ID and numero_lot for compatibility
-            const hasLot = mandat.lots.some(lotRef => {
-              // 1. Check if lotRef is directly the lotNumero (string comparison)
-              if (lotRef === lotNumero) return true;
-              
-              // 2. Check if lotRef is an ID that corresponds to a lot with this lotNumero
+            // Check if this mandat contains the lot (checking both by ID and by numero)
+            const containsLot = mandat.lots.some(lotRef => {
+              // Try to find lot by ID first
               const lotById = lots.find(l => l.id === lotRef);
               if (lotById && lotById.numero_lot === lotNumero) return true;
               
-              return false;
+              // Fallback: check if lotRef is directly the numero
+              return lotRef === lotNumero;
             });
             
-            if (hasLot) {
-              // Create unique key for dossier-mandat combination
-              const uniqueKey = `${dossier.id}-${mandatIndex}`;
-              if (!dossiersMap.has(uniqueKey)) {
-                dossiersMap.set(uniqueKey, {
+            if (containsLot) {
+              // Create a unique identifier based on dossier ID and mandat position
+              const uniqueKey = `${dossier.id}-${mandatIndex}-${mandat.type_mandat || 'no-type'}`;
+              
+              // Only add if we haven't seen this exact combination before
+              if (!seen.has(uniqueKey)) {
+                seen.add(uniqueKey);
+                dossiersWithMandats.push({
                   dossier,
                   mandat,
                 });
@@ -272,7 +274,7 @@ export default function Lots() {
       }
     });
     
-    return Array.from(dossiersMap.values());
+    return dossiersWithMandats;
   };
 
   const handleDossierClick = (dossier) => {
