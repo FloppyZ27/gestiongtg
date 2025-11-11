@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Send, Edit, Trash2, X, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Send, Edit, Trash2, X, Check, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -13,6 +15,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
 import ClientFormDialog from "./ClientFormDialog";
+
+const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -54,6 +58,12 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [dossierSearchTerm, setDossierSearchTerm] = useState("");
+  const [filterArpenteur, setFilterArpenteur] = useState("all");
+  const [filterTypeMandat, setFilterTypeMandat] = useState("all");
+  const [filterVille, setFilterVille] = useState("all");
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -177,6 +187,87 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
       });
     }
   });
+
+  // Extraire la liste des villes uniques
+  const uniqueVilles = [...new Set(
+    mandatsWithDossier
+      .map(item => item.mandat?.adresse_travaux?.ville)
+      .filter(ville => ville)
+  )].sort();
+
+  // Extraire les types de mandats uniques
+  const uniqueTypesMandats = [...new Set(
+    mandatsWithDossier
+      .map(item => item.mandat?.type_mandat)
+      .filter(type => type)
+  )].sort();
+
+  // Filtrer les mandats
+  const filteredMandats = mandatsWithDossier.filter(item => {
+    const searchLower = dossierSearchTerm.toLowerCase();
+    const matchesSearch = (
+      item.dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      (getArpenteurInitials(item.dossier.arpenteur_geometre) + item.dossier.numero_dossier).toLowerCase().includes(searchLower) ||
+      item.mandat?.type_mandat?.toLowerCase().includes(searchLower) ||
+      formatAdresse(item.mandat?.adresse_travaux).toLowerCase().includes(searchLower)
+    );
+
+    const matchesArpenteur = filterArpenteur === "all" || item.dossier.arpenteur_geometre === filterArpenteur;
+    const matchesTypeMandat = filterTypeMandat === "all" || item.mandat?.type_mandat === filterTypeMandat;
+    const matchesVille = filterVille === "all" || item.mandat?.adresse_travaux?.ville === filterVille;
+
+    return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille;
+  });
+
+  // Trier les mandats
+  const sortedMandats = [...filteredMandats].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aValue, bValue;
+
+    switch (sortField) {
+      case 'numero_dossier':
+        aValue = (getArpenteurInitials(a.dossier.arpenteur_geometre) + a.dossier.numero_dossier).toLowerCase();
+        bValue = (getArpenteurInitials(b.dossier.arpenteur_geometre) + b.dossier.numero_dossier).toLowerCase();
+        break;
+      case 'date_ouverture':
+        aValue = new Date(a.dossier.date_ouverture).getTime();
+        bValue = new Date(b.dossier.date_ouverture).getTime();
+        break;
+      case 'type_mandat':
+        aValue = (a.mandat?.type_mandat || '').toLowerCase();
+        bValue = (b.mandat?.type_mandat || '').toLowerCase();
+        break;
+      case 'adresse_travaux':
+        aValue = formatAdresse(a.mandat?.adresse_travaux).toLowerCase();
+        bValue = formatAdresse(b.mandat?.adresse_travaux).toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
 
   const adresseActuelle = client.adresses?.find(a => a.actuelle);
   const adressesAnciennes = client.adresses?.filter(a => !a.actuelle) || [];
@@ -342,42 +433,119 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   <FolderOpen className="w-4 h-4" />
                   Dossiers associés ({mandatsWithDossier.length} mandat{mandatsWithDossier.length > 1 ? 's' : ''})
                 </Label>
+
+                {/* Filtres et recherche */}
+                <div className="space-y-3 mb-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={dossierSearchTerm}
+                      onChange={(e) => setDossierSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                      <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                        <SelectValue placeholder="Arpenteur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                        {ARPENTEURS.map(arp => (
+                          <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
+                      <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                        <SelectValue placeholder="Type mandat" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                        {uniqueTypesMandats.map(type => (
+                          <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={filterVille} onValueChange={setFilterVille}>
+                      <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                        <SelectValue placeholder="Ville" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                        {uniqueVilles.map(ville => (
+                          <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="border border-slate-700 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead className="text-slate-300">N° Dossier</TableHead>
-                        <TableHead className="text-slate-300">Date d'ouverture</TableHead>
-                        <TableHead className="text-slate-300">Type de mandat</TableHead>
-                        <TableHead className="text-slate-300">Adresse des travaux</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('numero_dossier')}
+                        >
+                          N° Dossier {getSortIcon('numero_dossier')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('date_ouverture')}
+                        >
+                          Date d'ouverture {getSortIcon('date_ouverture')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('type_mandat')}
+                        >
+                          Type de mandat {getSortIcon('type_mandat')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSort('adresse_travaux')}
+                        >
+                          Adresse des travaux {getSortIcon('adresse_travaux')}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mandatsWithDossier.map((item, idx) => (
-                        <TableRow 
-                          key={`${item.dossier.id}-${idx}`}
-                          className="border-slate-800"
-                        >
-                          <TableCell className="font-medium text-white font-mono">
-                            {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {format(new Date(item.dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
-                          </TableCell>
-                          <TableCell>
-                            {item.mandat ? (
-                              <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                {item.mandat.type_mandat}
-                              </Badge>
-                            ) : (
-                              <span className="text-slate-600 text-sm">Aucun mandat</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                      {sortedMandats.length > 0 ? (
+                        sortedMandats.map((item, idx) => (
+                          <TableRow 
+                            key={`${item.dossier.id}-${idx}`}
+                            className="border-slate-800"
+                          >
+                            <TableCell className="font-medium text-white font-mono">
+                              {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {format(new Date(item.dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
+                            </TableCell>
+                            <TableCell>
+                              {item.mandat ? (
+                                <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                  {item.mandat.type_mandat}
+                                </Badge>
+                              ) : (
+                                <span className="text-slate-600 text-sm">Aucun mandat</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                              {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                            Aucun dossier trouvé
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -393,7 +561,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
           </div>
           
           <div className="flex-1 overflow-hidden flex flex-col bg-slate-800/30 border border-slate-700 rounded-lg">
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-3">
               {commentaires.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-center">
                   <div>
@@ -407,7 +575,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   const isEditing = editingCommentId === commentaire.id;
 
                   return (
-                    <div key={commentaire.id} className="flex gap-3">
+                    <div key={commentaire.id} className="flex gap-3 pr-2">
                       <Avatar className="w-8 h-8 flex-shrink-0">
                         {getUserPhoto(commentaire.utilisateur_email) ? (
                           <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
