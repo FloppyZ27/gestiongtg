@@ -2366,7 +2366,14 @@ export default function PriseDeMandat() {
                             {viewingDossier.clients_ids.map(clientId => {
                               const client = getClientById(clientId);
                               return client ? (
-                                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start">
+                                <Badge 
+                                  key={clientId} 
+                                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false); // Close current dialog
+                                    setViewingClientDetails(client); // Open client details
+                                  }}
+                                >
                                   {client.prenom} {client.nom}
                                 </Badge>
                               ) : null;
@@ -2382,7 +2389,14 @@ export default function PriseDeMandat() {
                             {viewingDossier.notaires_ids.map(notaireId => {
                               const notaire = getClientById(notaireId);
                               return notaire ? (
-                                <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start">
+                                <Badge 
+                                  key={notaireId} 
+                                  className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false); // Close current dialog
+                                    setViewingClientDetails(notaire); // Open client details
+                                  }}
+                                >
                                   {notaire.prenom} {notaire.nom}
                                 </Badge>
                               ) : null;
@@ -2398,7 +2412,14 @@ export default function PriseDeMandat() {
                             {viewingDossier.courtiers_ids.map(courtierId => {
                               const courtier = getClientById(courtierId);
                               return courtier ? (
-                                <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start">
+                                <Badge 
+                                  key={courtierId} 
+                                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false); // Close current dialog
+                                    setViewingClientDetails(courtier); // Open client details
+                                  }}
+                                >
                                   {courtier.prenom} {courtier.nom}
                                 </Badge>
                               ) : null;
