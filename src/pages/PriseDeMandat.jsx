@@ -2280,23 +2280,25 @@ export default function PriseDeMandat() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            {viewingClientDetails && (
-              <ClientDetailView
-                client={viewingClientDetails}
-                onClose={() => setViewingClientDetails(null)}
-                onViewDossier={(dossier) => {
-                  setViewingClientDetails(null);
-                  setViewingDossier(dossier);
-                  setIsViewDialogOpen(true);
-                }}
-              />
-            )}
+            <div className="flex-1 overflow-hidden p-6">
+              {viewingClientDetails && (
+                <ClientDetailView
+                  client={viewingClientDetails}
+                  onClose={() => setViewingClientDetails(null)}
+                  onViewDossier={(dossier) => {
+                    setViewingClientDetails(null);
+                    setViewingDossier(dossier);
+                    setIsViewDialogOpen(true);
+                  }}
+                />
+              )}
+            </div>
           </DialogContent>
         </Dialog>
 
