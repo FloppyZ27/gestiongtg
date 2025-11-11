@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -19,37 +20,20 @@ export default function ClientFormDialog({
 }) {
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState(
-    editingClient ? {
-      prenom: editingClient.prenom || "",
-      nom: editingClient.nom || "",
-      type_client: editingClient.type_client || "Client",
-      adresses: editingClient.adresses && editingClient.adresses.length > 0 
-        ? editingClient.adresses.map(addr => ({ ...addr })) 
-        : [],
-      courriels: editingClient.courriels && editingClient.courriels.length > 0 
-        ? editingClient.courriels.map(email => ({ ...email })) 
-        : [],
-      telephones: editingClient.telephones && editingClient.telephones.length > 0 
-        ? editingClient.telephones.map(tel => ({ ...tel })) 
-        : [],
-      notes: editingClient.notes || ""
-    } : {
-      prenom: "",
-      nom: "",
-      type_client: defaultType,
-      adresses: [],
-      courriels: [],
-      telephones: [],
-      notes: ""
-    }
-  );
+  const [formData, setFormData] = useState({
+    prenom: "",
+    nom: "",
+    type_client: defaultType,
+    adresses: [],
+    courriels: [],
+    telephones: [],
+    notes: ""
+  });
 
   const createClientMutation = useMutation({
     mutationFn: (clientData) => base44.entities.Client.create(clientData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
     },
@@ -59,7 +43,6 @@ export default function ClientFormDialog({
     mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
     },
@@ -84,10 +67,10 @@ export default function ClientFormDialog({
       ...formData,
       adresses: formData.adresses.filter(a => 
         (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
-        a.rue.trim() !== "" ||
-        a.ville.trim() !== "" ||
-        a.code_postal.trim() !== "" ||
-        a.province.trim() !== ""
+        (a.rue && a.rue.trim() !== "") ||
+        (a.ville && a.ville.trim() !== "") ||
+        (a.code_postal && a.code_postal.trim() !== "") ||
+        (a.province && a.province.trim() !== "")
       ),
       courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
       telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
@@ -131,16 +114,9 @@ export default function ClientFormDialog({
     }));
   };
 
-  // Reset form when dialog closes
+  // Update form when editingClient changes or when dialog opens
   React.useEffect(() => {
-    if (!open) {
-      setTimeout(() => resetForm(), 300);
-    }
-  }, [open]);
-
-  // Update form when editingClient changes
-  React.useEffect(() => {
-    if (editingClient) {
+    if (open && editingClient) {
       setFormData({
         prenom: editingClient.prenom || "",
         nom: editingClient.nom || "",
@@ -156,10 +132,22 @@ export default function ClientFormDialog({
           : [],
         notes: editingClient.notes || ""
       });
-    } else {
+    } else if (open && !editingClient) {
+      setFormData({
+        prenom: "",
+        nom: "",
+        type_client: defaultType,
+        adresses: [],
+        courriels: [],
+        telephones: [],
+        notes: ""
+      });
+    } else if (!open) {
+      // Reset form data when dialog closes, ensuring it's clean for next open
       resetForm();
     }
-  }, [editingClient]);
+  }, [open, editingClient, defaultType]);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -292,18 +280,23 @@ export default function ClientFormDialog({
                     type="button"
                     size="sm"
                     onClick={() => {
-                      const civic = document.getElementById('new-civic-0')?.value || "";
-                      const rue = document.getElementById('new-rue').value;
-                      const ville = document.getElementById('new-ville').value;
-                      const provinceSelect = document.querySelector('[id="new-province"]');
-                      const province = provinceSelect?.textContent || "Québec";
-                      const codePostal = document.getElementById('new-code-postal').value;
+                      const civicInput = document.getElementById('new-civic-0');
+                      const rueInput = document.getElementById('new-rue');
+                      const villeInput = document.getElementById('new-ville');
+                      const provinceSelectTrigger = document.querySelector('[id="new-province"]');
+                      const codePostalInput = document.getElementById('new-code-postal');
+
+                      const civic = civicInput ? civicInput.value.trim() : "";
+                      const rue = rueInput ? rueInput.value.trim() : "";
+                      const ville = villeInput ? villeInput.value.trim() : "";
+                      const province = provinceSelectTrigger ? provinceSelectTrigger.querySelector('.truncate')?.textContent || "Québec" : "Québec"; // Get selected value from Select component
+                      const codePostal = codePostalInput ? codePostalInput.value.trim() : "";
                       
-                      if (civic || rue || ville) {
+                      if (civic || rue || ville || codePostal) {
                         setFormData(prev => ({
                           ...prev,
                           adresses: [...prev.adresses, {
-                            numeros_civiques: civic ? [civic] : [""],
+                            numeros_civiques: civic ? [civic] : [],
                             rue,
                             ville,
                             province,
@@ -313,10 +306,10 @@ export default function ClientFormDialog({
                         }));
                         
                         // Clear inputs
-                        if (document.getElementById('new-civic-0')) document.getElementById('new-civic-0').value = "";
-                        document.getElementById('new-rue').value = "";
-                        document.getElementById('new-ville').value = "";
-                        document.getElementById('new-code-postal').value = "";
+                        if (civicInput) civicInput.value = "";
+                        if (rueInput) rueInput.value = "";
+                        if (villeInput) villeInput.value = "";
+                        if (codePostalInput) codePostalInput.value = "";
                       }
                     }}
                     className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
@@ -387,13 +380,14 @@ export default function ClientFormDialog({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        const courriel = document.getElementById('new-courriel').value;
-                        if (courriel.trim()) {
+                        const courrielInput = document.getElementById('new-courriel');
+                        const courriel = courrielInput ? courrielInput.value.trim() : "";
+                        if (courriel) {
                           setFormData(prev => ({
                             ...prev,
                             courriels: [...prev.courriels, { courriel, actuel: false }]
                           }));
-                          document.getElementById('new-courriel').value = "";
+                          if (courrielInput) courrielInput.value = "";
                         }
                       }}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
@@ -457,13 +451,14 @@ export default function ClientFormDialog({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        const telephone = document.getElementById('new-telephone').value;
-                        if (telephone.trim()) {
+                        const telephoneInput = document.getElementById('new-telephone');
+                        const telephone = telephoneInput ? telephoneInput.value.trim() : "";
+                        if (telephone) {
                           setFormData(prev => ({
                             ...prev,
                             telephones: [...prev.telephones, { telephone, actuel: false }]
                           }));
-                          document.getElementById('new-telephone').value = "";
+                          if (telephoneInput) telephoneInput.value = "";
                         }
                       }}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"

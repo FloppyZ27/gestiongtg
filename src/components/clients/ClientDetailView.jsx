@@ -186,7 +186,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const courrielsAnciens = client.courriels?.filter(c => !c.actuel) || [];
 
   const telephoneActuel = client.telephones?.find(t => t.actuel);
-  const telephonesAnciens = client.telephones?.filter(t => !t.actuelle) || [];
+  telephonesAnciens = client.telephones?.filter(t => !t.actuelle) || [];
 
   const handleDossierClick = (dossier) => {
     const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
@@ -351,15 +351,13 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                         <TableHead className="text-slate-300">Date d'ouverture</TableHead>
                         <TableHead className="text-slate-300">Type de mandat</TableHead>
                         <TableHead className="text-slate-300">Adresse des travaux</TableHead>
-                        <TableHead className="text-slate-300 text-center">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {mandatsWithDossier.map((item, idx) => (
                         <TableRow 
                           key={`${item.dossier.id}-${idx}`}
-                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                          onClick={() => handleDossierClick(item.dossier)}
+                          className="border-slate-800"
                         >
                           <TableCell className="font-medium text-white font-mono">
                             {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
@@ -378,9 +376,6 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                             {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
                           </TableCell>
                         </TableRow>
                       ))}
