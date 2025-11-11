@@ -689,6 +689,15 @@ export default function PriseDeMandat() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Validation: vérifier que le numéro de dossier ne contient que des chiffres pour le statut "Ouvert"
+    if (formData.statut === "Ouvert" && formData.numero_dossier) {
+      const isNumericOnly = /^\d+$/.test(formData.numero_dossier);
+      if (!isNumericOnly) {
+        alert("Le numéro de dossier doit contenir uniquement des chiffres.");
+        return;
+      }
+    }
+
     let dataToSubmit = { ...formData };
 
     if (formData.statut === "Ouvert") {
@@ -1586,7 +1595,6 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }
                                 </div>
 
                                 <div className="space-y-2">
@@ -2484,11 +2492,11 @@ export default function PriseDeMandat() {
                                       </div>
                                     )}
                                     <div>
-                                      <Label className="text-slate-400 text-xs">Taxes</Label>
-                                      <p className="text-slate-300 text-sm mt-1">
-                                        {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
-                                      </p>
-                                    </div>
+                                        <Label className="text-slate-400 text-xs">Taxes</Label>
+                                        <p className="text-slate-300 text-sm mt-1">
+                                          {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
+                                        </p>
+                                      </div>
                                   </div>
                                 )}
                               </CardContent>
