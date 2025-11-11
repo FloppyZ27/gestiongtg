@@ -97,6 +97,9 @@ const TYPES_OPERATIONS = [
   "Annulation"
 ];
 
+const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
+const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
   const mapping = {
@@ -130,6 +133,14 @@ export default function Lots() {
     numero_lot: "",
     rang: ""
   });
+
+  // New state for View Dialog filters and sorting
+  const [viewDossierSearchTerm, setViewDossierSearchTerm] = useState("");
+  const [viewFilterArpenteur, setViewFilterArpenteur] = useState("all");
+  const [viewFilterTypeMandat, setViewFilterTypeMandat] = useState("all");
+  const [viewFilterVille, setViewFilterVille] = useState("all");
+  const [viewSortField, setViewSortField] = useState(null);
+  const [viewSortDirection, setViewSortDirection] = useState("asc");
 
   const [formData, setFormData] = useState({
     numero_lot: "",
@@ -383,6 +394,85 @@ export default function Lots() {
   const getSortIcon = (field) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  const handleViewSort = (field) => {
+    if (viewSortField === field) {
+      setViewSortDirection(viewSortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setViewSortField(field);
+      setViewSortDirection("asc");
+    }
+  };
+
+  const getViewSortIcon = (field) => {
+    if (viewSortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return viewSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  const getFilteredAndSortedDossiers = (lotNumero) => {
+    const associatedDossiers = getDossiersWithLot(lotNumero);
+    
+    // Filter
+    const filtered = associatedDossiers.filter(item => {
+      const searchLower = viewDossierSearchTerm.toLowerCase();
+      const clientsNames = getClientsNames(item.dossier.clients_ids);
+      const adresseTravaux = item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "";
+      
+      const matchesSearch = (
+        item.dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+        (getArpenteurInitials(item.dossier.arpenteur_geometre) + item.dossier.numero_dossier).toLowerCase().includes(searchLower) ||
+        clientsNames.toLowerCase().includes(searchLower) ||
+        item.mandat?.type_mandat?.toLowerCase().includes(searchLower) ||
+        adresseTravaux.toLowerCase().includes(searchLower)
+      );
+
+      const matchesArpenteur = viewFilterArpenteur === "all" || item.dossier.arpenteur_geometre === viewFilterArpenteur;
+      const matchesTypeMandat = viewFilterTypeMandat === "all" || item.mandat?.type_mandat === viewFilterTypeMandat;
+      const matchesVille = viewFilterVille === "all" || item.mandat?.adresse_travaux?.ville === viewFilterVille;
+
+      return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille;
+    });
+
+    // Sort
+    if (!viewSortField) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (viewSortField) {
+        case 'numero_dossier':
+          aValue = (getArpenteurInitials(a.dossier.arpenteur_geometre) + a.dossier.numero_dossier).toLowerCase();
+          bValue = (getArpenteurInitials(b.dossier.arpenteur_geometre) + b.dossier.numero_dossier).toLowerCase();
+          break;
+        case 'clients':
+          aValue = getClientsNames(a.dossier.clients_ids).toLowerCase();
+          bValue = getClientsNames(b.dossier.clients_ids).toLowerCase();
+          break;
+        case 'type_mandat':
+          aValue = (a.mandat?.type_mandat || '').toLowerCase();
+          bValue = (b.mandat?.type_mandat || '').toLowerCase();
+          break;
+        case 'adresse_travaux':
+          aValue = (a.mandat?.adresse_travaux ? formatAdresse(a.mandat.adresse_travaux) : '').toLowerCase();
+          bValue = (b.mandat?.adresse_travaux ? formatAdresse(b.mandat.adresse_travaux) : '').toLowerCase();
+          break;
+        case 'date_minute':
+          aValue = a.mandat?.date_minute ? new Date(a.mandat.date_minute).getTime() : 0;
+          bValue = b.mandat?.date_minute ? new Date(b.mandat.date_minute).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return viewSortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        if (aValue < bValue) return viewSortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return viewSortDirection === "asc" ? 1 : -1;
+        return 0;
+      }
+    });
   };
 
   const filteredLots = lots.filter(lot => {
@@ -735,62 +825,6 @@ export default function Lots() {
                         </div>
                       )}
                     </div>
-
-                    {/* Dossiers/Mandats associés - ONLY for editing */}
-                    {editingLot && (
-                      <div className="space-y-3">
-                        <Label className="text-lg font-semibold">Dossiers/Mandats associés</Label>
-                        {(() => {
-                          const associatedDossiers = getDossiersWithLot(editingLot.numero_lot);
-                          return associatedDossiers.length > 0 ? (
-                            <div className="border border-slate-700 rounded-lg overflow-hidden">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                    <TableHead className="text-slate-300">N° Dossier</TableHead>
-                                    <TableHead className="text-slate-300">Clients</TableHead>
-                                    <TableHead className="text-slate-300">Type de mandat</TableHead>
-                                    <TableHead className="text-slate-300">Adresse travaux</TableHead>
-                                    <TableHead className="text-slate-300 text-center">Action</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {associatedDossiers.map((item, idx) => (
-                                    <TableRow 
-                                      key={`${item.dossier.id}-${idx}`}
-                                      className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                                      onClick={() => handleDossierClick(item.dossier)}
-                                    >
-                                      <TableCell className="font-medium text-white font-mono">
-                                        {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
-                                      </TableCell>
-                                      <TableCell className="text-slate-300 text-sm">
-                                        {getClientsNames(item.dossier.clients_ids)}
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                          {item.mandat.type_mandat}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                        {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
-                                      </TableCell>
-                                      <TableCell className="text-center">
-                                        <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          ) : (
-                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                              Aucun dossier associé à ce lot
-                            </p>
-                          );
-                        })()}
-                      </div>
-                    )}
                   </form>
 
                   {/* Boutons Annuler/Créer tout en bas */}
@@ -813,7 +847,6 @@ export default function Lots() {
                     <CommentairesSectionLot
                       lotId={editingLot?.id}
                       lotTemporaire={!editingLot}
-                      commentairesTemp={commentairesTemporaires}
                       onCommentairesTempChange={setCommentairesTemporaires}
                     />
                   </div>
@@ -824,7 +857,18 @@ export default function Lots() {
         </div>
 
         {/* View Lot Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <Dialog open={isViewDialogOpen} onOpenChange={(open) => {
+          setIsViewDialogOpen(open);
+          if (!open) {
+            // Reset filters when closing
+            setViewDossierSearchTerm("");
+            setViewFilterArpenteur("all");
+            setViewFilterTypeMandat("all");
+            setViewFilterVille("all");
+            setViewSortField(null);
+            setViewSortDirection("asc");
+          }
+        }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du lot</DialogTitle>
@@ -911,52 +955,142 @@ export default function Lots() {
                       </div>
                     )}
 
-                    {/* Dossiers/Mandats associés */}
+                    {/* Dossiers/Mandats associés avec filtres et tri */}
                     <div>
                       <Label className="text-slate-400 mb-3 block">Dossiers/Mandats associés</Label>
                       {(() => {
-                        const associatedDossiers = getDossiersWithLot(viewingLot.numero_lot);
-                        return associatedDossiers.length > 0 ? (
-                          <div className="border border-slate-700 rounded-lg overflow-hidden">
-                            <Table>
-                              <TableHeader>
-                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                  <TableHead className="text-slate-300">N° Dossier</TableHead>
-                                  <TableHead className="text-slate-300">Clients</TableHead>
-                                  <TableHead className="text-slate-300">Type de mandat</TableHead>
-                                  <TableHead className="text-slate-300">Adresse travaux</TableHead>
-                                  <TableHead className="text-slate-300 text-center">Action</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {associatedDossiers.map((item, idx) => (
-                                  <TableRow 
-                                    key={`${item.dossier.id}-${idx}`}
-                                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                                    onClick={() => handleDossierClick(item.dossier)}
-                                  >
-                                    <TableCell className="font-medium text-white font-mono">
-                                      {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
-                                    </TableCell>
-                                    <TableCell className="text-slate-300 text-sm">
-                                      {getClientsNames(item.dossier.clients_ids)}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                        {item.mandat.type_mandat}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                      {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                      <ExternalLink className="w-4 h-4 text-slate-400 mx-auto" />
-                                    </TableCell>
+                        const allAssociatedDossiers = getDossiersWithLot(viewingLot.numero_lot);
+                        const uniqueVilles = [...new Set(
+                          allAssociatedDossiers
+                            .map(item => item.mandat?.adresse_travaux?.ville)
+                            .filter(ville => ville)
+                        )].sort();
+                        
+                        const filteredAndSorted = getFilteredAndSortedDossiers(viewingLot.numero_lot);
+
+                        return allAssociatedDossiers.length > 0 ? (
+                          <>
+                            {/* Barre de recherche et filtres */}
+                            <div className="space-y-3 mb-3">
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                <Input
+                                  placeholder="Rechercher..."
+                                  value={viewDossierSearchTerm}
+                                  onChange={(e) => setViewDossierSearchTerm(e.target.value)}
+                                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                />
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <Select value={viewFilterArpenteur} onValueChange={setViewFilterArpenteur}>
+                                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                    <SelectValue placeholder="Arpenteur" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                                    {ARPENTEURS.map(arp => (
+                                      <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select value={viewFilterTypeMandat} onValueChange={setViewFilterTypeMandat}>
+                                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                    <SelectValue placeholder="Type mandat" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                                    {TYPES_MANDATS.map(type => (
+                                      <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select value={viewFilterVille} onValueChange={setViewFilterVille}>
+                                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                    <SelectValue placeholder="Ville" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                                    {uniqueVilles.map(ville => (
+                                      <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="border border-slate-700 rounded-lg overflow-hidden">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                    <TableHead 
+                                      className="text-slate-300 cursor-pointer hover:text-white"
+                                      onClick={() => handleViewSort('numero_dossier')}
+                                    >
+                                      N° Dossier {getViewSortIcon('numero_dossier')}
+                                    </TableHead>
+                                    <TableHead 
+                                      className="text-slate-300 cursor-pointer hover:text-white"
+                                      onClick={() => handleViewSort('clients')}
+                                    >
+                                      Clients {getViewSortIcon('clients')}
+                                    </TableHead>
+                                    <TableHead 
+                                      className="text-slate-300 cursor-pointer hover:text-white"
+                                      onClick={() => handleViewSort('type_mandat')}
+                                    >
+                                      Type de mandat {getViewSortIcon('type_mandat')}
+                                    </TableHead>
+                                    <TableHead 
+                                      className="text-slate-300 cursor-pointer hover:text-white"
+                                      onClick={() => handleViewSort('date_minute')}
+                                    >
+                                      Date de minute {getViewSortIcon('date_minute')}
+                                    </TableHead>
+                                    <TableHead 
+                                      className="text-slate-300 cursor-pointer hover:text-white"
+                                      onClick={() => handleViewSort('adresse_travaux')}
+                                    >
+                                      Adresse travaux {getViewSortIcon('adresse_travaux')}
+                                    </TableHead>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </div>
+                                </TableHeader>
+                                <TableBody>
+                                  {filteredAndSorted.length > 0 ? (
+                                    filteredAndSorted.map((item, idx) => (
+                                      <TableRow 
+                                        key={`${item.dossier.id}-${idx}`}
+                                        className="border-slate-800"
+                                      >
+                                        <TableCell className="font-medium text-white font-mono">
+                                          {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                                        </TableCell>
+                                        <TableCell className="text-slate-300 text-sm">
+                                          {getClientsNames(item.dossier.clients_ids)}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                            {item.mandat.type_mandat}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-slate-300 text-sm">
+                                          {item.mandat?.date_minute ? format(new Date(item.mandat.date_minute), "dd MMM yyyy", { locale: fr }) : "-"}
+                                        </TableCell>
+                                        <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                          {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  ) : (
+                                    <TableRow>
+                                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                        Aucun dossier trouvé
+                                      </TableCell>
+                                    </TableRow>
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </>
                         ) : (
                           <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
                             Aucun dossier associé à ce lot
@@ -995,7 +1129,7 @@ export default function Lots() {
           </DialogContent>
         </Dialog>
 
-        {/* Stats Cards - HIDDEN */}
+        {/* Stats Cards */}
         <div className="hidden grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {statsCards.map((stat, index) => (
             <Card key={index} className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
