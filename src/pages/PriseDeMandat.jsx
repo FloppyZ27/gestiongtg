@@ -351,7 +351,16 @@ export default function PriseDeMandat() {
       setIsNewClientDialogOpen(false);
       setIsNewNotaireDialogOpen(false);
       setIsNewCourtierDialogOpen(false);
-      resetClientForm();
+      setNewClientForm({ // Inlined resetClientForm logic
+        prenom: "",
+        nom: "",
+        type_client: "Client",
+        adresses: [],
+        courriels: [],
+        telephones: [],
+        notes: ""
+      });
+      setEditingClient(null); // Inlined resetClientForm logic
     },
   });
 
@@ -363,7 +372,16 @@ export default function PriseDeMandat() {
       setIsNewClientDialogOpen(false);
       setIsNewNotaireDialogOpen(false);
       setIsNewCourtierDialogOpen(false);
-      resetClientForm(); // This will clear editingClient
+      setNewClientForm({ // Inlined resetClientForm logic
+        prenom: "",
+        nom: "",
+        type_client: "Client",
+        adresses: [],
+        courriels: [],
+        telephones: [],
+        notes: ""
+      });
+      setEditingClient(null); // Inlined resetClientForm logic
     },
   });
   // END NEW MUTATION
@@ -762,19 +780,6 @@ export default function PriseDeMandat() {
     setDossierSearchForReference("");
   };
 
-  const resetClientForm = () => {
-    setNewClientForm({
-      prenom: "",
-      nom: "",
-      type_client: "Client",
-      adresses: [], // Changed to empty array
-      courriels: [], // Changed to empty array
-      telephones: [], // Changed to empty array
-      notes: ""
-    });
-    setEditingClient(null); // Reset editing client when form is cleared
-  };
-
   // NEW FUNCTION
   const resetLotForm = () => {
     setNewLotForm({
@@ -966,18 +971,6 @@ export default function PriseDeMandat() {
     }
   };
 
-  // This function is no longer used for adding addresses in the client form,
-  // but a simplified version might be useful if AddressInput is still used elsewhere.
-  // For the new client form, addresses are added directly to the array.
-  // const updateClientAddress = (index, newAddresses) => {
-  //   setNewClientForm(prev => ({
-  //     ...prev,
-  //     adresses: prev.adresses.map((item, i) =>
-  //       i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item // Preserve 'actuelle' status
-  //     )
-  //   }));
-  // };
-
   const removeLotFromMandat = (mandatIndex, lotId) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer le lot ${lotId} de ce mandat ?`)) {
       setFormData(prev => ({
@@ -989,21 +982,6 @@ export default function PriseDeMandat() {
     }
   };
 
-  // addClientField is no longer used as individual inputs + button handle adding
-  // const addClientField = (fieldName) => {
-  //   if (fieldName === 'adresses') {
-  //     setNewClientForm(prev => ({
-  //       ...prev,
-  //       adresses: [...prev.adresses, { rue: "", numeros_civiques: [""], ville: "", code_postal: "", province: "", latitude: null, longitude: null, actuelle: false }]
-  //     }));
-  //   } else {
-  //     setNewClientForm(prev => ({
-  //       ...prev,
-  //       [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
-  //     }));
-  //   }
-  // };
-
   const removeClientField = (fieldName, index) => {
     if (newClientForm[fieldName].length > 0) { // Check for > 0 instead of > 1 since the list might become empty
       setNewClientForm(prev => ({
@@ -1012,17 +990,6 @@ export default function PriseDeMandat() {
       }));
     }
   };
-
-  // updateClientField is no longer used for emails/phones as they are added as a whole string.
-  // The first name/last name fields are direct updates.
-  // const updateClientField = (fieldName, index, key, value) => {
-  //   setNewClientForm(prev => ({
-  //     ...prev,
-  //     [fieldName]: prev[fieldName].map((item, i) =>
-  //       i === index ? { ...item, [key]: value } : item
-  //     )
-  //   }));
-  // };
 
   const toggleActuel = (fieldName, index) => {
     setNewClientForm(prev => ({
@@ -2130,7 +2097,17 @@ export default function PriseDeMandat() {
             setIsNewClientDialogOpen(false);
             setIsNewNotaireDialogOpen(false);
             setIsNewCourtierDialogOpen(false);
-            resetClientForm();
+            // Inlined resetClientForm logic
+            setNewClientForm({
+              prenom: "",
+              nom: "",
+              type_client: "Client",
+              adresses: [],
+              courriels: [],
+              telephones: [],
+              notes: ""
+            });
+            setEditingClient(null);
           }
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
@@ -2523,7 +2500,17 @@ export default function PriseDeMandat() {
                       setIsNewClientDialogOpen(false);
                       setIsNewNotaireDialogOpen(false);
                       setIsNewCourtierDialogOpen(false);
-                      resetClientForm();
+                      // Inlined resetClientForm logic
+                      setNewClientForm({
+                        prenom: "",
+                        nom: "",
+                        type_client: "Client",
+                        adresses: [],
+                        courriels: [],
+                        telephones: [],
+                        notes: ""
+                      });
+                      setEditingClient(null);
                     }}
                   >
                     Annuler
