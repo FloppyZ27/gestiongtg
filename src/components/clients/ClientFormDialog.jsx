@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -8,8 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2, Check, Edit, X, Save } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
+
+const PROVINCES_CANADIENNES = [
+  "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
+  "Manitoba", "Nouveau-Brunswick", "Nouvelle-Écosse", "Nunavut",
+  "Ontario", "Saskatchewan", "Terre-Neuve-et-Labrador",
+  "Territoires du Nord-Ouest", "Yukon"
+];
 
 export default function ClientFormDialog({ 
   open, 
@@ -30,10 +37,15 @@ export default function ClientFormDialog({
     notes: ""
   });
 
+  const [editingAdresseIndex, setEditingAdresseIndex] = useState(null);
+  const [editingCourrielIndex, setEditingCourrielIndex] = useState(null);
+  const [editingTelephoneIndex, setEditingTelephoneIndex] = useState(null);
+
   const createClientMutation = useMutation({
     mutationFn: (clientData) => base44.entities.Client.create(clientData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
     },
@@ -43,6 +55,7 @@ export default function ClientFormDialog({
     mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
     },
@@ -93,6 +106,9 @@ export default function ClientFormDialog({
       telephones: [],
       notes: ""
     });
+    setEditingAdresseIndex(null);
+    setEditingCourrielIndex(null);
+    setEditingTelephoneIndex(null);
   };
 
   const removeClientField = (fieldName, index) => {
@@ -111,6 +127,47 @@ export default function ClientFormDialog({
         ...item,
         [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
       }))
+    }));
+  };
+
+  const updateAdresseField = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((addr, i) => 
+        i === index ? { ...addr, [field]: value } : addr
+      )
+    }));
+  };
+
+  const updateAdresseCivicNumber = (adresseIndex, civicIndex, value) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: prev.adresses.map((addr, i) => {
+        if (i === adresseIndex) {
+          const newCivics = [...(addr.numeros_civiques || [""])];
+          newCivics[civicIndex] = value;
+          return { ...addr, numeros_civiques: newCivics };
+        }
+        return addr;
+      })
+    }));
+  };
+
+  const updateCourrielField = (index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      courriels: prev.courriels.map((c, i) => 
+        i === index ? { ...c, courriel: value } : c
+      )
+    }));
+  };
+
+  const updateTelephoneField = (index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      telephones: prev.telephones.map((t, i) => 
+        i === index ? { ...t, telephone: value } : t
+      )
     }));
   };
 
@@ -142,12 +199,8 @@ export default function ClientFormDialog({
         telephones: [],
         notes: ""
       });
-    } else if (!open) {
-      // Reset form data when dialog closes, ensuring it's clean for next open
-      resetForm();
     }
   }, [open, editingClient, defaultType]);
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -249,19 +302,9 @@ export default function ClientFormDialog({
                           <SelectValue placeholder="Sélectionner une province" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Québec" className="text-white">Québec</SelectItem>
-                          <SelectItem value="Alberta" className="text-white">Alberta</SelectItem>
-                          <SelectItem value="Colombie-Britannique" className="text-white">Colombie-Britannique</SelectItem>
-                          <SelectItem value="Île-du-Prince-Édouard" className="text-white">Île-du-Prince-Édouard</SelectItem>
-                          <SelectItem value="Manitoba" className="text-white">Manitoba</SelectItem>
-                          <SelectItem value="Nouveau-Brunswick" className="text-white">Nouveau-Brunswick</SelectItem>
-                          <SelectItem value="Nouvelle-Écosse" className="text-white">Nouvelle-Écosse</SelectItem>
-                          <SelectItem value="Nunavut" className="text-white">Nunavut</SelectItem>
-                          <SelectItem value="Ontario" className="text-white">Ontario</SelectItem>
-                          <SelectItem value="Saskatchewan" className="text-white">Saskatchewan</SelectItem>
-                          <SelectItem value="Terre-Neuve-et-Labrador" className="text-white">Terre-Neuve-et-Labrador</SelectItem>
-                          <SelectItem value="Territoires du Nord-Ouest" className="text-white">Territoires du Nord-Ouest</SelectItem>
-                          <SelectItem value="Yukon" className="text-white">Yukon</SelectItem>
+                          {PROVINCES_CANADIENNES.map(prov => (
+                            <SelectItem key={prov} value={prov} className="text-white">{prov}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -280,23 +323,18 @@ export default function ClientFormDialog({
                     type="button"
                     size="sm"
                     onClick={() => {
-                      const civicInput = document.getElementById('new-civic-0');
-                      const rueInput = document.getElementById('new-rue');
-                      const villeInput = document.getElementById('new-ville');
-                      const provinceSelectTrigger = document.querySelector('[id="new-province"]');
-                      const codePostalInput = document.getElementById('new-code-postal');
-
-                      const civic = civicInput ? civicInput.value.trim() : "";
-                      const rue = rueInput ? rueInput.value.trim() : "";
-                      const ville = villeInput ? villeInput.value.trim() : "";
-                      const province = provinceSelectTrigger ? provinceSelectTrigger.querySelector('.truncate')?.textContent || "Québec" : "Québec"; // Get selected value from Select component
-                      const codePostal = codePostalInput ? codePostalInput.value.trim() : "";
+                      const civic = document.getElementById('new-civic-0')?.value || "";
+                      const rue = document.getElementById('new-rue').value;
+                      const ville = document.getElementById('new-ville').value;
+                      const provinceSelect = document.querySelector('[id="new-province"]');
+                      const province = provinceSelect?.textContent || "Québec";
+                      const codePostal = document.getElementById('new-code-postal').value;
                       
-                      if (civic || rue || ville || codePostal) {
+                      if (civic || rue || ville) {
                         setFormData(prev => ({
                           ...prev,
                           adresses: [...prev.adresses, {
-                            numeros_civiques: civic ? [civic] : [],
+                            numeros_civiques: civic ? [civic] : [""],
                             rue,
                             ville,
                             province,
@@ -306,10 +344,10 @@ export default function ClientFormDialog({
                         }));
                         
                         // Clear inputs
-                        if (civicInput) civicInput.value = "";
-                        if (rueInput) rueInput.value = "";
-                        if (villeInput) villeInput.value = "";
-                        if (codePostalInput) codePostalInput.value = "";
+                        if (document.getElementById('new-civic-0')) document.getElementById('new-civic-0').value = "";
+                        document.getElementById('new-rue').value = "";
+                        document.getElementById('new-ville').value = "";
+                        document.getElementById('new-code-postal').value = "";
                       }
                     }}
                     className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
@@ -331,32 +369,128 @@ export default function ClientFormDialog({
                       </TableHeader>
                       <TableBody>
                         {formData.adresses.map((addr, index) => (
-                          <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                            <TableCell className="text-white">
-                              {formatAdresse(addr) || "-"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => toggleActuel('adresses', index)}
-                                  className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                >
-                                  <Check className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => removeClientField('adresses', index)}
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
+                          <React.Fragment key={index}>
+                            {editingAdresseIndex === index ? (
+                              <TableRow className="bg-slate-700/50 border-slate-800">
+                                <TableCell colSpan={2}>
+                                  <div className="space-y-3 py-2">
+                                    <div className="grid grid-cols-[150px_1fr] gap-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-xs">Numéro(s) civique(s)</Label>
+                                        <Input
+                                          value={addr.numeros_civiques?.[0] || ""}
+                                          onChange={(e) => updateAdresseCivicNumber(index, 0, e.target.value)}
+                                          placeholder="Ex: 123"
+                                          className="bg-slate-800 border-slate-600 text-sm"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label className="text-xs">Rue</Label>
+                                        <Input
+                                          value={addr.rue || ""}
+                                          onChange={(e) => updateAdresseField(index, 'rue', e.target.value)}
+                                          placeholder="Nom de la rue"
+                                          className="bg-slate-800 border-slate-600 text-sm"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div className="space-y-2">
+                                        <Label className="text-xs">Ville</Label>
+                                        <Input
+                                          value={addr.ville || ""}
+                                          onChange={(e) => updateAdresseField(index, 'ville', e.target.value)}
+                                          placeholder="Ville"
+                                          className="bg-slate-800 border-slate-600 text-sm"
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label className="text-xs">Province</Label>
+                                        <Select 
+                                          value={addr.province || "Québec"} 
+                                          onValueChange={(value) => updateAdresseField(index, 'province', value)}
+                                        >
+                                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white text-sm">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700">
+                                            {PROVINCES_CANADIENNES.map(prov => (
+                                              <SelectItem key={prov} value={prov} className="text-white">{prov}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label className="text-xs">Code Postal</Label>
+                                      <Input
+                                        value={addr.code_postal || ""}
+                                        onChange={(e) => updateAdresseField(index, 'code_postal', e.target.value)}
+                                        placeholder="Code postal"
+                                        className="bg-slate-800 border-slate-600 text-sm"
+                                      />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setEditingAdresseIndex(null)}
+                                        className="text-slate-400 hover:text-white"
+                                      >
+                                        <X className="w-3 h-3 mr-1" />
+                                        Annuler
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => setEditingAdresseIndex(null)}
+                                        className="bg-emerald-500 hover:bg-emerald-600"
+                                      >
+                                        <Save className="w-3 h-3 mr-1" />
+                                        Enregistrer
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-white">
+                                  {formatAdresse(addr) || "-"}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => setEditingAdresseIndex(index)}
+                                      className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 w-7 p-0"
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => toggleActuel('adresses', index)}
+                                      className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                    >
+                                      <Check className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => removeClientField('adresses', index)}
+                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </React.Fragment>
                         ))}
                       </TableBody>
                     </Table>
@@ -380,14 +514,13 @@ export default function ClientFormDialog({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        const courrielInput = document.getElementById('new-courriel');
-                        const courriel = courrielInput ? courrielInput.value.trim() : "";
-                        if (courriel) {
+                        const courriel = document.getElementById('new-courriel').value;
+                        if (courriel.trim()) {
                           setFormData(prev => ({
                             ...prev,
                             courriels: [...prev.courriels, { courriel, actuel: false }]
                           }));
-                          if (courrielInput) courrielInput.value = "";
+                          document.getElementById('new-courriel').value = "";
                         }
                       }}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
@@ -403,34 +536,81 @@ export default function ClientFormDialog({
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Courriel</TableHead>
                             <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                        </TableRow>
+                          </TableRow>
                         </TableHeader>
                         <TableBody>
                           {formData.courriels.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                              <TableCell className="text-white text-sm">{item.courriel}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() => toggleActuel('courriels', index)}
-                                    className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeClientField('courriels', index)}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
+                            <React.Fragment key={index}>
+                              {editingCourrielIndex === index ? (
+                                <TableRow className="bg-slate-700/50 border-slate-800">
+                                  <TableCell colSpan={2}>
+                                    <div className="space-y-2 py-2">
+                                      <Input
+                                        type="email"
+                                        value={item.courriel}
+                                        onChange={(e) => updateCourrielField(index, e.target.value)}
+                                        placeholder="Courriel"
+                                        className="bg-slate-800 border-slate-600 text-sm"
+                                      />
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => setEditingCourrielIndex(null)}
+                                          className="text-slate-400 hover:text-white h-7 text-xs"
+                                        >
+                                          <X className="w-3 h-3 mr-1" />
+                                          Annuler
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => setEditingCourrielIndex(null)}
+                                          className="bg-emerald-500 hover:bg-emerald-600 h-7 text-xs"
+                                        >
+                                          <Save className="w-3 h-3 mr-1" />
+                                          Enregistrer
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ) : (
+                                <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                  <TableCell className="text-white text-sm">{item.courriel}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => setEditingCourrielIndex(index)}
+                                        className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 w-7 p-0"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => toggleActuel('courriels', index)}
+                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => removeClientField('courriels', index)}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
                           ))}
                         </TableBody>
                       </Table>
@@ -451,14 +631,13 @@ export default function ClientFormDialog({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        const telephoneInput = document.getElementById('new-telephone');
-                        const telephone = telephoneInput ? telephoneInput.value.trim() : "";
-                        if (telephone) {
+                        const telephone = document.getElementById('new-telephone').value;
+                        if (telephone.trim()) {
                           setFormData(prev => ({
                             ...prev,
                             telephones: [...prev.telephones, { telephone, actuel: false }]
                           }));
-                          if (telephoneInput) telephoneInput.value = "";
+                          document.getElementById('new-telephone').value = "";
                         }
                       }}
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
@@ -478,36 +657,93 @@ export default function ClientFormDialog({
                         </TableHeader>
                         <TableBody>
                           {formData.telephones.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                              <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() => toggleActuel('telephones', index)}
-                                    className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeClientField('telephones', index)}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
+                            <React.Fragment key={index}>
+                              {editingTelephoneIndex === index ? (
+                                <TableRow className="bg-slate-700/50 border-slate-800">
+                                  <TableCell colSpan={2}>
+                                    <div className="space-y-2 py-2">
+                                      <Input
+                                        value={item.telephone}
+                                        onChange={(e) => updateTelephoneField(index, e.target.value)}
+                                        placeholder="Téléphone"
+                                        className="bg-slate-800 border-slate-600 text-sm"
+                                      />
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => setEditingTelephoneIndex(null)}
+                                          className="text-slate-400 hover:text-white h-7 text-xs"
+                                        >
+                                          <X className="w-3 h-3 mr-1" />
+                                          Annuler
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => setEditingTelephoneIndex(null)}
+                                          className="bg-emerald-500 hover:bg-emerald-600 h-7 text-xs"
+                                        >
+                                          <Save className="w-3 h-3 mr-1" />
+                                          Enregistrer
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ) : (
+                                <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                  <TableCell className="text-white text-sm">{item.telephone}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => setEditingTelephoneIndex(index)}
+                                        className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 w-7 p-0"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => toggleActuel('telephones', index)}
+                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => removeClientField('telephones', index)}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
                           ))}
                         </TableBody>
                       </Table>
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  className="bg-slate-800 border-slate-700 h-24"
+                  placeholder="Notes supplémentaires..."
+                />
               </div>
             </form>
 
@@ -527,7 +763,7 @@ export default function ClientFormDialog({
             <div className="p-4 border-b border-slate-800 flex-shrink-0">
               <h3 className="text-lg font-bold text-white">Commentaires</h3>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-4">
               <CommentairesSectionClient
                 clientId={editingClient?.id}
                 clientTemporaire={!editingClient}
