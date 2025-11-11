@@ -2573,20 +2573,22 @@ export default function Dossiers() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
             <div className="p-6 border-b border-slate-800">
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4">
                 <CardTitle className="text-xl font-bold text-white">Liste des dossiers par mandat</CardTitle>
                 
-                <div className="flex flex-wrap gap-3">
-                  <div className="relative flex-1 min-w-[250px]">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                    />
-                  </div>
+                {/* Barre de recherche - Pleine largeur */}
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white w-full"
+                  />
+                </div>
 
+                {/* Filtres - Tous sur une ligne */}
+                <div className="flex gap-3 items-center flex-wrap"> {/* Added flex-wrap for better responsiveness */}
                   <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
                     <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Arpenteur" />
@@ -2665,9 +2667,9 @@ export default function Dossiers() {
                         setFilterMandat("all");
                         setFilterTache("all");
                       }}
-                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white whitespace-nowrap"
                     >
-                      Réinitialiser les filtres
+                      Réinitialiser
                     </Button>
                   )}
                 </div>
@@ -2771,26 +2773,22 @@ export default function Dossiers() {
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
-                          {item.mandatIndex === 0 && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(item)}
-                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(item.id, `${getArpenteurInitials(item.arpenteur_geometre)}${item.numero_dossier}`)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(item)}
+                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(item.id, `${getArpenteurInitials(item.arpenteur_geometre)}${item.numero_dossier}`)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
