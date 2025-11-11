@@ -239,20 +239,40 @@ export default function Lots() {
   const getDossiersWithLot = (lotNumero) => {
     if (!lotNumero) return [];
     
-    const dossiersWithMandats = [];
+    const dossiersMap = new Map(); // Use Map to track unique dossier-mandat combinations
+    
     dossiers.forEach(dossier => {
       if (dossier.mandats && dossier.mandats.length > 0) {
-        dossier.mandats.forEach((mandat) => { // Removed mandatIndex as it's not used
-          if (mandat.lots && Array.isArray(mandat.lots) && mandat.lots.includes(lotNumero)) {
-            dossiersWithMandats.push({
-              dossier,
-              mandat,
+        dossier.mandats.forEach((mandat, mandatIndex) => {
+          if (mandat.lots && Array.isArray(mandat.lots)) {
+            // Check both ID and numero_lot for compatibility
+            const hasLot = mandat.lots.some(lotRef => {
+              // 1. Check if lotRef is directly the lotNumero (string comparison)
+              if (lotRef === lotNumero) return true;
+              
+              // 2. Check if lotRef is an ID that corresponds to a lot with this lotNumero
+              const lotById = lots.find(l => l.id === lotRef);
+              if (lotById && lotById.numero_lot === lotNumero) return true;
+              
+              return false;
             });
+            
+            if (hasLot) {
+              // Create unique key for dossier-mandat combination
+              const uniqueKey = `${dossier.id}-${mandatIndex}`;
+              if (!dossiersMap.has(uniqueKey)) {
+                dossiersMap.set(uniqueKey, {
+                  dossier,
+                  mandat,
+                });
+              }
+            }
           }
         });
       }
     });
-    return dossiersWithMandats;
+    
+    return Array.from(dossiersMap.values());
   };
 
   const handleDossierClick = (dossier) => {
