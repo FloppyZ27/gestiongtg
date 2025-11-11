@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, FileText, Upload, ExternalLink, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -86,16 +85,27 @@ const CADASTRES_PAR_CIRCONSCRIPTION = {
   ]
 };
 
+const TYPES_OPERATIONS = [
+  "Division du territoire",
+  "Subdivision",
+  "Remplacement",
+  "Rénovation cadastrale",
+  "Correction",
+  "Annulation"
+];
+
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLot, setEditingLot] = useState(null);
   const [filterCirconscription, setFilterCirconscription] = useState("all");
   const [filterCadastre, setFilterCadastre] = useState("all");
+  const [filterTypeOperation, setFilterTypeOperation] = useState("all");
   const [availableCadastres, setAvailableCadastres] = useState([]);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [concordancesAnterieure, setConcordancesAnterieure] = useState([]);
   const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const [newConcordance, setNewConcordance] = useState({
     circonscription_fonciere: "",
     cadastre: "",
@@ -109,8 +119,7 @@ export default function Lots() {
     cadastre: "",
     rang: "",
     date_bpd: "",
-    type_operation: "",
-    document_pdf_url: ""
+    type_operation: ""
   });
 
   const queryClient = useQueryClient();
@@ -160,21 +169,6 @@ export default function Lots() {
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingPdf(true);
-    try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      setFormData({ ...formData, document_pdf_url: result.file_url });
-    } catch (error) {
-      console.error("Erreur lors de l'upload:", error);
-    } finally {
-      setUploadingPdf(false);
-    }
-  };
-
   const handleCirconscriptionChange = (value) => {
     setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
@@ -183,13 +177,11 @@ export default function Lots() {
   const addConcordance = () => {
     if (newConcordance.numero_lot && newConcordance.circonscription_fonciere) {
       if (editingConcordanceIndex !== null) {
-        // Mode édition
         const updated = [...concordancesAnterieure];
         updated[editingConcordanceIndex] = { ...newConcordance };
         setConcordancesAnterieure(updated);
         setEditingConcordanceIndex(null);
       } else {
-        // Mode ajout
         setConcordancesAnterieure([...concordancesAnterieure, { ...newConcordance }]);
       }
       setNewConcordance({
@@ -221,7 +213,6 @@ export default function Lots() {
     if (editingConcordanceIndex === index) {
       cancelEditConcordance();
     } else if (editingConcordanceIndex !== null && index < editingConcordanceIndex) {
-      // If an item before the currently edited item is removed, adjust the index
       setEditingConcordanceIndex(editingConcordanceIndex - 1);
     }
   };
@@ -233,8 +224,7 @@ export default function Lots() {
       cadastre: "",
       rang: "",
       date_bpd: "",
-      type_operation: "",
-      document_pdf_url: ""
+      type_operation: ""
     });
     setConcordancesAnterieure([]);
     setNewConcordance({
@@ -245,7 +235,7 @@ export default function Lots() {
     });
     setEditingLot(null);
     setAvailableCadastres([]);
-    setEditingConcordanceIndex(null); // Reset editing concordance index
+    setEditingConcordanceIndex(null);
   };
 
   const handleEdit = (lot) => {
@@ -255,22 +245,35 @@ export default function Lots() {
       circonscription_fonciere: lot.circonscription_fonciere || "",
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
-      date_bpd: lot.date_bpd ? format(new Date(lot.date_bpd), 'yyyy-MM-dd') : "", // Format date for input type="date"
-      type_operation: lot.type_operation || "",
-      document_pdf_url: lot.document_pdf_url || ""
+      date_bpd: lot.date_bpd ? format(new Date(lot.date_bpd), 'yyyy-MM-dd') : "",
+      type_operation: lot.type_operation || ""
     });
     setConcordancesAnterieure(lot.concordances_anterieures || []);
     if (lot.circonscription_fonciere) {
       setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
     }
     setIsDialogOpen(true);
-    setEditingConcordanceIndex(null); // Ensure no concordance is being edited when opening lot edit form
+    setEditingConcordanceIndex(null);
   };
 
   const handleDelete = (id) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce lot ?")) {
       deleteLotMutation.mutate(id);
     }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
   const filteredLots = lots.filter(lot => {
@@ -284,8 +287,52 @@ export default function Lots() {
 
     const matchesCirconscription = filterCirconscription === "all" || lot.circonscription_fonciere === filterCirconscription;
     const matchesCadastre = filterCadastre === "all" || lot.cadastre === filterCadastre;
+    const matchesTypeOperation = filterTypeOperation === "all" || lot.type_operation === filterTypeOperation;
 
-    return matchesSearch && matchesCirconscription && matchesCadastre;
+    return matchesSearch && matchesCirconscription && matchesCadastre && matchesTypeOperation;
+  });
+
+  const sortedLots = [...filteredLots].sort((a, b) => {
+    if (!sortField) return 0;
+
+    let aValue, bValue;
+
+    switch (sortField) {
+      case 'numero_lot':
+        aValue = (a.numero_lot || '').toLowerCase();
+        bValue = (b.numero_lot || '').toLowerCase();
+        break;
+      case 'circonscription':
+        aValue = (a.circonscription_fonciere || '').toLowerCase();
+        bValue = (b.circonscription_fonciere || '').toLowerCase();
+        break;
+      case 'cadastre':
+        aValue = (a.cadastre || '').toLowerCase();
+        bValue = (b.cadastre || '').toLowerCase();
+        break;
+      case 'rang':
+        aValue = (a.rang || '').toLowerCase();
+        bValue = (b.rang || '').toLowerCase();
+        break;
+      case 'date_bpd':
+        aValue = a.date_bpd ? new Date(a.date_bpd).getTime() : 0;
+        bValue = b.date_bpd ? new Date(b.date_bpd).getTime() : 0;
+        break;
+      case 'type_operation':
+        aValue = (a.type_operation || '').toLowerCase();
+        bValue = (b.type_operation || '').toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    }
   });
 
   const statsCards = [
@@ -414,12 +461,11 @@ export default function Lots() {
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="Division du territoire" className="text-white">Division du territoire</SelectItem>
-                        <SelectItem value="Subdivision" className="text-white">Subdivision</SelectItem>
-                        <SelectItem value="Remplacement" className="text-white">Remplacement</SelectItem>
-                        <SelectItem value="Rénovation cadastrale" className="text-white">Rénovation cadastrale</SelectItem>
-                        <SelectItem value="Correction" className="text-white">Correction</SelectItem>
-                        <SelectItem value="Annulation" className="text-white">Annulation</SelectItem>
+                        {TYPES_OPERATIONS.map((type) => (
+                          <SelectItem key={type} value={type} className="text-white">
+                            {type}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -529,7 +575,7 @@ export default function Lots() {
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Numéro de lot</TableHead>
                             <TableHead className="text-slate-300">Circonscription</TableHead>
-                            <TableHead className className="text-slate-300">Cadastre</TableHead>
+                            <TableHead className="text-slate-300">Cadastre</TableHead>
                             <TableHead className="text-slate-300">Rang</TableHead>
                             <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
@@ -568,37 +614,6 @@ export default function Lots() {
                         </TableBody>
                       </Table>
                     </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Document PDF</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileUpload}
-                      disabled={uploadingPdf}
-                      className="bg-slate-800 border-slate-700"
-                    />
-                    {uploadingPdf && (
-                      <Button type="button" disabled className="bg-slate-700">
-                        <Upload className="w-4 h-4 mr-2 animate-spin" />
-                        Upload...
-                      </Button>
-                    )}
-                  </div>
-                  {formData.document_pdf_url && (
-                    <a
-                      href={formData.document_pdf_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Voir le PDF
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
                   )}
                 </div>
                 
@@ -641,19 +656,18 @@ export default function Lots() {
           <CardContent className="p-0">
             <div className="p-6 border-b border-slate-800">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <CardTitle className="text-xl font-bold text-white">Liste des lots</CardTitle>
-                <div className="flex flex-col md:flex-row gap-3">
-                  <div className="relative w-full md:w-auto">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                    />
-                  </div>
+                <div className="relative w-full md:w-auto">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white md:w-64"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-3">
                   <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
-                    <SelectTrigger className="w-full md:w-48 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Circonscription" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
@@ -666,7 +680,7 @@ export default function Lots() {
                     </SelectContent>
                   </Select>
                   <Select value={filterCadastre} onValueChange={setFilterCadastre}>
-                    <SelectTrigger className="w-full md:w-48 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Cadastre" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
@@ -678,6 +692,19 @@ export default function Lots() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select value={filterTypeOperation} onValueChange={setFilterTypeOperation}>
+                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type d'opération" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                      {TYPES_OPERATIONS.map((type) => (
+                        <SelectItem key={type} value={type} className="text-white">
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -685,18 +712,47 @@ export default function Lots() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                    <TableHead className="text-slate-300">Circonscription</TableHead>
-                    <TableHead className="text-slate-300">Cadastre</TableHead>
-                    <TableHead className="text-slate-300">Rang</TableHead>
-                    <TableHead className="text-slate-300">Date BPD</TableHead>
-                    <TableHead className="text-slate-300">Type d'opération</TableHead>
-                    <TableHead className="text-slate-300">PDF</TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('numero_lot')}
+                    >
+                      Numéro de lot {getSortIcon('numero_lot')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('circonscription')}
+                    >
+                      Circonscription {getSortIcon('circonscription')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('cadastre')}
+                    >
+                      Cadastre {getSortIcon('cadastre')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('rang')}
+                    >
+                      Rang {getSortIcon('rang')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('date_bpd')}
+                    >
+                      Date BPD {getSortIcon('date_bpd')}
+                    </TableHead>
+                    <TableHead 
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('type_operation')}
+                    >
+                      Type d'opération {getSortIcon('type_operation')}
+                    </TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredLots.map((lot) => (
+                  {sortedLots.map((lot) => (
                     <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium text-white">
                         {lot.numero_lot}
@@ -720,21 +776,6 @@ export default function Lots() {
                           <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
                             {lot.type_operation}
                           </Badge>
-                        ) : (
-                          <span className="text-slate-600 text-sm">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {lot.document_pdf_url ? (
-                          <a
-                            href={lot.document_pdf_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Ouvrir
-                          </a>
                         ) : (
                           <span className="text-slate-600 text-sm">-</span>
                         )}
