@@ -40,9 +40,27 @@ export default function ClientFormDialog({
   const [editingAdresseIndex, setEditingAdresseIndex] = useState(null);
   const [editingCourrielIndex, setEditingCourrielIndex] = useState(null);
   const [editingTelephoneIndex, setEditingTelephoneIndex] = useState(null);
+  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
 
   const createClientMutation = useMutation({
-    mutationFn: (clientData) => base44.entities.Client.create(clientData),
+    mutationFn: async (clientData) => {
+      const newClient = await base44.entities.Client.create(clientData);
+      
+      // Créer les commentaires temporaires si présents
+      if (commentairesTemporaires.length > 0) {
+        const commentairePromises = commentairesTemporaires.map(comment =>
+          base44.entities.CommentaireClient.create({
+            client_id: newClient.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
+        );
+        await Promise.all(commentairePromises);
+      }
+      
+      return newClient;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       resetForm();
@@ -109,6 +127,7 @@ export default function ClientFormDialog({
     setEditingAdresseIndex(null);
     setEditingCourrielIndex(null);
     setEditingTelephoneIndex(null);
+    setCommentairesTemporaires([]);
   };
 
   const removeClientField = (fieldName, index) => {
@@ -189,6 +208,7 @@ export default function ClientFormDialog({
           : [],
         notes: editingClient.notes || ""
       });
+      setCommentairesTemporaires([]);
     } else if (open && !editingClient) {
       setFormData({
         prenom: "",
@@ -199,6 +219,7 @@ export default function ClientFormDialog({
         telephones: [],
         notes: ""
       });
+      setCommentairesTemporaires([]);
     }
   }, [open, editingClient, defaultType]);
 
@@ -735,16 +756,18 @@ export default function ClientFormDialog({
                 </div>
               </div>
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  className="bg-slate-800 border-slate-700 h-24"
-                  placeholder="Notes supplémentaires..."
-                />
-              </div>
+              {/* Notes - CACHER pour les nouveaux clients */}
+              {editingClient && (
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    className="bg-slate-800 border-slate-700 h-24"
+                    placeholder="Notes supplémentaires..."
+                  />
+                </div>
+              )}
             </form>
 
             {/* Boutons Annuler/Créer tout en bas */}
@@ -763,11 +786,12 @@ export default function ClientFormDialog({
             <div className="p-4 border-b border-slate-800 flex-shrink-0">
               <h3 className="text-lg font-bold text-white">Commentaires</h3>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-hidden p-4">
               <CommentairesSectionClient
                 clientId={editingClient?.id}
                 clientTemporaire={!editingClient}
-                clientNom={editingClient ? `${editingClient.prenom} ${editingClient.nom}` : `${formData.prenom} ${formData.nom}`.trim() || "Nouveau client"}
+                commentairesTemp={commentairesTemporaires}
+                onCommentairesTempChange={setCommentairesTemporaires}
               />
             </div>
           </div>
