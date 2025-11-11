@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -186,7 +185,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const courrielsAnciens = client.courriels?.filter(c => !c.actuel) || [];
 
   const telephoneActuel = client.telephones?.find(t => t.actuel);
-  telephonesAnciens = client.telephones?.filter(t => !t.actuelle) || [];
+  const telephonesAnciens = client.telephones?.filter(t => !t.actuel) || [];
 
   const handleDossierClick = (dossier) => {
     const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
