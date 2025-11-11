@@ -1566,6 +1566,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
+                                }
                                 </div>
 
                                 <div className="space-y-2">
@@ -2249,7 +2250,7 @@ export default function PriseDeMandat() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
