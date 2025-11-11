@@ -756,19 +756,6 @@ export default function ClientFormDialog({
                   )}
                 </div>
               </div>
-
-              {/* Notes - INVISIBLE LORS DE LA MODIFICATION */}
-              {editingClient && (
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-slate-800 border-slate-700 h-24"
-                    placeholder="Notes supplémentaires..."
-                  />
-                </div>
-              )}
             </form>
 
             {/* Boutons Annuler/Créer tout en bas */}
