@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -756,7 +757,7 @@ export default function ClientFormDialog({
                 </div>
               </div>
 
-              {/* Notes - CACHER pour les nouveaux clients */}
+              {/* Notes - INVISIBLE LORS DE LA MODIFICATION */}
               {editingClient && (
                 <div className="space-y-2">
                   <Label>Notes</Label>
