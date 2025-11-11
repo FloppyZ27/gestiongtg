@@ -2724,7 +2724,11 @@ export default function Dossiers() {
                 </TableHeader>
                 <TableBody>
                   {sortedDossiers.map((item) => (
-                    <TableRow key={item.displayId} className="hover:bg-slate-800/30 border-slate-800">
+                    <TableRow 
+                      key={item.displayId} 
+                      className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                      onClick={() => handleView(item)}
+                    >
                       <TableCell className="font-medium">
                         <Badge variant="outline" className={`${getArpenteurColor(item.arpenteur_geometre)} border`}>
                           {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
@@ -2765,16 +2769,8 @@ export default function Dossiers() {
                           <span className="text-slate-600 text-xs">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleView(item)}
-                            className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
                           {item.mandatIndex === 0 && (
                             <>
                               <Button
