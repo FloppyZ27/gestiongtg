@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -1285,7 +1286,7 @@ export default function Dossiers() {
                               <div>
                                 <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                                 <p className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</p>
-                                <p className="text-slate-500 text-xs mt-1">{dossier.mandats?.length || 0} mandat(s) - {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
+                                <p className="text-slate-500 text-xs mt-1">{dossier.mandats?.length || 0} mandat(s) - format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
                               </div>
                               <Button type="button" size="sm" variant="ghost" className="text-emerald-400">Sélectionner</Button>
                             </div>
@@ -1358,41 +1359,716 @@ export default function Dossiers() {
         </Dialog>
 
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+              <div className="space-y-2 p-4">
+                {filteredClientsForSelector.length > 0 ? (
+                  filteredClientsForSelector.map((client) => (
+                    <div key={client.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
+                      <div>
+                        <p className="font-medium text-white">{client.prenom} {client.nom}</p>
+                        <p className="text-slate-400 text-sm">{client.courriels?.[0]?.courriel || client.telephones?.[0]?.telephone}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {formData.clients_ids.includes(client.id) ? (
+                          <Button type="button" size="sm" onClick={() => toggleClient(client.id, 'clients')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
+                            <X className="w-4 h-4 mr-1" /> Retirer
+                          </Button>
+                        ) : (
+                          <Button type="button" size="sm" onClick={() => toggleClient(client.id, 'clients')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                            <Plus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        )}
+                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(client)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun client trouvé</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Client"); setIsClientSelectorOpen(false); }}>
+                <Plus className="w-4 h-4 mr-2" /> Nouveau client
+              </Button>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+              <div className="space-y-2 p-4">
+                {filteredNotairesForSelector.length > 0 ? (
+                  filteredNotairesForSelector.map((notaire) => (
+                    <div key={notaire.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
+                      <div>
+                        <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
+                        <p className="text-slate-400 text-sm">{notaire.courriels?.[0]?.courriel || notaire.telephones?.[0]?.telephone}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {formData.notaires_ids.includes(notaire.id) ? (
+                          <Button type="button" size="sm" onClick={() => toggleClient(notaire.id, 'notaires')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
+                            <X className="w-4 h-4 mr-1" /> Retirer
+                          </Button>
+                        ) : (
+                          <Button type="button" size="sm" onClick={() => toggleClient(notaire.id, 'notaires')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                            <Plus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        )}
+                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(notaire)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun notaire trouvé</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Notaire"); setIsNotaireSelectorOpen(false); }}>
+                <Plus className="w-4 h-4 mr-2" /> Nouveau notaire
+              </Button>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
+            </DialogHeader>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+              <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+            </div>
+            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+              <div className="space-y-2 p-4">
+                {filteredCourtiersForSelector.length > 0 ? (
+                  filteredCourtiersForSelector.map((courtier) => (
+                    <div key={courtier.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
+                      <div>
+                        <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
+                        <p className="text-slate-400 text-sm">{courtier.courriels?.[0]?.courriel || courtier.telephones?.[0]?.telephone}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {formData.courtiers_ids.includes(courtier.id) ? (
+                          <Button type="button" size="sm" onClick={() => toggleClient(courtier.id, 'courtiers')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
+                            <X className="w-4 h-4 mr-1" /> Retirer
+                          </Button>
+                        ) : (
+                          <Button type="button" size="sm" onClick={() => toggleClient(courtier.id, 'courtiers')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                            <Plus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        )}
+                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(courtier)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-slate-500">
+                    <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun courtier trouvé</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Courtier immobilier"); setIsCourtierSelectorOpen(false); }}>
+                <Plus className="w-4 h-4 mr-2" /> Nouveau courtier
+              </Button>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) setEditingClientForForm(null); }} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['clients'] }); if (clientTypeForForm === "Client") setIsClientSelectorOpen(true); if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true); if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true); }} />
 
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Détails du client</DialogTitle>
+            </DialogHeader>
+            <ClientDetailView client={viewingClientDetails} />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setViewingClientDetails(null)}>Fermer</Button>
+              <Button onClick={() => handleEdit(viewingClientDetails)} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                <Edit className="w-4 h-4 mr-2" /> Modifier
+              </Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 border-b border-slate-800 flex-shrink-0">
+              <DialogTitle className="text-2xl text-emerald-400">Dossier: <span className="text-white">{getArpenteurInitials(viewingDossier?.arpenteur_geometre)}{viewingDossier?.numero_dossier}</span></DialogTitle>
+            </DialogHeader>
+            <div className="p-6 flex-1 overflow-y-auto">
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Informations Générales</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Arpenteur-géomètre</Label>
+                    <p className="text-white">{viewingDossier?.arpenteur_geometre || '-'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Date d'ouverture</Label>
+                    <p className="text-white">{viewingDossier?.date_ouverture ? format(new Date(viewingDossier.date_ouverture), 'dd MMMM yyyy', { locale: fr }) : '-'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Statut</Label>
+                    <Badge variant="outline" className={`border ${viewingDossier?.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{viewingDossier?.statut || '-'}</Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Clients</Label>
+                    {viewingDossier?.clients_ids?.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {viewingDossier.clients_ids.map(id => {
+                          const client = getClientById(id);
+                          return client ? <Badge key={id} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">{client.prenom} {client.nom}</Badge> : null;
+                        })}
+                      </div>
+                    ) : <p className="text-slate-500">-</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Notaires</Label>
+                    {viewingDossier?.notaires_ids?.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {viewingDossier.notaires_ids.map(id => {
+                          const notaire = getClientById(id);
+                          return notaire ? <Badge key={id} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30">{notaire.prenom} {notaire.nom}</Badge> : null;
+                        })}
+                      </div>
+                    ) : <p className="text-slate-500">-</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400">Courtiers</Label>
+                    {viewingDossier?.courtiers_ids?.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {viewingDossier.courtiers_ids.map(id => {
+                          const courtier = getClientById(id);
+                          return courtier ? <Badge key={id} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30">{courtier.prenom} {courtier.nom}</Badge> : null;
+                        })}
+                      </div>
+                    ) : <p className="text-slate-500">-</p>}
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-semibold text-white mb-4">Mandats</h3>
+                {viewingDossier?.mandats?.length > 0 ? (
+                  viewingDossier.mandats.map((mandat, index) => (
+                    <Card key={index} className="border-slate-700 bg-slate-800/30 p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</CardTitle>
+                        {mandat.minute && (
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Minute {mandat.minute} ({mandat.type_minute})</Badge>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Adresse des travaux</Label>
+                          <p className="text-white">{formatAdresse(mandat.adresse_travaux) || '-'}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Tâche actuelle</Label>
+                          <p className="text-white">{mandat.tache_actuelle || '-'}</p>
+                        </div>
+                        {mandat.statut_terrain && (
+                          <div className="space-y-1">
+                            <Label className="text-slate-400">Statut du terrain</Label>
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{mandat.statut_terrain}</Badge>
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Dates</Label>
+                          <ul className="text-white list-disc list-inside">
+                            {mandat.date_ouverture && <li>Ouverture: {format(new Date(mandat.date_ouverture), 'dd MMM yyyy', { locale: fr })}</li>}
+                            {mandat.date_signature && <li>Signature: {format(new Date(mandat.date_signature), 'dd MMM yyyy', { locale: fr })}</li>}
+                            {mandat.date_debut_travaux && <li>Début travaux: {format(new Date(mandat.date_debut_travaux), 'dd MMM yyyy', { locale: fr })}</li>}
+                            {mandat.date_livraison && <li>Livraison: {format(new Date(mandat.date_livraison), 'dd MMM yyyy', { locale: fr })}</li>}
+                          </ul>
+                        </div>
+                      </div>
+                      {mandat.lots?.length > 0 && (
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Lots associés</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {mandat.lots.map(lotId => {
+                              const lot = getLotById(lotId);
+                              return lot ? (
+                                <Badge key={lot.id} variant="outline" className="bg-gray-500/20 text-gray-400 border-gray-500/30">Lot {lot.numero_lot} ({lot.circonscription_fonciere})</Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Tarification</Label>
+                          <p className="text-white">
+                            Prix estimé: {mandat.prix_estime?.toFixed(2)}$ {mandat.rabais > 0 && `(Rabais: ${mandat.rabais.toFixed(2)}$)`} {mandat.taxes_incluses && "(Taxes incluses)"}
+                          </p>
+                        </div>
+                      )}
+                      {mandat.notes && (
+                        <div className="space-y-1">
+                          <Label className="text-slate-400">Notes</Label>
+                          <p className="text-white whitespace-pre-wrap">{mandat.notes}</p>
+                        </div>
+                      )}
+
+                      {mandat.terrain && (
+                        <div className="border-t border-slate-700 pt-3 mt-3">
+                          <Label className="text-slate-300 font-semibold mb-2 block">Informations Terrain</Label>
+                          <div className="grid grid-cols-2 gap-3">
+                            {mandat.terrain.date_limite_leve && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400">Date limite levé</Label>
+                                <p className="text-white">{format(new Date(mandat.terrain.date_limite_leve), 'dd MMM yyyy', { locale: fr })}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.instruments_requis && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400">Instruments</Label>
+                                <p className="text-white">{mandat.terrain.instruments_requis}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.a_rendez_vous && (
+                              <div className="space-y-1 col-span-2">
+                                <Label className="text-slate-400">Rendez-vous</Label>
+                                <p className="text-white">{mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })} à {mandat.terrain.heure_rendez_vous} avec {mandat.terrain.donneur}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.technicien && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400">Technicien</Label>
+                                <p className="text-white">{mandat.terrain.technicien}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.dossier_simultane && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400">Dossier simultané</Label>
+                                <p className="text-white">{mandat.terrain.dossier_simultane}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.temps_prevu && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400">Temps prévu</Label>
+                                <p className="text-white">{mandat.terrain.temps_prevu}</p>
+                              </div>
+                            )}
+                            {mandat.terrain.notes && (
+                              <div className="space-y-1 col-span-2">
+                                <Label className="text-slate-400">Notes terrain</Label>
+                                <p className="text-white whitespace-pre-wrap">{mandat.terrain.notes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  ))
+                ) : (
+                  <p className="text-slate-500">Aucun mandat pour ce dossier.</p>
+                )}
+
+                <h3 className="text-xl font-semibold text-white mb-4">Historique des commentaires</h3>
+                <CommentairesSection dossierId={viewingDossier?.id} readOnly={true} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 p-6 border-t border-slate-800 flex-shrink-0">
+              <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Fermer</Button>
+              <Button onClick={handleEditFromView} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                <Edit className="w-4 h-4 mr-2" /> Modifier
+              </Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <Dialog open={isLotSelectorOpen} onOpenChange={(open) => { setIsLotSelectorOpen(open); if (!open) { setLotCirconscriptionFilter("all"); setLotSearchTerm(""); setLotCadastreFilter("Québec"); } }}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner les lots pour le mandat {currentMandatIndex !== null ? (formData.mandats[currentMandatIndex]?.type_mandat || `n°${currentMandatIndex + 1}`) : ''}</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input placeholder="Rechercher par n° lot, rang, circonscription..." value={lotSearchTerm} onChange={(e) => setLotSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                </div>
+                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                  <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                    <SelectValue placeholder="Circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all">Toutes les circonscriptions</SelectItem>
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
+                      <SelectItem key={circonscription} value={circonscription}>{circonscription}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {lotCirconscriptionFilter !== "all" && (
+                  <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                    <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                      <SelectValue placeholder="Cadastre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all">Tous les cadastres</SelectItem>
+                      {(CADASTRES_PAR_CIRCONSCRIPTION[lotCirconscriptionFilter] || []).map(cadastre => (
+                        <SelectItem key={cadastre} value={cadastre}>{cadastre}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700 sticky top-0 z-10">
+                      <TableHead className="text-slate-300">N° Lot</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300">Circonscription</TableHead>
+                      <TableHead className="text-slate-300">Cadastre</TableHead>
+                      <TableHead className="text-slate-300">Concordance antérieur</TableHead>
+                      <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLotsForSelector.length > 0 ? (
+                      filteredLotsForSelector.map((lot) => (
+                        <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
+                          <TableCell className="text-slate-300">{lot.rang || '-'}</TableCell>
+                          <TableCell className="text-slate-300">{lot.circonscription_fonciere || '-'}</TableCell>
+                          <TableCell className="text-slate-300">{lot.cadastre || '-'}</TableCell>
+                          <TableCell className="text-slate-300">{lot.concordance_anterieur || '-'}</TableCell>
+                          <TableCell className="text-right">
+                            {currentMandatIndex !== null && formData.mandats[currentMandatIndex]?.lots?.includes(lot.id) ? (
+                              <Button type="button" size="sm" onClick={() => addLotToCurrentMandat(lot.id)} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
+                                <X className="w-4 h-4 mr-1" /> Retirer
+                              </Button>
+                            ) : (
+                              <Button type="button" size="sm" onClick={() => addLotToCurrentMandat(lot.id)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                                <Plus className="w-4 h-4 mr-1" /> Ajouter
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                          <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p>Aucun lot trouvé</p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+              <Button variant="outline" onClick={() => { setIsNewLotDialogOpen(true); setIsLotSelectorOpen(false); }}>
+                <Plus className="w-4 h-4 mr-2" /> Nouveau lot
+              </Button>
+              <Button onClick={() => setIsLotSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+            </div>
+          </DialogContent>
         </Dialog>
 
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => { setIsNewLotDialogOpen(open); if (!open) resetNewLotForm(); }}>
-          {/* ... reste du contenu inchangé ... */}
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Créer un nouveau lot</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleNewLotSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
+                  <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange} required>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner la circonscription" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
+                        <SelectItem key={circonscription} value={circonscription} className="text-white">{circonscription}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Cadastre <span className="text-red-400">*</span></Label>
+                  <Select value={newLotForm.cadastre} onValueChange={(value) => setNewLotForm({ ...newLotForm, cadastre: value })} required disabled={!newLotForm.circonscription_fonciere}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner le cadastre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {availableLotCadastres.map(cadastre => (
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">{cadastre}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
+                  <Input value={newLotForm.numero_lot} onChange={(e) => setNewLotForm({ ...newLotForm, numero_lot: e.target.value })} required placeholder="Ex: 1234567" className="bg-slate-800 border-slate-700" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rang</Label>
+                  <Input value={newLotForm.rang} onChange={(e) => setNewLotForm({ ...newLotForm, rang: e.target.value })} placeholder="Ex: Rang 1" className="bg-slate-800 border-slate-700" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Concordance antérieur</Label>
+                <Textarea value={newLotForm.concordance_anterieur} onChange={(e) => setNewLotForm({ ...newLotForm, concordance_anterieur: e.target.value })} placeholder="Informations de concordance (ex: lot 123 subdivision 456)" className="bg-slate-800 border-slate-700" />
+              </div>
+              <div className="space-y-2">
+                <Label>Document PDF du lot</Label>
+                <div className="flex items-center gap-2">
+                  <Input type="file" onChange={handleLotFileUpload} accept=".pdf" className="bg-slate-800 border-slate-700 file:text-emerald-400 file:bg-emerald-500/10 file:border-none file:hover:bg-emerald-500/20" />
+                  {uploadingLotPdf && <span className="text-slate-500">Téléchargement...</span>}
+                  {newLotForm.document_pdf_url && (
+                    <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
+                      <FileText className="w-5 h-5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>Annuler</Button>
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer le lot</Button>
+              </div>
+            </form>
+          </DialogContent>
         </Dialog>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          {/* ... stats card inchangée ... */}
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-slate-400">Dossiers ouverts</CardTitle>
+            <FolderOpen className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">{dossiersOuverts.length}</div>
+            <p className="text-xs text-slate-500">
+              <div className="flex items-center gap-2 mt-2">
+                <span className="flex items-center text-emerald-400">
+                  <Eye className="w-3 h-3 mr-1" /> Aujourd'hui: {dossierStats.byDay}
+                  {dossierStats.percentages.day !== 0 && (
+                    dossierStats.percentages.day > 0 ? (
+                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
+                    )
+                  )}
+                  {dossierStats.percentages.day !== 0 && ` (${dossierStats.percentages.day}%)`}
+                </span>
+                <span className="flex items-center text-cyan-400">
+                  <Calendar className="w-3 h-3 mr-1" /> Cette semaine: {dossierStats.byWeek}
+                  {dossierStats.percentages.week !== 0 && (
+                    dossierStats.percentages.week > 0 ? (
+                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
+                    )
+                  )}
+                  {dossierStats.percentages.week !== 0 && ` (${dossierStats.percentages.week}%)`}
+                </span>
+                <span className="flex items-center text-purple-400">
+                  <Calendar className="w-3 h-3 mr-1" /> Ce mois-ci: {dossierStats.byMonth}
+                  {dossierStats.percentages.month !== 0 && (
+                    dossierStats.percentages.month > 0 ? (
+                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
+                    )
+                  )}
+                  {dossierStats.percentages.month !== 0 && ` (${dossierStats.percentages.month}%)`}
+                </span>
+                <span className="flex items-center text-orange-400">
+                  <Calendar className="w-3 h-3 mr-1" /> Cette année: {dossierStats.byYear}
+                  {dossierStats.percentages.year !== 0 && (
+                    dossierStats.percentages.year > 0 ? (
+                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
+                    )
+                  )}
+                  {dossierStats.percentages.year !== 0 && ` (${dossierStats.percentages.year}%)`}
+                </span>
+              </div>
+            </p>
+          </CardContent>
         </Card>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          {/* ... table inchangée ... */}
+          <CardHeader className="flex flex-row justify-between items-center">
+            <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
+            <div className="flex gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Filtrer par arpenteur" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">Tous les arpenteurs</SelectItem>
+                  {ARPENTEURS.map(arpenteur => (
+                    <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterStatut} onValueChange={setFilterStatut}>
+                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Filtrer par statut" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="Ouvert">Ouvert</SelectItem>
+                  <SelectItem value="Fermé">Fermé</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterMandat} onValueChange={setFilterMandat}>
+                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Filtrer par mandat" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">Tous les mandats</SelectItem>
+                  {TYPES_MANDATS.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterTache} onValueChange={setFilterTache}>
+                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Filtrer par tâche" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">Toutes les tâches</SelectItem>
+                  {TACHES.map(tache => (
+                    <SelectItem key={tache} value={tache}>{tache}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterVille} onValueChange={setFilterVille}>
+                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectValue placeholder="Filtrer par ville" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all">Toutes les villes</SelectItem>
+                  {uniqueVilles.map(ville => (
+                    <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div>
+            ) : (
+              <div className="border border-slate-700 rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('numero_dossier')}>N° Dossier {getSortIcon('numero_dossier')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('clients')}>Clients {getSortIcon('clients')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('type_mandat')}>Mandat {getSortIcon('type_mandat')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('tache_actuelle')}>Tâche actuelle {getSortIcon('tache_actuelle')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('ville')}>Adresse Travaux {getSortIcon('ville')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_ouverture')}>Date ouverture {getSortIcon('date_ouverture')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('statut')}>Statut {getSortIcon('statut')}</TableHead>
+                      <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedDossiers.length > 0 ? (
+                      sortedDossiers.map((dossier) => (
+                        <TableRow key={dossier.displayId} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium text-white">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300">{getClientsNames(dossier.clients_ids)}</TableCell>
+                          <TableCell className="text-slate-300">{dossier.mandatInfo?.type_mandat || '-'}</TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandatInfo?.tache_actuelle && (
+                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-300">{getFirstAdresseTravaux(dossier.mandats)}</TableCell>
+                          <TableCell className="text-slate-300">{dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`border ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{dossier.statut}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => handleView(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleDelete(dossier.id, getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                          <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p>Aucun dossier trouvé.</p>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
     </div>
