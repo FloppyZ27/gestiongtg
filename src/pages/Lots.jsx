@@ -239,42 +239,40 @@ export default function Lots() {
   const getDossiersWithLot = (lotNumero) => {
     if (!lotNumero) return [];
     
-    const uniqueDossiers = new Map();
+    const uniqueMap = new Map();
     
     dossiers.forEach(dossier => {
-      if (dossier.mandats && dossier.mandats.length > 0) {
-        dossier.mandats.forEach((mandat, mandatIndex) => {
-          if (mandat.lots && Array.isArray(mandat.lots) && mandat.lots.length > 0) {
-            // Check if this specific lot numero appears in the lots array
-            // We need to be careful about duplicates in the lots array itself
-            const hasThisLot = mandat.lots.some(lotRef => {
-              // Try to find lot by ID first
-              const lotById = lots.find(l => l.id === lotRef);
-              if (lotById && lotById.numero_lot === lotNumero) return true;
-              
-              // Fallback: check if lotRef is directly the numero
-              return lotRef === lotNumero;
-            });
-            
-            if (hasThisLot) {
-              // Use ONLY dossier.id and mandatIndex as unique key
-              // This ensures we only get ONE entry per mandat, regardless of how many times
-              // the lot appears in that mandat's lots array
-              const uniqueKey = `${dossier.id}-mandat-${mandatIndex}`;
-              
-              if (!uniqueDossiers.has(uniqueKey)) {
-                uniqueDossiers.set(uniqueKey, {
-                  dossier,
-                  mandat,
-                });
-              }
-            }
-          }
+      if (!dossier.mandats || dossier.mandats.length === 0) return;
+      
+      dossier.mandats.forEach((mandat, mandatIndex) => {
+        if (!mandat.lots || !Array.isArray(mandat.lots)) return;
+        
+        // Check if this mandat contains the lot we're looking for
+        const containsLot = mandat.lots.some(lotRef => {
+          // Direct string comparison with numero_lot
+          if (lotRef === lotNumero) return true;
+          
+          // If lotRef is an ID, find the lot and compare numero_lot
+          const foundLot = lots.find(l => l.id === lotRef);
+          return foundLot && foundLot.numero_lot === lotNumero;
         });
-      }
+        
+        if (containsLot) {
+          // Create unique key: dossier ID + mandat index
+          const uniqueKey = `${dossier.id}__${mandatIndex}`;
+          
+          // Only add if not already in map
+          if (!uniqueMap.has(uniqueKey)) {
+            uniqueMap.set(uniqueKey, {
+              dossier,
+              mandat,
+            });
+          }
+        }
+      });
     });
     
-    return Array.from(uniqueDossiers.values());
+    return Array.from(uniqueMap.values());
   };
 
   const handleDossierClick = (dossier) => {
