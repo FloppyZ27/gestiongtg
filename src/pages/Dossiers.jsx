@@ -425,6 +425,9 @@ export default function Dossiers() {
     setEditingDossier(null);
     setActiveTabMandat("0");
     setCommentairesTemporaires([]);
+    // NEW: Reset closing dossier states
+    setClosingDossierId(null);
+    setClosingMandatsMinutes([]);
   };
 
   const resetNewLotForm = () => {
@@ -956,14 +959,11 @@ export default function Dossiers() {
           <div className="flex gap-3">
             <Button
               onClick={() => {
-                const dossierOuvert = dossiers.find(d => d.statut === "Ouvert");
-                if (dossierOuvert) {
-                  handleOpenCloseDossier(dossierOuvert);
-                } else {
-                  // If no open dossier found, just open the dialog and let the user select
+                const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
+                if (dossiersOuverts.length > 0) {
                   setIsCloseDossierDialogOpen(true);
-                  setClosingDossierId(null);
-                  setClosingMandatsMinutes([]);
+                } else {
+                  alert("Aucun dossier ouvert à fermer.");
                 }
               }}
               className="bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white shadow-lg shadow-red-500/50"
@@ -1343,40 +1343,54 @@ export default function Dossiers() {
 
                                     {editingDossier && (
                                       <>
-                                        <div className="grid grid-cols-3 gap-3">
-                                          <div className="space-y-2">
-                                            <Label>Minute</Label>
-                                            <Input
-                                              value={mandat.minute || ""}
-                                              onChange={(e) => updateMandat(index, 'minute', e.target.value)}
-                                              placeholder="Ex: 12345"
-                                              className="bg-slate-700 border-slate-600"
-                                            />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label>Date de minute</Label>
-                                            <Input
-                                              type="date"
-                                              value={mandat.date_minute || ""}
-                                              onChange={(e) => updateMandat(index, 'date_minute', e.target.value)}
-                                              className="bg-slate-700 border-slate-600"
-                                            />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label>Type de minute</Label>
-                                            <Select
-                                              value={mandat.type_minute || "Initiale"}
-                                              onValueChange={(value) => updateMandat(index, 'type_minute', value)}
-                                            >
-                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                                <SelectValue />
-                                              </SelectTrigger>
-                                              <SelectContent className="bg-slate-800 border-slate-700">
-                                                <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
-                                                <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
-                                                <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
-                                              </SelectContent>
-                                            </Select>
+                                        {/* Tableau des minutes */}
+                                        <div className="space-y-3">
+                                          <Label className="text-lg font-semibold text-emerald-400">Minutes</Label>
+                                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                            <Table>
+                                              <TableHeader>
+                                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                  <TableHead className="text-slate-300">N° de minute</TableHead>
+                                                  <TableHead className="text-slate-300">Date de minute</TableHead>
+                                                  <TableHead className="text-slate-300">Type de minute</TableHead>
+                                                </TableRow>
+                                              </TableHeader>
+                                              <TableBody>
+                                                <TableRow className="border-slate-800">
+                                                  <TableCell>
+                                                    <Input
+                                                      value={mandat.minute || ""}
+                                                      onChange={(e) => updateMandat(index, 'minute', e.target.value)}
+                                                      placeholder="Ex: 12345"
+                                                      className="bg-slate-700 border-slate-600 text-white"
+                                                    />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                    <Input
+                                                      type="date"
+                                                      value={mandat.date_minute || ""}
+                                                      onChange={(e) => updateMandat(index, 'date_minute', e.target.value)}
+                                                      className="bg-slate-700 border-slate-600 text-white"
+                                                    />
+                                                  </TableCell>
+                                                  <TableCell>
+                                                    <Select
+                                                      value={mandat.type_minute || "Initiale"}
+                                                      onValueChange={(value) => updateMandat(index, 'type_minute', value)}
+                                                    >
+                                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                                        <SelectValue />
+                                                      </SelectTrigger>
+                                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                                        <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
+                                                        <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
+                                                        <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
+                                                      </SelectContent>
+                                                    </Select>
+                                                  </TableCell>
+                                                </TableRow>
+                                              </TableBody>
+                                            </Table>
                                           </div>
                                         </div>
 
@@ -2536,7 +2550,7 @@ export default function Dossiers() {
                   />
                 </div>
                 <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="w-52 bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Circonscription" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
