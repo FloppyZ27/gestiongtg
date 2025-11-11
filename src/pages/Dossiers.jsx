@@ -390,7 +390,7 @@ export default function Dossiers() {
           temps_prevu: "",
           notes: ""
         },
-        notes: m.notes || ""
+        notes: ""
       })) || [],
       description: entity.description || ""
     });
@@ -1286,7 +1286,7 @@ export default function Dossiers() {
                               <div>
                                 <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                                 <p className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</p>
-                                <p className="text-slate-500 text-xs mt-1">{dossier.mandats?.length || 0} mandat(s) - format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
+                                <p className="text-slate-500 text-xs mt-1">{dossier.mandats?.length || 0} mandat(s) - {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
                               </div>
                               <Button type="button" size="sm" variant="ghost" className="text-emerald-400">Sélectionner</Button>
                             </div>
