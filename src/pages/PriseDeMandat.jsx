@@ -19,7 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
-import CommentairesSectionClient from "../components/clients/CommentairesSectionClient"; // Added new import
+import ClientFormDialog from "../components/clients/ClientFormDialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -126,9 +126,13 @@ export default function PriseDeMandat() {
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
   const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
-  const [isNewClientDialogOpen, setIsNewClientDialogOpen] = useState(false);
-  const [isNewNotaireDialogOpen, setIsNewNotaireDialogOpen] = useState(false);
-  const [isNewCourtierDialogOpen, setIsNewCourtierDialogOpen] = useState(false);
+
+  // Replaced individual new client dialog states with a single one controlling the ClientFormDialog
+  const [isClientFormDialogOpen, setIsClientFormDialogOpen] = useState(false);
+  const [clientTypeForForm, setClientTypeForForm] = useState('Client'); // 'Client', 'Notaire', 'Courtier immobilier'
+  const [editingClientForForm, setEditingClientForForm] = useState(null); // Holds client object for editing
+
+
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingDossier, setViewingDossier] = useState(null);
@@ -159,10 +163,6 @@ export default function PriseDeMandat() {
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
   // END NEW STATES
 
-  // NEW STATE FOR CLIENT EDITING
-  const [editingClient, setEditingClient] = useState(null); // This will hold the client object if we are editing
-  // END NEW STATE
-
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
@@ -180,16 +180,6 @@ export default function PriseDeMandat() {
     courtiers_ids: [],
     mandats: [],
     description: ""
-  });
-
-  const [newClientForm, setNewClientForm] = useState({
-    prenom: "",
-    nom: "",
-    type_client: "Client",
-    adresses: [], // Changed to empty array
-    courriels: [], // Changed to empty array
-    telephones: [], // Changed to empty array
-    notes: ""
   });
 
   const queryClient = useQueryClient();
@@ -344,47 +334,9 @@ export default function PriseDeMandat() {
     },
   });
 
-  const createClientMutation = useMutation({
-    mutationFn: (clientData) => base44.entities.Client.create(clientData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      setIsNewClientDialogOpen(false);
-      setIsNewNotaireDialogOpen(false);
-      setIsNewCourtierDialogOpen(false);
-      setNewClientForm({ // Inlined resetClientForm logic
-        prenom: "",
-        nom: "",
-        type_client: "Client",
-        adresses: [],
-        courriels: [],
-        telephones: [],
-        notes: ""
-      });
-      setEditingClient(null); // Inlined resetClientForm logic
-    },
-  });
-
-  // NEW MUTATION FOR UPDATING CLIENTS
-  const updateClientMutation = useMutation({
-    mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      setIsNewClientDialogOpen(false);
-      setIsNewNotaireDialogOpen(false);
-      setIsNewCourtierDialogOpen(false);
-      setNewClientForm({ // Inlined resetClientForm logic
-        prenom: "",
-        nom: "",
-        type_client: "Client",
-        adresses: [],
-        courriels: [],
-        telephones: [],
-        notes: ""
-      });
-      setEditingClient(null); // Inlined resetClientForm logic
-    },
-  });
-  // END NEW MUTATION
+  // Client mutations removed as they will be handled within ClientFormDialog
+  // const createClientMutation = useMutation(...)
+  // const updateClientMutation = useMutation(...)
 
   const createLotMutation = useMutation({
     mutationFn: (lotData) => base44.entities.Lot.create(lotData),
@@ -737,22 +689,7 @@ export default function PriseDeMandat() {
     }
   };
 
-  const handleNewClientSubmit = (e) => {
-    e.preventDefault();
-    const cleanedData = {
-      ...newClientForm,
-      adresses: newClientForm.adresses.filter(a => a.rue?.trim() !== "" || a.numeros_civiques?.[0]?.trim() !== ""),
-      courriels: newClientForm.courriels.filter(c => c.courriel.trim() !== ""),
-      telephones: newClientForm.telephones.filter(t => t.telephone.trim() !== "")
-    };
-
-    // Check if we are editing an existing client or creating a new one
-    if (editingClient) {
-      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
-    } else {
-      createClientMutation.mutate(cleanedData);
-    }
-  };
+  // handleNewClientSubmit removed, logic moved to ClientFormDialog
 
   // NEW FUNCTION
   const handleNewLotSubmit = (e) => {
@@ -797,31 +734,15 @@ export default function PriseDeMandat() {
   const handleEdit = (entity) => { // Renamed from 'dossier' to 'entity'
     // Check if the entity is a client (based on type_client property presence)
     if (entity && entity.type_client) {
-      // It's a client. Open client editing form.
-      setEditingClient(entity);
-      setNewClientForm({
-        prenom: entity.prenom || "",
-        nom: entity.nom || "",
-        type_client: entity.type_client || "Client",
-        adresses: entity.adresses && entity.adresses.length > 0 ? entity.adresses.map(addr => ({ ...addr })) : [], // Ensure it's an array
-        courriels: entity.courriels && entity.courriels.length > 0 ? entity.courriels.map(email => ({ ...email })) : [], // Ensure it's an array
-        telephones: entity.telephones && entity.telephones.length > 0 ? entity.telephones.map(tel => ({ ...tel })) : [], // Ensure it's an array
-        notes: entity.notes || ""
-      });
+      // It's a client. Open client editing form using ClientFormDialog.
+      setEditingClientForForm(entity);
+      setClientTypeForForm(entity.type_client);
+      setIsClientFormDialogOpen(true);
 
       // Close the selector dialog first
       setIsClientSelectorOpen(false);
       setIsNotaireSelectorOpen(false);
       setIsCourtierSelectorOpen(false);
-
-      // Open the appropriate client/notaire/courtier dialog for editing
-      if (entity.type_client === "Notaire") {
-        setIsNewNotaireDialogOpen(true);
-      } else if (entity.type_client === "Courtier immobilier") {
-        setIsNewCourtierDialogOpen(true);
-      } else { // Default to "Client"
-        setIsNewClientDialogOpen(true);
-      }
       return; // Exit early as it's a client
     }
 
@@ -933,8 +854,7 @@ export default function PriseDeMandat() {
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
-        tache_actuelle: "" // NEWLY ADDED
-        // notes: "" // Removed as per changes
+        tache_actuelle: ""
       }]
     }));
     setActiveTabMandat(newIndex.toString());
@@ -982,24 +902,7 @@ export default function PriseDeMandat() {
     }
   };
 
-  const removeClientField = (fieldName, index) => {
-    if (newClientForm[fieldName].length > 0) { // Check for > 0 instead of > 1 since the list might become empty
-      setNewClientForm(prev => ({
-        ...prev,
-        [fieldName]: prev[fieldName].filter((_, i) => i !== index)
-      }));
-    }
-  };
-
-  const toggleActuel = (fieldName, index) => {
-    setNewClientForm(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].map((item, i) => ({
-        ...item,
-        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
-      }))
-    }));
-  };
+  // removeClientField and toggleActuel removed, logic moved to ClientFormDialog
 
   // NEW FUNCTIONS
   const handleLotCirconscriptionChange = (value) => {
@@ -1880,8 +1783,9 @@ export default function PriseDeMandat() {
                 <Button
                   type="button"
                   onClick={() => {
-                    setNewClientForm({...newClientForm, type_client: "Client"});
-                    setIsNewClientDialogOpen(true);
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Client");
+                    setIsClientFormDialogOpen(true);
                   }}
                   className="bg-emerald-500 hover:bg-emerald-600"
                 >
@@ -1957,8 +1861,9 @@ export default function PriseDeMandat() {
                 <Button
                   type="button"
                   onClick={() => {
-                    setNewClientForm({...newClientForm, type_client: "Notaire"});
-                    setIsNewNotaireDialogOpen(true);
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Notaire");
+                    setIsClientFormDialogOpen(true);
                   }}
                   className="bg-purple-500 hover:bg-purple-600"
                 >
@@ -2034,8 +1939,9 @@ export default function PriseDeMandat() {
                 <Button
                   type="button"
                   onClick={() => {
-                    setNewClientForm({...newClientForm, type_client: "Courtier immobilier"});
-                    setIsNewCourtierDialogOpen(true);
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Courtier immobilier");
+                    setIsClientFormDialogOpen(true);
                   }}
                   className="bg-orange-500 hover:bg-orange-600"
                 >
@@ -2091,452 +1997,23 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
-        {/* New Client Dialog (Generic for Client/Notaire/Courtier) */}
-        <Dialog open={isNewClientDialogOpen || isNewNotaireDialogOpen || isNewCourtierDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            setIsNewClientDialogOpen(false);
-            setIsNewNotaireDialogOpen(false);
-            setIsNewCourtierDialogOpen(false);
-            // Inlined resetClientForm logic
-            setNewClientForm({
-              prenom: "",
-              nom: "",
-              type_client: "Client",
-              adresses: [],
-              courriels: [],
-              telephones: [],
-              notes: ""
-            });
-            setEditingClient(null);
-          }
-        }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle className="text-2xl">
-                {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="flex h-[90vh]">
-              {/* Main form content - 70% */}
-              <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${newClientForm.type_client}`}
-                  </h2>
-                </div>
-
-                <form id="new-client-form" onSubmit={handleNewClientSubmit} className="space-y-6">
-                  {/* Prénom, Nom et Type sur la même ligne */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
-                      <Input
-                        id="prenom"
-                        value={newClientForm.prenom}
-                        onChange={(e) => setNewClientForm({...newClientForm, prenom: e.target.value})}
-                        required
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="nom">Nom <span className="text-red-400">*</span></Label>
-                      <Input
-                        id="nom"
-                        value={newClientForm.nom}
-                        onChange={(e) => setNewClientForm({...newClientForm, nom: e.target.value})}
-                        required
-                        className="bg-slate-800 border-slate-700"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="type_client">Type de client</Label>
-                      <Select value={newClientForm.type_client} onValueChange={(value) => setNewClientForm({...newClientForm, type_client: value})}>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner le type" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Client" className="text-white">Client</SelectItem>
-                          <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                          <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                          <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Adresses */}
-                  <div className="space-y-3">
-                    <Label>Adresses</Label>
-                    
-                    {/* Formulaire pour nouvelle adresse */}
-                    <div className="p-3 bg-slate-800/30 rounded-lg space-y-3">
-                      <div className="grid grid-cols-[200px_1fr] gap-3">
-                        <div className="space-y-2">
-                          <Label>Numéro(s) civique(s)</Label>
-                          <div className="flex gap-2 mb-2">
-                            <Input
-                              id="new-civic-0"
-                              defaultValue=""
-                              placeholder="Ex: 123"
-                              className="bg-slate-800 border-slate-700"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Rue</Label>
-                          <Input
-                            id="new-rue"
-                            defaultValue=""
-                            placeholder="Nom de la rue"
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label>Ville</Label>
-                          <Input
-                            id="new-ville"
-                            defaultValue=""
-                            placeholder="Ville"
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Province</Label>
-                          <Select id="new-province" defaultValue="Québec">
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner une province" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Québec" className="text-white">Québec</SelectItem>
-                              <SelectItem value="Alberta" className="text-white">Alberta</SelectItem>
-                              <SelectItem value="Colombie-Britannique" className="text-white">Colombie-Britannique</SelectItem>
-                              <SelectItem value="Île-du-Prince-Édouard" className="text-white">Île-du-Prince-Édouard</SelectItem>
-                              <SelectItem value="Manitoba" className="text-white">Manitoba</SelectItem>
-                              <SelectItem value="Nouveau-Brunswick" className="text-white">Nouveau-Brunswick</SelectItem>
-                              <SelectItem value="Nouvelle-Écosse" className="text-white">Nouvelle-Écosse</SelectItem>
-                              <SelectItem value="Nunavut" className="text-white">Nunavut</SelectItem>
-                              <SelectItem value="Ontario" className="text-white">Ontario</SelectItem>
-                              <SelectItem value="Saskatchewan" className="text-white">Saskatchewan</SelectItem>
-                              <SelectItem value="Terre-Neuve-et-Labrador" className="text-white">Terre-Neuve-et-Labrador</SelectItem>
-                              <SelectItem value="Territoires du Nord-Ouest" className="text-white">Territoires du Nord-Ouest</SelectItem>
-                              <SelectItem value="Yukon" className="text-white">Yukon</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label>Code Postal</Label>
-                        <Input
-                          id="new-code-postal"
-                          defaultValue=""
-                          placeholder="Code postal"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                      </div>
-                      
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => {
-                          const civicInput = document.getElementById('new-civic-0');
-                          const rueInput = document.getElementById('new-rue');
-                          const villeInput = document.getElementById('new-ville');
-                          const provinceSelectElement = document.getElementById('new-province'); // The shadcn Select root div
-                          const codePostalInput = document.getElementById('new-code-postal');
-
-                          const civic = civicInput?.value.trim() || "";
-                          const rue = rueInput?.value.trim() || "";
-                          const ville = villeInput?.value.trim() || "";
-                          // For shadcn Select, retrieve the value from the current display or state.
-                          // The `SelectValue` component displays the current value.
-                          // A more robust way would be to control it with React state for newAddressProvince.
-                          // For this direct DOM manipulation, we have to parse the text.
-                          const provinceText = provinceSelectElement?.querySelector('[data-state="checked"]')?.textContent || provinceSelectElement?.querySelector('.text-white:not([data-placeholder])')?.textContent || "Québec";
-                          const codePostal = codePostalInput?.value.trim() || "";
-                          
-                          if (civic || rue || ville || codePostal) {
-                            setNewClientForm(prev => ({
-                              ...prev,
-                              adresses: [...prev.adresses, {
-                                numeros_civiques: civic ? [civic] : [],
-                                rue,
-                                ville,
-                                province: provinceText, // Use the parsed text
-                                code_postal: codePostal,
-                                actuelle: false // New addresses are not current by default
-                              }]
-                            }));
-                            
-                            // Clear inputs
-                            if (civicInput) civicInput.value = "";
-                            if (rueInput) rueInput.value = "";
-                            if (villeInput) villeInput.value = "";
-                            if (codePostalInput) codePostalInput.value = "";
-                            // To reset the province select, you'd typically control its value with state,
-                            // but since it's not state-controlled here, it will retain its selection.
-                          }
-                        }}
-                        className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter cette adresse
-                      </Button>
-                    </div>
-
-                    {/* Liste des adresses */}
-                    {newClientForm.adresses.length > 0 && (
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300">Adresse complète</TableHead>
-                              <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {newClientForm.adresses.map((addr, index) => (
-                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-white">
-                                  {formatAdresse(addr) || "-"}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => toggleActuel('adresses', index)}
-                                      className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                    >
-                                      <Check className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClientField('adresses', index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Courriels et Téléphones en deux colonnes */}
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Courriels */}
-                    <div className="space-y-3">
-                      <Label>Courriels</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="email"
-                          id="new-courriel"
-                          defaultValue=""
-                          placeholder="Courriel"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => {
-                            const courrielInput = document.getElementById('new-courriel');
-                            const courriel = courrielInput?.value.trim();
-                            if (courriel) {
-                              setNewClientForm(prev => ({
-                                ...prev,
-                                courriels: [...prev.courriels, { courriel, actuel: false }]
-                              }));
-                              courrielInput.value = "";
-                            }
-                          }}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      
-                      {newClientForm.courriels.length > 0 && (
-                        <div className="border border-slate-700 rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                <TableHead className="text-slate-300">Courriel</TableHead>
-                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                            </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {newClientForm.courriels.map((item, index) => (
-                                <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-white text-sm">{item.courriel}</TableCell>
-                                  <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('courriels', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeClientField('courriels', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Téléphones */}
-                    <div className="space-y-3">
-                      <Label>Téléphones</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="new-telephone"
-                          defaultValue=""
-                          placeholder="Téléphone"
-                          className="bg-slate-800 border-slate-700"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => {
-                            const telephoneInput = document.getElementById('new-telephone');
-                            const telephone = telephoneInput?.value.trim();
-                            if (telephone) {
-                              setNewClientForm(prev => ({
-                                ...prev,
-                                telephones: [...prev.telephones, { telephone, actuel: false }]
-                              }));
-                              telephoneInput.value = "";
-                            }
-                          }}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      
-                      {newClientForm.telephones.length > 0 && (
-                        <div className="border border-slate-700 rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                <TableHead className="text-slate-300">Téléphone</TableHead>
-                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {newClientForm.telephones.map((item, index) => (
-                                <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                                  <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('telephones', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeClientField('telephones', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={newClientForm.notes}
-                      onChange={(e) => setNewClientForm({...newClientForm, notes: e.target.value})}
-                      className="bg-slate-800 border-slate-700 h-20"
-                    />
-                  </div>
-                </form>
-
-                {/* Boutons Annuler/Créer tout en bas */}
-                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsNewClientDialogOpen(false);
-                      setIsNewNotaireDialogOpen(false);
-                      setIsNewCourtierDialogOpen(false);
-                      // Inlined resetClientForm logic
-                      setNewClientForm({
-                        prenom: "",
-                        nom: "",
-                        type_client: "Client",
-                        adresses: [],
-                        courriels: [],
-                        telephones: [],
-                        notes: ""
-                      });
-                      setEditingClient(null);
-                    }}
-                  >
-                    Annuler
-                  </Button>
-                  <Button type="submit" form="new-client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingClient ? "Modifier" : "Créer"}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Right side - Commentaires Sidebar - 30% */}
-              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                  <h3 className="text-lg font-bold text-white">Commentaires</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <CommentairesSectionClient
-                    clientId={editingClient?.id}
-                    clientTemporaire={!editingClient}
-                    clientNom={editingClient ? `${editingClient.prenom} ${editingClient.nom}` : `${newClientForm.prenom} ${newClientForm.nom}`.trim() || "Nouveau client"}
-                  />
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* ClientFormDialog (replaces previous New Client Dialogs) */}
+        <ClientFormDialog
+          isOpen={isClientFormDialogOpen}
+          onClose={() => {
+            setIsClientFormDialogOpen(false);
+            setEditingClientForForm(null);
+          }}
+          clientType={clientTypeForForm}
+          initialClientData={editingClientForForm}
+          onSaveSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
+            // Optionally re-open the selector if editing from there
+            if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);
+            if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
+            if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
+          }}
+        />
 
         {/* Lot Selector Dialog */}
         <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
