@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -83,6 +84,12 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
     initialData: [],
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
   const { data: commentaires = [] } = useQuery({
     queryKey: ['commentairesClient', client?.id],
     queryFn: () => client?.id ? base44.entities.CommentaireClient.filter({ client_id: client.id }, '-created_date') : [],
@@ -158,6 +165,16 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
   };
 
+  const getClientById = (id) => clients.find(c => c.id === id);
+
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => {
+      const c = getClientById(id);
+      return c ? `${c.prenom} ${c.nom}` : "";
+    }).filter(name => name).join(", ");
+  };
+
   const getClientDossiers = () => {
     const type = client.type_client;
     const field = type === 'Notaire' ? 'notaires_ids' : 
@@ -205,11 +222,14 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   // Filtrer les mandats
   const filteredMandats = mandatsWithDossier.filter(item => {
     const searchLower = dossierSearchTerm.toLowerCase();
+    const clientsNames = getClientsNames(item.dossier.clients_ids);
+    
     const matchesSearch = (
       item.dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
       (getArpenteurInitials(item.dossier.arpenteur_geometre) + item.dossier.numero_dossier).toLowerCase().includes(searchLower) ||
       item.mandat?.type_mandat?.toLowerCase().includes(searchLower) ||
-      formatAdresse(item.mandat?.adresse_travaux).toLowerCase().includes(searchLower)
+      formatAdresse(item.mandat?.adresse_travaux).toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower)
     );
 
     const matchesArpenteur = filterArpenteur === "all" || item.dossier.arpenteur_geometre === filterArpenteur;
@@ -241,6 +261,10 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
       case 'adresse_travaux':
         aValue = formatAdresse(a.mandat?.adresse_travaux).toLowerCase();
         bValue = formatAdresse(b.mandat?.adresse_travaux).toLowerCase();
+        break;
+      case 'clients':
+        aValue = getClientsNames(a.dossier.clients_ids).toLowerCase();
+        bValue = getClientsNames(b.dossier.clients_ids).toLowerCase();
         break;
       default:
         return 0;
@@ -282,6 +306,9 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
     const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
     window.open(url, '_blank');
   };
+
+  // Déterminer si on doit afficher la colonne Clients
+  const isNotaireOrCourtier = client.type_client === 'Notaire' || client.type_client === 'Courtier immobilier';
 
   return (
     <>
@@ -498,6 +525,14 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                         >
                           Date d'ouverture {getSortIcon('date_ouverture')}
                         </TableHead>
+                        {isNotaireOrCourtier && (
+                          <TableHead 
+                            className="text-slate-300 cursor-pointer hover:text-white"
+                            onClick={() => handleSort('clients')}
+                          >
+                            Clients {getSortIcon('clients')}
+                          </TableHead>
+                        )}
                         <TableHead 
                           className="text-slate-300 cursor-pointer hover:text-white"
                           onClick={() => handleSort('type_mandat')}
@@ -525,6 +560,11 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                             <TableCell className="text-slate-300">
                               {format(new Date(item.dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
                             </TableCell>
+                            {isNotaireOrCourtier && (
+                              <TableCell className="text-slate-300 text-sm">
+                                {getClientsNames(item.dossier.clients_ids)}
+                              </TableCell>
+                            )}
                             <TableCell>
                               {item.mandat ? (
                                 <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
@@ -541,7 +581,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={isNotaireOrCourtier ? 5 : 4} className="text-center py-8 text-slate-500">
                             Aucun dossier trouvé
                           </TableCell>
                         </TableRow>

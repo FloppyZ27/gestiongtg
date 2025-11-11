@@ -40,6 +40,7 @@ export default function Clients() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [filterType, setFilterType] = useState("all");
   const [newCivicNumbers, setNewCivicNumbers] = useState([""]);
+  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   
   const [formData, setFormData] = useState({
     prenom: "",
@@ -66,7 +67,24 @@ export default function Clients() {
   });
 
   const createClientMutation = useMutation({
-    mutationFn: (clientData) => base44.entities.Client.create(clientData),
+    mutationFn: async (clientData) => {
+      const newClient = await base44.entities.Client.create(clientData);
+      
+      // Créer les commentaires temporaires si présents
+      if (commentairesTemporaires.length > 0) {
+        const commentairePromises = commentairesTemporaires.map(comment =>
+          base44.entities.CommentaireClient.create({
+            client_id: newClient.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
+        );
+        await Promise.all(commentairePromises);
+      }
+      
+      return newClient;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setIsDialogOpen(false);
@@ -234,6 +252,7 @@ export default function Clients() {
     });
     setNewCivicNumbers([""]);
     setEditingClient(null);
+    setCommentairesTemporaires([]);
   };
 
   const handleEdit = (client) => {
@@ -256,6 +275,7 @@ export default function Clients() {
       notes: client.notes || ""
     });
     setNewCivicNumbers([""]);
+    setCommentairesTemporaires([]); // Clear temporary comments when editing an existing client
     setIsDialogOpen(true);
   };
 
@@ -764,11 +784,13 @@ export default function Clients() {
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-hidden p-4">
                     <CommentairesSectionClient
                       clientId={editingClient?.id}
                       clientTemporaire={!editingClient}
                       clientNom={editingClient ? `${editingClient.prenom} ${editingClient.nom}` : `${formData.prenom} ${formData.nom}`.trim() || "Nouveau client"}
+                      commentairesTemp={commentairesTemporaires}
+                      onCommentairesTempChange={setCommentairesTemporaires}
                     />
                   </div>
                 </div>
