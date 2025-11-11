@@ -90,14 +90,26 @@ export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLot, setEditingLot] = useState(null);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [filterCirconscription, setFilterCirconscription] = useState("all");
+  const [filterCadastre, setFilterCadastre] = useState("all");
+  const [availableCadastres, setAvailableCadastres] = useState([]); // For the main form's cadastre
+  const [uploadingPdf, setUploadingPdf] = useState(false); // Kept from original
+  const [concordancesAnterieure, setConcordancesAnterieure] = useState([]); // The actual list of concordances for the current lot
+  const [newConcordance, setNewConcordance] = useState({ // Temporary state for adding a single concordance
+    circonscription_fonciere: "",
+    cadastre: "",
+    numero_lot: "",
+    rang: ""
+  });
+
   const [formData, setFormData] = useState({
+    numero_lot: "",
     circonscription_fonciere: "",
     cadastre: "",
     rang: "",
-    numero_lot: "",
-    concordances_anterieures: [],
-    document_pdf_url: ""
+    date_bpd: "",
+    type_operation: "",
+    document_pdf_url: "" // Kept from original
   });
 
   const queryClient = useQueryClient();
@@ -133,22 +145,17 @@ export default function Lots() {
     },
   });
 
-  const filteredLots = lots.filter(lot => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      lot.numero_lot?.toLowerCase().includes(searchLower) ||
-      lot.cadastre?.toLowerCase().includes(searchLower) ||
-      lot.rang?.toLowerCase().includes(searchLower) ||
-      lot.circonscription_fonciere?.toLowerCase().includes(searchLower)
-    );
-  });
-
   const handleSubmit = (e) => {
     e.preventDefault();
+    const dataToSubmit = {
+      ...formData,
+      concordances_anterieures: concordancesAnterieure
+    };
+    
     if (editingLot) {
-      updateLotMutation.mutate({ id: editingLot.id, lotData: formData });
+      updateLotMutation.mutate({ id: editingLot.id, lotData: dataToSubmit });
     } else {
-      createLotMutation.mutate(formData);
+      createLotMutation.mutate(dataToSubmit);
     }
   };
 
@@ -168,70 +175,62 @@ export default function Lots() {
   };
 
   const handleCirconscriptionChange = (value) => {
-    setFormData({
-      ...formData,
-      circonscription_fonciere: value,
-      cadastre: ""
-    });
+    setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
+    setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
   };
 
   const addConcordance = () => {
-    setFormData({
-      ...formData,
-      concordances_anterieures: [...formData.concordances_anterieures, {
+    if (newConcordance.numero_lot && newConcordance.circonscription_fonciere) {
+      setConcordancesAnterieure([...concordancesAnterieure, { ...newConcordance }]);
+      setNewConcordance({
         circonscription_fonciere: "",
         cadastre: "",
         numero_lot: "",
         rang: ""
-      }]
-    });
+      });
+    }
   };
 
   const removeConcordance = (index) => {
-    setFormData({
-      ...formData,
-      concordances_anterieures: formData.concordances_anterieures.filter((_, i) => i !== index)
-    });
-  };
-
-  const updateConcordance = (index, field, value) => {
-    setFormData({
-      ...formData,
-      concordances_anterieures: formData.concordances_anterieures.map((conc, i) => {
-        if (i === index) {
-          const updated = { ...conc, [field]: value };
-          if (field === 'circonscription_fonciere') {
-            updated.cadastre = "";
-          }
-          return updated;
-        }
-        return conc;
-      })
-    });
+    setConcordancesAnterieure(concordancesAnterieure.filter((_, i) => i !== index));
   };
 
   const resetForm = () => {
     setFormData({
+      numero_lot: "",
       circonscription_fonciere: "",
       cadastre: "",
       rang: "",
-      numero_lot: "",
-      concordances_anterieures: [],
+      date_bpd: "",
+      type_operation: "",
       document_pdf_url: ""
     });
+    setConcordancesAnterieure([]);
+    setNewConcordance({
+      circonscription_fonciere: "",
+      cadastre: "",
+      numero_lot: "",
+      rang: ""
+    });
     setEditingLot(null);
+    setAvailableCadastres([]);
   };
 
   const handleEdit = (lot) => {
     setEditingLot(lot);
     setFormData({
+      numero_lot: lot.numero_lot || "",
       circonscription_fonciere: lot.circonscription_fonciere || "",
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
-      numero_lot: lot.numero_lot || "",
-      concordances_anterieures: lot.concordances_anterieures || [],
+      date_bpd: lot.date_bpd ? format(new Date(lot.date_bpd), 'yyyy-MM-dd') : "", // Format date for input type="date"
+      type_operation: lot.type_operation || "",
       document_pdf_url: lot.document_pdf_url || ""
     });
+    setConcordancesAnterieure(lot.concordances_anterieures || []);
+    if (lot.circonscription_fonciere) {
+      setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
+    }
     setIsDialogOpen(true);
   };
 
@@ -241,13 +240,20 @@ export default function Lots() {
     }
   };
 
-  const availableCadastres = formData.circonscription_fonciere 
-    ? CADASTRES_PAR_CIRCONSCRIPTION[formData.circonscription_fonciere] || []
-    : [];
+  const filteredLots = lots.filter(lot => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = (
+      lot.numero_lot?.toLowerCase().includes(searchLower) ||
+      lot.cadastre?.toLowerCase().includes(searchLower) ||
+      lot.rang?.toLowerCase().includes(searchLower) ||
+      lot.circonscription_fonciere?.toLowerCase().includes(searchLower)
+    );
 
-  const getAvailableCadastresForConcordance = (circonscription) => {
-    return circonscription ? CADASTRES_PAR_CIRCONSCRIPTION[circonscription] || [] : [];
-  };
+    const matchesCirconscription = filterCirconscription === "all" || lot.circonscription_fonciere === filterCirconscription;
+    const matchesCadastre = filterCadastre === "all" || lot.cadastre === filterCadastre;
+
+    return matchesSearch && matchesCirconscription && matchesCadastre;
+  });
 
   const statsCards = [
     {
@@ -279,7 +285,7 @@ export default function Lots() {
               </h1>
               <Grid3x3 className="w-6 h-6 text-emerald-400" />
             </div>
-            <p className="text-slate-400">Gestion de vos lots cadastraux</p>
+            <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -307,7 +313,7 @@ export default function Lots() {
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
-                        {CIRCONSCRIPTIONS.map((circ) => (
+                        {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                           <SelectItem key={circ} value={circ} className="text-white">
                             {circ}
                           </SelectItem>
@@ -358,106 +364,152 @@ export default function Lots() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Date BPD</Label>
+                    <Input
+                      type="date"
+                      value={formData.date_bpd}
+                      onChange={(e) => setFormData({...formData, date_bpd: e.target.value})}
+                      className="bg-slate-800 border-slate-700"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Type d'opération</Label>
+                    <Select value={formData.type_operation} onValueChange={(value) => setFormData({...formData, type_operation: value})}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Vente" className="text-white">Vente</SelectItem>
+                        <SelectItem value="Cession" className="text-white">Cession</SelectItem>
+                        <SelectItem value="Donation" className="text-white">Donation</SelectItem>
+                        <SelectItem value="Déclaration de Transmission" className="text-white">Déclaration de Transmission</SelectItem>
+                        <SelectItem value="Jugement" className="text-white">Jugement</SelectItem>
+                        <SelectItem value="Rectification" className="text-white">Rectification</SelectItem>
+                        <SelectItem value="Retrocession" className="text-white">Retrocession</SelectItem>
+                        <SelectItem value="Subdivision" className="text-white">Subdivision</SelectItem>
+                        <SelectItem value="Morcellement" className="text-white">Morcellement</SelectItem>
+                        <SelectItem value="Autre" className="text-white">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Section Concordances antérieures */}
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Concordances antérieures</Label>
+                  <Label className="text-lg font-semibold">Concordances antérieures</Label>
+                  
+                  {/* Formulaire d'ajout */}
+                  <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label>Circonscription foncière</Label>
+                        <Select 
+                          value={newConcordance.circonscription_fonciere} 
+                          onValueChange={(value) => setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""})}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                              <SelectItem key={circ} value={circ} className="text-white">
+                                {circ}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Cadastre</Label>
+                        <Select
+                          value={newConcordance.cadastre}
+                          onValueChange={(value) => setNewConcordance({...newConcordance, cadastre: value})}
+                          disabled={!newConcordance.circonscription_fonciere}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder={newConcordance.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                            {newConcordance.circonscription_fonciere && CADASTRES_PAR_CIRCONSCRIPTION[newConcordance.circonscription_fonciere]?.map((cadastre) => (
+                              <SelectItem key={cadastre} value={cadastre} className="text-white">
+                                {cadastre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label>Numéro de lot</Label>
+                        <Input
+                          value={newConcordance.numero_lot}
+                          onChange={(e) => setNewConcordance({...newConcordance, numero_lot: e.target.value})}
+                          placeholder="Ex: 1234-5678"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Rang</Label>
+                        <Input
+                          value={newConcordance.rang}
+                          onChange={(e) => setNewConcordance({...newConcordance, rang: e.target.value})}
+                          placeholder="Ex: Rang 4"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                    </div>
+                    
                     <Button
                       type="button"
-                      size="sm"
                       onClick={addConcordance}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                      disabled={!newConcordance.numero_lot || !newConcordance.circonscription_fonciere}
+                      className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                     >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter une concordance
+                      <Plus className="w-4 h-4 mr-2" />
+                      Ajouter cette concordance
                     </Button>
                   </div>
-                  {formData.concordances_anterieures.length > 0 ? (
-                    <div className="space-y-3">
-                      {formData.concordances_anterieures.map((conc, index) => {
-                        const concCadastres = getAvailableCadastresForConcordance(conc.circonscription_fonciere);
-                        return (
-                          <Card key={index} className="border-slate-700 bg-slate-800/30">
-                            <CardContent className="p-4 space-y-3">
-                              <div className="flex justify-between items-center">
-                                <Label className="text-sm">Concordance {index + 1}</Label>
+
+                  {/* Tableau des concordances ajoutées */}
+                  {concordancesAnterieure.length > 0 && (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">Circonscription</TableHead>
+                            <TableHead className="text-slate-300">Cadastre</TableHead>
+                            <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                            <TableHead className="text-slate-300">Rang</TableHead>
+                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {concordancesAnterieure.map((concordance, index) => (
+                            <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                              <TableCell className="text-white">{concordance.circonscription_fonciere}</TableCell>
+                              <TableCell className="text-white">{concordance.cadastre || "-"}</TableCell>
+                              <TableCell className="text-white font-medium">{concordance.numero_lot}</TableCell>
+                              <TableCell className="text-white">{concordance.rang || "-"}</TableCell>
+                              <TableCell className="text-right">
                                 <Button
                                   type="button"
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => removeConcordance(index)}
-                                  className="text-red-400 hover:text-red-300"
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                 >
-                                  <X className="w-4 h-4" />
+                                  <Trash2 className="w-4 h-4" />
                                 </Button>
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                  <Label className="text-xs">Circonscription foncière</Label>
-                                  <Select 
-                                    value={conc.circonscription_fonciere} 
-                                    onValueChange={(value) => updateConcordance(index, 'circonscription_fonciere', value)}
-                                  >
-                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                      <SelectValue placeholder="Sélectionner" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700">
-                                      {CIRCONSCRIPTIONS.map((circ) => (
-                                        <SelectItem key={circ} value={circ} className="text-white">
-                                          {circ}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label className="text-xs">Cadastre</Label>
-                                  <Select 
-                                    value={conc.cadastre} 
-                                    onValueChange={(value) => updateConcordance(index, 'cadastre', value)}
-                                    disabled={!conc.circonscription_fonciere}
-                                  >
-                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                      <SelectValue placeholder={conc.circonscription_fonciere ? "Sélectionner" : "Choisir circonscription"} />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                      {concCadastres.map((cadastre) => (
-                                        <SelectItem key={cadastre} value={cadastre} className="text-white">
-                                          {cadastre}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                  <Label className="text-xs">Numéro de lot</Label>
-                                  <Input
-                                    value={conc.numero_lot}
-                                    onChange={(e) => updateConcordance(index, 'numero_lot', e.target.value)}
-                                    placeholder="Ex: 1234-5678"
-                                    className="bg-slate-700 border-slate-600"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label className="text-xs">Rang</Label>
-                                  <Input
-                                    value={conc.rang}
-                                    onChange={(e) => updateConcordance(index, 'rang', e.target.value)}
-                                    placeholder="Ex: Rang 4"
-                                    className="bg-slate-700 border-slate-600"
-                                  />
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
-                  ) : (
-                    <p className="text-slate-500 text-sm text-center py-3 bg-slate-800/30 rounded-lg">
-                      Aucune concordance antérieure
-                    </p>
                   )}
                 </div>
 
@@ -532,14 +584,42 @@ export default function Lots() {
             <div className="p-6 border-b border-slate-800">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                 <CardTitle className="text-xl font-bold text-white">Liste des lots</CardTitle>
-                <div className="relative w-full md:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                  />
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="relative w-full md:w-auto">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
+                    <SelectTrigger className="w-full md:w-48 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Circonscription" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                        <SelectItem key={circ} value={circ} className="text-white">
+                          {circ}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterCadastre} onValueChange={setFilterCadastre}>
+                    <SelectTrigger className="w-full md:w-48 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Cadastre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                      {filterCirconscription !== "all" && CADASTRES_PAR_CIRCONSCRIPTION[filterCirconscription]?.map((cadastre) => (
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">
+                          {cadastre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
