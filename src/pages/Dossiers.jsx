@@ -1045,7 +1045,7 @@ export default function Dossiers() {
           taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
           date_livraison: m.date_livraison || "",
           date_signature: m.date_signature || "",
-          date_debut_travaux: m.date_debut_travaux || "",
+          date_debut_travaux: "",
           factures: m.factures || [], // Changed from 'facture' to 'factures'
           terrain: m.terrain || {
             date_limite_leve: "",
@@ -1541,9 +1541,13 @@ export default function Dossiers() {
 
                         {formData.mandats.length > 0 ? (
                           <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
-                            <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start">
+                            <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start p-1.5">
                               {formData.mandats.map((mandat, index) => (
-                                <TabsTrigger key={index} value={index.toString()} className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-slate-400">
+                                <TabsTrigger 
+                                  key={index} 
+                                  value={index.toString()} 
+                                  className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-slate-400 px-6 py-3 text-base font-semibold"
+                                >
                                   {getMandatTabLabel(mandat, index)}
                                 </TabsTrigger>
                               ))}
@@ -1638,7 +1642,7 @@ export default function Dossiers() {
                                                     </TableCell>
                                                     <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
                                                     <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
-                                                    <TableCell className="text-right">
+                                                    <TableCell className="text-slate-300 text-right">
                                                       <Button type="button" size="sm" variant="ghost" onClick={() => removeLotFromMandat(index, lot.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                                         <Trash2 className="w-4 h-4" />
                                                       </Button>
@@ -2396,7 +2400,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des clients */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
@@ -2465,7 +2469,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des notaires */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
@@ -2534,7 +2538,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des courtiers */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
