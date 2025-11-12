@@ -610,7 +610,7 @@ export default function Dossiers() {
     .company .address { font-size: 10px; line-height: 1.5; color: #333; }
     
     .logo { flex: 0 0 30%; text-align: center; padding-top: 10px; }
-    .logo img { max-width: 100px; height: auto; }
+    .logo img { max-width: 200px; height: auto; }
     
     .invoice-title { flex: 0 0 35%; text-align: right; }
     .invoice-title h2 { font-size: 42px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
@@ -640,9 +640,10 @@ export default function Dossiers() {
     .description-table .rabais { color: #dc2626; font-style: italic; margin-left: 25px; }
     .description-table .minute-info { float: right; font-weight: bold; margin-left: 30px; }
     
-    .totals { margin-top: 80px; }
-    .totals-left { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 25px; }
-    .totals-table { width: 100%; font-size: 12px; margin-bottom: 5px; }
+    .totals { margin-top: 80px; display: flex; justify-content: space-between; align-items: center; }
+    .totals-left { flex: 1; text-align: center; font-size: 20px; font-weight: bold; }
+    .totals-right { flex: 0 0 auto; }
+    .totals-table { font-size: 12px; }
     .totals-table tr { height: 25px; }
     .totals-table tr td:first-child { text-align: right; padding-right: 40px; }
     .totals-table tr td:last-child { text-align: right; font-weight: bold; width: 120px; }
@@ -650,7 +651,7 @@ export default function Dossiers() {
     .totals-table .total-row td { padding-top: 8px; padding-bottom: 5px; font-size: 13px; font-weight: bold; }
     
     .footer { margin-top: 40px; font-size: 10px; line-height: 1.5; }
-    .footer .fiscal { color: #dc2626; text-align: center; margin-bottom: 8px; font-weight: bold; }
+    .footer .fiscal { color: #dc2626; text-align: left; margin-bottom: 8px; font-weight: bold; }
     .footer .conditions { color: #dc2626; text-align: right; font-weight: bold; }
     
     @media print {
@@ -780,24 +781,26 @@ export default function Dossiers() {
   
   <div class="totals">
     <div class="totals-left">Merci pour votre confiance !</div>
-    <table class="totals-table">
-      <tr>
-        <td>Sous-total :</td>
-        <td>${totalHT.toFixed(2)} $</td>
-      </tr>
-      <tr>
-        <td>TPS :</td>
-        <td>${tps.toFixed(2)}</td>
-      </tr>
-      <tr>
-        <td>TVQ :</td>
-        <td>${tvq.toFixed(2)}</td>
-      </tr>
-      <tr class="total-row">
-        <td>Total :</td>
-        <td>${totalTTC.toFixed(2)} $</td>
-      </tr>
-    </table>
+    <div class="totals-right">
+      <table class="totals-table">
+        <tr>
+          <td>Sous-total :</td>
+          <td>${totalHT.toFixed(2)} $</td>
+        </tr>
+        <tr>
+          <td>TPS :</td>
+          <td>${tps.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>TVQ :</td>
+          <td>${tvq.toFixed(2)}</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total :</td>
+          <td>${totalTTC.toFixed(2)} $</td>
+        </tr>
+      </table>
+    </div>
   </div>
   
   <div class="footer">
@@ -2680,4 +2683,3 @@ export default function Dossiers() {
     </div>
   );
 }
-
