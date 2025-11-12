@@ -114,6 +114,9 @@ export default function Dossiers() {
   const [facturationFilterVille, setFacturationFilterVille] = useState("all");
   const [facturationFilterMandat, setFacturationFilterMandat] = useState("all");
 
+  const [isFacturationMandatsDialogOpen, setIsFacturationMandatsDialogOpen] = useState(false);
+  const [selectedMandatsForLocalFacturation, setSelectedMandatsForLocalFacturation] = useState([]);
+
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
@@ -187,12 +190,14 @@ export default function Dossiers() {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       setIsDialogOpen(false);
       setIsCloseDossierDialogOpen(false);
+      setIsFacturationDialogOpen(false);
+      setIsFacturationMandatsDialogOpen(false); // Close local facturation dialog
       resetForm();
       setClosingDossierId(null);
       setMinutesData([]);
-      setIsFacturationDialogOpen(false); // Close facturation dialog after update
       setFacturationDossierId(null);
       setSelectedMandatsForFacturation([]);
+      setSelectedMandatsForLocalFacturation([]); // Reset local selection
     },
   });
 
@@ -590,18 +595,19 @@ export default function Dossiers() {
     updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
   };
 
-  const genererFacture = async (dossier = null, selectedMandatsIndexes = null) => {
+  const genererFacture = async (dossier = null, selectedMandatsIndexes = null, saveToDatabase = true) => {
     const targetDossier = dossier || editingDossier;
     if (!targetDossier) return;
     
-    const clientsList = (targetDossier.clients_ids).map(id => getClientById(id)).filter(c => c);
+    // Determine clients and mandats based on whether a specific dossier object is provided (from saved list)
+    // or if we are using the current formData (from editing dialog)
+    const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
     const client = clientsList[0];
     
-    // Get the mandats based on selected indexes
-    const allMandatsInDossier = targetDossier.mandats;
+    const allMandatsData = dossier ? targetDossier.mandats : formData.mandats;
     const mandatsToInvoice = selectedMandatsIndexes
-      ? selectedMandatsIndexes.map(idx => allMandatsInDossier[idx])
-      : allMandatsInDossier; // If no specific indexes, invoice all available mandats in the context
+      ? selectedMandatsIndexes.map(idx => allMandatsData[idx])
+      : allMandatsData; // If no specific indexes, invoice all available mandats in the context
 
     if (mandatsToInvoice.length === 0) {
       console.warn("No mandates selected or available for invoicing.");
@@ -871,7 +877,7 @@ export default function Dossiers() {
     // indicating we are invoicing an existing, saved dossier that needs to be updated in the DB.
     // If 'dossier' is null, it means we are in the main dossier editing dialog, and changes
     // will be saved with the form submission, so no immediate DB update is needed here.
-    if (dossier && selectedMandatsIndexes && selectedMandatsIndexes.length > 0) {
+    if (saveToDatabase && dossier && selectedMandatsIndexes && selectedMandatsIndexes.length > 0) {
       const updatedMandats = dossier.mandats.map((m, idx) => {
         if (selectedMandatsIndexes.includes(idx)) {
           const mandatHT = (m.prix_estime || 0) - (m.rabais || 0);
@@ -885,7 +891,8 @@ export default function Dossiers() {
               numero_facture: numeroFacture.toString(),
               date_facture: format(new Date(), "yyyy-MM-dd"),
               total_ht: mandatHT,
-              total_ttc: mandatTTC
+              total_ttc: mandatTTC,
+              facture_html: factureHTML // Store the generated HTML
             }
           };
         }
@@ -897,6 +904,12 @@ export default function Dossiers() {
         dossierData: { ...dossier, mandats: updatedMandats }
       });
     }
+  };
+
+  const voirFacture = (factureHTML) => {
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(factureHTML);
+    newWindow.document.close();
   };
 
   const now = new Date();
@@ -978,6 +991,33 @@ export default function Dossiers() {
     setFacturationFilterMandat("all");
   };
 
+  const openFacturationMandatsDialog = () => {
+    if (!editingDossier) return;
+    const mandatsWithoutFacture = formData.mandats
+      .map((m, idx) => ({ mandat: m, index: idx }))
+      .filter(item => !item.mandat.facture)
+      .map(item => item.index);
+    setSelectedMandatsForLocalFacturation(mandatsWithoutFacture);
+    setIsFacturationMandatsDialogOpen(true);
+  };
+
+  const toggleMandatForLocalFacturation = (index) => {
+    setSelectedMandatsForLocalFacturation(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
+  };
+
+  const handleGenererFactureLocal = async () => {
+    if (!editingDossier) return;
+    await genererFacture(editingDossier, selectedMandatsForLocalFacturation, true); // Pass editingDossier and true to save
+    setIsFacturationMandatsDialogOpen(false);
+    // Reload the dossier to update the display
+    const refreshedDossier = dossiers.find(d => d.id === editingDossier.id);
+    if (refreshedDossier) {
+      handleEdit(refreshedDossier); // Re-initialize form data with updated dossier
+    }
+  };
+
   const selectDossierForFacturation = (dossierId) => {
     setFacturationDossierId(dossierId);
     const dossier = dossiers.find(d => d.id === dossierId);
@@ -997,11 +1037,12 @@ export default function Dossiers() {
     );
   };
 
-  const handleGenererFactureFromDialog = () => {
+  const handleGenererFactureFromDialog = async () => {
     if (!facturationDossierId) return;
     const dossier = dossiers.find(d => d.id === facturationDossierId);
     if (!dossier) return;
-    genererFacture(dossier, selectedMandatsForFacturation);
+    await genererFacture(dossier, selectedMandatsForFacturation, true);
+    setIsFacturationDialogOpen(false);
   };
 
   const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
@@ -1117,10 +1158,23 @@ export default function Dossiers() {
   };
 
   const openCloseDossierDialog = () => {
-    setIsDialogOpen(false);
+    if (editingDossier) {
+      // If called from editing dialog, auto-select the current dossier
+      setClosingDossierId(editingDossier.id);
+      if (editingDossier.mandats) {
+        setMinutesData(editingDossier.mandats.map(m => ({
+          minute: m.minute || "",
+          date_minute: m.date_minute || "",
+          type_minute: m.type_minute || "Initiale"
+        })));
+      }
+    } else {
+      // Reset if opening from the main list
+      setClosingDossierId(null);
+      setMinutesData([]);
+    }
+    setIsDialogOpen(false); // Close the main dossier dialog if it's open
     setIsCloseDossierDialogOpen(true);
-    setClosingDossierId(null);
-    setMinutesData([]);
     setClosingDossierSearchTerm("");
     setCloseFilterArpenteur("all");
     setCloseFilterVille("all");
@@ -1245,7 +1299,7 @@ export default function Dossiers() {
                         <div className="flex gap-2">
                           <Button
                             type="button"
-                            onClick={() => genererFacture()}
+                            onClick={openFacturationMandatsDialog}
                             className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
                           >
                             <FileText className="w-5 h-5 mr-2" />
@@ -1635,6 +1689,39 @@ export default function Dossiers() {
                                             </Table>
                                           </div>
                                         )}
+
+                                        {mandat.facture && (
+                                          <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                                            <div className="flex items-center justify-between">
+                                              <div>
+                                                <Label className="text-purple-400 text-xs font-semibold">Facturé</Label>
+                                                <div className="grid grid-cols-3 gap-3 mt-2">
+                                                  <div>
+                                                    <p className="text-slate-400 text-xs">N° Facture</p>
+                                                    <p className="text-white text-sm font-semibold">{mandat.facture.numero_facture}</p>
+                                                  </div>
+                                                  <div>
+                                                    <p className="text-slate-400 text-xs">Date</p>
+                                                    <p className="text-white text-sm">{mandat.facture.date_facture ? format(new Date(mandat.facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</p>
+                                                  </div>
+                                                  <div>
+                                                    <p className="text-slate-400 text-xs">Total TTC</p>
+                                                    <p className="text-white text-sm font-semibold">{mandat.facture.total_ttc?.toFixed(2)} $</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <Button
+                                                type="button"
+                                                size="sm"
+                                                onClick={() => voirFacture(mandat.facture.facture_html)}
+                                                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                                              >
+                                                <FileText className="w-4 h-4 mr-2" />
+                                                Voir la facture
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
 
@@ -1766,6 +1853,73 @@ export default function Dossiers() {
             </Dialog>
           </div>
         </div>
+
+        {/* Dialog for local facturation (from editing dossier) */}
+        <Dialog open={isFacturationMandatsDialogOpen} onOpenChange={setIsFacturationMandatsDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner les mandats à facturer</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto space-y-2 p-4">
+              {formData.mandats.map((mandat, index) => {
+                const hasFacture = !!mandat.facture;
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border transition-colors ${
+                      hasFacture 
+                        ? 'bg-slate-700/30 border-slate-600 opacity-50 cursor-not-allowed'
+                        : selectedMandatsForLocalFacturation.includes(index)
+                          ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
+                          : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
+                    }`}
+                    onClick={() => !hasFacture && toggleMandatForLocalFacturation(index)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
+                        {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                          <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                        )}
+                      </div>
+                      <div className="ml-4 text-right">
+                        {(mandat.prix_estime || 0) > 0 && (
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                            {(mandat.prix_estime || 0).toFixed(2)} $
+                          </Badge>
+                        )}
+                        <div className="mt-2">
+                          {hasFacture ? (
+                            <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
+                              <FileText className="w-3 h-3 mr-1" />
+                              Déjà facturé
+                            </Badge>
+                          ) : selectedMandatsForLocalFacturation.includes(index) ? (
+                            <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                              <Check className="w-3 h-3 mr-1" />
+                              Sélectionné
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-slate-700 text-slate-400">
+                              Cliquer pour sélectionner
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-slate-800">
+              <Button type="button" variant="outline" onClick={() => setIsFacturationMandatsDialogOpen(false)}>Annuler</Button>
+              <Button type="button" onClick={handleGenererFactureLocal} disabled={selectedMandatsForLocalFacturation.length === 0} className="bg-gradient-to-r from-purple-500 to-indigo-600">
+                <FileText className="w-4 h-4 mr-2" />
+                Générer la facture
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={isFacturationDialogOpen} onOpenChange={setIsFacturationDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -2439,7 +2593,10 @@ export default function Dossiers() {
                                       </Badge>
                                     )}
                                     {mandat.facture && (
-                                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                                      <Badge 
+                                        className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer hover:bg-purple-500/30"
+                                        onClick={() => voirFacture(mandat.facture.facture_html)}
+                                      >
                                         <FileText className="w-3 h-3 mr-1" />
                                         Facture #{mandat.facture.numero_facture}
                                       </Badge>
@@ -2449,7 +2606,7 @@ export default function Dossiers() {
 
                                 {mandat.facture && (
                                   <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                                    <Label className="text-purple-400 text-xs font-semibold">Facturé</Label>
+                                    <Label className="text-purple-400 text-xs font-semibold">Informations de facturation</Label>
                                     <div className="grid grid-cols-3 gap-3 mt-2">
                                       <div>
                                         <p className="text-slate-400 text-xs">Date</p>
