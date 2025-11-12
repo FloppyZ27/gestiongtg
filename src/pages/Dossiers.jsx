@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -575,6 +574,16 @@ export default function Dossiers() {
           }
           if (field === 'terrain') {
             return { ...m, terrain: { ...m.terrain, ...value } };
+          }
+          // Si la date de livraison change, calculer automatiquement la date limite levé terrain (2 semaines avant)
+          if (field === 'date_livraison' && value) {
+            const dateLivraison = new Date(value);
+            const dateLimiteLeve = new Date(dateLivraison);
+            dateLimiteLeve.setDate(dateLimiteLeve.getDate() - 14);
+            updatedMandat.terrain = {
+              ...m.terrain,
+              date_limite_leve: dateLimiteLeve.toISOString().split('T')[0]
+            };
           }
           return updatedMandat;
         }
