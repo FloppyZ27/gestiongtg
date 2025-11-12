@@ -136,44 +136,44 @@ export default function Dossiers() {
   const { data: dossiers, isLoading } = useQuery({
     queryKey: ['dossiers'],
     queryFn: () => base44.entities.Dossier.list('-created_date'),
-    initialData: [],
+    initialData: []
   });
 
   const { data: clients } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
-    initialData: [],
+    initialData: []
   });
 
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
     queryFn: () => base44.entities.Lot.list(),
-    initialData: [],
+    initialData: []
   });
 
   const { data: entreeTemps = [] } = useQuery({
     queryKey: ['entreeTemps'],
     queryFn: () => base44.entities.EntreeTemps.list('-date'),
-    initialData: [],
+    initialData: []
   });
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
-    initialData: [],
+    initialData: []
   });
 
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
       if (commentairesTemporaires.length > 0) {
-        const commentairePromises = commentairesTemporaires.map(comment =>
-          base44.entities.CommentaireDossier.create({
-            dossier_id: newDossier.id,
-            contenu: comment.contenu,
-            utilisateur_email: comment.utilisateur_email,
-            utilisateur_nom: comment.utilisateur_nom
-          })
+        const commentairePromises = commentairesTemporaires.map((comment) =>
+        base44.entities.CommentaireDossier.create({
+          dossier_id: newDossier.id,
+          contenu: comment.contenu,
+          utilisateur_email: comment.utilisateur_email,
+          utilisateur_nom: comment.utilisateur_nom
+        })
         );
         await Promise.all(commentairePromises);
       }
@@ -183,7 +183,7 @@ export default function Dossiers() {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       setIsDialogOpen(false);
       resetForm();
-    },
+    }
   });
 
   const updateDossierMutation = useMutation({
@@ -200,14 +200,14 @@ export default function Dossiers() {
       setFacturationDossierId(null);
       setSelectedMandatsForFacturation([]);
       setSelectedMandatsForLocalFacturation([]); // Reset local selection
-    },
+    }
   });
 
   const deleteDossierMutation = useMutation({
     mutationFn: (id) => base44.entities.Dossier.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-    },
+    }
   });
 
   const createLotMutation = useMutation({
@@ -216,16 +216,16 @@ export default function Dossiers() {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       setIsNewLotDialogOpen(false);
       resetNewLotForm();
-    },
+    }
   });
 
-  const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
-  const notaires = clients.filter(c => c.type_client === 'Notaire');
-  const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
+  const clientsReguliers = clients.filter((c) => c.type_client === 'Client' || !c.type_client);
+  const notaires = clients.filter((c) => c.type_client === 'Notaire');
+  const courtiers = clients.filter((c) => c.type_client === 'Courtier immobilier');
 
-  const getClientById = (id) => clients.find(c => c.id === id);
-  const getLotById = (numeroLot) => lots.find(l => l.id === numeroLot);
-  const getUserByEmail = (email) => users.find(u => u.email === email);
+  const getClientById = (id) => clients.find((c) => c.id === id);
+  const getLotById = (numeroLot) => lots.find((l) => l.id === numeroLot);
+  const getUserByEmail = (email) => users.find((u) => u.email === email);
 
   const availableLotCadastres = newLotForm.circonscription_fonciere ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || [] : [];
 
@@ -252,7 +252,7 @@ export default function Dossiers() {
   };
 
   const filteredLotsForSelector = sortLotsWithSelected(
-    lots.filter(lot => {
+    lots.filter((lot) => {
       const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
       const matchesCirconscription = lotCirconscriptionFilter === "all" || lot.circonscription_fonciere === lotCirconscriptionFilter;
       const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
@@ -268,62 +268,62 @@ export default function Dossiers() {
 
   const addLotToCurrentMandat = (lotId) => {
     if (currentMandatIndex !== null) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
-          i === currentMandatIndex ? {
-            ...m,
-            lots: m.lots.includes(lotId) ? m.lots.filter(id => id !== lotId) : [...(m.lots || []), lotId]
-          } : m
+        i === currentMandatIndex ? {
+          ...m,
+          lots: m.lots.includes(lotId) ? m.lots.filter((id) => id !== lotId) : [...(m.lots || []), lotId]
+        } : m
         )
       }));
     }
   };
 
   const filteredClientsForSelector = sortClientsWithSelected(
-    clientsReguliers.filter(c =>
-      `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-      c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
-      c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+    clientsReguliers.filter((c) =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+    c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
     ),
     formData.clients_ids
   );
 
   const filteredNotairesForSelector = sortClientsWithSelected(
-    notaires.filter(n =>
-      `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
-      n.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
-      n.telephones?.some(tel => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+    notaires.filter((n) =>
+    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
+    n.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+    n.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
     ),
     formData.notaires_ids
   );
 
   const filteredCourtiersForSelector = sortClientsWithSelected(
-    courtiers.filter(c =>
-      `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
-      c.courriels?.some(courriel => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-      c.telephones?.some(tel => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+    courtiers.filter((c) =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
+    c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+    c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
     ),
     formData.courtiers_ids
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Vérifier que le numéro de dossier n'existe pas déjà pour cet arpenteur
     if (formData.statut === "Ouvert" && formData.numero_dossier && formData.arpenteur_geometre) {
-      const dossierExistant = dossiers.find(d => 
-        d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
-        d.numero_dossier === formData.numero_dossier && 
-        d.arpenteur_geometre === formData.arpenteur_geometre
+      const dossierExistant = dossiers.find((d) =>
+      d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
+      d.numero_dossier === formData.numero_dossier &&
+      d.arpenteur_geometre === formData.arpenteur_geometre
       );
-      
+
       if (dossierExistant) {
         alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
         return;
       }
     }
-    
+
     if (editingDossier) {
       updateDossierMutation.mutate({ id: editingDossier.id, dossierData: formData });
     } else {
@@ -405,7 +405,7 @@ export default function Dossiers() {
       clients_ids: entity.clients_ids || [],
       notaires_ids: entity.notaires_ids || [],
       courtiers_ids: entity.courtiers_ids || [],
-      mandats: entity.mandats?.map(m => ({
+      mandats: entity.mandats?.map((m) => ({
         ...m,
         date_ouverture: m.date_ouverture || "",
         minute: m.minute || "",
@@ -414,7 +414,7 @@ export default function Dossiers() {
         minutes_list: m.minutes_list || [],
         tache_actuelle: m.tache_actuelle || "",
         statut_terrain: m.statut_terrain || "",
-        adresse_travaux: m.adresse_travaux ? (typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
         lots: m.lots || [],
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
         rabais: m.rabais !== undefined ? m.rabais : 0,
@@ -464,17 +464,17 @@ export default function Dossiers() {
 
   const toggleClient = (clientId, type) => {
     const field = `${type}_ids`;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].includes(clientId) ? prev[field].filter(id => id !== clientId) : [...prev[field], clientId]
+      [field]: prev[field].includes(clientId) ? prev[field].filter((id) => id !== clientId) : [...prev[field], clientId]
     }));
   };
 
   const removeClient = (clientId, type) => {
     const field = `${type}_ids`;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].filter(id => id !== clientId)
+      [field]: prev[field].filter((id) => id !== clientId)
     }));
   };
 
@@ -484,7 +484,7 @@ export default function Dossiers() {
     const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" };
     const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
@@ -525,10 +525,10 @@ export default function Dossiers() {
   const getMandatTabLabel = (mandat, index) => mandat.type_mandat || `Mandat ${index + 1}`;
 
   const updateMandatAddress = (mandatIndex, newAddresses) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       mandats: prev.mandats.map((m, i) =>
-        i === mandatIndex ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
+      i === mandatIndex ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
       )
     }));
   };
@@ -537,18 +537,18 @@ export default function Dossiers() {
     if (!addr) return "";
     const parts = [];
     if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+      parts.push(addr.numeros_civiques.filter((n) => n).join(', '));
     }
     if (addr.rue) parts.push(addr.rue);
     if (addr.ville) parts.push(addr.ville);
     if (addr.province) parts.push(addr.province);
     if (addr.code_postal) parts.push(addr.code_postal);
-    return parts.filter(p => p).join(', ');
+    return parts.filter((p) => p).join(', ');
   };
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
+    return clientIds.map((id) => {
       const client = getClientById(id);
       return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
     }).join(", ");
@@ -560,7 +560,7 @@ export default function Dossiers() {
   };
 
   const updateMandat = (index, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       mandats: prev.mandats.map((m, i) => {
         if (i === index) {
@@ -594,7 +594,7 @@ export default function Dossiers() {
 
   const removeMandat = (index) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.")) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         mandats: prev.mandats.filter((_, i) => i !== index)
       }));
@@ -603,10 +603,10 @@ export default function Dossiers() {
 
   const removeLotFromMandat = (mandatIndex, lotId) => {
     if (confirm(`Êtes-vous sûr de vouloir retirer ce lot de ce mandat ?`)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
-          i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m
+        i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m
         )
       }));
     }
@@ -628,22 +628,22 @@ export default function Dossiers() {
   const genererFacture = async (dossier = null, selectedMandatsIndexes = null, saveToDatabase = true) => {
     const targetDossier = dossier || editingDossier;
     if (!targetDossier) return;
-    
+
     // Determine clients and mandats based on whether a specific dossier object is provided (from saved list)
     // or if we are using the current formData (from editing dialog)
-    const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
+    const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map((id) => getClientById(id)).filter((c) => c);
     const client = clientsList[0];
-    
+
     const allMandatsData = dossier ? targetDossier.mandats : formData.mandats;
-    const mandatsToInvoice = selectedMandatsIndexes
-      ? selectedMandatsIndexes.map(idx => allMandatsData[idx])
-      : allMandatsData; // If no specific indexes, invoice all available mandats in the context
+    const mandatsToInvoice = selectedMandatsIndexes ?
+    selectedMandatsIndexes.map((idx) => allMandatsData[idx]) :
+    allMandatsData; // If no specific indexes, invoice all available mandats in the context
 
     if (mandatsToInvoice.length === 0) {
       console.warn("No mandates selected or available for invoicing.");
       return;
     }
-    
+
     const totalHT = mandatsToInvoice.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
@@ -653,7 +653,7 @@ export default function Dossiers() {
 
     const uniqueAddresses = [];
     const addressMap = new Map();
-    mandatsToInvoice.forEach(m => {
+    mandatsToInvoice.forEach((m) => {
       if (m.adresse_travaux) {
         const addrStr = formatAdresse(m.adresse_travaux);
         if (addrStr && !addressMap.has(addrStr)) {
@@ -665,9 +665,9 @@ export default function Dossiers() {
 
     const uniqueLots = [];
     const lotMap = new Map();
-    mandatsToInvoice.forEach(m => {
+    mandatsToInvoice.forEach((m) => {
       if (m.lots && m.lots.length > 0) {
-        m.lots.forEach(lotId => {
+        m.lots.forEach((lotId) => {
           const lot = getLotById(lotId);
           const lotStr = lot ? lot.numero_lot : lotId;
           if (!lotMap.has(lotStr)) {
@@ -776,14 +776,14 @@ export default function Dossiers() {
       <div class="label">FACTURÉ À :</div>
       ${client ? `
         <p><strong>${client.prenom} ${client.nom}</strong></p>
-        ${client.adresses?.find(a => a.actuelle) ? `<p>${formatAdresse(client.adresses.find(a => a.actuelle))}</p>` : ''}
+        ${client.adresses?.find((a) => a.actuelle) ? `<p>${formatAdresse(client.adresses.find((a) => a.actuelle))}</p>` : ''}
       ` : '<p>Client non spécifié</p>'}
     </div>
     <div class="column">
       <div class="label">EXPÉDIÉ À :</div>
       ${client ? `
         <p><strong>${client.prenom} ${client.nom}</strong></p>
-        ${client.adresses?.find(a => a.actuelle) ? `<p>${formatAdresse(client.adresses.find(a => a.actuelle))}</p>` : ''}
+        ${client.adresses?.find((a) => a.actuelle) ? `<p>${formatAdresse(client.adresses.find((a) => a.actuelle))}</p>` : ''}
       ` : '<p>Client non spécifié</p>'}
     </div>
   </div>
@@ -791,14 +791,14 @@ export default function Dossiers() {
   ${uniqueAddresses.length > 0 ? `
     <div class="location-section">
       <div class="section-title">Localisation(s) des travaux :</div>
-      ${uniqueAddresses.map(addr => `<p>${addr}</p>`).join('')}
+      ${uniqueAddresses.map((addr) => `<p>${addr}</p>`).join('')}
     </div>
   ` : ''}
   
   ${uniqueLots.length > 0 ? `
     <div class="location-section">
       <div class="section-title">Lot(s) :</div>
-      <p>${uniqueLots.map(lot => `${lot} du cadastre du Québec`).join(', ')}</p>
+      <p>${uniqueLots.map((lot) => `${lot} du cadastre du Québec`).join(', ')}</p>
     </div>
   ` : ''}
   
@@ -826,13 +826,13 @@ export default function Dossiers() {
         <td class="amount-cell"></td>
       </tr>
       ${mandatsToInvoice.map((mandat) => {
-        const montant = (mandat.prix_estime || 0);
-        const rabais = mandat.rabais || 0;
-        const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 
-          ? mandat.minutes_list.map(m => m.minute).join(', ')
-          : (mandat.minute || '');
-        
-        return `
+      const montant = mandat.prix_estime || 0;
+      const rabais = mandat.rabais || 0;
+      const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 ?
+      mandat.minutes_list.map((m) => m.minute).join(', ') :
+      mandat.minute || '';
+
+      return `
           <tr>
             <td>
               <div class="bold-item">Travaux réalisés :</div>
@@ -852,7 +852,7 @@ export default function Dossiers() {
             </tr>
           ` : ''}
         `;
-      }).join('')}
+    }).join('')}
     </tbody>
   </table>
   
@@ -912,7 +912,7 @@ export default function Dossiers() {
           const mandatTPS = mandatHT * 0.05;
           const mandatTVQ = mandatHT * 0.09975;
           const mandatTTC = mandatHT + mandatTPS + mandatTVQ;
-          
+
           const newFacture = {
             numero_facture: numeroFacture.toString(),
             date_facture: format(new Date(), "yyyy-MM-dd"),
@@ -920,7 +920,7 @@ export default function Dossiers() {
             total_ttc: mandatTTC,
             facture_html: factureHTML // Store the generated HTML
           };
-          
+
           return {
             ...m,
             factures: [...(m.factures || []), newFacture]
@@ -929,8 +929,8 @@ export default function Dossiers() {
         return m;
       });
 
-      await updateDossierMutation.mutateAsync({ 
-        id: dossier.id, 
+      await updateDossierMutation.mutateAsync({
+        id: dossier.id,
         dossierData: { ...dossier, mandats: updatedMandats }
       });
     }
@@ -968,41 +968,41 @@ export default function Dossiers() {
   endOfPreviousYear.setHours(23, 59, 59, 999);
 
   const getCountsByPeriodWithComparison = (list, dateKey) => {
-    const byDay = list.filter(item => {
+    const byDay = list.filter((item) => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfDay;
     }).length;
-    const byWeek = list.filter(item => {
+    const byWeek = list.filter((item) => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfWeek;
     }).length;
-    const byMonth = list.filter(item => {
+    const byMonth = list.filter((item) => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfMonth;
     }).length;
-    const byYear = list.filter(item => {
+    const byYear = list.filter((item) => {
       const itemDate = new Date(item[dateKey] + 'T00:00:00');
       return itemDate >= startOfYear;
     }).length;
-    const previousDay = list.filter(item => {
+    const previousDay = list.filter((item) => {
       const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousDay && date < startOfDay;
     }).length;
-    const previousWeek = list.filter(item => {
+    const previousWeek = list.filter((item) => {
       const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousWeek && date < startOfWeek;
     }).length;
-    const previousMonth = list.filter(item => {
+    const previousMonth = list.filter((item) => {
       const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousMonth && date <= endOfPreviousMonth;
     }).length;
-    const previousYear = list.filter(item => {
+    const previousYear = list.filter((item) => {
       const date = new Date(item[dateKey] + 'T00:00:00');
       return date >= startOfPreviousYear && date <= endOfPreviousYear;
     }).length;
     const calculatePercentage = (current, previous) => {
       if (previous === 0) return current > 0 ? 100 : 0;
-      return Math.round(((current - previous) / previous) * 100);
+      return Math.round((current - previous) / previous * 100);
     };
     return {
       byDay, byWeek, byMonth, byYear,
@@ -1032,8 +1032,8 @@ export default function Dossiers() {
   };
 
   const toggleMandatForLocalFacturation = (index) => {
-    setSelectedMandatsForLocalFacturation(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    setSelectedMandatsForLocalFacturation((prev) =>
+    prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -1043,7 +1043,7 @@ export default function Dossiers() {
     setIsFacturationMandatsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['dossiers'] });
     // Reload the dossier to update formData
-    const refreshedDossier = dossiers.find(d => d.id === editingDossier.id);
+    const refreshedDossier = dossiers.find((d) => d.id === editingDossier.id);
     if (refreshedDossier) {
       setFormData({
         numero_dossier: refreshedDossier.numero_dossier || "",
@@ -1053,7 +1053,7 @@ export default function Dossiers() {
         clients_ids: refreshedDossier.clients_ids || [],
         notaires_ids: refreshedDossier.notaires_ids || [],
         courtiers_ids: refreshedDossier.courtiers_ids || [],
-        mandats: refreshedDossier.mandats?.map(m => ({
+        mandats: refreshedDossier.mandats?.map((m) => ({
           ...m,
           date_ouverture: m.date_ouverture || "",
           minute: m.minute || "",
@@ -1062,7 +1062,7 @@ export default function Dossiers() {
           minutes_list: m.minutes_list || [],
           tache_actuelle: m.tache_actuelle || "",
           statut_terrain: m.statut_terrain || "",
-          adresse_travaux: m.adresse_travaux ? (typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+          adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
           lots: m.lots || [],
           prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
           rabais: m.rabais !== undefined ? m.rabais : 0,
@@ -1096,23 +1096,23 @@ export default function Dossiers() {
   };
 
   const toggleMandatForFacturation = (index) => {
-    setSelectedMandatsForFacturation(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    setSelectedMandatsForFacturation((prev) =>
+    prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
   const handleGenererFactureFromDialog = async () => {
     if (!facturationDossierId) return;
-    const dossier = dossiers.find(d => d.id === facturationDossierId);
+    const dossier = dossiers.find((d) => d.id === facturationDossierId);
     if (!dossier) return;
     await genererFacture(dossier, selectedMandatsForFacturation, true);
     setIsFacturationDialogOpen(false);
   };
 
-  const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
+  const dossiersOuverts = dossiers.filter((d) => d.statut === "Ouvert");
   const dossierStats = getCountsByPeriodWithComparison(dossiersOuverts, 'date_ouverture');
 
-  const dossiersWithMandats = dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé").flatMap(dossier => {
+  const dossiersWithMandats = dossiers.filter((d) => d.statut === "Ouvert" || d.statut === "Fermé").flatMap((dossier) => {
     if (dossier.mandats && dossier.mandats.length > 0) {
       return dossier.mandats.map((mandat, idx) => ({
         ...dossier,
@@ -1124,21 +1124,21 @@ export default function Dossiers() {
     return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
   });
 
-  const uniqueVilles = [...new Set(dossiersWithMandats.filter(item => item.mandatInfo?.adresse_travaux?.ville).map(item => item.mandatInfo.adresse_travaux.ville))].sort();
+  const uniqueVilles = [...new Set(dossiersWithMandats.filter((item) => item.mandatInfo?.adresse_travaux?.ville).map((item) => item.mandatInfo.adresse_travaux.ville))].sort();
 
-  const filteredDossiersWithMandats = dossiersWithMandats.filter(item => {
+  const filteredDossiersWithMandats = dossiersWithMandats.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
     const clientsNames = getClientsNames(item.clients_ids);
-    const matchesSearch = (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      item.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower)
-    );
+    const matchesSearch =
+    fullNumber.toLowerCase().includes(searchLower) ||
+    item.numero_dossier?.toLowerCase().includes(searchLower) ||
+    clientsNames.toLowerCase().includes(searchLower) ||
+    item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
+    item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
+    item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
+    item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
+
     const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
     const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
     const matchesStatut = filterStatut === "all" || item.statut === filterStatut;
@@ -1207,7 +1207,7 @@ export default function Dossiers() {
 
   const handleCloseDossier = () => {
     if (!closingDossierId) return;
-    const dossier = dossiers.find(d => d.id === closingDossierId);
+    const dossier = dossiers.find((d) => d.id === closingDossierId);
     if (!dossier) return;
     const updatedMandats = dossier.mandats.map((mandat, index) => ({
       ...mandat,
@@ -1226,7 +1226,7 @@ export default function Dossiers() {
       // If called from editing dialog, auto-select the current dossier
       setClosingDossierId(editingDossier.id);
       if (editingDossier.mandats) {
-        setMinutesData(editingDossier.mandats.map(m => ({
+        setMinutesData(editingDossier.mandats.map((m) => ({
           minute: m.minute || "",
           date_minute: m.date_minute || "",
           type_minute: m.type_minute || "Initiale"
@@ -1247,9 +1247,9 @@ export default function Dossiers() {
 
   const selectDossierToClose = (dossierId) => {
     setClosingDossierId(dossierId);
-    const dossier = dossiers.find(d => d.id === dossierId);
+    const dossier = dossiers.find((d) => d.id === dossierId);
     if (dossier && dossier.mandats) {
-      setMinutesData(dossier.mandats.map(m => ({
+      setMinutesData(dossier.mandats.map((m) => ({
         minute: m.minute || "",
         date_minute: m.date_minute || "",
         type_minute: m.type_minute || "Initiale"
@@ -1258,58 +1258,58 @@ export default function Dossiers() {
   };
 
   const updateMinuteData = (index, field, value) => {
-    setMinutesData(prev => prev.map((m, i) => i === index ? { ...m, [field]: value } : m));
+    setMinutesData((prev) => prev.map((m, i) => i === index ? { ...m, [field]: value } : m));
   };
 
-  const dossiersOuvertsForClosing = dossiers.filter(d => d.statut === "Ouvert");
-  
-  const filteredDossiersForClosing = dossiersOuvertsForClosing.filter(dossier => {
+  const dossiersOuvertsForClosing = dossiers.filter((d) => d.statut === "Ouvert");
+
+  const filteredDossiersForClosing = dossiersOuvertsForClosing.filter((dossier) => {
     const searchLower = closingDossierSearchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
     const clientsNames = getClientsNames(dossier.clients_ids);
-    
-    const matchesSearch = (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
-    );
-    
+
+    const matchesSearch =
+    fullNumber.toLowerCase().includes(searchLower) ||
+    dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+    clientsNames.toLowerCase().includes(searchLower) ||
+    dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
+
+
     const matchesArpenteur = closeFilterArpenteur === "all" || dossier.arpenteur_geometre === closeFilterArpenteur;
-    const matchesVille = closeFilterVille === "all" || dossier.mandats?.some(m => m.adresse_travaux?.ville === closeFilterVille);
-    const matchesMandat = closeFilterMandat === "all" || dossier.mandats?.some(m => m.type_mandat === closeFilterMandat);
-    
+    const matchesVille = closeFilterVille === "all" || dossier.mandats?.some((m) => m.adresse_travaux?.ville === closeFilterVille);
+    const matchesMandat = closeFilterMandat === "all" || dossier.mandats?.some((m) => m.type_mandat === closeFilterMandat);
+
     return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   });
 
-  const dossiersForFacturation = dossiers.filter(d => {
+  const dossiersForFacturation = dossiers.filter((d) => {
     return d.statut === "Ouvert" || d.statut === "Fermé";
   });
-  
-  const filteredDossiersForFacturation = dossiersForFacturation.filter(dossier => {
+
+  const filteredDossiersForFacturation = dossiersForFacturation.filter((dossier) => {
     const searchLower = facturationSearchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
     const clientsNames = getClientsNames(dossier.clients_ids);
-    
-    const matchesSearch = (
-      fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
-    );
-    
+
+    const matchesSearch =
+    fullNumber.toLowerCase().includes(searchLower) ||
+    dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+    clientsNames.toLowerCase().includes(searchLower) ||
+    dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
+
+
     const matchesArpenteur = facturationFilterArpenteur === "all" || dossier.arpenteur_geometre === facturationFilterArpenteur;
-    const matchesVille = facturationFilterVille === "all" || dossier.mandats?.some(m => m.adresse_travaux?.ville === facturationFilterVille);
-    const matchesMandat = facturationFilterMandat === "all" || dossier.mandats?.some(m => m.type_mandat === facturationFilterMandat);
-    
+    const matchesVille = facturationFilterVille === "all" || dossier.mandats?.some((m) => m.adresse_travaux?.ville === facturationFilterVille);
+    const matchesMandat = facturationFilterMandat === "all" || dossier.mandats?.some((m) => m.type_mandat === facturationFilterMandat);
+
     return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   });
 
-  const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
-  const selectedDossierForFacturation = dossiers.find(d => d.id === facturationDossierId);
+  const selectedDossierToClose = dossiers.find((d) => d.id === closingDossierId);
+  const selectedDossierForFacturation = dossiers.find((d) => d.id === facturationDossierId);
 
   const toggleTerrainSection = (mandatIndex) => {
-    setTerrainSectionExpanded(prev => ({
+    setTerrainSectionExpanded((prev) => ({
       ...prev,
       [mandatIndex]: !prev[mandatIndex]
     }));
@@ -1344,18 +1344,18 @@ export default function Dossiers() {
           </div>
 
           <div className="flex gap-3">
-            <Button 
+            <Button
               onClick={openFacturationDialog}
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50"
-            >
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50">
+
               <FileText className="w-5 h-5 mr-2" />
               Facturation
             </Button>
 
-            <Button 
+            <Button
               onClick={openCloseDossierDialog}
-              className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50"
-            >
+              className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50">
+
               <Check className="w-5 h-5 mr-2" />
               Fermer dossier
             </Button>
@@ -1378,45 +1378,45 @@ export default function Dossiers() {
                   <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                     <div className="mb-6 flex justify-between items-center">
                       <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
-                      {editingDossier && (
-                        <div className="flex gap-2">
+                      {editingDossier &&
+                      <div className="flex gap-2">
                           <Button
-                            type="button"
-                            onClick={openFacturationMandatsDialog}
-                            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
-                          >
+                          type="button"
+                          onClick={openFacturationMandatsDialog}
+                          className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700">
+
                             <FileText className="w-5 h-5 mr-2" />
                             Facturation
                           </Button>
                           <Button
-                            type="button"
-                            onClick={openCloseDossierDialog}
-                            className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700"
-                          >
+                          type="button"
+                          onClick={openCloseDossierDialog}
+                          className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700">
+
                             <Check className="w-5 h-5 mr-2" />
                             Fermer dossier
                           </Button>
                         </div>
-                      )}
+                      }
                     </div>
                     <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                          <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
+                          <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })}>
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
-                              {ARPENTEURS.map((arpenteur) => (
-                                <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
-                              ))}
+                              {ARPENTEURS.map((arpenteur) =>
+                              <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
                           <Label>Statut <span className="text-red-400">*</span></Label>
-                          <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                          <Select value={formData.statut} onValueChange={(value) => setFormData({ ...formData, statut: value })}>
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                               <SelectValue placeholder="Sélectionner le statut" />
                             </SelectTrigger>
@@ -1428,18 +1428,18 @@ export default function Dossiers() {
                         </div>
                       </div>
 
-                      {formData.statut === "Ouvert" && (
-                        <div className="grid grid-cols-2 gap-4">
+                      {formData.statut === "Ouvert" &&
+                      <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                            <Input value={formData.numero_dossier} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
+                            <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
                           </div>
                           <div className="space-y-2">
                             <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                            <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-800 border-slate-700" />
+                            <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" />
                           </div>
                         </div>
-                      )}
+                      }
 
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
@@ -1450,33 +1450,33 @@ export default function Dossiers() {
                               Ajouter
                             </Button>
                           </div>
-                          {formData.clients_ids.length > 0 ? (
-                            <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                              {formData.clients_ids.map(clientId => {
-                                const client = getClientById(clientId);
-                                return client ? (
-                                  <div key={clientId} className="space-y-1">
+                          {formData.clients_ids.length > 0 ?
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                              {formData.clients_ids.map((clientId) => {
+                              const client = getClientById(clientId);
+                              return client ?
+                              <div key={clientId} className="space-y-1">
                                     <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
                                       <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
-                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(clientId, 'clients'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <button type="button" onClick={(e) => {e.stopPropagation();removeClient(clientId, 'clients');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                         <X className="w-3 h-3" />
                                       </button>
                                     </Badge>
-                                    {client.preferences_livraison && client.preferences_livraison.length > 0 && (
-                                      <div className="flex gap-1 ml-2">
+                                    {client.preferences_livraison && client.preferences_livraison.length > 0 &&
+                                <div className="flex gap-1 ml-2">
                                         <Package className="w-3 h-3 text-slate-500 mt-0.5" />
                                         <span className="text-xs text-slate-400">
                                           {client.preferences_livraison.join(', ')}
                                         </span>
                                       </div>
-                                    )}
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun client</p>
-                          )}
+                                }
+                                  </div> :
+                              null;
+                            })}
+                            </div> :
+
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun client</p>
+                          }
                         </div>
 
                         <div className="space-y-2">
@@ -1487,33 +1487,33 @@ export default function Dossiers() {
                               Ajouter
                             </Button>
                           </div>
-                          {formData.notaires_ids.length > 0 ? (
-                            <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                              {formData.notaires_ids.map(notaireId => {
-                                const notaire = getClientById(notaireId);
-                                return notaire ? (
-                                  <div key={notaireId} className="space-y-1">
+                          {formData.notaires_ids.length > 0 ?
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                              {formData.notaires_ids.map((notaireId) => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ?
+                              <div key={notaireId} className="space-y-1">
                                     <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
                                       <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
-                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <button type="button" onClick={(e) => {e.stopPropagation();removeClient(notaireId, 'notaires');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                         <X className="w-3 h-3" />
                                       </button>
                                     </Badge>
-                                    {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 && (
-                                      <div className="flex gap-1 ml-2">
+                                    {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 &&
+                                <div className="flex gap-1 ml-2">
                                         <Package className="w-3 h-3 text-slate-500 mt-0.5" />
                                         <span className="text-xs text-slate-400">
                                           {notaire.preferences_livraison.join(', ')}
                                         </span>
                                       </div>
-                                    )}
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun notaire</p>
-                          )}
+                                }
+                                  </div> :
+                              null;
+                            })}
+                            </div> :
+
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun notaire</p>
+                          }
                         </div>
 
                         <div className="space-y-2">
@@ -1524,33 +1524,33 @@ export default function Dossiers() {
                               Ajouter
                             </Button>
                           </div>
-                          {formData.courtiers_ids.length > 0 ? (
-                            <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                              {formData.courtiers_ids.map(courtierId => {
-                                const courtier = getClientById(courtierId);
-                                return courtier ? (
-                                  <div key={courtierId} className="space-y-1">
+                          {formData.courtiers_ids.length > 0 ?
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                              {formData.courtiers_ids.map((courtierId) => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ?
+                              <div key={courtierId} className="space-y-1">
                                     <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
                                       <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
-                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <button type="button" onClick={(e) => {e.stopPropagation();removeClient(courtierId, 'courtiers');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                         <X className="w-3 h-3" />
                                       </button>
                                     </Badge>
-                                    {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 && (
-                                      <div className="flex gap-1 ml-2">
+                                    {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 &&
+                                <div className="flex gap-1 ml-2">
                                         <Package className="w-3 h-3 text-slate-500 mt-0.5" />
                                         <span className="text-xs text-slate-400">
                                           {courtier.preferences_livraison.join(', ')}
                                         </span>
                                       </div>
-                                    )}
-                                  </div>
-                                ) : null;
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun courtier</p>
-                          )}
+                                }
+                                  </div> :
+                              null;
+                            })}
+                            </div> :
+
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun courtier</p>
+                          }
                         </div>
                       </div>
 
@@ -1563,22 +1563,22 @@ export default function Dossiers() {
                           </Button>
                         </div>
 
-                        {formData.mandats.length > 0 ? (
-                          <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
+                        {formData.mandats.length > 0 ?
+                        <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
                             <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
-                              {formData.mandats.map((mandat, index) => (
-                                <TabsTrigger 
-                                  key={index} 
-                                  value={index.toString()} 
-                                  className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
-                                >
+                              {formData.mandats.map((mandat, index) =>
+                            <TabsTrigger
+                              key={index}
+                              value={index.toString()}
+                              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all">
+
                                   {getMandatTabLabel(mandat, index)}
                                 </TabsTrigger>
-                              ))}
+                            )}
                             </TabsList>
 
-                            {formData.mandats.map((mandat, index) => (
-                              <TabsContent key={index} value={index.toString()}>
+                            {formData.mandats.map((mandat, index) =>
+                          <TabsContent key={index} value={index.toString()}>
                                 <Card className="border-slate-700 bg-slate-800/30">
                                   <CardContent className="p-4 space-y-4">
                                     <div className="flex gap-4 items-start">
@@ -1590,27 +1590,27 @@ export default function Dossiers() {
                                               <SelectValue placeholder="Sélectionner" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-slate-800 border-slate-700">
-                                              {TYPES_MANDATS.map((type) => (
-                                                <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                                              ))}
+                                              {TYPES_MANDATS.map((type) =>
+                                          <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                                          )}
                                             </SelectContent>
                                           </Select>
                                         </div>
-                                    {editingDossier && (
-                                      <div className="space-y-2">
+                                    {editingDossier &&
+                                    <div className="space-y-2">
                                         <Label>Tâche actuelle</Label>
                                         <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
                                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                                             <SelectValue placeholder="Sélectionner la tâche" />
                                           </SelectTrigger>
                                           <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                            {TACHES.map((tache) => (
-                                              <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
-                                            ))}
+                                            {TACHES.map((tache) =>
+                                          <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                                          )}
                                           </SelectContent>
                                         </Select>
                                       </div>
-                                    )}
+                                    }
                                   </div>
                                   <Button type="button" size="sm" variant="ghost" onClick={() => {
                                     removeMandat(index);
@@ -1633,31 +1633,21 @@ export default function Dossiers() {
                                       addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
                                       onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
                                       showActuelle={false}
-                                      singleAddress={true}
-                                    />
+                                      singleAddress={true} />
+
                                   </div>
 
                                   {/* Colonne droite - Dates */}
                                   <div className="space-y-3">
                                     <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
                                       <div className="space-y-2">
-                                        <Label>Date de livraison</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_livraison || ""}
-                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
-                                      </div>
-
-                                      <div className="space-y-2">
                                         <Label>Date de signature</Label>
                                         <Input
                                           type="date"
                                           value={mandat.date_signature || ""}
                                           onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
+                                          className="bg-slate-700 border-slate-600" />
+
                                       </div>
 
                                       <div className="space-y-2">
@@ -1666,8 +1656,18 @@ export default function Dossiers() {
                                           type="date"
                                           value={mandat.date_debut_travaux || ""}
                                           onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
+                                          className="bg-slate-700 border-slate-600" />
+
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <Label>Date de livraison</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_livraison || ""}
+                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                          className="bg-slate-700 border-slate-600" />
+
                                       </div>
                                     </div>
                                   </div>
@@ -1682,8 +1682,8 @@ export default function Dossiers() {
                                     </Button>
                                   </div>
 
-                                  {mandat.lots && mandat.lots.length > 0 ? (
-                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                  {mandat.lots && mandat.lots.length > 0 ?
+                                  <div className="border border-slate-700 rounded-lg overflow-hidden">
                                       <Table>
                                         <TableHeader>
                                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -1696,9 +1696,9 @@ export default function Dossiers() {
                                         </TableHeader>
                                         <TableBody>
                                           {mandat.lots.map((lotId) => {
-                                            const lot = getLotById(lotId);
-                                            return lot ? (
-                                              <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
+                                          const lot = getLotById(lotId);
+                                          return lot ?
+                                          <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
                                                 <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
                                                 <TableCell className="text-slate-300">
                                                   <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">{lot.circonscription_fonciere}</Badge>
@@ -1710,44 +1710,44 @@ export default function Dossiers() {
                                                     <Trash2 className="w-4 h-4" />
                                                   </Button>
                                                 </TableCell>
-                                              </TableRow>
-                                            ) : (
-                                              <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
+                                              </TableRow> :
+
+                                          <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
                                                 <TableCell colSpan={4} className="font-medium text-white">{lotId} (Lot introuvable)</TableCell>
                                                 <TableCell className="text-right">
                                                   <Button type="button" size="sm" variant="ghost" onClick={() => removeLotFromMandat(index, lotId)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                                     <Trash2 className="w-4 h-4" />
                                                   </Button>
                                                 </TableCell>
-                                              </TableRow>
-                                            );
-                                          })}
+                                              </TableRow>;
+
+                                        })}
                                         </TableBody>
                                       </Table>
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucun lot sélectionné</p>
-                                  )}
+                                    </div> :
+
+                                  <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucun lot sélectionné</p>
+                                  }
                                 </div>
 
-                                {editingDossier && (
-                                  <>
+                                {editingDossier &&
+                                <>
                                     <div className="space-y-2">
                                       <div className="flex justify-between items-center">
                                         <Label>Minutes</Label>
                                         <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => openAddMinuteDialog(index)}
-                                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                                        >
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => openAddMinuteDialog(index)}
+                                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+
                                           <Plus className="w-4 h-4 mr-1" />
                                           Ajouter minute
                                         </Button>
                                       </div>
                                       
-                                      {mandat.minutes_list && mandat.minutes_list.length > 0 ? (
-                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                      {mandat.minutes_list && mandat.minutes_list.length > 0 ?
+                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
                                           <Table>
                                             <TableHeader>
                                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -1758,8 +1758,8 @@ export default function Dossiers() {
                                               </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                              {mandat.minutes_list.map((minute, minuteIdx) => (
-                                                <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
+                                              {mandat.minutes_list.map((minute, minuteIdx) =>
+                                          <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
                                                   <TableCell className="text-white">{minute.minute}</TableCell>
                                                   <TableCell className="text-white">
                                                     {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
@@ -1771,29 +1771,29 @@ export default function Dossiers() {
                                                   </TableCell>
                                                   <TableCell className="text-right">
                                                     <Button
-                                                      type="button"
-                                                      size="sm"
-                                                      variant="ghost"
-                                                      onClick={() => removeMinuteFromMandat(index, minuteIdx)}
-                                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                    >
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => removeMinuteFromMandat(index, minuteIdx)}
+                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+
                                                       <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                   </TableCell>
                                                 </TableRow>
-                                              ))}
+                                          )}
                                             </TableBody>
                                           </Table>
-                                        </div>
-                                      ) : (
-                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune minute</p>
-                                      )}
+                                        </div> :
+
+                                    <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune minute</p>
+                                    }
                                     </div>
 
                                     <div className="space-y-2 pt-3 border-t border-slate-700">
-                                      <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures?.length || 0})</Label>
-                                      {mandat.factures && mandat.factures.length > 0 ? (
-                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                      <Label className="text-slate-50 mb-2 text-sm font-semibold peer-disabled:cursor-not-allowed peer-disabled:opacity-70 block">Factures générées ({mandat.factures?.length || 0})</Label>
+                                      {mandat.factures && mandat.factures.length > 0 ?
+                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
                                           <Table>
                                             <TableHeader>
                                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -1805,31 +1805,31 @@ export default function Dossiers() {
                                               </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                              {mandat.factures.map((facture, factureIdx) => (
-                                                <TableRow key={factureIdx} className="border-slate-800">
+                                              {mandat.factures.map((facture, factureIdx) =>
+                                          <TableRow key={factureIdx} className="border-slate-800">
                                                   <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
                                                   <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
                                                   <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
                                                   <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
                                                   <TableCell className="text-right">
                                                     <Button
-                                                      type="button"
-                                                      size="sm"
-                                                      onClick={() => voirFacture(facture.facture_html)}
-                                                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                                                    >
+                                                type="button"
+                                                size="sm"
+                                                onClick={() => voirFacture(facture.facture_html)}
+                                                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400">
+
                                                       <FileText className="w-4 h-4 mr-2" />
                                                       Voir
                                                     </Button>
                                                   </TableCell>
                                                 </TableRow>
-                                              ))}
+                                          )}
                                             </TableBody>
                                           </Table>
-                                        </div>
-                                      ) : (
-                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune facture générée</p>
-                                      )}
+                                        </div> :
+
+                                    <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune facture générée</p>
+                                    }
                                     </div>
 
                                     <div className="space-y-2">
@@ -1841,16 +1841,16 @@ export default function Dossiers() {
                                       <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => toggleTerrainSection(index)}>
                                         <Label className="text-lg font-semibold text-emerald-400">Section Terrain</Label>
                                         <Button type="button" variant="ghost" size="sm" className="text-emerald-400 hover:bg-emerald-500/10 p-0 h-auto">
-                                          {terrainSectionExpanded[index] ? (
-                                            <ChevronUp className="w-5 h-5" />
-                                          ) : (
-                                            <ChevronDown className="w-5 h-5" />
-                                          )}
+                                          {terrainSectionExpanded[index] ?
+                                        <ChevronUp className="w-5 h-5" /> :
+
+                                        <ChevronDown className="w-5 h-5" />
+                                        }
                                         </Button>
                                       </div>
                                       
-                                      {terrainSectionExpanded[index] && (
-                                        <div className="space-y-3">
+                                      {terrainSectionExpanded[index] &&
+                                    <div className="space-y-3">
                                           <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
                                               <Label>Date limite levé terrain</Label>
@@ -1866,8 +1866,8 @@ export default function Dossiers() {
                                               <input type="checkbox" checked={mandat.terrain?.a_rendez_vous || false} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, a_rendez_vous: e.target.checked })} className="w-4 h-4 rounded bg-slate-700 border-slate-600" />
                                               <Label>Rendez-vous nécessaire</Label>
                                             </div>
-                                            {mandat.terrain?.a_rendez_vous && (
-                                              <div className="grid grid-cols-2 gap-3 ml-7">
+                                            {mandat.terrain?.a_rendez_vous &&
+                                        <div className="grid grid-cols-2 gap-3 ml-7">
                                                 <div className="space-y-2">
                                                   <Label>Date du rendez-vous</Label>
                                                   <Input type="date" value={mandat.terrain?.date_rendez_vous || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, date_rendez_vous: e.target.value })} className="bg-slate-700 border-slate-600" />
@@ -1877,7 +1877,7 @@ export default function Dossiers() {
                                                   <Input type="time" value={mandat.terrain?.heure_rendez_vous || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, heure_rendez_vous: e.target.value })} className="bg-slate-700 border-slate-600" />
                                                 </div>
                                               </div>
-                                            )}
+                                        }
                                           </div>
                                           <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
@@ -1904,22 +1904,22 @@ export default function Dossiers() {
                                             <Textarea value={mandat.terrain?.notes || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, notes: e.target.value })} placeholder="Notes concernant le terrain..." className="bg-slate-700 border-slate-600 h-20" />
                                           </div>
                                         </div>
-                                      )}
+                                    }
                                     </div>
                                   </>
-                                )}
+                                }
                               </CardContent>
                             </Card>
                           </TabsContent>
-                        ))}
-                      </Tabs>
-                        ) : (
-                          <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.</div>
-                        )}
+                          )}
+                      </Tabs> :
+
+                        <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.</div>
+                        }
                       </div>
 
-                      {formData.mandats.length > 0 && (
-                        <div className="space-y-3 mt-6">
+                      {formData.mandats.length > 0 &&
+                      <div className="space-y-3 mt-6">
                           <Label className="text-lg font-semibold text-slate-300">Tarification</Label>
                           <div className="border border-slate-700 rounded-lg overflow-hidden">
                             <Table>
@@ -1932,25 +1932,25 @@ export default function Dossiers() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {formData.mandats.map((mandat, index) => (
-                                  <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                {formData.mandats.map((mandat, index) =>
+                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
                                     <TableCell className="font-medium text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</TableCell>
                                     <TableCell>
-                                      <Input type="text" inputMode="decimal" value={mandat.prix_estime || ""} onChange={(e) => { const value = e.target.value.replace(/[^0-9.]/g, ''); updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0); }} placeholder="0.00" className="bg-slate-700 border-slate-600 text-white" />
+                                      <Input type="text" inputMode="decimal" value={mandat.prix_estime || ""} onChange={(e) => {const value = e.target.value.replace(/[^0-9.]/g, '');updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);}} placeholder="0.00" className="bg-slate-700 border-slate-600 text-white" />
                                     </TableCell>
                                     <TableCell>
-                                      <Input type="text" inputMode="decimal" value={mandat.rabais || ""} onChange={(e) => { const value = e.target.value.replace(/[^0-9.]/g, ''); updateMandat(index, 'rabais', value ? parseFloat(value) : 0); }} placeholder="0.00" className="bg-slate-700 border-slate-600 text-white" />
+                                      <Input type="text" inputMode="decimal" value={mandat.rabais || ""} onChange={(e) => {const value = e.target.value.replace(/[^0-9.]/g, '');updateMandat(index, 'rabais', value ? parseFloat(value) : 0);}} placeholder="0.00" className="bg-slate-700 border-slate-600 text-white" />
                                     </TableCell>
                                     <TableCell className="text-center">
                                       <input type="checkbox" id={`taxes_incluses_${index}`} checked={mandat.taxes_incluses} onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)} className="form-checkbox h-5 w-5 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded" />
                                     </TableCell>
                                   </TableRow>
-                                ))}
+                              )}
                               </TableBody>
                             </Table>
                           </div>
                         </div>
-                      )}
+                      }
                     </form>
 
                     <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
@@ -1986,8 +1986,8 @@ export default function Dossiers() {
                   value={newMinuteForm.minute}
                   onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
                   placeholder="Ex: 12345"
-                  className="bg-slate-800 border-slate-700"
-                />
+                  className="bg-slate-800 border-slate-700" />
+
               </div>
               <div className="space-y-2">
                 <Label>Date de minute <span className="text-red-400">*</span></Label>
@@ -1995,15 +1995,15 @@ export default function Dossiers() {
                   type="date"
                   value={newMinuteForm.date_minute}
                   onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
-                  className="bg-slate-800 border-slate-700"
-                />
+                  className="bg-slate-800 border-slate-700" />
+
               </div>
               <div className="space-y-2">
                 <Label>Type de minute <span className="text-red-400">*</span></Label>
                 <Select
                   value={newMinuteForm.type_minute}
-                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
-                >
+                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}>
+
                   <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
@@ -2018,12 +2018,12 @@ export default function Dossiers() {
                 <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={handleAddMinuteFromDialog}
                   disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600">
+
                   Ajouter
                 </Button>
               </div>
@@ -2044,43 +2044,43 @@ export default function Dossiers() {
                   <div
                     key={index}
                     className={`p-4 rounded-lg border transition-colors ${
-                      selectedMandatsForLocalFacturation.includes(index)
-                        ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
-                        : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
-                    }`}
-                    onClick={() => toggleMandatForLocalFacturation(index)}
-                  >
+                    selectedMandatsForLocalFacturation.includes(index) ?
+                    'bg-emerald-500/20 border-emerald-500/30 cursor-pointer' :
+                    'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'}`
+                    }
+                    onClick={() => toggleMandatForLocalFacturation(index)}>
+
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
-                        {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                          <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
-                        )}
+                        {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) &&
+                        <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                        }
                       </div>
                       <div className="ml-4 text-right">
-                        {(mandat.prix_estime || 0) > 0 && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        {(mandat.prix_estime || 0) > 0 &&
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                             {(mandat.prix_estime || 0).toFixed(2)} $
                           </Badge>
-                        )}
+                        }
                         <div className="mt-2">
-                          {hasFactures ? (
-                            <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
+                          {hasFactures ?
+                          <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
                               <FileText className="w-3 h-3 mr-1" />
                               {mandat.factures.length} facture{mandat.factures.length > 1 ? 's' : ''}
-                            </Badge>
-                          ) : null}
-                          {selectedMandatsForLocalFacturation.includes(index) && (
-                            <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 ml-2">
+                            </Badge> :
+                          null}
+                          {selectedMandatsForLocalFacturation.includes(index) &&
+                          <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 ml-2">
                               <Check className="w-3 h-3 mr-1" />
                               Sélectionné
                             </Badge>
-                          )}
+                          }
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
+                  </div>);
+
               })}
             </div>
             <div className="flex justify-end gap-3 p-4 border-t border-slate-800">
@@ -2099,8 +2099,8 @@ export default function Dossiers() {
               <DialogTitle className="text-2xl">Générer une facture</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              {!facturationDossierId ? (
-                <>
+              {!facturationDossierId ?
+              <>
                   <div className="flex flex-wrap gap-3 items-center">
                     <div className="relative flex-1 min-w-[250px]">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2112,9 +2112,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les arpenteurs</SelectItem>
-                        {ARPENTEURS.map(arpenteur => (
-                          <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
-                        ))}
+                        {ARPENTEURS.map((arpenteur) =>
+                      <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                     <Select value={facturationFilterMandat} onValueChange={setFacturationFilterMandat}>
@@ -2123,9 +2123,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les mandats</SelectItem>
-                        {TYPES_MANDATS.map(type => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
-                        ))}
+                        {TYPES_MANDATS.map((type) =>
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                     <Select value={facturationFilterVille} onValueChange={setFacturationFilterVille}>
@@ -2134,9 +2134,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Toutes les villes</SelectItem>
-                        {uniqueVilles.map(ville => (
-                          <SelectItem key={ville} value={ville}>{ville}</SelectItem>
-                        ))}
+                        {uniqueVilles.map((ville) =>
+                      <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -2153,9 +2153,9 @@ export default function Dossiers() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDossiersForFacturation.length > 0 ? (
-                            filteredDossiersForFacturation.map((dossier) => (
-                              <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierForFacturation(dossier.id)}>
+                          {filteredDossiersForFacturation.length > 0 ?
+                        filteredDossiersForFacturation.map((dossier) =>
+                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierForFacturation(dossier.id)}>
                                 <TableCell className="font-medium">
                                   <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                                     {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
@@ -2163,22 +2163,22 @@ export default function Dossiers() {
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</TableCell>
                                 <TableCell className="text-slate-300">
-                                  {dossier.mandats && dossier.mandats.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                  {dossier.mandats && dossier.mandats.length > 0 ?
+                            <div className="flex flex-wrap gap-1">
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) =>
+                              <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
                                           {mandat.type_mandat}
                                         </Badge>
-                                      ))}
-                                      {dossier.mandats.length > 2 && (
-                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
+                              )}
+                                      {dossier.mandats.length > 2 &&
+                              <Badge className="bg-slate-700 text-slate-300 text-xs">
                                           +{dossier.mandats.length - 2}
                                         </Badge>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-slate-600 text-xs">Aucun</span>
-                                  )}
+                              }
+                                    </div> :
+
+                            <span className="text-slate-600 text-xs">Aucun</span>
+                            }
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                   {getFirstAdresseTravaux(dossier.mandats)}
@@ -2189,22 +2189,22 @@ export default function Dossiers() {
                                   </Button>
                                 </TableCell>
                               </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
+                        ) :
+
+                        <TableRow>
                               <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                                 <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                                 <p>Aucun dossier trouvé</p>
                               </TableCell>
                             </TableRow>
-                          )}
+                        }
                         </TableBody>
                       </Table>
                     </div>
                   </div>
-                </>
-              ) : (
-                <>
+                </> :
+
+              <>
                   <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
@@ -2214,7 +2214,7 @@ export default function Dossiers() {
                         <span className="text-slate-300 text-sm">{getClientsNames(selectedDossierForFacturation?.clients_ids)}</span>
                       </div>
                     </div>
-                    <Button type="button" size="sm" variant="outline" onClick={() => { setFacturationDossierId(null); setSelectedMandatsForFacturation([]); }} className="text-slate-400">
+                    <Button type="button" size="sm" variant="outline" onClick={() => {setFacturationDossierId(null);setSelectedMandatsForFacturation([]);}} className="text-slate-400">
                       Changer de dossier
                     </Button>
                   </div>
@@ -2222,62 +2222,62 @@ export default function Dossiers() {
                     <Label className="text-lg font-semibold text-white mb-3 block">Sélectionner les mandats à facturer</Label>
                     <div className="space-y-2">
                       {selectedDossierForFacturation?.mandats?.map((mandat, index) => {
-                        const hasFactures = mandat.factures && mandat.factures.length > 0;
-                        return (
-                          <div
-                            key={index}
-                            className={`p-4 rounded-lg border transition-colors ${
-                              selectedMandatsForFacturation.includes(index)
-                                ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
-                                : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
-                            }`}
-                            onClick={() => toggleMandatForFacturation(index)}
-                          >
+                      const hasFactures = mandat.factures && mandat.factures.length > 0;
+                      return (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border transition-colors ${
+                          selectedMandatsForFacturation.includes(index) ?
+                          'bg-emerald-500/20 border-emerald-500/30 cursor-pointer' :
+                          'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'}`
+                          }
+                          onClick={() => toggleMandatForFacturation(index)}>
+
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
-                                {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                                  <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
-                                )}
-                                {mandat.lots && mandat.lots.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
+                                {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) &&
+                              <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                              }
+                                {mandat.lots && mandat.lots.length > 0 &&
+                              <div className="flex flex-wrap gap-1 mt-2">
                                     {mandat.lots.map((lotId) => {
-                                      const lot = getLotById(lotId);
-                                      return (
-                                        <Badge key={lotId} variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/30">
+                                  const lot = getLotById(lotId);
+                                  return (
+                                    <Badge key={lotId} variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/30">
                                           {lot?.numero_lot || lotId}
-                                        </Badge>
-                                      );
-                                    })}
+                                        </Badge>);
+
+                                })}
                                   </div>
-                                )}
+                              }
                               </div>
                               <div className="ml-4 text-right">
-                                {(mandat.prix_estime || 0) > 0 && (
-                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                {(mandat.prix_estime || 0) > 0 &&
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                                     {(mandat.prix_estime || 0).toFixed(2)} $
                                     {(mandat.rabais || 0) > 0 && ` (-${mandat.rabais.toFixed(2)} $)`}
                                   </Badge>
-                                )}
+                              }
                                 <div className="mt-2 space-y-1">
-                                  {hasFactures && (
-                                    <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50 block">
+                                  {hasFactures &&
+                                <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50 block">
                                       <FileText className="w-3 h-3 mr-1" />
                                       {mandat.factures.length} facture{mandat.factures.length > 1 ? 's' : ''} générée{mandat.factures.length > 1 ? 's' : ''}
                                     </Badge>
-                                  )}
-                                  {selectedMandatsForFacturation.includes(index) && (
-                                    <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 block">
+                                }
+                                  {selectedMandatsForFacturation.includes(index) &&
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 block">
                                       <Check className="w-3 h-3 mr-1" />
                                       Sélectionné
                                     </Badge>
-                                  )}
+                                }
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          </div>);
+
+                    })}
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -2288,7 +2288,7 @@ export default function Dossiers() {
                     </Button>
                   </div>
                 </>
-              )}
+              }
             </div>
           </DialogContent>
         </Dialog>
@@ -2299,8 +2299,8 @@ export default function Dossiers() {
               <DialogTitle className="text-2xl">Fermer un dossier</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-              {!closingDossierId ? (
-                <>
+              {!closingDossierId ?
+              <>
                   <div className="flex flex-wrap gap-3 items-center">
                     <div className="relative flex-1 min-w-[250px]">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2312,9 +2312,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les arpenteurs</SelectItem>
-                        {ARPENTEURS.map(arpenteur => (
-                          <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
-                        ))}
+                        {ARPENTEURS.map((arpenteur) =>
+                      <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                     <Select value={closeFilterMandat} onValueChange={setCloseFilterMandat}>
@@ -2323,9 +2323,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les mandats</SelectItem>
-                        {TYPES_MANDATS.map(type => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
-                        ))}
+                        {TYPES_MANDATS.map((type) =>
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                     <Select value={closeFilterVille} onValueChange={setCloseFilterVille}>
@@ -2334,9 +2334,9 @@ export default function Dossiers() {
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Toutes les villes</SelectItem>
-                        {uniqueVilles.map(ville => (
-                          <SelectItem key={ville} value={ville}>{ville}</SelectItem>
-                        ))}
+                        {uniqueVilles.map((ville) =>
+                      <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                      )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -2353,9 +2353,9 @@ export default function Dossiers() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDossiersForClosing.length > 0 ? (
-                            filteredDossiersForClosing.map((dossier) => (
-                              <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierToClose(dossier.id)}>
+                          {filteredDossiersForClosing.length > 0 ?
+                        filteredDossiersForClosing.map((dossier) =>
+                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierToClose(dossier.id)}>
                                 <TableCell className="font-medium">
                                   <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                                     {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
@@ -2363,22 +2363,22 @@ export default function Dossiers() {
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</TableCell>
                                 <TableCell className="text-slate-300">
-                                  {dossier.mandats && dossier.mandats.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                  {dossier.mandats && dossier.mandats.length > 0 ?
+                            <div className="flex flex-wrap gap-1">
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) =>
+                              <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
                                           {mandat.type_mandat}
                                         </Badge>
-                                      ))}
-                                      {dossier.mandats.length > 2 && (
-                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
+                              )}
+                                      {dossier.mandats.length > 2 &&
+                              <Badge className="bg-slate-700 text-slate-300 text-xs">
                                           +{dossier.mandats.length - 2}
                                         </Badge>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-slate-600 text-xs">Aucun</span>
-                                  )}
+                              }
+                                    </div> :
+
+                            <span className="text-slate-600 text-xs">Aucun</span>
+                            }
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                   {getFirstAdresseTravaux(dossier.mandats)}
@@ -2389,38 +2389,38 @@ export default function Dossiers() {
                                   </Button>
                                 </TableCell>
                               </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
+                        ) :
+
+                        <TableRow>
                               <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                                 <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                                 <p>Aucun dossier ouvert trouvé</p>
                               </TableCell>
                             </TableRow>
-                          )}
+                        }
                         </TableBody>
                       </Table>
                     </div>
                   </div>
-                </>
-              ) : (
-                <>
+                </> :
+
+              <>
                   <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
                     <div>
                       <Badge variant="outline" className={`${getArpenteurColor(selectedDossierToClose?.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(selectedDossierToClose?.arpenteur_geometre)}{selectedDossierToClose?.numero_dossier}</Badge>
                       <p className="text-slate-300 text-sm">{getClientsNames(selectedDossierToClose?.clients_ids)}</p>
                     </div>
-                    {!editingDossier && (
-                      <Button type="button" size="sm" variant="outline" onClick={() => { setClosingDossierId(null); setMinutesData([]); }} className="text-slate-400">
+                    {!editingDossier &&
+                  <Button type="button" size="sm" variant="outline" onClick={() => {setClosingDossierId(null);setMinutesData([]);}} className="text-slate-400">
                         Changer de dossier
                       </Button>
-                    )}
+                  }
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     <Label className="text-lg font-semibold text-white mb-3 block">Informations de minutes par mandat</Label>
                     <div className="space-y-4">
-                      {selectedDossierToClose?.mandats?.map((mandat, index) => (
-                        <Card key={index} className="border-slate-700 bg-slate-800/30">
+                      {selectedDossierToClose?.mandats?.map((mandat, index) =>
+                    <Card key={index} className="border-slate-700 bg-slate-800/30">
                           <CardContent className="p-4 space-y-3">
                             <h4 className="font-semibold text-emerald-400">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
                             <div className="grid grid-cols-3 gap-3">
@@ -2448,18 +2448,18 @@ export default function Dossiers() {
                             </div>
                           </CardContent>
                         </Card>
-                      ))}
+                    )}
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
                     <Button type="button" variant="outline" onClick={() => setIsCloseDossierDialogOpen(false)}>Annuler</Button>
-                    <Button type="button" onClick={handleCloseDossier} disabled={!minutesData.every(m => m.minute && m.date_minute && m.type_minute)} className="bg-gradient-to-r from-red-500 to-pink-600">
+                    <Button type="button" onClick={handleCloseDossier} disabled={!minutesData.every((m) => m.minute && m.date_minute && m.type_minute)} className="bg-gradient-to-r from-red-500 to-pink-600">
                       <Check className="w-4 h-4 mr-2" />
                       Fermer le dossier
                     </Button>
                   </div>
                 </>
-              )}
+              }
             </div>
           </DialogContent>
         </Dialog>
@@ -2472,9 +2472,9 @@ export default function Dossiers() {
                 <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
                 <Button
                   variant="outline"
-                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Client"); setIsClientSelectorOpen(false); }}
-                  className="bg-blue-500 hover:bg-blue-600 border-0 text-white"
-                >
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Client");setIsClientSelectorOpen(false);}}
+                  className="bg-blue-500 hover:bg-blue-600 border-0 text-white">
+
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau
                 </Button>
@@ -2486,50 +2486,50 @@ export default function Dossiers() {
             </div>
             <div className="flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3 p-4">
-                {filteredClientsForSelector.length > 0 ? (
-                  filteredClientsForSelector.map((client) => (
-                    <div
-                      key={client.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.clients_ids.includes(client.id)
-                          ? 'bg-blue-500/20 border border-blue-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(client.id, 'clients')}
-                    >
+                {filteredClientsForSelector.length > 0 ?
+                filteredClientsForSelector.map((client) =>
+                <div
+                  key={client.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.clients_ids.includes(client.id) ?
+                  'bg-blue-500/20 border border-blue-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(client.id, 'clients')}>
+
                       <p className="text-white font-medium">{client.prenom} {client.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
-                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
-                        )}
-                        {client.courriels?.find(c => c.actuel)?.courriel && (
-                          <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                        )}
-                        {client.telephones?.find(t => t.actuel)?.telephone && (
-                          <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
-                        )}
+                        {client.adresses?.find((a) => a.actuelle) && formatAdresse(client.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(client.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {client.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {client.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {client.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>📞 {client.telephones.find((t) => t.actuel).telephone}</p>
+                    }
                       </div>
                       <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent toggling selection
-                          setIsClientSelectorOpen(false);
-                          handleEdit(client);
-                        }}
-                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
-                      >
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent toggling selection
+                      setIsClientSelectorOpen(false);
+                      handleEdit(client);
+                    }}
+                    className="text-emerald-400 hover:text-emerald-300 mt-2 w-full">
+
                         <Edit className="w-4 h-4 mr-1" />
                         Modifier
                       </Button>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center py-12 text-slate-500">
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun client trouvé</p>
                   </div>
-                )}
+                }
               </div>
             </div>
             <div className="flex justify-end items-center pt-4 border-t border-slate-800">
@@ -2546,9 +2546,9 @@ export default function Dossiers() {
                 <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
                 <Button
                   variant="outline"
-                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Notaire"); setIsNotaireSelectorOpen(false); }}
-                  className="bg-purple-500 hover:bg-purple-600 border-0 text-white"
-                >
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Notaire");setIsNotaireSelectorOpen(false);}}
+                  className="bg-purple-500 hover:bg-purple-600 border-0 text-white">
+
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau
                 </Button>
@@ -2560,50 +2560,50 @@ export default function Dossiers() {
             </div>
             <div className="flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3 p-4">
-                {filteredNotairesForSelector.length > 0 ? (
-                  filteredNotairesForSelector.map((notaire) => (
-                    <div
-                      key={notaire.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.notaires_ids.includes(notaire.id)
-                          ? 'bg-purple-500/20 border border-purple-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(notaire.id, 'notaires')}
-                    >
+                {filteredNotairesForSelector.length > 0 ?
+                filteredNotairesForSelector.map((notaire) =>
+                <div
+                  key={notaire.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.notaires_ids.includes(notaire.id) ?
+                  'bg-purple-500/20 border border-purple-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(notaire.id, 'notaires')}>
+
                       <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
-                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
-                        )}
-                        {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                          <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
-                        )}
-                        {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                          <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
-                        )}
+                        {notaire.adresses?.find((a) => a.actuelle) && formatAdresse(notaire.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(notaire.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {notaire.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {notaire.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {notaire.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>📞 {notaire.telephones.find((t) => t.actuel).telephone}</p>
+                    }
                       </div>
                       <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsNotaireSelectorOpen(false);
-                          handleEdit(notaire);
-                        }}
-                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
-                      >
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsNotaireSelectorOpen(false);
+                      handleEdit(notaire);
+                    }}
+                    className="text-purple-400 hover:text-purple-300 mt-2 w-full">
+
                         <Edit className="w-4 h-4 mr-1" />
                         Modifier
                       </Button>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center py-12 text-slate-500">
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun notaire trouvé</p>
                   </div>
-                )}
+                }
               </div>
             </div>
             <div className="flex justify-end items-center pt-4 border-t border-slate-800">
@@ -2620,9 +2620,9 @@ export default function Dossiers() {
                 <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
                 <Button
                   variant="outline"
-                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Courtier immobilier"); setIsCourtierSelectorOpen(false); }}
-                  className="bg-orange-500 hover:bg-orange-600 border-0 text-white"
-                >
+                  onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Courtier immobilier");setIsCourtierSelectorOpen(false);}}
+                  className="bg-orange-500 hover:bg-orange-600 border-0 text-white">
+
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau
                 </Button>
@@ -2634,50 +2634,50 @@ export default function Dossiers() {
             </div>
             <div className="flex-1 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3 p-4">
-                {filteredCourtiersForSelector.length > 0 ? (
-                  filteredCourtiersForSelector.map((courtier) => (
-                    <div
-                      key={courtier.id}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        formData.courtiers_ids.includes(courtier.id)
-                          ? 'bg-orange-500/20 border border-orange-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                      }`}
-                      onClick={() => toggleClient(courtier.id, 'courtiers')}
-                    >
+                {filteredCourtiersForSelector.length > 0 ?
+                filteredCourtiersForSelector.map((courtier) =>
+                <div
+                  key={courtier.id}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  formData.courtiers_ids.includes(courtier.id) ?
+                  'bg-orange-500/20 border border-orange-500/30' :
+                  'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`
+                  }
+                  onClick={() => toggleClient(courtier.id, 'courtiers')}>
+
                       <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
                       <div className="text-sm text-slate-400 space-y-1 mt-1">
-                        {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
-                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
-                        )}
-                        {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                          <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
-                        )}
-                        {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                          <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
-                        )}
+                        {courtier.adresses?.find((a) => a.actuelle) && formatAdresse(courtier.adresses.find((a) => a.actuelle)) &&
+                    <p className="truncate">📍 {formatAdresse(courtier.adresses.find((a) => a.actuelle))}</p>
+                    }
+                        {courtier.courriels?.find((c) => c.actuel)?.courriel &&
+                    <p className="truncate">✉️ {courtier.courriels.find((c) => c.actuel).courriel}</p>
+                    }
+                        {courtier.telephones?.find((t) => t.actuel)?.telephone &&
+                    <p>📞 {courtier.telephones.find((t) => t.actuel).telephone}</p>
+                    }
                       </div>
                       <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsCourtierSelectorOpen(false);
-                          handleEdit(courtier);
-                        }}
-                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
-                      >
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsCourtierSelectorOpen(false);
+                      handleEdit(courtier);
+                    }}
+                    className="text-orange-400 hover:text-orange-300 mt-2 w-full">
+
                         <Edit className="w-4 h-4 mr-1" />
                         Modifier
                       </Button>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center py-12 text-slate-500">
+                ) :
+
+                <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun courtier trouvé</p>
                   </div>
-                )}
+                }
               </div>
             </div>
             <div className="flex justify-end items-center pt-4 border-t border-slate-800">
@@ -2686,7 +2686,7 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) setEditingClientForForm(null); }} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['clients'] }); if (clientTypeForForm === "Client") setIsClientSelectorOpen(true); if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true); if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true); }} />
+        <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => {setIsClientFormDialogOpen(open);if (!open) setEditingClientForForm(null);}} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => {queryClient.invalidateQueries({ queryKey: ['clients'] });if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);}} />
 
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
@@ -2696,11 +2696,11 @@ export default function Dossiers() {
               </DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-hidden p-6">
-              {viewingClientDetails && (
-                <ClientDetailView
-                  client={viewingClientDetails}
-                />
-              )}
+              {viewingClientDetails &&
+              <ClientDetailView
+                client={viewingClientDetails} />
+
+              }
             </div>
           </DialogContent>
         </Dialog>
@@ -2710,8 +2710,8 @@ export default function Dossiers() {
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
-            {viewingDossier && (
-              <div className="flex h-[90vh]">
+            {viewingDossier &&
+            <div className="flex h-[90vh]">
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">
@@ -2741,151 +2741,151 @@ export default function Dossiers() {
                       </div>
                     </div>
 
-                    {viewingDossier.description && (
-                      <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                    {viewingDossier.description &&
+                  <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
                         <Label className="text-slate-400 text-sm">Description</Label>
                         <p className="text-white mt-2 whitespace-pre-wrap">{viewingDossier.description}</p>
                       </div>
-                    )}
+                  }
 
                     <div className="grid grid-cols-3 gap-4">
-                      {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
-                        <div>
+                      {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 &&
+                    <div>
                           <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
                           <div className="flex flex-col gap-2">
-                            {viewingDossier.clients_ids.map(clientId => {
-                              const client = getClientById(clientId);
-                              return client ? (
-                                <Badge 
-                                  key={clientId} 
-                                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                  onClick={() => {
-                                    setIsViewDialogOpen(false);
-                                    setViewingClientDetails(client);
-                                  }}
-                                >
+                            {viewingDossier.clients_ids.map((clientId) => {
+                          const client = getClientById(clientId);
+                          return client ?
+                          <Badge
+                            key={clientId}
+                            className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
+                            onClick={() => {
+                              setIsViewDialogOpen(false);
+                              setViewingClientDetails(client);
+                            }}>
+
                                   {client.prenom} {client.nom}
-                                </Badge>
-                              ) : null;
-                            })}
+                                </Badge> :
+                          null;
+                        })}
                           </div>
                         </div>
-                      )}
+                    }
 
-                      {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
-                        <div>
+                      {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 &&
+                    <div>
                           <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
                           <div className="flex flex-col gap-2">
-                            {viewingDossier.notaires_ids.map(notaireId => {
-                              const notaire = getClientById(notaireId);
-                              return notaire ? (
-                                <Badge 
-                                  key={notaireId} 
-                                  className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
-                                  onClick={() => {
-                                    setIsViewDialogOpen(false);
-                                    setViewingClientDetails(notaire);
-                                  }}
-                                >
+                            {viewingDossier.notaires_ids.map((notaireId) => {
+                          const notaire = getClientById(notaireId);
+                          return notaire ?
+                          <Badge
+                            key={notaireId}
+                            className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
+                            onClick={() => {
+                              setIsViewDialogOpen(false);
+                              setViewingClientDetails(notaire);
+                            }}>
+
                                   {notaire.prenom} {notaire.nom}
-                                </Badge>
-                              ) : null;
-                            })}
+                                </Badge> :
+                          null;
+                        })}
                           </div>
                         </div>
-                      )}
+                    }
 
-                      {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
-                        <div>
+                      {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 &&
+                    <div>
                           <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
                           <div className="flex flex-col gap-2">
-                            {viewingDossier.courtiers_ids.map(courtierId => {
-                              const courtier = getClientById(courtierId);
-                              return courtier ? (
-                                <Badge 
-                                  key={courtierId} 
-                                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
-                                  onClick={() => {
-                                    setIsViewDialogOpen(false);
-                                    setViewingClientDetails(courtier);
-                                  }}
-                                >
+                            {viewingDossier.courtiers_ids.map((courtierId) => {
+                          const courtier = getClientById(courtierId);
+                          return courtier ?
+                          <Badge
+                            key={courtierId}
+                            className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
+                            onClick={() => {
+                              setIsViewDialogOpen(false);
+                              setViewingClientDetails(courtier);
+                            }}>
+
                                   {courtier.prenom} {courtier.nom}
-                                </Badge>
-                              ) : null;
-                            })}
+                                </Badge> :
+                          null;
+                        })}
                           </div>
                         </div>
-                      )}
+                    }
                     </div>
 
-                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
-                      <div>
+                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 &&
+                  <div>
                         <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
                         <div className="space-y-3">
-                          {viewingDossier.mandats.map((mandat, index) => (
-                            <Card key={index} className="bg-slate-800/50 border-slate-700">
+                          {viewingDossier.mandats.map((mandat, index) =>
+                      <Card key={index} className="bg-slate-800/50 border-slate-700">
                               <CardContent className="p-4 space-y-3">
                                 <div className="flex items-start justify-between">
                                   <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
                                   <div className="flex gap-2">
-                                    {(mandat.prix_estime || 0) > 0 && (
-                                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
+                                    {(mandat.prix_estime || 0) > 0 &&
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
                                         {(mandat.prix_estime || 0).toFixed(2)} $
                                       </Badge>
-                                    )}
+                              }
                                   </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
-                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
-                                    <div>
+                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
                                       <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
                                     </div>
-                                  )}
+                            }
                                   
-                                  {mandat.lots && mandat.lots.length > 0 && (
-                                    <div>
+                                  {mandat.lots && mandat.lots.length > 0 &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Lots</Label>
                                       <div className="flex flex-wrap gap-1 mt-1">
                                         {mandat.lots.map((lotId) => {
-                                          const lot = getLotById(lotId);
-                                          return (
-                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                  const lot = getLotById(lotId);
+                                  return (
+                                    <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
                                               {lot?.numero_lot || lotId}
-                                            </Badge>
-                                          );
-                                        })}
+                                            </Badge>);
+
+                                })}
                                       </div>
                                     </div>
-                                  )}
+                            }
                                 </div>
 
-                                {mandat.tache_actuelle && (
-                                  <div>
+                                {mandat.tache_actuelle &&
+                          <div>
                                     <Label className="text-slate-400 text-xs">Tâche actuelle</Label>
                                     <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 mt-1">
                                       {mandat.tache_actuelle}
                                     </Badge>
                                   </div>
-                                )}
+                          }
 
-                                {mandat.minutes_list && mandat.minutes_list.length > 0 && (
-                                  <div className="pt-2 border-t border-slate-700">
+                                {mandat.minutes_list && mandat.minutes_list.length > 0 &&
+                          <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs">Minutes</Label>
                                     <div className="flex flex-wrap gap-2 mt-2">
-                                      {mandat.minutes_list.map((minute, minuteIdx) => (
-                                        <Badge key={minuteIdx} className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                      {mandat.minutes_list.map((minute, minuteIdx) =>
+                              <Badge key={minuteIdx} className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                                           {minute.minute} - {minute.type_minute} ({minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'})
                                         </Badge>
-                                      ))}
+                              )}
                                     </div>
                                   </div>
-                                )}
+                          }
 
-                                {mandat.minute && !mandat.minutes_list && (
-                                  <div className="pt-2 border-t border-slate-700">
+                                {mandat.minute && !mandat.minutes_list &&
+                          <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs">Minute</Label>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                       <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
@@ -2893,49 +2893,49 @@ export default function Dossiers() {
                                       </Badge>
                                     </div>
                                   </div>
-                                )}
+                          }
 
                                 <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
-                                  {mandat.date_ouverture && (
-                                    <div>
+                                  {mandat.date_ouverture &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Ouverture</Label>
                                       <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
                                     </div>
-                                  )}
-                                  {mandat.date_signature && (
-                                    <div>
+                            }
+                                  {mandat.date_signature &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Signature</Label>
                                       <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
                                     </div>
-                                  )}
-                                  {mandat.date_debut_travaux && (
-                                    <div>
+                            }
+                                  {mandat.date_debut_travaux &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Début travaux</Label>
                                       <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
                                     </div>
-                                  )}
-                                  {mandat.date_livraison && (
-                                    <div>
+                            }
+                                  {mandat.date_livraison &&
+                            <div>
                                       <Label className="text-slate-400 text-xs">Livraison</Label>
                                       <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
                                     </div>
-                                  )}
+                            }
                                 </div>
 
-                                {((mandat.prix_estime || 0) > 0 || (mandat.rabais || 0) > 0) && (
-                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
-                                    {(mandat.prix_estime || 0) > 0 && (
-                                      <div>
+                                {((mandat.prix_estime || 0) > 0 || (mandat.rabais || 0) > 0) &&
+                          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
+                                    {(mandat.prix_estime || 0) > 0 &&
+                            <div>
                                         <Label className="text-slate-400 text-xs">Prix estimé</Label>
                                         <p className="text-slate-300 text-sm mt-1">{(mandat.prix_estime || 0).toFixed(2)} $</p>
                                       </div>
-                                    )}
-                                    {(mandat.rabais || 0) > 0 && (
-                                      <div>
+                            }
+                                    {(mandat.rabais || 0) > 0 &&
+                            <div>
                                         <Label className="text-slate-400 text-xs">Rabais</Label>
                                         <p className="text-slate-300 text-sm mt-1">{(mandat.rabais || 0).toFixed(2)} $</p>
                                       </div>
-                                    )}
+                            }
                                     <div>
                                       <Label className="text-slate-400 text-xs">Taxes</Label>
                                       <p className="text-slate-300 text-sm mt-1">
@@ -2943,33 +2943,33 @@ export default function Dossiers() {
                                       </p>
                                     </div>
                                   </div>
-                                )}
+                          }
 
-                                {mandat.notes && (
-                                  <div className="pt-2 border-t border-slate-700">
+                                {mandat.notes &&
+                          <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs">Notes</Label>
                                     <p className="text-slate-300 text-sm mt-1 whitespace-pre-wrap">{mandat.notes}</p>
                                   </div>
-                                )}
+                          }
 
-                                {mandat.terrain && (
-                                  <div className="pt-2 border-t border-slate-700">
+                                {mandat.terrain &&
+                          <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs mb-2 block">Informations Terrain</Label>
                                     <div className="grid grid-cols-2 gap-3">
-                                      {mandat.terrain.date_limite_leve && (
-                                        <div>
+                                      {mandat.terrain.date_limite_leve &&
+                              <div>
                                           <Label className="text-slate-400 text-xs">Date limite levé</Label>
                                           <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.terrain.date_limite_leve), 'dd MMM yyyy', { locale: fr })}</p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.instruments_requis && (
-                                        <div>
+                              }
+                                      {mandat.terrain.instruments_requis &&
+                              <div>
                                           <Label className="text-slate-400 text-xs">Instruments</Label>
                                           <p className="text-slate-300 text-sm mt-1">{mandat.terrain.instruments_requis}</p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.a_rendez_vous && (
-                                        <div className="col-span-2">
+                              }
+                                      {mandat.terrain.a_rendez_vous &&
+                              <div className="col-span-2">
                                           <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                                           <p className="text-slate-300 text-sm mt-1">
                                             {mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })} 
@@ -2977,36 +2977,36 @@ export default function Dossiers() {
                                             {mandat.terrain.donneur && ` avec ${mandat.terrain.donneur}`}
                                           </p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.technicien && (
-                                        <div>
+                              }
+                                      {mandat.terrain.technicien &&
+                              <div>
                                           <Label className="text-slate-400 text-xs">Technicien</Label>
                                           <p className="text-slate-300 text-sm mt-1">{mandat.terrain.technicien}</p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.dossier_simultane && (
-                                        <div>
+                              }
+                                      {mandat.terrain.dossier_simultane &&
+                              <div>
                                           <Label className="text-slate-400 text-xs">Dossier simultané</Label>
                                           <p className="text-slate-300 text-sm mt-1">{mandat.terrain.dossier_simultane}</p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.temps_prevu && (
-                                        <div>
+                              }
+                                      {mandat.terrain.temps_prevu &&
+                              <div>
                                           <Label className="text-slate-400 text-xs">Temps prévu</Label>
                                           <p className="text-slate-300 text-sm mt-1">{mandat.terrain.temps_prevu}</p>
                                         </div>
-                                      )}
-                                      {mandat.terrain.notes && (
-                                        <div className="col-span-2">
+                              }
+                                      {mandat.terrain.notes &&
+                              <div className="col-span-2">
                                           <Label className="text-slate-400 text-xs">Notes terrain</Label>
                                           <p className="text-slate-300 text-sm mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
                                         </div>
-                                      )}
+                              }
                                     </div>
                                   </div>
-                                )}
-                                {mandat.factures && mandat.factures.length > 0 && (
-                                  <div className="pt-2 border-t border-slate-700">
+                          }
+                                {mandat.factures && mandat.factures.length > 0 &&
+                          <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs">Factures générées ({mandat.factures.length})</Label>
                                     <div className="border border-slate-700 rounded-lg overflow-hidden mt-2">
                                       <Table>
@@ -3020,36 +3020,36 @@ export default function Dossiers() {
                                           </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                          {mandat.factures.map((facture, factureIdx) => (
-                                            <TableRow key={factureIdx} className="border-slate-800">
+                                          {mandat.factures.map((facture, factureIdx) =>
+                                  <TableRow key={factureIdx} className="border-slate-800">
                                               <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
                                               <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
                                               <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
                                               <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
                                               <TableCell className="text-right">
                                                 <Button
-                                                  type="button"
-                                                  size="sm"
-                                                  onClick={() => voirFacture(facture.facture_html)}
-                                                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                                                >
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => voirFacture(facture.facture_html)}
+                                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400">
+
                                                   <FileText className="w-4 h-4 mr-2" />
                                                   Voir
                                                 </Button>
                                               </TableCell>
                                             </TableRow>
-                                          ))}
+                                  )}
                                         </TableBody>
                                       </Table>
                                     </div>
                                   </div>
-                                )}
+                          }
                               </CardContent>
                             </Card>
-                          ))}
+                      )}
                         </div>
                       </div>
-                    )}
+                  }
                   </div>
 
                   <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
@@ -3069,17 +3069,17 @@ export default function Dossiers() {
                   </div>
                   <div className="flex-1 overflow-y-auto p-4 pr-4">
                     <CommentairesSection
-                      dossierId={viewingDossier?.id}
-                      dossierTemporaire={false}
-                    />
+                    dossierId={viewingDossier?.id}
+                    dossierTemporaire={false} />
+
                   </div>
                 </div>
               </div>
-            )}
+            }
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => { setIsLotSelectorOpen(open); if (!open) { setLotCirconscriptionFilter("all"); setLotSearchTerm(""); setLotCadastreFilter("Québec"); } }}>
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {setIsLotSelectorOpen(open);if (!open) {setLotCirconscriptionFilter("all");setLotSearchTerm("");setLotCadastreFilter("Québec");}}}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
@@ -3092,8 +3092,8 @@ export default function Dossiers() {
                     placeholder="Rechercher par numéro, rang..."
                     value={lotSearchTerm}
                     onChange={(e) => setLotSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800 border-slate-700"
-                  />
+                    className="pl-10 bg-slate-800 border-slate-700" />
+
                 </div>
                 <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
                   <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
@@ -3101,11 +3101,11 @@ export default function Dossiers() {
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                      <SelectItem key={circ} value={circ} className="text-white">
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) =>
+                    <SelectItem key={circ} value={circ} className="text-white">
                         {circ}
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
                 <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
@@ -3121,8 +3121,8 @@ export default function Dossiers() {
                 <Button
                   type="button"
                   onClick={() => setIsNewLotDialogOpen(true)}
-                  className="bg-emerald-500 hover:bg-emerald-600"
-                >
+                  className="bg-emerald-500 hover:bg-emerald-600">
+
                   <Plus className="w-4 h-4 mr-2" />
                   Nouveau lot
                 </Button>
@@ -3140,20 +3140,20 @@ export default function Dossiers() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredLotsForSelector.length > 0 ? (
-                      filteredLotsForSelector.map((lot) => {
-                        const isSelected = currentMandatIndex !== null &&
-                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
-                        return (
-                          <TableRow
-                            key={lot.id}
-                            className={`cursor-pointer transition-colors border-slate-800 ${
-                              isSelected
-                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
-                                : 'hover:bg-slate-800/30'
-                            }`}
-                            onClick={() => addLotToCurrentMandat(lot.id)}
-                          >
+                    {filteredLotsForSelector.length > 0 ?
+                    filteredLotsForSelector.map((lot) => {
+                      const isSelected = currentMandatIndex !== null &&
+                      formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
+                      return (
+                        <TableRow
+                          key={lot.id}
+                          className={`cursor-pointer transition-colors border-slate-800 ${
+                          isSelected ?
+                          'bg-emerald-500/20 hover:bg-emerald-500/30' :
+                          'hover:bg-slate-800/30'}`
+                          }
+                          onClick={() => addLotToCurrentMandat(lot.id)}>
+
                             <TableCell className="font-medium text-white">
                               {lot.numero_lot}
                             </TableCell>
@@ -3169,18 +3169,18 @@ export default function Dossiers() {
                               {lot.rang || "-"}
                             </TableCell>
                             <TableCell className="text-right">
-                              {isSelected && (
-                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                              {isSelected &&
+                            <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
                                   <Check className="w-3 h-3 mr-1" />
                                   Sélectionné
                                 </Badge>
-                              )}
+                            }
                             </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
+                          </TableRow>);
+
+                    }) :
+
+                    <TableRow>
                         <TableCell colSpan={5} className="text-center py-12">
                           <div className="text-slate-400">
                             <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -3189,7 +3189,7 @@ export default function Dossiers() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
+                    }
                   </TableBody>
                 </Table>
               </div>
@@ -3201,7 +3201,7 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => { setIsNewLotDialogOpen(open); if (!open) resetNewLotForm(); }}>
+        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {setIsNewLotDialogOpen(open);if (!open) resetNewLotForm();}}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">Créer un nouveau lot</DialogTitle>
@@ -3215,9 +3215,9 @@ export default function Dossiers() {
                       <SelectValue placeholder="Sélectionner la circonscription" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
-                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
-                        <SelectItem key={circonscription} value={circonscription} className="text-white">{circonscription}</SelectItem>
-                      ))}
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circonscription) =>
+                      <SelectItem key={circonscription} value={circonscription} className="text-white">{circonscription}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -3228,9 +3228,9 @@ export default function Dossiers() {
                       <SelectValue placeholder="Sélectionner le cadastre" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
-                      {availableLotCadastres.map(cadastre => (
-                        <SelectItem key={cadastre} value={cadastre} className="text-white">{cadastre}</SelectItem>
-                      ))}
+                      {availableLotCadastres.map((cadastre) =>
+                      <SelectItem key={cadastre} value={cadastre} className="text-white">{cadastre}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -3254,11 +3254,11 @@ export default function Dossiers() {
                 <div className="flex items-center gap-2">
                   <Input type="file" onChange={handleLotFileUpload} accept=".pdf" className="bg-slate-800 border-slate-700 file:text-emerald-400 file:bg-emerald-500/10 file:border-none file:hover:bg-emerald-500/20" />
                   {uploadingLotPdf && <span className="text-slate-500">Téléchargement...</span>}
-                  {newLotForm.document_pdf_url && (
-                    <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
+                  {newLotForm.document_pdf_url &&
+                  <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
                       <FileText className="w-5 h-5" />
                     </a>
-                  )}
+                  }
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
@@ -3287,48 +3287,48 @@ export default function Dossiers() {
                 <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{dossierStats.byDay}</p>
-                  {dossierStats.percentages.day !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {dossierStats.percentages.day !== 0 &&
+                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {dossierStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {dossierStats.percentages.day > 0 ? '+' : ''}{dossierStats.percentages.day}%
                     </span>
-                  )}
+                  }
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{dossierStats.byWeek}</p>
-                  {dossierStats.percentages.week !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {dossierStats.percentages.week !== 0 &&
+                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {dossierStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {dossierStats.percentages.week > 0 ? '+' : ''}{dossierStats.percentages.week}%
                     </span>
-                  )}
+                  }
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Ce mois</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{dossierStats.byMonth}</p>
-                  {dossierStats.percentages.month !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {dossierStats.percentages.month !== 0 &&
+                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {dossierStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {dossierStats.percentages.month > 0 ? '+' : ''}{dossierStats.percentages.month}%
                     </span>
-                  )}
+                  }
                 </div>
               </div>
               <div className="bg-slate-800/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-slate-400 mb-1">Cette année</p>
                 <div className="flex items-center justify-center gap-2">
                   <p className="text-2xl font-bold text-white">{dossierStats.byYear}</p>
-                  {dossierStats.percentages.year !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {dossierStats.percentages.year !== 0 &&
+                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {dossierStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {dossierStats.percentages.year > 0 ? '+' : ''}{dossierStats.percentages.year}%
                     </span>
-                  )}
+                  }
                 </div>
               </div>
             </div>
@@ -3345,8 +3345,8 @@ export default function Dossiers() {
                   placeholder="Rechercher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                />
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
+
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -3356,11 +3356,11 @@ export default function Dossiers() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
-                  {ARPENTEURS.map((arp) => (
-                    <SelectItem key={arp} value={arp} className="text-white">
+                  {ARPENTEURS.map((arp) =>
+                  <SelectItem key={arp} value={arp} className="text-white">
                       {arp}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
 
@@ -3381,11 +3381,11 @@ export default function Dossiers() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
-                  {TYPES_MANDATS.map(type => (
-                    <SelectItem key={type} value={type} className="text-white">
+                  {TYPES_MANDATS.map((type) =>
+                  <SelectItem key={type} value={type} className="text-white">
                       {type}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
 
@@ -3395,11 +3395,11 @@ export default function Dossiers() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
-                  {TACHES.map(tache => (
-                    <SelectItem key={tache} value={tache} className="text-white">
+                  {TACHES.map((tache) =>
+                  <SelectItem key={tache} value={tache} className="text-white">
                       {tache}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
 
@@ -3409,37 +3409,37 @@ export default function Dossiers() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
-                  {uniqueVilles.map(ville => (
-                    <SelectItem key={ville} value={ville} className="text-white">
+                  {uniqueVilles.map((ville) =>
+                  <SelectItem key={ville} value={ville} className="text-white">
                       {ville}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
 
-              {(filterArpenteur !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all" || filterVille !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setFilterArpenteur("all");
-                    setFilterStatut("all");
-                    setFilterMandat("all");
-                    setFilterTache("all");
-                    setFilterVille("all");
-                  }}
-                  className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
-                >
+              {(filterArpenteur !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all" || filterVille !== "all") &&
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFilterArpenteur("all");
+                  setFilterStatut("all");
+                  setFilterMandat("all");
+                  setFilterTache("all");
+                  setFilterVille("all");
+                }}
+                className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+
                   Réinitialiser les filtres
                 </Button>
-              )}
+              }
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {isLoading ? (
-              <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div>
-            ) : (
-              <div className="overflow-x-auto">
+            {isLoading ?
+            <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div> :
+
+            <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -3454,30 +3454,30 @@ export default function Dossiers() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedDossiers.length > 0 ? (
-                      sortedDossiers.map((dossier) => (
-                        <TableRow 
-                          key={dossier.displayId} 
-                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                          onClick={() => handleView(dossier)}
-                        >
+                    {sortedDossiers.length > 0 ?
+                  sortedDossiers.map((dossier) =>
+                  <TableRow
+                    key={dossier.displayId}
+                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                    onClick={() => handleView(dossier)}>
+
                           <TableCell className="font-medium text-white">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           </TableCell>
                           <TableCell className="text-slate-300">{getClientsNames(dossier.clients_ids)}</TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.mandatInfo?.type_mandat ? (
-                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {dossier.mandatInfo?.type_mandat ?
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
                                 {dossier.mandatInfo.type_mandat}
-                              </Badge>
-                            ) : (
-                              <span className="text-slate-600 text-xs">-</span>
-                            )}
+                              </Badge> :
+
+                      <span className="text-slate-600 text-xs">-</span>
+                      }
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.mandatInfo?.tache_actuelle && (
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
-                            )}
+                            {dossier.mandatInfo?.tache_actuelle &&
+                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
+                      }
                           </TableCell>
                           <TableCell className="text-slate-300">{getFirstAdresseTravaux(dossier.mandats)}</TableCell>
                           <TableCell className="text-slate-300">{dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
@@ -3495,22 +3495,22 @@ export default function Dossiers() {
                             </div>
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
+                  ) :
+
+                  <TableRow>
                         <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                           <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                           <p>Aucun dossier trouvé.</p>
                         </TableCell>
                       </TableRow>
-                    )}
+                  }
                   </TableBody>
                 </Table>
               </div>
-            )}
+            }
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>);
+
 }
