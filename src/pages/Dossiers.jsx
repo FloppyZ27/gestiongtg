@@ -2394,10 +2394,21 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
+        {/* Dialog de sélection des clients */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Client"); setIsClientSelectorOpen(false); }}
+                  className="bg-blue-500 hover:bg-blue-600 border-0 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
             </DialogHeader>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2408,9 +2419,19 @@ export default function Dossiers() {
                 {filteredClientsForSelector.length > 0 ? (
                   filteredClientsForSelector.map((client) => (
                     <div key={client.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-white">{client.prenom} {client.nom}</p>
-                        <p className="text-slate-400 text-sm">{client.courriels?.[0]?.courriel || client.telephones?.[0]?.telephone}</p>
+                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
+                          {client.adresses?.find(a => a.actuelle) && (
+                            <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {client.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {client.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {formData.clients_ids.includes(client.id) ? (
@@ -2436,19 +2457,27 @@ export default function Dossiers() {
                 )}
               </div>
             </div>
-            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
-              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Client"); setIsClientSelectorOpen(false); }}>
-                <Plus className="w-4 h-4 mr-2" /> Nouveau client
-              </Button>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
               <Button onClick={() => setIsClientSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
             </div>
           </DialogContent>
         </Dialog>
 
+        {/* Dialog de sélection des notaires */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Notaire"); setIsNotaireSelectorOpen(false); }}
+                  className="bg-purple-500 hover:bg-purple-600 border-0 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
             </DialogHeader>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2459,9 +2488,19 @@ export default function Dossiers() {
                 {filteredNotairesForSelector.length > 0 ? (
                   filteredNotairesForSelector.map((notaire) => (
                     <div key={notaire.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
-                        <p className="text-slate-400 text-sm">{notaire.courriels?.[0]?.courriel || notaire.telephones?.[0]?.telephone}</p>
+                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
+                          {notaire.adresses?.find(a => a.actuelle) && (
+                            <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {formData.notaires_ids.includes(notaire.id) ? (
@@ -2487,19 +2526,27 @@ export default function Dossiers() {
                 )}
               </div>
             </div>
-            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
-              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Notaire"); setIsNotaireSelectorOpen(false); }}>
-                <Plus className="w-4 h-4 mr-2" /> Nouveau notaire
-              </Button>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
               <Button onClick={() => setIsNotaireSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
             </div>
           </DialogContent>
         </Dialog>
 
+        {/* Dialog de sélection des courtiers */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
+                <Button
+                  variant="outline"
+                  onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Courtier immobilier"); setIsCourtierSelectorOpen(false); }}
+                  className="bg-orange-500 hover:bg-orange-600 border-0 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
             </DialogHeader>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2510,9 +2557,19 @@ export default function Dossiers() {
                 {filteredCourtiersForSelector.length > 0 ? (
                   filteredCourtiersForSelector.map((courtier) => (
                     <div key={courtier.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
-                        <p className="text-slate-400 text-sm">{courtier.courriels?.[0]?.courriel || courtier.telephones?.[0]?.telephone}</p>
+                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
+                          {courtier.adresses?.find(a => a.actuelle) && (
+                            <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {formData.courtiers_ids.includes(courtier.id) ? (
@@ -2538,10 +2595,7 @@ export default function Dossiers() {
                 )}
               </div>
             </div>
-            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
-              <Button variant="outline" onClick={() => { setIsClientFormDialogOpen(true); setClientTypeForForm("Courtier immobilier"); setIsCourtierSelectorOpen(false); }}>
-                <Plus className="w-4 h-4 mr-2" /> Nouveau courtier
-              </Button>
+            <div className="flex justify-end items-center pt-4 border-t border-slate-800">
               <Button onClick={() => setIsCourtierSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
             </div>
           </DialogContent>

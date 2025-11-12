@@ -296,29 +296,27 @@ export default function ClientFormDialog({
                 </div>
               </div>
 
-              {/* Préférences de livraison */}
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Package className="w-4 h-4" />
+              {/* Préférences de livraison - COMPACT */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-sm">
+                  <Package className="w-3 h-3" />
                   Préférences de livraison
                 </Label>
-                <div className="flex gap-3 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+                <div className="flex gap-2">
                   {MODES_LIVRAISON.map((mode) => (
                     <div
                       key={mode}
                       onClick={() => togglePreferenceLivraison(mode)}
-                      className={`flex-1 p-3 rounded-lg border cursor-pointer transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border cursor-pointer transition-all text-sm ${
                         formData.preferences_livraison.includes(mode)
                           ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
                           : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{mode}</span>
-                        {formData.preferences_livraison.includes(mode) && (
-                          <Check className="w-4 h-4" />
-                        )}
-                      </div>
+                      <span>{mode}</span>
+                      {formData.preferences_livraison.includes(mode) && (
+                        <Check className="w-3 h-3" />
+                      )}
                     </div>
                   ))}
                 </div>
