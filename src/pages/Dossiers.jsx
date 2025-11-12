@@ -2473,11 +2473,9 @@ export default function Dossiers() {
                       <Badge variant="outline" className={`${getArpenteurColor(selectedDossierToClose?.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(selectedDossierToClose?.arpenteur_geometre)}{selectedDossierToClose?.numero_dossier}</Badge>
                       <p className="text-slate-300 text-sm">{getClientsNames(selectedDossierToClose?.clients_ids)}</p>
                     </div>
-                    {!editingDossier &&
-                  <Button type="button" size="sm" variant="outline" onClick={() => {setClosingDossierId(null);setMinutesData([]);}} className="text-slate-400">
-                        Changer de dossier
-                      </Button>
-                  }
+                    <Button type="button" size="sm" variant="outline" onClick={() => {setClosingDossierId(null);setMinutesData([]);}} className="text-slate-400">
+                      Changer de dossier
+                    </Button>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     <Label className="text-lg font-semibold text-white mb-3 block">Informations de minutes par mandat</Label>
