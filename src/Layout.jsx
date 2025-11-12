@@ -117,6 +117,12 @@ function LayoutContent({ children, currentPageName }) {
     initialData: [],
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
+
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
     heures: "",
