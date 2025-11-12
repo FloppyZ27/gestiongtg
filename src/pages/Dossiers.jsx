@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -582,20 +581,17 @@ export default function Dossiers() {
     const targetDossier = dossier || editingDossier;
     if (!targetDossier) return;
     
-    const clients = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
-    const client = clients[0];
+    const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
+    const client = clientsList[0];
     const mandatsData = dossier ? targetDossier.mandats : formData.mandats;
     
-    // Calculer les montants
     const totalHT = mandatsData.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
 
-    // Générer le numéro de facture
     const numeroFacture = Math.floor(Math.random() * 90000) + 10000;
 
-    // Rassembler toutes les adresses uniques
     const uniqueAddresses = [];
     const addressMap = new Map();
     mandatsData.forEach(m => {
@@ -608,14 +604,13 @@ export default function Dossiers() {
       }
     });
 
-    // Rassembler tous les lots uniques
     const uniqueLots = [];
     const lotMap = new Map();
     mandatsData.forEach(m => {
       if (m.lots && m.lots.length > 0) {
         m.lots.forEach(lotId => {
           const lot = getLotById(lotId);
-          const lotStr = lot ? lot.numero_lot : lotId; // Use lot number if available, otherwise lotId
+          const lotStr = lot ? lot.numero_lot : lotId;
           if (!lotMap.has(lotStr)) {
             lotMap.set(lotStr, true);
             uniqueLots.push(lotStr);
@@ -1036,6 +1031,7 @@ export default function Dossiers() {
   };
 
   const openCloseDossierDialog = () => {
+    setIsDialogOpen(false);
     setIsCloseDossierDialogOpen(true);
     setClosingDossierId(null);
     setMinutesData([]);
@@ -1099,21 +1095,6 @@ export default function Dossiers() {
           </div>
 
           <div className="flex gap-3">
-            <Button 
-              onClick={() => {
-                const selectedDossier = dossiers.find(d => d.statut === "Ouvert");
-                if (selectedDossier) {
-                  genererFacture(selectedDossier);
-                } else {
-                  alert("Veuillez ouvrir un dossier pour générer une facture.");
-                }
-              }}
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50"
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              Facturation
-            </Button>
-
             <Button 
               onClick={openCloseDossierDialog}
               className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50"
@@ -2482,7 +2463,7 @@ export default function Dossiers() {
                   {uploadingLotPdf && <span className="text-slate-500">Téléchargement...</span>}
                   {newLotForm.document_pdf_url && (
                     <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
-                      <ExternalLink className="w-5 h-5" />
+                      <FileText className="w-5 h-5" />
                     </a>
                   )}
                 </div>
