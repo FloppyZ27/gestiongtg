@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, TrendingUp, TrendingDown, Package } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -1331,27 +1331,36 @@ export default function PriseDeMandat() {
                           {formData.clients_ids.map(clientId => {
                             const client = getClientById(clientId);
                             return client ? (
-                              <Badge
-                                key={clientId}
-                                variant="outline"
-                                className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start"
-                              >
-                                <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">
-                                  {client.prenom} {client.nom}
-                                </span>
-                                {!dossierReferenceId && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeClient(clientId, 'clients');
-                                    }}
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
+                              <div key={clientId} className="space-y-1">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start"
+                                >
+                                  <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">
+                                    {client.prenom} {client.nom}
+                                  </span>
+                                  {!dossierReferenceId && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeClient(clientId, 'clients');
+                                      }}
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                                {client.preferences_livraison && client.preferences_livraison.length > 0 && (
+                                  <div className="flex gap-1 ml-2">
+                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                    <span className="text-xs text-slate-400">
+                                      {client.preferences_livraison.join(', ')}
+                                    </span>
+                                  </div>
                                 )}
-                              </Badge>
+                              </div>
                             ) : null;
                           })}
                         </div>
@@ -1382,27 +1391,36 @@ export default function PriseDeMandat() {
                           {formData.notaires_ids.map(notaireId => {
                             const notaire = getClientById(notaireId);
                             return notaire ? (
-                              <Badge
-                                key={notaireId}
-                                variant="outline"
-                                className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
-                              >
-                                <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">
-                                  {notaire.prenom} {notaire.nom}
-                                </span>
-                                {!dossierReferenceId && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeClient(notaireId, 'notaires');
-                                    }}
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
+                              <div key={notaireId} className="space-y-1">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
+                                >
+                                  <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">
+                                    {notaire.prenom} {notaire.nom}
+                                  </span>
+                                  {!dossierReferenceId && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeClient(notaireId, 'notaires');
+                                      }}
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                                {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 && (
+                                  <div className="flex gap-1 ml-2">
+                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                    <span className="text-xs text-slate-400">
+                                      {notaire.preferences_livraison.join(', ')}
+                                    </span>
+                                  </div>
                                 )}
-                              </Badge>
+                              </div>
                             ) : null;
                           })}
                         </div>
@@ -1433,27 +1451,36 @@ export default function PriseDeMandat() {
                           {formData.courtiers_ids.map(courtierId => {
                             const courtier = getClientById(courtierId);
                             return courtier ? (
-                              <Badge
-                                key={courtierId}
-                                variant="outline"
-                                className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
-                              >
-                                <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">
-                                  {courtier.prenom} {courtier.nom}
-                                </span>
-                                {!dossierReferenceId && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeClient(courtierId, 'courtiers');
-                                    }}
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
+                              <div key={courtierId} className="space-y-1">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
+                                >
+                                  <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">
+                                    {courtier.prenom} {courtier.nom}
+                                  </span>
+                                  {!dossierReferenceId && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeClient(courtierId, 'courtiers');
+                                      }}
+                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                                {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 && (
+                                  <div className="flex gap-1 ml-2">
+                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                    <span className="text-xs text-slate-400">
+                                      {courtier.preferences_livraison.join(', ')}
+                                    </span>
+                                  </div>
                                 )}
-                              </Badge>
+                              </div>
                             ) : null;
                           })}
                         </div>
@@ -1483,12 +1510,12 @@ export default function PriseDeMandat() {
 
                     {formData.mandats.length > 0 ? (
                       <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
-                        <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start">
+                        <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
                           {formData.mandats.map((mandat, index) => (
                             <TabsTrigger
                               key={index}
                               value={index.toString()}
-                              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 text-slate-400"
+                              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
                             >
                               {getMandatTabLabel(mandat, index)}
                             </TabsTrigger>
@@ -1560,7 +1587,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Dates */}
-                                  <div className="space-y-3 pr-4">
+                                  <div className="space-y-3">
                                     <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
                                       {/* Removed 'Date d'ouverture' field as per instruction */}
                                       <div className="space-y-2">
@@ -1797,7 +1824,7 @@ export default function PriseDeMandat() {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -1833,7 +1860,7 @@ export default function PriseDeMandat() {
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
                         formData.clients_ids.includes(client.id)
                           ? 'bg-blue-500/20 border border-blue-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
                       onClick={() => toggleClient(client.id, 'clients')}
                     >
@@ -1875,7 +1902,7 @@ export default function PriseDeMandat() {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -1911,7 +1938,7 @@ export default function PriseDeMandat() {
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
                         formData.notaires_ids.includes(notaire.id)
                           ? 'bg-purple-500/20 border border-purple-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
                       onClick={() => toggleClient(notaire.id, 'notaires')}
                     >
@@ -1953,7 +1980,7 @@ export default function PriseDeMandat() {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
@@ -1989,7 +2016,7 @@ export default function PriseDeMandat() {
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
                         formData.courtiers_ids.includes(courtier.id)
                           ? 'bg-orange-500/20 border border-orange-500/30'
-                          : 'bg-slate-800/50 hover:bg-slate-800'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
                       }`}
                       onClick={() => toggleClient(courtier.id, 'courtiers')}
                     >

@@ -1781,7 +1781,7 @@ export default function Dossiers() {
                                       )}
                                     </div>
 
-                                    <div className="pt-3 border-t border-slate-700">
+                                    <div className="space-y-2 pt-3 border-t border-slate-700">
                                       <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures?.length || 0})</Label>
                                       {mandat.factures && mandat.factures.length > 0 ? (
                                         <div className="border border-slate-700 rounded-lg overflow-hidden">
@@ -2457,7 +2457,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des clients */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
@@ -2475,43 +2475,48 @@ export default function Dossiers() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
               <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
             </div>
-            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-              <div className="space-y-2 p-4">
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
                 {filteredClientsForSelector.length > 0 ? (
                   filteredClientsForSelector.map((client) => (
-                    <div key={client.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{client.prenom} {client.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
-                          {client.adresses?.find(a => a.actuelle) && (
-                            <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {client.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {client.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {formData.clients_ids.includes(client.id) ? (
-                          <Button type="button" size="sm" onClick={() => toggleClient(client.id, 'clients')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
-                            <X className="w-4 h-4 mr-1" /> Retirer
-                          </Button>
-                        ) : (
-                          <Button type="button" size="sm" onClick={() => toggleClient(client.id, 'clients')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                            <Plus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
+                    <div
+                      key={client.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.clients_ids.includes(client.id)
+                          ? 'bg-blue-500/20 border border-blue-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(client.id, 'clients')}
+                    >
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
+                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
                         )}
-                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(client)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {client.courriels?.find(c => c.actuel)?.courriel && (
+                          <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
+                        )}
+                        {client.telephones?.find(t => t.actuel)?.telephone && (
+                          <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
+                        )}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent toggling selection
+                          setIsClientSelectorOpen(false);
+                          handleEdit(client);
+                        }}
+                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500">
+                  <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun client trouvé</p>
                   </div>
@@ -2526,7 +2531,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des notaires */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
@@ -2544,43 +2549,48 @@ export default function Dossiers() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
               <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
             </div>
-            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-              <div className="space-y-2 p-4">
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
                 {filteredNotairesForSelector.length > 0 ? (
                   filteredNotairesForSelector.map((notaire) => (
-                    <div key={notaire.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
-                          {notaire.adresses?.find(a => a.actuelle) && (
-                            <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {formData.notaires_ids.includes(notaire.id) ? (
-                          <Button type="button" size="sm" onClick={() => toggleClient(notaire.id, 'notaires')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
-                            <X className="w-4 h-4 mr-1" /> Retirer
-                          </Button>
-                        ) : (
-                          <Button type="button" size="sm" onClick={() => toggleClient(notaire.id, 'notaires')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                            <Plus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
+                    <div
+                      key={notaire.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.notaires_ids.includes(notaire.id)
+                          ? 'bg-purple-500/20 border border-purple-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(notaire.id, 'notaires')}
+                    >
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
+                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
                         )}
-                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(notaire)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                          <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
+                        )}
+                        {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                          <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
+                        )}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsNotaireSelectorOpen(false);
+                          handleEdit(notaire);
+                        }}
+                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500">
+                  <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun notaire trouvé</p>
                   </div>
@@ -2595,7 +2605,7 @@ export default function Dossiers() {
 
         {/* Dialog de sélection des courtiers */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" hideClose>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
@@ -2613,43 +2623,48 @@ export default function Dossiers() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
               <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
             </div>
-            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-              <div className="space-y-2 p-4">
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3 p-4">
                 {filteredCourtiersForSelector.length > 0 ? (
                   filteredCourtiersForSelector.map((courtier) => (
-                    <div key={courtier.id} className="p-3 bg-slate-800/50 rounded-lg flex items-center justify-between transition-colors border border-slate-700">
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-0.5 mt-1">
-                          {courtier.adresses?.find(a => a.actuelle) && (
-                            <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {formData.courtiers_ids.includes(courtier.id) ? (
-                          <Button type="button" size="sm" onClick={() => toggleClient(courtier.id, 'courtiers')} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
-                            <X className="w-4 h-4 mr-1" /> Retirer
-                          </Button>
-                        ) : (
-                          <Button type="button" size="sm" onClick={() => toggleClient(courtier.id, 'courtiers')} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                            <Plus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
+                    <div
+                      key={courtier.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.courtiers_ids.includes(courtier.id)
+                          ? 'bg-orange-500/20 border border-orange-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}
+                    >
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
+                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
                         )}
-                        <Button type="button" size="sm" variant="outline" onClick={() => handleEdit(courtier)} className="text-slate-400 border-slate-700 hover:bg-slate-700">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                          <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
+                        )}
+                        {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                          <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
+                        )}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCourtierSelectorOpen(false);
+                          handleEdit(courtier);
+                        }}
+                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500">
+                  <div className="col-span-2 text-center py-12 text-slate-500">
                     <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun courtier trouvé</p>
                   </div>
@@ -3056,92 +3071,123 @@ export default function Dossiers() {
         </Dialog>
 
         <Dialog open={isLotSelectorOpen} onOpenChange={(open) => { setIsLotSelectorOpen(open); if (!open) { setLotCirconscriptionFilter("all"); setLotSearchTerm(""); setLotCadastreFilter("Québec"); } }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Sélectionner les lots pour le mandat {currentMandatIndex !== null ? (formData.mandats[currentMandatIndex]?.type_mandat || `n°${currentMandatIndex + 1}`) : ''}</DialogTitle>
+              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <div className="relative flex-1 min-w-[200px]">
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input placeholder="Rechercher par n° lot, rang, circonscription..." value={lotSearchTerm} onChange={(e) => setLotSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                  <Input
+                    placeholder="Rechercher par numéro, rang..."
+                    value={lotSearchTerm}
+                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
                 </div>
                 <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                  <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Circonscription" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all">Toutes les circonscriptions</SelectItem>
-                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
-                      <SelectItem key={circonscription} value={circonscription} className="text-white">{circonscription}</SelectItem>
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                      <SelectItem key={circ} value={circ} className="text-white">
+                        {circ}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {lotCirconscriptionFilter !== "all" && (
-                  <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
-                    <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                      <SelectValue placeholder="Cadastre" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all">Tous les cadastres</SelectItem>
-                      {(CADASTRES_PAR_CIRCONSCRIPTION[lotCirconscriptionFilter] || []).map(cadastre => (
-                        <SelectItem key={cadastre} value={cadastre} className="text-white">{cadastre}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Cadastre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                    {/* The outline explicitly showed only 'Québec' as a direct item. If dynamic filtering by selected circonscription is desired, this section should be adapted to use `availableLotCadastres`. Following the outline directly: */}
+                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={() => setIsNewLotDialogOpen(true)}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau lot
+                </Button>
               </div>
+
               <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700 sticky top-0 z-10">
-                      <TableHead className="text-slate-300">N° Lot</TableHead>
-                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
                       <TableHead className="text-slate-300">Circonscription</TableHead>
                       <TableHead className="text-slate-300">Cadastre</TableHead>
-                      <TableHead className="text-slate-300">Concordance antérieur</TableHead>
-                      <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredLotsForSelector.length > 0 ? (
-                      filteredLotsForSelector.map((lot) => (
-                        <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
-                          <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
-                          <TableCell className="text-slate-300">{lot.rang || '-'}</TableCell>
-                          <TableCell className="text-slate-300">{lot.circonscription_fonciere || '-'}</TableCell>
-                          <TableCell className="text-slate-300">{lot.cadastre || '-'}</TableCell>
-                          <TableCell className="text-slate-300">{lot.concordance_anterieur || '-'}</TableCell>
-                          <TableCell className="text-right">
-                            {currentMandatIndex !== null && formData.mandats[currentMandatIndex]?.lots?.includes(lot.id) ? (
-                              <Button type="button" size="sm" onClick={() => addLotToCurrentMandat(lot.id)} className="bg-red-500/20 hover:bg-red-500/30 text-red-400">
-                                <X className="w-4 h-4 mr-1" /> Retirer
-                              </Button>
-                            ) : (
-                              <Button type="button" size="sm" onClick={() => addLotToCurrentMandat(lot.id)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                                <Plus className="w-4 h-4 mr-1" /> Ajouter
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      filteredLotsForSelector.map((lot) => {
+                        const isSelected = currentMandatIndex !== null &&
+                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
+                        return (
+                          <TableRow
+                            key={lot.id}
+                            className={`cursor-pointer transition-colors border-slate-800 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                                : 'hover:bg-slate-800/30'
+                            }`}
+                            onClick={() => addLotToCurrentMandat(lot.id)}
+                          >
+                            <TableCell className="font-medium text-white">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                {lot.circonscription_fonciere}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isSelected && (
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Sélectionné
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12 text-slate-500">
-                          <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>Aucun lot trouvé</p>
+                        <TableCell colSpan={5} className="text-center py-12">
+                          <div className="text-slate-400">
+                            <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>Aucun lot trouvé</p>
+                            <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </div>
-            </div>
-            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
-              <Button variant="outline" onClick={() => { setIsNewLotDialogOpen(true); setIsLotSelectorOpen(false); }}>
-                <Plus className="w-4 h-4 mr-2" /> Nouveau lot
+
+              <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600">
+                Valider la sélection
               </Button>
-              <Button onClick={() => setIsLotSelectorOpen(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
             </div>
           </DialogContent>
         </Dialog>
