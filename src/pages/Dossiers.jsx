@@ -763,14 +763,28 @@ export default function Dossiers() {
   };
 
   const dossiersOuvertsForClosing = dossiers.filter(d => d.statut === "Ouvert");
-  const filteredDossiersForClosing = dossiersOuvertsForClosing.filter(dossier => {
+  
+  const dossiersWithMandatsForClosing = dossiersOuvertsForClosing.flatMap(dossier => {
+    if (dossier.mandats && dossier.mandats.length > 0) {
+      return dossier.mandats.map((mandat, idx) => ({
+        ...dossier,
+        mandatInfo: mandat,
+        mandatIndex: idx,
+        displayId: `${dossier.id}-${idx}`
+      }));
+    }
+    return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
+  });
+
+  const filteredDossiersForClosing = dossiersWithMandatsForClosing.filter(item => {
     const searchLower = closingDossierSearchTerm.toLowerCase();
-    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
-    const clientsNames = getClientsNames(dossier.clients_ids);
+    const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
+    const clientsNames = getClientsNames(item.clients_ids);
     return (
       fullNumber.toLowerCase().includes(searchLower) ||
-      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower)
+      item.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -1266,7 +1280,7 @@ export default function Dossiers() {
         </div>
 
         <Dialog open={isCloseDossierDialogOpen} onOpenChange={setIsCloseDossierDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Fermer un dossier</DialogTitle>
             </DialogHeader>
@@ -1277,27 +1291,69 @@ export default function Dossiers() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                     <Input placeholder="Rechercher un dossier à fermer..." value={closingDossierSearchTerm} onChange={(e) => setClosingDossierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
                   </div>
-                  <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-                    <div className="space-y-2 p-4">
-                      {filteredDossiersForClosing.length > 0 ? (
-                        filteredDossiersForClosing.map((dossier) => (
-                          <div key={dossier.id} className="p-4 bg-slate-800/50 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors border border-slate-700" onClick={() => selectDossierToClose(dossier.id)}>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
-                                <p className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</p>
-                                <p className="text-slate-500 text-xs mt-1">{dossier.mandats?.length || 0} mandat(s) - {format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
-                              </div>
-                              <Button type="button" size="sm" variant="ghost" className="text-emerald-400">Sélectionner</Button>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-12 text-slate-500">
-                          <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>Aucun dossier ouvert trouvé</p>
-                        </div>
-                      )}
+                  <div className="flex-1 overflow-hidden border border-slate-700 rounded-lg">
+                    <div className="max-h-[500px] overflow-y-auto">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-800/50 z-10">
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300">Clients</TableHead>
+                            <TableHead className="text-slate-300">Mandat</TableHead>
+                            <TableHead className="text-slate-300">Tâche actuelle</TableHead>
+                            <TableHead className="text-slate-300">Adresse Travaux</TableHead>
+                            <TableHead className="text-slate-300">Date ouverture</TableHead>
+                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredDossiersForClosing.length > 0 ? (
+                            filteredDossiersForClosing.map((item) => (
+                              <TableRow key={item.displayId} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierToClose(item.id)}>
+                                <TableCell className="font-medium">
+                                  <Badge variant="outline" className={`${getArpenteurColor(item.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">{getClientsNames(item.clients_ids)}</TableCell>
+                                <TableCell className="text-slate-300">
+                                  {item.mandatInfo?.type_mandat ? (
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                                      {item.mandatInfo.type_mandat}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-slate-600 text-xs">Aucun</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-slate-300">
+                                  {item.mandatInfo?.tache_actuelle && (
+                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                      {item.mandatInfo.tache_actuelle}
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {item.mandatInfo?.adresse_travaux ? formatAdresse(item.mandatInfo.adresse_travaux) : '-'}
+                                </TableCell>
+                                <TableCell className="text-slate-300">
+                                  {item.date_ouverture ? format(new Date(item.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button type="button" size="sm" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10">
+                                    Sélectionner
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                                <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                <p>Aucun dossier ouvert trouvé</p>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
                 </>
