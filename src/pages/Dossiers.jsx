@@ -583,123 +583,230 @@ export default function Dossiers() {
     
     const dossier = editingDossier;
     const clients = formData.clients_ids.map(id => getClientById(id)).filter(c => c);
+    const client = clients[0];
+    
+    // Calculer les montants
     const totalHT = formData.mandats.reduce((sum, m) => sum + (parseFloat(m.prix_estime) || 0) - (parseFloat(m.rabais) || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
+
+    // Générer le numéro de facture
+    const numeroFacture = Math.floor(Math.random() * 90000) + 10000;
 
     const factureHTML = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Facture - Dossier ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
-    .header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 3px solid #059669; padding-bottom: 20px; }
-    .company-info { flex: 1; }
-    .company-info h1 { color: #059669; margin: 0; font-size: 28px; }
-    .company-info p { margin: 5px 0; color: #666; }
-    .invoice-info { text-align: right; }
-    .invoice-info h2 { color: #059669; margin: 0 0 10px 0; font-size: 32px; }
-    .invoice-details { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; }
-    .invoice-details p { margin: 8px 0; }
-    .client-section { margin-bottom: 30px; }
-    .client-section h3 { color: #059669; margin-bottom: 15px; border-bottom: 2px solid #059669; padding-bottom: 8px; }
-    .mandats-section { margin-bottom: 30px; }
-    .mandat-item { background: #f9fafb; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #059669; }
-    .mandat-item h4 { margin: 0 0 10px 0; color: #059669; }
-    .totals-table { width: 100%; margin-top: 30px; border-collapse: collapse; }
-    .totals-table tr { border-bottom: 1px solid #e5e7eb; }
-    .totals-table td { padding: 12px; text-align: right; }
-    .totals-table .label { text-align: left; font-weight: bold; }
-    .totals-table .total-row { background: #059669; color: white; font-size: 18px; font-weight: bold; }
-    .footer { margin-top: 50px; text-align: center; color: #999; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 40px; color: #000; }
+    
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+    .company { flex: 1; }
+    .company h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+    .company .subtitle { font-size: 14px; font-style: italic; margin-bottom: 10px; }
+    .company .address { font-size: 11px; line-height: 1.6; }
+    
+    .logo { flex: 1; text-align: center; }
+    .logo img { max-width: 120px; }
+    
+    .invoice-title { flex: 1; text-align: right; }
+    .invoice-title h2 { font-size: 36px; font-weight: bold; margin-bottom: 10px; }
+    .invoice-title .details { font-size: 12px; line-height: 1.8; }
+    .invoice-title .details strong { display: inline-block; width: 80px; }
+    
+    .separator { border-top: 2px solid #000; margin: 20px 0; }
+    
+    .billing-section { display: flex; gap: 40px; margin-bottom: 25px; font-size: 12px; }
+    .billing-section .column { flex: 1; }
+    .billing-section .label { font-weight: bold; text-decoration: underline; margin-bottom: 8px; }
+    .billing-section p { line-height: 1.6; }
+    
+    .location-section { margin: 25px 0; font-size: 12px; }
+    .location-section .section-title { font-weight: bold; font-style: italic; margin-bottom: 5px; }
+    
+    .description-table { width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 12px; }
+    .description-table th { background: #d1d5db; padding: 8px; text-align: left; font-weight: bold; border: 1px solid #000; }
+    .description-table td { padding: 8px; border: 1px solid #000; vertical-align: top; }
+    .description-table .amount-cell { text-align: right; white-space: nowrap; }
+    .description-table .bold-item { font-weight: bold; }
+    .description-table .italic-item { font-style: italic; margin-left: 20px; }
+    .description-table .rabais { color: #dc2626; font-style: italic; }
+    .description-table .minute-info { float: right; margin-left: 20px; }
+    
+    .totals { margin-top: 40px; }
+    .totals-table { width: 100%; font-size: 13px; }
+    .totals-table tr td:first-child { text-align: left; }
+    .totals-table tr td:last-child { text-align: right; width: 150px; font-weight: bold; }
+    .totals-table .total-row { border-top: 2px solid #000; border-bottom: 3px double #000; }
+    .totals-table .total-row td { padding-top: 8px; font-size: 15px; font-weight: bold; }
+    
+    .footer { margin-top: 50px; font-size: 11px; }
+    .footer .thank-you { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+    .footer .fiscal { color: #dc2626; text-align: center; margin-bottom: 10px; }
+    .footer .conditions { color: #dc2626; text-align: right; }
+    
     @media print {
-      body { margin: 20px; }
-      .no-print { display: none; }
+      body { padding: 20px; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="company-info">
-      <h1>Gaboury-Tremblay-Guay</h1>
-      <p>Arpenteurs-Géomètres</p>
-      <p>3460, boulevard Harvey, bureau 200</p>
-      <p>Jonquière (Québec) G7X 3B4</p>
-      <p>Téléphone: 418-547-2744</p>
-    </div>
-    <div class="invoice-info">
-      <h2>FACTURE</h2>
-      <p><strong>N°:</strong> ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}</p>
-      <p><strong>Date:</strong> ${format(new Date(), "dd MMMM yyyy", { locale: fr })}</p>
-    </div>
-  </div>
-
-  <div class="invoice-details">
-    <p><strong>Dossier:</strong> ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}</p>
-    <p><strong>Arpenteur-géomètre responsable:</strong> ${dossier.arpenteur_geometre}</p>
-    <p><strong>Date d'ouverture:</strong> ${dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
-  </div>
-
-  <div class="client-section">
-    <h3>Informations du client</h3>
-    ${clients.map(client => `
-      <p><strong>${client.prenom} ${client.nom}</strong></p>
-      ${client.adresses?.find(a => a.actuelle) ? `<p>${formatAdresse(client.adresses.find(a => a.actuelle))}</p>` : ''}
-      ${client.courriels?.find(c => c.actuel) ? `<p>Courriel: ${client.courriels.find(c => c.actuel).courriel}</p>` : ''}
-      ${client.telephones?.find(t => t.actuel) ? `<p>Téléphone: ${client.telephones.find(t => t.actuel).telephone}</p>` : ''}
-    `).join('<br>')}
-  </div>
-
-  <div class="mandats-section">
-    <h3>Description des travaux</h3>
-    ${formData.mandats.map((mandat, idx) => `
-      <div class="mandat-item">
-        <h4>${mandat.type_mandat || `Mandat ${idx + 1}`}</h4>
-        ${mandat.adresse_travaux ? `<p><strong>Adresse des travaux:</strong> ${formatAdresse(mandat.adresse_travaux)}</p>` : ''}
-        ${mandat.lots && mandat.lots.length > 0 ? `
-          <p><strong>Lots:</strong> ${mandat.lots.map(lotId => {
-            const lot = getLotById(lotId);
-            return lot ? lot.numero_lot : lotId;
-          }).join(', ')}</p>
-        ` : ''}
-        ${mandat.date_livraison ? `<p><strong>Date de livraison:</strong> ${format(new Date(mandat.date_livraison), "dd MMMM yyyy", { locale: fr })}</p>` : ''}
-        <p style="text-align: right; font-size: 18px; font-weight: bold; color: #059669;">
-          ${(parseFloat(mandat.prix_estime) - parseFloat(mandat.rabais)).toFixed(2)} $
-        </p>
+    <div class="company">
+      <h1>GIRARD TREMBLAY GILBERT INC.</h1>
+      <div class="subtitle">ARPENTEURS-GÉOMÈTRES</div>
+      <div class="address">
+        11, rue Melançon Est, Alma, Québec, G8B 3W8<br>
+        info@girardtremblaygilbert.com<br>
+        www.girardtremblaygilbert.com
       </div>
-    `).join('')}
+    </div>
+    
+    <div class="logo">
+      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png" alt="Logo GTG">
+    </div>
+    
+    <div class="invoice-title">
+      <h2>FACTURE</h2>
+      <div class="details">
+        <div><strong>NO.</strong> ${numeroFacture}</div>
+        <div><strong>DATE</strong> ${format(new Date(), "yyyy-MM-dd")}</div>
+        <div><strong>DOSSIER</strong> ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}</div>
+      </div>
+    </div>
   </div>
-
-  <table class="totals-table">
-    <tr>
-      <td class="label">Sous-total (avant taxes)</td>
-      <td>${totalHT.toFixed(2)} $</td>
-    </tr>
-    <tr>
-      <td class="label">TPS (5%)</td>
-      <td>${tps.toFixed(2)} $</td>
-    </tr>
-    <tr>
-      <td class="label">TVQ (9.975%)</td>
-      <td>${tvq.toFixed(2)} $</td>
-    </tr>
-    <tr class="total-row">
-      <td class="label">TOTAL</td>
-      <td>${totalTTC.toFixed(2)} $</td>
-    </tr>
+  
+  <div class="separator"></div>
+  
+  <div class="billing-section">
+    <div class="column">
+      <div class="label">FACTURÉ À :</div>
+      ${client ? `
+        <p><strong>${client.prenom} ${client.nom}</strong></p>
+        ${client.adresses?.find(a => a.actuelle) ? `<p>${formatAdresse(client.adresses.find(a => a.actuelle))}</p>` : ''}
+      ` : '<p>Client non spécifié</p>'}
+    </div>
+    <div class="column">
+      <div class="label">EXPÉDIÉ À :</div>
+      ${client ? `
+        <p><strong>${client.prenom} ${client.nom}</strong></p>
+        ${client.adresses?.find(a => a.actuelle) ? `<p>${formatAdresse(client.adresses.find(a => a.actuelle))}</p>` : ''}
+      ` : '<p>Client non spécifié</p>'}
+    </div>
+  </div>
+  
+  ${formData.mandats.length > 0 ? `
+    <div class="location-section">
+      <div class="section-title">Localisation(s) des travaux :</div>
+      ${formData.mandats.map(m => m.adresse_travaux ? `<p>${formatAdresse(m.adresse_travaux)}</p>` : '').join('')}
+    </div>
+    
+    <div class="location-section">
+      <div class="section-title">Lot(s) :</div>
+      ${formData.mandats.map(m => {
+        if (!m.lots || m.lots.length === 0) return '';
+        const lotsTexte = m.lots.map(lotId => {
+          const lot = getLotById(lotId);
+          return lot ? `${lot.numero_lot} du cadastre du Québec` : lotId;
+        }).join(', ');
+        return `<p>${lotsTexte}</p>`;
+      }).join('')}
+    </div>
+  ` : ''}
+  
+  <table class="description-table">
+    <thead>
+      <tr>
+        <th style="width: 70%;">DESCRIPTION</th>
+        <th style="width: 30%;">MONTANT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="bold-item">Ouverture de dossier.</div>
+        </td>
+        <td class="amount-cell"></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="bold-item">Travaux préalables :</div>
+          <div class="italic-item">Recherches, calcul et analyse foncière.</div>
+          <div class="italic-item">Mise en plan.</div>
+          <div class="italic-item">Étude du dossier.</div>
+        </td>
+        <td class="amount-cell"></td>
+      </tr>
+      ${formData.mandats.map((mandat, idx) => {
+        const montant = (mandat.prix_estime || 0);
+        const rabais = mandat.rabais || 0;
+        const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 
+          ? mandat.minutes_list.map(m => m.minute).join(', ')
+          : (mandat.minute || '');
+        
+        return `
+          <tr>
+            <td>
+              <div class="bold-item">Travaux réalisés :</div>
+              <div class="italic-item">${mandat.type_mandat || 'Mandat'}</div>
+              ${minutesInfo ? `<span class="minute-info"><strong>Minute:</strong> ${minutesInfo}</span>` : ''}
+            </td>
+            <td class="amount-cell">${montant.toFixed(2)} $</td>
+          </tr>
+          ${rabais > 0 ? `
+            <tr>
+              <td>
+                <div class="rabais">Rabais consenti.</div>
+              </td>
+              <td class="amount-cell rabais">(${rabais.toFixed(2)})</td>
+            </tr>
+          ` : ''}
+        `;
+      }).join('')}
+    </tbody>
   </table>
-
-  <div class="footer">
-    <p>Merci de votre confiance. Pour toute question, n'hésitez pas à nous contacter.</p>
-    <p>TPS: 123456789 RT0001 | TVQ: 1234567890 TQ0001</p>
+  
+  <div class="totals">
+    <table class="totals-table">
+      <tr>
+        <td></td>
+        <td>Sous-total :</td>
+        <td>${totalHT.toFixed(2)} $</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>TPS :</td>
+        <td>${tps.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>TVQ :</td>
+        <td>${tvq.toFixed(2)}</td>
+      </tr>
+      <tr class="total-row">
+        <td></td>
+        <td>Total :</td>
+        <td>${totalTTC.toFixed(2)} $</td>
+      </tr>
+    </table>
   </div>
-
-  <div class="no-print" style="margin-top: 30px; text-align: center;">
-    <button onclick="window.print()" style="background: #059669; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
+  
+  <div class="footer">
+    <div class="thank-you">Merci pour votre confiance !</div>
+    <div class="fiscal">TPS : 829858554 RT 0001 | TVQ : 1213714127 TQ 0001</div>
+    <div class="conditions">Condition : Payable sur réception | Frais d'administration : 2% par mois sur frais de retard</div>
+  </div>
+  
+  <div class="no-print" style="margin-top: 40px; text-align: center;">
+    <button onclick="window.print()" style="background: #059669; color: white; padding: 12px 32px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
       Imprimer / Enregistrer en PDF
+    </button>
+    <button onclick="window.close()" style="background: #6b7280; color: white; padding: 12px 32px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 10px;">
+      Fermer
     </button>
   </div>
 </body>
