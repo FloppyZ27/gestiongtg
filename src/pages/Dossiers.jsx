@@ -2346,7 +2346,17 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isCloseDossierDialogOpen} onOpenChange={setIsCloseDossierDialogOpen}>
+        <Dialog open={isCloseDossierDialogOpen} onOpenChange={(open) => {
+          setIsCloseDossierDialogOpen(open);
+          if (!open) {
+            setClosingDossierId(null);
+            setMinutesData([]);
+            setClosingDossierSearchTerm("");
+            setCloseFilterArpenteur("all");
+            setCloseFilterVille("all");
+            setCloseFilterMandat("all");
+          }
+        }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Fermer un dossier</DialogTitle>
