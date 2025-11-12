@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,7 +27,7 @@ const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Re
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": ["Québec", "Canton de Caron", "Canton de de l'Île", "Canton de Garnier", "Village d'Héberville", "Canton d'Hébertville-Station", "Canton de Labarre", "Canton de Mésy", "Canton de Métabetchouan", "Canton de Signay", "Canton de Taillon"],
   "Lac-Saint-Jean-Ouest": ["Québec", "Canton d'Albanel", "Canton de Charlevoix", "Canton de Dablon", "Canton de Dalmas", "Canton de Demeules", "Canton de Dequen", "Canton de Dolbeau", "Canton de Girard", "Canton de Jogues", "Canton de Malherbe", "Canton de Métabetchouan", "Canton de Milot", "Canton de Normandin", "Canton de Ouiatchouan", "Canton de Racine", "Canton de Roberval", "Canton de Saint-Hilaire"],
-  "Chicoutimi": ["Québec", "Cité d'Arvida", "Canton de Bagot", "Village de Bagotville", "Canton de Bégin", "Canton de Boileau", "Canton de Bourget", "Canton de Chicoutimi", "Paroisse de Chicoutimi", "Ville de Chicoutimi", "Canton de Dumas", "Canton de Durocher", "Canton de Falardeau", "Canton de Ferland", "Ville de Grande-Baie", "Canton de Harvey", "Canton de Hébert", "Canton de Jonquière", "Canton de Kénogami", "Canton de Labrecque", "Canton de Laterrière", "Canton d'Otis", "Canton de Périgny", "Canton de Rouleau", "Canton de Simard", "Paroisse de Saint-Alexis", "Paroisse de Saint-Alphonse", "Ville de Sainte-Anne-de-Chicoutimi", "Canton de Saint-Germains", "Canton de Saint-Jean", "Canton de Taché", "Canton de Tremblay"]
+  "Chicoutimi": ["Québec", "Cité d'Arvida", "Canton de Bagot", "Village de Bagotville", "Canton de Bégin", "Canton de Boileau", "Canton de Bourget", "Canton de Chicoutimi", "Paroisse de Chicoutimi", "Ville de Chicoutimi", "Canton de Dumas", "Canton de Durocher", "Canton de Falardau", "Canton de Ferland", "Ville de Grande-Baie", "Canton de Harvey", "Canton de Hébert", "Canton de Jonquière", "Canton de Kénogami", "Canton de Labrecque", "Canton de Laterrière", "Canton d'Otis", "Canton de Périgny", "Canton de Rouleau", "Canton de Simard", "Paroisse de Saint-Alexis", "Paroisse de Saint-Alphonse", "Ville de Sainte-Anne-de-Chicoutimi", "Canton de Saint-Germains", "Canton de Saint-Jean", "Canton de Taché", "Canton de Tremblay"]
 };
 
 const getArpenteurColor = (arpenteur) => {
@@ -104,6 +105,14 @@ export default function Dossiers() {
     date_minute: "",
     type_minute: "Initiale"
   });
+
+  const [isFacturationDialogOpen, setIsFacturationDialogOpen] = useState(false);
+  const [facturationDossierId, setFacturationDossierId] = useState(null);
+  const [facturationSearchTerm, setFacturationSearchTerm] = useState("");
+  const [selectedMandatsForFacturation, setSelectedMandatsForFacturation] = useState([]);
+  const [facturationFilterArpenteur, setFacturationFilterArpenteur] = useState("all");
+  const [facturationFilterVille, setFacturationFilterVille] = useState("all");
+  const [facturationFilterMandat, setFacturationFilterMandat] = useState("all");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -577,13 +586,13 @@ export default function Dossiers() {
     updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
   };
 
-  const genererFacture = async (dossier = null) => {
+  const genererFacture = async (dossier = null, selectedMandats = null) => {
     const targetDossier = dossier || editingDossier;
     if (!targetDossier) return;
     
     const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
     const client = clientsList[0];
-    const mandatsData = dossier ? targetDossier.mandats : formData.mandats;
+    const mandatsData = selectedMandats || (dossier ? targetDossier.mandats : formData.mandats);
     
     const totalHT = mandatsData.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
@@ -844,11 +853,6 @@ export default function Dossiers() {
     newWindow.document.close();
   };
 
-  const getCurrentValue = (items, key) => {
-    const current = items?.find(item => item.actuel || item.actuelle);
-    return current?.[key] || "";
-  };
-
   const now = new Date();
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
@@ -916,6 +920,40 @@ export default function Dossiers() {
         year: calculatePercentage(byYear, previousYear)
       }
     };
+  };
+
+  const openFacturationDialog = () => {
+    setIsFacturationDialogOpen(true);
+    setFacturationDossierId(null);
+    setSelectedMandatsForFacturation([]);
+    setFacturationSearchTerm("");
+    setFacturationFilterArpenteur("all");
+    setFacturationFilterVille("all");
+    setFacturationFilterMandat("all");
+  };
+
+  const selectDossierForFacturation = (dossierId) => {
+    setFacturationDossierId(dossierId);
+    const dossier = dossiers.find(d => d.id === dossierId);
+    if (dossier && dossier.mandats) {
+      // By default, select all mandates for facturation
+      setSelectedMandatsForFacturation(dossier.mandats.map((_, idx) => idx));
+    }
+  };
+
+  const toggleMandatForFacturation = (index) => {
+    setSelectedMandatsForFacturation(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
+  };
+
+  const handleGenererFactureFromDialog = () => {
+    if (!facturationDossierId) return;
+    const dossier = dossiers.find(d => d.id === facturationDossierId);
+    if (!dossier) return;
+    const selectedMandats = selectedMandatsForFacturation.map(idx => dossier.mandats[idx]);
+    genererFacture(dossier, selectedMandats);
+    setIsFacturationDialogOpen(false);
   };
 
   const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
@@ -1080,6 +1118,29 @@ export default function Dossiers() {
 
   const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
 
+  const dossiersForFacturation = dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé"); // Can facturer closed dossiers too
+  
+  const filteredDossiersForFacturation = dossiersForFacturation.filter(dossier => {
+    const searchLower = facturationSearchTerm.toLowerCase();
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+    );
+    
+    const matchesArpenteur = facturationFilterArpenteur === "all" || dossier.arpenteur_geometre === facturationFilterArpenteur;
+    const matchesVille = facturationFilterVille === "all" || dossier.mandats?.some(m => m.adresse_travaux?.ville === facturationFilterVille);
+    const matchesMandat = facturationFilterMandat === "all" || dossier.mandats?.some(m => m.type_mandat === facturationFilterMandat);
+    
+    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
+  });
+
+  const selectedDossierForFacturation = dossiers.find(d => d.id === facturationDossierId);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -1095,6 +1156,14 @@ export default function Dossiers() {
           </div>
 
           <div className="flex gap-3">
+            <Button 
+              onClick={openFacturationDialog}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Facturation
+            </Button>
+
             <Button 
               onClick={openCloseDossierDialog}
               className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50"
@@ -1647,6 +1716,199 @@ export default function Dossiers() {
           </div>
         </div>
 
+        <Dialog open={isFacturationDialogOpen} onOpenChange={setIsFacturationDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Générer une facture</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              {!facturationDossierId ? (
+                <>
+                  <div className="flex flex-wrap gap-3 items-center">
+                    <div className="relative flex-1 min-w-[250px]">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input placeholder="Rechercher..." value={facturationSearchTerm} onChange={(e) => setFacturationSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                    </div>
+                    <Select value={facturationFilterArpenteur} onValueChange={setFacturationFilterArpenteur}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Arpenteur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Tous les arpenteurs</SelectItem>
+                        {ARPENTEURS.map(arpenteur => (
+                          <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={facturationFilterMandat} onValueChange={setFacturationFilterMandat}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Mandat" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Tous les mandats</SelectItem>
+                        {TYPES_MANDATS.map(type => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={facturationFilterVille} onValueChange={setFacturationFilterVille}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Ville" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Toutes les villes</SelectItem>
+                        {uniqueVilles.map(ville => (
+                          <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex-1 overflow-hidden border border-slate-700 rounded-lg">
+                    <div className="max-h-[500px] overflow-y-auto">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-800/50 z-10">
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300">Clients</TableHead>
+                            <TableHead className="text-slate-300">Mandats</TableHead>
+                            <TableHead className="text-slate-300">Adresse Travaux</TableHead>
+                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredDossiersForFacturation.length > 0 ? (
+                            filteredDossiersForFacturation.map((dossier) => (
+                              <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierForFacturation(dossier.id)}>
+                                <TableCell className="font-medium">
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</TableCell>
+                                <TableCell className="text-slate-300">
+                                  {dossier.mandats && dossier.mandats.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                          {mandat.type_mandat}
+                                        </Badge>
+                                      ))}
+                                      {dossier.mandats.length > 2 && (
+                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                          +{dossier.mandats.length - 2}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-600 text-xs">Aucun</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {getFirstAdresseTravaux(dossier.mandats)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button type="button" size="sm" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10">
+                                    Sélectionner
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-12 text-slate-500">
+                                <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                <p>Aucun dossier trouvé</p>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+                    <div>
+                      <Badge variant="outline" className={`${getArpenteurColor(selectedDossierForFacturation?.arpenteur_geometre)} border mb-2`}>
+                        {getArpenteurInitials(selectedDossierForFacturation?.arpenteur_geometre)}{selectedDossierForFacturation?.numero_dossier}
+                      </Badge>
+                      <p className="text-slate-300 text-sm">{getClientsNames(selectedDossierForFacturation?.clients_ids)}</p>
+                    </div>
+                    <Button type="button" size="sm" variant="outline" onClick={() => { setFacturationDossierId(null); setSelectedMandatsForFacturation([]); }} className="text-slate-400">
+                      Changer de dossier
+                    </Button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    <Label className="text-lg font-semibold text-white mb-3 block">Sélectionner les mandats à facturer</Label>
+                    <div className="space-y-2">
+                      {selectedDossierForFacturation?.mandats?.map((mandat, index) => (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border transition-colors cursor-pointer ${
+                            selectedMandatsForFacturation.includes(index)
+                              ? 'bg-emerald-500/20 border-emerald-500/30'
+                              : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50'
+                          }`}
+                          onClick={() => toggleMandatForFacturation(index)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
+                              {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                                <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                              )}
+                              {mandat.lots && mandat.lots.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {mandat.lots.map((lotId) => {
+                                    const lot = getLotById(lotId);
+                                    return (
+                                      <Badge key={lotId} variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/30">
+                                        {lot?.numero_lot || lotId}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4 text-right">
+                              {(mandat.prix_estime || 0) > 0 && (
+                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                  {(mandat.prix_estime || 0).toFixed(2)} $
+                                  {(mandat.rabais || 0) > 0 && ` (-${mandat.rabais.toFixed(2)} $)`}
+                                </Badge>
+                              )}
+                              <div className="mt-2">
+                                {selectedMandatsForFacturation.includes(index) ? (
+                                  <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Sélectionné
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-slate-700 text-slate-400">
+                                    Cliquer pour sélectionner
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsFacturationDialogOpen(false)}>Annuler</Button>
+                    <Button type="button" onClick={handleGenererFactureFromDialog} disabled={selectedMandatsForFacturation.length === 0} className="bg-gradient-to-r from-purple-500 to-indigo-600">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Générer la facture
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={isCloseDossierDialogOpen} onOpenChange={setIsCloseDossierDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
@@ -1970,16 +2232,18 @@ export default function Dossiers() {
         <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) setEditingClientForForm(null); }} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['clients'] }); if (clientTypeForForm === "Client") setIsClientSelectorOpen(true); if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true); if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true); }} />
 
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">Détails du client</DialogTitle>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+              <DialogTitle className="text-2xl">
+                Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
+              </DialogTitle>
             </DialogHeader>
-            <ClientDetailView client={viewingClientDetails} />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setViewingClientDetails(null)}>Fermer</Button>
-              <Button onClick={() => handleEdit(viewingClientDetails)} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                <Edit className="w-4 h-4 mr-2" /> Modifier
-              </Button>
+            <div className="flex-1 overflow-hidden p-6">
+              {viewingClientDetails && (
+                <ClientDetailView
+                  client={viewingClientDetails}
+                />
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -2672,7 +2936,15 @@ export default function Dossiers() {
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           </TableCell>
                           <TableCell className="text-slate-300">{getClientsNames(dossier.clients_ids)}</TableCell>
-                          <TableCell className="text-slate-300">{dossier.mandatInfo?.type_mandat || '-'}</TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandatInfo?.type_mandat ? (
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                {dossier.mandatInfo.type_mandat}
+                              </Badge>
+                            ) : (
+                              <span className="text-slate-600 text-xs">-</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.mandatInfo?.tache_actuelle && (
                               <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
