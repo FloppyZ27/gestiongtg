@@ -3006,9 +3006,9 @@ export default function Dossiers() {
                                   </div>
                                 )}
                                 {mandat.factures && mandat.factures.length > 0 && (
-                                  <div className="pt-3 border-t border-slate-700">
-                                    <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures.length})</Label>
-                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                  <div className="pt-2 border-t border-slate-700">
+                                    <Label className="text-slate-400 text-xs">Factures générées ({mandat.factures.length})</Label>
+                                    <div className="border border-slate-700 rounded-lg overflow-hidden mt-2">
                                       <Table>
                                         <TableHeader>
                                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
