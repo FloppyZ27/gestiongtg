@@ -117,6 +117,8 @@ export default function Dossiers() {
   const [isFacturationMandatsDialogOpen, setIsFacturationMandatsDialogOpen] = useState(false);
   const [selectedMandatsForLocalFacturation, setSelectedMandatsForLocalFacturation] = useState([]);
   const [terrainSectionExpanded, setTerrainSectionExpanded] = useState({});
+  const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
+  const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -1289,6 +1291,20 @@ export default function Dossiers() {
     }));
   };
 
+  const openAddMinuteDialog = (mandatIndex) => {
+    setCurrentMinuteMandatIndex(mandatIndex);
+    setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" }); // Reset form for new minute
+    setIsAddMinuteDialogOpen(true);
+  };
+
+  const handleAddMinuteFromDialog = () => {
+    if (currentMinuteMandatIndex !== null && newMinuteForm.minute && newMinuteForm.date_minute) {
+      addMinuteToMandat(currentMinuteMandatIndex);
+      setIsAddMinuteDialogOpen(false);
+      setCurrentMinuteMandatIndex(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -1618,98 +1634,62 @@ export default function Dossiers() {
                                     </div>
 
                                     {editingDossier && (
-                                      <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                          <Label className="text-lg font-semibold text-slate-300">Informations de minute</Label>
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            onClick={() => addMinuteToMandat(index)}
-                                            disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
-                                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                                          >
-                                            <Plus className="w-4 h-4 mr-1" />
-                                            Ajouter minute
-                                          </Button>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-3 gap-3 p-3 bg-slate-700/30 border border-slate-600 rounded-lg">
-                                          <div className="space-y-2">
-                                            <Label className="text-sm">Minute</Label>
-                                            <Input
-                                              value={newMinuteForm.minute}
-                                              onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
-                                              placeholder="Ex: 12345"
-                                              className="bg-slate-700 border-slate-600"
-                                            />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-sm">Date de minute</Label>
-                                            <Input
-                                              type="date"
-                                              value={newMinuteForm.date_minute}
-                                              onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
-                                              className="bg-slate-700 border-slate-600"
-                                            />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-sm">Type de minute</Label>
-                                            <Select
-                                              value={newMinuteForm.type_minute}
-                                              onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
+                                      <>
+                                        <div className="space-y-2">
+                                          <div className="flex justify-between items-center">
+                                            <Label className="text-lg font-semibold text-slate-300">Informations de minute</Label>
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              onClick={() => openAddMinuteDialog(index)}
+                                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                                             >
-                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                                <SelectValue placeholder="Type" />
-                                              </SelectTrigger>
-                                              <SelectContent className="bg-slate-800 border-slate-700">
-                                                <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
-                                                <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
-                                                <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
-                                              </SelectContent>
-                                            </Select>
+                                              <Plus className="w-4 h-4 mr-1" />
+                                              Ajouter minute
+                                            </Button>
                                           </div>
-                                        </div>
-
-                                        {mandat.minutes_list && mandat.minutes_list.length > 0 && (
-                                          <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                            <Table>
-                                              <TableHeader>
-                                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                                  <TableHead className="text-slate-300">Minute</TableHead>
-                                                  <TableHead className="text-slate-300">Date de minute</TableHead>
-                                                  <TableHead className="text-slate-300">Type de minute</TableHead>
-                                                  <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                                                </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                {mandat.minutes_list.map((minute, minuteIdx) => (
-                                                  <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
-                                                    <TableCell className="text-white">{minute.minute}</TableCell>
-                                                    <TableCell className="text-white">
-                                                      {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
-                                                    </TableCell>
-                                                    <TableCell className="text-white">
-                                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                                        {minute.type_minute}
-                                                      </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                      <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => removeMinuteFromMandat(index, minuteIdx)}
-                                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                      >
-                                                        <Trash2 className="w-4 h-4" />
-                                                      </Button>
-                                                    </TableCell>
+                                          
+                                          {mandat.minutes_list && mandat.minutes_list.length > 0 && (
+                                            <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                              <Table>
+                                                <TableHeader>
+                                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                    <TableHead className="text-slate-300">Minute</TableHead>
+                                                    <TableHead className="text-slate-300">Date de minute</TableHead>
+                                                    <TableHead className="text-slate-300">Type de minute</TableHead>
+                                                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                                   </TableRow>
-                                                ))}
-                                              </TableBody>
-                                            </Table>
-                                          </div>
-                                        )}
+                                                </TableHeader>
+                                                <TableBody>
+                                                  {mandat.minutes_list.map((minute, minuteIdx) => (
+                                                    <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
+                                                      <TableCell className="text-white">{minute.minute}</TableCell>
+                                                      <TableCell className="text-white">
+                                                        {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
+                                                      </TableCell>
+                                                      <TableCell className="text-white">
+                                                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                                          {minute.type_minute}
+                                                        </Badge>
+                                                      </TableCell>
+                                                      <TableCell className="text-right">
+                                                        <Button
+                                                          type="button"
+                                                          size="sm"
+                                                          variant="ghost"
+                                                          onClick={() => removeMinuteFromMandat(index, minuteIdx)}
+                                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                        >
+                                                          <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                      </TableCell>
+                                                    </TableRow>
+                                                  ))}
+                                                </TableBody>
+                                              </Table>
+                                            </div>
+                                          )}
+                                        </div>
                                         {mandat.factures && mandat.factures.length > 0 && (
                                           <div className="pt-3 border-t border-slate-700">
                                             <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures.length})</Label>
@@ -1749,7 +1729,7 @@ export default function Dossiers() {
                                         </div>
                                       </div>
                                     )}
-                                  </div>
+                                  </>
                                 )}
 
                                 {editingDossier && (
@@ -1894,6 +1874,64 @@ export default function Dossiers() {
             </Dialog>
           </div>
         </div>
+
+        {/* Dialog pour ajouter une minute */}
+        <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Minute <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newMinuteForm.minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
+                  placeholder="Ex: 12345"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date de minute <span className="text-red-400">*</span></Label>
+                <Input
+                  type="date"
+                  value={newMinuteForm.date_minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type de minute <span className="text-red-400">*</span></Label>
+                <Select
+                  value={newMinuteForm.type_minute}
+                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
+                >
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
+                    <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
+                    <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleAddMinuteFromDialog}
+                  disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Ajouter
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Dialog for local facturation (from editing dossier) */}
         <Dialog open={isFacturationMandatsDialogOpen} onOpenChange={setIsFacturationMandatsDialogOpen}>
