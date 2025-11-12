@@ -578,21 +578,51 @@ export default function Dossiers() {
     updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
   };
 
-  const genererFacture = async () => {
-    if (!editingDossier) return;
+  const genererFacture = async (dossier = null) => {
+    const targetDossier = dossier || editingDossier;
+    if (!targetDossier) return;
     
-    const dossier = editingDossier;
-    const clients = formData.clients_ids.map(id => getClientById(id)).filter(c => c);
+    const clients = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
     const client = clients[0];
+    const mandatsData = dossier ? targetDossier.mandats : formData.mandats;
     
     // Calculer les montants
-    const totalHT = formData.mandats.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
+    const totalHT = mandatsData.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
 
     // Générer le numéro de facture
     const numeroFacture = Math.floor(Math.random() * 90000) + 10000;
+
+    // Rassembler toutes les adresses uniques
+    const uniqueAddresses = [];
+    const addressMap = new Map();
+    mandatsData.forEach(m => {
+      if (m.adresse_travaux) {
+        const addrStr = formatAdresse(m.adresse_travaux);
+        if (addrStr && !addressMap.has(addrStr)) {
+          addressMap.set(addrStr, true);
+          uniqueAddresses.push(addrStr);
+        }
+      }
+    });
+
+    // Rassembler tous les lots uniques
+    const uniqueLots = [];
+    const lotMap = new Map();
+    mandatsData.forEach(m => {
+      if (m.lots && m.lots.length > 0) {
+        m.lots.forEach(lotId => {
+          const lot = getLotById(lotId);
+          const lotStr = lot ? lot.numero_lot : lotId; // Use lot number if available, otherwise lotId
+          if (!lotMap.has(lotStr)) {
+            lotMap.set(lotStr, true);
+            uniqueLots.push(lotStr);
+          }
+        });
+      }
+    });
 
     const factureHTML = `
 <!DOCTYPE html>
@@ -650,9 +680,9 @@ export default function Dossiers() {
     .totals-table .total-row { border-top: 1.5px solid #000; border-bottom: 3px double #000; }
     .totals-table .total-row td { padding-top: 8px; padding-bottom: 5px; font-size: 13px; font-weight: bold; }
     
-    .footer { margin-top: 40px; font-size: 10px; line-height: 1.5; }
-    .footer .fiscal { color: #dc2626; text-align: left; margin-bottom: 8px; font-weight: bold; }
-    .footer .conditions { color: #dc2626; text-align: right; font-weight: bold; }
+    .footer { margin-top: 40px; font-size: 10px; line-height: 1.5; display: flex; justify-content: space-between; align-items: center; }
+    .footer .fiscal { color: #dc2626; font-weight: bold; }
+    .footer .conditions { color: #dc2626; font-weight: bold; }
     
     @media print {
       body { padding: 30px 40px; }
@@ -681,7 +711,7 @@ export default function Dossiers() {
       <div class="details">
         <div><strong>NO.</strong> ${numeroFacture}</div>
         <div><strong>DATE</strong> ${format(new Date(), "yyyy-MM-dd")}</div>
-        <div><strong>DOSSIER</strong> ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}</div>
+        <div><strong>DOSSIER</strong> ${getArpenteurInitials(targetDossier.arpenteur_geometre)}${targetDossier.numero_dossier}</div>
       </div>
     </div>
   </div>
@@ -705,23 +735,17 @@ export default function Dossiers() {
     </div>
   </div>
   
-  ${formData.mandats.length > 0 && formData.mandats.some(m => m.adresse_travaux) ? `
+  ${uniqueAddresses.length > 0 ? `
     <div class="location-section">
       <div class="section-title">Localisation(s) des travaux :</div>
-      ${formData.mandats.filter(m => m.adresse_travaux && formatAdresse(m.adresse_travaux)).map(m => `<p>${formatAdresse(m.adresse_travaux)}</p>`).join('')}
+      ${uniqueAddresses.map(addr => `<p>${addr}</p>`).join('')}
     </div>
   ` : ''}
   
-  ${formData.mandats.length > 0 && formData.mandats.some(m => m.lots && m.lots.length > 0) ? `
+  ${uniqueLots.length > 0 ? `
     <div class="location-section">
       <div class="section-title">Lot(s) :</div>
-      ${formData.mandats.filter(m => m.lots && m.lots.length > 0).map(m => {
-        const lotsTexte = m.lots.map(lotId => {
-          const lot = getLotById(lotId);
-          return lot ? `${lot.numero_lot} du cadastre du Québec` : lotId;
-        }).join(', ');
-        return `<p>${lotsTexte}</p>`;
-      }).join('')}
+      <p>${uniqueLots.map(lot => `${lot} du cadastre du Québec`).join(', ')}</p>
     </div>
   ` : ''}
   
@@ -748,7 +772,7 @@ export default function Dossiers() {
         </td>
         <td class="amount-cell"></td>
       </tr>
-      ${formData.mandats.map((mandat, idx) => {
+      ${mandatsData.map((mandat, idx) => {
         const montant = (mandat.prix_estime || 0);
         const rabais = mandat.rabais || 0;
         const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 
@@ -1076,6 +1100,21 @@ export default function Dossiers() {
 
           <div className="flex gap-3">
             <Button 
+              onClick={() => {
+                const selectedDossier = dossiers.find(d => d.statut === "Ouvert");
+                if (selectedDossier) {
+                  genererFacture(selectedDossier);
+                } else {
+                  alert("Veuillez ouvrir un dossier pour générer une facture.");
+                }
+              }}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              Facturation
+            </Button>
+
+            <Button 
               onClick={openCloseDossierDialog}
               className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50"
             >
@@ -1102,14 +1141,24 @@ export default function Dossiers() {
                     <div className="mb-6 flex justify-between items-center">
                       <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
                       {editingDossier && (
-                        <Button
-                          type="button"
-                          onClick={genererFacture}
-                          className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
-                        >
-                          <FileText className="w-5 h-5 mr-2" />
-                          Facturation
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            onClick={() => genererFacture()}
+                            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
+                          >
+                            <FileText className="w-5 h-5 mr-2" />
+                            Facturation
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={openCloseDossierDialog}
+                            className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700"
+                          >
+                            <Check className="w-5 h-5 mr-2" />
+                            Fermer dossier
+                          </Button>
+                        </div>
                       )}
                     </div>
                     <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
