@@ -1641,6 +1641,16 @@ export default function Dossiers() {
                                   <div className="space-y-3">
                                     <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
                                       <div className="space-y-2">
+                                        <Label>Date de livraison</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_livraison || ""}
+                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-2">
                                         <Label>Date de signature</Label>
                                         <Input
                                           type="date"
@@ -1656,16 +1666,6 @@ export default function Dossiers() {
                                           type="date"
                                           value={mandat.date_debut_travaux || ""}
                                           onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                        />
-                                      </div>
-
-                                      <div className="space-y-2">
-                                        <Label>Date de livraison</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_livraison || ""}
-                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
                                           className="bg-slate-700 border-slate-600"
                                         />
                                       </div>
