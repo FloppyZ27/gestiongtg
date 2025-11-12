@@ -586,7 +586,7 @@ export default function Dossiers() {
     const client = clients[0];
     
     // Calculer les montants
-    const totalHT = formData.mandats.reduce((sum, m) => sum + (parseFloat(m.prix_estime) || 0) - (parseFloat(m.rabais) || 0), 0);
+    const totalHT = formData.mandats.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
@@ -601,55 +601,60 @@ export default function Dossiers() {
   <meta charset="UTF-8">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; padding: 40px; color: #000; }
+    body { font-family: Arial, sans-serif; padding: 50px 60px; color: #000; line-height: 1.4; }
     
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-    .company { flex: 1; }
-    .company h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-    .company .subtitle { font-size: 14px; font-style: italic; margin-bottom: 10px; }
-    .company .address { font-size: 11px; line-height: 1.6; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .company { flex: 0 0 35%; }
+    .company h1 { font-size: 16px; font-weight: bold; margin-bottom: 2px; letter-spacing: 0.5px; }
+    .company .subtitle { font-size: 13px; font-style: italic; margin-bottom: 8px; }
+    .company .address { font-size: 10px; line-height: 1.5; color: #333; }
     
-    .logo { flex: 1; text-align: center; }
-    .logo img { max-width: 120px; }
+    .logo { flex: 0 0 30%; text-align: center; padding-top: 10px; }
+    .logo img { max-width: 100px; height: auto; }
     
-    .invoice-title { flex: 1; text-align: right; }
-    .invoice-title h2 { font-size: 36px; font-weight: bold; margin-bottom: 10px; }
-    .invoice-title .details { font-size: 12px; line-height: 1.8; }
-    .invoice-title .details strong { display: inline-block; width: 80px; }
+    .invoice-title { flex: 0 0 35%; text-align: right; }
+    .invoice-title h2 { font-size: 42px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+    .invoice-title .details { font-size: 11px; line-height: 1.8; text-align: right; }
+    .invoice-title .details div { margin: 3px 0; }
+    .invoice-title .details strong { font-weight: bold; margin-right: 5px; }
     
-    .separator { border-top: 2px solid #000; margin: 20px 0; }
+    .separator { border-top: 1.5px solid #000; margin: 18px 0; }
     
-    .billing-section { display: flex; gap: 40px; margin-bottom: 25px; font-size: 12px; }
+    .billing-section { display: flex; margin-bottom: 20px; font-size: 11px; }
     .billing-section .column { flex: 1; }
-    .billing-section .label { font-weight: bold; text-decoration: underline; margin-bottom: 8px; }
-    .billing-section p { line-height: 1.6; }
+    .billing-section .label { font-weight: bold; text-decoration: underline; margin-bottom: 10px; font-size: 11px; }
+    .billing-section p { line-height: 1.5; margin: 2px 0; }
     
-    .location-section { margin: 25px 0; font-size: 12px; }
-    .location-section .section-title { font-weight: bold; font-style: italic; margin-bottom: 5px; }
+    .location-section { margin: 20px 0 8px 0; font-size: 11px; }
+    .location-section .section-title { font-weight: normal; font-style: italic; margin-bottom: 3px; }
+    .location-section p { margin: 2px 0; }
     
-    .description-table { width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 12px; }
-    .description-table th { background: #d1d5db; padding: 8px; text-align: left; font-weight: bold; border: 1px solid #000; }
-    .description-table td { padding: 8px; border: 1px solid #000; vertical-align: top; }
-    .description-table .amount-cell { text-align: right; white-space: nowrap; }
-    .description-table .bold-item { font-weight: bold; }
-    .description-table .italic-item { font-style: italic; margin-left: 20px; }
-    .description-table .rabais { color: #dc2626; font-style: italic; }
-    .description-table .minute-info { float: right; margin-left: 20px; }
+    .description-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 11px; }
+    .description-table th { background: #d1d5db; padding: 6px 10px; text-align: left; font-weight: bold; border: 1px solid #000; font-size: 11px; }
+    .description-table th:last-child { text-align: right; }
+    .description-table td { padding: 6px 10px; border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; vertical-align: top; }
+    .description-table tr:first-child td { border-top: 1px solid #000; }
+    .description-table .amount-cell { text-align: right; white-space: nowrap; vertical-align: top; }
+    .description-table .bold-item { font-weight: bold; margin: 4px 0; }
+    .description-table .italic-item { font-style: italic; margin-left: 25px; margin: 2px 0 2px 25px; }
+    .description-table .rabais { color: #dc2626; font-style: italic; margin-left: 25px; }
+    .description-table .minute-info { float: right; font-weight: bold; margin-left: 30px; }
     
-    .totals { margin-top: 40px; }
-    .totals-table { width: 100%; font-size: 13px; }
-    .totals-table tr td:first-child { text-align: left; }
-    .totals-table tr td:last-child { text-align: right; width: 150px; font-weight: bold; }
-    .totals-table .total-row { border-top: 2px solid #000; border-bottom: 3px double #000; }
-    .totals-table .total-row td { padding-top: 8px; font-size: 15px; font-weight: bold; }
+    .totals { margin-top: 80px; }
+    .totals-left { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 25px; }
+    .totals-table { width: 100%; font-size: 12px; margin-bottom: 5px; }
+    .totals-table tr { height: 25px; }
+    .totals-table tr td:first-child { text-align: right; padding-right: 40px; }
+    .totals-table tr td:last-child { text-align: right; font-weight: bold; width: 120px; }
+    .totals-table .total-row { border-top: 1.5px solid #000; border-bottom: 3px double #000; }
+    .totals-table .total-row td { padding-top: 8px; padding-bottom: 5px; font-size: 13px; font-weight: bold; }
     
-    .footer { margin-top: 50px; font-size: 11px; }
-    .footer .thank-you { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
-    .footer .fiscal { color: #dc2626; text-align: center; margin-bottom: 10px; }
-    .footer .conditions { color: #dc2626; text-align: right; }
+    .footer { margin-top: 40px; font-size: 10px; line-height: 1.5; }
+    .footer .fiscal { color: #dc2626; text-align: center; margin-bottom: 8px; font-weight: bold; }
+    .footer .conditions { color: #dc2626; text-align: right; font-weight: bold; }
     
     @media print {
-      body { padding: 20px; }
+      body { padding: 30px 40px; }
       .no-print { display: none !important; }
     }
   </style>
@@ -699,16 +704,17 @@ export default function Dossiers() {
     </div>
   </div>
   
-  ${formData.mandats.length > 0 ? `
+  ${formData.mandats.length > 0 && formData.mandats.some(m => m.adresse_travaux) ? `
     <div class="location-section">
       <div class="section-title">Localisation(s) des travaux :</div>
-      ${formData.mandats.map(m => m.adresse_travaux ? `<p>${formatAdresse(m.adresse_travaux)}</p>` : '').join('')}
+      ${formData.mandats.filter(m => m.adresse_travaux && formatAdresse(m.adresse_travaux)).map(m => `<p>${formatAdresse(m.adresse_travaux)}</p>`).join('')}
     </div>
-    
+  ` : ''}
+  
+  ${formData.mandats.length > 0 && formData.mandats.some(m => m.lots && m.lots.length > 0) ? `
     <div class="location-section">
       <div class="section-title">Lot(s) :</div>
-      ${formData.mandats.map(m => {
-        if (!m.lots || m.lots.length === 0) return '';
+      ${formData.mandats.filter(m => m.lots && m.lots.length > 0).map(m => {
         const lotsTexte = m.lots.map(lotId => {
           const lot = getLotById(lotId);
           return lot ? `${lot.numero_lot} du cadastre du Québec` : lotId;
@@ -721,8 +727,8 @@ export default function Dossiers() {
   <table class="description-table">
     <thead>
       <tr>
-        <th style="width: 70%;">DESCRIPTION</th>
-        <th style="width: 30%;">MONTANT</th>
+        <th style="width: 75%;">DESCRIPTION</th>
+        <th style="width: 25%;">MONTANT</th>
       </tr>
     </thead>
     <tbody>
@@ -752,15 +758,17 @@ export default function Dossiers() {
           <tr>
             <td>
               <div class="bold-item">Travaux réalisés :</div>
-              <div class="italic-item">${mandat.type_mandat || 'Mandat'}</div>
-              ${minutesInfo ? `<span class="minute-info"><strong>Minute:</strong> ${minutesInfo}</span>` : ''}
+              <div class="italic-item">
+                ${mandat.type_mandat || 'Mandat'}
+                ${minutesInfo ? `<span class="minute-info">Minute: ${minutesInfo}</span>` : ''}
+              </div>
             </td>
             <td class="amount-cell">${montant.toFixed(2)} $</td>
           </tr>
           ${rabais > 0 ? `
             <tr>
               <td>
-                <div class="rabais">Rabais consenti.</div>
+                <div class="italic-item rabais">Rabais consenti.</div>
               </td>
               <td class="amount-cell rabais">(${rabais.toFixed(2)})</td>
             </tr>
@@ -771,24 +779,21 @@ export default function Dossiers() {
   </table>
   
   <div class="totals">
+    <div class="totals-left">Merci pour votre confiance !</div>
     <table class="totals-table">
       <tr>
-        <td></td>
         <td>Sous-total :</td>
         <td>${totalHT.toFixed(2)} $</td>
       </tr>
       <tr>
-        <td></td>
         <td>TPS :</td>
         <td>${tps.toFixed(2)}</td>
       </tr>
       <tr>
-        <td></td>
         <td>TVQ :</td>
         <td>${tvq.toFixed(2)}</td>
       </tr>
       <tr class="total-row">
-        <td></td>
         <td>Total :</td>
         <td>${totalTTC.toFixed(2)} $</td>
       </tr>
@@ -796,7 +801,6 @@ export default function Dossiers() {
   </div>
   
   <div class="footer">
-    <div class="thank-you">Merci pour votre confiance !</div>
     <div class="fiscal">TPS : 829858554 RT 0001 | TVQ : 1213714127 TQ 0001</div>
     <div class="conditions">Condition : Payable sur réception | Frais d'administration : 2% par mois sur frais de retard</div>
   </div>
