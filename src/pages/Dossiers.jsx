@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -116,6 +116,7 @@ export default function Dossiers() {
 
   const [isFacturationMandatsDialogOpen, setIsFacturationMandatsDialogOpen] = useState(false);
   const [selectedMandatsForLocalFacturation, setSelectedMandatsForLocalFacturation] = useState([]);
+  const [terrainSectionExpanded, setTerrainSectionExpanded] = useState({});
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -353,6 +354,7 @@ export default function Dossiers() {
     setActiveTabMandat("0");
     setCommentairesTemporaires([]);
     setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+    setTerrainSectionExpanded({}); // Reset expanded state on form close
   };
 
   const resetNewLotForm = () => {
@@ -424,6 +426,7 @@ export default function Dossiers() {
     setIsDialogOpen(true);
     setActiveTabMandat("0");
     setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+    setTerrainSectionExpanded({}); // Reset expanded state when opening a dossier
   };
 
   const handleView = (dossier) => {
@@ -690,7 +693,7 @@ export default function Dossiers() {
     .description-table tr:first-child td { border-top: 1px solid #000; }
     .description-table .amount-cell { text-align: right; white-space: nowrap; vertical-align: top; }
     .description-table .bold-item { font-weight: bold; margin: 4px 0; }
-    .description-table .italic-item { font-style: italic; margin-left: 25px; margin: 2px 0 2px 25px; }
+    .description-table .italic-item { margin-left: 25px; margin: 2px 0 2px 25px; }
     .description-table .rabais { color: #dc2626; font-style: italic; margin-left: 25px; }
     .description-table .minute-info { float: right; font-weight: bold; margin-left: 30px; }
     
@@ -1279,6 +1282,13 @@ export default function Dossiers() {
   const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
   const selectedDossierForFacturation = dossiers.find(d => d.id === facturationDossierId);
 
+  const toggleTerrainSection = (mandatIndex) => {
+    setTerrainSectionExpanded(prev => ({
+      ...prev,
+      [mandatIndex]: !prev[mandatIndex]
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -1512,65 +1522,43 @@ export default function Dossiers() {
                                             </SelectContent>
                                           </Select>
                                         </div>
-                                        {editingDossier && (
-                                          <div className="space-y-2">
-                                            <Label>Tâche actuelle</Label>
-                                            <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                                <SelectValue placeholder="Sélectionner la tâche" />
-                                              </SelectTrigger>
-                                              <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                                {TACHES.map((tache) => (
-                                                  <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
-                                        )}
+                                    {editingDossier && (
+                                      <div className="space-y-2">
+                                        <Label>Tâche actuelle</Label>
+                                        <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                            <SelectValue placeholder="Sélectionner la tâche" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                            {TACHES.map((tache) => (
+                                              <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
                                       </div>
-                                      <Button type="button" size="sm" variant="ghost" onClick={() => {
-                                        removeMandat(index);
-                                        if (formData.mandats.length > 1) {
-                                          setActiveTabMandat(Math.max(0, index - 1).toString());
-                                        } else {
-                                          setActiveTabMandat("0");
-                                        }
-                                      }} className="text-red-400 hover:text-red-300 mt-8">
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Supprimer ce mandat
-                                      </Button>
-                                    </div>
+                                    )}
+                                  </div>
+                                  <Button type="button" size="sm" variant="ghost" onClick={() => {
+                                    removeMandat(index);
+                                    if (formData.mandats.length > 1) {
+                                      setActiveTabMandat(Math.max(0, index - 1).toString());
+                                    } else {
+                                      setActiveTabMandat("0");
+                                    }
+                                  }} className="text-red-400 hover:text-red-300 mt-8">
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Supprimer ce mandat
+                                  </Button>
+                                </div>
 
-                                    <div className="grid grid-cols-[70%_30%] gap-4">
-                                      <div className="space-y-3">
-                                        <AddressInput
-                                          addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
-                                          onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
-                                          showActuelle={false}
-                                          singleAddress={true}
-                                        />
-                                      </div>
-                                      <div className="space-y-3 pr-4">
-                                        <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
-                                          <div className="space-y-2">
-                                            <Label className="text-left block">Date d'ouverture</Label>
-                                            <Input type="date" value={mandat.date_ouverture || ""} onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)} className="bg-slate-700 border-slate-600" />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-left block">Date de signature</Label>
-                                            <Input type="date" value={mandat.date_signature || ""} onChange={(e) => updateMandat(index, 'date_signature', e.target.value)} className="bg-slate-700 border-slate-600" />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-left block">Début des travaux</Label>
-                                            <Input type="date" value={mandat.date_debut_travaux || ""} onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)} className="bg-slate-700 border-slate-600" />
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-left block">Date de livraison</Label>
-                                            <Input type="date" value={mandat.date_livraison || ""} onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)} className="bg-slate-700 border-slate-600" />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
+                                <div className="space-y-3">
+                                  <AddressInput
+                                    addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
+                                    onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                                    showActuelle={false}
+                                    singleAddress={true}
+                                  />
+                                </div>
 
                                     <div className="space-y-2">
                                       <div className="flex justify-between items-center">
@@ -1735,44 +1723,56 @@ export default function Dossiers() {
                                                     <TableHead className="text-slate-300">Total TTC</TableHead>
                                                     <TableHead className="text-slate-300 text-right">Action</TableHead>
                                                   </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                  {mandat.factures.map((facture, factureIdx) => (
-                                                    <TableRow key={factureIdx} className="border-slate-800">
-                                                      <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
-                                                      <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
-                                                      <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
-                                                      <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
-                                                      <TableCell className="text-right">
-                                                        <Button
-                                                          type="button"
-                                                          size="sm"
-                                                          onClick={() => voirFacture(facture.facture_html)}
-                                                          className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                                                        >
-                                                          <FileText className="w-4 h-4 mr-2" />
-                                                          Voir
-                                                        </Button>
-                                                      </TableCell>
-                                                    </TableRow>
-                                                  ))}
-                                                </TableBody>
-                                              </Table>
-                                            </div>
-                                          </div>
-                                        )}
+                                            </TableHeader>
+                                            <TableBody>
+                                              {mandat.factures.map((facture, factureIdx) => (
+                                                <TableRow key={factureIdx} className="border-slate-800">
+                                                  <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
+                                                  <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                                                  <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
+                                                  <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button
+                                                      type="button"
+                                                      size="sm"
+                                                      onClick={() => voirFacture(facture.facture_html)}
+                                                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                                                    >
+                                                      <FileText className="w-4 h-4 mr-2" />
+                                                      Voir
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
                                       </div>
                                     )}
+                                  </div>
+                                )}
 
-                                    {editingDossier && (
-                                      <>
-                                        <div className="space-y-2">
-                                          <Label>Notes</Label>
-                                          <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(index, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
-                                        </div>
+                                {editingDossier && (
+                                  <>
+                                    <div className="space-y-2">
+                                      <Label>Notes</Label>
+                                      <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(index, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
+                                    </div>
 
-                                        <div className="border-t border-slate-700 pt-4 mt-4">
-                                          <Label className="text-lg font-semibold text-emerald-400 mb-3 block">Section Terrain</Label>
+                                    <div className="border-t border-slate-700 pt-4 mt-4">
+                                      <div className="flex items-center justify-between mb-3 cursor-pointer" onClick={() => toggleTerrainSection(index)}>
+                                        <Label className="text-lg font-semibold text-emerald-400">Section Terrain</Label>
+                                        <Button type="button" variant="ghost" size="sm" className="text-emerald-400 hover:bg-emerald-500/10">
+                                          {terrainSectionExpanded[index] ? (
+                                            <ChevronUp className="w-5 h-5" />
+                                          ) : (
+                                            <ChevronDown className="w-5 h-5" />
+                                          )}
+                                        </Button>
+                                      </div>
+                                      
+                                      {terrainSectionExpanded[index] && (
+                                        <div className="space-y-3">
                                           <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
                                               <Label>Date limite levé terrain</Label>
@@ -1783,7 +1783,7 @@ export default function Dossiers() {
                                               <Input value={mandat.terrain?.instruments_requis || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, instruments_requis: e.target.value })} placeholder="Ex: GPS, Total Station" className="bg-slate-700 border-slate-600" />
                                             </div>
                                           </div>
-                                          <div className="space-y-3 mt-3">
+                                          <div className="space-y-3">
                                             <div className="flex items-center gap-3">
                                               <input type="checkbox" checked={mandat.terrain?.a_rendez_vous || false} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, a_rendez_vous: e.target.checked })} className="w-4 h-4 rounded bg-slate-700 border-slate-600" />
                                               <Label>Rendez-vous nécessaire</Label>
@@ -1801,7 +1801,7 @@ export default function Dossiers() {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="grid grid-cols-2 gap-3 mt-3">
+                                          <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
                                               <Label>Donneur</Label>
                                               <Input value={mandat.terrain?.donneur || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, donneur: e.target.value })} placeholder="Nom du donneur" className="bg-slate-700 border-slate-600" />
@@ -1811,7 +1811,7 @@ export default function Dossiers() {
                                               <Input value={mandat.terrain?.technicien || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, technicien: e.target.value })} placeholder="Nom du technicien" className="bg-slate-700 border-slate-600" />
                                             </div>
                                           </div>
-                                          <div className="grid grid-cols-2 gap-3 mt-3">
+                                          <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
                                               <Label>Dossier à faire en même temps</Label>
                                               <Input value={mandat.terrain?.dossier_simultane || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, dossier_simultane: e.target.value })} placeholder="N° de dossier" className="bg-slate-700 border-slate-600" />
@@ -1821,18 +1821,20 @@ export default function Dossiers() {
                                               <Input value={mandat.terrain?.temps_prevu || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, temps_prevu: e.target.value })} placeholder="Ex: 2h30" className="bg-slate-700 border-slate-600" />
                                             </div>
                                           </div>
-                                          <div className="space-y-2 mt-3">
+                                          <div className="space-y-2">
                                             <Label>Notes terrain</Label>
                                             <Textarea value={mandat.terrain?.notes || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, notes: e.target.value })} placeholder="Notes concernant le terrain..." className="bg-slate-700 border-slate-600 h-20" />
                                           </div>
                                         </div>
-                                      </>
-                                    )}
-                                  </CardContent>
-                                </Card>
-                              </TabsContent>
-                            ))}
-                          </Tabs>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+                        ))}
+                      </Tabs>
                         ) : (
                           <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.</div>
                         )}
