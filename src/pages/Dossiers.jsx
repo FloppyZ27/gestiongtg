@@ -1618,192 +1618,331 @@ export default function Dossiers() {
         </Dialog>
 
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
-            <DialogHeader className="p-6 border-b border-slate-800 flex-shrink-0">
-              <DialogTitle className="text-2xl text-emerald-400">Dossier: <span className="text-white">{getArpenteurInitials(viewingDossier?.arpenteur_geometre)}{viewingDossier?.numero_dossier}</span></DialogTitle>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
-            <div className="p-6 flex-1 overflow-y-auto">
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Informations Générales</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Arpenteur-géomètre</Label>
-                    <p className="text-white">{viewingDossier?.arpenteur_geometre || '-'}</p>
+            {viewingDossier && (
+              <div className="flex h-[90vh]">
+                {/* Main content - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">
+                      Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
+                    </h2>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Date d'ouverture</Label>
-                    <p className="text-white">{viewingDossier?.date_ouverture ? format(new Date(viewingDossier.date_ouverture), 'dd MMMM yyyy', { locale: fr }) : '-'}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Statut</Label>
-                    <Badge variant="outline" className={`border ${viewingDossier?.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{viewingDossier?.statut || '-'}</Badge>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Clients</Label>
-                    {viewingDossier?.clients_ids?.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {viewingDossier.clients_ids.map(id => {
-                          const client = getClientById(id);
-                          return client ? <Badge key={id} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">{client.prenom} {client.nom}</Badge> : null;
-                        })}
+                  <div className="space-y-6">
+                    {/* Informations principales */}
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                      <div>
+                        <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                        <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
                       </div>
-                    ) : <p className="text-slate-500">-</p>}
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Notaires</Label>
-                    {viewingDossier?.notaires_ids?.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {viewingDossier.notaires_ids.map(id => {
-                          const notaire = getClientById(id);
-                          return notaire ? <Badge key={id} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30">{notaire.prenom} {notaire.nom}</Badge> : null;
-                        })}
+                      <div>
+                        <Label className="text-slate-400 text-sm">Statut</Label>
+                        <div className="mt-1">
+                          <Badge variant="outline" className={`border ${viewingDossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                            {viewingDossier.statut}
+                          </Badge>
+                        </div>
                       </div>
-                    ) : <p className="text-slate-500">-</p>}
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400">Courtiers</Label>
-                    {viewingDossier?.courtiers_ids?.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {viewingDossier.courtiers_ids.map(id => {
-                          const courtier = getClientById(id);
-                          return courtier ? <Badge key={id} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30">{courtier.prenom} {courtier.nom}</Badge> : null;
-                        })}
+                      <div>
+                        <Label className="text-slate-400 text-sm">Date d'ouverture</Label>
+                        <p className="text-white font-medium mt-1">
+                          {viewingDossier.date_ouverture ? format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}
+                        </p>
                       </div>
-                    ) : <p className="text-slate-500">-</p>}
-                  </div>
-                </div>
+                    </div>
 
-                <h3 className="text-xl font-semibold text-white mb-4">Mandats</h3>
-                {viewingDossier?.mandats?.length > 0 ? (
-                  viewingDossier.mandats.map((mandat, index) => (
-                    <Card key={index} className="border-slate-700 bg-slate-800/30 p-4 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</CardTitle>
-                        {mandat.minute && (
-                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Minute {mandat.minute} ({mandat.type_minute})</Badge>
-                        )}
+                    {viewingDossier.description && (
+                      <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                        <Label className="text-slate-400 text-sm">Description</Label>
+                        <p className="text-white mt-2 whitespace-pre-wrap">{viewingDossier.description}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Adresse des travaux</Label>
-                          <p className="text-white">{formatAdresse(mandat.adresse_travaux) || '-'}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Tâche actuelle</Label>
-                          <p className="text-white">{mandat.tache_actuelle || '-'}</p>
-                        </div>
-                        {mandat.statut_terrain && (
-                          <div className="space-y-1">
-                            <Label className="text-slate-400">Statut du terrain</Label>
-                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{mandat.statut_terrain}</Badge>
-                          </div>
-                        )}
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Dates</Label>
-                          <ul className="text-white list-disc list-inside">
-                            {mandat.date_ouverture && <li>Ouverture: {format(new Date(mandat.date_ouverture), 'dd MMM yyyy', { locale: fr })}</li>}
-                            {mandat.date_signature && <li>Signature: {format(new Date(mandat.date_signature), 'dd MMM yyyy', { locale: fr })}</li>}
-                            {mandat.date_debut_travaux && <li>Début travaux: {format(new Date(mandat.date_debut_travaux), 'dd MMM yyyy', { locale: fr })}</li>}
-                            {mandat.date_livraison && <li>Livraison: {format(new Date(mandat.date_livraison), 'dd MMM yyyy', { locale: fr })}</li>}
-                          </ul>
-                        </div>
-                      </div>
-                      {mandat.lots?.length > 0 && (
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Lots associés</Label>
-                          <div className="flex flex-wrap gap-2">
-                            {mandat.lots.map(lotId => {
-                              const lot = getLotById(lotId);
-                              return lot ? (
-                                <Badge key={lot.id} variant="outline" className="bg-gray-500/20 text-gray-400 border-gray-500/30">Lot {lot.numero_lot} ({lot.circonscription_fonciere})</Badge>
+                    )}
+
+                    {/* Clients, Notaires, Courtiers */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.clients_ids.map(clientId => {
+                              const client = getClientById(clientId);
+                              return client ? (
+                                <Badge 
+                                  key={clientId} 
+                                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false);
+                                    setViewingClientDetails(client);
+                                  }}
+                                >
+                                  {client.prenom} {client.nom}
+                                </Badge>
                               ) : null;
                             })}
                           </div>
                         </div>
                       )}
-                      {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Tarification</Label>
-                          <p className="text-white">
-                            Prix estimé: {mandat.prix_estime?.toFixed(2)}$ {mandat.rabais > 0 && `(Rabais: ${mandat.rabais.toFixed(2)}$)`} {mandat.taxes_incluses && "(Taxes incluses)"}
-                          </p>
-                        </div>
-                      )}
-                      {mandat.notes && (
-                        <div className="space-y-1">
-                          <Label className="text-slate-400">Notes</Label>
-                          <p className="text-white whitespace-pre-wrap">{mandat.notes}</p>
-                        </div>
-                      )}
 
-                      {mandat.terrain && (
-                        <div className="border-t border-slate-700 pt-3 mt-3">
-                          <Label className="text-slate-300 font-semibold mb-2 block">Informations Terrain</Label>
-                          <div className="grid grid-cols-2 gap-3">
-                            {mandat.terrain.date_limite_leve && (
-                              <div className="space-y-1">
-                                <Label className="text-slate-400">Date limite levé</Label>
-                                <p className="text-white">{format(new Date(mandat.terrain.date_limite_leve), 'dd MMM yyyy', { locale: fr })}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.instruments_requis && (
-                              <div className="space-y-1">
-                                <Label className="text-slate-400">Instruments</Label>
-                                <p className="text-white">{mandat.terrain.instruments_requis}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.a_rendez_vous && (
-                              <div className="space-y-1 col-span-2">
-                                <Label className="text-slate-400">Rendez-vous</Label>
-                                <p className="text-white">{mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })} à {mandat.terrain.heure_rendez_vous} avec {mandat.terrain.donneur}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.technicien && (
-                              <div className="space-y-1">
-                                <Label className="text-slate-400">Technicien</Label>
-                                <p className="text-white">{mandat.terrain.technicien}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.dossier_simultane && (
-                              <div className="space-y-1">
-                                <Label className="text-slate-400">Dossier simultané</Label>
-                                <p className="text-white">{mandat.terrain.dossier_simultane}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.temps_prevu && (
-                              <div className="space-y-1">
-                                <Label className="text-slate-400">Temps prévu</Label>
-                                <p className="text-white">{mandat.terrain.temps_prevu}</p>
-                              </div>
-                            )}
-                            {mandat.terrain.notes && (
-                              <div className="space-y-1 col-span-2">
-                                <Label className="text-slate-400">Notes terrain</Label>
-                                <p className="text-white whitespace-pre-wrap">{mandat.terrain.notes}</p>
-                              </div>
-                            )}
+                      {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.notaires_ids.map(notaireId => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ? (
+                                <Badge 
+                                  key={notaireId} 
+                                  className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false);
+                                    setViewingClientDetails(notaire);
+                                  }}
+                                >
+                                  {notaire.prenom} {notaire.nom}
+                                </Badge>
+                              ) : null;
+                            })}
                           </div>
                         </div>
                       )}
-                    </Card>
-                  ))
-                ) : (
-                  <p className="text-slate-500">Aucun mandat pour ce dossier.</p>
-                )}
 
-                <h3 className="text-xl font-semibold text-white mb-4">Historique des commentaires</h3>
-                <CommentairesSection dossierId={viewingDossier?.id} readOnly={true} />
+                      {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.courtiers_ids.map(courtierId => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ? (
+                                <Badge 
+                                  key={courtierId} 
+                                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                  onClick={() => {
+                                    setIsViewDialogOpen(false);
+                                    setViewingClientDetails(courtier);
+                                  }}
+                                >
+                                  {courtier.prenom} {courtier.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mandats */}
+                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
+                      <div>
+                        <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
+                        <div className="space-y-3">
+                          {viewingDossier.mandats.map((mandat, index) => (
+                            <Card key={index} className="bg-slate-800/50 border-slate-700">
+                              <CardContent className="p-4 space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
+                                  {mandat.prix_estime > 0 && (
+                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
+                                      {mandat.prix_estime.toFixed(2)} $
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {mandat.lots && mandat.lots.length > 0 && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Lots</Label>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {mandat.lots.map((lotId) => {
+                                          const lot = getLotById(lotId);
+                                          return (
+                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                              {lot?.numero_lot || lotId}
+                                            </Badge>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {mandat.tache_actuelle && (
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Tâche actuelle</Label>
+                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 mt-1">
+                                      {mandat.tache_actuelle}
+                                    </Badge>
+                                  </div>
+                                )}
+
+                                {/* Minutes */}
+                                {mandat.minute && (
+                                  <div className="pt-2 border-t border-slate-700">
+                                    <Label className="text-slate-400 text-xs">Minute</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                        {mandat.minute} - {mandat.type_minute} ({mandat.date_minute ? format(new Date(mandat.date_minute), "dd MMM yyyy", { locale: fr }) : '-'})
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Dates */}
+                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
+                                  {mandat.date_ouverture && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Ouverture</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_signature && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Signature</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_debut_travaux && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Début travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_livraison && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Livraison</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Tarification */}
+                                {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
+                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
+                                    {mandat.prix_estime > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Prix estimé</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.prix_estime.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    {mandat.rabais > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Rabais</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.rabais.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Taxes</Label>
+                                      <p className="text-slate-300 text-sm mt-1">
+                                        {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {mandat.notes && (
+                                  <div className="pt-2 border-t border-slate-700">
+                                    <Label className="text-slate-400 text-xs">Notes</Label>
+                                    <p className="text-slate-300 text-sm mt-1 whitespace-pre-wrap">{mandat.notes}</p>
+                                  </div>
+                                )}
+
+                                {mandat.terrain && (
+                                  <div className="pt-2 border-t border-slate-700">
+                                    <Label className="text-slate-400 text-xs mb-2 block">Informations Terrain</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {mandat.terrain.date_limite_leve && (
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Date limite levé</Label>
+                                          <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.terrain.date_limite_leve), 'dd MMM yyyy', { locale: fr })}</p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.instruments_requis && (
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Instruments</Label>
+                                          <p className="text-slate-300 text-sm mt-1">{mandat.terrain.instruments_requis}</p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.a_rendez_vous && (
+                                        <div className="col-span-2">
+                                          <Label className="text-slate-400 text-xs">Rendez-vous</Label>
+                                          <p className="text-slate-300 text-sm mt-1">
+                                            {mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })} 
+                                            {mandat.terrain.heure_rendez_vous && ` à ${mandat.terrain.heure_rendez_vous}`}
+                                            {mandat.terrain.donneur && ` avec ${mandat.terrain.donneur}`}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.technicien && (
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Technicien</Label>
+                                          <p className="text-slate-300 text-sm mt-1">{mandat.terrain.technicien}</p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.dossier_simultane && (
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Dossier simultané</Label>
+                                          <p className="text-slate-300 text-sm mt-1">{mandat.terrain.dossier_simultane}</p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.temps_prevu && (
+                                        <div>
+                                          <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                                          <p className="text-slate-300 text-sm mt-1">{mandat.terrain.temps_prevu}</p>
+                                        </div>
+                                      )}
+                                      {mandat.terrain.notes && (
+                                        <div className="col-span-2">
+                                          <Label className="text-slate-400 text-xs">Notes terrain</Label>
+                                          <p className="text-slate-300 text-sm mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Boutons Fermer/Modifier tout en bas */}
+                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                      Fermer
+                    </Button>
+                    <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Right side - Commentaires Sidebar - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 pr-4">
+                    <CommentairesSection
+                      dossierId={viewingDossier?.id}
+                      dossierTemporaire={false}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-2 p-6 border-t border-slate-800 flex-shrink-0">
-              <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Fermer</Button>
-              <Button onClick={handleEditFromView} className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                <Edit className="w-4 h-4 mr-2" /> Modifier
-              </Button>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
 
@@ -1825,7 +1964,7 @@ export default function Dossiers() {
                   <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="all">Toutes les circonscriptions</SelectItem>
                     {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map(circonscription => (
-                      <SelectItem key={circonscription} value={circonscription}>{circonscription}</SelectItem>
+                      <SelectItem key={circonscription} value={circonscription} className="text-white">{circonscription}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1837,7 +1976,7 @@ export default function Dossiers() {
                     <SelectContent className="bg-slate-800 border-slate-700">
                       <SelectItem value="all">Tous les cadastres</SelectItem>
                       {(CADASTRES_PAR_CIRCONSCRIPTION[lotCirconscriptionFilter] || []).map(cadastre => (
-                        <SelectItem key={cadastre} value={cadastre}>{cadastre}</SelectItem>
+                        <SelectItem key={cadastre} value={cadastre} className="text-white">{cadastre}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
