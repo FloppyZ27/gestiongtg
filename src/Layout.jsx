@@ -167,22 +167,36 @@ function LayoutContent({ children, currentPageName }) {
       heures: parseFloat(entreeForm.heures)
     });
 
+    // Mettre à jour le dossier avec la tâche suivante et l'utilisateur assigné
+    if (entreeForm.dossier_id && entreeForm.mandat && (entreeForm.tache_suivante || entreeForm.utilisateur_assigne)) {
+      const dossier = dossiers.find(d => d.id === entreeForm.dossier_id);
+      if (dossier && dossier.mandats) {
+        const updatedMandats = dossier.mandats.map(mandat => {
+          // Trouver le mandat correspondant
+          if (mandat.type_mandat === entreeForm.mandat) {
+            return {
+              ...mandat,
+              tache_actuelle: entreeForm.tache_suivante || mandat.tache_actuelle,
+              utilisateur_assigne: entreeForm.utilisateur_assigne || mandat.utilisateur_assigne
+            };
+          }
+          return mandat;
+        });
+
+        await base44.entities.Dossier.update(entreeForm.dossier_id, {
+          ...dossier,
+          mandats: updatedMandats
+        });
+
+        queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      }
+    }
+
     // Créer une notification si un utilisateur est assigné à une tâche suivante
     if (entreeForm.utilisateur_assigne && entreeForm.tache_suivante && entreeForm.dossier_id) {
       const dossier = dossiers.find(d => d.id === entreeForm.dossier_id);
       const clientsNames = getClientsNames(dossier?.clients_ids);
-      const getArpenteurInitialsLocal = (arpenteur) => {
-        if (!arpenteur) return "";
-        const mapping = {
-          "Samuel Guay": "SG-",
-          "Dany Gaboury": "DG-",
-          "Pierre-Luc Pilote": "PLP-",
-          "Benjamin Larouche": "BL-",
-          "Frédéric Gilbert": "FG-"
-        };
-        return mapping[arpenteur] || "";
-      };
-      const numeroDossier = dossier ? `${getArpenteurInitialsLocal(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
+      const numeroDossier = dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
       
       await base44.entities.Notification.create({
         utilisateur_email: entreeForm.utilisateur_assigne,
@@ -318,14 +332,29 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                       {dossiers.slice(0, 5).map((dossier) => {
                         const clientsNames = getClientsNames(dossier.clients_ids);
-                        const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                        const getArpenteurColor = (arpenteur) => {
+                          const colors = {
+                            "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+                            "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+                            "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+                            "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+                            "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                          };
+                          return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+                        };
+                        
                         return (
                           <div
                             key={dossier.id}
-                            className="p-2 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
+                            className="p-2 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0 flex items-center gap-2"
                             onClick={() => handleDossierSelect(dossier.id)}
                           >
-                            <p className="text-white text-sm">{displayText}</p>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
+                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                            </Badge>
+                            {clientsNames && (
+                              <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
+                            )}
                           </div>
                         );
                       })}
