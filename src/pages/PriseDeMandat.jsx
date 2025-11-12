@@ -696,6 +696,18 @@ export default function PriseDeMandat() {
         alert("Le numéro de dossier doit contenir uniquement des chiffres.");
         return;
       }
+      
+      // Vérifier que le numéro de dossier n'existe pas déjà pour cet arpenteur
+      const dossierExistant = dossiers.find(d => 
+        d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
+        d.numero_dossier === formData.numero_dossier && 
+        d.arpenteur_geometre === formData.arpenteur_geometre
+      );
+      
+      if (dossierExistant) {
+        alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        return;
+      }
     }
 
     let dataToSubmit = { ...formData };
@@ -1636,7 +1648,7 @@ export default function PriseDeMandat() {
                                                   <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
                                                     {lot.circonscription_fonciere}
                                                   </Badge>
-                                                </TableCell>
+                                                                                                </TableCell>
                                                 <TableCell className="text-slate-300">
                                                   {lot.cadastre || "-"}
                                                 </TableCell>
@@ -2801,7 +2813,7 @@ export default function PriseDeMandat() {
                               ? (users.find(u => u.email === dossier.utilisateur_assigne)?.full_name || dossier.utilisateur_assigne)
                               : "-"}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                             {getClientsNames(dossier.clients_ids)}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm max-w-xs truncate">

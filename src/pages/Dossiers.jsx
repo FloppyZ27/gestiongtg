@@ -310,6 +310,21 @@ export default function Dossiers() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Vérifier que le numéro de dossier n'existe pas déjà pour cet arpenteur
+    if (formData.statut === "Ouvert" && formData.numero_dossier && formData.arpenteur_geometre) {
+      const dossierExistant = dossiers.find(d => 
+        d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
+        d.numero_dossier === formData.numero_dossier && 
+        d.arpenteur_geometre === formData.arpenteur_geometre
+      );
+      
+      if (dossierExistant) {
+        alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        return;
+      }
+    }
+    
     if (editingDossier) {
       updateDossierMutation.mutate({ id: editingDossier.id, dossierData: formData });
     } else {
@@ -1125,7 +1140,7 @@ export default function Dossiers() {
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "asc" : "asc"); // Always sort ascending for simplicity on re-click
     } else {
       setSortField(field);
       setSortDirection("asc");
@@ -1405,7 +1420,7 @@ export default function Dossiers() {
                       </div>
 
                       {formData.statut === "Ouvert" && (
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                        <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>N° de dossier <span className="text-red-400">*</span></Label>
                             <Input value={formData.numero_dossier} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
