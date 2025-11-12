@@ -158,12 +158,43 @@ function LayoutContent({ children, currentPageName }) {
     setSelectedDossierId(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    createEntreeMutation.mutate({
+    
+    // Créer l'entrée de temps
+    await createEntreeMutation.mutateAsync({
       ...entreeForm,
       heures: parseFloat(entreeForm.heures)
     });
+
+    // Créer une notification si un utilisateur est assigné à une tâche suivante
+    if (entreeForm.utilisateur_assigne && entreeForm.tache_suivante && entreeForm.dossier_id) {
+      const dossier = dossiers.find(d => d.id === entreeForm.dossier_id);
+      const clientsNames = getClientsNames(dossier?.clients_ids);
+      const getArpenteurInitialsLocal = (arpenteur) => {
+        if (!arpenteur) return "";
+        const mapping = {
+          "Samuel Guay": "SG-",
+          "Dany Gaboury": "DG-",
+          "Pierre-Luc Pilote": "PLP-",
+          "Benjamin Larouche": "BL-",
+          "Frédéric Gilbert": "FG-"
+        };
+        return mapping[arpenteur] || "";
+      };
+      const numeroDossier = dossier ? `${getArpenteurInitialsLocal(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
+      
+      await base44.entities.Notification.create({
+        utilisateur_email: entreeForm.utilisateur_assigne,
+        titre: "Nouvelle tâche assignée",
+        message: `${user?.full_name} vous a assigné la tâche "${entreeForm.tache_suivante}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+        type: "dossier",
+        dossier_id: entreeForm.dossier_id,
+        lue: false
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }
   };
 
   const getClientById = (id) => clients.find(c => c.id === id);
@@ -278,6 +309,29 @@ function LayoutContent({ children, currentPageName }) {
                       className="pl-10 bg-slate-800 border-slate-700"
                     />
                   </div>
+                  
+                  {/* Tableau de sélection rapide des 5 derniers dossiers */}
+                  {!dossierSearchTerm && (
+                    <div className="border border-slate-700 rounded-lg overflow-hidden mb-3">
+                      <div className="bg-slate-800/50 p-2 border-b border-slate-700">
+                        <p className="text-xs text-slate-400">Dossiers récents</p>
+                      </div>
+                      {dossiers.slice(0, 5).map((dossier) => {
+                        const clientsNames = getClientsNames(dossier.clients_ids);
+                        const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                        return (
+                          <div
+                            key={dossier.id}
+                            className="p-2 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
+                            onClick={() => handleDossierSelect(dossier.id)}
+                          >
+                            <p className="text-white text-sm">{displayText}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
                   {dossierSearchTerm && (
                     <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg">
                       {filteredDossiers.length > 0 ? (
