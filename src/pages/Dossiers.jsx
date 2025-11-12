@@ -416,7 +416,7 @@ export default function Dossiers() {
           temps_prevu: "",
           notes: ""
         },
-        facture: m.facture || undefined, // Keep existing facture if any
+        factures: m.factures || [], // Changed from 'facture' to 'factures'
         notes: ""
       })) || [],
       description: entity.description || ""
@@ -496,6 +496,7 @@ export default function Dossiers() {
           temps_prevu: "",
           notes: ""
         },
+        factures: [], // Added for new mandates
         notes: ""
       }]
     }));
@@ -883,15 +884,17 @@ export default function Dossiers() {
           const mandatTVQ = mandatHT * 0.09975;
           const mandatTTC = mandatHT + mandatTPS + mandatTVQ;
           
+          const newFacture = {
+            numero_facture: numeroFacture.toString(),
+            date_facture: format(new Date(), "yyyy-MM-dd"),
+            total_ht: mandatHT,
+            total_ttc: mandatTTC,
+            facture_html: factureHTML // Store the generated HTML
+          };
+          
           return {
             ...m,
-            facture: {
-              numero_facture: numeroFacture.toString(),
-              date_facture: format(new Date(), "yyyy-MM-dd"),
-              total_ht: mandatHT,
-              total_ttc: mandatTTC,
-              facture_html: factureHTML // Store the generated HTML
-            }
+            factures: [...(m.factures || []), newFacture]
           };
         }
         return m;
@@ -995,11 +998,7 @@ export default function Dossiers() {
 
   const openFacturationMandatsDialog = () => {
     if (!editingDossier) return;
-    const mandatsWithoutFacture = formData.mandats
-      .map((m, idx) => ({ mandat: m, index: idx }))
-      .filter(item => !item.mandat.facture)
-      .map(item => item.index);
-    setSelectedMandatsForLocalFacturation(mandatsWithoutFacture);
+    setSelectedMandatsForLocalFacturation([]);
     setIsFacturationMandatsDialogOpen(true);
   };
 
@@ -1010,7 +1009,7 @@ export default function Dossiers() {
   };
 
   const handleGenererFactureLocal = async () => {
-    if (!editingDossier) return;
+    if (!editingDossier || selectedMandatsForLocalFacturation.length === 0) return;
     await genererFacture(editingDossier, selectedMandatsForLocalFacturation, true); // Pass editingDossier and true to save
     setIsFacturationMandatsDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ['dossiers'] });
@@ -1042,7 +1041,7 @@ export default function Dossiers() {
           date_livraison: m.date_livraison || "",
           date_signature: m.date_signature || "",
           date_debut_travaux: m.date_debut_travaux || "",
-          facture: m.facture || null,
+          factures: m.factures || [], // Changed from 'facture' to 'factures'
           terrain: m.terrain || {
             date_limite_leve: "",
             instruments_requis: "",
@@ -1064,15 +1063,7 @@ export default function Dossiers() {
 
   const selectDossierForFacturation = (dossierId) => {
     setFacturationDossierId(dossierId);
-    const dossier = dossiers.find(d => d.id === dossierId);
-    if (dossier && dossier.mandats) {
-      // Select only mandats without facture
-      const mandatsWithoutFacture = dossier.mandats
-        .map((m, idx) => ({ mandat: m, index: idx }))
-        .filter(item => !item.mandat.facture)
-        .map(item => item.index);
-      setSelectedMandatsForFacturation(mandatsWithoutFacture);
-    }
+    setSelectedMandatsForFacturation([]); // Reset selection when changing dossier
   };
 
   const toggleMandatForFacturation = (index) => {
@@ -1263,9 +1254,7 @@ export default function Dossiers() {
   });
 
   const dossiersForFacturation = dossiers.filter(d => {
-    if (d.statut !== "Ouvert" && d.statut !== "Fermé") return false;
-    // Only show dossiers that have at least one mandat without a facture
-    return d.mandats && d.mandats.some(m => !m.facture);
+    return d.statut === "Ouvert" || d.statut === "Fermé";
   });
   
   const filteredDossiersForFacturation = dossiersForFacturation.filter(dossier => {
@@ -1733,36 +1722,42 @@ export default function Dossiers() {
                                             </Table>
                                           </div>
                                         )}
-
-                                        {mandat.facture && (
-                                          <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                                            <div className="flex items-center justify-between">
-                                              <div>
-                                                <Label className="text-purple-400 text-xs font-semibold">Facturé</Label>
-                                                <div className="grid grid-cols-3 gap-3 mt-2">
-                                                  <div>
-                                                    <p className="text-slate-400 text-xs">N° Facture</p>
-                                                    <p className="text-white text-sm font-semibold">{mandat.facture.numero_facture}</p>
-                                                  </div>
-                                                  <div>
-                                                    <p className="text-slate-400 text-xs">Date</p>
-                                                    <p className="text-white text-sm">{mandat.facture.date_facture ? format(new Date(mandat.facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</p>
-                                                  </div>
-                                                  <div>
-                                                    <p className="text-slate-400 text-xs">Total TTC</p>
-                                                    <p className="text-white text-sm font-semibold">{mandat.facture.total_ttc?.toFixed(2)} $</p>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              <Button
-                                                type="button"
-                                                size="sm"
-                                                onClick={() => voirFacture(mandat.facture.facture_html)}
-                                                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                                              >
-                                                <FileText className="w-4 h-4 mr-2" />
-                                                Voir la facture
-                                              </Button>
+                                        {mandat.factures && mandat.factures.length > 0 && (
+                                          <div className="pt-3 border-t border-slate-700">
+                                            <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures.length})</Label>
+                                            <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                              <Table>
+                                                <TableHeader>
+                                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                    <TableHead className="text-slate-300">N° Facture</TableHead>
+                                                    <TableHead className="text-slate-300">Date</TableHead>
+                                                    <TableHead className="text-slate-300">Total HT</TableHead>
+                                                    <TableHead className="text-slate-300">Total TTC</TableHead>
+                                                    <TableHead className="text-slate-300 text-right">Action</TableHead>
+                                                  </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                  {mandat.factures.map((facture, factureIdx) => (
+                                                    <TableRow key={factureIdx} className="border-slate-800">
+                                                      <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
+                                                      <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                                                      <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
+                                                      <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
+                                                      <TableCell className="text-right">
+                                                        <Button
+                                                          type="button"
+                                                          size="sm"
+                                                          onClick={() => voirFacture(facture.facture_html)}
+                                                          className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                                                        >
+                                                          <FileText className="w-4 h-4 mr-2" />
+                                                          Voir
+                                                        </Button>
+                                                      </TableCell>
+                                                    </TableRow>
+                                                  ))}
+                                                </TableBody>
+                                              </Table>
                                             </div>
                                           </div>
                                         )}
@@ -1906,18 +1901,16 @@ export default function Dossiers() {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto space-y-2 p-4">
               {formData.mandats.map((mandat, index) => {
-                const hasFacture = !!mandat.facture;
+                const hasFactures = mandat.factures && mandat.factures.length > 0;
                 return (
                   <div
                     key={index}
                     className={`p-4 rounded-lg border transition-colors ${
-                      hasFacture 
-                        ? 'bg-slate-700/30 border-slate-600 opacity-50 cursor-not-allowed'
-                        : selectedMandatsForLocalFacturation.includes(index)
-                          ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
-                          : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
+                      selectedMandatsForLocalFacturation.includes(index)
+                        ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
+                        : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
                     }`}
-                    onClick={() => !hasFacture && toggleMandatForLocalFacturation(index)}
+                    onClick={() => toggleMandatForLocalFacturation(index)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -1933,19 +1926,16 @@ export default function Dossiers() {
                           </Badge>
                         )}
                         <div className="mt-2">
-                          {hasFacture ? (
+                          {hasFactures ? (
                             <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
                               <FileText className="w-3 h-3 mr-1" />
-                              Déjà facturé
+                              {mandat.factures.length} facture{mandat.factures.length > 1 ? 's' : ''}
                             </Badge>
-                          ) : selectedMandatsForLocalFacturation.includes(index) ? (
-                            <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                          ) : null}
+                          {selectedMandatsForLocalFacturation.includes(index) && (
+                            <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 ml-2">
                               <Check className="w-3 h-3 mr-1" />
                               Sélectionné
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-slate-700 text-slate-400">
-                              Cliquer pour sélectionner
                             </Badge>
                           )}
                         </div>
@@ -2019,7 +2009,7 @@ export default function Dossiers() {
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">N° Dossier</TableHead>
                             <TableHead className="text-slate-300">Clients</TableHead>
-                            <TableHead className="text-slate-300">Mandats non facturés</TableHead>
+                            <TableHead className="text-slate-300">Mandats</TableHead>
                             <TableHead className="text-slate-300">Adresse Travaux</TableHead>
                             <TableHead className="text-slate-300 text-right">Action</TableHead>
                           </TableRow>
@@ -2037,14 +2027,14 @@ export default function Dossiers() {
                                 <TableCell className="text-slate-300">
                                   {dossier.mandats && dossier.mandats.length > 0 ? (
                                     <div className="flex flex-wrap gap-1">
-                                      {dossier.mandats.filter(m => !m.facture).slice(0, 2).map((mandat, idx) => (
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
                                         <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
                                           {mandat.type_mandat}
                                         </Badge>
                                       ))}
-                                      {dossier.mandats.filter(m => !m.facture).length > 2 && (
+                                      {dossier.mandats.length > 2 && (
                                         <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                          +{dossier.mandats.filter(m => !m.facture).length - 2}
+                                          +{dossier.mandats.length - 2}
                                         </Badge>
                                       )}
                                     </div>
@@ -2066,7 +2056,7 @@ export default function Dossiers() {
                             <TableRow>
                               <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                                 <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                <p>Aucun dossier avec mandats non facturés</p>
+                                <p>Aucun dossier trouvé</p>
                               </TableCell>
                             </TableRow>
                           )}
@@ -2092,18 +2082,16 @@ export default function Dossiers() {
                     <Label className="text-lg font-semibold text-white mb-3 block">Sélectionner les mandats à facturer</Label>
                     <div className="space-y-2">
                       {selectedDossierForFacturation?.mandats?.map((mandat, index) => {
-                        const hasFacture = !!mandat.facture;
+                        const hasFactures = mandat.factures && mandat.factures.length > 0;
                         return (
                           <div
                             key={index}
                             className={`p-4 rounded-lg border transition-colors ${
-                              hasFacture 
-                                ? 'bg-slate-700/30 border-slate-600 opacity-50 cursor-not-allowed'
-                                : selectedMandatsForFacturation.includes(index)
-                                  ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
-                                  : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
+                              selectedMandatsForFacturation.includes(index)
+                                ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
+                                : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
                             }`}
-                            onClick={() => !hasFacture && toggleMandatForFacturation(index)}
+                            onClick={() => toggleMandatForFacturation(index)}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
@@ -2131,20 +2119,17 @@ export default function Dossiers() {
                                     {(mandat.rabais || 0) > 0 && ` (-${mandat.rabais.toFixed(2)} $)`}
                                   </Badge>
                                 )}
-                                <div className="mt-2">
-                                  {hasFacture ? (
-                                    <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
+                                <div className="mt-2 space-y-1">
+                                  {hasFactures && (
+                                    <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50 block">
                                       <FileText className="w-3 h-3 mr-1" />
-                                      Facture #{mandat.facture.numero_facture}
+                                      {mandat.factures.length} facture{mandat.factures.length > 1 ? 's' : ''} générée{mandat.factures.length > 1 ? 's' : ''}
                                     </Badge>
-                                  ) : selectedMandatsForFacturation.includes(index) ? (
-                                    <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  )}
+                                  {selectedMandatsForFacturation.includes(index) && (
+                                    <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50 block">
                                       <Check className="w-3 h-3 mr-1" />
                                       Sélectionné
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="outline" className="bg-slate-700 text-slate-400">
-                                      Cliquer pour sélectionner
                                     </Badge>
                                   )}
                                 </div>
@@ -2640,37 +2625,8 @@ export default function Dossiers() {
                                         {(mandat.prix_estime || 0).toFixed(2)} $
                                       </Badge>
                                     )}
-                                    {mandat.facture && (
-                                      <Badge 
-                                        className="bg-purple-500/20 text-purple-400 border-purple-500/30 border cursor-pointer hover:bg-purple-500/30"
-                                        onClick={() => voirFacture(mandat.facture.facture_html)}
-                                      >
-                                        <FileText className="w-3 h-3 mr-1" />
-                                        Facture #{mandat.facture.numero_facture}
-                                      </Badge>
-                                    )}
                                   </div>
                                 </div>
-
-                                {mandat.facture && (
-                                  <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                                    <Label className="text-purple-400 text-xs font-semibold">Informations de facturation</Label>
-                                    <div className="grid grid-cols-3 gap-3 mt-2">
-                                      <div>
-                                        <p className="text-slate-400 text-xs">Date</p>
-                                        <p className="text-white text-sm">{mandat.facture.date_facture ? format(new Date(mandat.facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</p>
-                                      </div>
-                                      <div>
-                                        <p className="text-slate-400 text-xs">Total HT</p>
-                                        <p className="text-white text-sm">{mandat.facture.total_ht?.toFixed(2)} $</p>
-                                      </div>
-                                      <div>
-                                        <p className="text-slate-400 text-xs">Total TTC</p>
-                                        <p className="text-white text-sm font-semibold">{mandat.facture.total_ttc?.toFixed(2)} $</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                   {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
@@ -2837,6 +2793,45 @@ export default function Dossiers() {
                                           <p className="text-slate-300 text-sm mt-1 whitespace-pre-wrap">{mandat.terrain.notes}</p>
                                         </div>
                                       )}
+                                    </div>
+                                  </div>
+                                )}
+                                {mandat.factures && mandat.factures.length > 0 && (
+                                  <div className="pt-3 border-t border-slate-700">
+                                    <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures.length})</Label>
+                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                            <TableHead className="text-slate-300">N° Facture</TableHead>
+                                            <TableHead className="text-slate-300">Date</TableHead>
+                                            <TableHead className="text-slate-300">Total HT</TableHead>
+                                            <TableHead className="text-slate-300">Total TTC</TableHead>
+                                            <TableHead className="text-slate-300 text-right">Action</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {mandat.factures.map((facture, factureIdx) => (
+                                            <TableRow key={factureIdx} className="border-slate-800">
+                                              <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
+                                              <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                                              <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
+                                              <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
+                                              <TableCell className="text-right">
+                                                <Button
+                                                  type="button"
+                                                  size="sm"
+                                                  onClick={() => voirFacture(facture.facture_html)}
+                                                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                                                >
+                                                  <FileText className="w-4 h-4 mr-2" />
+                                                  Voir
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
                                     </div>
                                   </div>
                                 )}
