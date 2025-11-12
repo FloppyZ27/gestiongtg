@@ -100,7 +100,6 @@ export default function Dossiers() {
   const [closeFilterArpenteur, setCloseFilterArpenteur] = useState("all");
   const [closeFilterVille, setCloseFilterVille] = useState("all");
   const [closeFilterMandat, setCloseFilterMandat] = useState("all");
-  const [closeFilterTache, setCloseFilterTache] = useState("all");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -751,7 +750,6 @@ export default function Dossiers() {
     setCloseFilterArpenteur("all");
     setCloseFilterVille("all");
     setCloseFilterMandat("all");
-    setCloseFilterTache("all");
   };
 
   const selectDossierToClose = (dossierId) => {
@@ -772,36 +770,23 @@ export default function Dossiers() {
 
   const dossiersOuvertsForClosing = dossiers.filter(d => d.statut === "Ouvert");
   
-  const dossiersWithMandatsForClosing = dossiersOuvertsForClosing.flatMap(dossier => {
-    if (dossier.mandats && dossier.mandats.length > 0) {
-      return dossier.mandats.map((mandat, idx) => ({
-        ...dossier,
-        mandatInfo: mandat,
-        mandatIndex: idx,
-        displayId: `${dossier.id}-${idx}`
-      }));
-    }
-    return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
-  });
-
-  const filteredDossiersForClosing = dossiersWithMandatsForClosing.filter(item => {
+  const filteredDossiersForClosing = dossiersOuvertsForClosing.filter(dossier => {
     const searchLower = closingDossierSearchTerm.toLowerCase();
-    const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
-    const clientsNames = getClientsNames(item.clients_ids);
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+    const clientsNames = getClientsNames(dossier.clients_ids);
     
     const matchesSearch = (
       fullNumber.toLowerCase().includes(searchLower) ||
-      item.numero_dossier?.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
       clientsNames.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower)
+      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
     );
     
-    const matchesArpenteur = closeFilterArpenteur === "all" || item.arpenteur_geometre === closeFilterArpenteur;
-    const matchesVille = closeFilterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === closeFilterVille;
-    const matchesMandat = closeFilterMandat === "all" || item.mandatInfo?.type_mandat === closeFilterMandat;
-    const matchesTache = closeFilterTache === "all" || item.mandatInfo?.tache_actuelle === closeFilterTache;
+    const matchesArpenteur = closeFilterArpenteur === "all" || dossier.arpenteur_geometre === closeFilterArpenteur;
+    const matchesVille = closeFilterVille === "all" || dossier.mandats?.some(m => m.adresse_travaux?.ville === closeFilterVille);
+    const matchesMandat = closeFilterMandat === "all" || dossier.mandats?.some(m => m.type_mandat === closeFilterMandat);
     
-    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat && matchesTache;
+    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   });
 
   const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
@@ -1310,7 +1295,7 @@ export default function Dossiers() {
                     </div>
                     <Select value={closeFilterArpenteur} onValueChange={setCloseFilterArpenteur}>
                       <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                        <SelectValue placeholder="Filtrer par arpenteur" />
+                        <SelectValue placeholder="Arpenteur" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les arpenteurs</SelectItem>
@@ -1321,7 +1306,7 @@ export default function Dossiers() {
                     </Select>
                     <Select value={closeFilterMandat} onValueChange={setCloseFilterMandat}>
                       <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                        <SelectValue placeholder="Filtrer par mandat" />
+                        <SelectValue placeholder="Mandat" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Tous les mandats</SelectItem>
@@ -1330,20 +1315,9 @@ export default function Dossiers() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select value={closeFilterTache} onValueChange={setCloseFilterTache}>
-                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                        <SelectValue placeholder="Filtrer par tâche" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="all">Toutes les tâches</SelectItem>
-                        {TACHES.map(tache => (
-                          <SelectItem key={tache} value={tache}>{tache}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                     <Select value={closeFilterVille} onValueChange={setCloseFilterVille}>
                       <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                        <SelectValue placeholder="Filtrer par ville" />
+                        <SelectValue placeholder="Ville" />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         <SelectItem value="all">Toutes les villes</SelectItem>
@@ -1360,26 +1334,41 @@ export default function Dossiers() {
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">N° Dossier</TableHead>
                             <TableHead className="text-slate-300">Clients</TableHead>
-                            <TableHead className="text-slate-300">Mandat</TableHead>
+                            <TableHead className="text-slate-300">Mandats</TableHead>
                             <TableHead className="text-slate-300">Adresse Travaux</TableHead>
                             <TableHead className="text-slate-300 text-right">Action</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {filteredDossiersForClosing.length > 0 ? (
-                            filteredDossiersForClosing.map((item) => (
-                              <TableRow key={item.displayId} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierToClose(item.id)}>
+                            filteredDossiersForClosing.map((dossier) => (
+                              <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => selectDossierToClose(dossier.id)}>
                                 <TableCell className="font-medium">
-                                  <Badge variant="outline" className={`${getArpenteurColor(item.arpenteur_geometre)} border`}>
-                                    {getArpenteurInitials(item.arpenteur_geometre)}{item.numero_dossier}
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                   </Badge>
                                 </TableCell>
-                                <TableCell className="text-slate-300 text-sm">{getClientsNames(item.clients_ids)}</TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {item.mandatInfo?.type_mandat || '-'}
+                                <TableCell className="text-slate-300 text-sm">{getClientsNames(dossier.clients_ids)}</TableCell>
+                                <TableCell className="text-slate-300">
+                                  {dossier.mandats && dossier.mandats.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                          {mandat.type_mandat}
+                                        </Badge>
+                                      ))}
+                                      {dossier.mandats.length > 2 && (
+                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                          +{dossier.mandats.length - 2}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-600 text-xs">Aucun</span>
+                                  )}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {item.mandatInfo?.adresse_travaux ? formatAdresse(item.mandatInfo.adresse_travaux) : '-'}
+                                  {getFirstAdresseTravaux(dossier.mandats)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <Button type="button" size="sm" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10">
@@ -1978,137 +1967,175 @@ export default function Dossiers() {
         </Dialog>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-400">Dossiers ouverts</CardTitle>
-            <FolderOpen className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{dossiersOuverts.length}</div>
-            <p className="text-xs text-slate-500">
-              <div className="flex items-center gap-2 mt-2">
-                <span className="flex items-center text-emerald-400">
-                  <Eye className="w-3 h-3 mr-1" /> Aujourd'hui: {dossierStats.byDay}
-                  {dossierStats.percentages.day !== 0 && (
-                    dossierStats.percentages.day > 0 ? (
-                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
-                    )
-                  )}
-                  {dossierStats.percentages.day !== 0 && ` (${dossierStats.percentages.day}%)`}
-                </span>
-                <span className="flex items-center text-cyan-400">
-                  <Calendar className="w-3 h-3 mr-1" /> Cette semaine: {dossierStats.byWeek}
-                  {dossierStats.percentages.week !== 0 && (
-                    dossierStats.percentages.week > 0 ? (
-                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
-                    )
-                  )}
-                  {dossierStats.percentages.week !== 0 && ` (${dossierStats.percentages.week}%)`}
-                </span>
-                <span className="flex items-center text-purple-400">
-                  <Calendar className="w-3 h-3 mr-1" /> Ce mois-ci: {dossierStats.byMonth}
-                  {dossierStats.percentages.month !== 0 && (
-                    dossierStats.percentages.month > 0 ? (
-                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
-                    )
-                  )}
-                  {dossierStats.percentages.month !== 0 && ` (${dossierStats.percentages.month}%)`}
-                </span>
-                <span className="flex items-center text-orange-400">
-                  <Calendar className="w-3 h-3 mr-1" /> Cette année: {dossierStats.byYear}
-                  {dossierStats.percentages.year !== 0 && (
-                    dossierStats.percentages.year > 0 ? (
-                      <TrendingUp className="w-3 h-3 ml-1 text-green-500" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 ml-1 text-red-500" />
-                    )
-                  )}
-                  {dossierStats.percentages.year !== 0 && ` (${dossierStats.percentages.year}%)`}
-                </span>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-600/20">
+                <FolderOpen className="w-5 h-5 text-emerald-400" />
               </div>
-            </p>
+              <div>
+                <CardTitle className="text-xl text-white">Dossiers ouverts</CardTitle>
+                <p className="text-sm text-slate-400">Statistique par période</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byDay}</p>
+                  {dossierStats.percentages.day !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.day > 0 ? '+' : ''}{dossierStats.percentages.day}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byWeek}</p>
+                  {dossierStats.percentages.week !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.week > 0 ? '+' : ''}{dossierStats.percentages.week}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Ce mois</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byMonth}</p>
+                  {dossierStats.percentages.month !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.month > 0 ? '+' : ''}{dossierStats.percentages.month}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
+                <p className="text-xs text-slate-400 mb-1">Cette année</p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-2xl font-bold text-white">{dossierStats.byYear}</p>
+                  {dossierStats.percentages.year !== 0 && (
+                    <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {dossierStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {dossierStats.percentages.year > 0 ? '+' : ''}{dossierStats.percentages.year}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="flex flex-row justify-between items-center">
+          <CardHeader>
             <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
-            <div className="flex gap-2">
-              <div className="relative">
+            <div className="flex flex-wrap gap-3 pt-4">
+              <div className="relative flex-1 min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
+
               <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Filtrer par arpenteur" />
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Arpenteur" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Tous les arpenteurs</SelectItem>
-                  {ARPENTEURS.map(arpenteur => (
-                    <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                  <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                  {ARPENTEURS.map((arp) => (
+                    <SelectItem key={arp} value={arp} className="text-white">
+                      {arp}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
               <Select value={filterStatut} onValueChange={setFilterStatut}>
-                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Filtrer par statut" />
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="Ouvert">Ouvert</SelectItem>
-                  <SelectItem value="Fermé">Fermé</SelectItem>
+                  <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
+                  <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                  <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
                 </SelectContent>
               </Select>
+
               <Select value={filterMandat} onValueChange={setFilterMandat}>
-                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Filtrer par mandat" />
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Mandat" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Tous les mandats</SelectItem>
+                  <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
                   {TYPES_MANDATS.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                    <SelectItem key={type} value={type} className="text-white">
+                      {type}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
               <Select value={filterTache} onValueChange={setFilterTache}>
-                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Filtrer par tâche" />
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Tâche" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Toutes les tâches</SelectItem>
+                  <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
                   {TACHES.map(tache => (
-                    <SelectItem key={tache} value={tache}>{tache}</SelectItem>
+                    <SelectItem key={tache} value={tache} className="text-white">
+                      {tache}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
               <Select value={filterVille} onValueChange={setFilterVille}>
-                <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
-                  <SelectValue placeholder="Filtrer par ville" />
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Ville" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Toutes les villes</SelectItem>
+                  <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
                   {uniqueVilles.map(ville => (
-                    <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                    <SelectItem key={ville} value={ville} className="text-white">
+                      {ville}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
+              {(filterArpenteur !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all" || filterVille !== "all") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFilterArpenteur("all");
+                    setFilterStatut("all");
+                    setFilterMandat("all");
+                    setFilterTache("all");
+                    setFilterVille("all");
+                  }}
+                  className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                >
+                  Réinitialiser les filtres
+                </Button>
+              )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoading ? (
               <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div>
             ) : (
-              <div className="border border-slate-700 rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -2125,7 +2152,11 @@ export default function Dossiers() {
                   <TableBody>
                     {sortedDossiers.length > 0 ? (
                       sortedDossiers.map((dossier) => (
-                        <TableRow key={dossier.displayId} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableRow 
+                          key={dossier.displayId} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleView(dossier)}
+                        >
                           <TableCell className="font-medium text-white">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           </TableCell>
@@ -2141,7 +2172,7 @@ export default function Dossiers() {
                           <TableCell>
                             <Badge variant="outline" className={`border ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{dossier.statut}</Badge>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
                               <Button variant="ghost" size="sm" onClick={() => handleView(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
                                 <Eye className="w-4 h-4" />
