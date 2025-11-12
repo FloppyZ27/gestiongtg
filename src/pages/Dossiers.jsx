@@ -413,6 +413,7 @@ export default function Dossiers() {
         type_minute: m.type_minute || "Initiale",
         minutes_list: m.minutes_list || [],
         tache_actuelle: m.tache_actuelle || "",
+        utilisateur_assigne: m.utilisateur_assigne || "",
         statut_terrain: m.statut_terrain || "",
         adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
         lots: m.lots || [],
@@ -1635,7 +1636,7 @@ export default function Dossiers() {
                                 <Card className="border-slate-700 bg-slate-800/30">
                                   <CardContent className="p-4 space-y-4">
                                     <div className="flex gap-4 items-start">
-                                      <div className="flex-1 grid grid-cols-2 gap-4">
+                                      <div className="flex-1 grid grid-cols-3 gap-4">
                                         <div className="space-y-2">
                                           <Label>Type de mandat <span className="text-red-400">*</span></Label>
                                           <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
@@ -1650,7 +1651,8 @@ export default function Dossiers() {
                                           </Select>
                                         </div>
                                     {editingDossier &&
-                                    <div className="space-y-2">
+                                    <>
+                                      <div className="space-y-2">
                                         <Label>Tâche actuelle</Label>
                                         <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
                                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
@@ -1663,6 +1665,21 @@ export default function Dossiers() {
                                           </SelectContent>
                                         </Select>
                                       </div>
+                                      <div className="space-y-2">
+                                        <Label>Utilisateur assigné</Label>
+                                        <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                            <SelectValue placeholder="Sélectionner" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                            <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                                            {users.map((user) =>
+                                          <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                                          )}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </>
                                     }
                                   </div>
                                   <Button type="button" size="sm" variant="ghost" onClick={() => {

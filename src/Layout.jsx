@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -97,6 +96,7 @@ function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
   const [dossierSearchTerm, setDossierSearchTerm] = useState("");
+  const [selectedDossierId, setSelectedDossierId] = useState(null);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -123,6 +123,8 @@ function LayoutContent({ children, currentPageName }) {
     dossier_id: "",
     mandat: "",
     tache: "",
+    tache_suivante: "",
+    utilisateur_assigne: "",
     description: ""
   });
 
@@ -142,9 +144,12 @@ function LayoutContent({ children, currentPageName }) {
       dossier_id: "",
       mandat: "",
       tache: "",
+      tache_suivante: "",
+      utilisateur_assigne: "",
       description: ""
     });
     setDossierSearchTerm("");
+    setSelectedDossierId(null);
   };
 
   const handleSubmit = (e) => {
@@ -177,15 +182,17 @@ function LayoutContent({ children, currentPageName }) {
     );
   });
 
-  const selectedDossier = dossiers.find(d => d.id === entreeForm.dossier_id);
+  const selectedDossier = dossiers.find(d => d.id === selectedDossierId);
   const availableMandats = selectedDossier?.mandats || [];
 
-  const handleDossierChange = (dossierId) => {
+  const handleDossierSelect = (dossierId) => {
+    setSelectedDossierId(dossierId);
     setEntreeForm({
       ...entreeForm,
       dossier_id: dossierId,
       mandat: "" // Reset mandat when dossier changes
     });
+    setDossierSearchTerm("");
   };
 
   const isCollapsed = state === "collapsed";
@@ -254,35 +261,64 @@ function LayoutContent({ children, currentPageName }) {
 
             <div className="space-y-2">
               <Label>Dossier</Label>
-              <div className="relative mb-2">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un dossier..."
-                  value={dossierSearchTerm}
-                  onChange={(e) => setDossierSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700"
-                />
-              </div>
-              <Select value={entreeForm.dossier_id} onValueChange={handleDossierChange}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="Sélectionner un dossier" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                  <SelectItem value="aucun" className="text-white">Aucun dossier</SelectItem>
-                  {filteredDossiers.map((dossier) => {
-                    const clientsNames = getClientsNames(dossier.clients_ids);
-                    const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
-                    return (
-                      <SelectItem key={dossier.id} value={dossier.id} className="text-white">
-                        {displayText}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              {!selectedDossierId ? (
+                <>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher un dossier..."
+                      value={dossierSearchTerm}
+                      onChange={(e) => setDossierSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800 border-slate-700"
+                    />
+                  </div>
+                  {dossierSearchTerm && (
+                    <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg">
+                      {filteredDossiers.length > 0 ? (
+                        filteredDossiers.map((dossier) => {
+                          const clientsNames = getClientsNames(dossier.clients_ids);
+                          const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                          return (
+                            <div
+                              key={dossier.id}
+                              className="p-3 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
+                              onClick={() => handleDossierSelect(dossier.id)}
+                            >
+                              <p className="text-white font-medium">{displayText}</p>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="p-3 text-center text-slate-500">Aucun dossier trouvé</p>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                  <div>
+                    <p className="text-white font-medium">
+                      {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                    </p>
+                    <p className="text-slate-400 text-sm">{getClientsNames(selectedDossier?.clients_ids)}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedDossierId(null);
+                      setEntreeForm({...entreeForm, dossier_id: "", mandat: ""});
+                    }}
+                    className="text-slate-400"
+                  >
+                    Changer
+                  </Button>
+                </div>
+              )}
             </div>
 
-            {entreeForm.dossier_id && entreeForm.dossier_id !== "aucun" && availableMandats.length > 0 && (
+            {selectedDossierId && availableMandats.length > 0 && (
               <div className="space-y-2">
                 <Label>Mandat</Label>
                 <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({...entreeForm, mandat: value})}>
@@ -300,16 +336,51 @@ function LayoutContent({ children, currentPageName }) {
               </div>
             )}
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
+                <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner une tâche" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {TACHES.map((tache) => (
+                      <SelectItem key={tache} value={tache} className="text-white">
+                        {tache}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tâche suivante</Label>
+                <Select value={entreeForm.tache_suivante} onValueChange={(value) => setEntreeForm({...entreeForm, tache_suivante: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner une tâche" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {TACHES.map((tache) => (
+                      <SelectItem key={tache} value={tache} className="text-white">
+                        {tache}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
-              <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
+              <Label>Utilisateur assigné</Label>
+              <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({...entreeForm, utilisateur_assigne: value})}>
                 <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="Sélectionner une tâche" />
+                  <SelectValue placeholder="Sélectionner un utilisateur" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  {TACHES.map((tache) => (
-                    <SelectItem key={tache} value={tache} className="text-white">
-                      {tache}
+                  <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.email} value={user.email} className="text-white">
+                      {user.full_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
