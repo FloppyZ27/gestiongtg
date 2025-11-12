@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Check, Edit, X, Save } from "lucide-react";
+import { Plus, Trash2, Check, Edit, X, Save, Package } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 
 const PROVINCES_CANADIENNES = [
@@ -18,6 +18,8 @@ const PROVINCES_CANADIENNES = [
   "Ontario", "Saskatchewan", "Terre-Neuve-et-Labrador",
   "Territoires du Nord-Ouest", "Yukon"
 ];
+
+const MODES_LIVRAISON = ["Main propre", "Poste", "Courriel"];
 
 export default function ClientFormDialog({ 
   open, 
@@ -32,6 +34,7 @@ export default function ClientFormDialog({
     prenom: "",
     nom: "",
     type_client: defaultType,
+    preferences_livraison: [],
     adresses: [],
     courriels: [],
     telephones: [],
@@ -120,6 +123,7 @@ export default function ClientFormDialog({
       prenom: "",
       nom: "",
       type_client: defaultType,
+      preferences_livraison: [],
       adresses: [],
       courriels: [],
       telephones: [],
@@ -191,6 +195,15 @@ export default function ClientFormDialog({
     }));
   };
 
+  const togglePreferenceLivraison = (mode) => {
+    setFormData(prev => ({
+      ...prev,
+      preferences_livraison: prev.preferences_livraison.includes(mode)
+        ? prev.preferences_livraison.filter(m => m !== mode)
+        : [...prev.preferences_livraison, mode]
+    }));
+  };
+
   // Update form when editingClient changes or when dialog opens
   React.useEffect(() => {
     if (open && editingClient) {
@@ -198,6 +211,7 @@ export default function ClientFormDialog({
         prenom: editingClient.prenom || "",
         nom: editingClient.nom || "",
         type_client: editingClient.type_client || "Client",
+        preferences_livraison: editingClient.preferences_livraison || [],
         adresses: editingClient.adresses && editingClient.adresses.length > 0 
           ? editingClient.adresses.map(addr => ({ ...addr })) 
           : [],
@@ -215,6 +229,7 @@ export default function ClientFormDialog({
         prenom: "",
         nom: "",
         type_client: defaultType,
+        preferences_livraison: [],
         adresses: [],
         courriels: [],
         telephones: [],
@@ -278,6 +293,34 @@ export default function ClientFormDialog({
                       <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              {/* Préférences de livraison */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Préférences de livraison
+                </Label>
+                <div className="flex gap-3 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+                  {MODES_LIVRAISON.map((mode) => (
+                    <div
+                      key={mode}
+                      onClick={() => togglePreferenceLivraison(mode)}
+                      className={`flex-1 p-3 rounded-lg border cursor-pointer transition-all ${
+                        formData.preferences_livraison.includes(mode)
+                          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                          : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{mode}</span>
+                        {formData.preferences_livraison.includes(mode) && (
+                          <Check className="w-4 h-4" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 

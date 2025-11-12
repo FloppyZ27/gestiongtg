@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -1431,12 +1431,22 @@ export default function Dossiers() {
                               {formData.clients_ids.map(clientId => {
                                 const client = getClientById(clientId);
                                 return client ? (
-                                  <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
-                                    <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(clientId, 'clients'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </Badge>
+                                  <div key={clientId} className="space-y-1">
+                                    <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
+                                      <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(clientId, 'clients'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </Badge>
+                                    {client.preferences_livraison && client.preferences_livraison.length > 0 && (
+                                      <div className="flex gap-1 ml-2">
+                                        <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                        <span className="text-xs text-slate-400">
+                                          {client.preferences_livraison.join(', ')}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : null;
                               })}
                             </div>
@@ -1458,12 +1468,22 @@ export default function Dossiers() {
                               {formData.notaires_ids.map(notaireId => {
                                 const notaire = getClientById(notaireId);
                                 return notaire ? (
-                                  <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
-                                    <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </Badge>
+                                  <div key={notaireId} className="space-y-1">
+                                    <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
+                                      <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </Badge>
+                                    {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 && (
+                                      <div className="flex gap-1 ml-2">
+                                        <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                        <span className="text-xs text-slate-400">
+                                          {notaire.preferences_livraison.join(', ')}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : null;
                               })}
                             </div>
@@ -1485,12 +1505,22 @@ export default function Dossiers() {
                               {formData.courtiers_ids.map(courtierId => {
                                 const courtier = getClientById(courtierId);
                                 return courtier ? (
-                                  <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
-                                    <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </Badge>
+                                  <div key={courtierId} className="space-y-1">
+                                    <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
+                                      <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </Badge>
+                                    {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 && (
+                                      <div className="flex gap-1 ml-2">
+                                        <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                        <span className="text-xs text-slate-400">
+                                          {courtier.preferences_livraison.join(', ')}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : null;
                               })}
                             </div>

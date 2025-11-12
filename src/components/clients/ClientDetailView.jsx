@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Send, Edit, Trash2, X, Check, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Send, Edit, Trash2, X, Check, Search, ArrowUpDown, ArrowUp, ArrowDown, Package } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -346,7 +346,23 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
             </div>
           </div>
 
-          {/* Coordonnées */}
+          {/* Préférences de livraison */}
+          {client.preferences_livraison && client.preferences_livraison.length > 0 && (
+            <div>
+              <Label className="text-slate-400 mb-2 block flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Préférences de livraison
+              </Label>
+              <div className="flex gap-2">
+                {client.preferences_livraison.map((mode, idx) => (
+                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border">
+                    {mode}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-4">
             {/* Adresses */}
             {(adresseActuelle || adressesAnciennes.length > 0) && (
