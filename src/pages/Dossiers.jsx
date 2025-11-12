@@ -648,8 +648,7 @@ export default function Dossiers() {
       }
     });
 
-    const factureHTML = `
-<!DOCTYPE html>
+    const factureHTML = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -796,7 +795,7 @@ export default function Dossiers() {
         </td>
         <td class="amount-cell"></td>
       </tr>
-      ${mandatsToInvoice.map((mandat) => { // Removed idx as it's not the original index
+      ${mandatsToInvoice.map((mandat) => {
         const montant = (mandat.prix_estime || 0);
         const rabais = mandat.rabais || 0;
         const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 
@@ -809,7 +808,7 @@ export default function Dossiers() {
               <div class="bold-item">Travaux réalisés :</div>
               <div class="italic-item">
                 ${mandat.type_mandat || 'Mandat'}
-                ${minutesInfo ? `<span class="minute-info">Minute: ${minutesInfo}</span>` : ''}
+                ${minutesInfo ? '<span class="minute-info">Minute: ' + minutesInfo + '</span>' : ''}
               </div>
             </td>
             <td class="amount-cell">${montant.toFixed(2)} $</td>
@@ -865,8 +864,7 @@ export default function Dossiers() {
     </button>
   </div>
 </body>
-</html>
-    `;
+</html>`;
 
     const newWindow = window.open('', '_blank');
     newWindow.document.write(factureHTML);
@@ -877,9 +875,9 @@ export default function Dossiers() {
     // indicating we are invoicing an existing, saved dossier that needs to be updated in the DB.
     // If 'dossier' is null, it means we are in the main dossier editing dialog, and changes
     // will be saved with the form submission, so no immediate DB update is needed here.
-    if (saveToDatabase && dossier && selectedMandatsIndexes && selectedMandatsIndexes.length > 0) {
+    if (saveToDatabase && dossier) {
       const updatedMandats = dossier.mandats.map((m, idx) => {
-        if (selectedMandatsIndexes.includes(idx)) {
+        if (selectedMandatsIndexes && selectedMandatsIndexes.includes(idx)) {
           const mandatHT = (m.prix_estime || 0) - (m.rabais || 0);
           const mandatTPS = mandatHT * 0.05;
           const mandatTVQ = mandatHT * 0.09975;
@@ -907,6 +905,10 @@ export default function Dossiers() {
   };
 
   const voirFacture = (factureHTML) => {
+    if (!factureHTML) {
+      alert("Le HTML de la facture n'est pas disponible.");
+      return;
+    }
     const newWindow = window.open('', '_blank');
     newWindow.document.write(factureHTML);
     newWindow.document.close();
@@ -1011,10 +1013,52 @@ export default function Dossiers() {
     if (!editingDossier) return;
     await genererFacture(editingDossier, selectedMandatsForLocalFacturation, true); // Pass editingDossier and true to save
     setIsFacturationMandatsDialogOpen(false);
-    // Reload the dossier to update the display
+    queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    // Reload the dossier to update formData
     const refreshedDossier = dossiers.find(d => d.id === editingDossier.id);
     if (refreshedDossier) {
-      handleEdit(refreshedDossier); // Re-initialize form data with updated dossier
+      setFormData({
+        numero_dossier: refreshedDossier.numero_dossier || "",
+        arpenteur_geometre: refreshedDossier.arpenteur_geometre || "",
+        date_ouverture: refreshedDossier.date_ouverture || new Date().toISOString().split('T')[0],
+        statut: refreshedDossier.statut || "Ouvert",
+        clients_ids: refreshedDossier.clients_ids || [],
+        notaires_ids: refreshedDossier.notaires_ids || [],
+        courtiers_ids: refreshedDossier.courtiers_ids || [],
+        mandats: refreshedDossier.mandats?.map(m => ({
+          ...m,
+          date_ouverture: m.date_ouverture || "",
+          minute: m.minute || "",
+          date_minute: m.date_minute || "",
+          type_minute: m.type_minute || "Initiale",
+          minutes_list: m.minutes_list || [],
+          tache_actuelle: m.tache_actuelle || "",
+          statut_terrain: m.statut_terrain || "",
+          adresse_travaux: m.adresse_travaux ? (typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+          lots: m.lots || [],
+          prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+          rabais: m.rabais !== undefined ? m.rabais : 0,
+          taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
+          date_livraison: m.date_livraison || "",
+          date_signature: m.date_signature || "",
+          date_debut_travaux: m.date_debut_travaux || "",
+          facture: m.facture || null,
+          terrain: m.terrain || {
+            date_limite_leve: "",
+            instruments_requis: "",
+            a_rendez_vous: false,
+            date_rendez_vous: "",
+            heure_rendez_vous: "",
+            donneur: "",
+            technicien: "",
+            dossier_simultane: "",
+            temps_prevu: "",
+            notes: ""
+          },
+          notes: ""
+        })) || [],
+        description: refreshedDossier.description || ""
+      });
     }
   };
 
@@ -2241,7 +2285,11 @@ export default function Dossiers() {
                       <Badge variant="outline" className={`${getArpenteurColor(selectedDossierToClose?.arpenteur_geometre)} border mb-2`}>{getArpenteurInitials(selectedDossierToClose?.arpenteur_geometre)}{selectedDossierToClose?.numero_dossier}</Badge>
                       <p className="text-slate-300 text-sm">{getClientsNames(selectedDossierToClose?.clients_ids)}</p>
                     </div>
-                    <Button type="button" size="sm" variant="outline" onClick={() => { setClosingDossierId(null); setMinutesData([]); }} className="text-slate-400">Changer de dossier</Button>
+                    {!editingDossier && (
+                      <Button type="button" size="sm" variant="outline" onClick={() => { setClosingDossierId(null); setMinutesData([]); }} className="text-slate-400">
+                        Changer de dossier
+                      </Button>
+                    )}
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     <Label className="text-lg font-semibold text-white mb-3 block">Informations de minutes par mandat</Label>
