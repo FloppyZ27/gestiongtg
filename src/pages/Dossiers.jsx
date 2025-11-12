@@ -190,6 +190,9 @@ export default function Dossiers() {
       resetForm();
       setClosingDossierId(null);
       setMinutesData([]);
+      setIsFacturationDialogOpen(false); // Close facturation dialog after update
+      setFacturationDossierId(null);
+      setSelectedMandatsForFacturation([]);
     },
   });
 
@@ -408,6 +411,7 @@ export default function Dossiers() {
           temps_prevu: "",
           notes: ""
         },
+        facture: m.facture || undefined, // Keep existing facture if any
         notes: ""
       })) || [],
       description: entity.description || ""
@@ -586,15 +590,25 @@ export default function Dossiers() {
     updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
   };
 
-  const genererFacture = async (dossier = null, selectedMandats = null) => {
+  const genererFacture = async (dossier = null, selectedMandatsIndexes = null) => {
     const targetDossier = dossier || editingDossier;
     if (!targetDossier) return;
     
-    const clientsList = (dossier ? targetDossier.clients_ids : formData.clients_ids).map(id => getClientById(id)).filter(c => c);
+    const clientsList = (targetDossier.clients_ids).map(id => getClientById(id)).filter(c => c);
     const client = clientsList[0];
-    const mandatsData = selectedMandats || (dossier ? targetDossier.mandats : formData.mandats);
     
-    const totalHT = mandatsData.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
+    // Get the mandats based on selected indexes
+    const allMandatsInDossier = targetDossier.mandats;
+    const mandatsToInvoice = selectedMandatsIndexes
+      ? selectedMandatsIndexes.map(idx => allMandatsInDossier[idx])
+      : allMandatsInDossier; // If no specific indexes, invoice all available mandats in the context
+
+    if (mandatsToInvoice.length === 0) {
+      console.warn("No mandates selected or available for invoicing.");
+      return;
+    }
+    
+    const totalHT = mandatsToInvoice.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
@@ -603,7 +617,7 @@ export default function Dossiers() {
 
     const uniqueAddresses = [];
     const addressMap = new Map();
-    mandatsData.forEach(m => {
+    mandatsToInvoice.forEach(m => {
       if (m.adresse_travaux) {
         const addrStr = formatAdresse(m.adresse_travaux);
         if (addrStr && !addressMap.has(addrStr)) {
@@ -615,7 +629,7 @@ export default function Dossiers() {
 
     const uniqueLots = [];
     const lotMap = new Map();
-    mandatsData.forEach(m => {
+    mandatsToInvoice.forEach(m => {
       if (m.lots && m.lots.length > 0) {
         m.lots.forEach(lotId => {
           const lot = getLotById(lotId);
@@ -776,7 +790,7 @@ export default function Dossiers() {
         </td>
         <td class="amount-cell"></td>
       </tr>
-      ${mandatsData.map((mandat, idx) => {
+      ${mandatsToInvoice.map((mandat) => { // Removed idx as it's not the original index
         const montant = (mandat.prix_estime || 0);
         const rabais = mandat.rabais || 0;
         const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 
@@ -851,6 +865,38 @@ export default function Dossiers() {
     const newWindow = window.open('', '_blank');
     newWindow.document.write(factureHTML);
     newWindow.document.close();
+
+    // Save invoice info to the mandats
+    // This logic applies when 'dossier' parameter is provided (from the facturation dialog),
+    // indicating we are invoicing an existing, saved dossier that needs to be updated in the DB.
+    // If 'dossier' is null, it means we are in the main dossier editing dialog, and changes
+    // will be saved with the form submission, so no immediate DB update is needed here.
+    if (dossier && selectedMandatsIndexes && selectedMandatsIndexes.length > 0) {
+      const updatedMandats = dossier.mandats.map((m, idx) => {
+        if (selectedMandatsIndexes.includes(idx)) {
+          const mandatHT = (m.prix_estime || 0) - (m.rabais || 0);
+          const mandatTPS = mandatHT * 0.05;
+          const mandatTVQ = mandatHT * 0.09975;
+          const mandatTTC = mandatHT + mandatTPS + mandatTVQ;
+          
+          return {
+            ...m,
+            facture: {
+              numero_facture: numeroFacture.toString(),
+              date_facture: format(new Date(), "yyyy-MM-dd"),
+              total_ht: mandatHT,
+              total_ttc: mandatTTC
+            }
+          };
+        }
+        return m;
+      });
+
+      await updateDossierMutation.mutateAsync({ 
+        id: dossier.id, 
+        dossierData: { ...dossier, mandats: updatedMandats }
+      });
+    }
   };
 
   const now = new Date();
@@ -936,8 +982,12 @@ export default function Dossiers() {
     setFacturationDossierId(dossierId);
     const dossier = dossiers.find(d => d.id === dossierId);
     if (dossier && dossier.mandats) {
-      // By default, select all mandates for facturation
-      setSelectedMandatsForFacturation(dossier.mandats.map((_, idx) => idx));
+      // Select only mandats without facture
+      const mandatsWithoutFacture = dossier.mandats
+        .map((m, idx) => ({ mandat: m, index: idx }))
+        .filter(item => !item.mandat.facture)
+        .map(item => item.index);
+      setSelectedMandatsForFacturation(mandatsWithoutFacture);
     }
   };
 
@@ -951,9 +1001,7 @@ export default function Dossiers() {
     if (!facturationDossierId) return;
     const dossier = dossiers.find(d => d.id === facturationDossierId);
     if (!dossier) return;
-    const selectedMandats = selectedMandatsForFacturation.map(idx => dossier.mandats[idx]);
-    genererFacture(dossier, selectedMandats);
-    setIsFacturationDialogOpen(false);
+    genererFacture(dossier, selectedMandatsForFacturation);
   };
 
   const dossiersOuverts = dossiers.filter(d => d.statut === "Ouvert");
@@ -1116,9 +1164,11 @@ export default function Dossiers() {
     return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   });
 
-  const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
-
-  const dossiersForFacturation = dossiers.filter(d => d.statut === "Ouvert" || d.statut === "Fermé"); // Can facturer closed dossiers too
+  const dossiersForFacturation = dossiers.filter(d => {
+    if (d.statut !== "Ouvert" && d.statut !== "Fermé") return false;
+    // Only show dossiers that have at least one mandat without a facture
+    return d.mandats && d.mandats.some(m => !m.facture);
+  });
   
   const filteredDossiersForFacturation = dossiersForFacturation.filter(dossier => {
     const searchLower = facturationSearchTerm.toLowerCase();
@@ -1139,6 +1189,7 @@ export default function Dossiers() {
     return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   });
 
+  const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
   const selectedDossierForFacturation = dossiers.find(d => d.id === facturationDossierId);
 
   return (
@@ -1770,7 +1821,7 @@ export default function Dossiers() {
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">N° Dossier</TableHead>
                             <TableHead className="text-slate-300">Clients</TableHead>
-                            <TableHead className="text-slate-300">Mandats</TableHead>
+                            <TableHead className="text-slate-300">Mandats non facturés</TableHead>
                             <TableHead className="text-slate-300">Adresse Travaux</TableHead>
                             <TableHead className="text-slate-300 text-right">Action</TableHead>
                           </TableRow>
@@ -1788,14 +1839,14 @@ export default function Dossiers() {
                                 <TableCell className="text-slate-300">
                                   {dossier.mandats && dossier.mandats.length > 0 ? (
                                     <div className="flex flex-wrap gap-1">
-                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                      {dossier.mandats.filter(m => !m.facture).slice(0, 2).map((mandat, idx) => (
                                         <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
                                           {mandat.type_mandat}
                                         </Badge>
                                       ))}
-                                      {dossier.mandats.length > 2 && (
+                                      {dossier.mandats.filter(m => !m.facture).length > 2 && (
                                         <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                          +{dossier.mandats.length - 2}
+                                          +{dossier.mandats.filter(m => !m.facture).length - 2}
                                         </Badge>
                                       )}
                                     </div>
@@ -1817,7 +1868,7 @@ export default function Dossiers() {
                             <TableRow>
                               <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                                 <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                <p>Aucun dossier trouvé</p>
+                                <p>Aucun dossier avec mandats non facturés</p>
                               </TableCell>
                             </TableRow>
                           )}
@@ -1842,58 +1893,68 @@ export default function Dossiers() {
                   <div className="flex-1 overflow-y-auto">
                     <Label className="text-lg font-semibold text-white mb-3 block">Sélectionner les mandats à facturer</Label>
                     <div className="space-y-2">
-                      {selectedDossierForFacturation?.mandats?.map((mandat, index) => (
-                        <div
-                          key={index}
-                          className={`p-4 rounded-lg border transition-colors cursor-pointer ${
-                            selectedMandatsForFacturation.includes(index)
-                              ? 'bg-emerald-500/20 border-emerald-500/30'
-                              : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50'
-                          }`}
-                          onClick={() => toggleMandatForFacturation(index)}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
-                              {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-                                <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
-                              )}
-                              {mandat.lots && mandat.lots.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {mandat.lots.map((lotId) => {
-                                    const lot = getLotById(lotId);
-                                    return (
-                                      <Badge key={lotId} variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/30">
-                                        {lot?.numero_lot || lotId}
-                                      </Badge>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                            <div className="ml-4 text-right">
-                              {(mandat.prix_estime || 0) > 0 && (
-                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                                  {(mandat.prix_estime || 0).toFixed(2)} $
-                                  {(mandat.rabais || 0) > 0 && ` (-${mandat.rabais.toFixed(2)} $)`}
-                                </Badge>
-                              )}
-                              <div className="mt-2">
-                                {selectedMandatsForFacturation.includes(index) ? (
-                                  <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
-                                    <Check className="w-3 h-3 mr-1" />
-                                    Sélectionné
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="bg-slate-700 text-slate-400">
-                                    Cliquer pour sélectionner
+                      {selectedDossierForFacturation?.mandats?.map((mandat, index) => {
+                        const hasFacture = !!mandat.facture;
+                        return (
+                          <div
+                            key={index}
+                            className={`p-4 rounded-lg border transition-colors ${
+                              hasFacture 
+                                ? 'bg-slate-700/30 border-slate-600 opacity-50 cursor-not-allowed'
+                                : selectedMandatsForFacturation.includes(index)
+                                  ? 'bg-emerald-500/20 border-emerald-500/30 cursor-pointer'
+                                  : 'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 cursor-pointer'
+                            }`}
+                            onClick={() => !hasFacture && toggleMandatForFacturation(index)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-white">{mandat.type_mandat || `Mandat ${index + 1}`}</h4>
+                                {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+                                  <p className="text-slate-400 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                                )}
+                                {mandat.lots && mandat.lots.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {mandat.lots.map((lotId) => {
+                                      const lot = getLotById(lotId);
+                                      return (
+                                        <Badge key={lotId} variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/30">
+                                          {lot?.numero_lot || lotId}
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-4 text-right">
+                                {(mandat.prix_estime || 0) > 0 && (
+                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                    {(mandat.prix_estime || 0).toFixed(2)} $
+                                    {(mandat.rabais || 0) > 0 && ` (-${mandat.rabais.toFixed(2)} $)`}
                                   </Badge>
                                 )}
+                                <div className="mt-2">
+                                  {hasFacture ? (
+                                    <Badge className="bg-purple-500/30 text-purple-400 border-purple-500/50">
+                                      <FileText className="w-3 h-3 mr-1" />
+                                      Facture #{mandat.facture.numero_facture}
+                                    </Badge>
+                                  ) : selectedMandatsForFacturation.includes(index) ? (
+                                    <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                      <Check className="w-3 h-3 mr-1" />
+                                      Sélectionné
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-slate-700 text-slate-400">
+                                      Cliquer pour sélectionner
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
@@ -2371,12 +2432,40 @@ export default function Dossiers() {
                               <CardContent className="p-4 space-y-3">
                                 <div className="flex items-start justify-between">
                                   <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
-                                  {(mandat.prix_estime || 0) > 0 && (
-                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
-                                      {(mandat.prix_estime || 0).toFixed(2)} $
-                                    </Badge>
-                                  )}
+                                  <div className="flex gap-2">
+                                    {(mandat.prix_estime || 0) > 0 && (
+                                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
+                                        {(mandat.prix_estime || 0).toFixed(2)} $
+                                      </Badge>
+                                    )}
+                                    {mandat.facture && (
+                                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                                        <FileText className="w-3 h-3 mr-1" />
+                                        Facture #{mandat.facture.numero_facture}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
+
+                                {mandat.facture && (
+                                  <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                                    <Label className="text-purple-400 text-xs font-semibold">Facturé</Label>
+                                    <div className="grid grid-cols-3 gap-3 mt-2">
+                                      <div>
+                                        <p className="text-slate-400 text-xs">Date</p>
+                                        <p className="text-white text-sm">{mandat.facture.date_facture ? format(new Date(mandat.facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-400 text-xs">Total HT</p>
+                                        <p className="text-white text-sm">{mandat.facture.total_ht?.toFixed(2)} $</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-400 text-xs">Total TTC</p>
+                                        <p className="text-white text-sm font-semibold">{mandat.facture.total_ttc?.toFixed(2)} $</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                   {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
