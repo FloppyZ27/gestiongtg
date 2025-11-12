@@ -1209,12 +1209,49 @@ export default function Dossiers() {
     if (!closingDossierId) return;
     const dossier = dossiers.find((d) => d.id === closingDossierId);
     if (!dossier) return;
-    const updatedMandats = dossier.mandats.map((mandat, index) => ({
-      ...mandat,
-      minute: minutesData[index]?.minute || mandat.minute || "",
-      date_minute: minutesData[index]?.date_minute || mandat.date_minute || "",
-      type_minute: minutesData[index]?.type_minute || mandat.type_minute || "Initiale"
-    }));
+
+    // Vérifier si les minutes existent déjà pour cet arpenteur
+    for (let index = 0; index < minutesData.length; index++) {
+      const minuteData = minutesData[index];
+      if (minuteData?.minute) {
+        const minuteExiste = dossiers.some((d) => 
+          d.id !== closingDossierId && // Exclure le dossier en cours de fermeture
+          d.arpenteur_geometre === dossier.arpenteur_geometre &&
+          d.mandats?.some((m) => 
+            m.minutes_list?.some((min) => min.minute === minuteData.minute) ||
+            m.minute === minuteData.minute
+          )
+        );
+
+        if (minuteExiste) {
+          alert(`La minute ${minuteData.minute} existe déjà pour ${dossier.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+          return;
+        }
+      }
+    }
+
+    const updatedMandats = dossier.mandats.map((mandat, index) => {
+      const minuteData = minutesData[index];
+      const existingMinutesList = mandat.minutes_list || [];
+      
+      // Ajouter la nouvelle minute à la liste si elle est fournie
+      const newMinutesList = minuteData?.minute && minuteData?.date_minute 
+        ? [...existingMinutesList, {
+            minute: minuteData.minute,
+            date_minute: minuteData.date_minute,
+            type_minute: minuteData.type_minute || "Initiale"
+          }]
+        : existingMinutesList;
+
+      return {
+        ...mandat,
+        minutes_list: newMinutesList,
+        minute: minuteData?.minute || mandat.minute || "",
+        date_minute: minuteData?.date_minute || mandat.date_minute || "",
+        type_minute: minuteData?.type_minute || mandat.type_minute || "Initiale"
+      };
+    });
+
     updateDossierMutation.mutate({
       id: closingDossierId,
       dossierData: { ...dossier, statut: "Fermé", mandats: updatedMandats }
@@ -1402,6 +1439,7 @@ export default function Dossiers() {
                             <FileText className="w-5 h-5 mr-2" />
                             Facturation
                           </Button>
+                          {editingDossier.statut !== "Fermé" &&
                           <Button
                           type="button"
                           onClick={openCloseDossierDialog}
@@ -1410,6 +1448,7 @@ export default function Dossiers() {
                             <Check className="w-5 h-5 mr-2" />
                             Fermer dossier
                           </Button>
+                          }
                         </div>
                       }
                     </div>
