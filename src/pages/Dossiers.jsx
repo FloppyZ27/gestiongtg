@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, Eye, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -100,6 +99,11 @@ export default function Dossiers() {
   const [closeFilterArpenteur, setCloseFilterArpenteur] = useState("all");
   const [closeFilterVille, setCloseFilterVille] = useState("all");
   const [closeFilterMandat, setCloseFilterMandat] = useState("all");
+  const [newMinuteForm, setNewMinuteForm] = useState({
+    minute: "",
+    date_minute: "",
+    type_minute: "Initiale"
+  });
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -331,6 +335,7 @@ export default function Dossiers() {
     setEditingDossier(null);
     setActiveTabMandat("0");
     setCommentairesTemporaires([]);
+    setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
   };
 
   const resetNewLotForm = () => {
@@ -371,6 +376,7 @@ export default function Dossiers() {
         minute: m.minute || "",
         date_minute: m.date_minute || "",
         type_minute: m.type_minute || "Initiale",
+        minutes_list: m.minutes_list || [],
         tache_actuelle: m.tache_actuelle || "",
         statut_terrain: m.statut_terrain || "",
         adresse_travaux: m.adresse_travaux ? (typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
@@ -399,6 +405,7 @@ export default function Dossiers() {
     });
     setIsDialogOpen(true);
     setActiveTabMandat("0");
+    setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
   };
 
   const handleView = (dossier) => {
@@ -448,6 +455,7 @@ export default function Dossiers() {
         minute: "",
         date_minute: "",
         type_minute: "Initiale",
+        minutes_list: [],
         tache_actuelle: "",
         statut_terrain: "",
         adresse_travaux: defaultAdresse,
@@ -554,6 +562,19 @@ export default function Dossiers() {
         )
       }));
     }
+  };
+
+  const addMinuteToMandat = (mandatIndex) => {
+    if (newMinuteForm.minute && newMinuteForm.date_minute) {
+      const currentMinutes = formData.mandats[mandatIndex].minutes_list || [];
+      updateMandat(mandatIndex, 'minutes_list', [...currentMinutes, { ...newMinuteForm }]);
+      setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+    }
+  };
+
+  const removeMinuteFromMandat = (mandatIndex, minuteIndex) => {
+    const updatedMinutes = formData.mandats[mandatIndex].minutes_list.filter((_, idx) => idx !== minuteIndex);
+    updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
   };
 
   const getCurrentValue = (items, key) => {
@@ -982,18 +1003,35 @@ export default function Dossiers() {
                                 <Card className="border-slate-700 bg-slate-800/30">
                                   <CardContent className="p-4 space-y-4">
                                     <div className="flex gap-4 items-start">
-                                      <div className="flex-1 space-y-2">
-                                        <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                        <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
-                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                            <SelectValue placeholder="Sélectionner" />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700">
-                                            {TYPES_MANDATS.map((type) => (
-                                              <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
+                                      <div className="flex-1 grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                          <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                                          <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                              <SelectValue placeholder="Sélectionner" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                              {TYPES_MANDATS.map((type) => (
+                                                <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        {editingDossier && (
+                                          <div className="space-y-2">
+                                            <Label>Tâche actuelle</Label>
+                                            <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                                <SelectValue placeholder="Sélectionner la tâche" />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                                {TACHES.map((tache) => (
+                                                  <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        )}
                                       </div>
                                       <Button type="button" size="sm" variant="ghost" onClick={() => {
                                         removeMandat(index);
@@ -1042,54 +1080,97 @@ export default function Dossiers() {
                                     {editingDossier && (
                                       <>
                                         <div className="space-y-2">
-                                          <Label className="text-lg font-semibold text-slate-300">Informations de minute</Label>
-                                          <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                            <Table>
-                                              <TableHeader>
-                                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                                  <TableHead className="text-slate-300">Minute</TableHead>
-                                                  <TableHead className="text-slate-300">Date de minute</TableHead>
-                                                  <TableHead className="text-slate-300">Type de minute</TableHead>
-                                                </TableRow>
-                                              </TableHeader>
-                                              <TableBody>
-                                                <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                                  <TableCell>
-                                                    <Input value={mandat.minute || ""} onChange={(e) => updateMandat(index, 'minute', e.target.value)} placeholder="Ex: 12345" className="bg-slate-700 border-slate-600" />
-                                                  </TableCell>
-                                                  <TableCell>
-                                                    <Input type="date" value={mandat.date_minute || ""} onChange={(e) => updateMandat(index, 'date_minute', e.target.value)} className="bg-slate-700 border-slate-600" />
-                                                  </TableCell>
-                                                  <TableCell>
-                                                    <Select value={mandat.type_minute || "Initiale"} onValueChange={(value) => updateMandat(index, 'type_minute', value)}>
-                                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                                        <SelectValue placeholder="Type" />
-                                                      </SelectTrigger>
-                                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                                        <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
-                                                        <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
-                                                        <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
-                                                      </SelectContent>
-                                                    </Select>
-                                                  </TableCell>
-                                                </TableRow>
-                                              </TableBody>
-                                            </Table>
+                                          <div className="flex justify-between items-center">
+                                            <Label className="text-lg font-semibold text-slate-300">Informations de minute</Label>
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              onClick={() => addMinuteToMandat(index)}
+                                              disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
+                                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                            >
+                                              <Plus className="w-4 h-4 mr-1" />
+                                              Ajouter minute
+                                            </Button>
                                           </div>
-                                        </div>
+                                          
+                                          <div className="grid grid-cols-3 gap-3 p-3 bg-slate-700/30 border border-slate-600 rounded-lg">
+                                            <div className="space-y-2">
+                                              <Label className="text-sm">Minute</Label>
+                                              <Input
+                                                value={newMinuteForm.minute}
+                                                onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
+                                                placeholder="Ex: 12345"
+                                                className="bg-slate-700 border-slate-600"
+                                              />
+                                            </div>
+                                            <div className="space-y-2">
+                                              <Label className="text-sm">Date de minute</Label>
+                                              <Input
+                                                type="date"
+                                                value={newMinuteForm.date_minute}
+                                                onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
+                                                className="bg-slate-700 border-slate-600"
+                                              />
+                                            </div>
+                                            <div className="space-y-2">
+                                              <Label className="text-sm">Type de minute</Label>
+                                              <Select
+                                                value={newMinuteForm.type_minute}
+                                                onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
+                                              >
+                                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                                  <SelectValue placeholder="Type" />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-slate-800 border-slate-700">
+                                                  <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
+                                                  <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
+                                                  <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          </div>
 
-                                        <div className="space-y-2">
-                                          <Label>Tâche actuelle</Label>
-                                          <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                              <SelectValue placeholder="Sélectionner la tâche" />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                              {TACHES.map((tache) => (
-                                                <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
+                                          {mandat.minutes_list && mandat.minutes_list.length > 0 && (
+                                            <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                              <Table>
+                                                <TableHeader>
+                                                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                    <TableHead className="text-slate-300">Minute</TableHead>
+                                                    <TableHead className="text-slate-300">Date de minute</TableHead>
+                                                    <TableHead className="text-slate-300">Type de minute</TableHead>
+                                                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                                  </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                  {mandat.minutes_list.map((minute, minuteIdx) => (
+                                                    <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
+                                                      <TableCell className="text-white">{minute.minute}</TableCell>
+                                                      <TableCell className="text-white">
+                                                        {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
+                                                      </TableCell>
+                                                      <TableCell className="text-white">
+                                                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                                          {minute.type_minute}
+                                                        </Badge>
+                                                      </TableCell>
+                                                      <TableCell className="text-right">
+                                                        <Button
+                                                          type="button"
+                                                          size="sm"
+                                                          variant="ghost"
+                                                          onClick={() => removeMinuteFromMandat(index, minuteIdx)}
+                                                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                        >
+                                                          <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                      </TableCell>
+                                                    </TableRow>
+                                                  ))}
+                                                </TableBody>
+                                              </Table>
+                                            </div>
+                                          )}
                                         </div>
                                       </>
                                     )}
@@ -1624,7 +1705,6 @@ export default function Dossiers() {
             </DialogHeader>
             {viewingDossier && (
               <div className="flex h-[90vh]">
-                {/* Main content - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">
@@ -1633,7 +1713,6 @@ export default function Dossiers() {
                   </div>
 
                   <div className="space-y-6">
-                    {/* Informations principales */}
                     <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
                       <div>
                         <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
@@ -1662,7 +1741,6 @@ export default function Dossiers() {
                       </div>
                     )}
 
-                    {/* Clients, Notaires, Courtiers */}
                     <div className="grid grid-cols-3 gap-4">
                       {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
                         <div>
@@ -1734,7 +1812,6 @@ export default function Dossiers() {
                       )}
                     </div>
 
-                    {/* Mandats */}
                     {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
                       <div>
                         <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
@@ -1785,8 +1862,20 @@ export default function Dossiers() {
                                   </div>
                                 )}
 
-                                {/* Minutes */}
-                                {mandat.minute && (
+                                {mandat.minutes_list && mandat.minutes_list.length > 0 && (
+                                  <div className="pt-2 border-t border-slate-700">
+                                    <Label className="text-slate-400 text-xs">Minutes</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {mandat.minutes_list.map((minute, minuteIdx) => (
+                                        <Badge key={minuteIdx} className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                          {minute.minute} - {minute.type_minute} ({minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'})
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {mandat.minute && !mandat.minutes_list && (
                                   <div className="pt-2 border-t border-slate-700">
                                     <Label className="text-slate-400 text-xs">Minute</Label>
                                     <div className="flex flex-wrap gap-2 mt-2">
@@ -1797,7 +1886,6 @@ export default function Dossiers() {
                                   </div>
                                 )}
 
-                                {/* Dates */}
                                 <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
                                   {mandat.date_ouverture && (
                                     <div>
@@ -1825,7 +1913,6 @@ export default function Dossiers() {
                                   )}
                                 </div>
 
-                                {/* Tarification */}
                                 {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
                                   <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
                                     {mandat.prix_estime > 0 && (
@@ -1917,7 +2004,6 @@ export default function Dossiers() {
                     )}
                   </div>
 
-                  {/* Boutons Fermer/Modifier tout en bas */}
                   <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
                     <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                       Fermer
@@ -1929,7 +2015,6 @@ export default function Dossiers() {
                   </div>
                 </div>
 
-                {/* Right side - Commentaires Sidebar - 30% */}
                 <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
@@ -2173,9 +2258,9 @@ export default function Dossiers() {
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
-            <div className="flex flex-wrap gap-3 pt-4">
-              <div className="relative flex-1 min-w-[250px]">
+            <div className="flex justify-between items-center mb-4">
+              <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
+              <div className="relative w-96">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher..."
@@ -2184,7 +2269,8 @@ export default function Dossiers() {
                   className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
-
+            </div>
+            <div className="flex flex-wrap gap-3">
               <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
                 <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                   <SelectValue placeholder="Arpenteur" />
@@ -2313,10 +2399,7 @@ export default function Dossiers() {
                           </TableCell>
                           <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => handleView(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                              <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
                                 <Edit className="w-4 h-4" />
                               </Button>
                               <Button variant="ghost" size="sm" onClick={() => handleDelete(dossier.id, getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
