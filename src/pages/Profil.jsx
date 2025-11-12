@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -609,6 +608,98 @@ export default function Profil() {
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-slate-500">
                         Aucun retour d'appel assigné
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Mandats assignés */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader className="border-b border-slate-800">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-purple-400" />
+              Mes mandats assignés
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                    <TableHead className="text-slate-300">Dossier</TableHead>
+                    <TableHead className="text-slate-300">Clients</TableHead>
+                    <TableHead className="text-slate-300">Type de mandat</TableHead>
+                    <TableHead className="text-slate-300">Tâche assignée</TableHead>
+                    <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dossiers.flatMap(dossier => 
+                    (dossier.mandats || [])
+                      .filter(mandat => mandat.utilisateur_assigne === user?.email)
+                      .map((mandat, idx) => (
+                        <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                              {mandat.type_mandat}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                              {mandat.tache_actuelle || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {formatAdresse(mandat.adresse_travaux) || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                  ).length > 0 ? (
+                    dossiers.flatMap(dossier => 
+                      (dossier.mandats || [])
+                        .filter(mandat => mandat.utilisateur_assigne === user?.email)
+                        .map((mandat, idx) => (
+                          <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+                            <TableCell className="font-medium">
+                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300 text-sm">
+                              {getClientsNames(dossier.clients_ids)}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                {mandat.type_mandat}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                                {mandat.tache_actuelle || "-"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                              {formatAdresse(mandat.adresse_travaux) || "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    )
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                        Aucun mandat assigné
                       </TableCell>
                     </TableRow>
                   )}
