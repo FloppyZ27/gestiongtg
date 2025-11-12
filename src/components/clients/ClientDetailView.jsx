@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +28,17 @@ const getArpenteurInitials = (arpenteur) => {
     "Frédéric Gilbert": "FG-"
   };
   return mapping[arpenteur] || "";
+};
+
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
 const getTypeColor = (type) => {
@@ -239,20 +249,31 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
     return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille;
   });
 
-  // Trier les mandats
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
   const sortedMandats = [...filteredMandats].sort((a, b) => {
     if (!sortField) return 0;
-
     let aValue, bValue;
-
     switch (sortField) {
       case 'numero_dossier':
         aValue = (getArpenteurInitials(a.dossier.arpenteur_geometre) + a.dossier.numero_dossier).toLowerCase();
         bValue = (getArpenteurInitials(b.dossier.arpenteur_geometre) + b.dossier.numero_dossier).toLowerCase();
         break;
       case 'date_ouverture':
-        aValue = new Date(a.dossier.date_ouverture).getTime();
-        bValue = new Date(b.dossier.date_ouverture).getTime();
+        aValue = a.dossier.date_ouverture ? new Date(a.dossier.date_ouverture).getTime() : 0;
+        bValue = b.dossier.date_ouverture ? new Date(b.dossier.date_ouverture).getTime() : 0;
         break;
       case 'type_mandat':
         aValue = (a.mandat?.type_mandat || '').toLowerCase();
@@ -269,7 +290,6 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
       default:
         return 0;
     }
-
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     } else {
@@ -278,20 +298,6 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
       return 0;
     }
   });
-
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
-    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
 
   const adresseActuelle = client.adresses?.find(a => a.actuelle);
   const adressesAnciennes = client.adresses?.filter(a => !a.actuelle) || [];
@@ -570,8 +576,10 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                             key={`${item.dossier.id}-${idx}`}
                             className="border-slate-800"
                           >
-                            <TableCell className="font-medium text-white font-mono">
-                              {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                            <TableCell className="font-medium">
+                              <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border`}>
+                                {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                              </Badge>
                             </TableCell>
                             <TableCell className="text-slate-300">
                               {format(new Date(item.dossier.date_ouverture), "dd MMM yyyy", { locale: fr })}
