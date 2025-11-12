@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -157,6 +156,13 @@ export default function PriseDeMandat() {
   });
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
   const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+  const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
+  const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
+  const [newMinuteForm, setNewMinuteForm] = useState({
+    minute: "",
+    date_minute: "",
+    type_minute: "Initiale"
+  });
 
   // NEW STATES FOR DOSSIER REFERENCE
   const [dossierReferenceId, setDossierReferenceId] = useState(null);
@@ -805,6 +811,10 @@ export default function PriseDeMandat() {
       mandats: entity.mandats?.map(m => ({
         ...m,
         date_ouverture: m.date_ouverture || "",
+        minute: m.minute || "",
+        date_minute: m.date_minute || "",
+        type_minute: m.type_minute || "Initiale",
+        minutes_list: m.minutes_list || [],
         adresse_travaux: m.adresse_travaux
           ? (typeof m.adresse_travaux === 'string'
             ? {
@@ -824,6 +834,7 @@ export default function PriseDeMandat() {
         date_livraison: m.date_livraison || "",
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
+        factures: m.factures || [],
         tache_actuelle: m.tache_actuelle || ""
       })) || [],
       description: entity.description || ""
@@ -886,7 +897,11 @@ export default function PriseDeMandat() {
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
-        date_ouverture: "", // Keep date_ouverture in the state for view, but remove from form input
+        date_ouverture: "",
+        minute: "",
+        date_minute: "",
+        type_minute: "Initiale",
+        minutes_list: [],
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -895,6 +910,7 @@ export default function PriseDeMandat() {
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
+        factures: [],
         tache_actuelle: ""
       }]
     }));
@@ -941,6 +957,43 @@ export default function PriseDeMandat() {
         )
       }));
     }
+  };
+
+  const openAddMinuteDialog = (mandatIndex) => {
+    setCurrentMinuteMandatIndex(mandatIndex);
+    setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+    setIsAddMinuteDialogOpen(true);
+  };
+
+  const handleAddMinuteFromDialog = () => {
+    if (currentMinuteMandatIndex !== null && newMinuteForm.minute && newMinuteForm.date_minute) {
+      addMinuteToMandat(currentMinuteMandatIndex);
+      setIsAddMinuteDialogOpen(false);
+      setCurrentMinuteMandatIndex(null);
+    }
+  };
+
+  const addMinuteToMandat = (mandatIndex) => {
+    if (newMinuteForm.minute && newMinuteForm.date_minute) {
+      const currentMinutes = formData.mandats[mandatIndex].minutes_list || [];
+      updateMandat(mandatIndex, 'minutes_list', [...currentMinutes, { ...newMinuteForm }]);
+      setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+    }
+  };
+
+  const removeMinuteFromMandat = (mandatIndex, minuteIndex) => {
+    const updatedMinutes = formData.mandats[mandatIndex].minutes_list.filter((_, idx) => idx !== minuteIndex);
+    updateMandat(mandatIndex, 'minutes_list', updatedMinutes);
+  };
+
+  const voirFacture = (factureHTML) => {
+    if (!factureHTML) {
+      alert("Le HTML de la facture n'est pas disponible.");
+      return;
+    }
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(factureHTML);
+    newWindow.document.close();
   };
 
   // removeClientField and toggleActuel removed, logic moved to ClientFormDialog
@@ -1714,6 +1767,110 @@ export default function PriseDeMandat() {
                                     </p>
                                   )}
                                 </div>
+
+                                {editingDossier && (
+                                  <>
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between items-center">
+                                        <Label>Minutes</Label>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => openAddMinuteDialog(index)}
+                                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                                        >
+                                          <Plus className="w-4 h-4 mr-1" />
+                                          Ajouter minute
+                                        </Button>
+                                      </div>
+                                      
+                                      {mandat.minutes_list && mandat.minutes_list.length > 0 ? (
+                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                <TableHead className="text-slate-300">Minute</TableHead>
+                                                <TableHead className="text-slate-300">Date de minute</TableHead>
+                                                <TableHead className="text-slate-300">Type de minute</TableHead>
+                                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {mandat.minutes_list.map((minute, minuteIdx) => (
+                                                <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
+                                                  <TableCell className="text-white">{minute.minute}</TableCell>
+                                                  <TableCell className="text-white">
+                                                    {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
+                                                  </TableCell>
+                                                  <TableCell className="text-white">
+                                                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                                      {minute.type_minute}
+                                                    </Badge>
+                                                  </TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button
+                                                      type="button"
+                                                      size="sm"
+                                                      variant="ghost"
+                                                      onClick={() => removeMinuteFromMandat(index, minuteIdx)}
+                                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                    >
+                                                      <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                      ) : (
+                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune minute</p>
+                                      )}
+                                    </div>
+
+                                    <div className="space-y-2 pt-3 border-t border-slate-700">
+                                      <Label>Factures générées ({mandat.factures?.length || 0})</Label>
+                                      {mandat.factures && mandat.factures.length > 0 ? (
+                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                                <TableHead className="text-slate-300">N° Facture</TableHead>
+                                                <TableHead className="text-slate-300">Date</TableHead>
+                                                <TableHead className="text-slate-300">Total HT</TableHead>
+                                                <TableHead className="text-slate-300">Total TTC</TableHead>
+                                                <TableHead className="text-slate-300 text-right">Action</TableHead>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {mandat.factures.map((facture, factureIdx) => (
+                                                <TableRow key={factureIdx} className="border-slate-800">
+                                                  <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
+                                                  <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                                                  <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
+                                                  <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
+                                                  <TableCell className="text-right">
+                                                    <Button
+                                                      type="button"
+                                                      size="sm"
+                                                      onClick={() => voirFacture(facture.facture_html)}
+                                                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
+                                                    >
+                                                      <FileText className="w-4 h-4 mr-2" />
+                                                      Voir
+                                                    </Button>
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                      ) : (
+                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune facture générée</p>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
                               </CardContent>
                             </Card>
                           </TabsContent>
