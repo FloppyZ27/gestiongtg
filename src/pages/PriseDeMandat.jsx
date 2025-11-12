@@ -967,6 +967,20 @@ export default function PriseDeMandat() {
 
   const handleAddMinuteFromDialog = () => {
     if (currentMinuteMandatIndex !== null && newMinuteForm.minute && newMinuteForm.date_minute) {
+      // Vérifier si la minute existe déjà pour cet arpenteur
+      const minuteExiste = dossiers.some(d => 
+        d.arpenteur_geometre === formData.arpenteur_geometre &&
+        d.mandats?.some(m => 
+          m.minutes_list?.some(min => min.minute === newMinuteForm.minute) ||
+          m.minute === newMinuteForm.minute
+        )
+      );
+
+      if (minuteExiste) {
+        alert(`La minute ${newMinuteForm.minute} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        return;
+      }
+
       addMinuteToMandat(currentMinuteMandatIndex);
       setIsAddMinuteDialogOpen(false);
       setCurrentMinuteMandatIndex(null);
