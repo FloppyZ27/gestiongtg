@@ -344,17 +344,51 @@ function LayoutContent({ children, currentPageName }) {
                           return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
                         };
                         
+                        const formatAdresse = (addr) => {
+                          if (!addr) return "";
+                          const parts = [];
+                          if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+                            parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+                          }
+                          if (addr.rue) parts.push(addr.rue);
+                          if (addr.ville) parts.push(addr.ville);
+                          return parts.filter(p => p).join(', ');
+                        };
+                        
                         return (
                           <div
                             key={dossier.id}
-                            className="p-2 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0 flex items-center gap-2"
+                            className="p-3 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
                             onClick={() => handleDossierSelect(dossier.id)}
                           >
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
-                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                            </Badge>
-                            {clientsNames && (
-                              <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
+                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                              </Badge>
+                              {clientsNames && (
+                                <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
+                              )}
+                            </div>
+                            {dossier.mandats && dossier.mandats.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="flex flex-wrap gap-1">
+                                  {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                    <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                      {mandat.type_mandat}
+                                    </Badge>
+                                  ))}
+                                  {dossier.mandats.length > 2 && (
+                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                      +{dossier.mandats.length - 2}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {dossier.mandats[0]?.adresse_travaux && formatAdresse(dossier.mandats[0].adresse_travaux) && (
+                                  <p className="text-slate-400 text-xs truncate">
+                                    📍 {formatAdresse(dossier.mandats[0].adresse_travaux)}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         );
@@ -367,14 +401,63 @@ function LayoutContent({ children, currentPageName }) {
                       {filteredDossiers.length > 0 ? (
                         filteredDossiers.map((dossier) => {
                           const clientsNames = getClientsNames(dossier.clients_ids);
-                          const displayText = `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}${clientsNames ? ` - ${clientsNames}` : ''}`;
+                          const getArpenteurColor = (arpenteur) => {
+                            const colors = {
+                              "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+                              "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+                              "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+                              "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+                              "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                            };
+                            return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+                          };
+                          
+                          const formatAdresse = (addr) => {
+                            if (!addr) return "";
+                            const parts = [];
+                            if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+                              parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+                            }
+                            if (addr.rue) parts.push(addr.rue);
+                            if (addr.ville) parts.push(addr.ville);
+                            return parts.filter(p => p).join(', ');
+                          };
+                          
                           return (
                             <div
                               key={dossier.id}
                               className="p-3 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
                               onClick={() => handleDossierSelect(dossier.id)}
                             >
-                              <p className="text-white font-medium">{displayText}</p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                                {clientsNames && (
+                                  <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
+                                )}
+                              </div>
+                              {dossier.mandats && dossier.mandats.length > 0 && (
+                                <div className="space-y-1">
+                                  <div className="flex flex-wrap gap-1">
+                                    {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                      <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                        {mandat.type_mandat}
+                                      </Badge>
+                                    ))}
+                                    {dossier.mandats.length > 2 && (
+                                      <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                        +{dossier.mandats.length - 2}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {dossier.mandats[0]?.adresse_travaux && formatAdresse(dossier.mandats[0].adresse_travaux) && (
+                                    <p className="text-slate-400 text-xs truncate">
+                                      📍 {formatAdresse(dossier.mandats[0].adresse_travaux)}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           );
                         })
