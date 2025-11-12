@@ -886,7 +886,7 @@ export default function PriseDeMandat() {
       ...prev,
       mandats: [...prev.mandats, {
         type_mandat: "",
-        date_ouverture: "",
+        date_ouverture: "", // Keep date_ouverture in the state for view, but remove from form input
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -1562,17 +1562,7 @@ export default function PriseDeMandat() {
                                   {/* Colonne droite - Dates */}
                                   <div className="space-y-3 pr-4">
                                     <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
-                                      <div className="space-y-2">
-                                        <Label className="text-left block">Date d'ouverture</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_ouverture || ""}
-                                          onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                          disabled={!!dossierReferenceId}
-                                        />
-                                      </div>
-
+                                      {/* Removed 'Date d'ouverture' field as per instruction */}
                                       <div className="space-y-2">
                                         <Label className="text-left block">Date de signature</Label>
                                         <Input

@@ -1140,7 +1140,7 @@ export default function Dossiers() {
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "asc" : "asc"); // Always sort ascending for simplicity on re-click
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
       setSortDirection("asc");
@@ -1616,55 +1616,51 @@ export default function Dossiers() {
                                   </Button>
                                 </div>
 
-                                <div className="space-y-3">
-                                  <AddressInput
-                                    addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
-                                    onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
-                                    showActuelle={false}
-                                    singleAddress={true}
-                                  />
-                                </div>
-
-                                {/* Section Dates */}
-                                <div className="grid grid-cols-4 gap-3 p-4 bg-slate-700/30 border border-slate-600 rounded-lg">
-                                  <div className="space-y-2">
-                                    <Label className="text-xs">Date d'ouverture</Label>
-                                    <Input
-                                      type="date"
-                                      value={mandat.date_ouverture || ""}
-                                      onChange={(e) => updateMandat(index, 'date_ouverture', e.target.value)}
-                                      className="bg-slate-700 border-slate-600 text-sm"
+                                {/* Adresse et Dates côte à côte */}
+                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                  {/* Colonne gauche - Adresse */}
+                                  <div className="space-y-3">
+                                    <AddressInput
+                                      addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
+                                      onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
+                                      showActuelle={false}
+                                      singleAddress={true}
                                     />
                                   </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="text-xs">Date de signature</Label>
-                                    <Input
-                                      type="date"
-                                      value={mandat.date_signature || ""}
-                                      onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                      className="bg-slate-700 border-slate-600 text-sm"
-                                    />
-                                  </div>
+                                  {/* Colonne droite - Dates */}
+                                  <div className="space-y-3">
+                                    <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                                      <div className="space-y-2">
+                                        <Label>Date de signature</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_signature || ""}
+                                          onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="text-xs">Début des travaux</Label>
-                                    <Input
-                                      type="date"
-                                      value={mandat.date_debut_travaux || ""}
-                                      onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                      className="bg-slate-700 border-slate-600 text-sm"
-                                    />
-                                  </div>
+                                      <div className="space-y-2">
+                                        <Label>Début des travaux</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_debut_travaux || ""}
+                                          onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="text-xs">Date de livraison</Label>
-                                    <Input
-                                      type="date"
-                                      value={mandat.date_livraison || ""}
-                                      onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                      className="bg-slate-700 border-slate-600 text-sm"
-                                    />
+                                      <div className="space-y-2">
+                                        <Label>Date de livraison</Label>
+                                        <Input
+                                          type="date"
+                                          value={mandat.date_livraison || ""}
+                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                          className="bg-slate-700 border-slate-600"
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
 
