@@ -672,7 +672,7 @@ export default function Dossiers() {
     </div>
     
     <div class="logo">
-      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png" alt="Logo GTG">
+      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/cc5da5790_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png" alt="Logo GTG">
     </div>
     
     <div class="invoice-title">
@@ -2430,7 +2430,7 @@ export default function Dossiers() {
                   {uploadingLotPdf && <span className="text-slate-500">Téléchargement...</span>}
                   {newLotForm.document_pdf_url && (
                     <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
-                      <FileText className="w-5 h-5" />
+                      <ExternalLink className="w-5 h-5" />
                     </a>
                   )}
                 </div>
@@ -2680,3 +2680,4 @@ export default function Dossiers() {
     </div>
   );
 }
+
