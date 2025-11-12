@@ -97,6 +97,10 @@ export default function Dossiers() {
   const [closingDossierId, setClosingDossierId] = useState(null);
   const [closingDossierSearchTerm, setClosingDossierSearchTerm] = useState("");
   const [minutesData, setMinutesData] = useState([]);
+  const [closeFilterArpenteur, setCloseFilterArpenteur] = useState("all");
+  const [closeFilterVille, setCloseFilterVille] = useState("all");
+  const [closeFilterMandat, setCloseFilterMandat] = useState("all");
+  const [closeFilterTache, setCloseFilterTache] = useState("all");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -744,6 +748,10 @@ export default function Dossiers() {
     setClosingDossierId(null);
     setMinutesData([]);
     setClosingDossierSearchTerm("");
+    setCloseFilterArpenteur("all");
+    setCloseFilterVille("all");
+    setCloseFilterMandat("all");
+    setCloseFilterTache("all");
   };
 
   const selectDossierToClose = (dossierId) => {
@@ -780,12 +788,20 @@ export default function Dossiers() {
     const searchLower = closingDossierSearchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
     const clientsNames = getClientsNames(item.clients_ids);
-    return (
+    
+    const matchesSearch = (
       fullNumber.toLowerCase().includes(searchLower) ||
       item.numero_dossier?.toLowerCase().includes(searchLower) ||
       clientsNames.toLowerCase().includes(searchLower) ||
       item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower)
     );
+    
+    const matchesArpenteur = closeFilterArpenteur === "all" || item.arpenteur_geometre === closeFilterArpenteur;
+    const matchesVille = closeFilterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === closeFilterVille;
+    const matchesMandat = closeFilterMandat === "all" || item.mandatInfo?.type_mandat === closeFilterMandat;
+    const matchesTache = closeFilterTache === "all" || item.mandatInfo?.tache_actuelle === closeFilterTache;
+    
+    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat && matchesTache;
   });
 
   const selectedDossierToClose = dossiers.find(d => d.id === closingDossierId);
@@ -1287,9 +1303,55 @@ export default function Dossiers() {
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
               {!closingDossierId ? (
                 <>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input placeholder="Rechercher un dossier à fermer..." value={closingDossierSearchTerm} onChange={(e) => setClosingDossierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                  <div className="flex flex-wrap gap-3 items-center">
+                    <div className="relative flex-1 min-w-[250px]">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input placeholder="Rechercher..." value={closingDossierSearchTerm} onChange={(e) => setClosingDossierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                    </div>
+                    <Select value={closeFilterArpenteur} onValueChange={setCloseFilterArpenteur}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Filtrer par arpenteur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Tous les arpenteurs</SelectItem>
+                        {ARPENTEURS.map(arpenteur => (
+                          <SelectItem key={arpenteur} value={arpenteur}>{arpenteur}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={closeFilterMandat} onValueChange={setCloseFilterMandat}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Filtrer par mandat" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Tous les mandats</SelectItem>
+                        {TYPES_MANDATS.map(type => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={closeFilterTache} onValueChange={setCloseFilterTache}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Filtrer par tâche" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Toutes les tâches</SelectItem>
+                        {TACHES.map(tache => (
+                          <SelectItem key={tache} value={tache}>{tache}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={closeFilterVille} onValueChange={setCloseFilterVille}>
+                      <SelectTrigger className="w-[180px] bg-slate-800 border-slate-700">
+                        <SelectValue placeholder="Filtrer par ville" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="all">Toutes les villes</SelectItem>
+                        {uniqueVilles.map(ville => (
+                          <SelectItem key={ville} value={ville}>{ville}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex-1 overflow-hidden border border-slate-700 rounded-lg">
                     <div className="max-h-[500px] overflow-y-auto">
@@ -1299,9 +1361,7 @@ export default function Dossiers() {
                             <TableHead className="text-slate-300">N° Dossier</TableHead>
                             <TableHead className="text-slate-300">Clients</TableHead>
                             <TableHead className="text-slate-300">Mandat</TableHead>
-                            <TableHead className="text-slate-300">Tâche actuelle</TableHead>
                             <TableHead className="text-slate-300">Adresse Travaux</TableHead>
-                            <TableHead className="text-slate-300">Date ouverture</TableHead>
                             <TableHead className="text-slate-300 text-right">Action</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -1315,27 +1375,11 @@ export default function Dossiers() {
                                   </Badge>
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm">{getClientsNames(item.clients_ids)}</TableCell>
-                                <TableCell className="text-slate-300">
-                                  {item.mandatInfo?.type_mandat ? (
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                                      {item.mandatInfo.type_mandat}
-                                    </Badge>
-                                  ) : (
-                                    <span className="text-slate-600 text-xs">Aucun</span>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  {item.mandatInfo?.tache_actuelle && (
-                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                                      {item.mandatInfo.tache_actuelle}
-                                    </Badge>
-                                  )}
+                                <TableCell className="text-slate-300 text-sm">
+                                  {item.mandatInfo?.type_mandat || '-'}
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                   {item.mandatInfo?.adresse_travaux ? formatAdresse(item.mandatInfo.adresse_travaux) : '-'}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  {item.date_ouverture ? format(new Date(item.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <Button type="button" size="sm" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10">
@@ -1346,7 +1390,7 @@ export default function Dossiers() {
                             ))
                           ) : (
                             <TableRow>
-                              <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                              <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                                 <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                                 <p>Aucun dossier ouvert trouvé</p>
                               </TableCell>
