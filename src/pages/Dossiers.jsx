@@ -436,7 +436,7 @@ export default function Dossiers() {
           notes: ""
         },
         factures: m.factures || [], // Changed from 'facture' to 'factures'
-        notes: ""
+        notes: m.notes || "" // Ensure notes field is initialized
       })) || [],
       description: entity.description || ""
     });
@@ -1074,7 +1074,7 @@ export default function Dossiers() {
             temps_prevu: "",
             notes: ""
           },
-          notes: ""
+          notes: m.notes || ""
         })) || [],
         description: refreshedDossier.description || ""
       });
@@ -1781,9 +1781,9 @@ export default function Dossiers() {
                                       )}
                                     </div>
 
-                                    {mandat.factures && mandat.factures.length > 0 && (
-                                      <div className="pt-3 border-t border-slate-700">
-                                        <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures.length})</Label>
+                                    <div className="pt-3 border-t border-slate-700">
+                                      <Label className="text-purple-400 text-sm font-semibold mb-2 block">Factures générées ({mandat.factures?.length || 0})</Label>
+                                      {mandat.factures && mandat.factures.length > 0 ? (
                                         <div className="border border-slate-700 rounded-lg overflow-hidden">
                                           <Table>
                                             <TableHeader>
@@ -1818,13 +1818,20 @@ export default function Dossiers() {
                                             </TableBody>
                                           </Table>
                                         </div>
-                                      </div>
-                                    )}
+                                      ) : (
+                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune facture générée</p>
+                                      )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <Label>Notes</Label>
+                                      <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(index, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
+                                    </div>
 
                                     <div className="border-t border-slate-700 pt-4 mt-4">
-                                      <div className="flex items-center justify-between mb-3 cursor-pointer" onClick={() => toggleTerrainSection(index)}>
+                                      <div className="flex items-center gap-2 mb-3 cursor-pointer" onClick={() => toggleTerrainSection(index)}>
                                         <Label className="text-lg font-semibold text-emerald-400">Section Terrain</Label>
-                                        <Button type="button" variant="ghost" size="sm" className="text-emerald-400 hover:bg-emerald-500/10">
+                                        <Button type="button" variant="ghost" size="sm" className="text-emerald-400 hover:bg-emerald-500/10 p-0 h-auto">
                                           {terrainSectionExpanded[index] ? (
                                             <ChevronUp className="w-5 h-5" />
                                           ) : (
@@ -2189,12 +2196,14 @@ export default function Dossiers() {
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-                    <div>
-                      <Badge variant="outline" className={`${getArpenteurColor(selectedDossierForFacturation?.arpenteur_geometre)} border mb-2`}>
-                        {getArpenteurInitials(selectedDossierForFacturation?.arpenteur_geometre)}{selectedDossierForFacturation?.numero_dossier}
-                      </Badge>
-                      <p className="text-slate-300 text-sm">{getClientsNames(selectedDossierForFacturation?.clients_ids)}</p>
+                  <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className={`${getArpenteurColor(selectedDossierForFacturation?.arpenteur_geometre)} border`}>
+                          {getArpenteurInitials(selectedDossierForFacturation?.arpenteur_geometre)}{selectedDossierForFacturation?.numero_dossier}
+                        </Badge>
+                        <span className="text-slate-300 text-sm">{getClientsNames(selectedDossierForFacturation?.clients_ids)}</span>
+                      </div>
                     </div>
                     <Button type="button" size="sm" variant="outline" onClick={() => { setFacturationDossierId(null); setSelectedMandatsForFacturation([]); }} className="text-slate-400">
                       Changer de dossier
