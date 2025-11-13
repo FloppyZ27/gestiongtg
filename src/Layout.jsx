@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -310,14 +309,14 @@ function LayoutContent({ children, currentPageName }) {
       
       {/* Dialog pour l'entrée de temps */}
       <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Nouvelle entrée de temps</DialogTitle>
           </DialogHeader>
           
           <div className="flex-1 flex gap-6 overflow-hidden">
-            {/* Colonne gauche - Sélection du dossier (65%) */}
-            <div className="flex-[0_0_65%] flex flex-col space-y-4 overflow-hidden">
+            {/* Colonne gauche - Sélection du dossier (60%) */}
+            <div className="flex-[0_0_60%] flex flex-col space-y-4 overflow-hidden">
               <Label className="text-lg font-semibold">Sélection du dossier</Label>
               
               {!selectedDossierId ? (
@@ -398,7 +397,7 @@ function LayoutContent({ children, currentPageName }) {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-4">
                   <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
                     <div className="flex-1">
                       <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2`}>
@@ -459,8 +458,8 @@ function LayoutContent({ children, currentPageName }) {
               )}
             </div>
 
-            {/* Colonne droite - Champs de formulaire (35%) */}
-            <div className="flex-[0_0_35%] flex flex-col space-y-4 overflow-y-auto pr-2 border-l border-slate-700 pl-6">
+            {/* Colonne droite - Champs de formulaire (40%) */}
+            <div className="flex-[0_0_40%] flex flex-col space-y-4 overflow-y-auto border-l border-slate-700 pl-6">
               <Label className="text-lg font-semibold">Détails de l'entrée</Label>
               
               <div className="space-y-2">
