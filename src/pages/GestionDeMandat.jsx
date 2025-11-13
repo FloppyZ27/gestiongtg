@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +20,21 @@ import CommentairesSection from "../components/dossiers/CommentairesSection";
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+
+const MONTHS = [
+  { value: 0, label: "Janvier" },
+  { value: 1, label: "Février" },
+  { value: 2, label: "Mars" },
+  { value: 3, label: "Avril" },
+  { value: 4, label: "Mai" },
+  { value: 5, label: "Juin" },
+  { value: 6, label: "Juillet" },
+  { value: 7, label: "Août" },
+  { value: 8, label: "Septembre" },
+  { value: 9, label: "Octobre" },
+  { value: 10, label: "Novembre" },
+  { value: 11, label: "Décembre" }
+];
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -291,6 +305,18 @@ export default function GestionDeMandat() {
     setIsEditingDialogOpen(true);
   };
 
+  const handleMonthChange = (monthValue) => {
+    const newDate = new Date(currentMonthStart);
+    newDate.setMonth(parseInt(monthValue));
+    setCurrentMonthStart(startOfMonth(newDate));
+  };
+
+  const handleYearChange = (increment) => {
+    const newDate = new Date(currentMonthStart);
+    newDate.setFullYear(newDate.getFullYear() + increment);
+    setCurrentMonthStart(startOfMonth(newDate));
+  };
+
   const renderMandatCard = (card, provided, snapshot) => {
     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
     
@@ -302,45 +328,62 @@ export default function GestionDeMandat() {
         onClick={() => !snapshot?.isDragging && handleCardClick(card)}
       >
         <CardContent className="p-3 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
-              {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-            </Badge>
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+          {/* Mandat en haut */}
+          <div className="text-center pb-2 border-b border-slate-700">
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
               {card.mandat.type_mandat}
             </Badge>
           </div>
 
-          {getClientsNames(card.dossier.clients_ids) !== "-" && (
-            <div className="text-sm text-slate-300">
-              <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
+          {/* Dossier à gauche, Clients à droite */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Dossier</p>
+              <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs w-full justify-center`}>
+                {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+              </Badge>
             </div>
-          )}
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Clients</p>
+              <p className="text-xs text-slate-300 font-medium truncate">
+                {getClientsNames(card.dossier.clients_ids)}
+              </p>
+            </div>
+          </div>
 
+          {/* Adresse des travaux */}
           {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-            <div className="flex items-start gap-1 text-xs text-slate-400">
-              <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-              <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+            <div className="pt-1">
+              <p className="text-xs text-slate-500 mb-1">Adresse</p>
+              <div className="flex items-start gap-1 text-xs text-slate-300">
+                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                <span className="line-clamp-2">{formatAdresse(card.mandat.adresse_travaux)}</span>
+              </div>
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-1 border-t border-slate-700">
+          {/* Date de livraison et utilisateur */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
             {card.mandat.date_livraison ? (
               <div className="flex items-center gap-1 text-xs text-slate-400">
                 <Calendar className="w-3 h-3" />
-                <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+                <span>{format(new Date(card.mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</span>
               </div>
             ) : (
-              <div></div>
+              <div className="text-xs text-slate-600">Pas de date</div>
             )}
 
-            {assignedUser && (
-              <Avatar className="w-6 h-6 border border-slate-600">
+            {assignedUser ? (
+              <Avatar className="w-7 h-7 border-2 border-slate-600">
                 <AvatarImage src={assignedUser.photo_url} />
                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
                   {getUserInitials(assignedUser.full_name)}
                 </AvatarFallback>
               </Avatar>
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                <User className="w-4 h-4 text-slate-500" />
+              </div>
             )}
           </div>
         </CardContent>
@@ -633,7 +676,16 @@ export default function GestionDeMandat() {
           <TabsContent value="calendrier" className="mt-0">
             <div className="border-2 border-slate-800 rounded-lg bg-slate-900/30 p-4">
               {/* Navigation du calendrier */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 gap-4">
+                <Button
+                  onClick={() => handleYearChange(-1)}
+                  variant="outline"
+                  size="sm"
+                  className="bg-slate-800 border-slate-700 text-white"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 -ml-2" />
+                </Button>
                 <Button
                   onClick={() => setCurrentMonthStart(subMonths(currentMonthStart, 1))}
                   variant="outline"
@@ -642,9 +694,28 @@ export default function GestionDeMandat() {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <h3 className="text-lg font-semibold text-white">
-                  {format(currentMonthStart, "MMMM yyyy", { locale: fr })}
-                </h3>
+                
+                <div className="flex items-center gap-2">
+                  <Select 
+                    value={currentMonthStart.getMonth().toString()} 
+                    onValueChange={handleMonthChange}
+                  >
+                    <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {MONTHS.map(month => (
+                        <SelectItem key={month.value} value={month.value.toString()} className="text-white">
+                          {month.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <h3 className="text-lg font-semibold text-white">
+                    {currentMonthStart.getFullYear()}
+                  </h3>
+                </div>
+
                 <Button
                   onClick={() => setCurrentMonthStart(addMonths(currentMonthStart, 1))}
                   variant="outline"
@@ -652,6 +723,15 @@ export default function GestionDeMandat() {
                   className="bg-slate-800 border-slate-700 text-white"
                 >
                   <ChevronRight className="w-4 h-4" />
+                </Button>
+                <Button
+                  onClick={() => handleYearChange(1)}
+                  variant="outline"
+                  size="sm"
+                  className="bg-slate-800 border-slate-700 text-white"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 -ml-2" />
                 </Button>
               </div>
 
