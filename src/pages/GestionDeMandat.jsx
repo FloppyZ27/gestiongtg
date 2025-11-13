@@ -581,7 +581,7 @@ export default function GestionDeMandat() {
                     return (
                       <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
                         <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: `calc((100vh - 340px) / ${zoom})` }}
+                          style={{ height: 'calc(100vh - 340px)' }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                             <div className="flex items-center justify-between">
@@ -654,7 +654,7 @@ export default function GestionDeMandat() {
                     return (
                       <div key={user.email} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
                         <Card className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: `calc((100vh - 340px) / ${zoom})` }}
+                          style={{ height: 'calc(100vh - 340px)' }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
                             <div className="flex items-center justify-between">
