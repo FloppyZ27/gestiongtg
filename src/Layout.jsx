@@ -315,8 +315,8 @@ function LayoutContent({ children, currentPageName }) {
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="flex-1 flex gap-6 overflow-hidden">
-            {/* Colonne gauche - Sélection du dossier (50%) */}
-            <div className="flex-[0_0_50%] flex flex-col space-y-4">
+            {/* Colonne gauche - Sélection du dossier (70%) */}
+            <div className="flex-[0_0_70%] flex flex-col space-y-4">
               <Label className="text-lg font-semibold">Sélection du dossier</Label>
               
               {!selectedDossierId ? (
@@ -458,8 +458,8 @@ function LayoutContent({ children, currentPageName }) {
               )}
             </div>
 
-            {/* Colonne droite - Champs de formulaire (50%) */}
-            <div className="flex-[0_0_50%] flex flex-col space-y-4">
+            {/* Colonne droite - Champs de formulaire (30%) */}
+            <div className="flex-[0_0_30%] flex flex-col space-y-4">
               <Label className="text-lg font-semibold">Détails de l'entrée</Label>
               
               <div className="space-y-2">
@@ -542,7 +542,7 @@ function LayoutContent({ children, currentPageName }) {
             <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
               Annuler
             </Button>
-            <Button type="submit" form="entree-temps-form" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+            <Button type="submit" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
               Enregistrer
             </Button>
           </div>
