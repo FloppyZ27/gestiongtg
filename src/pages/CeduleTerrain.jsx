@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter, Search, User, Edit } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter, Search, User, Edit, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, addDays, startOfWeek } from "date-fns";
@@ -18,10 +18,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
+import { Textarea } from "@/components/ui/textarea";
 
 const JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
+const DONNEURS = ["Dave Vallée", "Julie Abud", "André Guérin"];
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -68,6 +70,20 @@ export default function CeduleTerrain() {
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [editingEquipe, setEditingEquipe] = useState(null);
   const [newEquipeName, setNewEquipeName] = useState("");
+  const [editingTerrainItem, setEditingTerrainItem] = useState(null);
+  const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
+  const [terrainForm, setTerrainForm] = useState({
+    date_limite_leve: "",
+    instruments_requis: "",
+    a_rendez_vous: false,
+    date_rendez_vous: "",
+    heure_rendez_vous: "",
+    donneur: "",
+    technicien: "",
+    dossier_simultane: "",
+    temps_prevu: "",
+    notes: ""
+  });
 
   const queryClient = useQueryClient();
 
@@ -164,7 +180,6 @@ export default function CeduleTerrain() {
   const getMandatsCedules = () => {
     const mandats = {};
     JOURS_SEMAINE.forEach((jour, jourIndex) => {
-      // const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd"); // Not directly used here, but for context
       mandats[jour.toLowerCase()] = {};
       
       dossiers.forEach(dossier => {
@@ -222,7 +237,6 @@ export default function CeduleTerrain() {
     const updatedMandats = [...dossier.mandats];
     let updatedMandat = { ...updatedMandats[mandatIndex] };
 
-    // Handle drops to verification or a-ceduler lists
     if (destinationId === "verification") {
       updatedMandat = {
         ...updatedMandat,
@@ -238,12 +252,11 @@ export default function CeduleTerrain() {
         equipe_assignee: null
       };
     } else {
-      // Handle drops to calendar days
       const destParts = destinationId.split('-');
       const jour = destParts[0];
       const equipe = destParts.slice(1).join('-');
       const jourIndex = JOURS_SEMAINE.findIndex(j => j.toLowerCase() === jour);
-      if (jourIndex === -1) return; // Should not happen if droppableId format is consistent
+      if (jourIndex === -1) return;
 
       const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
 
@@ -251,7 +264,7 @@ export default function CeduleTerrain() {
         ...updatedMandat,
         date_terrain: dateJour,
         equipe_assignee: equipe,
-        statut_terrain: "a_ceduler" // Assuming scheduled items are "a_ceduler"
+        statut_terrain: "a_ceduler"
       };
     }
 
@@ -301,7 +314,6 @@ export default function CeduleTerrain() {
       
       if (!confirmation) return;
       
-      // Retirer les mandats de cette équipe et les remettre à "a_ceduler"
       equipeMandats.forEach(item => {
         const dossier = dossiers.find(d => d.id === item.dossier.id);
         if (!dossier) return;
@@ -351,7 +363,6 @@ export default function CeduleTerrain() {
     dossiers.forEach(dossier => {
       let needsUpdate = false;
       const updatedMandats = dossier.mandats?.map(mandat => {
-        // Check if the mandat is assigned to the old team name AND it's scheduled for a date (not just "a_ceduler" without a date)
         if (mandat.equipe_assignee === oldName && mandat.date_terrain) {
           needsUpdate = true;
           return { ...mandat, equipe_assignee: newName };
@@ -401,6 +412,45 @@ export default function CeduleTerrain() {
     setIsEditingDialogOpen(true);
   };
 
+  const handleEditTerrain = (item, e) => {
+    e.stopPropagation(); // Prevent opening dossier details
+    setEditingTerrainItem(item);
+    setTerrainForm({
+      date_limite_leve: item.mandat.terrain?.date_limite_leve || "",
+      instruments_requis: item.mandat.terrain?.instruments_requis || "",
+      a_rendez_vous: item.mandat.terrain?.a_rendez_vous || false,
+      date_rendez_vous: item.mandat.terrain?.date_rendez_vous || "",
+      heure_rendez_vous: item.mandat.terrain?.heure_rendez_vous || "",
+      donneur: item.mandat.terrain?.donneur || "",
+      technicien: item.mandat.terrain?.technicien || "",
+      dossier_simultane: item.mandat.terrain?.dossier_simultane || "",
+      temps_prevu: item.mandat.terrain?.temps_prevu || "",
+      notes: item.mandat.terrain?.notes || ""
+    });
+    setIsTerrainDialogOpen(true);
+  };
+
+  const handleSaveTerrain = () => {
+    if (!editingTerrainItem) return;
+
+    const dossier = dossiers.find(d => d.id === editingTerrainItem.dossier.id);
+    if (!dossier) return;
+
+    const updatedMandats = [...dossier.mandats];
+    updatedMandats[editingTerrainItem.mandatIndex] = {
+      ...updatedMandats[editingTerrainItem.mandatIndex],
+      terrain: terrainForm // Save the entire terrainForm object
+    };
+
+    updateDossierMutation.mutate({
+      id: dossier.id,
+      dossierData: { ...dossier, mandats: updatedMandats }
+    });
+
+    setIsTerrainDialogOpen(false);
+    setEditingTerrainItem(null);
+  };
+
   const mandatsEnVerification = getMandatsEnVerification();
   const mandatsACeduler = getMandatsACeduler();
   const mandatsCedules = getMandatsCedules();
@@ -408,7 +458,7 @@ export default function CeduleTerrain() {
   const MandatCard = ({ item, showActions = true, isDragging = false }) => {
     const assignedUser = users.find(u => u.email === item.mandat.utilisateur_assigne);
     
-    // Trouver l'utilisateur correspondant au donneur
+    // Trouver l'utilisateur correspondant au donneur (s'il s'agit d'un utilisateur du système)
     const donneurUser = item.mandat.terrain?.donneur 
       ? users.find(u => u.full_name === item.mandat.terrain.donneur)
       : null;
@@ -435,7 +485,7 @@ export default function CeduleTerrain() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
             <div>
               <p className="text-xs text-slate-500 mb-1">Dossier</p>
               <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border text-xs w-full justify-center`}>
@@ -460,8 +510,11 @@ export default function CeduleTerrain() {
             </div>
           )}
 
+          {/* Ligne de séparation */}
+          <div className="border-t border-slate-700" />
+
           {/* Informations terrain */}
-          <div className="pt-1 space-y-1">
+          <div className="space-y-1">
             {item.mandat.terrain?.instruments_requis && (
               <div className="text-xs text-slate-400">
                 <span className="font-medium">Instruments: </span>
@@ -489,7 +542,10 @@ export default function CeduleTerrain() {
                 <span>{item.mandat.terrain.temps_prevu}</span>
               </div>
             )}
-            
+          </div>
+
+          {/* Dates et avatar */}
+          <div className="space-y-1 pt-1 border-t border-slate-700">
             {item.mandat.terrain?.a_rendez_vous && item.mandat.terrain?.date_rendez_vous && (
               <div className="text-xs text-purple-400 font-medium">
                 <Calendar className="w-3 h-3 inline mr-1" />
@@ -499,33 +555,34 @@ export default function CeduleTerrain() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Date limite et photo du donneur sur la même ligne */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
-            <div className="flex-1">
-              {item.mandat.terrain?.date_limite_leve && (
-                <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                  <Calendar className="w-3 h-3 flex-shrink-0" />
-                  <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                {item.mandat.terrain?.date_limite_leve && (
+                  <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                    <Calendar className="w-3 h-3 flex-shrink-0" />
+                    {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
+                    <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
+                  </div>
+                )}
+              </div>
+              
+              {displayUser ? (
+                <Avatar className="w-7 h-7 border-2 border-slate-600">
+                  <AvatarImage src={displayUser.photo_url} />
+                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                    {getUserInitials(displayUser.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                  <User className="w-4 h-4 text-slate-500" />
                 </div>
               )}
             </div>
-            
-            {displayUser ? (
-              <Avatar className="w-7 h-7 border-2 border-slate-600">
-                <AvatarImage src={displayUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                  {getUserInitials(displayUser.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
-                <User className="w-4 h-4 text-slate-500" />
-              </div>
-            )}
           </div>
 
+          {/* Boutons d'action */}
           {showActions && (
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
@@ -544,6 +601,20 @@ export default function CeduleTerrain() {
                 title="Pas de terrain"
               >
                 <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* Bouton pour modifier les infos terrain (sur les cartes du calendrier) */}
+          {!showActions && (
+            <div className="pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
+              <Button
+                size="sm"
+                onClick={(e) => handleEditTerrain(item, e)}
+                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-xs h-8"
+              >
+                <Settings className="w-4 h-4 mr-1" />
+                Modifier terrain
               </Button>
             </div>
           )}
@@ -718,7 +789,7 @@ export default function CeduleTerrain() {
               </CardContent>
             </Card>
 
-            {/* Calendrier hebdomadaire - Pleine largeur */}
+            {/* Calendrier hebdomadaire */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
@@ -839,20 +910,7 @@ export default function CeduleTerrain() {
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                           >
-                                            <div className="relative">
-                                              <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} />
-                                              <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  retirerDuCalendrier(item.dossier.id, item.mandatIndex);
-                                                }}
-                                                className="absolute top-1 right-1 h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                              >
-                                                <X className="w-3 h-3" />
-                                              </Button>
-                                            </div>
+                                            <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} />
                                           </div>
                                         )}
                                       </Draggable>
@@ -872,6 +930,137 @@ export default function CeduleTerrain() {
             </Card>
           </div>
         </div>
+
+        {/* Dialog pour modifier les informations terrain */}
+        <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date limite levé terrain</Label>
+                  <Input
+                    type="date"
+                    value={terrainForm.date_limite_leve}
+                    onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Instruments requis</Label>
+                  <Input
+                    value={terrainForm.instruments_requis}
+                    onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
+                    placeholder="Ex: GPS, Total Station"
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={terrainForm.a_rendez_vous}
+                    onChange={(e) => setTerrainForm({...terrainForm, a_rendez_vous: e.target.checked})}
+                    className="w-4 h-4 rounded bg-slate-800 border-slate-700"
+                  />
+                  <Label>Rendez-vous nécessaire</Label>
+                </div>
+                {terrainForm.a_rendez_vous && (
+                  <div className="grid grid-cols-2 gap-3 ml-7">
+                    <div className="space-y-2">
+                      <Label>Date du rendez-vous</Label>
+                      <Input
+                        type="date"
+                        value={terrainForm.date_rendez_vous}
+                        onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Heure du rendez-vous</Label>
+                      <Input
+                        type="time"
+                        value={terrainForm.heure_rendez_vous}
+                        onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
+                        className="bg-slate-800 border-slate-700 text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Donneur</Label>
+                  <Select value={terrainForm.donneur} onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner un donneur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                      {DONNEURS.map((donneur) => (
+                        <SelectItem key={donneur} value={donneur} className="text-white">{donneur}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Technicien à prioriser</Label>
+                  <Input
+                    value={terrainForm.technicien}
+                    onChange={(e) => setTerrainForm({...terrainForm, technicien: e.target.value})}
+                    placeholder="Nom du technicien"
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Dossier à faire en même temps</Label>
+                  <Input
+                    value={terrainForm.dossier_simultane}
+                    onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value})}
+                    placeholder="N° de dossier"
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Temps prévu</Label>
+                  <Input
+                    value={terrainForm.temps_prevu}
+                    onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
+                    placeholder="Ex: 2h30"
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notes terrain</Label>
+                <Textarea
+                  value={terrainForm.notes}
+                  onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
+                  placeholder="Notes concernant le terrain..."
+                  className="bg-slate-800 border-slate-700 text-white h-24"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <Button variant="outline" onClick={() => setIsTerrainDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleSaveTerrain} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                Enregistrer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
