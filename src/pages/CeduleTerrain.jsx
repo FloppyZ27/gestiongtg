@@ -544,45 +544,58 @@ export default function CeduleTerrain() {
             )}
           </div>
 
-          {/* Dates et avatar */}
-          <div className="space-y-1 pt-1 border-t border-slate-700">
-            {item.mandat.terrain?.a_rendez_vous && item.mandat.terrain?.date_rendez_vous && (
-              <div className="text-xs text-purple-400 font-medium">
-                <Calendar className="w-3 h-3 inline mr-1" />
-                <span>RDV: {format(new Date(item.mandat.terrain.date_rendez_vous), "dd MMM yyyy", { locale: fr })}</span>
-                {item.mandat.terrain?.heure_rendez_vous && (
-                  <span> à {item.mandat.terrain.heure_rendez_vous}</span>
-                )}
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                {item.mandat.terrain?.date_limite_leve && (
-                  <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                    <Calendar className="w-3 h-3 flex-shrink-0" />
-                    {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
-                    <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
+          {/* Dates et avatar (seulement pour les cartes dans le calendrier) */}
+          {!showActions && (
+            <div className="space-y-1 pt-1 border-t border-slate-700">
+              {item.mandat.terrain?.a_rendez_vous && item.mandat.terrain?.date_rendez_vous && (
+                <div className="text-xs text-purple-400 font-medium">
+                  <Calendar className="w-3 h-3 inline mr-1" />
+                  <span>RDV: {format(new Date(item.mandat.terrain.date_rendez_vous), "dd MMM yyyy", { locale: fr })}</span>
+                  {item.mandat.terrain?.heure_rendez_vous && (
+                    <span> à {item.mandat.terrain.heure_rendez_vous}</span>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  {item.mandat.terrain?.date_limite_leve && (
+                    <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                      <Calendar className="w-3 h-3 flex-shrink-0" />
+                      {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
+                      <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {displayUser ? (
+                  <Avatar className="w-7 h-7 border-2 border-slate-600">
+                    <AvatarImage src={displayUser.photo_url} />
+                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                      {getUserInitials(displayUser.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                    <User className="w-4 h-4 text-slate-500" />
                   </div>
                 )}
               </div>
-              
-              {displayUser ? (
-                <Avatar className="w-7 h-7 border-2 border-slate-600">
-                  <AvatarImage src={displayUser.photo_url} />
-                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                    {getUserInitials(displayUser.full_name)}
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
-                  <User className="w-4 h-4 text-slate-500" />
-                </div>
-              )}
             </div>
-          </div>
+          )}
 
-          {/* Boutons d'action */}
+          {/* Date limite seulement pour les cartes en vérification (sans avatar) */}
+          {showActions && item.mandat.terrain?.date_limite_leve && (
+            <div className="pt-1 border-t border-slate-700">
+              <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                <Calendar className="w-3 h-3 flex-shrink-0" />
+                {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
+                <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Boutons d'action pour les cartes en vérification */}
           {showActions && (
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
@@ -1150,7 +1163,7 @@ export default function CeduleTerrain() {
                               return courtier ? (
                                 <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start">
                                   {courtier.prenom} {courtier.nom}
-                                </Badge>
+                                高校>
                               ) : null;
                             })}
                           </div>
