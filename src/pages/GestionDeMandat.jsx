@@ -256,6 +256,11 @@ export default function GestionDeMandat() {
         div[data-rbd-draggable-id] {
           transition: none !important;
         }
+
+        /* Portal pour les éléments en cours de glisser */
+        [data-rbd-draggable-id][style*="position: fixed"] {
+          z-index: 99999 !important;
+        }
       `}</style>
       
       <div className="max-w-[1100px] mx-auto">
@@ -372,78 +377,82 @@ export default function GestionDeMandat() {
                               
                               return (
                                 <Draggable key={card.id} draggableId={card.id} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        ...(snapshot.isDragging && {
-                                          transform: provided.draggableProps.style?.transform 
-                                            ? `${provided.draggableProps.style.transform} translate(-50%, -50%)`
-                                            : 'translate(-50%, -50%)',
-                                          cursor: 'grabbing',
-                                          zIndex: 9999,
-                                        })
-                                      }}
-                                    >
-                                      <Card 
-                                        className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
-                                          snapshot.isDragging ? 'shadow-2xl scale-105 rotate-3' : 'hover:shadow-lg'
-                                        }`}
-                                        onClick={() => handleCardClick(card)}
+                                  {(provided, snapshot) => {
+                                    const style = {
+                                      ...provided.draggableProps.style,
+                                    };
+
+                                    // Centrer la carte sur le curseur pendant le drag
+                                    if (snapshot.isDragging && style.transform) {
+                                      // The transform from rbd is typically translate3d(x,y,z).
+                                      // We append translate(-50%, -50%) to it to center the card under the cursor.
+                                      style.transform = `${style.transform} translate(-50%, -50%)`;
+                                    }
+
+                                    return (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={style}
                                       >
-                                        <CardContent className="p-3 space-y-2">
+                                        <Card 
+                                          className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
+                                            snapshot.isDragging ? 'shadow-2xl shadow-emerald-500/50 scale-110 rotate-3' : 'hover:shadow-lg'
+                                          }`}
+                                          onClick={() => !snapshot.isDragging && handleCardClick(card)}
+                                        >
                                           {/* Numéro de dossier et type mandat */}
-                                          <div className="flex items-center justify-between gap-2">
-                                            <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
-                                              {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-                                            </Badge>
-                                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                              {card.mandat.type_mandat}
-                                            </Badge>
-                                          </div>
-
-                                          {/* Clients */}
-                                          {getClientsNames(card.dossier.clients_ids) !== "-" && (
-                                            <div className="text-sm text-slate-300">
-                                              <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
+                                          <CardContent className="p-3 space-y-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                              <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
+                                                {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+                                              </Badge>
+                                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                                {card.mandat.type_mandat}
+                                              </Badge>
                                             </div>
-                                          )}
 
-                                          {/* Adresse */}
-                                          {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-                                            <div className="flex items-start gap-1 text-xs text-slate-400">
-                                              <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                              <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
-                                            </div>
-                                          )}
-
-                                          {/* Date de livraison et utilisateur assigné */}
-                                          <div className="flex items-center justify-between pt-1 border-t border-slate-700">
-                                            {card.mandat.date_livraison ? (
-                                              <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                <Calendar className="w-3 h-3" />
-                                                <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+                                            {/* Clients */}
+                                            {getClientsNames(card.dossier.clients_ids) !== "-" && (
+                                              <div className="text-sm text-slate-300">
+                                                <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
                                               </div>
-                                            ) : (
-                                              <div></div>
                                             )}
 
-                                            {assignedUser && (
-                                              <Avatar className="w-6 h-6 border border-slate-600">
-                                                <AvatarImage src={assignedUser.photo_url} />
-                                                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                                  {getUserInitials(assignedUser.full_name)}
-                                                </AvatarFallback>
-                                              </Avatar>
+                                            {/* Adresse */}
+                                            {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+                                              <div className="flex items-start gap-1 text-xs text-slate-400">
+                                                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                                <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+                                              </div>
                                             )}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    </div>
-                                  )}
+
+                                            {/* Date de livraison et utilisateur assigné */}
+                                            <div className="flex items-center justify-between pt-1 border-t border-slate-700">
+                                              {card.mandat.date_livraison ? (
+                                                <div className="flex items-center gap-1 text-xs text-slate-400">
+                                                  <Calendar className="w-3 h-3" />
+                                                  <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+                                                </div>
+                                              ) : (
+                                                <div></div>
+                                              )}
+
+                                              {assignedUser && (
+                                                <Avatar className="w-6 h-6 border border-slate-600">
+                                                  <AvatarImage src={assignedUser.photo_url} />
+                                                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                                    {getUserInitials(assignedUser.full_name)}
+                                                  </AvatarFallback>
+                                                </Avatar>
+                                              )}
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      </div>
+                                    );
+                                  }}
                                 </Draggable>
                               );
                             })}
