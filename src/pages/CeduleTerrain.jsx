@@ -423,9 +423,16 @@ export default function CeduleTerrain() {
       >
         <CardContent className="p-3 space-y-2">
           <div className="text-center pb-2 border-b border-slate-700">
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
-              {item.mandat.type_mandat}
-            </Badge>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
+                {item.mandat.type_mandat}
+              </Badge>
+              {item.mandat.terrain?.a_rendez_vous && (
+                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border text-xs font-semibold">
+                  Rendez-vous
+                </Badge>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -453,14 +460,46 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {/* Temps prévu */}
-          {item.mandat.terrain?.temps_prevu && (
-            <div className="pt-1">
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-                <span className="font-medium">Temps: {item.mandat.terrain.temps_prevu}</span>
+          {/* Informations terrain */}
+          <div className="pt-1 space-y-1">
+            {item.mandat.terrain?.instruments_requis && (
+              <div className="text-xs text-slate-400">
+                <span className="font-medium">Instruments: </span>
+                <span>{item.mandat.terrain.instruments_requis}</span>
               </div>
-            </div>
-          )}
+            )}
+            
+            {item.mandat.terrain?.technicien && (
+              <div className="text-xs text-slate-400">
+                <span className="font-medium">Technicien: </span>
+                <span>{item.mandat.terrain.technicien}</span>
+              </div>
+            )}
+            
+            {item.mandat.terrain?.dossier_simultane && (
+              <div className="text-xs text-slate-400">
+                <span className="font-medium">Dossier simultané: </span>
+                <span>{item.mandat.terrain.dossier_simultane}</span>
+              </div>
+            )}
+            
+            {item.mandat.terrain?.temps_prevu && (
+              <div className="text-xs text-slate-400">
+                <span className="font-medium">Temps: </span>
+                <span>{item.mandat.terrain.temps_prevu}</span>
+              </div>
+            )}
+            
+            {item.mandat.terrain?.a_rendez_vous && item.mandat.terrain?.date_rendez_vous && (
+              <div className="text-xs text-purple-400 font-medium">
+                <Calendar className="w-3 h-3 inline mr-1" />
+                <span>RDV: {format(new Date(item.mandat.terrain.date_rendez_vous), "dd MMM yyyy", { locale: fr })}</span>
+                {item.mandat.terrain?.heure_rendez_vous && (
+                  <span> à {item.mandat.terrain.heure_rendez_vous}</span>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Date limite et photo du donneur sur la même ligne */}
           <div className="flex items-center justify-between pt-2 border-t border-slate-700">
