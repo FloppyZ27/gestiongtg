@@ -457,13 +457,22 @@ export default function CeduleTerrain() {
           {item.mandat.terrain?.temps_prevu && (
             <div className="pt-1">
               <div className="flex items-center gap-1 text-xs text-slate-400">
-                <span className="font-semibold">⏱️ {item.mandat.terrain.temps_prevu}</span>
+                <span className="font-medium">Temps: {item.mandat.terrain.temps_prevu}</span>
               </div>
             </div>
           )}
 
-          {/* Avatar du donneur ou utilisateur assigné */}
-          <div className="flex items-center justify-end pt-2 border-t border-slate-700">
+          {/* Date limite et photo du donneur sur la même ligne */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
+            <div className="flex-1">
+              {item.mandat.terrain?.date_limite_leve && (
+                <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
+                </div>
+              )}
+            </div>
+            
             {displayUser ? (
               <Avatar className="w-7 h-7 border-2 border-slate-600">
                 <AvatarImage src={displayUser.photo_url} />
@@ -477,16 +486,6 @@ export default function CeduleTerrain() {
               </div>
             )}
           </div>
-
-          {/* Date limite en bas de carte */}
-          {item.mandat.terrain?.date_limite_leve && (
-            <div className="pt-2 border-t border-slate-700">
-              <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                <Calendar className="w-3 h-3 flex-shrink-0" />
-                <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
-              </div>
-            </div>
-          )}
 
           {showActions && (
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
