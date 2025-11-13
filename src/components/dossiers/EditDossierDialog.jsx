@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit } from "lucide-react";
+import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit, Package } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -18,6 +18,7 @@ import { fr } from "date-fns/locale";
 import CommentairesSection from "./CommentairesSection";
 import AddressInput from "../shared/AddressInput";
 import ClientFormDialog from "../clients/ClientFormDialog";
+import ClientDetailView from "../clients/ClientDetailView";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -54,6 +55,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     date_minute: "",
     type_minute: "Initiale"
   });
+  const [viewingClientDetails, setViewingClientDetails] = useState(null);
 
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
@@ -497,12 +499,26 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                         {formData.clients_ids.map((clientId) => {
                           const client = getClientById(clientId);
                           return client ? (
-                            <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
-                              <span className="flex-1">{client.prenom} {client.nom}</span>
-                              <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(clientId, 'clients');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
+                            <div key={clientId} className="space-y-1">
+                              <Badge 
+                                variant="outline" 
+                                className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start"
+                                onClick={() => setViewingClientDetails(client)}
+                              >
+                                <span className="flex-1">{client.prenom} {client.nom}</span>
+                                <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(clientId, 'clients');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                              {client.preferences_livraison && client.preferences_livraison.length > 0 && (
+                                <div className="flex gap-1 ml-2">
+                                  <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                  <span className="text-xs text-slate-400">
+                                    {client.preferences_livraison.join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           ) : null;
                         })}
                       </div>
@@ -524,12 +540,26 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                         {formData.notaires_ids.map((notaireId) => {
                           const notaire = getClientById(notaireId);
                           return notaire ? (
-                            <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
-                              <span className="flex-1">{notaire.prenom} {notaire.nom}</span>
-                              <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(notaireId, 'notaires');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
+                            <div key={notaireId} className="space-y-1">
+                              <Badge 
+                                variant="outline" 
+                                className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
+                                onClick={() => setViewingClientDetails(notaire)}
+                              >
+                                <span className="flex-1">{notaire.prenom} {notaire.nom}</span>
+                                <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(notaireId, 'notaires');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                              {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 && (
+                                <div className="flex gap-1 ml-2">
+                                  <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                  <span className="text-xs text-slate-400">
+                                    {notaire.preferences_livraison.join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           ) : null;
                         })}
                       </div>
@@ -551,12 +581,26 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                         {formData.courtiers_ids.map((courtierId) => {
                           const courtier = getClientById(courtierId);
                           return courtier ? (
-                            <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
-                              <span className="flex-1">{courtier.prenom} {courtier.nom}</span>
-                              <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(courtierId, 'courtiers');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
+                            <div key={courtierId} className="space-y-1">
+                              <Badge 
+                                variant="outline" 
+                                className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
+                                onClick={() => setViewingClientDetails(courtier)}
+                              >
+                                <span className="flex-1">{courtier.prenom} {courtier.nom}</span>
+                                <button type="button" onClick={(e) => {e.stopPropagation(); removeClient(courtierId, 'courtiers');}} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                              {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 && (
+                                <div className="flex gap-1 ml-2">
+                                  <Package className="w-3 h-3 text-slate-500 mt-0.5" />
+                                  <span className="text-xs text-slate-400">
+                                    {courtier.preferences_livraison.join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           ) : null;
                         })}
                       </div>
@@ -1329,6 +1373,22 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600">
               Valider la sélection
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de consultation de client */}
+      <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+          <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+            <DialogTitle className="text-2xl">
+              Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden p-6">
+            {viewingClientDetails && (
+              <ClientDetailView client={viewingClientDetails} />
+            )}
           </div>
         </DialogContent>
       </Dialog>

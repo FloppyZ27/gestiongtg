@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -75,6 +74,7 @@ export default function GestionDeMandat() {
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [activeView, setActiveView] = useState("taches");
   const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
+  const [zoom, setZoom] = useState(1);
 
   const queryClient = useQueryClient();
 
@@ -445,6 +445,29 @@ export default function GestionDeMandat() {
             </div>
             <p className="text-slate-400">Vue Kanban de vos mandats</p>
           </div>
+          
+          {/* Contrôles de zoom */}
+          <div className="flex items-center gap-2 px-3 py-1 bg-slate-800/50 rounded-lg border border-slate-700">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-slate-400 hover:text-white"
+              onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))}
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-slate-400 font-mono w-12 text-center">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-slate-400 hover:text-white"
+              onClick={() => setZoom(prev => Math.min(1.5, prev + 0.1))}
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Filtres et recherche */}
@@ -544,7 +567,13 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
               <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="flex gap-4 p-4 min-w-max">
+                <div 
+                  className="flex gap-4 p-4 min-w-max"
+                  style={{ 
+                    transform: `scale(${zoom})`,
+                    transformOrigin: 'top left'
+                  }}
+                >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
                     
@@ -607,7 +636,13 @@ export default function GestionDeMandat() {
           <TabsContent value="utilisateurs" className="mt-0">
             <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
               <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="flex gap-4 p-4 min-w-max">
+                <div 
+                  className="flex gap-4 p-4 min-w-max"
+                  style={{ 
+                    transform: `scale(${zoom})`,
+                    transformOrigin: 'top left'
+                  }}
+                >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
                     const colorClass = getUserColor(userIndex);
