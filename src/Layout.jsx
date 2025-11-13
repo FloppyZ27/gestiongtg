@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tantml:react-query";
 import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus } from "lucide-react";
 import {
   Sidebar,
@@ -315,8 +315,8 @@ function LayoutContent({ children, currentPageName }) {
           </DialogHeader>
           
           <div className="flex-1 flex gap-6 overflow-hidden">
-            {/* Colonne gauche - Sélection du dossier (70%) */}
-            <div className="flex-[0_0_70%] flex flex-col space-y-4 overflow-hidden">
+            {/* Colonne gauche - Sélection du dossier (65%) */}
+            <div className="flex-[0_0_65%] flex flex-col space-y-4 overflow-hidden">
               <Label className="text-lg font-semibold">Sélection du dossier</Label>
               
               {!selectedDossierId ? (
@@ -458,8 +458,8 @@ function LayoutContent({ children, currentPageName }) {
               )}
             </div>
 
-            {/* Colonne droite - Champs de formulaire (30%) */}
-            <div className="flex-[0_0_30%] flex flex-col space-y-4 overflow-y-auto pr-2">
+            {/* Colonne droite - Champs de formulaire (35%) */}
+            <div className="flex-[0_0_35%] flex flex-col space-y-4 overflow-y-auto pr-2 border-l border-slate-700 pl-6">
               <Label className="text-lg font-semibold">Détails de l'entrée</Label>
               
               <div className="space-y-2">
