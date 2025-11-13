@@ -261,6 +261,16 @@ export default function GestionDeMandat() {
         div[data-rbd-draggable-id][data-is-dragging="true"] {
           z-index: 99999 !important;
         }
+
+        /* Portal de react-beautiful-dnd au-dessus de tout */
+        body > [data-rbd-droppable-context-id] {
+          z-index: 99999 !important;
+        }
+
+        /* S'assurer que le conteneur de drag est au-dessus */
+        [data-rbd-drag-handle-draggable-id] {
+          z-index: 99999 !important;
+        }
       `}</style>
       
       <div className="max-w-[1100px] mx-auto">
@@ -351,7 +361,7 @@ export default function GestionDeMandat() {
                 const cardsInColumn = cardsByTache[tache] || [];
                 
                 return (
-                  <div key={tache} className="flex-shrink-0 w-72">
+                  <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
                     <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
                       <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                         <div className="flex items-center justify-between">
@@ -383,10 +393,7 @@ export default function GestionDeMandat() {
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                       data-is-dragging={snapshot.isDragging}
-                                      style={{
-                                        ...provided.draggableProps.style,
-                                        zIndex: snapshot.isDragging ? 99999 : 'auto',
-                                      }}
+                                      style={provided.draggableProps.style}
                                     >
                                       <Card 
                                         className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
@@ -394,7 +401,6 @@ export default function GestionDeMandat() {
                                         }`}
                                         onClick={() => !snapshot.isDragging && handleCardClick(card)}
                                       >
-                                        {/* Numéro de dossier et type mandat */}
                                         <CardContent className="p-3 space-y-2">
                                           <div className="flex items-center justify-between gap-2">
                                             <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
@@ -405,14 +411,12 @@ export default function GestionDeMandat() {
                                             </Badge>
                                           </div>
 
-                                          {/* Clients */}
                                           {getClientsNames(card.dossier.clients_ids) !== "-" && (
                                             <div className="text-sm text-slate-300">
                                               <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
                                             </div>
                                           )}
 
-                                          {/* Adresse */}
                                           {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
                                             <div className="flex items-start gap-1 text-xs text-slate-400">
                                               <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
@@ -420,7 +424,6 @@ export default function GestionDeMandat() {
                                             </div>
                                           )}
 
-                                          {/* Date de livraison et utilisateur assigné */}
                                           <div className="flex items-center justify-between pt-1 border-t border-slate-700">
                                             {card.mandat.date_livraison ? (
                                               <div className="flex items-center gap-1 text-xs text-slate-400">
