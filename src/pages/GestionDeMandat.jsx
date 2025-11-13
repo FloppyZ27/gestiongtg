@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -311,11 +312,18 @@ export default function GestionDeMandat() {
     setCurrentMonthStart(startOfMonth(newDate));
   };
 
-  const handleYearChange = (increment) => {
+  const handleYearChange = (yearValue) => {
     const newDate = new Date(currentMonthStart);
-    newDate.setFullYear(newDate.getFullYear() + increment);
+    newDate.setFullYear(parseInt(yearValue));
     setCurrentMonthStart(startOfMonth(newDate));
   };
+
+  // Générer une liste d'années (10 ans avant et après l'année actuelle)
+  const currentYear = new Date().getFullYear();
+  const YEARS = [];
+  for (let i = currentYear - 10; i <= currentYear + 10; i++) {
+    YEARS.push(i);
+  }
 
   const renderMandatCard = (card, provided, snapshot) => {
     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
@@ -678,15 +686,6 @@ export default function GestionDeMandat() {
               {/* Navigation du calendrier */}
               <div className="flex items-center justify-between mb-4 gap-4">
                 <Button
-                  onClick={() => handleYearChange(-1)}
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-800 border-slate-700 text-white"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <ChevronLeft className="w-4 h-4 -ml-2" />
-                </Button>
-                <Button
                   onClick={() => setCurrentMonthStart(subMonths(currentMonthStart, 1))}
                   variant="outline"
                   size="sm"
@@ -711,9 +710,21 @@ export default function GestionDeMandat() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <h3 className="text-lg font-semibold text-white">
-                    {currentMonthStart.getFullYear()}
-                  </h3>
+                  <Select 
+                    value={currentMonthStart.getFullYear().toString()} 
+                    onValueChange={handleYearChange}
+                  >
+                    <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                      {YEARS.map(year => (
+                        <SelectItem key={year} value={year.toString()} className="text-white">
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <Button
@@ -723,15 +734,6 @@ export default function GestionDeMandat() {
                   className="bg-slate-800 border-slate-700 text-white"
                 >
                   <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button
-                  onClick={() => handleYearChange(1)}
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-800 border-slate-700 text-white"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                  <ChevronRight className="w-4 h-4 -ml-2" />
                 </Button>
               </div>
 
