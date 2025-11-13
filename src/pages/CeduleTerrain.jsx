@@ -397,16 +397,30 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
-            {item.mandat.date_livraison ? (
+          {/* Informations terrain */}
+          <div className="pt-2 border-t border-slate-700 space-y-1">
+            {item.mandat.terrain?.donneur && (
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <User className="w-3 h-3" />
+                <span className="truncate">{item.mandat.terrain.donneur}</span>
+              </div>
+            )}
+            
+            {item.mandat.terrain?.date_limite_leve && (
               <div className="flex items-center gap-1 text-xs text-slate-400">
                 <Calendar className="w-3 h-3" />
-                <span>{format(new Date(item.mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</span>
+                <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
               </div>
-            ) : (
-              <div className="text-xs text-slate-600">Pas de date</div>
             )}
+            
+            {item.mandat.terrain?.temps_prevu && (
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <span className="font-semibold">⏱️ {item.mandat.terrain.temps_prevu}</span>
+              </div>
+            )}
+          </div>
 
+          <div className="flex items-center justify-end pt-2 border-t border-slate-700">
             {assignedUser ? (
               <Avatar className="w-7 h-7 border-2 border-slate-600">
                 <AvatarImage src={assignedUser.photo_url} />
