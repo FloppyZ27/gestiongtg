@@ -85,7 +85,6 @@ export default function CeduleTerrain() {
     });
   };
 
-  // Extraire tous les mandats avec la tâche "Cédule"
   const getMandatsEnVerification = () => {
     const mandats = [];
     dossiers.forEach(dossier => {
@@ -173,7 +172,6 @@ export default function CeduleTerrain() {
     const sourceId = result.source.droppableId;
     const destinationId = result.destination.droppableId;
 
-    // Parse destination: format "jour-equipe"
     const destParts = destinationId.split('-');
     const jour = destParts[0];
     const equipe = destParts.slice(1).join('-');
@@ -182,7 +180,6 @@ export default function CeduleTerrain() {
 
     const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
     
-    // Parse draggable ID: "dossierId-mandatIndex"
     const [dossierId, mandatIndex] = result.draggableId.split('-').slice(0, 2);
     const dossier = dossiers.find(d => d.id === dossierId);
     if (!dossier) return;
@@ -473,7 +470,6 @@ export default function CeduleTerrain() {
 
             {/* Mandats à vérifier et à céduler - Horizontal */}
             <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* En vérification */}
               <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
                 <CardHeader className="border-b border-slate-800 pb-3">
                   <div className="flex items-center justify-between">
@@ -526,7 +522,6 @@ export default function CeduleTerrain() {
                 </CardContent>
               </Card>
 
-              {/* À céduler */}
               <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
                 <CardHeader className="border-b border-slate-800 pb-3">
                   <div className="flex items-center justify-between">
@@ -734,74 +729,73 @@ export default function CeduleTerrain() {
             </Card>
           </div>
         </div>
-      </div>
 
-      {/* View Dossier Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">
-              Dossier {viewingDossier ? `${getArpenteurInitials(viewingDossier.arpenteur_geometre)}${viewingDossier.numero_dossier}` : ''}
-            </DialogTitle>
-          </DialogHeader>
-          {viewingDossier && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-slate-400">N° de dossier</Label>
-                  <p className="text-white font-medium">{viewingDossier.numero_dossier}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-400">Arpenteur-géomètre</Label>
-                  <p className="text-white font-medium">{viewingDossier.arpenteur_geometre}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-400">Date d'ouverture</Label>
-                  <p className="text-white font-medium">
-                    {format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-slate-400">Statut</Label>
-                <Badge className={`mt-2 ${viewingDossier.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
-                  {viewingDossier.statut || "Ouvert"}
-                </Badge>
-              </div>
-
-              {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
-                <div>
-                  <Label className="text-slate-400 mb-2 block">Clients</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {viewingDossier.clients_ids.map(id => {
-                      const client = getClientById(id);
-                      return client ? (
-                        <Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border">
-                          {client.prenom} {client.nom}
-                        </Badge>
-                      ) : null;
-                    })}
+        {/* View Dossier Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">
+                Dossier {viewingDossier ? `${getArpenteurInitials(viewingDossier.arpenteur_geometre)}${viewingDossier.numero_dossier}` : ''}
+              </DialogTitle>
+            </DialogHeader>
+            {viewingDossier && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-slate-400">N° de dossier</Label>
+                    <p className="text-white font-medium">{viewingDossier.numero_dossier}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400">Arpenteur-géomètre</Label>
+                    <p className="text-white font-medium">{viewingDossier.arpenteur_geometre}</p>
+                  </div>
+                  <div>
+                    <Label className="text-slate-400">Date d'ouverture</Label>
+                    <p className="text-white font-medium">
+                      {format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr })}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              {viewingDossier.description && (
                 <div>
-                  <Label className="text-slate-400 mb-2 block">Description</Label>
-                  <p className="text-slate-300 whitespace-pre-wrap">{viewingDossier.description}</p>
+                  <Label className="text-slate-400">Statut</Label>
+                  <Badge className={`mt-2 ${viewingDossier.statut === 'Ouvert' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'} border`}>
+                    {viewingDossier.statut || "Ouvert"}
+                  </Badge>
                 </div>
-              )}
 
-              <div className="flex justify-end pt-4 border-t border-slate-700">
-                <Button onClick={() => setIsViewDialogOpen(false)}>
-                  Fermer
-                </Button>
+                {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Clients</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {viewingDossier.clients_ids.map(id => {
+                        const client = getClientById(id);
+                        return client ? (
+                          <Badge key={id} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border">
+                            {client.prenom} {client.nom}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {viewingDossier.description && (
+                  <div>
+                    <Label className="text-slate-400 mb-2 block">Description</Label>
+                    <p className="text-slate-300 whitespace-pre-wrap">{viewingDossier.description}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-4 border-t border-slate-700">
+                  <Button onClick={() => setIsViewDialogOpen(false)}>
+                    Fermer
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </DialogContent>
+        </Dialog>
       </DragDropContext>
     </TooltipProvider>
   );
