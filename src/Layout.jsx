@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import NotificationBanner from "@/components/shared/NotificationBanner";
 import NotificationButton from "@/components/shared/NotificationButton";
@@ -91,6 +92,28 @@ const getArpenteurInitials = (arpenteur) => {
     "Frédéric Gilbert": "FG-"
   };
   return mapping[arpenteur] || "";
+};
+
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
+const formatAdresse = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+    parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  }
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  return parts.filter(p => p).join(', ');
 };
 
 function LayoutContent({ children, currentPageName }) {
@@ -239,10 +262,16 @@ function LayoutContent({ children, currentPageName }) {
 
   const handleDossierSelect = (dossierId) => {
     setSelectedDossierId(dossierId);
+    const dossier = dossiers.find(d => d.id === dossierId);
+    
+    // Auto-remplir le mandat, la tâche suivante et l'utilisateur assigné si disponibles
+    const premierMandat = dossier?.mandats?.[0];
     setEntreeForm({
       ...entreeForm,
       dossier_id: dossierId,
-      mandat: "" // Reset mandat when dossier changes
+      mandat: premierMandat?.type_mandat || "",
+      tache_suivante: premierMandat?.tache_actuelle || "",
+      utilisateur_assigne: premierMandat?.utilisateur_assigne || ""
     });
     setDossierSearchTerm("");
   };
@@ -280,12 +309,159 @@ function LayoutContent({ children, currentPageName }) {
       
       {/* Dialog pour l'entrée de temps */}
       <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Nouvelle entrée de temps</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          
+          <form onSubmit={handleSubmit} className="flex-1 flex gap-6 overflow-hidden">
+            {/* Colonne gauche - Sélection du dossier (50%) */}
+            <div className="flex-[0_0_50%] flex flex-col space-y-4">
+              <Label className="text-lg font-semibold">Sélection du dossier</Label>
+              
+              {!selectedDossierId ? (
+                <>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher un dossier..."
+                      value={dossierSearchTerm}
+                      onChange={(e) => setDossierSearchTerm(e.target.value)}
+                      className="pl-10 bg-slate-800 border-slate-700"
+                    />
+                  </div>
+                  
+                  {/* Tableau de sélection des dossiers */}
+                  <div className="flex-1 overflow-hidden border border-slate-700 rounded-lg">
+                    <div className="overflow-y-auto max-h-[500px]">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300">Clients</TableHead>
+                            <TableHead className="text-slate-300">Mandats</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).map((dossier) => {
+                            const clientsNames = getClientsNames(dossier.clients_ids);
+                            return (
+                              <TableRow
+                                key={dossier.id}
+                                className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                onClick={() => handleDossierSelect(dossier.id)}
+                              >
+                                <TableCell className="font-medium">
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {clientsNames || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300">
+                                  {dossier.mandats && dossier.mandats.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                          {mandat.type_mandat}
+                                        </Badge>
+                                      ))}
+                                      {dossier.mandats.length > 2 && (
+                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                          +{dossier.mandats.length - 2}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-600 text-xs">Aucun</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                          {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                Aucun dossier trouvé
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col gap-4">
+                  <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+                    <div className="flex-1">
+                      <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2`}>
+                        {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                      </Badge>
+                      <p className="text-slate-400 text-sm">{getClientsNames(selectedDossier?.clients_ids)}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedDossierId(null);
+                        setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
+                      }}
+                      className="text-slate-400"
+                    >
+                      Changer
+                    </Button>
+                  </div>
+
+                  {availableMandats.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Mandat</Label>
+                      <Select value={entreeForm.mandat} onValueChange={(value) => {
+                        const mandat = availableMandats.find(m => m.type_mandat === value);
+                        setEntreeForm({
+                          ...entreeForm, 
+                          mandat: value,
+                          tache_suivante: mandat?.tache_actuelle || "",
+                          utilisateur_assigne: mandat?.utilisateur_assigne || ""
+                        });
+                      }}>
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner un mandat" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {availableMandats.map((mandat, index) => (
+                            <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
+                              {mandat.type_mandat || `Mandat ${index + 1}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={entreeForm.description}
+                      onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
+                      placeholder="Détails supplémentaires..."
+                      className="bg-slate-800 border-slate-700 h-32"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Colonne droite - Champs de formulaire (50%) */}
+            <div className="flex-[0_0_50%] flex flex-col space-y-4">
+              <Label className="text-lg font-semibold">Détails de l'entrée</Label>
+              
               <div className="space-y-2">
                 <Label>Date <span className="text-red-400">*</span></Label>
                 <Input
@@ -296,8 +472,9 @@ function LayoutContent({ children, currentPageName }) {
                   className="bg-slate-800 border-slate-700"
                 />
               </div>
+
               <div className="space-y-2">
-                <Label>Heures <span className="text-red-400">*</span></Label>
+                <Label>Temps <span className="text-red-400">*</span></Label>
                 <Input
                   type="number"
                   step="0.25"
@@ -309,207 +486,7 @@ function LayoutContent({ children, currentPageName }) {
                   className="bg-slate-800 border-slate-700"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Dossier</Label>
-              {!selectedDossierId ? (
-                <>
-                  <div className="relative mb-2">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher un dossier..."
-                      value={dossierSearchTerm}
-                      onChange={(e) => setDossierSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                  
-                  {/* Tableau de sélection rapide des 5 derniers dossiers */}
-                  {!dossierSearchTerm && (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden mb-3">
-                      <div className="bg-slate-800/50 p-2 border-b border-slate-700">
-                        <p className="text-xs text-slate-400">Dossiers récents</p>
-                      </div>
-                      {dossiers.slice(0, 5).map((dossier) => {
-                        const clientsNames = getClientsNames(dossier.clients_ids);
-                        const getArpenteurColor = (arpenteur) => {
-                          const colors = {
-                            "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-                            "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-                            "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-                            "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-                            "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-                          };
-                          return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-                        };
-                        
-                        const formatAdresse = (addr) => {
-                          if (!addr) return "";
-                          const parts = [];
-                          if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-                            parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-                          }
-                          if (addr.rue) parts.push(addr.rue);
-                          if (addr.ville) parts.push(addr.ville);
-                          return parts.filter(p => p).join(', ');
-                        };
-                        
-                        return (
-                          <div
-                            key={dossier.id}
-                            className="p-3 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
-                            onClick={() => handleDossierSelect(dossier.id)}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
-                              {clientsNames && (
-                                <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
-                              )}
-                            </div>
-                            {dossier.mandats && dossier.mandats.length > 0 && (
-                              <div className="space-y-1">
-                                <div className="flex flex-wrap gap-1">
-                                  {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                    <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                      {mandat.type_mandat}
-                                    </Badge>
-                                  ))}
-                                  {dossier.mandats.length > 2 && (
-                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                      +{dossier.mandats.length - 2}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {dossier.mandats[0]?.adresse_travaux && formatAdresse(dossier.mandats[0].adresse_travaux) && (
-                                  <p className="text-slate-400 text-xs truncate">
-                                    📍 {formatAdresse(dossier.mandats[0].adresse_travaux)}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  
-                  {dossierSearchTerm && (
-                    <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg">
-                      {filteredDossiers.length > 0 ? (
-                        filteredDossiers.map((dossier) => {
-                          const clientsNames = getClientsNames(dossier.clients_ids);
-                          const getArpenteurColor = (arpenteur) => {
-                            const colors = {
-                              "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-                              "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-                              "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-                              "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-                              "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-                            };
-                            return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-                          };
-                          
-                          const formatAdresse = (addr) => {
-                            if (!addr) return "";
-                            const parts = [];
-                            if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-                              parts.push(addr.numeros_civiques.filter(n => n).join(', '));
-                            }
-                            if (addr.rue) parts.push(addr.rue);
-                            if (addr.ville) parts.push(addr.ville);
-                            return parts.filter(p => p).join(', ');
-                          };
-                          
-                          return (
-                            <div
-                              key={dossier.id}
-                              className="p-3 cursor-pointer hover:bg-slate-700/50 border-b border-slate-800 last:border-b-0"
-                              onClick={() => handleDossierSelect(dossier.id)}
-                            >
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border flex-shrink-0`}>
-                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                </Badge>
-                                {clientsNames && (
-                                  <span className="text-slate-300 text-sm truncate">{clientsNames}</span>
-                                )}
-                              </div>
-                              {dossier.mandats && dossier.mandats.length > 0 && (
-                                <div className="space-y-1">
-                                  <div className="flex flex-wrap gap-1">
-                                    {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                      <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                        {mandat.type_mandat}
-                                      </Badge>
-                                    ))}
-                                    {dossier.mandats.length > 2 && (
-                                      <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                        +{dossier.mandats.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {dossier.mandats[0]?.adresse_travaux && formatAdresse(dossier.mandats[0].adresse_travaux) && (
-                                    <p className="text-slate-400 text-xs truncate">
-                                      📍 {formatAdresse(dossier.mandats[0].adresse_travaux)}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <p className="p-3 text-center text-slate-500">Aucun dossier trouvé</p>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700">
-                  <div>
-                    <p className="text-white font-medium">
-                      {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                    </p>
-                    <p className="text-slate-400 text-sm">{getClientsNames(selectedDossier?.clients_ids)}</p>
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedDossierId(null);
-                      setEntreeForm({...entreeForm, dossier_id: "", mandat: ""});
-                    }}
-                    className="text-slate-400"
-                  >
-                    Changer
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {selectedDossierId && availableMandats.length > 0 && (
-              <div className="space-y-2">
-                <Label>Mandat</Label>
-                <Select value={entreeForm.mandat} onValueChange={(value) => setEntreeForm({...entreeForm, mandat: value})}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner un mandat" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {availableMandats.map((mandat, index) => (
-                      <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
-                        {mandat.type_mandat || `Mandat ${index + 1}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
                 <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
@@ -541,44 +518,34 @@ function LayoutContent({ children, currentPageName }) {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Utilisateur assigné</Label>
-              <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({...entreeForm, utilisateur_assigne: value})}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="Sélectionner un utilisateur" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.email} value={user.email} className="text-white">
-                      {user.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={entreeForm.description}
-                onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
-                placeholder="Détails supplémentaires..."
-                className="bg-slate-800 border-slate-700 h-24"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
-                Annuler
-              </Button>
-              <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                Enregistrer
-              </Button>
+              <div className="space-y-2">
+                <Label>Utilisateur assigné</Label>
+                <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({...entreeForm, utilisateur_assigne: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner un utilisateur" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.email} value={user.email} className="text-white">
+                        {user.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </form>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
+              Annuler
+            </Button>
+            <Button type="submit" form="entree-temps-form" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+              Enregistrer
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       
