@@ -655,7 +655,7 @@ export default function CeduleTerrain() {
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white">
-                    Semaine du {format(semaineCourante, "d MMMM yyyy", { locale: fr })}
+                    Semaine du {format(semaineCourante, "d MMMM", { locale: fr })} au {format(addDays(semaineCourante, 4), "d MMMM yyyy", { locale: fr })}
                   </CardTitle>
                   <div className="flex gap-2">
                     <Button
@@ -692,7 +692,7 @@ export default function CeduleTerrain() {
                       <div key={jour} className="space-y-2">
                         <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
                           <div className="flex justify-between items-center mb-2">
-                            <div>
+                            <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-white text-sm">{jour}</h3>
                               <p className="text-xs text-slate-400">
                                 {format(dateJour, "d MMM", { locale: fr })}
@@ -710,10 +710,10 @@ export default function CeduleTerrain() {
 
                         <div className="space-y-2">
                           {equipes[jourKey]?.map((equipe) => (
-                            <div key={equipe} className="bg-slate-800/30 rounded-lg border border-slate-700/50">
-                              <div className="flex justify-between items-center mb-2 px-2 pt-2">
-                                <div className="flex items-center gap-1 flex-1">
-                                  <Users className="w-3 h-3 text-cyan-400" />
+                            <div key={equipe} className="bg-slate-800/50 rounded-lg border-2 border-slate-700">
+                              <div className="flex justify-between items-center px-3 py-2 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border-b-2 border-slate-700">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Users className="w-4 h-4 text-cyan-400" />
                                   {editingEquipe === `${jour}-${equipe}` ? (
                                     <Input
                                       value={newEquipeName}
@@ -728,11 +728,11 @@ export default function CeduleTerrain() {
                                         }
                                       }}
                                       autoFocus
-                                      className="bg-slate-700 border-slate-600 text-white h-6 text-xs px-2"
+                                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm px-2"
                                     />
                                   ) : (
                                     <span 
-                                      className="text-xs font-medium text-cyan-400 cursor-pointer hover:text-cyan-300"
+                                      className="text-sm font-bold text-cyan-300 cursor-pointer hover:text-cyan-200"
                                       onClick={() => {
                                         setEditingEquipe(`${jour}-${equipe}`);
                                         setNewEquipeName(equipe);
@@ -747,7 +747,7 @@ export default function CeduleTerrain() {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => supprimerEquipe(jour, equipe)}
-                                    className="h-5 w-5 p-0 text-red-400 hover:text-red-300"
+                                    className="h-6 w-6 p-0 text-red-400 hover:text-red-300"
                                   >
                                     <Trash2 className="w-3 h-3" />
                                   </Button>
@@ -760,7 +760,7 @@ export default function CeduleTerrain() {
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
                                     className={`min-h-[100px] space-y-2 transition-colors ${
-                                      snapshot.isDraggingOver ? 'bg-emerald-500/10 border-t border-emerald-500/30 p-2' : 'bg-slate-900/30 p-2'
+                                      snapshot.isDraggingOver ? 'bg-emerald-500/10 border-t-2 border-emerald-500/30' : ''
                                     }`}
                                   >
                                     {mandatsCedules[jourKey]?.[equipe]?.map((item, index) => (
