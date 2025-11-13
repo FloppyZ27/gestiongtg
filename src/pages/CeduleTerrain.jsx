@@ -164,13 +164,17 @@ export default function CeduleTerrain() {
   const getMandatsCedules = () => {
     const mandats = {};
     JOURS_SEMAINE.forEach((jour, jourIndex) => {
-      const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
+      // const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd"); // Not directly used here, but for context
       mandats[jour.toLowerCase()] = {};
       
       dossiers.forEach(dossier => {
         if (dossier.mandats) {
           dossier.mandats.forEach((mandat, idx) => {
-            if (mandat.date_terrain === dateJour && mandat.equipe_assignee) {
+            const dateDuMandat = mandat.date_terrain ? new Date(mandat.date_terrain) : null;
+            const dateDuJour = addDays(semaineCourante, jourIndex);
+            
+            if (dateDuMandat && mandat.equipe_assignee && 
+                format(dateDuMandat, "yyyy-MM-dd") === format(dateDuJour, "yyyy-MM-dd")) {
               if (!mandats[jour.toLowerCase()][mandat.equipe_assignee]) {
                 mandats[jour.toLowerCase()][mandat.equipe_assignee] = [];
               }
@@ -293,8 +297,28 @@ export default function CeduleTerrain() {
     const equipeMandats = mandatsCedules[jourKey]?.[equipe] || [];
     
     if (equipeMandats.length > 0) {
-      alert("Impossible de supprimer cette équipe car elle contient déjà des mandats planifiés. Veuillez d'abord retirer les mandats de cette équipe.");
-      return;
+      const confirmation = confirm(`Cette équipe contient ${equipeMandats.length} mandat(s) planifié(s). Si vous supprimez l'équipe, ces mandats retourneront dans la section "À céduler". Voulez-vous continuer ?`);
+      
+      if (!confirmation) return;
+      
+      // Retirer les mandats de cette équipe et les remettre à "a_ceduler"
+      equipeMandats.forEach(item => {
+        const dossier = dossiers.find(d => d.id === item.dossier.id);
+        if (!dossier) return;
+        
+        const updatedMandats = [...dossier.mandats];
+        updatedMandats[item.mandatIndex] = {
+          ...updatedMandats[item.mandatIndex],
+          date_terrain: null,
+          equipe_assignee: null,
+          statut_terrain: "a_ceduler"
+        };
+        
+        updateDossierMutation.mutate({
+          id: dossier.id,
+          dossierData: { ...dossier, mandats: updatedMandats }
+        });
+      });
     }
     
     setEquipes(prev => ({
@@ -327,6 +351,7 @@ export default function CeduleTerrain() {
     dossiers.forEach(dossier => {
       let needsUpdate = false;
       const updatedMandats = dossier.mandats?.map(mandat => {
+        // Check if the mandat is assigned to the old team name AND it's scheduled for a date (not just "a_ceduler" without a date)
         if (mandat.equipe_assignee === oldName && mandat.date_terrain) {
           needsUpdate = true;
           return { ...mandat, equipe_assignee: newName };
@@ -383,6 +408,14 @@ export default function CeduleTerrain() {
   const MandatCard = ({ item, showActions = true, isDragging = false }) => {
     const assignedUser = users.find(u => u.email === item.mandat.utilisateur_assigne);
     
+    // Trouver l'utilisateur correspondant au donneur
+    const donneurUser = item.mandat.terrain?.donneur 
+      ? users.find(u => u.full_name === item.mandat.terrain.donneur)
+      : null;
+    
+    // Utiliser le donneur s'il existe, sinon l'utilisateur assigné
+    const displayUser = donneurUser || assignedUser;
+    
     return (
       <Card 
         className={`border-slate-700 ${isDragging ? 'bg-slate-700' : 'bg-slate-800/80'} hover:bg-slate-800 transition-colors cursor-pointer`}
@@ -420,35 +453,22 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {/* Informations terrain */}
-          <div className="pt-2 border-t border-slate-700 space-y-1">
-            {item.mandat.terrain?.donneur && (
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-                <User className="w-3 h-3 flex-shrink-0" />
-                <span>{item.mandat.terrain.donneur}</span>
-              </div>
-            )}
-            
-            {item.mandat.terrain?.date_limite_leve && (
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-                <Calendar className="w-3 h-3 flex-shrink-0" />
-                <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
-              </div>
-            )}
-            
-            {item.mandat.terrain?.temps_prevu && (
+          {/* Temps prévu */}
+          {item.mandat.terrain?.temps_prevu && (
+            <div className="pt-1">
               <div className="flex items-center gap-1 text-xs text-slate-400">
                 <span className="font-semibold">⏱️ {item.mandat.terrain.temps_prevu}</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
+          {/* Avatar du donneur ou utilisateur assigné */}
           <div className="flex items-center justify-end pt-2 border-t border-slate-700">
-            {assignedUser ? (
+            {displayUser ? (
               <Avatar className="w-7 h-7 border-2 border-slate-600">
-                <AvatarImage src={assignedUser.photo_url} />
+                <AvatarImage src={displayUser.photo_url} />
                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                  {getUserInitials(assignedUser.full_name)}
+                  {getUserInitials(displayUser.full_name)}
                 </AvatarFallback>
               </Avatar>
             ) : (
@@ -457,6 +477,16 @@ export default function CeduleTerrain() {
               </div>
             )}
           </div>
+
+          {/* Date limite en bas de carte */}
+          {item.mandat.terrain?.date_limite_leve && (
+            <div className="pt-2 border-t border-slate-700">
+              <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                <Calendar className="w-3 h-3 flex-shrink-0" />
+                <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
+              </div>
+            </div>
+          )}
 
           {showActions && (
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
