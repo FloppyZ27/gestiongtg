@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -222,7 +223,7 @@ export default function GestionDeMandat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <div className="max-w-[1800px] mx-auto">
+      <div className="max-w-[1260px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -302,120 +303,124 @@ export default function GestionDeMandat() {
           </CardContent>
         </Card>
 
-        {/* Kanban Board */}
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {TACHES.map(tache => {
-              const cardsInColumn = cardsByTache[tache] || [];
-              
-              return (
-                <div key={tache} className="flex-shrink-0 w-72">
-                  <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
-                    <CardHeader className={`pb-3 border-b border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)} bg-opacity-10`}>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg font-bold text-white">
-                          {tache}
-                        </CardTitle>
-                        <Badge className="bg-slate-900/70 text-white font-bold">
-                          {cardsInColumn.length}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <Droppable droppableId={tache}>
-                      {(provided, snapshot) => (
-                        <CardContent
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-320px)] ${
-                            snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
-                          }`}
-                        >
-                          {cardsInColumn.map((card, index) => {
-                            const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
-                            
-                            return (
-                              <Draggable key={card.id} draggableId={card.id} index={index}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className={`${
-                                      snapshot.isDragging ? 'opacity-50 rotate-2' : ''
-                                    }`}
-                                  >
-                                    <Card 
-                                      className="border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer"
-                                      onClick={() => handleCardClick(card)}
-                                    >
-                                      <CardContent className="p-3 space-y-2">
-                                        {/* Numéro de dossier et type mandat */}
-                                        <div className="flex items-center justify-between gap-2">
-                                          <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
-                                            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-                                          </Badge>
-                                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                            {card.mandat.type_mandat}
-                                          </Badge>
-                                        </div>
-
-                                        {/* Clients */}
-                                        {getClientsNames(card.dossier.clients_ids) !== "-" && (
-                                          <div className="text-sm text-slate-300">
-                                            <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
-                                          </div>
-                                        )}
-
-                                        {/* Adresse */}
-                                        {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-                                          <div className="flex items-start gap-1 text-xs text-slate-400">
-                                            <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                            <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
-                                          </div>
-                                        )}
-
-                                        {/* Date de livraison et utilisateur assigné */}
-                                        <div className="flex items-center justify-between pt-1 border-t border-slate-700">
-                                          {card.mandat.date_livraison ? (
-                                            <div className="flex items-center gap-1 text-xs text-slate-400">
-                                              <Calendar className="w-3 h-3" />
-                                              <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+        {/* Kanban Board avec scroll en haut */}
+        <div className="overflow-x-auto overflow-y-hidden pb-4" style={{ direction: 'rtl' }}>
+          <div style={{ direction: 'ltr' }}>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="flex gap-4">
+                {TACHES.map(tache => {
+                  const cardsInColumn = cardsByTache[tache] || [];
+                  
+                  return (
+                    <div key={tache} className="flex-shrink-0 w-72">
+                      <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
+                        <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-xl font-bold text-white tracking-wide">
+                              {tache}
+                            </CardTitle>
+                            <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                              {cardsInColumn.length}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <Droppable droppableId={tache}>
+                          {(provided, snapshot) => (
+                            <CardContent
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-320px)] ${
+                                snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
+                              }`}
+                            >
+                              {cardsInColumn.map((card, index) => {
+                                const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+                                
+                                return (
+                                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className={`${
+                                          snapshot.isDragging ? 'opacity-50 rotate-2' : ''
+                                        }`}
+                                      >
+                                        <Card 
+                                          className="border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer"
+                                          onClick={() => handleCardClick(card)}
+                                        >
+                                          <CardContent className="p-3 space-y-2">
+                                            {/* Numéro de dossier et type mandat */}
+                                            <div className="flex items-center justify-between gap-2">
+                                              <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
+                                                {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+                                              </Badge>
+                                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                                {card.mandat.type_mandat}
+                                              </Badge>
                                             </div>
-                                          ) : (
-                                            <div></div>
-                                          )}
 
-                                          {assignedUser && (
-                                            <Avatar className="w-6 h-6 border border-slate-600">
-                                              <AvatarImage src={assignedUser.photo_url} />
-                                              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                                {getUserInitials(assignedUser.full_name)}
-                                              </AvatarFallback>
-                                            </Avatar>
-                                          )}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                )}
-                              </Draggable>
-                            );
-                          })}
-                          {provided.placeholder}
-                          {cardsInColumn.length === 0 && (
-                            <div className="text-center py-8 text-slate-600 text-sm">
-                              Aucun mandat
-                            </div>
+                                            {/* Clients */}
+                                            {getClientsNames(card.dossier.clients_ids) !== "-" && (
+                                              <div className="text-sm text-slate-300">
+                                                <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
+                                              </div>
+                                            )}
+
+                                            {/* Adresse */}
+                                            {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+                                              <div className="flex items-start gap-1 text-xs text-slate-400">
+                                                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                                <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+                                              </div>
+                                            )}
+
+                                            {/* Date de livraison et utilisateur assigné */}
+                                            <div className="flex items-center justify-between pt-1 border-t border-slate-700">
+                                              {card.mandat.date_livraison ? (
+                                                <div className="flex items-center gap-1 text-xs text-slate-400">
+                                                  <Calendar className="w-3 h-3" />
+                                                  <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+                                                </div>
+                                              ) : (
+                                                <div></div>
+                                              )}
+
+                                              {assignedUser && (
+                                                <Avatar className="w-6 h-6 border border-slate-600">
+                                                  <AvatarImage src={assignedUser.photo_url} />
+                                                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                                    {getUserInitials(assignedUser.full_name)}
+                                                  </AvatarFallback>
+                                                </Avatar>
+                                              )}
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                );
+                              })}
+                              {provided.placeholder}
+                              {cardsInColumn.length === 0 && (
+                                <div className="text-center py-8 text-slate-600 text-sm">
+                                  Aucun mandat
+                                </div>
+                              )}
+                            </CardContent>
                           )}
-                        </CardContent>
-                      )}
-                    </Droppable>
-                  </Card>
-                </div>
-              );
-            })}
+                        </Droppable>
+                      </Card>
+                    </div>
+                  );
+                })}
+              </div>
+            </DragDropContext>
           </div>
-        </DragDropContext>
+        </div>
 
         {/* Dialog de vue/édition du dossier */}
         <Dialog open={!!viewingDossier} onOpenChange={(open) => {
