@@ -145,13 +145,18 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     if (!addr) return "";
     const parts = [];
     if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
-      parts.push(addr.numeros_civiques.filter((n) => n).join(', '));
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
     }
     if (addr.rue) parts.push(addr.rue);
     if (addr.ville) parts.push(addr.ville);
     if (addr.province) parts.push(addr.province);
     if (addr.code_postal) parts.push(addr.code_postal);
-    return parts.filter((p) => p).join(', ');
+    return parts.filter(p => p).join(', ');
+  };
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "";
   };
 
   const sortClientsWithSelected = (clientsList, selectedIds) => {
@@ -170,7 +175,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     clientsReguliers.filter((c) =>
       `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
       c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
-      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+      c.adresses?.some((addr) => formatAdresse(addr).toLowerCase().includes(clientSearchTerm.toLowerCase()))
     ),
     formData.clients_ids
   );
@@ -179,7 +185,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     notaires.filter((n) =>
       `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
       n.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
-      n.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+      n.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+      n.adresses?.some((addr) => formatAdresse(addr).toLowerCase().includes(notaireSearchTerm.toLowerCase()))
     ),
     formData.notaires_ids
   );
@@ -188,7 +195,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     courtiers.filter((c) =>
       `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
       c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+      c.adresses?.some((addr) => formatAdresse(addr).toLowerCase().includes(courtierSearchTerm.toLowerCase()))
     ),
     formData.courtiers_ids
   );
@@ -1112,6 +1120,17 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                     onClick={() => toggleClient(client.id, 'clients')}
                   >
                     <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
+                        <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
+                      )}
+                      {getCurrentValue(client.courriels, 'courriel') && (
+                        <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(client.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -1174,6 +1193,17 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                     onClick={() => toggleClient(notaire.id, 'notaires')}
                   >
                     <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
+                        <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
+                      )}
+                      {getCurrentValue(notaire.courriels, 'courriel') && (
+                        <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(notaire.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -1236,6 +1266,17 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                     onClick={() => toggleClient(courtier.id, 'courtiers')}
                   >
                     <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                    <div className="text-sm text-slate-400 space-y-1 mt-1">
+                      {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
+                        <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
+                      )}
+                      {getCurrentValue(courtier.courriels, 'courriel') && (
+                        <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                      )}
+                      {getCurrentValue(courtier.telephones, 'telephone') && (
+                        <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                      )}
+                    </div>
                     <Button
                       size="sm"
                       variant="ghost"

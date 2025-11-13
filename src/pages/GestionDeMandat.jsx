@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -571,7 +572,8 @@ export default function GestionDeMandat() {
                   className="flex gap-4 p-4 min-w-max"
                   style={{ 
                     transform: `scale(${zoom})`,
-                    transformOrigin: 'top left'
+                    transformOrigin: 'top left',
+                    height: `${100 / zoom}%` // Added this line
                   }}
                 >
                   {TACHES.map(tache => {
@@ -595,9 +597,12 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)] ${
+                                className={`p-3 space-y-3 flex-1 overflow-y-auto ${
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
+                                style={{
+                                  maxHeight: `calc((100vh - 340px) / ${zoom})` // Modified this line
+                                }}
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -640,7 +645,8 @@ export default function GestionDeMandat() {
                   className="flex gap-4 p-4 min-w-max"
                   style={{ 
                     transform: `scale(${zoom})`,
-                    transformOrigin: 'top left'
+                    transformOrigin: 'top left',
+                    height: `${100 / zoom}%` // Added this line
                   }}
                 >
                   {usersList.map((user, userIndex) => {
@@ -678,9 +684,12 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)] ${
+                                className={`p-3 space-y-3 flex-1 overflow-y-auto ${
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
+                                style={{
+                                  maxHeight: `calc((100vh - 340px) / ${zoom})` // Modified this line
+                                }}
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
