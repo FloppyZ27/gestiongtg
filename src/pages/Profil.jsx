@@ -524,253 +524,263 @@ export default function Profil() {
           </CardContent>
         </Card>
 
-        {/* Retours d'appel assignés */}
+        {/* Tabs pour les 3 tableaux */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Phone className="w-5 h-5 text-blue-400" />
-              Mes retours d'appel ({retoursAppel.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
-                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                    <TableHead className="text-slate-300">Dossier</TableHead>
-                    <TableHead className="text-slate-300">Date</TableHead>
-                    <TableHead className="text-slate-300">Clients</TableHead>
-                    <TableHead className="text-slate-300">Adresse travaux</TableHead>
-                    <TableHead className="text-slate-300">Mandat</TableHead>
-                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {retoursAppel.map((dossier) => (
-                    <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
-                      <TableCell className="font-medium">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                          {dossier.numero_dossier
-                            ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                            : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-sm">
-                        {getClientsNames(dossier.clients_ids)}
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                        {getFirstAdresseTravaux(dossier.mandats)}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {dossier.mandats && dossier.mandats.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                              <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                {mandat.type_mandat}
-                              </Badge>
-                            ))}
-                            {dossier.mandats.length > 2 && (
-                              <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                +{dossier.mandats.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-slate-600 text-xs">Aucun</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditDossier(dossier)}
-                            className="gap-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteDossier(dossier.id)}
-                            className="gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {retoursAppel.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                        Aucun retour d'appel assigné
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+          <Tabs defaultValue="retours-appel" className="w-full">
+            <CardHeader className="border-b border-slate-800 pb-0">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto">
+                <TabsTrigger
+                  value="retours-appel"
+                  className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Retours d'appel ({retoursAppel.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mandats-assignes"
+                  className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
+                >
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  Mandats assignés
+                </TabsTrigger>
+                <TabsTrigger
+                  value="entrees-temps"
+                  className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Entrées de temps
+                </TabsTrigger>
+              </TabsList>
+            </CardHeader>
 
-        {/* Mandats assignés */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-purple-400" />
-              Mes mandats assignés
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
-                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                    <TableHead className="text-slate-300">Dossier</TableHead>
-                    <TableHead className="text-slate-300">Clients</TableHead>
-                    <TableHead className="text-slate-300">Type de mandat</TableHead>
-                    <TableHead className="text-slate-300">Tâche assignée</TableHead>
-                    <TableHead className="text-slate-300">Adresse travaux</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dossiers.flatMap(dossier => 
-                    (dossier.mandats || [])
-                      .filter(mandat => mandat.utilisateur_assigne === user?.email)
-                      .map((mandat, idx) => (
-                        <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+            <TabsContent value="retours-appel" className="p-0">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                      <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                        <TableHead className="text-slate-300">Dossier</TableHead>
+                        <TableHead className="text-slate-300">Date</TableHead>
+                        <TableHead className="text-slate-300">Clients</TableHead>
+                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                        <TableHead className="text-slate-300">Mandat</TableHead>
+                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {retoursAppel.map((dossier) => (
+                        <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                              {dossier.numero_dossier
+                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {getClientsNames(dossier.clients_ids)}
                           </TableCell>
-                          <TableCell className="text-slate-300">
-                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                              {mandat.type_mandat}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
-                              {mandat.tache_actuelle || "-"}
-                            </Badge>
-                          </TableCell>
                           <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {formatAdresse(mandat.adresse_travaux) || "-"}
+                            {getFirstAdresseTravaux(dossier.mandats)}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.mandats && dossier.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                ))}
+                                {dossier.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{dossier.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditDossier(dossier)}
+                                className="gap-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteDossier(dossier.id)}
+                                className="gap-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))
-                  ).length > 0 ? (
-                    dossiers.flatMap(dossier => 
-                      (dossier.mandats || [])
-                        .filter(mandat => mandat.utilisateur_assigne === user?.email)
-                        .map((mandat, idx) => (
-                          <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+                      ))}
+                      {retoursAppel.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                            Aucun retour d'appel assigné
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </TabsContent>
+
+            <TabsContent value="mandats-assignes" className="p-0">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                      <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                        <TableHead className="text-slate-300">Dossier</TableHead>
+                        <TableHead className="text-slate-300">Clients</TableHead>
+                        <TableHead className="text-slate-300">Type de mandat</TableHead>
+                        <TableHead className="text-slate-300">Tâche assignée</TableHead>
+                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dossiers.flatMap(dossier => 
+                        (dossier.mandats || [])
+                          .filter(mandat => mandat.utilisateur_assigne === user?.email)
+                          .map((mandat, idx) => (
+                            <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+                              <TableCell className="font-medium">
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-sm">
+                                {getClientsNames(dossier.clients_ids)}
+                              </TableCell>
+                              <TableCell className="text-slate-300">
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                  {mandat.type_mandat}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                                  {mandat.tache_actuelle || "-"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                {formatAdresse(mandat.adresse_travaux) || "-"}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                      ).length > 0 ? (
+                        dossiers.flatMap(dossier => 
+                          (dossier.mandats || [])
+                            .filter(mandat => mandat.utilisateur_assigne === user?.email)
+                            .map((mandat, idx) => (
+                              <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="font-medium">
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm">
+                                  {getClientsNames(dossier.clients_ids)}
+                                </TableCell>
+                                <TableCell className="text-slate-300">
+                                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                    {mandat.type_mandat}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                                    {mandat.tache_actuelle || "-"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                  {formatAdresse(mandat.adresse_travaux) || "-"}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        )
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                            Aucun mandat assigné
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </TabsContent>
+
+            <TabsContent value="entrees-temps" className="p-0">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                      <TableRow className="hover:bg-slate-800/95 border-slate-700">
+                        <TableHead className="text-slate-300">Dossier</TableHead>
+                        <TableHead className="text-slate-300">Mandat</TableHead>
+                        <TableHead className="text-slate-300">Date</TableHead>
+                        <TableHead className="text-slate-300">Heures</TableHead>
+                        <TableHead className="text-slate-300">Tâche</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {entreeTemps.map((entree) => {
+                        const dossier = dossiers.find(d => d.id === entree.dossier_id);
+                        return (
+                          <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
                             <TableCell className="font-medium">
-                              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                              </Badge>
+                              {dossier ? (
+                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                </Badge>
+                              ) : (
+                                <span className="text-slate-600">-</span>
+                              )}
                             </TableCell>
                             <TableCell className="text-slate-300 text-sm">
-                              {getClientsNames(dossier.clients_ids)}
+                              {entree.mandat || "-"}
                             </TableCell>
                             <TableCell className="text-slate-300">
-                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                {mandat.type_mandat}
-                              </Badge>
+                              {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
+                            </TableCell>
+                            <TableCell className="text-emerald-400 font-semibold">
+                              {entree.heures}h
                             </TableCell>
                             <TableCell>
-                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
-                                {mandat.tache_actuelle || "-"}
+                              <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
+                                {entree.tache}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                              {formatAdresse(mandat.adresse_travaux) || "-"}
-                            </TableCell>
                           </TableRow>
-                        ))
-                    )
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                        Aucun mandat assigné
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Entrées de temps - pleine largeur */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-emerald-400" />
-              Mes entrées de temps
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
-                  <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                    <TableHead className="text-slate-300">Dossier</TableHead>
-                    <TableHead className="text-slate-300">Mandat</TableHead>
-                    <TableHead className="text-slate-300">Date</TableHead>
-                    <TableHead className="text-slate-300">Heures</TableHead>
-                    <TableHead className="text-slate-300">Tâche</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {entreeTemps.map((entree) => {
-                    const dossier = dossiers.find(d => d.id === entree.dossier_id);
-                    return (
-                      <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
-                        <TableCell className="font-medium">
-                          {dossier ? (
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                              {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                            </Badge>
-                          ) : (
-                            <span className="text-slate-600">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-slate-300 text-sm">
-                          {entree.mandat || "-"}
-                        </TableCell>
-                        <TableCell className="text-slate-300">
-                          {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
-                        </TableCell>
-                        <TableCell className="text-emerald-400 font-semibold">
-                          {entree.heures}h
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
-                            {entree.tache}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {entreeTemps.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                        Aucune entrée de temps
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
+                        );
+                      })}
+                      {entreeTemps.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                            Aucune entrée de temps
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </TabsContent>
+          </Tabs>
         </Card>
 
         {/* Edit Profile Dialog */}
