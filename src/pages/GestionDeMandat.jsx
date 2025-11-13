@@ -435,7 +435,7 @@ export default function GestionDeMandat() {
         }
       `}</style>
       
-      <div className="max-w-[1100px] mx-auto">
+      <div className="max-w-[1265px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
