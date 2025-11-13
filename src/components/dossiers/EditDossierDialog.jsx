@@ -224,18 +224,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (formData.statut === "Ouvert" && formData.numero_dossier && formData.arpenteur_geometre) {
-      const dossierExistant = queryClient.getQueryData(['dossiers'])?.find((d) =>
-        d.id !== dossier?.id &&
-        d.numero_dossier === formData.numero_dossier &&
-        d.arpenteur_geometre === formData.arpenteur_geometre
-      );
-
-      if (dossierExistant) {
-        alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
-        return;
-      }
-    }
+    // As per requirement: "Ne pas valider le numéro de dossier lors de la modification"
+    // The validation for duplicate dossier number and arpenteur is removed for editing existing dossiers.
 
     if (dossier) {
       updateDossierMutation.mutate({ id: dossier.id, dossierData: formData });
@@ -777,7 +767,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                                                 <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">{lot.circonscription_fonciere}</Badge>
                                               </TableCell>
                                               <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
-                                              <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
+                                              <TableCell className="text-slate-300">{lot.rang || "-eroom"}</TableCell>
                                               <TableCell className="text-right">
                                                 <Button type="button" size="sm" variant="ghost" onClick={() => removeLotFromMandat(index, lot.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                                   <Trash2 className="w-4 h-4" />
