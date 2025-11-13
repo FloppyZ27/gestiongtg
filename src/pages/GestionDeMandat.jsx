@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Kanban, MapPin, Calendar, Edit, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { format } from "date-fns";
+import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
@@ -57,6 +57,8 @@ export default function GestionDeMandat() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
+  const [activeView, setActiveView] = useState("taches");
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { locale: fr }));
 
   const queryClient = useQueryClient();
 
@@ -128,7 +130,8 @@ export default function GestionDeMandat() {
               mandatIndex: mandatIndex,
               dossier: dossier,
               mandat: mandat,
-              tache: mandat.tache_actuelle || "Ouverture"
+              tache: mandat.tache_actuelle || "Ouverture",
+              utilisateur: mandat.utilisateur_assigne || "non-assigne"
             });
           });
         }
@@ -165,6 +168,24 @@ export default function GestionDeMandat() {
     return acc;
   }, {});
 
+  // Organiser les cartes par utilisateur
+  const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
+  const cardsByUtilisateur = usersList.reduce((acc, user) => {
+    acc[user.email] = filteredCards.filter(card => 
+      card.utilisateur === user.email || (card.utilisateur === "non-assigne" && user.email === "non-assigne")
+    );
+    return acc;
+  }, {});
+
+  // Organiser les cartes par date de livraison pour le calendrier
+  const getWeeksToDisplay = () => {
+    const weeks = [];
+    for (let i = 0; i < 8; i++) {
+      weeks.push(addWeeks(currentWeekStart, i));
+    }
+    return weeks;
+  };
+
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -175,15 +196,27 @@ export default function GestionDeMandat() {
     const card = filteredCards.find(c => c.id === draggableId);
     if (!card) return;
 
-    const nouvelleTache = destination.droppableId;
     const dossier = card.dossier;
     
-    const updatedMandats = dossier.mandats.map((m, idx) => {
-      if (idx === card.mandatIndex) {
-        return { ...m, tache_actuelle: nouvelleTache };
-      }
-      return m;
-    });
+    let updatedMandats = [...dossier.mandats];
+
+    if (activeView === "taches") {
+      const nouvelleTache = destination.droppableId;
+      updatedMandats = dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) {
+          return { ...m, tache_actuelle: nouvelleTache };
+        }
+        return m;
+      });
+    } else if (activeView === "utilisateurs") {
+      const nouvelUtilisateur = destination.droppableId === "non-assigne" ? "" : destination.droppableId;
+      updatedMandats = dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) {
+          return { ...m, utilisateur_assigne: nouvelUtilisateur };
+        }
+        return m;
+      });
+    }
 
     updateDossierMutation.mutate({
       id: dossier.id,
@@ -227,6 +260,20 @@ export default function GestionDeMandat() {
     return colors[tache] || "from-slate-500 to-slate-600";
   };
 
+  const getUserColor = (index) => {
+    const colors = [
+      "bg-blue-500/20 border-blue-500/30 from-blue-500 to-blue-600",
+      "bg-purple-500/20 border-purple-500/30 from-purple-500 to-purple-600",
+      "bg-green-500/20 border-green-500/30 from-green-500 to-green-600",
+      "bg-orange-500/20 border-orange-500/30 from-orange-500 to-orange-600",
+      "bg-pink-500/20 border-pink-500/30 from-pink-500 to-pink-600",
+      "bg-cyan-500/20 border-cyan-500/30 from-cyan-500 to-cyan-600",
+      "bg-yellow-500/20 border-yellow-500/30 from-yellow-500 to-yellow-600",
+      "bg-red-500/20 border-red-500/30 from-red-500 to-red-600"
+    ];
+    return colors[index % colors.length];
+  };
+
   const handleCardClick = (card) => {
     setViewingDossier(card.dossier);
     setIsViewDialogOpen(true);
@@ -236,6 +283,63 @@ export default function GestionDeMandat() {
     setIsViewDialogOpen(false);
     setEditingDossier(dossier);
     setIsEditingDialogOpen(true);
+  };
+
+  const renderMandatCard = (card, provided, snapshot) => {
+    const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+    
+    return (
+      <Card 
+        className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
+          snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50 scale-110 rotate-3' : 'hover:shadow-lg'
+        }`}
+        onClick={() => !snapshot?.isDragging && handleCardClick(card)}
+      >
+        <CardContent className="p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
+              {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+            </Badge>
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+              {card.mandat.type_mandat}
+            </Badge>
+          </div>
+
+          {getClientsNames(card.dossier.clients_ids) !== "-" && (
+            <div className="text-sm text-slate-300">
+              <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
+            </div>
+          )}
+
+          {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+            <div className="flex items-start gap-1 text-xs text-slate-400">
+              <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+              <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between pt-1 border-t border-slate-700">
+            {card.mandat.date_livraison ? (
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <Calendar className="w-3 h-3" />
+                <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+              </div>
+            ) : (
+              <div></div>
+            )}
+
+            {assignedUser && (
+              <Avatar className="w-6 h-6 border border-slate-600">
+                <AvatarImage src={assignedUser.photo_url} />
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  {getUserInitials(assignedUser.full_name)}
+                </AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
   };
 
   return (
@@ -282,7 +386,7 @@ export default function GestionDeMandat() {
               </h1>
               <Kanban className="w-6 h-6 text-emerald-400" />
             </div>
-            <p className="text-slate-400">Vue Kanban de vos mandats par tâche</p>
+            <p className="text-slate-400">Vue Kanban de vos mandats</p>
           </div>
         </div>
 
@@ -353,121 +457,256 @@ export default function GestionDeMandat() {
           </CardContent>
         </Card>
 
-        {/* Kanban Board avec scroll horizontal */}
-        <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="flex gap-4 p-4 min-w-max">
-              {TACHES.map(tache => {
-                const cardsInColumn = cardsByTache[tache] || [];
-                
-                return (
-                  <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
-                    <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
-                      <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-xl font-bold text-white tracking-wide">
-                            {tache}
-                          </CardTitle>
-                          <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
-                            {cardsInColumn.length}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <Droppable droppableId={tache}>
-                        {(provided, snapshot) => (
-                          <CardContent
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)] ${
-                              snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
-                            }`}
-                          >
-                            {cardsInColumn.map((card, index) => {
-                              const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
-                              
-                              return (
-                                <Draggable key={card.id} draggableId={card.id} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      data-is-dragging={snapshot.isDragging}
-                                      style={provided.draggableProps.style}
-                                    >
-                                      <Card 
-                                        className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
-                                          snapshot.isDragging ? 'shadow-2xl shadow-emerald-500/50 scale-110 rotate-3' : 'hover:shadow-lg'
-                                        }`}
-                                        onClick={() => !snapshot.isDragging && handleCardClick(card)}
+        {/* Tabs pour les différentes vues */}
+        <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+          <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
+            <TabsTrigger
+              value="taches"
+              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3 text-base"
+            >
+              <Kanban className="w-4 h-4 mr-2" />
+              Par Tâches
+            </TabsTrigger>
+            <TabsTrigger
+              value="utilisateurs"
+              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3 text-base"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Par Utilisateur
+            </TabsTrigger>
+            <TabsTrigger
+              value="calendrier"
+              className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3 text-base"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Calendrier
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Vue par Tâches */}
+          <TabsContent value="taches" className="mt-0">
+            <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <div className="flex gap-4 p-4 min-w-max">
+                  {TACHES.map(tache => {
+                    const cardsInColumn = cardsByTache[tache] || [];
+                    
+                    return (
+                      <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
+                        <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
+                          <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-xl font-bold text-white tracking-wide">
+                                {tache}
+                              </CardTitle>
+                              <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                                {cardsInColumn.length}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <Droppable droppableId={tache}>
+                            {(provided, snapshot) => (
+                              <CardContent
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)] ${
+                                  snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
+                                }`}
+                              >
+                                {cardsInColumn.map((card, index) => (
+                                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        data-is-dragging={snapshot.isDragging}
+                                        style={provided.draggableProps.style}
                                       >
-                                        <CardContent className="p-3 space-y-2">
-                                          <div className="flex items-center justify-between gap-2">
-                                            <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
-                                              {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-                                            </Badge>
-                                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                              {card.mandat.type_mandat}
-                                            </Badge>
-                                          </div>
+                                        {renderMandatCard(card, provided, snapshot)}
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                {cardsInColumn.length === 0 && (
+                                  <div className="text-center py-8 text-slate-600 text-sm">
+                                    Aucun mandat
+                                  </div>
+                                )}
+                              </CardContent>
+                            )}
+                          </Droppable>
+                        </Card>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DragDropContext>
+            </div>
+          </TabsContent>
 
-                                          {getClientsNames(card.dossier.clients_ids) !== "-" && (
-                                            <div className="text-sm text-slate-300">
-                                              <p className="font-medium truncate">{getClientsNames(card.dossier.clients_ids)}</p>
-                                            </div>
-                                          )}
+          {/* Vue par Utilisateur */}
+          <TabsContent value="utilisateurs" className="mt-0">
+            <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <div className="flex gap-4 p-4 min-w-max">
+                  {usersList.map((user, userIndex) => {
+                    const cardsInColumn = cardsByUtilisateur[user.email] || [];
+                    const colorClass = getUserColor(userIndex);
+                    const [bgColor, borderColor, gradientColor] = colorClass.split(' ');
+                    
+                    return (
+                      <div key={user.email} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
+                        <Card className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
+                          <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {user.email !== "non-assigne" ? (
+                                  <Avatar className="w-8 h-8 border-2 border-white/20">
+                                    <AvatarImage src={user.photo_url} />
+                                    <AvatarFallback className="text-xs bg-slate-900 text-white">
+                                      {getUserInitials(user.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <User className="w-8 h-8 text-white" />
+                                )}
+                                <CardTitle className="text-lg font-bold text-white tracking-wide">
+                                  {user.full_name}
+                                </CardTitle>
+                              </div>
+                              <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                                {cardsInColumn.length}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <Droppable droppableId={user.email}>
+                            {(provided, snapshot) => (
+                              <CardContent
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-340px)] ${
+                                  snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
+                                }`}
+                              >
+                                {cardsInColumn.map((card, index) => (
+                                  <Draggable key={card.id} draggableId={card.id} index={index}>
+                                    {(provided, snapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        data-is-dragging={snapshot.isDragging}
+                                        style={provided.draggableProps.style}
+                                      >
+                                        {renderMandatCard(card, provided, snapshot)}
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                {cardsInColumn.length === 0 && (
+                                  <div className="text-center py-8 text-slate-600 text-sm">
+                                    Aucun mandat
+                                  </div>
+                                )}
+                              </CardContent>
+                            )}
+                          </Droppable>
+                        </Card>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DragDropContext>
+            </div>
+          </TabsContent>
 
-                                          {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-                                            <div className="flex items-start gap-1 text-xs text-slate-400">
-                                              <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                              <span className="truncate">{formatAdresse(card.mandat.adresse_travaux)}</span>
-                                            </div>
-                                          )}
+          {/* Vue Calendrier */}
+          <TabsContent value="calendrier" className="mt-0">
+            <div className="border-2 border-slate-800 rounded-lg bg-slate-900/30 p-4">
+              {/* Navigation du calendrier */}
+              <div className="flex items-center justify-between mb-4">
+                <Button
+                  onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
+                  variant="outline"
+                  size="sm"
+                  className="bg-slate-800 border-slate-700 text-white"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <h3 className="text-lg font-semibold text-white">
+                  {format(currentWeekStart, "MMMM yyyy", { locale: fr })}
+                </h3>
+                <Button
+                  onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
+                  variant="outline"
+                  size="sm"
+                  className="bg-slate-800 border-slate-700 text-white"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
 
-                                          <div className="flex items-center justify-between pt-1 border-t border-slate-700">
-                                            {card.mandat.date_livraison ? (
-                                              <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                <Calendar className="w-3 h-3" />
-                                                <span>{format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}</span>
-                                              </div>
-                                            ) : (
-                                              <div></div>
-                                            )}
+              {/* Calendrier avec semaines verticales */}
+              <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                {getWeeksToDisplay().map((weekStart, weekIndex) => {
+                  const weekEnd = endOfWeek(weekStart, { locale: fr });
+                  const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
+                    .filter(day => day.getDay() !== 0 && day.getDay() !== 6); // Lundi à Vendredi seulement
 
-                                            {assignedUser && (
-                                              <Avatar className="w-6 h-6 border border-slate-600">
-                                                <AvatarImage src={assignedUser.photo_url} />
-                                                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                                  {getUserInitials(assignedUser.full_name)}
-                                                </AvatarFallback>
-                                              </Avatar>
-                                            )}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
+                  return (
+                    <Card key={weekIndex} className="border-slate-700 bg-slate-800/30">
+                      <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
+                        <CardTitle className="text-sm text-slate-300">
+                          Semaine du {format(weekStart, "d MMMM", { locale: fr })}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="grid grid-cols-5 divide-x divide-slate-700">
+                          {daysOfWeek.map((day, dayIndex) => {
+                            const cardsForDay = filteredCards.filter(card => 
+                              card.mandat.date_livraison && 
+                              isSameDay(new Date(card.mandat.date_livraison), day)
+                            );
+
+                            return (
+                              <div key={dayIndex} className="p-3 min-h-[200px]">
+                                <div className="text-center mb-3">
+                                  <p className="text-xs text-slate-500 uppercase">
+                                    {format(day, "EEE", { locale: fr })}
+                                  </p>
+                                  <p className="text-lg font-bold text-white">
+                                    {format(day, "d", { locale: fr })}
+                                  </p>
+                                </div>
+                                <div className="space-y-2">
+                                  {cardsForDay.map(card => (
+                                    <div key={card.id} onClick={() => handleCardClick(card)}>
+                                      {renderMandatCard(card)}
+                                    </div>
+                                  ))}
+                                  {cardsForDay.length === 0 && (
+                                    <div className="text-center py-4 text-slate-600 text-xs">
+                                      Aucun mandat
                                     </div>
                                   )}
-                                </Draggable>
-                              );
-                            })}
-                            {provided.placeholder}
-                            {cardsInColumn.length === 0 && (
-                              <div className="text-center py-8 text-slate-600 text-sm">
-                                Aucun mandat
+                                </div>
                               </div>
-                            )}
-                          </CardContent>
-                        )}
-                      </Droppable>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
                     </Card>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </DragDropContext>
-        </div>
+          </TabsContent>
+        </Tabs>
 
-        {/* Dialog de vue du dossier (identique à Dossiers) */}
+        {/* Dialog de vue du dossier */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
             <DialogHeader className="sr-only">
