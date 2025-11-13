@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -413,7 +412,7 @@ export default function CeduleTerrain() {
   };
 
   const handleEditTerrain = (item, e) => {
-    e.stopPropagation(); // Prevent opening dossier details
+    e.stopPropagation();
     setEditingTerrainItem(item);
     setTerrainForm({
       date_limite_leve: item.mandat.terrain?.date_limite_leve || "",
@@ -439,7 +438,7 @@ export default function CeduleTerrain() {
     const updatedMandats = [...dossier.mandats];
     updatedMandats[editingTerrainItem.mandatIndex] = {
       ...updatedMandats[editingTerrainItem.mandatIndex],
-      terrain: terrainForm // Save the entire terrainForm object
+      terrain: terrainForm
     };
 
     updateDossierMutation.mutate({
@@ -458,12 +457,10 @@ export default function CeduleTerrain() {
   const MandatCard = ({ item, showActions = true, isDragging = false }) => {
     const assignedUser = users.find(u => u.email === item.mandat.utilisateur_assigne);
     
-    // Trouver l'utilisateur correspondant au donneur (s'il s'agit d'un utilisateur du système)
     const donneurUser = item.mandat.terrain?.donneur 
       ? users.find(u => u.full_name === item.mandat.terrain.donneur)
       : null;
     
-    // Utiliser le donneur s'il existe, sinon l'utilisateur assigné
     const displayUser = donneurUser || assignedUser;
     
     return (
@@ -510,10 +507,8 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {/* Ligne de séparation */}
           <div className="border-t border-slate-700" />
 
-          {/* Informations terrain */}
           <div className="space-y-1">
             {item.mandat.terrain?.instruments_requis && (
               <div className="text-xs text-slate-400">
@@ -544,7 +539,6 @@ export default function CeduleTerrain() {
             )}
           </div>
 
-          {/* Dates et avatar (seulement pour les cartes dans le calendrier) */}
           {!showActions && (
             <div className="space-y-1 pt-1 border-t border-slate-700">
               {item.mandat.terrain?.a_rendez_vous && item.mandat.terrain?.date_rendez_vous && (
@@ -562,7 +556,6 @@ export default function CeduleTerrain() {
                   {item.mandat.terrain?.date_limite_leve && (
                     <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
                       <Calendar className="w-3 h-3 flex-shrink-0" />
-                      {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
                       <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
                     </div>
                   )}
@@ -584,18 +577,15 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {/* Date limite seulement pour les cartes en vérification (sans avatar) */}
           {showActions && item.mandat.terrain?.date_limite_leve && (
             <div className="pt-1 border-t border-slate-700">
               <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
                 <Calendar className="w-3 h-3 flex-shrink-0" />
-                {/* Assuming date_limite_leve is stored as UTC start of day, adding 1 day to correctly display local date if it was originally local date saved as UTC */}
                 <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
               </div>
             </div>
           )}
 
-          {/* Boutons d'action pour les cartes en vérification */}
           {showActions && (
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
@@ -618,7 +608,6 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {/* Bouton pour modifier les infos terrain (sur les cartes du calendrier) */}
           {!showActions && (
             <div className="pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
@@ -651,7 +640,6 @@ export default function CeduleTerrain() {
               </div>
             </div>
 
-            {/* Mandats à vérifier et à céduler avec onglets */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
               <CardHeader className="border-b border-slate-800 pb-4">
                 <div className="flex flex-wrap items-center gap-4">
@@ -802,7 +790,6 @@ export default function CeduleTerrain() {
               </CardContent>
             </Card>
 
-            {/* Calendrier hebdomadaire */}
             <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
@@ -944,7 +931,6 @@ export default function CeduleTerrain() {
           </div>
         </div>
 
-        {/* Dialog pour modifier les informations terrain */}
         <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
@@ -1075,7 +1061,6 @@ export default function CeduleTerrain() {
           </DialogContent>
         </Dialog>
 
-        {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
             <DialogHeader className="sr-only">
@@ -1091,7 +1076,6 @@ export default function CeduleTerrain() {
                   </div>
 
                   <div className="space-y-6">
-                    {/* Informations principales */}
                     <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
                       <div>
                         <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
@@ -1120,7 +1104,6 @@ export default function CeduleTerrain() {
                       </div>
                     )}
 
-                    {/* Clients, Notaires, Courtiers */}
                     <div className="grid grid-cols-3 gap-4">
                       {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
                         <div>
@@ -1163,7 +1146,7 @@ export default function CeduleTerrain() {
                               return courtier ? (
                                 <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start">
                                   {courtier.prenom} {courtier.nom}
-                                高校>
+                                </Badge>
                               ) : null;
                             })}
                           </div>
@@ -1171,7 +1154,6 @@ export default function CeduleTerrain() {
                       )}
                     </div>
 
-                    {/* Mandats */}
                     {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
                       <div>
                         <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
@@ -1352,7 +1334,6 @@ export default function CeduleTerrain() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog d'édition du dossier */}
         <EditDossierDialog
           isOpen={isEditingDialogOpen}
           onClose={() => {
@@ -1362,7 +1343,6 @@ export default function CeduleTerrain() {
           dossier={editingDossier}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-            // If the viewed dossier was modified, re-open the view dialog with updated data
             if (viewingDossier && editingDossier?.id === viewingDossier.id) {
               const updatedDossier = queryClient.getQueryData(['dossiers'])?.find(d => d.id === editingDossier.id);
               if (updatedDossier) {
