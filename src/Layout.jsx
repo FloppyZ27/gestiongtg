@@ -314,9 +314,9 @@ function LayoutContent({ children, currentPageName }) {
             <DialogTitle>Nouvelle entrée de temps</DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="flex-1 flex gap-6 overflow-hidden">
+          <div className="flex-1 flex gap-6 overflow-hidden">
             {/* Colonne gauche - Sélection du dossier (70%) */}
-            <div className="flex-[0_0_70%] flex flex-col space-y-4">
+            <div className="flex-[0_0_70%] flex flex-col space-y-4 overflow-hidden">
               <Label className="text-lg font-semibold">Sélection du dossier</Label>
               
               {!selectedDossierId ? (
@@ -397,7 +397,7 @@ function LayoutContent({ children, currentPageName }) {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col gap-4">
+                <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
                   <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
                     <div className="flex-1">
                       <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2`}>
@@ -459,7 +459,7 @@ function LayoutContent({ children, currentPageName }) {
             </div>
 
             {/* Colonne droite - Champs de formulaire (30%) */}
-            <div className="flex-[0_0_30%] flex flex-col space-y-4">
+            <div className="flex-[0_0_30%] flex flex-col space-y-4 overflow-y-auto pr-2">
               <Label className="text-lg font-semibold">Détails de l'entrée</Label>
               
               <div className="space-y-2">
@@ -536,7 +536,7 @@ function LayoutContent({ children, currentPageName }) {
                 </Select>
               </div>
             </div>
-          </form>
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)}>
