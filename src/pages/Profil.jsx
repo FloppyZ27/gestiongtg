@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -79,12 +80,15 @@ export default function Profil() {
   // États pour les retours d'appel
   const [searchRetours, setSearchRetours] = useState("");
   const [filterArpenteurRetours, setFilterArpenteurRetours] = useState("all");
+  const [filterVilleRetours, setFilterVilleRetours] = useState("all");
+  const [filterMandatRetours, setFilterMandatRetours] = useState("all");
   const [sortFieldRetours, setSortFieldRetours] = useState(null);
   const [sortDirectionRetours, setSortDirectionRetours] = useState("asc");
 
   // États pour les mandats assignés
   const [searchMandats, setSearchMandats] = useState("");
   const [filterArpenteurMandats, setFilterArpenteurMandats] = useState("all");
+  const [filterVilleMandats, setFilterVilleMandats] = useState("all");
   const [filterTypeMandats, setFilterTypeMandats] = useState("all");
   const [filterTacheMandats, setFilterTacheMandats] = useState("all");
   const [sortFieldMandats, setSortFieldMandats] = useState(null);
@@ -93,6 +97,7 @@ export default function Profil() {
   // États pour les entrées de temps
   const [searchEntrees, setSearchEntrees] = useState("");
   const [filterArpenteurEntrees, setFilterArpenteurEntrees] = useState("all");
+  const [filterMandatEntrees, setFilterMandatEntrees] = useState("all");
   const [filterTacheEntrees, setFilterTacheEntrees] = useState("all");
   const [sortFieldEntrees, setSortFieldEntrees] = useState(null);
   const [sortDirectionEntrees, setSortDirectionEntrees] = useState("asc");
@@ -376,6 +381,32 @@ export default function Profil() {
     return sortDirectionEntrees === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
+  // Extraire les villes et types de mandats uniques pour les filtres
+  const uniqueVillesRetours = [...new Set(
+    retoursAppel
+      .flatMap(d => d.mandats?.map(m => m.adresse_travaux?.ville))
+      .filter(ville => ville)
+  )].sort();
+
+  const mandatsAssignes = dossiers.flatMap(dossier => 
+    (dossier.mandats || [])
+      .filter(mandat => mandat.utilisateur_assigne === user?.email)
+      .map((mandat, idx) => ({ dossier, mandat, key: `${dossier.id}-${idx}` }))
+  );
+
+  const uniqueVillesMandats = [...new Set(
+    mandatsAssignes
+      .map(item => item.mandat?.adresse_travaux?.ville)
+      .filter(ville => ville)
+  )].sort();
+
+  const uniqueMandatsEntrees = [...new Set(
+    entreeTemps
+      .map(e => e.mandat)
+      .filter(mandat => mandat)
+  )].sort();
+
+
   // Filtrage et tri des retours d'appel
   const filteredAndSortedRetours = retoursAppel.filter(dossier => {
     const searchLower = searchRetours.toLowerCase();
@@ -390,8 +421,10 @@ export default function Profil() {
     );
 
     const matchesArpenteur = filterArpenteurRetours === "all" || dossier.arpenteur_geometre === filterArpenteurRetours;
+    const matchesVille = filterVilleRetours === "all" || dossier.mandats?.some(m => m.adresse_travaux?.ville === filterVilleRetours);
+    const matchesMandat = filterMandatRetours === "all" || dossier.mandats?.some(m => m.type_mandat === filterMandatRetours);
 
-    return matchesSearch && matchesArpenteur;
+    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat;
   }).sort((a, b) => {
     if (!sortFieldRetours) return 0;
 
@@ -428,12 +461,6 @@ export default function Profil() {
   });
 
   // Filtrage et tri des mandats assignés
-  const mandatsAssignes = dossiers.flatMap(dossier => 
-    (dossier.mandats || [])
-      .filter(mandat => mandat.utilisateur_assigne === user?.email)
-      .map((mandat, idx) => ({ dossier, mandat, key: `${dossier.id}-${idx}` }))
-  );
-
   const filteredAndSortedMandats = mandatsAssignes.filter(item => {
     const searchLower = searchMandats.toLowerCase();
     const fullNumber = getArpenteurInitials(item.dossier.arpenteur_geometre) + item.dossier.numero_dossier;
@@ -448,10 +475,11 @@ export default function Profil() {
     );
 
     const matchesArpenteur = filterArpenteurMandats === "all" || item.dossier.arpenteur_geometre === filterArpenteurMandats;
+    const matchesVille = filterVilleMandats === "all" || item.mandat?.adresse_travaux?.ville === filterVilleMandats;
     const matchesType = filterTypeMandats === "all" || item.mandat.type_mandat === filterTypeMandats;
     const matchesTache = filterTacheMandats === "all" || item.mandat.tache_actuelle === filterTacheMandats;
 
-    return matchesSearch && matchesArpenteur && matchesType && matchesTache;
+    return matchesSearch && matchesArpenteur && matchesVille && matchesType && matchesTache;
   }).sort((a, b) => {
     if (!sortFieldMandats) return 0;
 
@@ -505,9 +533,10 @@ export default function Profil() {
     );
 
     const matchesArpenteur = filterArpenteurEntrees === "all" || (dossier && dossier.arpenteur_geometre === filterArpenteurEntrees);
+    const matchesMandat = filterMandatEntrees === "all" || entree.mandat === filterMandatEntrees;
     const matchesTache = filterTacheEntrees === "all" || entree.tache === filterTacheEntrees;
 
-    return matchesSearch && matchesArpenteur && matchesTache;
+    return matchesSearch && matchesArpenteur && matchesMandat && matchesTache;
   }).sort((a, b) => {
     if (!sortFieldEntrees) return 0;
 
@@ -817,13 +846,37 @@ export default function Profil() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {(searchRetours || filterArpenteurRetours !== "all") && (
+                  <Select value={filterVilleRetours} onValueChange={setFilterVilleRetours}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Ville" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                      {uniqueVillesRetours.map(ville => (
+                        <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterMandatRetours} onValueChange={setFilterMandatRetours}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Mandat" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
+                      {TYPES_MANDATS.map(type => (
+                        <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {(searchRetours || filterArpenteurRetours !== "all" || filterVilleRetours !== "all" || filterMandatRetours !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setSearchRetours("");
                         setFilterArpenteurRetours("all");
+                        setFilterVilleRetours("all");
+                        setFilterMandatRetours("all");
                       }}
                       className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                     >
@@ -960,6 +1013,17 @@ export default function Profil() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select value={filterVilleMandats} onValueChange={setFilterVilleMandats}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Ville" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                      {uniqueVillesMandats.map(ville => (
+                        <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Select value={filterTypeMandats} onValueChange={setFilterTypeMandats}>
                     <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Type mandat" />
@@ -982,13 +1046,14 @@ export default function Profil() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {(searchMandats || filterArpenteurMandats !== "all" || filterTypeMandats !== "all" || filterTacheMandats !== "all") && (
+                  {(searchMandats || filterArpenteurMandats !== "all" || filterVilleMandats !== "all" || filterTypeMandats !== "all" || filterTacheMandats !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setSearchMandats("");
                         setFilterArpenteurMandats("all");
+                        setFilterVilleMandats("all");
                         setFilterTypeMandats("all");
                         setFilterTacheMandats("all");
                       }}
@@ -1053,7 +1118,7 @@ export default function Profil() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border">
                               {item.mandat.tache_actuelle || "-"}
                             </Badge>
                           </TableCell>
@@ -1098,6 +1163,17 @@ export default function Profil() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select value={filterMandatEntrees} onValueChange={setFilterMandatEntrees}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Mandat" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
+                      {uniqueMandatsEntrees.map(mandat => (
+                        <SelectItem key={mandat} value={mandat} className="text-white">{mandat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Select value={filterTacheEntrees} onValueChange={setFilterTacheEntrees}>
                     <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
                       <SelectValue placeholder="Tâche" />
@@ -1109,13 +1185,14 @@ export default function Profil() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {(searchEntrees || filterArpenteurEntrees !== "all" || filterTacheEntrees !== "all") && (
+                  {(searchEntrees || filterArpenteurEntrees !== "all" || filterMandatEntrees !== "all" || filterTacheEntrees !== "all") && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setSearchEntrees("");
                         setFilterArpenteurEntrees("all");
+                        setFilterMandatEntrees("all");
                         setFilterTacheEntrees("all");
                       }}
                       className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
@@ -1177,7 +1254,13 @@ export default function Profil() {
                               )}
                             </TableCell>
                             <TableCell className="text-slate-300 text-sm">
-                              {entree.mandat || "-"}
+                              {entree.mandat ? (
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                                  {entree.mandat}
+                                </Badge>
+                              ) : (
+                                <span className="text-slate-600 text-sm">-</span>
+                              )}
                             </TableCell>
                             <TableCell className="text-slate-300">
                               {format(new Date(entree.date), "dd MMM yyyy", { locale: fr })}
@@ -1186,7 +1269,7 @@ export default function Profil() {
                               {entree.heures}h
                             </TableCell>
                             <TableCell>
-                              <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
+                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
                                 {entree.tache}
                               </Badge>
                             </TableCell>
