@@ -580,7 +580,9 @@ export default function GestionDeMandat() {
                     
                     return (
                       <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
-                        <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
+                        <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
+                          style={{ height: `calc((100vh - 340px) / ${zoom})` }}
+                        >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                             <div className="flex items-center justify-between">
                               <CardTitle className="text-xl font-bold text-white tracking-wide">
@@ -599,9 +601,6 @@ export default function GestionDeMandat() {
                                 className={`p-3 space-y-3 flex-1 overflow-y-auto ${
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
-                                style={{
-                                  maxHeight: 'calc(100vh - 340px)'
-                                }}
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -654,7 +653,9 @@ export default function GestionDeMandat() {
                     
                     return (
                       <div key={user.email} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
-                        <Card className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl h-full flex flex-col`}>
+                        <Card className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
+                          style={{ height: `calc((100vh - 340px) / ${zoom})` }}
+                        >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
@@ -685,9 +686,6 @@ export default function GestionDeMandat() {
                                 className={`p-3 space-y-3 flex-1 overflow-y-auto ${
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
-                                style={{
-                                  maxHeight: 'calc(100vh - 340px)'
-                                }}
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
