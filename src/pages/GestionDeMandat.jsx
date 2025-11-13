@@ -572,8 +572,7 @@ export default function GestionDeMandat() {
                   className="flex gap-4 p-4 min-w-max"
                   style={{ 
                     transform: `scale(${zoom})`,
-                    transformOrigin: 'top left',
-                    height: `${100 / zoom}%` // Added this line
+                    transformOrigin: 'top left'
                   }}
                 >
                   {TACHES.map(tache => {
@@ -601,7 +600,7 @@ export default function GestionDeMandat() {
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
                                 style={{
-                                  maxHeight: `calc((100vh - 340px) / ${zoom})` // Modified this line
+                                  maxHeight: 'calc(100vh - 340px)'
                                 }}
                               >
                                 {cardsInColumn.map((card, index) => (
@@ -645,8 +644,7 @@ export default function GestionDeMandat() {
                   className="flex gap-4 p-4 min-w-max"
                   style={{ 
                     transform: `scale(${zoom})`,
-                    transformOrigin: 'top left',
-                    height: `${100 / zoom}%` // Added this line
+                    transformOrigin: 'top left'
                   }}
                 >
                   {usersList.map((user, userIndex) => {
@@ -688,7 +686,7 @@ export default function GestionDeMandat() {
                                   snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
                                 }`}
                                 style={{
-                                  maxHeight: `calc((100vh - 340px) / ${zoom})` // Modified this line
+                                  maxHeight: 'calc(100vh - 340px)'
                                 }}
                               >
                                 {cardsInColumn.map((card, index) => (
