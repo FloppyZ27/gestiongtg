@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -459,7 +460,7 @@ function LayoutContent({ children, currentPageName }) {
             </div>
 
             {/* Colonne droite - Champs de formulaire (40%) */}
-            <div className="flex-[0_0_40%] flex flex-col space-y-4 overflow-y-auto border-l border-slate-700 pl-6">
+            <div className="flex-[0_0_40%] flex flex-col space-y-4 overflow-y-auto border-l border-slate-700 pl-6 pr-6">
               <Label className="text-lg font-semibold">Détails de l'entrée</Label>
               
               <div className="space-y-2">
