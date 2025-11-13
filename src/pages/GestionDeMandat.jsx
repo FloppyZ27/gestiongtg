@@ -579,15 +579,15 @@ export default function GestionDeMandat() {
                         key={tache} 
                         className="flex-shrink-0" 
                         style={{ 
-                          width: `${72 * zoom / 0.25}rem`,
-                          zIndex: 1,
-                          transform: `scale(${zoom})`,
-                          transformOrigin: 'top left'
+                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
+                          zIndex: 1 
                         }}
                       >
                         <Card 
                           className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: 'calc(100vh - 340px)', width: '18rem' }}
+                          style={{ 
+                            height: 'calc(100vh - 340px)'
+                          }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                             <div className="flex items-center justify-between">
@@ -658,35 +658,37 @@ export default function GestionDeMandat() {
                         key={user.email} 
                         className="flex-shrink-0" 
                         style={{ 
-                          width: `${72 * zoom / 0.25}rem`,
-                          zIndex: 1,
-                          transform: `scale(${zoom})`,
-                          transformOrigin: 'top left'
+                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
+                          zIndex: 1 
                         }}
                       >
                         <Card 
                           className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: 'calc(100vh - 340px)', width: '18rem' }}
+                          style={{ 
+                            height: 'calc(100vh - 340px)'
+                          }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
-                            <div className="flex items-center gap-2">
-                              {user.email !== "non-assigne" ? (
-                                <Avatar className="w-8 h-8 border-2 border-white/20">
-                                  <AvatarImage src={user.photo_url} />
-                                  <AvatarFallback className="text-xs bg-slate-900 text-white">
-                                    {getUserInitials(user.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                              ) : (
-                                <User className="w-8 h-8 text-white" />
-                              )}
-                              <CardTitle className="text-lg font-bold text-white tracking-wide">
-                                {user.full_name}
-                              </CardTitle>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {user.email !== "non-assigne" ? (
+                                  <Avatar className="w-8 h-8 border-2 border-white/20">
+                                    <AvatarImage src={user.photo_url} />
+                                    <AvatarFallback className="text-xs bg-slate-900 text-white">
+                                      {getUserInitials(user.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ) : (
+                                  <User className="w-8 h-8 text-white" />
+                                )}
+                                <CardTitle className="text-lg font-bold text-white tracking-wide">
+                                  {user.full_name}
+                                </CardTitle>
+                              </div>
+                              <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                                {cardsInColumn.length}
+                              </Badge>
                             </div>
-                            <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
-                              {cardsInColumn.length}
-                            </Badge>
                           </CardHeader>
                           <Droppable droppableId={user.email}>
                             {(provided, snapshot) => (
