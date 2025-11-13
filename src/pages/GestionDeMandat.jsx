@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -239,6 +240,24 @@ export default function GestionDeMandat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <style>{`
+        [data-rbd-draggable-context-id] {
+          cursor: grab !important;
+        }
+        
+        [data-rbd-draggable-context-id]:active {
+          cursor: grabbing !important;
+        }
+        
+        [data-rbd-drag-handle-context-id] {
+          cursor: grab !important;
+        }
+        
+        div[data-rbd-draggable-id] {
+          transition: none !important;
+        }
+      `}</style>
+      
       <div className="max-w-[1100px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
@@ -358,12 +377,21 @@ export default function GestionDeMandat() {
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
-                                      className={`${
-                                        snapshot.isDragging ? 'opacity-50 rotate-2' : ''
-                                      }`}
+                                      style={{
+                                        ...provided.draggableProps.style,
+                                        ...(snapshot.isDragging && {
+                                          transform: provided.draggableProps.style?.transform 
+                                            ? `${provided.draggableProps.style.transform} translate(-50%, -50%)`
+                                            : 'translate(-50%, -50%)',
+                                          cursor: 'grabbing',
+                                          zIndex: 9999,
+                                        })
+                                      }}
                                     >
                                       <Card 
-                                        className="border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 hover:shadow-lg transition-all cursor-pointer"
+                                        className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
+                                          snapshot.isDragging ? 'shadow-2xl scale-105 rotate-3' : 'hover:shadow-lg'
+                                        }`}
                                         onClick={() => handleCardClick(card)}
                                       >
                                         <CardContent className="p-3 space-y-2">
