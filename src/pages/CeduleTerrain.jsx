@@ -210,25 +210,48 @@ export default function CeduleTerrain() {
     const sourceId = result.source.droppableId;
     const destinationId = result.destination.droppableId;
 
-    const destParts = destinationId.split('-');
-    const jour = destParts[0];
-    const equipe = destParts.slice(1).join('-');
-    const jourIndex = JOURS_SEMAINE.findIndex(j => j.toLowerCase() === jour);
-    if (jourIndex === -1) return;
-
-    const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
-    
-    const [dossierId, mandatIndex] = result.draggableId.split('-').slice(0, 2);
+    const [dossierId, mandatIndexStr] = result.draggableId.split('-');
+    const mandatIndex = parseInt(mandatIndexStr);
     const dossier = dossiers.find(d => d.id === dossierId);
     if (!dossier) return;
 
     const updatedMandats = [...dossier.mandats];
-    updatedMandats[parseInt(mandatIndex)] = {
-      ...updatedMandats[parseInt(mandatIndex)],
-      date_terrain: dateJour,
-      equipe_assignee: equipe,
-      statut_terrain: "a_ceduler"
-    };
+    let updatedMandat = { ...updatedMandats[mandatIndex] };
+
+    // Handle drops to verification or a-ceduler lists
+    if (destinationId === "verification") {
+      updatedMandat = {
+        ...updatedMandat,
+        statut_terrain: "en_verification",
+        date_terrain: null,
+        equipe_assignee: null
+      };
+    } else if (destinationId === "a-ceduler") {
+      updatedMandat = {
+        ...updatedMandat,
+        statut_terrain: "a_ceduler",
+        date_terrain: null,
+        equipe_assignee: null
+      };
+    } else {
+      // Handle drops to calendar days
+      const destParts = destinationId.split('-');
+      const jour = destParts[0];
+      const equipe = destParts.slice(1).join('-');
+      const jourIndex = JOURS_SEMAINE.findIndex(j => j.toLowerCase() === jour);
+      if (jourIndex === -1) return; // Should not happen if droppableId format is consistent
+
+      const dateJour = format(addDays(semaineCourante, jourIndex), "yyyy-MM-dd");
+
+      updatedMandat = {
+        ...updatedMandat,
+        date_terrain: dateJour,
+        equipe_assignee: equipe,
+        statut_terrain: "a_ceduler" // Assuming scheduled items are "a_ceduler"
+      };
+    }
+
+    updatedMandats[mandatIndex] = updatedMandat;
 
     updateDossierMutation.mutate({
       id: dossierId,
@@ -381,7 +404,7 @@ export default function CeduleTerrain() {
             </div>
             <div>
               <p className="text-xs text-slate-500 mb-1">Clients</p>
-              <p className="text-xs text-slate-300 font-medium truncate">
+              <p className="text-xs text-slate-300 font-medium">
                 {getClientsNames(item.dossier.clients_ids)}
               </p>
             </div>
@@ -401,14 +424,14 @@ export default function CeduleTerrain() {
           <div className="pt-2 border-t border-slate-700 space-y-1">
             {item.mandat.terrain?.donneur && (
               <div className="flex items-center gap-1 text-xs text-slate-400">
-                <User className="w-3 h-3" />
-                <span className="truncate">{item.mandat.terrain.donneur}</span>
+                <User className="w-3 h-3 flex-shrink-0" />
+                <span>{item.mandat.terrain.donneur}</span>
               </div>
             )}
             
             {item.mandat.terrain?.date_limite_leve && (
               <div className="flex items-center gap-1 text-xs text-slate-400">
-                <Calendar className="w-3 h-3" />
+                <Calendar className="w-3 h-3 flex-shrink-0" />
                 <span>Limite: {format(new Date(item.mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr })}</span>
               </div>
             )}
@@ -547,7 +570,7 @@ export default function CeduleTerrain() {
                   </TabsList>
 
                   <TabsContent value="verification" className="mt-0">
-                    <Droppable droppableId="verification" isDropDisabled={true} direction="horizontal">
+                    <Droppable droppableId="verification" isDropDisabled={false} direction="horizontal">
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
@@ -586,7 +609,7 @@ export default function CeduleTerrain() {
                   </TabsContent>
 
                   <TabsContent value="a-ceduler" className="mt-0">
-                    <Droppable droppableId="a-ceduler" isDropDisabled={true} direction="horizontal">
+                    <Droppable droppableId="a-ceduler" isDropDisabled={false} direction="horizontal">
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
@@ -687,8 +710,8 @@ export default function CeduleTerrain() {
 
                         <div className="space-y-2">
                           {equipes[jourKey]?.map((equipe) => (
-                            <div key={equipe} className="bg-slate-800/30 rounded-lg p-2 border border-slate-700/50">
-                              <div className="flex justify-between items-center mb-2">
+                            <div key={equipe} className="bg-slate-800/30 rounded-lg border border-slate-700/50">
+                              <div className="flex justify-between items-center mb-2 px-2 pt-2">
                                 <div className="flex items-center gap-1 flex-1">
                                   <Users className="w-3 h-3 text-cyan-400" />
                                   {editingEquipe === `${jour}-${equipe}` ? (
@@ -736,8 +759,8 @@ export default function CeduleTerrain() {
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className={`min-h-[100px] space-y-2 rounded p-2 transition-colors ${
-                                      snapshot.isDraggingOver ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-slate-900/30'
+                                    className={`min-h-[100px] space-y-2 transition-colors ${
+                                      snapshot.isDraggingOver ? 'bg-emerald-500/10 border-t border-emerald-500/30 p-2' : 'bg-slate-900/30 p-2'
                                     }`}
                                   >
                                     {mandatsCedules[jourKey]?.[equipe]?.map((item, index) => (

@@ -23,6 +23,7 @@ import ClientDetailView from "../clients/ClientDetailView";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+const DONNEURS = ["Dave Vallée", "Julie Abud", "André Guérin"];
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": ["Québec", "Canton de Caron", "Canton de de l'Île", "Canton de Garnier", "Village d'Héberville", "Canton d'Hébertville-Station", "Canton de Labarre", "Canton de Mésy", "Canton de Métabetchouan", "Canton de Signay", "Canton de Taillon"],
@@ -931,7 +932,17 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                                     <div className="grid grid-cols-2 gap-3">
                                       <div className="space-y-2">
                                         <Label>Donneur</Label>
-                                        <Input value={mandat.terrain?.donneur || ""} onChange={(e) => updateMandat(index, 'terrain', { ...mandat.terrain, donneur: e.target.value })} placeholder="Nom du donneur" className="bg-slate-700 border-slate-600" />
+                                        <Select value={mandat.terrain?.donneur || ""} onValueChange={(value) => updateMandat(index, 'terrain', { ...mandat.terrain, donneur: value })}>
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                            <SelectValue placeholder="Sélectionner un donneur" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700">
+                                            <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                                            {DONNEURS.map((donneur) => (
+                                              <SelectItem key={donneur} value={donneur} className="text-white">{donneur}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
                                       </div>
                                       <div className="space-y-2">
                                         <Label>Technicien à prioriser</Label>
