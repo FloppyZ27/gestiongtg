@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -19,6 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 
+const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
+const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -43,7 +46,6 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-// Placeholder component for CommentairesSection
 const CommentairesSection = ({ dossierId, dossierTemporaire }) => {
   return (
     <div className="p-4 space-y-4 text-slate-300">
@@ -74,6 +76,27 @@ export default function Profil() {
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
 
+  // États pour les retours d'appel
+  const [searchRetours, setSearchRetours] = useState("");
+  const [filterArpenteurRetours, setFilterArpenteurRetours] = useState("all");
+  const [sortFieldRetours, setSortFieldRetours] = useState(null);
+  const [sortDirectionRetours, setSortDirectionRetours] = useState("asc");
+
+  // États pour les mandats assignés
+  const [searchMandats, setSearchMandats] = useState("");
+  const [filterArpenteurMandats, setFilterArpenteurMandats] = useState("all");
+  const [filterTypeMandats, setFilterTypeMandats] = useState("all");
+  const [filterTacheMandats, setFilterTacheMandats] = useState("all");
+  const [sortFieldMandats, setSortFieldMandats] = useState(null);
+  const [sortDirectionMandats, setSortDirectionMandats] = useState("asc");
+
+  // États pour les entrées de temps
+  const [searchEntrees, setSearchEntrees] = useState("");
+  const [filterArpenteurEntrees, setFilterArpenteurEntrees] = useState("all");
+  const [filterTacheEntrees, setFilterTacheEntrees] = useState("all");
+  const [sortFieldEntrees, setSortFieldEntrees] = useState(null);
+  const [sortDirectionEntrees, setSortDirectionEntrees] = useState("asc");
+
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -101,7 +124,7 @@ export default function Profil() {
 
   const { data: entreeTemps = [] } = useQuery({
     queryKey: ['entreeTemps', user?.email],
-    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 20),
+    queryFn: () => base44.entities.EntreeTemps.filter({ utilisateur_email: user?.email }, '-date', 100),
     initialData: [],
     enabled: !!user,
   });
@@ -303,10 +326,228 @@ export default function Profil() {
     
     if (displayYears === 0 && displayMonths === 0) return "Moins d'un mois";
     if (displayYears === 0) return `${displayMonths} mois`;
-    if (displayYears === 0 && displayMonths === 1) return `${displayMonths} mois`; // Handle singular month correctly
+    if (displayYears === 0 && displayMonths === 1) return `${displayMonths} mois`;
     if (displayMonths === 0) return `${displayYears} an${displayYears > 1 ? 's' : ''}`;
     return `${displayYears} an${displayYears > 1 ? 's' : ''} et ${displayMonths} mois`;
   };
+
+  // Fonctions de tri pour retours d'appel
+  const handleSortRetours = (field) => {
+    if (sortFieldRetours === field) {
+      setSortDirectionRetours(sortDirectionRetours === "asc" ? "desc" : "asc");
+    } else {
+      setSortFieldRetours(field);
+      setSortDirectionRetours("asc");
+    }
+  };
+
+  const getSortIconRetours = (field) => {
+    if (sortFieldRetours !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirectionRetours === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  // Fonctions de tri pour mandats
+  const handleSortMandats = (field) => {
+    if (sortFieldMandats === field) {
+      setSortDirectionMandats(sortDirectionMandats === "asc" ? "desc" : "asc");
+    } else {
+      setSortFieldMandats(field);
+      setSortDirectionMandats("asc");
+    }
+  };
+
+  const getSortIconMandats = (field) => {
+    if (sortFieldMandats !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirectionMandats === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  // Fonctions de tri pour entrées de temps
+  const handleSortEntrees = (field) => {
+    if (sortFieldEntrees === field) {
+      setSortDirectionEntrees(sortDirectionEntrees === "asc" ? "desc" : "asc");
+    } else {
+      setSortFieldEntrees(field);
+      setSortDirectionEntrees("asc");
+    }
+  };
+
+  const getSortIconEntrees = (field) => {
+    if (sortFieldEntrees !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return sortDirectionEntrees === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  // Filtrage et tri des retours d'appel
+  const filteredAndSortedRetours = retoursAppel.filter(dossier => {
+    const searchLower = searchRetours.toLowerCase();
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      getFirstAdresseTravaux(dossier.mandats).toLowerCase().includes(searchLower)
+    );
+
+    const matchesArpenteur = filterArpenteurRetours === "all" || dossier.arpenteur_geometre === filterArpenteurRetours;
+
+    return matchesSearch && matchesArpenteur;
+  }).sort((a, b) => {
+    if (!sortFieldRetours) return 0;
+
+    let aValue, bValue;
+
+    switch (sortFieldRetours) {
+      case 'numero_dossier':
+        aValue = (getArpenteurInitials(a.arpenteur_geometre) + a.numero_dossier).toLowerCase();
+        bValue = (getArpenteurInitials(b.arpenteur_geometre) + b.numero_dossier).toLowerCase();
+        break;
+      case 'date':
+        aValue = a.created_date ? new Date(a.created_date).getTime() : 0;
+        bValue = b.created_date ? new Date(b.created_date).getTime() : 0;
+        break;
+      case 'clients':
+        aValue = getClientsNames(a.clients_ids).toLowerCase();
+        bValue = getClientsNames(b.clients_ids).toLowerCase();
+        break;
+      case 'adresse':
+        aValue = getFirstAdresseTravaux(a.mandats).toLowerCase();
+        bValue = getFirstAdresseTravaux(b.mandats).toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string') {
+      return sortDirectionRetours === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirectionRetours === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirectionRetours === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
+
+  // Filtrage et tri des mandats assignés
+  const mandatsAssignes = dossiers.flatMap(dossier => 
+    (dossier.mandats || [])
+      .filter(mandat => mandat.utilisateur_assigne === user?.email)
+      .map((mandat, idx) => ({ dossier, mandat, key: `${dossier.id}-${idx}` }))
+  );
+
+  const filteredAndSortedMandats = mandatsAssignes.filter(item => {
+    const searchLower = searchMandats.toLowerCase();
+    const fullNumber = getArpenteurInitials(item.dossier.arpenteur_geometre) + item.dossier.numero_dossier;
+    const clientsNames = getClientsNames(item.dossier.clients_ids);
+
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      item.dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      item.mandat.type_mandat?.toLowerCase().includes(searchLower) ||
+      formatAdresse(item.mandat.adresse_travaux).toLowerCase().includes(searchLower)
+    );
+
+    const matchesArpenteur = filterArpenteurMandats === "all" || item.dossier.arpenteur_geometre === filterArpenteurMandats;
+    const matchesType = filterTypeMandats === "all" || item.mandat.type_mandat === filterTypeMandats;
+    const matchesTache = filterTacheMandats === "all" || item.mandat.tache_actuelle === filterTacheMandats;
+
+    return matchesSearch && matchesArpenteur && matchesType && matchesTache;
+  }).sort((a, b) => {
+    if (!sortFieldMandats) return 0;
+
+    let aValue, bValue;
+
+    switch (sortFieldMandats) {
+      case 'numero_dossier':
+        aValue = (getArpenteurInitials(a.dossier.arpenteur_geometre) + a.dossier.numero_dossier).toLowerCase();
+        bValue = (getArpenteurInitials(b.dossier.arpenteur_geometre) + b.dossier.numero_dossier).toLowerCase();
+        break;
+      case 'clients':
+        aValue = getClientsNames(a.dossier.clients_ids).toLowerCase();
+        bValue = getClientsNames(b.dossier.clients_ids).toLowerCase();
+        break;
+      case 'type_mandat':
+        aValue = (a.mandat.type_mandat || '').toLowerCase();
+        bValue = (b.mandat.type_mandat || '').toLowerCase();
+        break;
+      case 'tache':
+        aValue = (a.mandat.tache_actuelle || '').toLowerCase();
+        bValue = (b.mandat.tache_actuelle || '').toLowerCase();
+        break;
+      case 'adresse':
+        aValue = formatAdresse(a.mandat.adresse_travaux).toLowerCase();
+        bValue = formatAdresse(b.mandat.adresse_travaux).toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string') {
+      return sortDirectionMandats === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirectionMandats === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirectionMandats === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
+
+  // Filtrage et tri des entrées de temps
+  const filteredAndSortedEntrees = entreeTemps.filter(entree => {
+    const searchLower = searchEntrees.toLowerCase();
+    const dossier = dossiers.find(d => d.id === entree.dossier_id);
+    const fullNumber = dossier ? (getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier) : "";
+
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      entree.mandat?.toLowerCase().includes(searchLower) ||
+      entree.tache?.toLowerCase().includes(searchLower) ||
+      entree.description?.toLowerCase().includes(searchLower)
+    );
+
+    const matchesArpenteur = filterArpenteurEntrees === "all" || (dossier && dossier.arpenteur_geometre === filterArpenteurEntrees);
+    const matchesTache = filterTacheEntrees === "all" || entree.tache === filterTacheEntrees;
+
+    return matchesSearch && matchesArpenteur && matchesTache;
+  }).sort((a, b) => {
+    if (!sortFieldEntrees) return 0;
+
+    let aValue, bValue;
+    const dossierA = dossiers.find(d => d.id === a.dossier_id);
+    const dossierB = dossiers.find(d => d.id === b.dossier_id);
+
+    switch (sortFieldEntrees) {
+      case 'numero_dossier':
+        aValue = dossierA ? (getArpenteurInitials(dossierA.arpenteur_geometre) + dossierA.numero_dossier).toLowerCase() : '';
+        bValue = dossierB ? (getArpenteurInitials(dossierB.arpenteur_geometre) + dossierB.numero_dossier).toLowerCase() : '';
+        break;
+      case 'mandat':
+        aValue = (a.mandat || '').toLowerCase();
+        bValue = (b.mandat || '').toLowerCase();
+        break;
+      case 'date':
+        aValue = new Date(a.date).getTime();
+        bValue = new Date(b.date).getTime();
+        break;
+      case 'heures':
+        aValue = a.heures || 0;
+        bValue = b.heures || 0;
+        break;
+      case 'tache':
+        aValue = (a.tache || '').toLowerCase();
+        bValue = (b.tache || '').toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string') {
+      return sortDirectionEntrees === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirectionEntrees === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirectionEntrees === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
 
   const getHolidays = (year) => {
     return [
@@ -534,41 +775,98 @@ export default function Profil() {
                   className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3"
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  Retours d'appel ({retoursAppel.length})
+                  Retours d'appel ({filteredAndSortedRetours.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="mandats-assignes"
                   className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3"
                 >
                   <Briefcase className="w-4 h-4 mr-2" />
-                  Mandats assignés
+                  Mandats assignés ({filteredAndSortedMandats.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="entrees-temps"
                   className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3"
                 >
                   <Clock className="w-4 h-4 mr-2" />
-                  Entrées de temps
+                  Entrées de temps ({filteredAndSortedEntrees.length})
                 </TabsTrigger>
               </TabsList>
             </CardHeader>
 
             <TabsContent value="retours-appel" className="p-0">
+              <div className="p-4 border-b border-slate-800">
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[250px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchRetours}
+                      onChange={(e) => setSearchRetours(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <Select value={filterArpenteurRetours} onValueChange={setFilterArpenteurRetours}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Arpenteur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                      {ARPENTEURS.map(arp => (
+                        <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {(searchRetours || filterArpenteurRetours !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchRetours("");
+                        setFilterArpenteurRetours("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
+                </div>
+              </div>
               <CardContent className="p-0">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
                       <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                        <TableHead className="text-slate-300">Dossier</TableHead>
-                        <TableHead className="text-slate-300">Date</TableHead>
-                        <TableHead className="text-slate-300">Clients</TableHead>
-                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortRetours('numero_dossier')}
+                        >
+                          Dossier {getSortIconRetours('numero_dossier')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortRetours('date')}
+                        >
+                          Date {getSortIconRetours('date')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortRetours('clients')}
+                        >
+                          Clients {getSortIconRetours('clients')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortRetours('adresse')}
+                        >
+                          Adresse travaux {getSortIconRetours('adresse')}
+                        </TableHead>
                         <TableHead className="text-slate-300">Mandat</TableHead>
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {retoursAppel.map((dossier) => (
+                      {filteredAndSortedRetours.map((dossier) => (
                         <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800">
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
@@ -626,10 +924,10 @@ export default function Profil() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {retoursAppel.length === 0 && (
+                      {filteredAndSortedRetours.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                            Aucun retour d'appel assigné
+                            Aucun retour d'appel trouvé
                           </TableCell>
                         </TableRow>
                       )}
@@ -640,81 +938,134 @@ export default function Profil() {
             </TabsContent>
 
             <TabsContent value="mandats-assignes" className="p-0">
+              <div className="p-4 border-b border-slate-800">
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[250px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchMandats}
+                      onChange={(e) => setSearchMandats(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <Select value={filterArpenteurMandats} onValueChange={setFilterArpenteurMandats}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Arpenteur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                      {ARPENTEURS.map(arp => (
+                        <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterTypeMandats} onValueChange={setFilterTypeMandats}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Type mandat" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                      {TYPES_MANDATS.map(type => (
+                        <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterTacheMandats} onValueChange={setFilterTacheMandats}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Tâche" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
+                      {TACHES.map(tache => (
+                        <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {(searchMandats || filterArpenteurMandats !== "all" || filterTypeMandats !== "all" || filterTacheMandats !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchMandats("");
+                        setFilterArpenteurMandats("all");
+                        setFilterTypeMandats("all");
+                        setFilterTacheMandats("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
+                </div>
+              </div>
               <CardContent className="p-0">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
                       <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                        <TableHead className="text-slate-300">Dossier</TableHead>
-                        <TableHead className="text-slate-300">Clients</TableHead>
-                        <TableHead className="text-slate-300">Type de mandat</TableHead>
-                        <TableHead className="text-slate-300">Tâche assignée</TableHead>
-                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortMandats('numero_dossier')}
+                        >
+                          Dossier {getSortIconMandats('numero_dossier')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortMandats('clients')}
+                        >
+                          Clients {getSortIconMandats('clients')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortMandats('type_mandat')}
+                        >
+                          Type de mandat {getSortIconMandats('type_mandat')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortMandats('tache')}
+                        >
+                          Tâche assignée {getSortIconMandats('tache')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortMandats('adresse')}
+                        >
+                          Adresse travaux {getSortIconMandats('adresse')}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {dossiers.flatMap(dossier => 
-                        (dossier.mandats || [])
-                          .filter(mandat => mandat.utilisateur_assigne === user?.email)
-                          .map((mandat, idx) => (
-                            <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
-                              <TableCell className="font-medium">
-                                <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                  {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-slate-300 text-sm">
-                                {getClientsNames(dossier.clients_ids)}
-                              </TableCell>
-                              <TableCell className="text-slate-300">
-                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                  {mandat.type_mandat}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
-                                  {mandat.tache_actuelle || "-"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                {formatAdresse(mandat.adresse_travaux) || "-"}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                      ).length > 0 ? (
-                        dossiers.flatMap(dossier => 
-                          (dossier.mandats || [])
-                            .filter(mandat => mandat.utilisateur_assigne === user?.email)
-                            .map((mandat, idx) => (
-                              <TableRow key={`${dossier.id}-${idx}`} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="font-medium">
-                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {getClientsNames(dossier.clients_ids)}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                    {mandat.type_mandat}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
-                                    {mandat.tache_actuelle || "-"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {formatAdresse(mandat.adresse_travaux) || "-"}
-                                </TableCell>
-                              </TableRow>
-                            ))
-                        )
-                      ) : (
+                      {filteredAndSortedMandats.map((item) => (
+                        <TableRow key={item.key} className="hover:bg-slate-800/30 border-slate-800">
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border`}>
+                              {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {getClientsNames(item.dossier.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
+                              {item.mandat.type_mandat}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border">
+                              {item.mandat.tache_actuelle || "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {formatAdresse(item.mandat.adresse_travaux) || "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {filteredAndSortedMandats.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                            Aucun mandat assigné
+                            Aucun mandat trouvé
                           </TableCell>
                         </TableRow>
                       )}
@@ -725,20 +1076,94 @@ export default function Profil() {
             </TabsContent>
 
             <TabsContent value="entrees-temps" className="p-0">
+              <div className="p-4 border-b border-slate-800">
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 min-w-[250px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher..."
+                      value={searchEntrees}
+                      onChange={(e) => setSearchEntrees(e.target.value)}
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    />
+                  </div>
+                  <Select value={filterArpenteurEntrees} onValueChange={setFilterArpenteurEntrees}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Arpenteur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                      {ARPENTEURS.map(arp => (
+                        <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterTacheEntrees} onValueChange={setFilterTacheEntrees}>
+                    <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                      <SelectValue placeholder="Tâche" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
+                      {TACHES.map(tache => (
+                        <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {(searchEntrees || filterArpenteurEntrees !== "all" || filterTacheEntrees !== "all") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchEntrees("");
+                        setFilterArpenteurEntrees("all");
+                        setFilterTacheEntrees("all");
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
+                </div>
+              </div>
               <CardContent className="p-0">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
                       <TableRow className="hover:bg-slate-800/95 border-slate-700">
-                        <TableHead className="text-slate-300">Dossier</TableHead>
-                        <TableHead className="text-slate-300">Mandat</TableHead>
-                        <TableHead className="text-slate-300">Date</TableHead>
-                        <TableHead className="text-slate-300">Heures</TableHead>
-                        <TableHead className="text-slate-300">Tâche</TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortEntrees('numero_dossier')}
+                        >
+                          Dossier {getSortIconEntrees('numero_dossier')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortEntrees('mandat')}
+                        >
+                          Mandat {getSortIconEntrees('mandat')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortEntrees('date')}
+                        >
+                          Date {getSortIconEntrees('date')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortEntrees('heures')}
+                        >
+                          Heures {getSortIconEntrees('heures')}
+                        </TableHead>
+                        <TableHead 
+                          className="text-slate-300 cursor-pointer hover:text-white"
+                          onClick={() => handleSortEntrees('tache')}
+                        >
+                          Tâche {getSortIconEntrees('tache')}
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {entreeTemps.map((entree) => {
+                      {filteredAndSortedEntrees.map((entree) => {
                         const dossier = dossiers.find(d => d.id === entree.dossier_id);
                         return (
                           <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
@@ -768,10 +1193,10 @@ export default function Profil() {
                           </TableRow>
                         );
                       })}
-                      {entreeTemps.length === 0 && (
+                      {filteredAndSortedEntrees.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                            Aucune entrée de temps
+                            Aucune entrée de temps trouvée
                           </TableCell>
                         </TableRow>
                       )}
