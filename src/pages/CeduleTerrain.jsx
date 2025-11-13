@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -440,7 +441,7 @@ export default function CeduleTerrain() {
     <TooltipProvider>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-          <div className="max-w-[1800px] mx-auto">
+          <div className="max-w-[1440px] mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <Calendar className="w-8 h-8 text-emerald-400" />
               <div>
