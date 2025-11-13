@@ -570,18 +570,24 @@ export default function GestionDeMandat() {
               <DragDropContext onDragEnd={handleDragEnd}>
                 <div 
                   className="flex gap-4 p-4 min-w-max"
-                  style={{ 
-                    transform: `scale(${zoom})`,
-                    transformOrigin: 'top left'
-                  }}
                 >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
                     
                     return (
-                      <div key={tache} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
-                        <Card className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: 'calc(100vh - 340px)' }}
+                      <div 
+                        key={tache} 
+                        className="flex-shrink-0" 
+                        style={{ 
+                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
+                          zIndex: 1 
+                        }}
+                      >
+                        <Card 
+                          className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
+                          style={{ 
+                            height: 'calc(100vh - 340px)'
+                          }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                             <div className="flex items-center justify-between">
@@ -641,10 +647,6 @@ export default function GestionDeMandat() {
               <DragDropContext onDragEnd={handleDragEnd}>
                 <div 
                   className="flex gap-4 p-4 min-w-max"
-                  style={{ 
-                    transform: `scale(${zoom})`,
-                    transformOrigin: 'top left'
-                  }}
                 >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
@@ -652,9 +654,19 @@ export default function GestionDeMandat() {
                     const [bgColor, borderColor, gradientColor] = colorClass.split(' ');
                     
                     return (
-                      <div key={user.email} className="flex-shrink-0 w-72" style={{ zIndex: 1 }}>
-                        <Card className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ height: 'calc(100vh - 340px)' }}
+                      <div 
+                        key={user.email} 
+                        className="flex-shrink-0" 
+                        style={{ 
+                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
+                          zIndex: 1 
+                        }}
+                      >
+                        <Card 
+                          className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
+                          style={{ 
+                            height: 'calc(100vh - 340px)'
+                          }}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
                             <div className="flex items-center justify-between">
