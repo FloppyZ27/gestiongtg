@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays } from "date-fns";
+import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
@@ -58,7 +59,7 @@ export default function GestionDeMandat() {
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [activeView, setActiveView] = useState("taches");
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { locale: fr }));
+  const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
 
   const queryClient = useQueryClient();
 
@@ -179,10 +180,15 @@ export default function GestionDeMandat() {
 
   // Organiser les cartes par date de livraison pour le calendrier
   const getWeeksToDisplay = () => {
-    const weeks = [];
-    for (let i = 0; i < 8; i++) {
-      weeks.push(addWeeks(currentWeekStart, i));
-    }
+    const monthStart = startOfMonth(currentMonthStart);
+    const monthEnd = endOfMonth(currentMonthStart);
+    
+    // Obtenir toutes les semaines qui touchent ce mois
+    const weeks = eachWeekOfInterval(
+      { start: monthStart, end: monthEnd },
+      { locale: fr }
+    );
+    
     return weeks;
   };
 
@@ -629,7 +635,7 @@ export default function GestionDeMandat() {
               {/* Navigation du calendrier */}
               <div className="flex items-center justify-between mb-4">
                 <Button
-                  onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
+                  onClick={() => setCurrentMonthStart(subMonths(currentMonthStart, 1))}
                   variant="outline"
                   size="sm"
                   className="bg-slate-800 border-slate-700 text-white"
@@ -637,10 +643,10 @@ export default function GestionDeMandat() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <h3 className="text-lg font-semibold text-white">
-                  {format(currentWeekStart, "MMMM yyyy", { locale: fr })}
+                  {format(currentMonthStart, "MMMM yyyy", { locale: fr })}
                 </h3>
                 <Button
-                  onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
+                  onClick={() => setCurrentMonthStart(addMonths(currentMonthStart, 1))}
                   variant="outline"
                   size="sm"
                   className="bg-slate-800 border-slate-700 text-white"
@@ -660,7 +666,7 @@ export default function GestionDeMandat() {
                     <Card key={weekIndex} className="border-slate-700 bg-slate-800/30">
                       <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
                         <CardTitle className="text-sm text-slate-300">
-                          Semaine du {format(weekStart, "d MMMM", { locale: fr })}
+                          Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-0">
