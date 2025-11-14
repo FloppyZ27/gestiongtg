@@ -173,17 +173,7 @@ export default function Lots() {
 
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
-      // Vérifier si un lot avec le même numéro, cadastre et circonscription existe déjà
-      const lotExistant = lots.find(l =>
-        l.numero_lot === lotData.numero_lot &&
-        l.cadastre === lotData.cadastre &&
-        l.circonscription_fonciere === lotData.circonscription_fonciere
-      );
-
-      if (lotExistant) {
-        throw new Error(`Un lot ${lotData.numero_lot} existe déjà dans le cadastre ${lotData.cadastre} de ${lotData.circonscription_fonciere}.`);
-      }
-      
+      // Validation moved to handleSubmit
       const newLot = await base44.entities.Lot.create(lotData);
       
       if (commentairesTemporaires.length > 0) {
@@ -213,18 +203,7 @@ export default function Lots() {
 
   const updateLotMutation = useMutation({
     mutationFn: ({ id, lotData }) => {
-      // Vérifier si un lot avec le même numéro, cadastre et circonscription existe déjà (sauf pour lui-même)
-      const lotExistant = lots.find(l =>
-        l.id !== id && // Exclure le lot actuel
-        l.numero_lot === lotData.numero_lot &&
-        l.cadastre === lotData.cadastre &&
-        l.circonscription_fonciere === lotData.circonscription_fonciere
-      );
-
-      if (lotExistant) {
-        throw new Error(`Un lot ${lotData.numero_lot} existe déjà dans le cadastre ${lotData.cadastre} de ${lotData.circonscription_fonciere}.`);
-      }
-
+      // Validation moved to handleSubmit
       return base44.entities.Lot.update(id, lotData);
     },
     onSuccess: () => {
@@ -314,6 +293,20 @@ export default function Lots() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validation pour vérifier si le lot existe déjà
+    const lotExistant = lots.find(l =>
+      l.id !== editingLot?.id && // Exclure le lot actuel en modification
+      l.numero_lot === formData.numero_lot &&
+      l.cadastre === formData.cadastre &&
+      l.circonscription_fonciere === formData.circonscription_fonciere
+    );
+
+    if (lotExistant) {
+      alert(`Un lot ${formData.numero_lot} existe déjà dans le cadastre ${formData.cadastre} de ${formData.circonscription_fonciere}.`);
+      return;
+    }
+
     const dataToSubmit = {
       ...formData,
       concordances_anterieures: concordancesAnterieure
