@@ -915,6 +915,7 @@ export default function Profil() {
                           Adresse travaux {getSortIconRetours('adresse')}
                         </TableHead>
                         <TableHead className="text-slate-300">Mandat</TableHead>
+                        <TableHead className="text-slate-300">Statut</TableHead> {/* Added Statut column */}
                         <TableHead className="text-slate-300 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -955,6 +956,15 @@ export default function Profil() {
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
+                          <TableCell> {/* New Statut Cell */}
+                            <Badge variant="outline" className={`border ${
+                              dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                              dossier.statut === 'Fermé' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                              'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                            }`}>
+                              {dossier.statut}
+                            </Badge>
+                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -979,7 +989,7 @@ export default function Profil() {
                       ))}
                       {filteredAndSortedRetours.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                          <TableCell colSpan={7} className="text-center py-8 text-slate-500"> {/* Updated colSpan from 6 to 7 */}
                             Aucun retour d'appel trouvé
                           </TableCell>
                         </TableRow>

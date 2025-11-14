@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,6 +86,14 @@ export default function CeduleTerrain() {
   });
 
   const queryClient = useQueryClient();
+
+  // Query for the current user
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.getCurrentUser(), // Assuming base44.auth.getCurrentUser() is available
+    staleTime: Infinity, // User info usually doesn't change frequently during a session
+    enabled: true,
+  });
 
   const { data: dossiers = [] } = useQuery({
     queryKey: ['dossiers'],
@@ -454,7 +463,7 @@ export default function CeduleTerrain() {
   const mandatsACeduler = getMandatsACeduler();
   const mandatsCedules = getMandatsCedules();
 
-  const MandatCard = ({ item, showActions = true, isDragging = false }) => {
+  const MandatCard = ({ item, showActions = true, isDragging = false, currentUser }) => {
     const assignedUser = users.find(u => u.email === item.mandat.utilisateur_assigne);
     
     const donneurUser = item.mandat.terrain?.donneur 
@@ -462,6 +471,9 @@ export default function CeduleTerrain() {
       : null;
     
     const displayUser = donneurUser || assignedUser;
+    
+    // Vérifier si l'utilisateur courant est assigné à ce mandat
+    const isAssignedToCurrentUser = currentUser && item.mandat.utilisateur_assigne === currentUser.email;
     
     return (
       <Card 
@@ -591,8 +603,13 @@ export default function CeduleTerrain() {
               <Button
                 size="sm"
                 onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "a_ceduler")}
-                className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8 p-0"
-                title="Marquer à céduler"
+                disabled={!isAssignedToCurrentUser}
+                className={`flex-1 text-xs h-8 p-0 ${
+                  isAssignedToCurrentUser 
+                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400' 
+                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                }`}
+                title={isAssignedToCurrentUser ? "Marquer à céduler" : "Vous devez être assigné à ce mandat"}
               >
                 <CheckCircle className="w-4 h-4" />
               </Button>
@@ -600,8 +617,13 @@ export default function CeduleTerrain() {
               <Button
                 size="sm"
                 onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain")}
-                className="flex-1 bg-slate-600 hover:bg-slate-500 text-white text-xs h-8 p-0"
-                title="Pas de terrain"
+                disabled={!isAssignedToCurrentUser}
+                className={`flex-1 text-xs h-8 p-0 ${
+                  isAssignedToCurrentUser 
+                    ? 'bg-slate-600 hover:bg-slate-500 text-white' 
+                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                }`}
+                title={isAssignedToCurrentUser ? "Pas de terrain" : "Vous devez être assigné à ce mandat"}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -729,7 +751,7 @@ export default function CeduleTerrain() {
                                     className="flex-shrink-0"
                                     style={{ width: '280px' }}
                                   >
-                                    <MandatCard item={item} showActions={true} />
+                                    <MandatCard item={item} showActions={true} currentUser={currentUser} />
                                   </div>
                                 )}
                               </Draggable>
@@ -768,7 +790,7 @@ export default function CeduleTerrain() {
                                     className="flex-shrink-0"
                                     style={{ width: '280px' }}
                                   >
-                                    <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} />
+                                    <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} currentUser={currentUser} />
                                   </div>
                                 )}
                               </Draggable>
@@ -910,7 +932,7 @@ export default function CeduleTerrain() {
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                           >
-                                            <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} />
+                                            <MandatCard item={item} showActions={false} isDragging={snapshot.isDragging} currentUser={currentUser} />
                                           </div>
                                         )}
                                       </Draggable>

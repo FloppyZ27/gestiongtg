@@ -64,6 +64,12 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     initialData: [],
   });
 
+  const { data: allDossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list(),
+    initialData: [],
+  });
+
   const clientsReguliers = clients?.filter((c) => c.type_client === 'Client' || !c.type_client) || [];
   const notaires = clients?.filter((c) => c.type_client === 'Notaire') || [];
   const courtiers = clients?.filter((c) => c.type_client === 'Courtier immobilier') || [];
@@ -100,6 +106,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           tache_actuelle: m.tache_actuelle || "",
           utilisateur_assigne: m.utilisateur_assigne || "",
           statut_terrain: m.statut_terrain || "",
+          date_terrain: m.date_terrain || "", // New field
+          equipe_assignee: m.equipe_assignee || "", // New field
           adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
           lots: m.lots || [],
           prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
@@ -225,8 +233,26 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // As per requirement: "Ne pas valider le numéro de dossier lors de la modification"
-    // The validation for duplicate dossier number and arpenteur is removed for editing existing dossiers.
+    // Validation pour les dossiers ouverts : numéro unique (sauf pour le dossier lui-même)
+    if (formData.statut === "Ouvert") {
+      const dossierExistant = allDossiers.find(d => 
+        d.id !== dossier?.id && // Exclure le dossier actuel
+        d.numero_dossier === formData.numero_dossier &&
+        d.arpenteur_geometre === formData.arpenteur_geometre
+      );
+
+      if (dossierExistant) {
+        alert(`Un dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        return;
+      }
+
+      // Validation : tous les mandats doivent avoir un utilisateur assigné
+      const mandatsSansUtilisateur = formData.mandats.filter(m => !m.utilisateur_assigne);
+      if (mandatsSansUtilisateur.length > 0) {
+        alert("Tous les mandats doivent avoir un utilisateur assigné.");
+        return;
+      }
+    }
 
     if (dossier) {
       updateDossierMutation.mutate({ id: dossier.id, dossierData: formData });
@@ -267,6 +293,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         tache_actuelle: "",
         utilisateur_assigne: "",
         statut_terrain: "",
+        date_terrain: "", // New field
+        equipe_assignee: "", // New field
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -665,7 +693,10 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                                     </Select>
                                   </div>
                                   <div className="space-y-2">
-                                    <Label>Utilisateur assigné</Label>
+                                    <Label>
+                                      Utilisateur assigné 
+                                      {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
+                                    </Label>
                                     <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
                                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                                         <SelectValue placeholder="Sélectionner" />
@@ -901,6 +932,31 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                                 
                                 {terrainSectionExpanded[index] && (
                                   <div className="space-y-3">
+                                    {/* Encadré pour date terrain et équipe */}
+                                    <div className="p-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50 rounded-lg">
+                                      <Label className="text-cyan-300 font-semibold mb-3 block">Planification terrain</Label>
+                                      <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-2">
+                                          <Label className="text-white">Date terrain</Label>
+                                          <Input
+                                            type="date"
+                                            value={mandat.date_terrain || ""}
+                                            onChange={(e) => updateMandat(index, 'date_terrain', e.target.value)}
+                                            className="bg-slate-700 border-slate-600 text-white"
+                                          />
+                                        </div>
+                                        <div className="space-y-2">
+                                          <Label className="text-white">Équipe assignée</Label>
+                                          <Input
+                                            value={mandat.equipe_assignee || ""}
+                                            onChange={(e) => updateMandat(index, 'equipe_assignee', e.target.value)}
+                                            placeholder="Ex: Équipe 1"
+                                            className="bg-slate-700 border-slate-600 text-white"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+
                                     <div className="grid grid-cols-2 gap-3">
                                       <div className="space-y-2">
                                         <Label>Date limite levé terrain</Label>

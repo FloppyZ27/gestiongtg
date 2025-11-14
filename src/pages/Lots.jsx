@@ -114,7 +114,7 @@ const getArpenteurInitials = (arpenteur) => {
 
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false); // Renamed from isDialogOpen
   const [editingLot, setEditingLot] = useState(null);
   const [viewingLot, setViewingLot] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -173,6 +173,17 @@ export default function Lots() {
 
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
+      // Vérifier si un lot avec le même numéro, cadastre et circonscription existe déjà
+      const lotExistant = lots.find(l =>
+        l.numero_lot === lotData.numero_lot &&
+        l.cadastre === lotData.cadastre &&
+        l.circonscription_fonciere === lotData.circonscription_fonciere
+      );
+
+      if (lotExistant) {
+        throw new Error(`Un lot ${lotData.numero_lot} existe déjà dans le cadastre ${lotData.cadastre} de ${lotData.circonscription_fonciere}.`);
+      }
+      
       const newLot = await base44.entities.Lot.create(lotData);
       
       if (commentairesTemporaires.length > 0) {
@@ -191,19 +202,40 @@ export default function Lots() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
-      setIsDialogOpen(false);
+      setIsFormDialogOpen(false); // Renamed from setIsDialogOpen
       resetForm();
       setCommentairesTemporaires([]);
     },
+    onError: (error) => { // Added onError
+      alert(error.message);
+    }
   });
 
   const updateLotMutation = useMutation({
-    mutationFn: ({ id, lotData }) => base44.entities.Lot.update(id, lotData),
+    mutationFn: ({ id, lotData }) => {
+      // Vérifier si un lot avec le même numéro, cadastre et circonscription existe déjà (sauf pour lui-même)
+      const lotExistant = lots.find(l =>
+        l.id !== id && // Exclure le lot actuel
+        l.numero_lot === lotData.numero_lot &&
+        l.cadastre === lotData.cadastre &&
+        l.circonscription_fonciere === lotData.circonscription_fonciere
+      );
+
+      if (lotExistant) {
+        throw new Error(`Un lot ${lotData.numero_lot} existe déjà dans le cadastre ${lotData.cadastre} de ${lotData.circonscription_fonciere}.`);
+      }
+
+      return base44.entities.Lot.update(id, lotData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
-      setIsDialogOpen(false);
+      setIsFormDialogOpen(false); // Renamed from setIsDialogOpen
+      setIsViewDialogOpen(false); // Added as lot might be updated from view dialog
       resetForm();
     },
+    onError: (error) => { // Added onError
+      alert(error.message);
+    }
   });
 
   const deleteLotMutation = useMutation({
@@ -381,7 +413,7 @@ export default function Lots() {
     if (lot.circonscription_fonciere) {
       setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
     }
-    setIsDialogOpen(true);
+    setIsFormDialogOpen(true); // Renamed from setIsDialogOpen
     setEditingConcordanceIndex(null);
   };
 
@@ -587,8 +619,8 @@ export default function Lots() {
             <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
           
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
+          <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
+            setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
@@ -849,7 +881,7 @@ export default function Lots() {
 
                   {/* Boutons Annuler/Créer tout en bas */}
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>
                       Annuler
                     </Button>
                     <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
