@@ -90,10 +90,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
           return client ? `${client.prenom} ${client.nom}` : "";
         }).filter(n => n).join(", ");
         
+        // Nettoyer le commentaire en enlevant les @mentions
+        let commentaireNettoye = commentaireData.contenu.replace(/@([^\s]+)/g, '').trim();
         // Tronquer le commentaire à 100 caractères
-        const commentaireTronque = commentaireData.contenu.length > 100 
-          ? commentaireData.contenu.substring(0, 100) + "..." 
-          : commentaireData.contenu;
+        const commentaireTronque = commentaireNettoye.length > 100 
+          ? commentaireNettoye.substring(0, 100) + "..." 
+          : commentaireNettoye;
         
         for (const email of uniqueEmails) {
           console.log(`Processing email: ${email}`);

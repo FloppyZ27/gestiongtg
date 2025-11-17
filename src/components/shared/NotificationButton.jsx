@@ -72,6 +72,18 @@ export default function NotificationButton({ user }) {
     }
   };
 
+  // Fonction pour extraire le commentaire du message
+  const extractComment = (message) => {
+    const lines = message.split('\n\n');
+    if (lines.length === 2 && lines[1].startsWith('"') && lines[1].endsWith('"')) {
+      return {
+        mainMessage: lines[0],
+        comment: lines[1].slice(1, -1) // Remove quotes
+      };
+    }
+    return { mainMessage: message, comment: null };
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -103,7 +115,7 @@ export default function NotificationButton({ user }) {
             </Button>
           )}
         </div>
-        <ScrollArea className="max-h-[440px]"> {/* Changed max-h from [400px] to [440px] */}
+        <ScrollArea className="max-h-[440px]">
           {notifications.length === 0 ? (
             <div className="p-8 text-center">
               <Bell className="w-12 h-12 mx-auto mb-3 text-slate-600" />
@@ -112,39 +124,47 @@ export default function NotificationButton({ user }) {
             </div>
           ) : (
             <div className="divide-y divide-slate-800">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="p-4 hover:bg-slate-800/50 cursor-pointer transition-colors"
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${getColor(notification.type)} flex-shrink-0`}>
-                      {getIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h4 className="font-medium text-white text-sm">{notification.titre}</h4>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            markAsReadMutation.mutate(notification.id);
-                          }}
-                          className="h-6 w-6 text-slate-400 hover:text-white flex-shrink-0"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
+              {notifications.map((notification) => {
+                const { mainMessage, comment } = extractComment(notification.message);
+                return (
+                  <div
+                    key={notification.id}
+                    className="p-4 hover:bg-slate-800/50 cursor-pointer transition-colors"
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${getColor(notification.type)} flex-shrink-0`}>
+                        {getIcon(notification.type)}
                       </div>
-                      <p className="text-sm text-slate-300 mb-2">{notification.message}</p>
-                      <p className="text-xs text-slate-500">
-                        {format(new Date(notification.created_date), "dd MMM à HH:mm", { locale: fr })}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="font-medium text-white text-sm">{notification.titre}</h4>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsReadMutation.mutate(notification.id);
+                            }}
+                            className="h-6 w-6 text-slate-400 hover:text-white flex-shrink-0"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-slate-300 mb-2">{mainMessage}</p>
+                        {comment && (
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-md p-2 mb-2">
+                            <p className="text-xs text-slate-400 italic">{comment}</p>
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500">
+                          {format(new Date(notification.created_date), "dd MMM à HH:mm", { locale: fr })}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>
