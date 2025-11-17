@@ -659,7 +659,21 @@ export default function Dossiers() {
       return;
     }
 
-    const totalHT = mandatsToInvoice.reduce((sum, m) => sum + (m.prix_estime || 0) - (m.rabais || 0), 0);
+    let totalHT = 0;
+    mandatsToInvoice.forEach(m => {
+      const prix = m.prix_estime || 0;
+      const rabais = m.rabais || 0;
+      if (!m.taxes_incluses) {
+        totalHT += (prix - rabais);
+      } else {
+        // If taxes are included, remove them to get the HT amount
+        // Assuming 5% TPS and 9.975% TVQ for a combined 15.475% tax (1.15475 factor)
+        // totalTTC = totalHT * (1 + 0.05 + 0.09975) = totalHT * 1.15475
+        // totalHT = totalTTC / 1.15475
+        totalHT += (prix - rabais) / 1.15475;
+      }
+    });
+
     const tps = totalHT * 0.05;
     const tvq = totalHT * 0.09975;
     const totalTTC = totalHT + tps + tvq;
@@ -841,7 +855,10 @@ export default function Dossiers() {
         <td class="amount-cell"></td>
       </tr>
       ${mandatsToInvoice.map((mandat) => {
-      const montant = mandat.prix_estime || 0;
+      let montantHTMandat = (mandat.prix_estime || 0) - (mandat.rabais || 0);
+      if (mandat.taxes_incluses) {
+        montantHTMandat = montantHTMandat / 1.15475; // Recalculer le montant HT si les taxes étaient incluses
+      }
       const rabais = mandat.rabais || 0;
       const minutesInfo = mandat.minutes_list && mandat.minutes_list.length > 0 ?
       mandat.minutes_list.map((m) => m.minute).join(', ') :
@@ -856,7 +873,7 @@ export default function Dossiers() {
                 ${minutesInfo ? '<span class="minute-info">Minute: ' + minutesInfo + '</span>' : ''}
               </div>
             </td>
-            <td class="amount-cell">${montant.toFixed(2)} $</td>
+            <td class="amount-cell">${montantHTMandat.toFixed(2)} $</td>
           </tr>
           ${rabais > 0 ? `
             <tr>
@@ -923,7 +940,10 @@ export default function Dossiers() {
     if (saveToDatabase && dossier) {
       const updatedMandats = dossier.mandats.map((m, idx) => {
         if (selectedMandatsIndexes && selectedMandatsIndexes.includes(idx)) {
-          const mandatHT = (m.prix_estime || 0) - (m.rabais || 0);
+          let mandatHT = (m.prix_estime || 0) - (m.rabais || 0);
+          if (m.taxes_incluses) {
+            mandatHT = mandatHT / 1.15475; // Calculate HT from TTC
+          }
           const mandatTPS = mandatHT * 0.05;
           const mandatTVQ = mandatHT * 0.09975;
           const mandatTTC = mandatHT + mandatTPS + mandatTVQ;
@@ -2744,7 +2764,7 @@ export default function Dossiers() {
                     <p className="truncate">📍 {formatAdresse(courtier.adresses.find((a) => a.actuelle))}</p>
                     }
                         {courtier.courriels?.find((c) => c.actuel)?.courriel &&
-                    <p className="truncate">✉️ {client.courriels.find((c) => c.actuel).courriel}</p>
+                    <p className="truncate">✉️ {courtier.courriels.find((c) => c.actuel).courriel}</p>
                     }
                         {courtier.telephones?.find((t) => t.actuel)?.telephone &&
                     <p>📞 {courtier.telephones.find((t) => t.actuel).telephone}</p>
