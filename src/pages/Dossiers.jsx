@@ -188,19 +188,55 @@ export default function Dossiers() {
   });
 
   const updateDossierMutation = useMutation({
-    mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
+    mutationFn: async ({ id, dossierData }) => {
+      const oldDossier = dossiers.find(d => d.id === id);
+      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      // Créer des notifications pour les utilisateurs nouvellement assignés
+      if (oldDossier && dossierData.mandats) {
+        for (let i = 0; i < dossierData.mandats.length; i++) {
+          const newMandat = dossierData.mandats[i];
+          const oldMandat = oldDossier.mandats?.[i];
+          
+          // If an assignee is present, it's different from the old one, and a current task is defined
+          if (newMandat.utilisateur_assigne && 
+              newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
+              newMandat.tache_actuelle) {
+            const clientsNames = getClientsNames(dossierData.clients_ids);
+            const numeroDossier = `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`;
+            
+            // Assuming 'user' here refers to the currently logged-in user who performed the update
+            // If there's no current user context, a generic name can be used.
+            // For this implementation, I'll use a placeholder for the actor's name.
+            const actorName = "Un utilisateur"; // Replace with actual current user's full_name if available
+
+            await base44.entities.Notification.create({
+              utilisateur_email: newMandat.utilisateur_assigne, // The email of the person being assigned
+              titre: "Nouvelle tâche assignée",
+              message: `${actorName} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+              type: "dossier",
+              dossier_id: id,
+              lue: false
+            });
+          }
+        }
+      }
+      
+      return updatedDossier;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
       setIsDialogOpen(false);
       setIsCloseDossierDialogOpen(false);
       setIsFacturationDialogOpen(false);
-      setIsFacturationMandatsDialogOpen(false); // Close local facturation dialog
+      setIsFacturationMandatsDialogOpen(false);
       resetForm();
       setClosingDossierId(null);
       setMinutesData([]);
       setFacturationDossierId(null);
       setSelectedMandatsForFacturation([]);
-      setSelectedMandatsForLocalFacturation([]); // Reset local selection
+      setSelectedMandatsForLocalFacturation([]);
     }
   });
 

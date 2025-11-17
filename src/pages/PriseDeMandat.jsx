@@ -317,6 +317,33 @@ export default function PriseDeMandat() {
         }
       }
 
+      // Créer des notifications pour les utilisateurs nouvellement assignés aux mandats
+      if (oldDossier && dossierData.mandats) {
+        for (let i = 0; i < dossierData.mandats.length; i++) {
+          const newMandat = dossierData.mandats[i];
+          const oldMandat = oldDossier.mandats?.[i];
+          
+          // Si un utilisateur est assigné au mandat et qu'il est différent de l'ancien
+          if (newMandat.utilisateur_assigne && 
+              newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
+              newMandat.type_mandat) {
+            const clientsNames = getClientsNames(dossierData.clients_ids);
+            const numeroDossier = dossierData.numero_dossier 
+              ? `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`
+              : getArpenteurInitials(dossierData.arpenteur_geometre).slice(0, -1);
+            
+            await base44.entities.Notification.create({
+              utilisateur_email: newMandat.utilisateur_assigne,
+              titre: "Nouveau mandat assigné",
+              message: `Un mandat "${newMandat.type_mandat}"${numeroDossier ? ` du dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''} vous a été assigné.`,
+              type: "dossier",
+              dossier_id: id,
+              lue: false
+            });
+          }
+        }
+      }
+
       // Créer compteur SEULEMENT si on passe au statut "Nouveau mandat/Demande d'information" ou "Mandats à ouvrir"
       // et que l'ancien statut n'était pas l'un de ceux-là
       const oldStatusIsCounted = oldDossier?.statut === "Nouveau mandat/Demande d'information" ||

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,12 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const textareaRef = useRef(null);
+  const mentionMenuRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -32,11 +38,57 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
     initialData: [],
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
   const createCommentaireMutation = useMutation({
-    mutationFn: (commentaireData) => base44.entities.CommentaireClient.create(commentaireData),
+    mutationFn: async (commentaireData) => {
+      const newComment = await base44.entities.CommentaireClient.create(commentaireData);
+      
+      // Détecter les tags (@email) dans le contenu et créer des notifications
+      const emailRegex = /@([^\s]+)/g;
+      const matches = commentaireData.contenu.match(emailRegex);
+      
+      if (matches) {
+        const taggedEmails = matches.map(match => match.substring(1));
+        const uniqueEmails = [...new Set(taggedEmails)];
+        
+        // Obtenir le client pour extraire les informations
+        const client = clients.find(c => c.id === clientId);
+        const clientNom = client ? `${client.prenom} ${client.nom}` : '';
+        
+        // Nettoyer le commentaire en enlevant les @mentions
+        let commentaireNettoye = commentaireData.contenu.replace(/@([^\s]+)/g, '');
+        // Tronquer le commentaire à 100 caractères
+        const commentaireTronque = commentaireNettoye.length > 100 
+          ? commentaireNettoye.substring(0, 100) + "..." 
+          : commentaireNettoye;
+        
+        for (const email of uniqueEmails) {
+          const taggedUser = users.find(u => u.email === email);
+          if (taggedUser) {
+            await base44.entities.Notification.create({
+              utilisateur_email: email,
+              titre: "Vous avez été mentionné dans un commentaire",
+              message: `${user?.full_name} vous a mentionné dans un commentaire sur la fiche client${clientNom ? ` ${clientNom}` : ''}.\n\n"${commentaireTronque}"`,
+              type: "general",
+              lue: false
+            });
+          }
+        }
+      }
+      
+      return newComment;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentairesClient', clientId] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setNouveauCommentaire("");
+      setShowMentionMenu(false);
+      setMentionSearch("");
     },
   });
 
@@ -55,6 +107,94 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
       queryClient.invalidateQueries({ queryKey: ['commentairesClient', clientId] });
     },
   });
+
+  const filteredUsersForMention = users.filter(u => 
+    (u.full_name?.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+    u.email?.toLowerCase().includes(mentionSearch.toLowerCase()))
+  ).slice(0, 5);
+
+  const handleTextChange = (e) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    setNouveauCommentaire(value);
+    setCursorPosition(cursorPos);
+
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+        setMentionSearch(textAfterAt);
+        setShowMentionMenu(true);
+        setSelectedMentionIndex(0);
+      } else {
+        setShowMentionMenu(false);
+        setMentionSearch("");
+      }
+    } else {
+      setShowMentionMenu(false);
+      setMentionSearch("");
+    }
+  };
+
+  const handleMentionKeyDown = (e) => {
+    if (!showMentionMenu || filteredUsersForMention.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedMentionIndex(prev => 
+        Math.min(prev + 1, filteredUsersForMention.length - 1)
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedMentionIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      if (filteredUsersForMention[selectedMentionIndex]) {
+        selectUser(filteredUsersForMention[selectedMentionIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setShowMentionMenu(false);
+    }
+  };
+
+  const selectUser = (selectedUser) => {
+    const textBeforeCursor = nouveauCommentaire.substring(0, cursorPosition);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    const textAfterCursor = nouveauCommentaire.substring(cursorPosition);
+    
+    const newText = 
+      nouveauCommentaire.substring(0, lastAtIndex) + 
+      `@${selectedUser.email} ` + 
+      textAfterCursor;
+    
+    setNouveauCommentaire(newText);
+    setShowMentionMenu(false);
+    setMentionSearch("");
+    
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newCursorPos = lastAtIndex + selectedUser.email.length + 2;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mentionMenuRef.current && !mentionMenuRef.current.contains(event.target) &&
+          textareaRef.current && !textareaRef.current.contains(event.target)) {
+        setShowMentionMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmitCommentaire = (e) => {
     e.preventDefault();
@@ -130,6 +270,23 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
 
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+  };
+
+  const renderCommentaireContent = (contenu) => {
+    const emailRegex = /@([^\s]+)/g;
+    const parts = contenu.split(emailRegex);
+    
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        const taggedUser = users.find(u => u.email === part);
+        return (
+          <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
+            @{taggedUser?.full_name || part}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   const allCommentaires = clientTemporaire ? commentairesTemp : commentaires;
@@ -217,7 +374,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
                     </div>
                   ) : (
                     <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                      {commentaire.contenu}
+                      {renderCommentaireContent(commentaire.contenu)}
                     </p>
                   )}
                 </div>
@@ -227,18 +384,63 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
         )}
       </div>
 
-      <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0">
+      <div className="border-t border-slate-700 p-3 bg-slate-800/50 flex-shrink-0 relative">
+        {showMentionMenu && (
+          <div 
+            ref={mentionMenuRef}
+            className="absolute bottom-full left-3 right-3 mb-2 bg-slate-800 border-2 border-emerald-500 rounded-lg shadow-2xl overflow-hidden z-[9999]"
+          >
+            <div className="p-2 text-xs text-slate-400 border-b border-slate-700 bg-slate-900">
+              Mentionner quelqu'un ({filteredUsersForMention.length} résultat{filteredUsersForMention.length > 1 ? 's' : ''})
+            </div>
+            {filteredUsersForMention.length > 0 ? (
+              <div className="overflow-y-auto max-h-60">
+                {filteredUsersForMention.map((u, index) => (
+                  <div
+                    key={u.email}
+                    className={`px-3 py-2 cursor-pointer transition-colors flex items-center gap-2 ${
+                      index === selectedMentionIndex 
+                        ? 'bg-emerald-500/30 text-emerald-400' 
+                        : 'text-slate-300 hover:bg-slate-700'
+                    }`}
+                    onClick={() => selectUser(u)}
+                    onMouseEnter={() => setSelectedMentionIndex(index)}
+                  >
+                    <Avatar className="w-6 h-6">
+                      {u.photo_url ? <AvatarImage src={u.photo_url} /> : null}
+                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                        {getInitials(u.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{u.full_name}</p>
+                      <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center text-slate-500 text-sm">
+                Aucun utilisateur trouvé
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmitCommentaire} className="space-y-2">
           <Textarea
+            ref={textareaRef}
             value={nouveauCommentaire}
-            onChange={(e) => setNouveauCommentaire(e.target.value)}
+            onChange={handleTextChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (showMentionMenu && filteredUsersForMention.length > 0) {
+                handleMentionKeyDown(e);
+              } else if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSubmitCommentaire(e);
               }
             }}
-            placeholder="Ajouter un commentaire..."
+            placeholder="Ajouter un commentaire... (tapez @ pour mentionner)"
             className="bg-slate-700 border-slate-600 text-white resize-none h-20"
             disabled={createCommentaireMutation.isPending}
           />

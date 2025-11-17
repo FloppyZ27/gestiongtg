@@ -139,9 +139,60 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   }, [dossier]);
 
   const updateDossierMutation = useMutation({
-    mutationFn: ({ id, dossierData }) => base44.entities.Dossier.update(id, dossierData),
+    mutationFn: async ({ id, dossierData }) => {
+      const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
+      const oldDossier = allDossiersCurrentState.find(d => d.id === id);
+      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      // Obtenir l'utilisateur courant
+      const currentUser = await base44.auth.me();
+      
+      // Créer des notifications pour les utilisateurs nouvellement assignés
+      if (oldDossier && dossierData.mandats) {
+        for (let i = 0; i < dossierData.mandats.length; i++) {
+          const newMandat = dossierData.mandats[i];
+          const oldMandat = oldDossier.mandats?.[i];
+          
+          // Si un utilisateur est assigné et qu'il est différent de l'ancien
+          if (newMandat.utilisateur_assigne && 
+              newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
+              newMandat.tache_actuelle) {
+            const clientsNames = dossierData.clients_ids?.map(cid => {
+              const client = clients.find(c => c.id === cid);
+              return client ? `${client.prenom} ${client.nom}` : "";
+            }).filter(n => n).join(", ");
+            
+            const getArpenteurInitials = (arpenteur) => {
+              if (!arpenteur) return "";
+              const mapping = {
+                "Samuel Guay": "SG-",
+                "Dany Gaboury": "DG-",
+                "Pierre-Luc Pilote": "PLP-",
+                "Benjamin Larouche": "BL-",
+                "Frédéric Gilbert": "FG-"
+              };
+              return mapping[arpenteur] || "";
+            };
+            
+            const numeroDossierDisplay = `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`;
+            
+            await base44.entities.Notification.create({
+              utilisateur_email: newMandat.utilisateur_assigne,
+              titre: "Nouvelle tâche assignée",
+              message: `${currentUser?.full_name || 'Un utilisateur'} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossierDisplay ? ` pour le dossier ${numeroDossierDisplay}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+              type: "dossier",
+              dossier_id: id,
+              lue: false
+            });
+          }
+        }
+      }
+      
+      return updatedDossier;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       if (onSuccess) onSuccess();
       onClose();
     }
