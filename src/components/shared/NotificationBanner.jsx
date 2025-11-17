@@ -35,7 +35,7 @@ export default function NotificationBanner({ user }) {
         setVisibleNotification(null);
       }, 5000);
     }
-  }, [notifications, dismissedIds]);
+  }, [notifications, dismissedIds, visibleNotification]);
 
   const handleDismiss = async (notificationId) => {
     await base44.entities.Notification.update(notificationId, { lue: true });
@@ -59,6 +59,18 @@ export default function NotificationBanner({ user }) {
       default:
         return 'from-purple-500/20 to-purple-600/20 border-purple-500/30';
     }
+  };
+
+  // Fonction pour extraire le commentaire du message
+  const extractComment = (message) => {
+    const lines = message.split('\n\n');
+    if (lines.length === 2 && lines[1].startsWith('"') && lines[1].endsWith('"')) {
+      return {
+        mainMessage: lines[0],
+        comment: lines[1].slice(1, -1) // Remove quotes
+      };
+    }
+    return { mainMessage: message, comment: null };
   };
 
   return (
@@ -93,7 +105,19 @@ export default function NotificationBanner({ user }) {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-sm text-slate-300 mb-2 whitespace-pre-wrap">{visibleNotification.message}</p>
+                {(() => {
+                  const { mainMessage, comment } = extractComment(visibleNotification.message);
+                  return (
+                    <>
+                      <p className="text-sm text-slate-300 mb-2 whitespace-pre-wrap">{mainMessage}</p>
+                      {comment && (
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-md p-2 mb-2">
+                          <p className="text-xs text-slate-400 italic whitespace-pre-wrap">{comment}</p>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
                     {visibleNotification.type === 'retour_appel' ? 'Retour d\'appel' : visibleNotification.type === 'dossier' ? 'Dossier' : 'Général'}
