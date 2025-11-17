@@ -90,6 +90,11 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
           return client ? `${client.prenom} ${client.nom}` : "";
         }).filter(n => n).join(", ");
         
+        // Tronquer le commentaire à 100 caractères
+        const commentaireTronque = commentaireData.contenu.length > 100 
+          ? commentaireData.contenu.substring(0, 100) + "..." 
+          : commentaireData.contenu;
+        
         for (const email of uniqueEmails) {
           console.log(`Processing email: ${email}`);
           const taggedUser = users.find(u => u.email === email);
@@ -99,7 +104,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
             const notification = await base44.entities.Notification.create({
               utilisateur_email: email,
               titre: "Vous avez été mentionné dans un commentaire",
-              message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier ${numeroDossierComplet}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+              message: `${user?.full_name} vous a mentionné dans un commentaire sur le dossier ${numeroDossierComplet}${clientsNames ? ` - ${clientsNames}` : ''}.\n\n"${commentaireTronque}"`,
               type: "dossier",
               dossier_id: dossierId,
               lue: false
