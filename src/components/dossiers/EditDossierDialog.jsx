@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -19,12 +18,9 @@ import CommentairesSection from "./CommentairesSection";
 import AddressInput from "../shared/AddressInput";
 import ClientFormDialog from "../clients/ClientFormDialog";
 import ClientDetailView from "../clients/ClientDetailView";
-import MandatTabs from "./MandatTabs"; // New import
+import MandatTabs from "./MandatTabs";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
-const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
-const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-const DONNEURS = ["Dave Vallée", "Julie Abud", "André Guérin"];
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": ["Québec", "Canton de Caron", "Canton de de l'Île", "Canton de Garnier", "Village d'Héberville", "Canton d'Hébertville-Station", "Canton de Labarre", "Canton de Mésy", "Canton de Métabetchouan", "Canton de Signay", "Canton de Taillon"],
@@ -49,7 +45,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
   const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
-  // const [terrainSectionExpanded, setTerrainSectionExpanded] = useState({}); // Removed, now managed by MandatTabs
   const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
   const [newMinuteForm, setNewMinuteForm] = useState({
@@ -107,8 +102,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           tache_actuelle: m.tache_actuelle || "",
           utilisateur_assigne: m.utilisateur_assigne || "",
           statut_terrain: m.statut_terrain || "",
-          date_terrain: m.date_terrain || "", // New field
-          equipe_assignee: m.equipe_assignee || "", // New field
+          date_terrain: m.date_terrain || "",
+          equipe_assignee: m.equipe_assignee || "",
           adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
           lots: m.lots || [],
           prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
@@ -135,7 +130,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         description: dossier.description || ""
       });
       setActiveTabMandat("0");
-      // setTerrainSectionExpanded({}); // Removed, now managed by MandatTabs
     }
   }, [dossier]);
 
@@ -145,16 +139,13 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       const oldDossier = allDossiersCurrentState.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
       
-      // Obtenir l'utilisateur courant
       const currentUser = await base44.auth.me();
       
-      // Créer des notifications pour les utilisateurs nouvellement assignés
       if (oldDossier && dossierData.mandats) {
         for (let i = 0; i < dossierData.mandats.length; i++) {
           const newMandat = dossierData.mandats[i];
           const oldMandat = oldDossier.mandats?.[i];
           
-          // Si un utilisateur est assigné et qu'il est différent de l'ancien
           if (newMandat.utilisateur_assigne && 
               newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
               newMandat.tache_actuelle) {
@@ -285,10 +276,9 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validation pour les dossiers ouverts : numéro unique (sauf pour le dossier lui-même)
     if (formData.statut === "Ouvert") {
       const dossierExistant = allDossiers.find(d => 
-        d.id !== dossier?.id && // Exclure le dossier actuel
+        d.id !== dossier?.id &&
         d.numero_dossier === formData.numero_dossier &&
         d.arpenteur_geometre === formData.arpenteur_geometre
       );
@@ -298,7 +288,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         return;
       }
 
-      // Validation : tous les mandats doivent avoir un utilisateur assigné
       const mandatsSansUtilisateur = formData.mandats.filter(m => !m.utilisateur_assigne);
       if (mandatsSansUtilisateur.length > 0) {
         alert("Tous les mandats doivent avoir un utilisateur assigné.");
@@ -345,8 +334,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         tache_actuelle: "",
         utilisateur_assigne: "",
         statut_terrain: "",
-        date_terrain: "", // New field
-        equipe_assignee: "", // New field
+        date_terrain: "",
+        equipe_assignee: "",
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
         prix_estime: 0,
@@ -455,14 +444,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       }));
     }
   };
-
-  // Removed, now managed by MandatTabs
-  // const toggleTerrainSection = (mandatIndex) => {
-  //   setTerrainSectionExpanded((prev) => ({
-  //     ...prev,
-  //     [mandatIndex]: !prev[mandatIndex]
-  //   }));
-  // };
 
   const openAddMinuteDialog = (mandatIndex) => {
     setCurrentMinuteMandatIndex(mandatIndex);
@@ -743,9 +724,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                                 getLotById={getLotById}
                                 users={users}
                                 formStatut={formData.statut}
-                                DONNEURS={DONNEURS}
-                                TACHES={TACHES}
-                                TYPES_MANDATS={TYPES_MANDATS}
                               />
                             </CardContent>
                           </Card>
@@ -810,7 +788,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Dialog pour ajouter une minute */}
       <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
           <DialogHeader>
@@ -868,7 +845,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de sélection des clients */}
       <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
           <DialogHeader>
@@ -941,7 +917,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de sélection des notaires */}
       <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
           <DialogHeader>
@@ -1014,7 +989,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de sélection des courtiers */}
       <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
           <DialogHeader>
@@ -1087,7 +1061,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Lot Selector Dialog */}
       <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {setIsLotSelectorOpen(open); if (!open) {setLotCirconscriptionFilter("all"); setLotSearchTerm(""); setLotCadastreFilter("Québec");}}}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
@@ -1200,7 +1173,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de consultation de client */}
       <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
           <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
