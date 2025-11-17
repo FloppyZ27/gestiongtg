@@ -45,7 +45,7 @@ export default function NotificationBanner({ user }) {
 
   const handleClick = (notification) => {
     if (notification.dossier_id) {
-      navigate(createPageUrl("PriseDeMandat"));
+      navigate(createPageUrl("Dossiers") + `?dossier_id=${notification.dossier_id}`);
     }
     handleDismiss(notification.id);
   };

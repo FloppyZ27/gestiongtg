@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -164,6 +164,26 @@ export default function Dossiers() {
     initialData: []
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Détecter si un dossier_id est passé dans l'URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dossierIdFromUrl = urlParams.get('dossier_id');
+    
+    if (dossierIdFromUrl && dossiers.length > 0) {
+      const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
+      if (dossier) {
+        handleView(dossier);
+        // Nettoyer l'URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [dossiers]);
+
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
@@ -198,22 +218,17 @@ export default function Dossiers() {
           const newMandat = dossierData.mandats[i];
           const oldMandat = oldDossier.mandats?.[i];
           
-          // If an assignee is present, it's different from the old one, and a current task is defined
+          // Si un utilisateur est assigné et qu'il est différent de l'ancien
           if (newMandat.utilisateur_assigne && 
               newMandat.utilisateur_assigne !== oldMandat?.utilisateur_assigne &&
               newMandat.tache_actuelle) {
             const clientsNames = getClientsNames(dossierData.clients_ids);
             const numeroDossier = `${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`;
             
-            // Assuming 'user' here refers to the currently logged-in user who performed the update
-            // If there's no current user context, a generic name can be used.
-            // For this implementation, I'll use a placeholder for the actor's name.
-            const actorName = "Un utilisateur"; // Replace with actual current user's full_name if available
-
             await base44.entities.Notification.create({
-              utilisateur_email: newMandat.utilisateur_assigne, // The email of the person being assigned
+              utilisateur_email: newMandat.utilisateur_assigne,
               titre: "Nouvelle tâche assignée",
-              message: `${actorName} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+              message: `${user?.full_name || 'Un utilisateur'} vous a assigné la tâche "${newMandat.tache_actuelle}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
               type: "dossier",
               dossier_id: id,
               lue: false
@@ -226,7 +241,7 @@ export default function Dossiers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Invalidate notifications query
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setIsDialogOpen(false);
       setIsCloseDossierDialogOpen(false);
       setIsFacturationDialogOpen(false);
@@ -2349,7 +2364,7 @@ export default function Dossiers() {
                   <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <Badge variant="outline" className={`${getArpenteurColor(selectedDossierForFacturation?.arpenteur_geometre)} border`}>
+                        <Badge variant="outline" className={`${getArpenteurColor(selectedDossierForFacturation?.arpenteur_geometre)} border mb-2`}>
                           {getArpenteurInitials(selectedDossierForFacturation?.arpenteur_geometre)}{selectedDossierForFacturation?.numero_dossier}
                         </Badge>
                         <span className="text-slate-300 text-sm">{getClientsNames(selectedDossierForFacturation?.clients_ids)}</span>

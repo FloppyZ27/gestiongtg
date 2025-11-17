@@ -231,6 +231,26 @@ export default function PriseDeMandat() {
     initialData: [],
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Détecter si un dossier_id est passé dans l'URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dossierIdFromUrl = urlParams.get('dossier_id');
+    
+    if (dossierIdFromUrl && dossiers.length > 0) {
+      const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
+      if (dossier) {
+        handleView(dossier);
+        // Nettoyer l'URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [dossiers]);
+
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);

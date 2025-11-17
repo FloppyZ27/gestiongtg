@@ -45,7 +45,8 @@ export default function NotificationButton({ user }) {
   const handleNotificationClick = (notification) => {
     markAsReadMutation.mutate(notification.id);
     if (notification.dossier_id) {
-      navigate(createPageUrl("PriseDeMandat"));
+      // Naviguer vers Dossiers avec le paramètre dossier_id pour ouvrir automatiquement
+      navigate(createPageUrl("Dossiers") + `?dossier_id=${notification.dossier_id}`);
     }
     setIsOpen(false);
   };
