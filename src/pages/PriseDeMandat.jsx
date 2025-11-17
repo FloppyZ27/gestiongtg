@@ -1606,47 +1606,49 @@ export default function PriseDeMandat() {
                               <CardContent className="p-4 space-y-4">
                                 {/* Type de mandat et bouton supprimer sur la même ligne */}
                                 <div className="flex gap-4 items-start">
-                                  <div className="flex-1 space-y-2">
-                                    <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                    <Select
-                                      value={mandat.type_mandat}
-                                      onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                                      disabled={!!dossierReferenceId}
-                                    >
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                        <SelectValue placeholder="Sélectionner" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                        {TYPES_MANDATS.map((type) => (
-                                          <SelectItem key={type} value={type} className="text-white">
-                                            {type}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  {editingDossier && (
-                                    <div className="flex-1 space-y-2">
-                                      <Label>
-                                        Utilisateur assigné
-                                        {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
-                                      </Label>
+                                  <div className="flex-1 grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                      <Label>Type de mandat <span className="text-red-400">*</span></Label>
                                       <Select
-                                        value={mandat.utilisateur_assigne || ""}
-                                        onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}
+                                        value={mandat.type_mandat}
+                                        onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
+                                        disabled={!!dossierReferenceId}
                                       >
                                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                                           <SelectValue placeholder="Sélectionner" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                          <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                                          {users.map((user) => (
-                                            <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          {TYPES_MANDATS.map((type) => (
+                                            <SelectItem key={type} value={type} className="text-white">
+                                              {type}
+                                            </SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                  )}
+                                    {editingDossier && (
+                                      <div className="space-y-2">
+                                        <Label>
+                                          Utilisateur assigné
+                                          {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
+                                        </Label>
+                                        <Select
+                                          value={mandat.utilisateur_assigne || ""}
+                                          onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}
+                                        >
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                            <SelectValue placeholder="Sélectionner" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                            <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                                            {users.map((user) => (
+                                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    )}
+                                  </div>
                                   <Button
                                     type="button"
                                     size="sm"
@@ -1724,7 +1726,6 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
-                                }
                                 </div>
 
                                 <div className="space-y-2">

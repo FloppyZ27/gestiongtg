@@ -1229,10 +1229,10 @@ export default function Dossiers() {
     for (let index = 0; index < minutesData.length; index++) {
       const minuteData = minutesData[index];
       if (minuteData?.minute) {
-        const minuteExiste = dossiers.some((d) => 
+        const minuteExiste = dossiers.some((d) =>
           d.id !== closingDossierId && // Exclure le dossier en cours de fermeture
           d.arpenteur_geometre === dossier.arpenteur_geometre &&
-          d.mandats?.some((m) => 
+          d.mandats?.some((m) =>
             m.minutes_list?.some((min) => min.minute === minuteData.minute) ||
             m.minute === minuteData.minute
           )
@@ -1250,7 +1250,7 @@ export default function Dossiers() {
       const existingMinutesList = mandat.minutes_list || [];
       
       // Ajouter la nouvelle minute à la liste si elle est fournie
-      const newMinutesList = minuteData?.minute && minuteData?.date_minute 
+      const newMinutesList = minuteData?.minute && minuteData?.date_minute
         ? [...existingMinutesList, {
             minute: minuteData.minute,
             date_minute: minuteData.date_minute,
@@ -1376,9 +1376,9 @@ export default function Dossiers() {
   const handleAddMinuteFromDialog = () => {
     if (currentMinuteMandatIndex !== null && newMinuteForm.minute && newMinuteForm.date_minute) {
       // Vérifier si la minute existe déjà pour cet arpenteur
-      const minuteExiste = dossiers.some((d) => 
+      const minuteExiste = dossiers.some((d) =>
         d.arpenteur_geometre === formData.arpenteur_geometre &&
-        d.mandats?.some((m) => 
+        d.mandats?.some((m) =>
           m.minutes_list?.some((min) => min.minute === newMinuteForm.minute) ||
           m.minute === newMinuteForm.minute
         )
@@ -1664,50 +1664,51 @@ export default function Dossiers() {
                                             </SelectContent>
                                           </Select>
                                         </div>
-                                    {editingDossier &&
-                                    <>
-                                      <div className="space-y-2">
-                                        <Label>Tâche actuelle</Label>
-                                        <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                            <SelectValue placeholder="Sélectionner la tâche" />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                            {TACHES.map((tache) =>
-                                          <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
-                                          )}
-                                          </SelectContent>
-                                        </Select>
+                                        <div className="space-y-2">
+                                          <Label>
+                                            Utilisateur assigné
+                                            {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
+                                          </Label>
+                                          <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                              <SelectValue placeholder="Sélectionner" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                              <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                                              {users.map((user) =>
+                                            <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                                            )}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        {editingDossier && (
+                                          <div className="space-y-2">
+                                            <Label>Tâche actuelle</Label>
+                                            <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                                <SelectValue placeholder="Sélectionner la tâche" />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                                {TACHES.map((tache) =>
+                                              <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                                              )}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        )}
                                       </div>
-                                      <div className="space-y-2">
-                                        <Label>Utilisateur assigné</Label>
-                                        <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
-                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                            <SelectValue placeholder="Sélectionner" />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                            <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                                            {users.map((user) =>
-                                          <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                                          )}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    </>
-                                    }
-                                  </div>
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => {
-                                    removeMandat(index);
-                                    if (formData.mandats.length > 1) {
-                                      setActiveTabMandat(Math.max(0, index - 1).toString());
-                                    } else {
-                                      setActiveTabMandat("0");
-                                    }
-                                  }} className="text-red-400 hover:text-red-300 mt-8">
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Supprimer ce mandat
-                                  </Button>
-                                </div>
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => {
+                                        removeMandat(index);
+                                        if (formData.mandats.length > 1) {
+                                          setActiveTabMandat(Math.max(0, index - 1).toString());
+                                        } else {
+                                          setActiveTabMandat("0");
+                                        }
+                                      }} className="text-red-400 hover:text-red-300 mt-8">
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Supprimer ce mandat
+                                      </Button>
+                                    </div>
 
                                 {/* Adresse et Dates côte à côte */}
                                 <div className="grid grid-cols-[70%_30%] gap-4">
@@ -2743,7 +2744,7 @@ export default function Dossiers() {
                     <p className="truncate">📍 {formatAdresse(courtier.adresses.find((a) => a.actuelle))}</p>
                     }
                         {courtier.courriels?.find((c) => c.actuel)?.courriel &&
-                    <p className="truncate">✉️ {courtier.courriels.find((c) => c.actuel).courriel}</p>
+                    <p className="truncate">✉️ {client.courriels.find((c) => c.actuel).courriel}</p>
                     }
                         {courtier.telephones?.find((t) => t.actuel)?.telephone &&
                     <p>📞 {courtier.telephones.find((t) => t.actuel).telephone}</p>
@@ -3064,7 +3065,7 @@ export default function Dossiers() {
                               <div className="col-span-2">
                                           <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                                           <p className="text-slate-300 text-sm mt-1">
-                                            {mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })} 
+                                            {mandat.terrain.date_rendez_vous && format(new Date(mandat.terrain.date_rendez_vous), 'dd MMM yyyy', { locale: fr })}
                                             {mandat.terrain.heure_rendez_vous && ` à ${mandat.terrain.heure_rendez_vous}`}
                                             {mandat.terrain.donneur && ` avec ${mandat.terrain.donneur}`}
                                           </p>
@@ -3348,7 +3349,7 @@ export default function Dossiers() {
                   {uploadingLotPdf && <span className="text-slate-500">Téléchargement...</span>}
                   {newLotForm.document_pdf_url &&
                   <a href={newLotForm.document_pdf_url} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300">
-                      <FileText className="w-5 h-5" />
+                      <ExternalLink className="w-5 h-5" />
                     </a>
                   }
                 </div>
