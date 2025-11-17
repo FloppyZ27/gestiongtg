@@ -13,7 +13,7 @@ import CeduleTerrain from './pages/CeduleTerrain';
 import PriseDeMandat from './pages/PriseDeMandat';
 import Clavardage from './pages/Clavardage';
 import GestionDeMandat from './pages/GestionDeMandat';
-import Layout from './Layout.jsx';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -37,5 +37,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Dashboard",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };

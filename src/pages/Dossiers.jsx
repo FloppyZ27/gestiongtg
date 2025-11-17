@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -168,12 +169,12 @@ export default function Dossiers() {
       const newDossier = await base44.entities.Dossier.create(dossierData);
       if (commentairesTemporaires.length > 0) {
         const commentairePromises = commentairesTemporaires.map((comment) =>
-        base44.entities.CommentaireDossier.create({
-          dossier_id: newDossier.id,
-          contenu: comment.contenu,
-          utilisateur_email: comment.utilisateur_email,
-          utilisateur_nom: comment.utilisateur_nom
-        })
+          base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
         );
         await Promise.all(commentairePromises);
       }
@@ -271,10 +272,10 @@ export default function Dossiers() {
       setFormData((prev) => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
-        i === currentMandatIndex ? {
-          ...m,
-          lots: m.lots.includes(lotId) ? m.lots.filter((id) => id !== lotId) : [...(m.lots || []), lotId]
-        } : m
+          i === currentMandatIndex ? {
+            ...m,
+            lots: m.lots.includes(lotId) ? m.lots.filter((id) => id !== lotId) : [...(m.lots || []), lotId]
+          } : m
         )
       }));
     }
@@ -282,27 +283,27 @@ export default function Dossiers() {
 
   const filteredClientsForSelector = sortClientsWithSelected(
     clientsReguliers.filter((c) =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
-    c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
-    c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
+      `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+      c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(clientSearchTerm.toLowerCase())) ||
+      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(clientSearchTerm.toLowerCase()))
     ),
     formData.clients_ids
   );
 
   const filteredNotairesForSelector = sortClientsWithSelected(
     notaires.filter((n) =>
-    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
-    n.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
-    n.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
+      `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase()) ||
+      n.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(notaireSearchTerm.toLowerCase())) ||
+      n.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(notaireSearchTerm.toLowerCase()))
     ),
     formData.notaires_ids
   );
 
   const filteredCourtiersForSelector = sortClientsWithSelected(
     courtiers.filter((c) =>
-    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
-    c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
-    c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
+      `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase()) ||
+      c.courriels?.some((courriel) => courriel.courriel?.toLowerCase().includes(courtierSearchTerm.toLowerCase())) ||
+      c.telephones?.some((tel) => tel.telephone?.toLowerCase().includes(courtierSearchTerm.toLowerCase()))
     ),
     formData.courtiers_ids
   );
@@ -313,13 +314,26 @@ export default function Dossiers() {
     // Vérifier que le numéro de dossier n'existe pas déjà pour cet arpenteur
     if (formData.statut === "Ouvert" && formData.numero_dossier && formData.arpenteur_geometre) {
       const dossierExistant = dossiers.find((d) =>
-      d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
-      d.numero_dossier === formData.numero_dossier &&
-      d.arpenteur_geometre === formData.arpenteur_geometre
+        d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
+        d.numero_dossier === formData.numero_dossier &&
+        d.arpenteur_geometre === formData.arpenteur_geometre
       );
 
       if (dossierExistant) {
         alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        return;
+      }
+
+      // Validation : au moins un mandat doit exister
+      if (formData.mandats.length === 0) {
+        alert("Vous devez ajouter au moins un mandat avant d'ouvrir un dossier.");
+        return;
+      }
+
+      // Validation : tous les mandats doivent avoir un utilisateur assigné
+      const mandatsSansUtilisateur = formData.mandats.filter(m => !m.utilisateur_assigne);
+      if (mandatsSansUtilisateur.length > 0) {
+        alert("Tous les mandats doivent avoir un utilisateur assigné.");
         return;
       }
     }
@@ -529,7 +543,7 @@ export default function Dossiers() {
     setFormData((prev) => ({
       ...prev,
       mandats: prev.mandats.map((m, i) =>
-      i === mandatIndex ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
+        i === mandatIndex ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
       )
     }));
   };
@@ -607,7 +621,7 @@ export default function Dossiers() {
       setFormData((prev) => ({
         ...prev,
         mandats: prev.mandats.map((m, i) =>
-        i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m
+          i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m
         )
       }));
     }
@@ -637,8 +651,8 @@ export default function Dossiers() {
 
     const allMandatsData = dossier ? targetDossier.mandats : formData.mandats;
     const mandatsToInvoice = selectedMandatsIndexes ?
-    selectedMandatsIndexes.map((idx) => allMandatsData[idx]) :
-    allMandatsData; // If no specific indexes, invoice all available mandats in the context
+      selectedMandatsIndexes.map((idx) => allMandatsData[idx]) :
+      allMandatsData; // If no specific indexes, invoice all available mandats in the context
 
     if (mandatsToInvoice.length === 0) {
       console.warn("No mandates selected or available for invoicing.");
@@ -1034,7 +1048,7 @@ export default function Dossiers() {
 
   const toggleMandatForLocalFacturation = (index) => {
     setSelectedMandatsForLocalFacturation((prev) =>
-    prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -1098,7 +1112,7 @@ export default function Dossiers() {
 
   const toggleMandatForFacturation = (index) => {
     setSelectedMandatsForFacturation((prev) =>
-    prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -1132,13 +1146,13 @@ export default function Dossiers() {
     const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
     const clientsNames = getClientsNames(item.clients_ids);
     const matchesSearch =
-    fullNumber.toLowerCase().includes(searchLower) ||
-    item.numero_dossier?.toLowerCase().includes(searchLower) ||
-    clientsNames.toLowerCase().includes(searchLower) ||
-    item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
-    item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
-    item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
-    item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
+      fullNumber.toLowerCase().includes(searchLower) ||
+      item.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
+      item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
 
     const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
     const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
@@ -1307,10 +1321,10 @@ export default function Dossiers() {
     const clientsNames = getClientsNames(dossier.clients_ids);
 
     const matchesSearch =
-    fullNumber.toLowerCase().includes(searchLower) ||
-    dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-    clientsNames.toLowerCase().includes(searchLower) ||
-    dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
 
 
     const matchesArpenteur = closeFilterArpenteur === "all" || dossier.arpenteur_geometre === closeFilterArpenteur;
@@ -1330,10 +1344,10 @@ export default function Dossiers() {
     const clientsNames = getClientsNames(dossier.clients_ids);
 
     const matchesSearch =
-    fullNumber.toLowerCase().includes(searchLower) ||
-    dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-    clientsNames.toLowerCase().includes(searchLower) ||
-    dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some((m) => m.type_mandat?.toLowerCase().includes(searchLower));
 
 
     const matchesArpenteur = facturationFilterArpenteur === "all" || dossier.arpenteur_geometre === facturationFilterArpenteur;

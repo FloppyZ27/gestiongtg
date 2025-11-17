@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, TrendingUp, TrendingDown, Package } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, TrendingUp, TrendingDown, Package, FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -451,7 +452,8 @@ export default function PriseDeMandat() {
         date_livraison: "",
         date_signature: "",
         date_debut_travaux: "",
-        tache_actuelle: ""
+        tache_actuelle: "",
+        utilisateur_assigne: "" // New mandat level field, initialize empty for reference loading
       })) || [],
       description: dossier.description || ""
     });
@@ -714,6 +716,13 @@ export default function PriseDeMandat() {
         alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
         return;
       }
+
+      // Validation: Chaque mandat doit avoir un utilisateur assigné si le statut est "Ouvert"
+      const mandatsWithoutAssignedUser = formData.mandats.filter(m => !m.utilisateur_assigne);
+      if (mandatsWithoutAssignedUser.length > 0) {
+        alert("Chaque mandat doit avoir un utilisateur assigné lorsque le dossier est 'Ouvert'.");
+        return;
+      }
     }
 
     let dataToSubmit = { ...formData };
@@ -835,7 +844,8 @@ export default function PriseDeMandat() {
         date_signature: m.date_signature || "",
         date_debut_travaux: m.date_debut_travaux || "",
         factures: m.factures || [],
-        tache_actuelle: m.tache_actuelle || ""
+        tache_actuelle: m.tache_actuelle || "",
+        utilisateur_assigne: m.utilisateur_assigne || "" // Add this field for mandat
       })) || [],
       description: entity.description || ""
     });
@@ -911,7 +921,8 @@ export default function PriseDeMandat() {
         date_signature: "",
         date_debut_travaux: "",
         factures: [],
-        tache_actuelle: ""
+        tache_actuelle: "",
+        utilisateur_assigne: "" // Initialize new field for mandat
       }]
     }));
     setActiveTabMandat(newIndex.toString());
@@ -1614,6 +1625,28 @@ export default function PriseDeMandat() {
                                       </SelectContent>
                                     </Select>
                                   </div>
+                                  {editingDossier && (
+                                    <div className="flex-1 space-y-2">
+                                      <Label>
+                                        Utilisateur assigné
+                                        {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
+                                      </Label>
+                                      <Select
+                                        value={mandat.utilisateur_assigne || ""}
+                                        onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}
+                                      >
+                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                          <SelectValue placeholder="Sélectionner" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                          <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                                          {users.map((user) => (
+                                            <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  )}
                                   <Button
                                     type="button"
                                     size="sm"
@@ -1691,6 +1724,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                   </div>
+                                }
                                 </div>
 
                                 <div className="space-y-2">
@@ -2727,6 +2761,16 @@ export default function PriseDeMandat() {
                                     </div>
                                   )}
                                 </div>
+
+                                {/* Utilisateur assigné pour mandat */}
+                                {mandat.utilisateur_assigne && (
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Utilisateur assigné pour le mandat</Label>
+                                    <p className="text-slate-300 text-sm mt-1">
+                                      {users.find(u => u.email === mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}
+                                    </p>
+                                  </div>
+                                )}
 
                                 {/* Dates */}
                                 <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
