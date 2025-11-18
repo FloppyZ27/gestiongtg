@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -53,6 +53,25 @@ export default function PlanningCalendar({
   const [assignments, setAssignments] = useState({});
   const [equipes, setEquipes] = useState({}); // { "date": [{ id, nom, techniciens: [], vehicules: [], equipements: [], mandats: [] }] }
   const [activeResourceTab, setActiveResourceTab] = useState("mandats");
+
+  // Charger les équipes depuis localStorage au démarrage
+  useEffect(() => {
+    const savedEquipes = localStorage.getItem('planning_equipes');
+    if (savedEquipes) {
+      try {
+        setEquipes(JSON.parse(savedEquipes));
+      } catch (e) {
+        console.error('Erreur lors du chargement des équipes:', e);
+      }
+    }
+  }, []);
+
+  // Sauvegarder les équipes dans localStorage à chaque modification
+  useEffect(() => {
+    if (Object.keys(equipes).length > 0) {
+      localStorage.setItem('planning_equipes', JSON.stringify(equipes));
+    }
+  }, [equipes]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
@@ -169,10 +188,25 @@ export default function PlanningCalendar({
       };
     };
 
+    // Vérifier si une ressource est déjà utilisée dans une autre équipe de la même journée
+    const isResourceUsedInDay = (dateStr, resourceId, resourceType, excludeEquipeId) => {
+      if (!equipes[dateStr]) return false;
+      return equipes[dateStr].some(eq => {
+        if (eq.id === excludeEquipeId) return false;
+        return eq[resourceType].includes(resourceId);
+      });
+    };
+
     // Drag & drop de technicien
     if (type === "TECHNICIEN") {
       const dest = parseEquipeDroppableId(destId);
       if (!dest || destId === "techniciens-list") return;
+
+      // Vérifier si le technicien est déjà utilisé dans une autre équipe de la même journée
+      if (isResourceUsedInDay(dest.dateStr, draggableId, 'techniciens', dest.equipeId)) {
+        alert('Ce technicien est déjà assigné à une autre équipe ce jour-là.');
+        return;
+      }
 
       const newEquipes = { ...equipes };
       if (!newEquipes[dest.dateStr]) return;
@@ -203,6 +237,12 @@ export default function PlanningCalendar({
       const dest = parseEquipeDroppableId(destId);
       if (!dest || destId === "vehicules-list") return;
 
+      // Vérifier si le véhicule est déjà utilisé dans une autre équipe de la même journée
+      if (isResourceUsedInDay(dest.dateStr, draggableId, 'vehicules', dest.equipeId)) {
+        alert('Ce véhicule est déjà assigné à une autre équipe ce jour-là.');
+        return;
+      }
+
       const newEquipes = { ...equipes };
       if (!newEquipes[dest.dateStr]) return;
       
@@ -229,6 +269,12 @@ export default function PlanningCalendar({
     if (type === "EQUIPEMENT") {
       const dest = parseEquipeDroppableId(destId);
       if (!dest || destId === "equipements-list") return;
+
+      // Vérifier si l'équipement est déjà utilisé dans une autre équipe de la même journée
+      if (isResourceUsedInDay(dest.dateStr, draggableId, 'equipements', dest.equipeId)) {
+        alert('Cet équipement est déjà assigné à une autre équipe ce jour-là.');
+        return;
+      }
 
       const newEquipes = { ...equipes };
       if (!newEquipes[dest.dateStr]) return;
