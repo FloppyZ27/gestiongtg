@@ -669,27 +669,26 @@ export default function PlanningCalendar({
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.droppableProps}
-                                  className={`min-h-[40px] mb-2 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded p-1' : ''}`}
+                                  className={`min-h-[30px] mb-2 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded p-1' : ''}`}
                                 >
-                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
-                                    <Users className="w-3 h-3" />
-                                    Techniciens
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Users className="w-3 h-3 text-blue-400" />
+                                    {equipe.techniciens.map(techId => {
+                                      const tech = techniciens.find(t => t.id === techId);
+                                      if (!tech) return null;
+                                      return (
+                                        <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                          <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
+                                          <button
+                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'techniciens', techId)}
+                                            className="opacity-0 group-hover:opacity-100 text-red-400"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                  {equipe.techniciens.map(techId => {
-                                    const tech = techniciens.find(t => t.id === techId);
-                                    if (!tech) return null;
-                                    return (
-                                      <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group flex items-center justify-between">
-                                        <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
-                                        <button
-                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'techniciens', techId)}
-                                          className="opacity-0 group-hover:opacity-100 text-red-400"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </button>
-                                      </div>
-                                    );
-                                  })}
                                   {provided.placeholder}
                                 </div>
                               )}
@@ -703,25 +702,24 @@ export default function PlanningCalendar({
                                   {...provided.droppableProps}
                                   className={`min-h-[30px] mb-2 ${snapshot.isDraggingOver ? 'bg-purple-500/10 rounded p-1' : ''}`}
                                 >
-                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
-                                    <Truck className="w-3 h-3" />
-                                    Véhicules
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Truck className="w-3 h-3 text-purple-400" />
+                                    {equipe.vehicules.map(vId => {
+                                      const v = vehicules.find(v => v.id === vId);
+                                      if (!v) return null;
+                                      return (
+                                        <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                          <span className="text-white text-xs">{v.nom}</span>
+                                          <button
+                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'vehicules', vId)}
+                                            className="opacity-0 group-hover:opacity-100 text-red-400"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                  {equipe.vehicules.map(vId => {
-                                    const v = vehicules.find(v => v.id === vId);
-                                    if (!v) return null;
-                                    return (
-                                      <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded p-1 mb-1 group flex items-center justify-between">
-                                        <span className="text-white text-xs">{v.nom}</span>
-                                        <button
-                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'vehicules', vId)}
-                                          className="opacity-0 group-hover:opacity-100 text-red-400"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </button>
-                                      </div>
-                                    );
-                                  })}
                                   {provided.placeholder}
                                 </div>
                               )}
@@ -735,25 +733,24 @@ export default function PlanningCalendar({
                                   {...provided.droppableProps}
                                   className={`min-h-[30px] mb-2 ${snapshot.isDraggingOver ? 'bg-orange-500/10 rounded p-1' : ''}`}
                                 >
-                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
-                                    <Wrench className="w-3 h-3" />
-                                    Équipements
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Wrench className="w-3 h-3 text-orange-400" />
+                                    {equipe.equipements.map(eId => {
+                                      const e = equipements.find(e => e.id === eId);
+                                      if (!e) return null;
+                                      return (
+                                        <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                          <span className="text-white text-xs">{e.nom}</span>
+                                          <button
+                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'equipements', eId)}
+                                            className="opacity-0 group-hover:opacity-100 text-red-400"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                  {equipe.equipements.map(eId => {
-                                    const e = equipements.find(e => e.id === eId);
-                                    if (!e) return null;
-                                    return (
-                                      <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded p-1 mb-1 group flex items-center justify-between">
-                                        <span className="text-white text-xs">{e.nom}</span>
-                                        <button
-                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'equipements', eId)}
-                                          className="opacity-0 group-hover:opacity-100 text-red-400"
-                                        >
-                                          <X className="w-3 h-3" />
-                                        </button>
-                                      </div>
-                                    );
-                                  })}
                                   {provided.placeholder}
                                 </div>
                               )}
@@ -767,9 +764,8 @@ export default function PlanningCalendar({
                                   {...provided.droppableProps}
                                   className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
                                 >
-                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
-                                    <FolderOpen className="w-3 h-3" />
-                                    Mandats
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <FolderOpen className="w-3 h-3 text-cyan-400" />
                                   </div>
                                   {equipe.mandats.map((dossierId, index) => {
                                     const dossier = dossiers.find(d => d.id === dossierId);
@@ -844,14 +840,51 @@ export default function PlanningCalendar({
                             </div>
 
                             <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
-                              {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="mb-1">
-                                  {equipe.techniciens.length > 0 && equipe.techniciens.map(techId => {
-                                    const tech = techniciens.find(t => t.id === techId);
-                                    return tech ? (
-                                      <div key={techId} className="bg-blue-500/20 rounded px-1 mb-0.5 text-xs text-white">{tech.prenom}</div>
-                                    ) : null;
-                                  })}
+                              {(provided, snapshot) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded' : ''}`}>
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                    <Users className="w-3 h-3 text-blue-400" />
+                                    {equipe.techniciens.map(techId => {
+                                      const tech = techniciens.find(t => t.id === techId);
+                                      return tech ? (
+                                        <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white">{tech.prenom}</div>
+                                      ) : null;
+                                    })}
+                                  </div>
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
+                              {(provided, snapshot) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 ${snapshot.isDraggingOver ? 'bg-purple-500/10 rounded' : ''}`}>
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                    <Truck className="w-3 h-3 text-purple-400" />
+                                    {equipe.vehicules.map(vId => {
+                                      const v = vehicules.find(v => v.id === vId);
+                                      return v ? (
+                                        <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white">{v.nom}</div>
+                                      ) : null;
+                                    })}
+                                  </div>
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
+                              {(provided, snapshot) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 ${snapshot.isDraggingOver ? 'bg-orange-500/10 rounded' : ''}`}>
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                    <Wrench className="w-3 h-3 text-orange-400" />
+                                    {equipe.equipements.map(eId => {
+                                      const e = equipements.find(e => e.id === eId);
+                                      return e ? (
+                                        <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white">{e.nom}</div>
+                                      ) : null;
+                                    })}
+                                  </div>
                                   {provided.placeholder}
                                 </div>
                               )}
