@@ -359,9 +359,9 @@ export default function GestionEquipeTerrain() {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
+            </div>
 
-          <div value="vehicules">
+            <div value="vehicules">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
