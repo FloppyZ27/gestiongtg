@@ -42,6 +42,7 @@ export default function PlanningCalendar({
   const [viewMode, setViewMode] = useState("week"); // week or month
   const [assignments, setAssignments] = useState({});
   const [technicienAssignments, setTechnicienAssignments] = useState({}); // { "date": ["techId1", "techId2"] }
+  const [activeResourceTab, setActiveResourceTab] = useState("mandats");
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
@@ -114,6 +115,9 @@ export default function PlanningCalendar({
       // Retirer du source si ce n'est pas la liste principale
       if (sourceId !== "techniciens-list") {
         newTechAssignments[sourceId] = (newTechAssignments[sourceId] || []).filter(id => id !== draggableId);
+        if (newTechAssignments[sourceId].length === 0) {
+          delete newTechAssignments[sourceId];
+        }
       }
       
       // Ajouter à la destination si ce n'est pas la liste principale
@@ -121,12 +125,25 @@ export default function PlanningCalendar({
         if (!newTechAssignments[destId]) {
           newTechAssignments[destId] = [];
         }
+        // Vérifier si le technicien n'est pas déjà assigné à cette date
         if (!newTechAssignments[destId].includes(draggableId)) {
           newTechAssignments[destId].push(draggableId);
         }
       }
       
       setTechnicienAssignments(newTechAssignments);
+      return;
+    }
+    
+    // Drag & drop de véhicule
+    if (type === "VEHICULE") {
+      // TODO: Implémenter la logique pour les véhicules
+      return;
+    }
+    
+    // Drag & drop d'équipement
+    if (type === "EQUIPEMENT") {
+      // TODO: Implémenter la logique pour les équipements
       return;
     }
 
@@ -310,80 +327,175 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-[250px_1fr] gap-4">
-          {/* Colonne gauche - Dossiers et Techniciens */}
-          <div className="space-y-4">
-            <Card className="bg-slate-900/50 border-slate-800 p-4">
-              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4" />
-                Non planifiés ({unassignedDossiers.length})
-              </h3>
-              <Droppable droppableId="unassigned">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`min-h-[200px] ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
-                  >
-                    {unassignedDossiers.map((dossier, index) => (
-                      <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={snapshot.isDragging ? 'opacity-50' : ''}
-                          >
-                            <DossierCard dossier={dossier} />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </Card>
+        <div className="grid grid-cols-[280px_1fr] gap-4">
+          {/* Colonne gauche - Ressources avec tabs */}
+          <Card className="bg-slate-900/50 border-slate-800 p-4">
+            <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
+                <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700 text-xs">
+                  <FolderOpen className="w-3 h-3 mr-1" />
+                  Mandats
+                </TabsTrigger>
+                <TabsTrigger value="techniciens" className="data-[state=active]:bg-slate-700 text-xs">
+                  <Users className="w-3 h-3 mr-1" />
+                  Tech.
+                </TabsTrigger>
+                <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700 text-xs">
+                  <Truck className="w-3 h-3 mr-1" />
+                  Véh.
+                </TabsTrigger>
+                <TabsTrigger value="equipements" className="data-[state=active]:bg-slate-700 text-xs">
+                  <Wrench className="w-3 h-3 mr-1" />
+                  Équip.
+                </TabsTrigger>
+              </TabsList>
 
-            <Card className="bg-slate-900/50 border-slate-800 p-4">
-              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Techniciens ({techniciens.length})
-              </h3>
-              <Droppable droppableId="techniciens-list" type="TECHNICIEN">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`min-h-[200px] space-y-2 ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
-                  >
-                    {techniciens.map((tech, index) => (
-                      <Draggable key={tech.id} draggableId={tech.id} index={index} type="TECHNICIEN">
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={snapshot.isDragging ? 'opacity-50' : ''}
-                          >
-                            <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2">
-                              <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-blue-400" />
-                                <span className="text-white text-sm font-medium">
-                                  {tech.prenom} {tech.nom}
-                                </span>
+              <TabsContent value="mandats" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  Non planifiés ({unassignedDossiers.length})
+                </h3>
+                <Droppable droppableId="unassigned">
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                    >
+                      {unassignedDossiers.map((dossier, index) => (
+                        <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={snapshot.isDragging ? 'opacity-50' : ''}
+                            >
+                              <DossierCard dossier={dossier} />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </TabsContent>
+
+              <TabsContent value="techniciens" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  Techniciens ({techniciens.length})
+                </h3>
+                <Droppable droppableId="techniciens-list" type="TECHNICIEN" isDropDisabled={true}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto"
+                    >
+                      {techniciens.map((tech, index) => (
+                        <Draggable key={tech.id} draggableId={tech.id} index={index} type="TECHNICIEN">
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={snapshot.isDragging ? 'opacity-50' : ''}
+                            >
+                              <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2 cursor-move hover:bg-blue-500/30 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4 h-4 text-blue-400" />
+                                  <span className="text-white text-sm font-medium">
+                                    {tech.prenom} {tech.nom}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </Card>
-          </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </TabsContent>
+
+              <TabsContent value="vehicules" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  Véhicules ({vehicules.length})
+                </h3>
+                <Droppable droppableId="vehicules-list" type="VEHICULE" isDropDisabled={true}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto"
+                    >
+                      {vehicules.map((vehicule, index) => (
+                        <Draggable key={vehicule.id} draggableId={vehicule.id} index={index} type="VEHICULE">
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={snapshot.isDragging ? 'opacity-50' : ''}
+                            >
+                              <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-2 cursor-move hover:bg-purple-500/30 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  <Truck className="w-4 h-4 text-purple-400" />
+                                  <span className="text-white text-sm font-medium">
+                                    {vehicule.nom}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </TabsContent>
+
+              <TabsContent value="equipements" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  Équipements ({equipements.length})
+                </h3>
+                <Droppable droppableId="equipements-list" type="EQUIPEMENT" isDropDisabled={true}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto"
+                    >
+                      {equipements.map((equipement, index) => (
+                        <Draggable key={equipement.id} draggableId={equipement.id} index={index} type="EQUIPEMENT">
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={snapshot.isDragging ? 'opacity-50' : ''}
+                            >
+                              <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2 cursor-move hover:bg-orange-500/30 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  <Wrench className="w-4 h-4 text-orange-400" />
+                                  <span className="text-white text-sm font-medium">
+                                    {equipement.nom}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </TabsContent>
+            </Tabs>
+          </Card>
 
           {/* Grille calendrier */}
           <div className="space-y-4">
