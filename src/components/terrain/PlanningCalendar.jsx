@@ -629,10 +629,11 @@ export default function PlanningCalendar({
                                   </Button>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                    </div>
+                              </div>
+                              </div>
+                              );
+                              })}
+                              </div>
                   </TabsContent>
 
                   <TabsContent value="planifier" className="mt-0">
