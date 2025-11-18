@@ -230,58 +230,56 @@ export default function GestionEquipeTerrain() {
           <p className="text-slate-400">Gestion des techniciens, véhicules et équipements</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-slate-800/50 border border-slate-700 mb-6">
-            <TabsTrigger value="planning" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
-              <CalendarDays className="w-4 h-4 mr-2" />
-              Planning
-            </TabsTrigger>
-            <TabsTrigger value="employes" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
-              <Users className="w-4 h-4 mr-2" />
-              Techniciens
-            </TabsTrigger>
-            <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
-              <Truck className="w-4 h-4 mr-2" />
-              Véhicules
-            </TabsTrigger>
-            <TabsTrigger value="equipements" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
-              <Wrench className="w-4 h-4 mr-2" />
-              Équipements
-            </TabsTrigger>
-            <TabsTrigger value="cedule" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
-              <Calendar className="w-4 h-4 mr-2" />
-              Dossiers Cédule ({dossiersCedule.length})
-            </TabsTrigger>
-          </TabsList>
+        <PlanningCalendar 
+          dossiers={dossiersCedule}
+          techniciens={techniciensTerrain}
+          vehicules={vehicules}
+          equipements={equipements}
+          clients={clients}
+          onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
+          onAddTechnicien={() => {
+            setEditingEmploye(null);
+            setIsEmployeDialogOpen(true);
+          }}
+          onAddVehicule={() => {
+            setEditingVehicule(null);
+            setIsVehiculeDialogOpen(true);
+          }}
+          onAddEquipement={() => {
+            setEditingEquipement(null);
+            setIsEquipementDialogOpen(true);
+          }}
+          onEditTechnicien={(tech) => {
+            setEditingEmploye(tech);
+            setIsEmployeDialogOpen(true);
+          }}
+          onDeleteTechnicien={(id) => {
+            if (confirm('Supprimer ce technicien ?')) {
+              deleteEmployeMutation.mutate(id);
+            }
+          }}
+          onEditVehicule={(vehicule) => {
+            setEditingVehicule(vehicule);
+            setIsVehiculeDialogOpen(true);
+          }}
+          onDeleteVehicule={(id) => {
+            if (confirm('Supprimer ce véhicule ?')) {
+              deleteVehiculeMutation.mutate(id);
+            }
+          }}
+          onEditEquipement={(equipement) => {
+            setEditingEquipement(equipement);
+            setIsEquipementDialogOpen(true);
+          }}
+          onDeleteEquipement={(id) => {
+            if (confirm('Supprimer cet équipement ?')) {
+              deleteEquipementMutation.mutate(id);
+            }
+          }}
+        />
 
-          {/* Tab Planning */}
-          <TabsContent value="planning">
-            <PlanningCalendar 
-              dossiers={dossiersCedule}
-              techniciens={techniciensTerrain}
-              vehicules={vehicules}
-              equipements={equipements}
-              clients={clients}
-              onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
-              onAddTechnicien={() => {
-                setEditingEmploye(null);
-                setIsEmployeDialogOpen(true);
-                setActiveTab("employes");
-              }}
-              onAddVehicule={() => {
-                setEditingVehicule(null);
-                setIsVehiculeDialogOpen(true);
-                setActiveTab("vehicules");
-              }}
-              onAddEquipement={() => {
-                setEditingEquipement(null);
-                setIsEquipementDialogOpen(true);
-                setActiveTab("equipements");
-              }}
-            />
-          </TabsContent>
-
-          {/* Tab Employés */}
+          {/* Tabs cachées - conservées pour les dialogs */}
+          <div style={{ display: 'none' }}>
           <TabsContent value="employes">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
@@ -617,7 +615,7 @@ export default function GestionEquipeTerrain() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </div>
 
         {/* Dialog Employé */}
         <Dialog open={isEmployeDialogOpen} onOpenChange={setIsEmployeDialogOpen}>

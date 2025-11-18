@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -40,7 +40,13 @@ export default function PlanningCalendar({
   onUpdateDossier,
   onAddTechnicien,
   onAddVehicule,
-  onAddEquipement
+  onAddEquipement,
+  onEditTechnicien,
+  onDeleteTechnicien,
+  onEditVehicule,
+  onDeleteVehicule,
+  onEditEquipement,
+  onDeleteEquipement
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
@@ -104,6 +110,17 @@ export default function PlanningCalendar({
     setCurrentDate(new Date());
   };
 
+  const removeTechnicienFromDate = (dateStr, techId) => {
+    const newTechAssignments = { ...technicienAssignments };
+    if (newTechAssignments[dateStr]) {
+      newTechAssignments[dateStr] = newTechAssignments[dateStr].filter(id => id !== techId);
+      if (newTechAssignments[dateStr].length === 0) {
+        delete newTechAssignments[dateStr];
+      }
+    }
+    setTechnicienAssignments(newTechAssignments);
+  };
+
   const onDragEnd = (result) => {
     const { source, destination, draggableId, type } = result;
 
@@ -116,7 +133,8 @@ export default function PlanningCalendar({
     if (type === "TECHNICIEN") {
       const newTechAssignments = { ...technicienAssignments };
       
-      // Retirer du source si ce n'est pas la liste principale
+      // Ne jamais retirer de la liste principale - on garde toujours les techniciens visibles
+      // Retirer du source seulement si c'est une date (pas la liste principale)
       if (sourceId !== "techniciens-list") {
         newTechAssignments[sourceId] = (newTechAssignments[sourceId] || []).filter(id => id !== draggableId);
         if (newTechAssignments[sourceId].length === 0) {
@@ -411,12 +429,34 @@ export default function PlanningCalendar({
                               {...provided.dragHandleProps}
                               className={snapshot.isDragging ? 'opacity-50' : ''}
                             >
-                              <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2 cursor-move hover:bg-blue-500/30 transition-colors">
-                                <div className="flex items-center gap-2">
-                                  <Users className="w-4 h-4 text-blue-400" />
-                                  <span className="text-white text-sm font-medium">
-                                    {tech.prenom} {tech.nom}
-                                  </span>
+                              <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2 hover:bg-blue-500/30 transition-colors group">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 cursor-move flex-1">
+                                    <Users className="w-4 h-4 text-blue-400" />
+                                    <span className="text-white text-sm font-medium">
+                                      {tech.prenom} {tech.nom}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEditTechnicien(tech);
+                                      }}
+                                      className="text-cyan-400 hover:text-cyan-300 p-1"
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteTechnicien(tech.id);
+                                      }}
+                                      className="text-red-400 hover:text-red-300 p-1"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -459,12 +499,34 @@ export default function PlanningCalendar({
                               {...provided.dragHandleProps}
                               className={snapshot.isDragging ? 'opacity-50' : ''}
                             >
-                              <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-2 cursor-move hover:bg-purple-500/30 transition-colors">
-                                <div className="flex items-center gap-2">
-                                  <Truck className="w-4 h-4 text-purple-400" />
-                                  <span className="text-white text-sm font-medium">
-                                    {vehicule.nom}
-                                  </span>
+                              <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-2 hover:bg-purple-500/30 transition-colors group">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 cursor-move flex-1">
+                                    <Truck className="w-4 h-4 text-purple-400" />
+                                    <span className="text-white text-sm font-medium">
+                                      {vehicule.nom}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEditVehicule(vehicule);
+                                      }}
+                                      className="text-cyan-400 hover:text-cyan-300 p-1"
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteVehicule(vehicule.id);
+                                      }}
+                                      className="text-red-400 hover:text-red-300 p-1"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -507,12 +569,34 @@ export default function PlanningCalendar({
                               {...provided.dragHandleProps}
                               className={snapshot.isDragging ? 'opacity-50' : ''}
                             >
-                              <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2 cursor-move hover:bg-orange-500/30 transition-colors">
-                                <div className="flex items-center gap-2">
-                                  <Wrench className="w-4 h-4 text-orange-400" />
-                                  <span className="text-white text-sm font-medium">
-                                    {equipement.nom}
-                                  </span>
+                              <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2 hover:bg-orange-500/30 transition-colors group">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 cursor-move flex-1">
+                                    <Wrench className="w-4 h-4 text-orange-400" />
+                                    <span className="text-white text-sm font-medium">
+                                      {equipement.nom}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEditEquipement(equipement);
+                                      }}
+                                      className="text-cyan-400 hover:text-cyan-300 p-1"
+                                    >
+                                      <Edit className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteEquipement(equipement.id);
+                                      }}
+                                      className="text-red-400 hover:text-red-300 p-1"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -561,23 +645,20 @@ export default function PlanningCalendar({
                               const tech = techniciens.find(t => t.id === techId);
                               if (!tech) return null;
                               return (
-                                <Draggable key={techId} draggableId={techId} index={idx} type="TECHNICIEN">
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className={snapshot.isDragging ? 'opacity-50' : ''}
-                                    >
-                                      <div className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1">
-                                        <div className="flex items-center gap-1">
-                                          <Users className="w-3 h-3 text-blue-400" />
-                                          <span className="text-white text-xs">{tech.prenom}</span>
-                                        </div>
-                                      </div>
+                                <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <div className="flex items-center gap-1">
+                                      <Users className="w-3 h-3 text-blue-400" />
+                                      <span className="text-white text-xs">{tech.prenom}</span>
                                     </div>
-                                  )}
-                                </Draggable>
+                                    <button
+                                      onClick={() => removeTechnicienFromDate(dateStr, techId)}
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
                               );
                             })}
                             {provided.placeholder}
@@ -659,23 +740,20 @@ export default function PlanningCalendar({
                               const tech = techniciens.find(t => t.id === techId);
                               if (!tech) return null;
                               return (
-                                <Draggable key={techId} draggableId={techId} index={idx} type="TECHNICIEN">
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className={snapshot.isDragging ? 'opacity-50' : ''}
-                                    >
-                                      <div className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1">
-                                        <div className="flex items-center gap-1">
-                                          <Users className="w-3 h-3 text-blue-400" />
-                                          <span className="text-white text-xs">{tech.prenom}</span>
-                                        </div>
-                                      </div>
+                                <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group">
+                                  <div className="flex items-center justify-between gap-1">
+                                    <div className="flex items-center gap-1">
+                                      <Users className="w-3 h-3 text-blue-400" />
+                                      <span className="text-white text-xs">{tech.prenom}</span>
                                     </div>
-                                  )}
-                                </Draggable>
+                                    <button
+                                      onClick={() => removeTechnicienFromDate(dateStr, techId)}
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
                               );
                             })}
                             {provided.placeholder}
