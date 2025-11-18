@@ -7,10 +7,11 @@ import { fr } from "date-fns/locale";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const getActionIcon = (action) => {
-  if (action.includes("DOSSIER")) return <FolderOpen className="w-4 h-4" />;
-  if (action.includes("CLIENT")) return <User className="w-4 h-4" />;
+  if (action.includes("DOSSIER") && !action.includes("COMMENTAIRE")) return <FolderOpen className="w-4 h-4" />;
+  if (action.includes("CLIENT") && !action.includes("COMMENTAIRE")) return <User className="w-4 h-4" />;
   if (action.includes("LOT")) return <Grid3x3 className="w-4 h-4" />;
   if (action.includes("UTILISATEUR")) return <User className="w-4 h-4" />;
+  if (action.includes("COMMENTAIRE")) return <FileText className="w-4 h-4" />;
   return <FileText className="w-4 h-4" />;
 };
 
@@ -36,7 +37,13 @@ const getActionLabel = (action) => {
     "SUPPRESSION_LOT": "Suppression de lot",
     "MODIFICATION_UTILISATEUR": "Modification d'utilisateur",
     "DESACTIVATION_UTILISATEUR": "Désactivation d'utilisateur",
-    "ACTIVATION_UTILISATEUR": "Activation d'utilisateur"
+    "ACTIVATION_UTILISATEUR": "Activation d'utilisateur",
+    "AJOUT_COMMENTAIRE": "Ajout de commentaire (dossier)",
+    "MODIFICATION_COMMENTAIRE": "Modification de commentaire (dossier)",
+    "SUPPRESSION_COMMENTAIRE": "Suppression de commentaire (dossier)",
+    "AJOUT_COMMENTAIRE_CLIENT": "Ajout de commentaire (client)",
+    "MODIFICATION_COMMENTAIRE_CLIENT": "Modification de commentaire (client)",
+    "SUPPRESSION_COMMENTAIRE_CLIENT": "Suppression de commentaire (client)"
   };
   return labels[action] || action;
 };

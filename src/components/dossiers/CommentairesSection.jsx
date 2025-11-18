@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +55,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       console.log("Creating comment:", commentaireData);
       const newComment = await base44.entities.CommentaireDossier.create(commentaireData);
       console.log("Comment created:", newComment);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: commentaireData.utilisateur_email,
+        utilisateur_nom: commentaireData.utilisateur_nom,
+        action: "AJOUT_COMMENTAIRE",
+        entite: "CommentaireDossier",
+        entite_id: newComment.id,
+        details: `Ajout d'un commentaire sur un dossier`,
+        metadata: {
+          dossier_id: commentaireData.dossier_id
+        }
+      });
       
       // Détecter les tags (@email) dans le contenu et créer des notifications
       const emailRegex = /@([^\s]+)/g;
@@ -125,6 +137,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setNouveauCommentaire("");
       setShowMentionMenu(false);
       setMentionSearch("");
@@ -132,18 +145,52 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
   });
 
   const updateCommentaireMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.CommentaireDossier.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const result = await base44.entities.CommentaireDossier.update(id, data);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "MODIFICATION_COMMENTAIRE",
+        entite: "CommentaireDossier",
+        entite_id: id,
+        details: `Modification d'un commentaire`,
+        metadata: {
+          dossier_id: dossierId
+        }
+      });
+      
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setEditingCommentId(null);
       setEditingContent("");
     },
   });
 
   const deleteCommentaireMutation = useMutation({
-    mutationFn: (id) => base44.entities.CommentaireDossier.delete(id),
+    mutationFn: async (id) => {
+      await base44.entities.CommentaireDossier.delete(id);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "SUPPRESSION_COMMENTAIRE",
+        entite: "CommentaireDossier",
+        entite_id: id,
+        details: `Suppression d'un commentaire`,
+        metadata: {
+          dossier_id: dossierId
+        }
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentaires', dossierId] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
     },
   });
 

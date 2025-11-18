@@ -93,18 +93,52 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   });
 
   const updateCommentaireMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.CommentaireClient.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const result = await base44.entities.CommentaireClient.update(id, data);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "MODIFICATION_COMMENTAIRE_CLIENT",
+        entite: "CommentaireClient",
+        entite_id: id,
+        details: `Modification d'un commentaire sur un client`,
+        metadata: {
+          client_id: clientId
+        }
+      });
+      
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentairesClient', clientId] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setEditingCommentId(null);
       setEditingContent("");
     },
   });
 
   const deleteCommentaireMutation = useMutation({
-    mutationFn: (id) => base44.entities.CommentaireClient.delete(id),
+    mutationFn: async (id) => {
+      await base44.entities.CommentaireClient.delete(id);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "SUPPRESSION_COMMENTAIRE_CLIENT",
+        entite: "CommentaireClient",
+        entite_id: id,
+        details: `Suppression d'un commentaire sur un client`,
+        metadata: {
+          client_id: clientId
+        }
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commentairesClient', clientId] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
     },
   });
 

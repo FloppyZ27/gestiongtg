@@ -188,6 +188,21 @@ export default function Dossiers() {
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "CREATION_DOSSIER",
+        entite: "Dossier",
+        entite_id: newDossier.id,
+        details: `Création du dossier ${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`,
+        metadata: {
+          arpenteur: dossierData.arpenteur_geometre,
+          nombre_mandats: dossierData.mandats?.length || 0
+        }
+      });
+      
       if (commentairesTemporaires.length > 0) {
         const commentairePromises = commentairesTemporaires.map((comment) =>
           base44.entities.CommentaireDossier.create({
@@ -203,6 +218,7 @@ export default function Dossiers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setIsDialogOpen(false);
       resetForm();
     }
@@ -212,6 +228,19 @@ export default function Dossiers() {
     mutationFn: async ({ id, dossierData }) => {
       const oldDossier = dossiers.find(d => d.id === id);
       const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      
+      // Log l'action
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email,
+        utilisateur_nom: user?.full_name,
+        action: "MODIFICATION_DOSSIER",
+        entite: "Dossier",
+        entite_id: id,
+        details: `Modification du dossier ${getArpenteurInitials(dossierData.arpenteur_geometre)}${dossierData.numero_dossier}`,
+        metadata: {
+          statut: dossierData.statut
+        }
+      });
       
       // Créer des notifications pour les utilisateurs nouvellement assignés
       if (oldDossier && dossierData.mandats) {
@@ -243,6 +272,7 @@ export default function Dossiers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setIsDialogOpen(false);
       setIsCloseDossierDialogOpen(false);
       setIsFacturationDialogOpen(false);
@@ -257,9 +287,25 @@ export default function Dossiers() {
   });
 
   const deleteDossierMutation = useMutation({
-    mutationFn: (id) => base44.entities.Dossier.delete(id),
+    mutationFn: async (id) => {
+      const dossier = dossiers.find(d => d.id === id);
+      await base44.entities.Dossier.delete(id);
+      
+      // Log l'action
+      if (dossier) {
+        await base44.entities.ActionLog.create({
+          utilisateur_email: user?.email,
+          utilisateur_nom: user?.full_name,
+          action: "SUPPRESSION_DOSSIER",
+          entite: "Dossier",
+          entite_id: id,
+          details: `Suppression du dossier ${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
+        });
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
     }
   });
 
