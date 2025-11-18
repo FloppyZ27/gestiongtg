@@ -922,10 +922,16 @@ export default function PlanningCalendar({
                       <div className="space-y-2">
                         {dayEquipes.map((equipe) => {
                           const activeTab = getEquipeActiveTab(equipe.id);
+                          const equipeNom = equipe.techniciens.length > 0
+                            ? equipe.techniciens.map(techId => {
+                                const tech = techniciens.find(t => t.id === techId);
+                                return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+                              }).filter(n => n).join('-')
+                            : equipe.nom;
                           return (
                             <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
-                              <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-700">
-                                <span className="text-white text-xs font-semibold">{equipe.nom}</span>
+                              <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-slate-600 bg-slate-700/50 -m-2 mx-2 px-2 py-2 rounded-t-lg">
+                                <span className="text-white text-xs font-bold">{equipeNom}</span>
                                 
                                 {/* Tabs pour ressources */}
                                 <div className="flex items-center gap-1">
@@ -1137,10 +1143,16 @@ export default function PlanningCalendar({
                       <div className="space-y-2">
                         {dayEquipes.map((equipe) => {
                           const activeTab = getEquipeActiveTab(equipe.id);
+                          const equipeNom = equipe.techniciens.length > 0
+                            ? equipe.techniciens.map(techId => {
+                                const tech = techniciens.find(t => t.id === techId);
+                                return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+                              }).filter(n => n).join('-')
+                            : equipe.nom;
                           return (
                             <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded p-1 text-xs">
-                              <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-700">
-                                <span className="text-white font-semibold text-xs">{equipe.nom}</span>
+                              <div className="flex items-center justify-between mb-1 pb-1 border-b-2 border-slate-600 bg-slate-700/50 -mx-1 -mt-1 px-1 py-1 rounded-t">
+                                <span className="text-white font-bold text-xs">{equipeNom}</span>
                                 
                                 {/* Tabs pour ressources */}
                                 <div className="flex items-center gap-0.5">
