@@ -531,7 +531,7 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-[280px_1fr] gap-4">
+        <div className="grid grid-cols-[240px_1fr] gap-4">
           {/* Colonne gauche - Ressources avec tabs */}
           <Card className="bg-slate-900/50 border-slate-800 p-4">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
