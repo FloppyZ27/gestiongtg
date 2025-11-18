@@ -116,7 +116,7 @@ export default function PlanningCalendar({
       newEquipes[dateStr] = [];
     }
     const newEquipe = {
-      id: `equipe-${Date.now()}`,
+      id: `eq${Date.now()}`,
       nom: `Équipe ${newEquipes[dateStr].length + 1}`,
       techniciens: [],
       vehicules: [],
