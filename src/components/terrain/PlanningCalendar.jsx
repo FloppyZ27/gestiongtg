@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, Tool, UserCheck, Link2, Timer, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -427,7 +427,7 @@ export default function PlanningCalendar({
         {/* Instruments requis */}
         {terrain.instruments_requis && (
           <div className="flex items-center gap-1 mb-1">
-            <Tool className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
             <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
           </div>
         )}
@@ -435,7 +435,7 @@ export default function PlanningCalendar({
         {/* Rendez-vous */}
         {terrain.a_rendez_vous && terrain.date_rendez_vous && (
           <div className="flex items-center gap-1 mb-1">
-            <Calendar className="w-3 h-3 text-orange-400 flex-shrink-0" />
+            <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
             <span className="text-xs text-orange-300">
               RDV: {format(new Date(terrain.date_rendez_vous), "dd MMM", { locale: fr })}
               {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
