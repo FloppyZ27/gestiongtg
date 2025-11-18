@@ -236,6 +236,8 @@ export default function GestionEquipeTerrain() {
           vehicules={vehicules}
           equipements={equipements}
           clients={clients}
+          users={employes}
+          lots={[]}
           onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
           onAddTechnicien={() => {
             setEditingEmploye(null);

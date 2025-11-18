@@ -5,9 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
+import EditDossierDialog from "../dossiers/EditDossierDialog";
+import CommentairesSection from "../dossiers/CommentairesSection";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -46,13 +51,19 @@ export default function PlanningCalendar({
   onEditVehicule,
   onDeleteVehicule,
   onEditEquipement,
-  onDeleteEquipement
+  onDeleteEquipement,
+  users,
+  lots
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
   const [assignments, setAssignments] = useState({});
   const [equipes, setEquipes] = useState({}); // { "date": [{ id, nom, techniciens: [], vehicules: [], equipements: [], mandats: [] }] }
   const [activeResourceTab, setActiveResourceTab] = useState("mandats");
+  const [viewingDossier, setViewingDossier] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [editingDossier, setEditingDossier] = useState(null);
+  const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
 
   // Charger les équipes depuis localStorage au démarrage
   useEffect(() => {
@@ -351,39 +362,94 @@ export default function PlanningCalendar({
     return !isAssignedInEquipe;
   });
 
-  const handleDossierClick = (dossierId) => {
-    const url = `/pages/Dossiers?dossier_id=${dossierId}`;
-    window.open(url, '_blank');
+  const getClientById = (id) => clients.find(c => c.id === id);
+  const getLotById = (id) => lots?.find(l => l.id === id);
+  const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+
+  const handleCardClick = (dossier) => {
+    setViewingDossier(dossier);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEdit = (dossier) => {
+    setIsViewDialogOpen(false);
+    setEditingDossier(dossier);
+    setIsEditingDialogOpen(true);
   };
 
   const DossierCard = ({ dossier }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
+    const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
     
     return (
-      <div 
+      <Card 
         onClick={(e) => {
           e.stopPropagation();
-          handleDossierClick(dossier.id);
+          handleCardClick(dossier);
         }}
-        className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-3 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+        className="border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer hover:shadow-lg"
       >
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-sm font-semibold`}>
-            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-          </Badge>
-          {mandat && (
-            <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-sm font-semibold">
-              {mandat.type_mandat}
+        <div className="p-3 space-y-2">
+          {/* Mandat en haut */}
+          <div className="text-center pb-2 border-b border-slate-700">
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
+              {mandat?.type_mandat || 'Mandat'}
             </Badge>
+          </div>
+
+          {/* Dossier à gauche, Clients à droite */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Dossier</p>
+              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs w-full justify-center`}>
+                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Clients</p>
+              <p className="text-xs text-slate-300 font-medium truncate">
+                {getClientsNames(dossier.clients_ids)}
+              </p>
+            </div>
+          </div>
+
+          {/* Adresse des travaux */}
+          {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+            <div className="pt-1">
+              <p className="text-xs text-slate-500 mb-1">Adresse</p>
+              <div className="flex items-start gap-1 text-xs text-slate-300">
+                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                <span className="line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
+              </div>
+            </div>
           )}
+
+          {/* Date de livraison et utilisateur */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
+            {mandat?.date_livraison ? (
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <Calendar className="w-3 h-3" />
+                <span>{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</span>
+              </div>
+            ) : (
+              <div className="text-xs text-slate-600">Pas de date</div>
+            )}
+
+            {assignedUser ? (
+              <Avatar className="w-7 h-7 border-2 border-slate-600">
+                <AvatarImage src={assignedUser.photo_url} />
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  {getUserInitials(assignedUser.full_name)}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                <User className="w-4 h-4 text-slate-500" />
+              </div>
+            )}
+          </div>
         </div>
-        <p className="text-white text-sm font-medium mb-1 line-clamp-1">
-          {getClientsNames(dossier.clients_ids)}
-        </p>
-        <p className="text-emerald-300 text-xs line-clamp-1">
-          {formatAdresse(mandat?.adresse_travaux)}
-        </p>
-      </div>
+      </Card>
     );
   };
 
@@ -1086,6 +1152,139 @@ export default function PlanningCalendar({
           </div>
         </div>
       </DragDropContext>
+
+      {/* Dialog de vue du dossier */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
+          </DialogHeader>
+          {viewingDossier && (
+            <div className="flex h-[90vh]">
+              <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-white">
+                    Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
+                  </h2>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Informations principales */}
+                  <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                    <div>
+                      <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                      <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Statut</Label>
+                      <div className="mt-1">
+                        <Badge variant="outline" className={`border ${viewingDossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
+                          {viewingDossier.statut}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-sm">Date d'ouverture</Label>
+                      <p className="text-white font-medium mt-1">
+                        {viewingDossier.date_ouverture ? format(new Date(viewingDossier.date_ouverture), "dd MMMM yyyy", { locale: fr }) : '-'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mandats */}
+                  {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
+                    <div>
+                      <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
+                      <div className="space-y-3">
+                        {viewingDossier.mandats.map((mandat, index) => (
+                          <Card key={index} className="bg-slate-800/50 border-slate-700">
+                            <div className="p-4 space-y-3">
+                              <div className="flex items-start justify-between">
+                                <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                    <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                                  </div>
+                                )}
+                                
+                                {mandat.lots && mandat.lots.length > 0 && (
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Lots</Label>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {mandat.lots.map((lotId) => {
+                                        const lot = getLotById(lotId);
+                                        return (
+                                          <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                            {lot?.numero_lot || lotId}
+                                          </Badge>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {mandat.tache_actuelle && (
+                                <div>
+                                  <Label className="text-slate-400 text-xs">Tâche actuelle</Label>
+                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 mt-1">
+                                    {mandat.tache_actuelle}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                  <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    Fermer
+                  </Button>
+                  <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={() => handleEdit(viewingDossier)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 pr-4">
+                  <CommentairesSection
+                    dossierId={viewingDossier?.id}
+                    dossierTemporaire={false}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog d'édition du dossier */}
+      <EditDossierDialog
+        isOpen={isEditingDialogOpen}
+        onClose={() => {
+          setIsEditingDialogOpen(false);
+          setEditingDossier(null);
+        }}
+        dossier={editingDossier}
+        onSuccess={() => {
+          // Pas besoin d'invalider, les données sont passées en props
+        }}
+        clients={clients}
+        users={users}
+      />
     </div>
   );
 }
