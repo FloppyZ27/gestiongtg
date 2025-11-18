@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit, Package, FileDown } from "lucide-react";
+import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit, Package } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -19,7 +19,6 @@ import AddressInput from "../shared/AddressInput";
 import ClientFormDialog from "../clients/ClientFormDialog";
 import ClientDetailView from "../clients/ClientDetailView";
 import MandatTabs from "./MandatTabs";
-import RapportDossier from "./RapportDossier";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -54,7 +53,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     type_minute: "Initiale"
   });
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
-  const [isRapportDialogOpen, setIsRapportDialogOpen] = useState(false);
 
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
@@ -65,12 +63,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const { data: allDossiers = [] } = useQuery({
     queryKey: ['dossiers'],
     queryFn: () => base44.entities.Dossier.list(),
-    initialData: [],
-  });
-
-  const { data: entreeTemps = [] } = useQuery({
-    queryKey: ['entreeTemps'],
-    queryFn: () => base44.entities.EntreeTemps.list(),
     initialData: [],
   });
 
@@ -779,20 +771,9 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                 )}
               </form>
 
-              <div className="flex justify-between gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => setIsRapportDialogOpen(true)}
-                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/30"
-                >
-                  <FileDown className="w-4 h-4 mr-2" />
-                  Générer un rapport
-                </Button>
-                <div className="flex gap-3">
-                  <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Modifier</Button>
-                </div>
+              <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
+                <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+                <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Modifier</Button>
               </div>
             </div>
 
@@ -1222,16 +1203,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
           if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
         }}
-        />
-
-        <RapportDossier
-        isOpen={isRapportDialogOpen}
-        onClose={() => setIsRapportDialogOpen(false)}
-        dossier={dossier}
-        clients={clients}
-        users={users}
-        entreeTemps={entreeTemps}
-        />
-        </>
-        );
-        }
+      />
+    </>
+  );
+}
