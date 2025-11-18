@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, FileDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,7 @@ import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
+import RapportDossier from "../components/dossiers/RapportDossier";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -119,6 +120,8 @@ export default function Dossiers() {
   const [terrainSectionExpanded, setTerrainSectionExpanded] = useState({});
   const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
+  const [isRapportDialogOpen, setIsRapportDialogOpen] = useState(false);
+  const [rapportDossier, setRapportDossier] = useState(null);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -523,6 +526,11 @@ export default function Dossiers() {
     if (viewingDossier) {
       handleEdit(viewingDossier);
     }
+  };
+
+  const handleGenerateRapport = (dossier) => {
+    setRapportDossier(dossier);
+    setIsRapportDialogOpen(true);
   };
 
   const handleDelete = (id, nom) => {
@@ -2537,6 +2545,15 @@ export default function Dossiers() {
 
         <ClientFormDialog open={isClientFormDialogOpen} onOpenChange={(open) => {setIsClientFormDialogOpen(open);if (!open) setEditingClientForForm(null);}} editingClient={editingClientForForm} defaultType={clientTypeForForm} onSuccess={() => {queryClient.invalidateQueries({ queryKey: ['clients'] });if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);}} />
 
+        <RapportDossier
+          isOpen={isRapportDialogOpen}
+          onClose={() => setIsRapportDialogOpen(false)}
+          dossier={rapportDossier}
+          clients={clients}
+          users={users}
+          entreeTemps={entreeTemps}
+        />
+
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
             <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
@@ -3357,7 +3374,16 @@ export default function Dossiers() {
                             <Badge variant="outline" className={`border ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{dossier.statut}</Badge>
                           </TableCell>
                           <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleGenerateRapport(dossier)} 
+                                className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                title="Générer un rapport"
+                              >
+                                <FileDown className="w-4 h-4" />
+                              </Button>
                               <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
                                 <Edit className="w-4 h-4" />
                               </Button>
