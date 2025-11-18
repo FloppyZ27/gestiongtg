@@ -64,11 +64,15 @@ export default function PlanningCalendar({
   const getDays = () => {
     if (viewMode === "week") {
       const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // Lundi
-      return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+      return Array.from({ length: 5 }, (_, i) => addDays(start, i)); // Seulement lun-ven
     } else {
       const start = startOfMonth(currentDate);
       const end = endOfMonth(currentDate);
-      return eachDayOfInterval({ start, end });
+      const allDays = eachDayOfInterval({ start, end });
+      return allDays.filter(day => {
+        const dayOfWeek = day.getDay();
+        return dayOfWeek !== 0 && dayOfWeek !== 6; // Exclure dimanche (0) et samedi (6)
+      });
     }
   };
 
@@ -99,73 +103,96 @@ export default function PlanningCalendar({
 
     if (!destination) return;
 
-    const sourceDate = source.droppableId;
-    const destDate = destination.droppableId;
+    const sourceId = source.droppableId;
+    const destId = destination.droppableId;
 
-    if (sourceDate === "unassigned") {
-      // Déplacer d'unassigned vers une date
+    // Format: "date-technicienId" ou "unassigned"
+    const parseDroppableId = (id) => {
+      if (id === "unassigned") return { date: null, technicienId: null };
+      const parts = id.split('-');
+      return { 
+        date: parts.slice(0, 3).join('-'), // yyyy-MM-dd
+        technicienId: parts.slice(3).join('-') 
+      };
+    };
+
+    const source_parsed = parseDroppableId(sourceId);
+    const dest_parsed = parseDroppableId(destId);
+
+    // Trouver le dossier
+    const dossier = dossiers.find(d => d.id === draggableId);
+    if (!dossier) return;
+
+    if (sourceId === "unassigned") {
+      // Déplacer d'unassigned vers date-technicien
       const newAssignments = { ...assignments };
-      if (!newAssignments[destDate]) {
-        newAssignments[destDate] = [];
+      if (!newAssignments[destId]) {
+        newAssignments[destId] = [];
       }
-      newAssignments[destDate].push({
+      newAssignments[destId].push({
         dossierId: draggableId,
-        technicien: null,
+        technicienId: dest_parsed.technicienId,
         vehicule: null,
         equipement: null
       });
       setAssignments(newAssignments);
 
-      // Mettre à jour le dossier dans la base de données
-      const dossier = dossiers.find(d => d.id === draggableId);
-      if (dossier) {
-        const updatedMandats = dossier.mandats?.map(m => 
-          m.tache_actuelle === "Cédule" ? { ...m, date_terrain: destDate } : m
-        );
-        onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
-      }
-    } else if (destDate === "unassigned") {
+      // Mettre à jour le dossier
+      const updatedMandats = dossier.mandats?.map(m => 
+        m.tache_actuelle === "Cédule" ? { 
+          ...m, 
+          date_terrain: dest_parsed.date,
+          utilisateur_assigne: dest_parsed.technicienId 
+        } : m
+      );
+      onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
+    } else if (destId === "unassigned") {
       // Déplacer vers unassigned
       const newAssignments = { ...assignments };
-      if (newAssignments[sourceDate]) {
-        newAssignments[sourceDate] = newAssignments[sourceDate].filter(a => a.dossierId !== draggableId);
-        if (newAssignments[sourceDate].length === 0) {
-          delete newAssignments[sourceDate];
+      if (newAssignments[sourceId]) {
+        newAssignments[sourceId] = newAssignments[sourceId].filter(a => a.dossierId !== draggableId);
+        if (newAssignments[sourceId].length === 0) {
+          delete newAssignments[sourceId];
         }
       }
       setAssignments(newAssignments);
 
       // Mettre à jour le dossier
-      const dossier = dossiers.find(d => d.id === draggableId);
-      if (dossier) {
-        const updatedMandats = dossier.mandats?.map(m => 
-          m.tache_actuelle === "Cédule" ? { ...m, date_terrain: null } : m
-        );
-        onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
-      }
-    } else if (sourceDate !== destDate) {
-      // Déplacer d'une date à une autre
+      const updatedMandats = dossier.mandats?.map(m => 
+        m.tache_actuelle === "Cédule" ? { 
+          ...m, 
+          date_terrain: null,
+          utilisateur_assigne: null 
+        } : m
+      );
+      onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
+    } else if (sourceId !== destId) {
+      // Déplacer d'un slot à un autre
       const newAssignments = { ...assignments };
-      const item = newAssignments[sourceDate]?.find(a => a.dossierId === draggableId);
+      const item = newAssignments[sourceId]?.find(a => a.dossierId === draggableId);
       if (item) {
-        newAssignments[sourceDate] = newAssignments[sourceDate].filter(a => a.dossierId !== draggableId);
-        if (newAssignments[sourceDate].length === 0) {
-          delete newAssignments[sourceDate];
+        newAssignments[sourceId] = newAssignments[sourceId].filter(a => a.dossierId !== draggableId);
+        if (newAssignments[sourceId].length === 0) {
+          delete newAssignments[sourceId];
         }
-        if (!newAssignments[destDate]) {
-          newAssignments[destDate] = [];
+        if (!newAssignments[destId]) {
+          newAssignments[destId] = [];
         }
-        newAssignments[destDate].push(item);
+        newAssignments[destId].push({
+          ...item,
+          technicienId: dest_parsed.technicienId
+        });
         setAssignments(newAssignments);
 
         // Mettre à jour le dossier
-        const dossier = dossiers.find(d => d.id === draggableId);
-        if (dossier) {
-          const updatedMandats = dossier.mandats?.map(m => 
-            m.tache_actuelle === "Cédule" ? { ...m, date_terrain: destDate } : m
-          );
-          onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
-        }
+        const updatedMandats = dossier.mandats?.map(m => 
+          m.tache_actuelle === "Cédule" ? { 
+            ...m, 
+            date_terrain: dest_parsed.date,
+            utilisateur_assigne: dest_parsed.technicienId 
+          } : m
+        );
+        onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
       }
     }
   };
@@ -174,25 +201,35 @@ export default function PlanningCalendar({
     const isAssigned = Object.values(assignments).some(dayAssignments => 
       dayAssignments.some(a => a.dossierId === d.id)
     );
-    return !isAssigned && !d.mandats?.some(m => m.date_terrain);
+    const hasDateTerrain = d.mandats?.some(m => m.date_terrain && m.tache_actuelle === "Cédule");
+    return !isAssigned && !hasDateTerrain;
   });
 
-  const getAssignmentsForDate = (date) => {
+  const getAssignmentsForDateAndTech = (date, technicienId) => {
     const dateStr = format(date, "yyyy-MM-dd");
-    const assigned = assignments[dateStr] || [];
+    const slotId = `${dateStr}-${technicienId}`;
+    const assigned = assignments[slotId] || [];
     
-    // Ajouter aussi les dossiers qui ont cette date dans leur mandat
-    const fromMandats = dossiers.filter(d => 
-      d.mandats?.some(m => m.date_terrain === dateStr && m.tache_actuelle === "Cédule")
-    ).filter(d => !assigned.some(a => a.dossierId === d.id));
+    // Ajouter aussi les dossiers qui ont cette date et ce technicien dans leur mandat
+    const fromMandats = dossiers.filter(d => {
+      const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+      return mandat?.date_terrain === dateStr && 
+             mandat?.utilisateur_assigne === technicienId;
+    }).filter(d => !assigned.some(a => a.dossierId === d.id));
 
     return [
       ...assigned.map(a => ({ ...a, dossier: dossiers.find(d => d.id === a.dossierId) })),
-      ...fromMandats.map(d => ({ dossierId: d.id, dossier: d, technicien: null, vehicule: null, equipement: null }))
+      ...fromMandats.map(d => ({ 
+        dossierId: d.id, 
+        dossier: d, 
+        technicienId: technicienId,
+        vehicule: null, 
+        equipement: null 
+      }))
     ];
   };
 
-  const DossierCard = ({ dossier, assignment }) => {
+  const DossierCard = ({ dossier }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     
     return (
@@ -213,28 +250,6 @@ export default function PlanningCalendar({
         <p className="text-slate-500 text-xs line-clamp-1">
           {formatAdresse(mandat?.adresse_travaux)}
         </p>
-        {assignment && (assignment.technicien || assignment.vehicule || assignment.equipement) && (
-          <div className="flex gap-1 mt-2 flex-wrap">
-            {assignment.technicien && (
-              <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                <Users className="w-3 h-3 mr-1" />
-                {techniciens.find(t => t.id === assignment.technicien)?.prenom}
-              </Badge>
-            )}
-            {assignment.vehicule && (
-              <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                <Truck className="w-3 h-3 mr-1" />
-                {vehicules.find(v => v.id === assignment.vehicule)?.nom}
-              </Badge>
-            )}
-            {assignment.equipement && (
-              <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                <Wrench className="w-3 h-3 mr-1" />
-                {equipements.find(e => e.id === assignment.equipement)?.nom}
-              </Badge>
-            )}
-          </div>
-        )}
       </div>
     );
   };
@@ -305,64 +320,78 @@ export default function PlanningCalendar({
             </Droppable>
           </Card>
 
-          {/* Grille calendrier */}
-          <div className={`grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-7"} gap-2`}>
-            {days.map((day) => {
-              const dateStr = format(day, "yyyy-MM-dd");
-              const dayAssignments = getAssignmentsForDate(day);
-              const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+          {/* Grille calendrier par technicien */}
+          <div className="space-y-4">
+            {techniciens.map((technicien) => (
+              <Card key={technicien.id} className="bg-slate-900/50 border-slate-800 p-4">
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-700">
+                  <Users className="w-4 h-4 text-blue-400" />
+                  <h3 className="text-white font-semibold">
+                    {technicien.prenom} {technicien.nom}
+                  </h3>
+                </div>
+                
+                <div className={`grid ${viewMode === "week" ? "grid-cols-5" : `grid-cols-${Math.min(days.length, 7)}`} gap-2`}>
+                  {days.map((day) => {
+                    const dateStr = format(day, "yyyy-MM-dd");
+                    const slotId = `${dateStr}-${technicien.id}`;
+                    const assignments = getAssignmentsForDateAndTech(day, technicien.id);
+                    const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
 
-              return (
-                <Card 
-                  key={dateStr} 
-                  className={`bg-slate-900/50 border-slate-800 p-2 min-h-[300px] ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
-                >
-                  <div className="text-center mb-2 pb-2 border-b border-slate-700">
-                    <div className="text-slate-400 text-xs">
-                      {format(day, "EEE", { locale: fr })}
-                    </div>
-                    <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                      {format(day, "d", { locale: fr })}
-                    </div>
-                    {dayAssignments.length > 0 && (
-                      <Badge className="bg-emerald-500/20 text-emerald-400 text-xs mt-1">
-                        {dayAssignments.length}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <Droppable droppableId={dateStr}>
-                    {(provided, snapshot) => (
+                    return (
                       <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`min-h-[200px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg' : ''}`}
+                        key={slotId}
+                        className={`border border-slate-700 rounded-lg p-2 min-h-[200px] ${isToday ? 'ring-2 ring-cyan-500/50' : ''}`}
                       >
-                        {dayAssignments.map((assignment, index) => (
-                          <Draggable 
-                            key={assignment.dossierId} 
-                            draggableId={assignment.dossierId} 
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={snapshot.isDragging ? 'opacity-50' : ''}
-                              >
-                                <DossierCard dossier={assignment.dossier} assignment={assignment} />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
+                        <div className="text-center mb-2 pb-2 border-b border-slate-700">
+                          <div className="text-slate-400 text-xs">
+                            {format(day, "EEE", { locale: fr })}
+                          </div>
+                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                            {format(day, "d", { locale: fr })}
+                          </div>
+                          {assignments.length > 0 && (
+                            <Badge className="bg-emerald-500/20 text-emerald-400 text-xs mt-1">
+                              {assignments.length}
+                            </Badge>
+                          )}
+                        </div>
+
+                        <Droppable droppableId={slotId}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`min-h-[120px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg' : ''}`}
+                            >
+                              {assignments.map((assignment, index) => (
+                                <Draggable 
+                                  key={assignment.dossierId} 
+                                  draggableId={assignment.dossierId} 
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={snapshot.isDragging ? 'opacity-50' : ''}
+                                    >
+                                      <DossierCard dossier={assignment.dossier} />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
                       </div>
-                    )}
-                  </Droppable>
-                </Card>
-              );
-            })}
+                    );
+                  })}
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       </DragDropContext>
