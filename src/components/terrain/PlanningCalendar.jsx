@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, Tool, UserCheck, Link2, Timer, AlertCircle } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -380,6 +380,7 @@ export default function PlanningCalendar({
   const DossierCard = ({ dossier }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
+    const terrain = mandat?.terrain || {};
     
     return (
       <div 
@@ -396,8 +397,8 @@ export default function PlanningCalendar({
           </Badge>
         </div>
 
-        {/* Dossier + Clients sur une ligne */}
-        <div className="flex items-center justify-between gap-2 mb-2">
+        {/* Dossier + Clients */}
+        <div className="flex items-center justify-between gap-2 mb-1">
           <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
           </Badge>
@@ -407,24 +408,67 @@ export default function PlanningCalendar({
           </div>
         </div>
 
-        {/* Adresse sur une ligne */}
+        {/* Adresse */}
         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1 mb-1">
             <MapPin className="w-3 h-3 text-emerald-400 flex-shrink-0" />
             <span className="text-xs text-emerald-300 truncate">{formatAdresse(mandat.adresse_travaux)}</span>
           </div>
         )}
 
-        {/* Date + Avatar sur une ligne */}
-        <div className="flex items-center justify-between">
-          {mandat?.date_livraison ? (
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-emerald-400" />
-              <span className="text-xs text-emerald-300">{format(new Date(mandat.date_livraison), "dd MMM", { locale: fr })}</span>
-            </div>
-          ) : (
-            <div className="w-1"></div>
-          )}
+        {/* Date limite levé */}
+        {terrain.date_limite_leve && (
+          <div className="flex items-center gap-1 mb-1">
+            <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+            <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve), "dd MMM", { locale: fr })}</span>
+          </div>
+        )}
+
+        {/* Instruments requis */}
+        {terrain.instruments_requis && (
+          <div className="flex items-center gap-1 mb-1">
+            <Tool className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
+          </div>
+        )}
+
+        {/* Rendez-vous */}
+        {terrain.a_rendez_vous && terrain.date_rendez_vous && (
+          <div className="flex items-center gap-1 mb-1">
+            <Calendar className="w-3 h-3 text-orange-400 flex-shrink-0" />
+            <span className="text-xs text-orange-300">
+              RDV: {format(new Date(terrain.date_rendez_vous), "dd MMM", { locale: fr })}
+              {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
+            </span>
+          </div>
+        )}
+
+        {/* Technicien à prioriser */}
+        {terrain.technicien && (
+          <div className="flex items-center gap-1 mb-1">
+            <UserCheck className="w-3 h-3 text-blue-400 flex-shrink-0" />
+            <span className="text-xs text-blue-300 truncate">{terrain.technicien}</span>
+          </div>
+        )}
+
+        {/* Dossier simultané */}
+        {terrain.dossier_simultane && (
+          <div className="flex items-center gap-1 mb-1">
+            <Link2 className="w-3 h-3 text-purple-400 flex-shrink-0" />
+            <span className="text-xs text-purple-300 truncate">Avec: {terrain.dossier_simultane}</span>
+          </div>
+        )}
+
+        {/* Temps prévu + Utilisateur assigné */}
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+          <div className="flex items-center gap-2">
+            {terrain.temps_prevu && (
+              <div className="flex items-center gap-1">
+                <Timer className="w-3 h-3 text-emerald-400" />
+                <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+              </div>
+            )}
+          </div>
 
           {assignedUser ? (
             <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
