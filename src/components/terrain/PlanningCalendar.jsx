@@ -333,21 +333,17 @@ export default function PlanningCalendar({
           <Card className="bg-slate-900/50 border-slate-800 p-4">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
-                <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700 text-xs">
-                  <FolderOpen className="w-3 h-3 mr-1" />
-                  Mandats
+                <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
+                  <FolderOpen className="w-4 h-4" />
                 </TabsTrigger>
-                <TabsTrigger value="techniciens" className="data-[state=active]:bg-slate-700 text-xs">
-                  <Users className="w-3 h-3 mr-1" />
-                  Tech.
+                <TabsTrigger value="techniciens" className="data-[state=active]:bg-slate-700">
+                  <Users className="w-4 h-4" />
                 </TabsTrigger>
-                <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700 text-xs">
-                  <Truck className="w-3 h-3 mr-1" />
-                  Véh.
+                <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700">
+                  <Truck className="w-4 h-4" />
                 </TabsTrigger>
-                <TabsTrigger value="equipements" className="data-[state=active]:bg-slate-700 text-xs">
-                  <Wrench className="w-3 h-3 mr-1" />
-                  Équip.
+                <TabsTrigger value="equipements" className="data-[state=active]:bg-slate-700">
+                  <Wrench className="w-4 h-4" />
                 </TabsTrigger>
               </TabsList>
 
