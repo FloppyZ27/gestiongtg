@@ -70,6 +70,11 @@ const navigationItems = [
     icon: MapPin,
   },
   {
+    title: "Équipe Terrain",
+    url: createPageUrl("GestionEquipeTerrain"),
+    icon: Users,
+  },
+  {
     title: "Lots",
     url: createPageUrl("Lots"),
     icon: Grid3x3,

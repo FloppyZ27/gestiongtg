@@ -14,6 +14,7 @@ import PriseDeMandat from './pages/PriseDeMandat';
 import Clavardage from './pages/Clavardage';
 import GestionDeMandat from './pages/GestionDeMandat';
 import Administration from './pages/Administration';
+import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "Clavardage": Clavardage,
     "GestionDeMandat": GestionDeMandat,
     "Administration": Administration,
+    "GestionEquipeTerrain": GestionEquipeTerrain,
 }
 
 export const pagesConfig = {
