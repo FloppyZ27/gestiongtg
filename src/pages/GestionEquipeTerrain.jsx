@@ -40,7 +40,7 @@ const getArpenteurColor = (arpenteur) => {
 };
 
 export default function GestionEquipeTerrain() {
-  const [activeTab, setActiveTab] = useState("employes");
+
   const [isEmployeDialogOpen, setIsEmployeDialogOpen] = useState(false);
   const [isVehiculeDialogOpen, setIsVehiculeDialogOpen] = useState(false);
   const [isEquipementDialogOpen, setIsEquipementDialogOpen] = useState(false);
@@ -278,9 +278,9 @@ export default function GestionEquipeTerrain() {
           }}
         />
 
-          {/* Tabs cachées - conservées pour les dialogs */}
-          <div style={{ display: 'none' }}>
-          <TabsContent value="employes">
+        {/* Dialogs cachés - conservés mais hors des tabs */}
+        <div style={{ display: 'none' }}>
+          <div value="employes">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -361,8 +361,7 @@ export default function GestionEquipeTerrain() {
             </Card>
           </TabsContent>
 
-          {/* Tab Véhicules */}
-          <TabsContent value="vehicules">
+          <div value="vehicules">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -443,10 +442,9 @@ export default function GestionEquipeTerrain() {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          {/* Tab Équipements */}
-          <TabsContent value="equipements">
+          <div value="equipements">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -529,10 +527,9 @@ export default function GestionEquipeTerrain() {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          {/* Tab Dossiers Cédule */}
-          <TabsContent value="cedule">
+          <div value="cedule">
             <Card className="border-slate-800 bg-slate-900/50">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -614,8 +611,8 @@ export default function GestionEquipeTerrain() {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
           </div>
+        </div>
 
         {/* Dialog Employé */}
         <Dialog open={isEmployeDialogOpen} onOpenChange={setIsEmployeDialogOpen}>
