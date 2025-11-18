@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus, Kanban } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus, Kanban, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -628,6 +627,47 @@ function LayoutContent({ children, currentPageName }) {
                       )}
                     </SidebarMenuItem>
                   ))}
+
+                  {/* Admin menu item */}
+                  {user?.role === 'admin' && (
+                    <SidebarMenuItem>
+                      {isCollapsed ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton 
+                              asChild 
+                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
+                                location.pathname === createPageUrl("Administration")
+                                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
+                                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                              }`}
+                            >
+                              <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5">
+                                <Shield className="w-5 h-5" />
+                              </Link>
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
+                            <p>Administration</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <SidebarMenuButton 
+                          asChild 
+                          className={`transition-all duration-200 rounded-lg mb-0.5 ${
+                            location.pathname === createPageUrl("Administration")
+                              ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
+                              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                          }`}
+                        >
+                          <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5">
+                            <Shield className="w-5 h-5" />
+                            <span className="font-medium">Administration</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
+                    </SidebarMenuItem>
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

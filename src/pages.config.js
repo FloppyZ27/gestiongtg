@@ -13,6 +13,7 @@ import CeduleTerrain from './pages/CeduleTerrain';
 import PriseDeMandat from './pages/PriseDeMandat';
 import Clavardage from './pages/Clavardage';
 import GestionDeMandat from './pages/GestionDeMandat';
+import Administration from './pages/Administration';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "PriseDeMandat": PriseDeMandat,
     "Clavardage": Clavardage,
     "GestionDeMandat": GestionDeMandat,
+    "Administration": Administration,
 }
 
 export const pagesConfig = {
