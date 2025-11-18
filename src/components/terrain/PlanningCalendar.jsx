@@ -680,7 +680,10 @@ export default function PlanningCalendar({
                                         <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
                                           <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
                                           <button
-                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'techniciens', techId)}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeFromEquipe(dateStr, equipe.id, 'techniciens', techId);
+                                            }}
                                             className="opacity-0 group-hover:opacity-100 text-red-400"
                                           >
                                             <X className="w-3 h-3" />
@@ -688,8 +691,8 @@ export default function PlanningCalendar({
                                         </div>
                                       );
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
@@ -711,7 +714,10 @@ export default function PlanningCalendar({
                                         <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
                                           <span className="text-white text-xs">{v.nom}</span>
                                           <button
-                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'vehicules', vId)}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeFromEquipe(dateStr, equipe.id, 'vehicules', vId);
+                                            }}
                                             className="opacity-0 group-hover:opacity-100 text-red-400"
                                           >
                                             <X className="w-3 h-3" />
@@ -719,8 +725,8 @@ export default function PlanningCalendar({
                                         </div>
                                       );
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
@@ -742,7 +748,10 @@ export default function PlanningCalendar({
                                         <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
                                           <span className="text-white text-xs">{e.nom}</span>
                                           <button
-                                            onClick={() => removeFromEquipe(dateStr, equipe.id, 'equipements', eId)}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeFromEquipe(dateStr, equipe.id, 'equipements', eId);
+                                            }}
                                             className="opacity-0 group-hover:opacity-100 text-red-400"
                                           >
                                             <X className="w-3 h-3" />
@@ -750,8 +759,8 @@ export default function PlanningCalendar({
                                         </div>
                                       );
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
@@ -850,8 +859,8 @@ export default function PlanningCalendar({
                                         <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white">{tech.prenom}</div>
                                       ) : null;
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
@@ -867,8 +876,8 @@ export default function PlanningCalendar({
                                         <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white">{v.nom}</div>
                                       ) : null;
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
@@ -884,8 +893,8 @@ export default function PlanningCalendar({
                                         <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white">{e.nom}</div>
                                       ) : null;
                                     })}
-                                    {provided.placeholder}
                                   </div>
+                                  {provided.placeholder}
                                 </div>
                               )}
                             </Droppable>
