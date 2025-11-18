@@ -382,74 +382,64 @@ export default function PlanningCalendar({
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
     
     return (
-      <Card 
+      <div 
         onClick={(e) => {
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className="border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer hover:shadow-lg"
+        className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
       >
-        <div className="p-3 space-y-2">
-          {/* Mandat en haut */}
-          <div className="text-center pb-2 border-b border-slate-700">
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
-              {mandat?.type_mandat || 'Mandat'}
-            </Badge>
-          </div>
+        {/* Type de mandat */}
+        <div className="text-center mb-2">
+          <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
+            {mandat?.type_mandat || 'Mandat'}
+          </Badge>
+        </div>
 
-          {/* Dossier à gauche, Clients à droite */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="text-xs text-slate-500 mb-1">Dossier</p>
-              <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs w-full justify-center`}>
-                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 mb-1">Clients</p>
-              <p className="text-xs text-slate-300 font-medium truncate">
-                {getClientsNames(dossier.clients_ids)}
-              </p>
-            </div>
-          </div>
-
-          {/* Adresse des travaux */}
-          {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-            <div className="pt-1">
-              <p className="text-xs text-slate-500 mb-1">Adresse</p>
-              <div className="flex items-start gap-1 text-xs text-slate-300">
-                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span className="line-clamp-2">{formatAdresse(mandat.adresse_travaux)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Date de livraison et utilisateur */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
-            {mandat?.date_livraison ? (
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-                <Calendar className="w-3 h-3" />
-                <span>{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</span>
-              </div>
-            ) : (
-              <div className="text-xs text-slate-600">Pas de date</div>
-            )}
-
-            {assignedUser ? (
-              <Avatar className="w-7 h-7 border-2 border-slate-600">
-                <AvatarImage src={assignedUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                  {getUserInitials(assignedUser.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
-                <User className="w-4 h-4 text-slate-500" />
-              </div>
-            )}
+        {/* Dossier + Clients sur une ligne */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+          </Badge>
+          <div className="flex items-center gap-1 min-w-0 flex-1">
+            <User className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
           </div>
         </div>
-      </Card>
+
+        {/* Adresse sur une ligne */}
+        {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
+          <div className="flex items-center gap-1 mb-2">
+            <MapPin className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <span className="text-xs text-emerald-300 truncate">{formatAdresse(mandat.adresse_travaux)}</span>
+          </div>
+        )}
+
+        {/* Date + Avatar sur une ligne */}
+        <div className="flex items-center justify-between">
+          {mandat?.date_livraison ? (
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-emerald-400" />
+              <span className="text-xs text-emerald-300">{format(new Date(mandat.date_livraison), "dd MMM", { locale: fr })}</span>
+            </div>
+          ) : (
+            <div className="w-1"></div>
+          )}
+
+          {assignedUser ? (
+            <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+              <AvatarImage src={assignedUser.photo_url} />
+              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                {getUserInitials(assignedUser.full_name)}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+              <User className="w-3 h-3 text-emerald-500" />
+            </div>
+          )}
+        </div>
+      </div>
     );
   };
 
