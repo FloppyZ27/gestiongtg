@@ -149,6 +149,12 @@ export default function PlanningCalendar({
   const removeEquipe = (dateStr, equipeId) => {
     const newEquipes = { ...equipes };
     if (newEquipes[dateStr]) {
+      const equipe = newEquipes[dateStr].find(e => e.id === equipeId);
+      if (equipe && equipe.mandats && equipe.mandats.length > 0) {
+        if (!confirm(`Cette équipe contient ${equipe.mandats.length} mandat(s). Voulez-vous vraiment la supprimer ? Les mandats seront replacés dans "À planifier".`)) {
+          return;
+        }
+      }
       newEquipes[dateStr] = newEquipes[dateStr].filter(e => e.id !== equipeId);
       if (newEquipes[dateStr].length === 0) {
         delete newEquipes[dateStr];

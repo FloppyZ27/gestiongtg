@@ -65,7 +65,7 @@ const navigationItems = [
     icon: User,
   },
   {
-    title: "Équipe Terrain",
+    title: "Cédule Terrain",
     url: createPageUrl("GestionEquipeTerrain"),
     icon: Users,
   },

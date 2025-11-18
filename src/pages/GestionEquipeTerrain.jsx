@@ -223,11 +223,11 @@ export default function GestionEquipeTerrain() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Gestion Équipe Terrain
+              Cédule Terrain
             </h1>
             <Users className="w-6 h-6 text-cyan-400" />
           </div>
-          <p className="text-slate-400">Gestion des techniciens, véhicules et équipements</p>
+          <p className="text-slate-400">Planification des équipes de terrain</p>
         </div>
 
         <PlanningCalendar 
