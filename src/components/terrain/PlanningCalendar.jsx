@@ -634,7 +634,7 @@ export default function PlanningCalendar({
                               );
                               })}
                               </div>
-                  </TabsContent>
+                              </TabsContent>
 
                   <TabsContent value="planifier" className="mt-0">
                     <h3 className="text-white font-semibold mb-3 text-sm">
@@ -1267,10 +1267,11 @@ export default function PlanningCalendar({
                                   </div>
                                 )}
                               </Droppable>
-                            </div>
-                          );
-                        })}
-                      </div>
+                              </div>
+                              </div>
+                              );
+                              })}
+                              </div>
                     </Card>
                   );
                 })}
