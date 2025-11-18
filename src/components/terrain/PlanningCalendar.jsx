@@ -37,7 +37,10 @@ export default function PlanningCalendar({
   vehicules, 
   equipements, 
   clients,
-  onUpdateDossier 
+  onUpdateDossier,
+  onAddTechnicien,
+  onAddVehicule,
+  onAddEquipement
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
@@ -379,9 +382,19 @@ export default function PlanningCalendar({
               </TabsContent>
 
               <TabsContent value="techniciens" className="mt-0">
-                <h3 className="text-white font-semibold mb-3 text-sm">
-                  Techniciens ({techniciens.length})
-                </h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-white font-semibold text-sm">
+                    Techniciens ({techniciens.length})
+                  </h3>
+                  <Button 
+                    onClick={onAddTechnicien} 
+                    size="sm" 
+                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
                 <Droppable droppableId="techniciens-list" type="TECHNICIEN" isDropDisabled={true}>
                   {(provided, snapshot) => (
                     <div
@@ -417,9 +430,19 @@ export default function PlanningCalendar({
               </TabsContent>
 
               <TabsContent value="vehicules" className="mt-0">
-                <h3 className="text-white font-semibold mb-3 text-sm">
-                  Véhicules ({vehicules.length})
-                </h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-white font-semibold text-sm">
+                    Véhicules ({vehicules.length})
+                  </h3>
+                  <Button 
+                    onClick={onAddVehicule} 
+                    size="sm" 
+                    className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
                 <Droppable droppableId="vehicules-list" type="VEHICULE" isDropDisabled={true}>
                   {(provided, snapshot) => (
                     <div
@@ -455,9 +478,19 @@ export default function PlanningCalendar({
               </TabsContent>
 
               <TabsContent value="equipements" className="mt-0">
-                <h3 className="text-white font-semibold mb-3 text-sm">
-                  Équipements ({equipements.length})
-                </h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-white font-semibold text-sm">
+                    Équipements ({equipements.length})
+                  </h3>
+                  <Button 
+                    onClick={onAddEquipement} 
+                    size="sm" 
+                    className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Ajouter
+                  </Button>
+                </div>
                 <Droppable droppableId="equipements-list" type="EQUIPEMENT" isDropDisabled={true}>
                   {(provided, snapshot) => (
                     <div

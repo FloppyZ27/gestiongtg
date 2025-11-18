@@ -263,6 +263,21 @@ export default function GestionEquipeTerrain() {
               equipements={equipements}
               clients={clients}
               onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
+              onAddTechnicien={() => {
+                setEditingEmploye(null);
+                setIsEmployeDialogOpen(true);
+                setActiveTab("employes");
+              }}
+              onAddVehicule={() => {
+                setEditingVehicule(null);
+                setIsVehiculeDialogOpen(true);
+                setActiveTab("vehicules");
+              }}
+              onAddEquipement={() => {
+                setEditingEquipement(null);
+                setIsEquipementDialogOpen(true);
+                setActiveTab("equipements");
+              }}
             />
           </TabsContent>
 
