@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +19,7 @@ import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
+import MandatTabs from "../components/dossiers/MandatTabs";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -1651,51 +1651,7 @@ export default function PriseDeMandat() {
                           <TabsContent key={index} value={index.toString()}>
                             <Card className="border-slate-700 bg-slate-800/30">
                               <CardContent className="p-4 space-y-4">
-                                {/* Type de mandat et bouton supprimer sur la même ligne */}
-                                <div className="flex gap-4 items-start">
-                                  <div className="flex-1 grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                                      <Select
-                                        value={mandat.type_mandat}
-                                        onValueChange={(value) => updateMandat(index, 'type_mandat', value)}
-                                        disabled={!!dossierReferenceId}
-                                      >
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                          <SelectValue placeholder="Sélectionner" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          {TYPES_MANDATS.map((type) => (
-                                            <SelectItem key={type} value={type} className="text-white">
-                                              {type}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                    {editingDossier && (
-                                      <div className="space-y-2">
-                                        <Label>
-                                          Utilisateur assigné
-                                          {formData.statut === "Ouvert" && <span className="text-red-400"> *</span>}
-                                        </Label>
-                                        <Select
-                                          value={mandat.utilisateur_assigne || ""}
-                                          onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}
-                                        >
-                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                                            <SelectValue placeholder="Sélectionner" />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                            <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                                            {users.map((user) => (
-                                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    )}
-                                  </div>
+                                <div className="flex justify-end">
                                   <Button
                                     type="button"
                                     size="sm"
@@ -1708,7 +1664,7 @@ export default function PriseDeMandat() {
                                         setActiveTabMandat("0");
                                       }
                                     }}
-                                    className="text-red-400 hover:text-red-300 mt-8"
+                                    className="text-red-400 hover:text-red-300"
                                     disabled={!!dossierReferenceId}
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" />
@@ -1716,257 +1672,19 @@ export default function PriseDeMandat() {
                                   </Button>
                                 </div>
 
-                                {/* Nouvelle mise en page : 70% gauche / 30% droite */}
-                                <div className="grid grid-cols-[70%_30%] gap-4">
-                                  {/* Colonne gauche - Adresse */}
-                                  <div className="space-y-3">
-                                    <AddressInput
-                                      addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{
-                                        ville: "",
-                                        numeros_civiques: [""],
-                                        rue: "",
-                                        code_postal: "",
-                                        province: ""
-                                      }]}
-                                      onChange={(newAddresses) => updateMandatAddress(index, newAddresses)}
-                                      showActuelle={false}
-                                      singleAddress={true}
-                                      disabled={!!dossierReferenceId}
-                                    />
-                                  </div>
-
-                                  {/* Colonne droite - Dates */}
-                                  <div className="space-y-3">
-                                    <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
-                                      {/* Removed 'Date d'ouverture' field as per instruction */}
-                                      <div className="space-y-2">
-                                        <Label className="text-left block">Date de signature</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_signature || ""}
-                                          onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                          disabled={!!dossierReferenceId}
-                                        />
-                                      </div>
-
-                                      <div className="space-y-2">
-                                        <Label className="text-left block">Début des travaux</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_debut_travaux || ""}
-                                          onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                          disabled={!!dossierReferenceId}
-                                        />
-                                      </div>
-
-                                      <div className="space-y-2">
-                                        <Label className="text-left block">Date de livraison</Label>
-                                        <Input
-                                          type="date"
-                                          value={mandat.date_livraison || ""}
-                                          onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
-                                          className="bg-slate-700 border-slate-600"
-                                          disabled={!!dossierReferenceId}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <div className="flex justify-between items-center">
-                                    <Label>Lots sélectionnés</Label>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => openLotSelector(index)}
-                                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                                      disabled={!!dossierReferenceId}
-                                    >
-                                      <Plus className="w-4 h-4 mr-1" />
-                                      Sélectionner des lots
-                                    </Button>
-                                  </div>
-
-                                  {mandat.lots && mandat.lots.length > 0 ? (
-                                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                      <Table>
-                                        <TableHeader>
-                                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                            <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                                            <TableHead className="text-slate-300">Circonscription</TableHead>
-                                            <TableHead className="text-slate-300">Cadastre</TableHead>
-                                            <TableHead className="text-slate-300">Rang</TableHead>
-                                            <TableHead className="text-slate-300 text-right">Sélection</TableHead>
-                                          </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                          {mandat.lots.map((lotId) => {
-                                            const lot = getLotById(lotId);
-                                            return lot ? (
-                                              <TableRow key={lot.id} className="hover:bg-slate-800/30 border-slate-800">
-                                                <TableCell className="font-medium text-white">
-                                                  {lot.numero_lot}
-                                                </TableCell>
-                                                <TableCell className="text-slate-300">
-                                                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                                    {lot.circonscription_fonciere}
-                                                  </Badge>
-                                                                                                </TableCell>
-                                                <TableCell className="text-slate-300">
-                                                  {lot.cadastre || "-"}
-                                                </TableCell>
-                                                <TableCell className="text-slate-300">
-                                                  {lot.rang || "-"}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                  <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => removeLotFromMandat(index, lot.id)}
-                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                    disabled={!!dossierReferenceId}
-                                                  >
-                                                    <Trash2 className="w-4 h-4" />
-                                                  </Button>
-                                                </TableCell>
-                                              </TableRow>
-                                            ) : (
-                                              <TableRow key={lotId} className="hover:bg-slate-800/30 border-slate-800">
-                                                <TableCell colSpan={4} className="font-medium text-white">
-                                                  {lotId} (Lot introuvable)
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                  <Button
-                                                    type="button"
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    onClick={() => removeLotFromMandat(index, lotId)}
-                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                    disabled={!!dossierReferenceId}
-                                                  >
-                                                    <Trash2 className="w-4 h-4" />
-                                                  </Button>
-                                                </TableCell>
-                                              </TableRow>
-                                            );
-                                          })}
-                                        </TableBody>
-                                      </Table>
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                                      Aucun lot sélectionné
-                                    </p>
-                                  )}
-                                </div>
-
-                                {editingDossier && (
-                                  <>
-                                    <div className="space-y-2">
-                                      <div className="flex justify-between items-center">
-                                        <Label>Minutes</Label>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => openAddMinuteDialog(index)}
-                                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                                        >
-                                          <Plus className="w-4 h-4 mr-1" />
-                                          Ajouter minute
-                                        </Button>
-                                      </div>
-                                      
-                                      {mandat.minutes_list && mandat.minutes_list.length > 0 ? (
-                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                          <Table>
-                                            <TableHeader>
-                                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                                <TableHead className="text-slate-300">Minute</TableHead>
-                                                <TableHead className="text-slate-300">Date de minute</TableHead>
-                                                <TableHead className="text-slate-300">Type de minute</TableHead>
-                                                <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                                              </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                              {mandat.minutes_list.map((minute, minuteIdx) => (
-                                                <TableRow key={minuteIdx} className="hover:bg-slate-800/30 border-slate-800">
-                                                  <TableCell className="text-white">{minute.minute}</TableCell>
-                                                  <TableCell className="text-white">
-                                                    {minute.date_minute ? format(new Date(minute.date_minute), "dd MMM yyyy", { locale: fr }) : '-'}
-                                                  </TableCell>
-                                                  <TableCell className="text-white">
-                                                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                                      {minute.type_minute}
-                                                    </Badge>
-                                                  </TableCell>
-                                                  <TableCell className="text-right">
-                                                    <Button
-                                                      type="button"
-                                                      size="sm"
-                                                      variant="ghost"
-                                                      onClick={() => removeMinuteFromMandat(index, minuteIdx)}
-                                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                    >
-                                                      <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                  </TableCell>
-                                                </TableRow>
-                                              ))}
-                                            </TableBody>
-                                          </Table>
-                                        </div>
-                                      ) : (
-                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune minute</p>
-                                      )}
-                                    </div>
-
-                                    <div className="space-y-2 pt-3 border-t border-slate-700">
-                                      <Label>Factures générées ({mandat.factures?.length || 0})</Label>
-                                      {mandat.factures && mandat.factures.length > 0 ? (
-                                        <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                          <Table>
-                                            <TableHeader>
-                                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                                <TableHead className="text-slate-300">N° Facture</TableHead>
-                                                <TableHead className="text-slate-300">Date</TableHead>
-                                                <TableHead className="text-slate-300">Total HT</TableHead>
-                                                <TableHead className="text-slate-300">Total TTC</TableHead>
-                                                <TableHead className="text-slate-300 text-right">Action</TableHead>
-                                              </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                              {mandat.factures.map((facture, factureIdx) => (
-                                                <TableRow key={factureIdx} className="border-slate-800">
-                                                  <TableCell className="text-white font-semibold">{facture.numero_facture}</TableCell>
-                                                  <TableCell className="text-white">{facture.date_facture ? format(new Date(facture.date_facture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
-                                                  <TableCell className="text-white">{facture.total_ht?.toFixed(2)} $</TableCell>
-                                                  <TableCell className="text-white font-semibold">{facture.total_ttc?.toFixed(2)} $</TableCell>
-                                                  <TableCell className="text-right">
-                                                    <Button
-                                                      type="button"
-                                                      size="sm"
-                                                      onClick={() => voirFacture(facture.facture_html)}
-                                                      className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                                                    >
-                                                      <FileText className="w-4 h-4 mr-2" />
-                                                      Voir
-                                                    </Button>
-                                                  </TableCell>
-                                                </TableRow>
-                                              ))}
-                                            </TableBody>
-                                          </Table>
-                                        </div>
-                                      ) : (
-                                        <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucune facture générée</p>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
+                                <MandatTabs
+                                  mandat={mandat}
+                                  mandatIndex={index}
+                                  updateMandat={updateMandat}
+                                  updateMandatAddress={updateMandatAddress}
+                                  openLotSelector={openLotSelector}
+                                  openAddMinuteDialog={openAddMinuteDialog}
+                                  removeLotFromMandat={removeLotFromMandat}
+                                  removeMinuteFromMandat={removeMinuteFromMandat}
+                                  getLotById={getLotById}
+                                  users={users}
+                                  formStatut={formData.statut}
+                                />
                               </CardContent>
                             </Card>
                           </TabsContent>
