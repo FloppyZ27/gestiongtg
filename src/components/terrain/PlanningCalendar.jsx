@@ -181,9 +181,9 @@ export default function PlanningCalendar({
       if (!equipe) return;
 
       // Retirer du source si applicable
-      const source = parseEquipeDroppableId(sourceId);
-      if (source && sourceId !== "techniciens-list") {
-        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+      const sourceParsed = parseEquipeDroppableId(sourceId);
+      if (sourceParsed && sourceId !== "techniciens-list") {
+        const sourceEquipe = newEquipes[sourceParsed.dateStr]?.find(e => e.id === sourceParsed.equipeId);
         if (sourceEquipe) {
           sourceEquipe.techniciens = sourceEquipe.techniciens.filter(id => id !== draggableId);
         }
@@ -209,9 +209,9 @@ export default function PlanningCalendar({
       const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
       if (!equipe) return;
 
-      const source = parseEquipeDroppableId(sourceId);
-      if (source && sourceId !== "vehicules-list") {
-        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+      const sourceVehicule = parseEquipeDroppableId(sourceId);
+      if (sourceVehicule && sourceId !== "vehicules-list") {
+        const sourceEquipe = newEquipes[sourceVehicule.dateStr]?.find(e => e.id === sourceVehicule.equipeId);
         if (sourceEquipe) {
           sourceEquipe.vehicules = sourceEquipe.vehicules.filter(id => id !== draggableId);
         }
@@ -236,9 +236,9 @@ export default function PlanningCalendar({
       const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
       if (!equipe) return;
 
-      const source = parseEquipeDroppableId(sourceId);
-      if (source && sourceId !== "equipements-list") {
-        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+      const sourceEquipement = parseEquipeDroppableId(sourceId);
+      if (sourceEquipement && sourceId !== "equipements-list") {
+        const sourceEquipe = newEquipes[sourceEquipement.dateStr]?.find(e => e.id === sourceEquipement.equipeId);
         if (sourceEquipe) {
           sourceEquipe.equipements = sourceEquipe.equipements.filter(id => id !== draggableId);
         }
@@ -276,9 +276,9 @@ export default function PlanningCalendar({
     if (!equipe) return;
 
     // Retirer du source
-    const source = parseEquipeDroppableId(sourceId);
-    if (source && sourceId !== "unassigned") {
-      const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+    const sourceMandat = parseEquipeDroppableId(sourceId);
+    if (sourceMandat && sourceId !== "unassigned") {
+      const sourceEquipe = newEquipes[sourceMandat.dateStr]?.find(e => e.id === sourceMandat.equipeId);
       if (sourceEquipe) {
         sourceEquipe.mandats = sourceEquipe.mandats.filter(id => id !== draggableId);
       }
