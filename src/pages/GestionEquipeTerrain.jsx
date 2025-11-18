@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Users, Truck, Wrench, Edit, Trash2, Calendar, FolderOpen, Search, CalendarDays } from "lucide-react";
+import { Plus, Truck, Wrench, Edit, Trash2, Calendar, FolderOpen, Search, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -225,7 +225,7 @@ export default function GestionEquipeTerrain() {
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
               Cédule Terrain
             </h1>
-            <Users className="w-6 h-6 text-cyan-400" />
+            <CalendarDays className="w-6 h-6 text-cyan-400" />
           </div>
           <p className="text-slate-400">Planification des équipes de terrain</p>
         </div>

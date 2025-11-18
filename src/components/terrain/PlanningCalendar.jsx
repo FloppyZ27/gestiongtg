@@ -351,11 +351,22 @@ export default function PlanningCalendar({
     return !isAssignedInEquipe;
   });
 
+  const handleDossierClick = (dossierId) => {
+    const url = `/pages/Dossiers?dossier_id=${dossierId}`;
+    window.open(url, '_blank');
+  };
+
   const DossierCard = ({ dossier }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     
     return (
-      <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-3 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02]">
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDossierClick(dossier.id);
+        }}
+        className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-3 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+      >
         <div className="flex items-start justify-between gap-2 mb-2">
           <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-sm font-semibold`}>
             {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
