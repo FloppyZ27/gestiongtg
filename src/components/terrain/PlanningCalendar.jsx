@@ -422,34 +422,128 @@ export default function PlanningCalendar({
               </TabsList>
 
               <TabsContent value="mandats" className="mt-0">
-                <h3 className="text-white font-semibold mb-3 text-sm">
-                  Non planifiés ({unassignedDossiers.length})
-                </h3>
-                <Droppable droppableId="unassigned">
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
-                    >
-                      {unassignedDossiers.map((dossier, index) => (
-                        <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={snapshot.isDragging ? 'opacity-50' : ''}
-                            >
-                              <DossierCard dossier={dossier} />
+                <Tabs defaultValue="verification" className="w-full">
+                  <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3">
+                    <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700">
+                      En vérification
+                    </TabsTrigger>
+                    <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700">
+                      À planifier
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="verification" className="mt-0">
+                    <h3 className="text-white font-semibold mb-3 text-sm">
+                      En vérification ({unassignedDossiers.filter(d => {
+                        const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+                        return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
+                      }).length})
+                    </h3>
+                    <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto">
+                      {unassignedDossiers
+                        .filter(d => {
+                          const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+                          return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
+                        })
+                        .map((dossier) => {
+                          const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
+                          return (
+                            <div key={dossier.id} className="mb-2">
+                              <div className="bg-slate-800 border border-slate-700 rounded-lg p-2">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                  </Badge>
+                                  {mandat && (
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                      {mandat.type_mandat}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-slate-300 text-xs mb-1 line-clamp-1">
+                                  {getClientsNames(dossier.clients_ids)}
+                                </p>
+                                <p className="text-slate-500 text-xs line-clamp-1 mb-2">
+                                  {formatAdresse(mandat?.adresse_travaux)}
+                                </p>
+                                <div className="flex gap-2 pt-2 border-t border-slate-700">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      const updatedMandats = dossier.mandats.map(m => {
+                                        if (m.tache_actuelle === "Cédule") {
+                                          return { ...m, statut_terrain: "a_ceduler" };
+                                        }
+                                        return m;
+                                      });
+                                      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                    }}
+                                    className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
+                                  >
+                                    Oui, terrain requis
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      const updatedMandats = dossier.mandats.map(m => {
+                                        if (m.tache_actuelle === "Cédule") {
+                                          return { ...m, statut_terrain: "pas_de_terrain" };
+                                        }
+                                        return m;
+                                      });
+                                      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                    }}
+                                    className="flex-1 bg-slate-600/20 hover:bg-slate-600/30 text-slate-400 text-xs h-7"
+                                  >
+                                    Non
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
+                          );
+                        })}
                     </div>
-                  )}
-                </Droppable>
+                  </TabsContent>
+
+                  <TabsContent value="planifier" className="mt-0">
+                    <h3 className="text-white font-semibold mb-3 text-sm">
+                      À planifier ({unassignedDossiers.filter(d => {
+                        const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+                        return mandat?.statut_terrain === "a_ceduler";
+                      }).length})
+                    </h3>
+                    <Droppable droppableId="unassigned">
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                        >
+                          {unassignedDossiers
+                            .filter(d => {
+                              const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+                              return mandat?.statut_terrain === "a_ceduler";
+                            })
+                            .map((dossier, index) => (
+                              <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={snapshot.isDragging ? 'opacity-50' : ''}
+                                  >
+                                    <DossierCard dossier={dossier} />
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="techniciens" className="mt-0">
