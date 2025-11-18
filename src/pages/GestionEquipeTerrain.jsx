@@ -11,10 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Users, Truck, Wrench, Edit, Trash2, Calendar, FolderOpen, Search } from "lucide-react";
+import { Plus, Users, Truck, Wrench, Edit, Trash2, Calendar, FolderOpen, Search, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
+import PlanningCalendar from "@/components/terrain/PlanningCalendar";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -192,6 +193,13 @@ export default function GestionEquipeTerrain() {
     },
   });
 
+  const updateDossierMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    },
+  });
+
   const handleViewDossier = (dossier) => {
     const url = createPageUrl("Dossiers") + "?dossier_id=" + dossier.id;
     window.open(url, '_blank');
@@ -224,6 +232,10 @@ export default function GestionEquipeTerrain() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-slate-800/50 border border-slate-700 mb-6">
+            <TabsTrigger value="planning" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
+              <CalendarDays className="w-4 h-4 mr-2" />
+              Planning
+            </TabsTrigger>
             <TabsTrigger value="employes" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
               <Users className="w-4 h-4 mr-2" />
               Techniciens
@@ -241,6 +253,18 @@ export default function GestionEquipeTerrain() {
               Dossiers Cédule ({dossiersCedule.length})
             </TabsTrigger>
           </TabsList>
+
+          {/* Tab Planning */}
+          <TabsContent value="planning">
+            <PlanningCalendar 
+              dossiers={dossiersCedule}
+              techniciens={techniciensTerrain}
+              vehicules={vehicules}
+              equipements={equipements}
+              clients={clients}
+              onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
+            />
+          </TabsContent>
 
           {/* Tab Employés */}
           <TabsContent value="employes">
