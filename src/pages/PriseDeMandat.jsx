@@ -184,6 +184,7 @@ export default function PriseDeMandat() {
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
+    date_fermeture: "",
     statut: "Retour d'appel",
     utilisateur_assigne: "",
     clients_ids: [],
@@ -805,6 +806,7 @@ export default function PriseDeMandat() {
       numero_dossier: "",
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
+      date_fermeture: "",
       statut: "Retour d'appel",
       utilisateur_assigne: "",
       clients_ids: [],
@@ -859,6 +861,7 @@ export default function PriseDeMandat() {
       numero_dossier: entity.numero_dossier || "",
       arpenteur_geometre: entity.arpenteur_geometre || "",
       date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
+      date_fermeture: entity.date_fermeture || "",
       statut: mapOldStatusToCombined(entity.statut || "Retour d'appel"), // Apply mapping here
       utilisateur_assigne: entity.utilisateur_assigne || "",
       clients_ids: entity.clients_ids || [],

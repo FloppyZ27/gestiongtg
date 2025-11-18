@@ -124,6 +124,7 @@ export default function Dossiers() {
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
+    date_fermeture: "",
     statut: "Ouvert",
     clients_ids: [],
     notaires_ids: [],
@@ -424,6 +425,7 @@ export default function Dossiers() {
       numero_dossier: "",
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
+      date_fermeture: "",
       statut: "Ouvert",
       clients_ids: [],
       notaires_ids: [],
@@ -466,6 +468,7 @@ export default function Dossiers() {
       numero_dossier: entity.numero_dossier || "",
       arpenteur_geometre: entity.arpenteur_geometre || "",
       date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
+      date_fermeture: entity.date_fermeture || "",
       statut: entity.statut || "Ouvert",
       clients_ids: entity.clients_ids || [],
       notaires_ids: entity.notaires_ids || [],
@@ -1539,7 +1542,7 @@ export default function Dossiers() {
                       }
                     </div>
                     <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                           <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })}>
@@ -1552,6 +1555,10 @@ export default function Dossiers() {
                               )}
                             </SelectContent>
                           </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                          <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
                         </div>
                         <div className="space-y-2">
                           <Label>Statut <span className="text-red-400">*</span></Label>
@@ -1567,18 +1574,18 @@ export default function Dossiers() {
                         </div>
                       </div>
 
-                      {formData.statut === "Ouvert" &&
                       <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                            <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                            <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" />
-                          </div>
+                        <div className="space-y-2">
+                          <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
+                          <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" />
                         </div>
-                      }
+                        {formData.statut === "Fermé" && (
+                          <div className="space-y-2">
+                            <Label>Date de fermeture</Label>
+                            <Input type="date" value={formData.date_fermeture || ""} onChange={(e) => setFormData({ ...formData, date_fermeture: e.target.value })} className="bg-slate-800 border-slate-700" />
+                          </div>
+                        )}
+                      </div>
 
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
@@ -1720,20 +1727,6 @@ export default function Dossiers() {
                           <TabsContent key={index} value={index.toString()}>
                                 <Card className="border-slate-700 bg-slate-800/30">
                                   <CardContent className="p-4 space-y-4">
-                                    <div className="flex justify-end">
-                                      <Button type="button" size="sm" variant="ghost" onClick={() => {
-                                        removeMandat(index);
-                                        if (formData.mandats.length > 1) {
-                                          setActiveTabMandat(Math.max(0, index - 1).toString());
-                                        } else {
-                                          setActiveTabMandat("0");
-                                        }
-                                      }} className="text-red-400 hover:text-red-300">
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Supprimer ce mandat
-                                      </Button>
-                                    </div>
-
                                     <MandatTabs
                                       mandat={mandat}
                                       mandatIndex={index}
@@ -1746,6 +1739,15 @@ export default function Dossiers() {
                                       getLotById={getLotById}
                                       users={users}
                                       formStatut={formData.statut}
+                                      onRemoveMandat={() => {
+                                        removeMandat(index);
+                                        if (formData.mandats.length > 1) {
+                                          setActiveTabMandat(Math.max(0, index - 1).toString());
+                                        } else {
+                                          setActiveTabMandat("0");
+                                        }
+                                      }}
+                                      isReferenceDisabled={false}
                                     />
                                   </CardContent>
                                 </Card>

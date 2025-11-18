@@ -27,19 +27,22 @@ export default function MandatTabs({
   removeMinuteFromMandat,
   getLotById,
   users,
-  formStatut
+  formStatut,
+  onRemoveMandat,
+  isReferenceDisabled
 }) {
   const [activeSubTab, setActiveSubTab] = useState("informations");
 
   return (
     <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-      <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-start p-1 rounded-lg mb-4">
-        <TabsTrigger
-          value="informations"
-          className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
-        >
-          Informations
-        </TabsTrigger>
+      <TabsList className="bg-slate-800/50 border border-slate-700 w-full h-auto justify-between p-1 rounded-lg mb-4">
+        <div className="flex">
+          <TabsTrigger
+            value="informations"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
+          >
+            Informations
+          </TabsTrigger>
         <TabsTrigger
           value="minutes"
           className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
@@ -52,12 +55,26 @@ export default function MandatTabs({
         >
           Factures
         </TabsTrigger>
-        <TabsTrigger
-          value="terrain"
-          className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
-        >
-          Terrain
-        </TabsTrigger>
+          <TabsTrigger
+            value="terrain"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
+          >
+            Terrain
+          </TabsTrigger>
+        </div>
+        {onRemoveMandat && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={onRemoveMandat}
+            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 mr-1"
+            disabled={isReferenceDisabled}
+          >
+            <Trash2 className="w-4 h-4 mr-1" />
+            Supprimer ce mandat
+          </Button>
+        )}
       </TabsList>
 
       {/* Tab Informations */}
