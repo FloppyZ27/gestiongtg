@@ -41,6 +41,7 @@ export default function PlanningCalendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
   const [assignments, setAssignments] = useState({});
+  const [technicienAssignments, setTechnicienAssignments] = useState({}); // { "date": ["techId1", "techId2"] }
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
@@ -99,12 +100,35 @@ export default function PlanningCalendar({
   };
 
   const onDragEnd = (result) => {
-    const { source, destination, draggableId } = result;
+    const { source, destination, draggableId, type } = result;
 
     if (!destination) return;
 
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
+
+    // Drag & drop de technicien
+    if (type === "TECHNICIEN") {
+      const newTechAssignments = { ...technicienAssignments };
+      
+      // Retirer du source si ce n'est pas la liste principale
+      if (sourceId !== "techniciens-list") {
+        newTechAssignments[sourceId] = (newTechAssignments[sourceId] || []).filter(id => id !== draggableId);
+      }
+      
+      // Ajouter à la destination si ce n'est pas la liste principale
+      if (destId !== "techniciens-list") {
+        if (!newTechAssignments[destId]) {
+          newTechAssignments[destId] = [];
+        }
+        if (!newTechAssignments[destId].includes(draggableId)) {
+          newTechAssignments[destId].push(draggableId);
+        }
+      }
+      
+      setTechnicienAssignments(newTechAssignments);
+      return;
+    }
 
     // Format: "date-technicienId" ou "unassigned"
     const parseDroppableId = (id) => {
@@ -286,90 +310,116 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-[200px_1fr] gap-4">
-          {/* Colonne gauche - Dossiers non assignés */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4">
-            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4" />
-              Non planifiés ({unassignedDossiers.length})
-            </h3>
-            <Droppable droppableId="unassigned">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`min-h-[500px] ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
-                >
-                  {unassignedDossiers.map((dossier, index) => (
-                    <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={snapshot.isDragging ? 'opacity-50' : ''}
-                        >
-                          <DossierCard dossier={dossier} />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </Card>
-
-          {/* Grille calendrier par technicien */}
+        <div className="grid grid-cols-[250px_1fr] gap-4">
+          {/* Colonne gauche - Dossiers et Techniciens */}
           <div className="space-y-4">
-            {techniciens.map((technicien) => (
-              <Card key={technicien.id} className="bg-slate-900/50 border-slate-800 p-4">
-                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-700">
-                  <Users className="w-4 h-4 text-blue-400" />
-                  <h3 className="text-white font-semibold">
-                    {technicien.prenom} {technicien.nom}
-                  </h3>
-                </div>
-                
-                <div className={`grid ${viewMode === "week" ? "grid-cols-5" : `grid-cols-${Math.min(days.length, 7)}`} gap-2`}>
-                  {days.map((day) => {
-                    const dateStr = format(day, "yyyy-MM-dd");
-                    const slotId = `${dateStr}-${technicien.id}`;
-                    const assignments = getAssignmentsForDateAndTech(day, technicien.id);
-                    const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+            <Card className="bg-slate-900/50 border-slate-800 p-4">
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4" />
+                Non planifiés ({unassignedDossiers.length})
+              </h3>
+              <Droppable droppableId="unassigned">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`min-h-[200px] ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                  >
+                    {unassignedDossiers.map((dossier, index) => (
+                      <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={snapshot.isDragging ? 'opacity-50' : ''}
+                          >
+                            <DossierCard dossier={dossier} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </Card>
 
-                    return (
-                      <div
-                        key={slotId}
-                        className={`border border-slate-700 rounded-lg p-2 min-h-[200px] ${isToday ? 'ring-2 ring-cyan-500/50' : ''}`}
-                      >
-                        <div className="text-center mb-2 pb-2 border-b border-slate-700">
-                          <div className="text-slate-400 text-xs">
-                            {format(day, "EEE", { locale: fr })}
+            <Card className="bg-slate-900/50 border-slate-800 p-4">
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Techniciens ({techniciens.length})
+              </h3>
+              <Droppable droppableId="techniciens-list" type="TECHNICIEN">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`min-h-[200px] space-y-2 ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                  >
+                    {techniciens.map((tech, index) => (
+                      <Draggable key={tech.id} draggableId={tech.id} index={index} type="TECHNICIEN">
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={snapshot.isDragging ? 'opacity-50' : ''}
+                          >
+                            <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2">
+                              <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4 text-blue-400" />
+                                <span className="text-white text-sm font-medium">
+                                  {tech.prenom} {tech.nom}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                            {format(day, "d", { locale: fr })}
-                          </div>
-                          {assignments.length > 0 && (
-                            <Badge className="bg-emerald-500/20 text-emerald-400 text-xs mt-1">
-                              {assignments.length}
-                            </Badge>
-                          )}
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </Card>
+          </div>
+
+          {/* Grille calendrier */}
+          <div className="space-y-4">
+            {viewMode === "week" ? (
+              <div className="grid grid-cols-5 gap-2">
+                {days.map((day) => {
+                  const dateStr = format(day, "yyyy-MM-dd");
+                  const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+                  const assignedTechs = technicienAssignments[dateStr] || [];
+                  
+                  return (
+                    <Card 
+                      key={dateStr}
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
+                    >
+                      <div className="text-center mb-2 pb-2 border-b border-slate-700">
+                        <div className="text-slate-400 text-xs">
+                          {format(day, "EEE", { locale: fr })}
                         </div>
+                        <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                          {format(day, "d MMM", { locale: fr })}
+                        </div>
+                      </div>
 
-                        <Droppable droppableId={slotId}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className={`min-h-[120px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg' : ''}`}
-                            >
-                              {assignments.map((assignment, index) => (
-                                <Draggable 
-                                  key={assignment.dossierId} 
-                                  draggableId={assignment.dossierId} 
-                                  index={index}
-                                >
+                      <Droppable droppableId={dateStr} type="TECHNICIEN">
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={`min-h-[100px] mb-3 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded-lg p-1' : ''}`}
+                          >
+                            {assignedTechs.map((techId, idx) => {
+                              const tech = techniciens.find(t => t.id === techId);
+                              if (!tech) return null;
+                              return (
+                                <Draggable key={techId} draggableId={techId} index={idx} type="TECHNICIEN">
                                   {(provided, snapshot) => (
                                     <div
                                       ref={provided.innerRef}
@@ -377,21 +427,163 @@ export default function PlanningCalendar({
                                       {...provided.dragHandleProps}
                                       className={snapshot.isDragging ? 'opacity-50' : ''}
                                     >
-                                      <DossierCard dossier={assignment.dossier} />
+                                      <div className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1">
+                                        <div className="flex items-center gap-1">
+                                          <Users className="w-3 h-3 text-blue-400" />
+                                          <span className="text-white text-xs">{tech.prenom}</span>
+                                        </div>
+                                      </div>
                                     </div>
                                   )}
                                 </Draggable>
-                              ))}
-                              {provided.placeholder}
+                              );
+                            })}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+
+                      <div className="space-y-1">
+                        {assignedTechs.map(techId => {
+                          const assignments = getAssignmentsForDateAndTech(day, techId);
+                          return (
+                            <div key={techId}>
+                              <Droppable droppableId={`${dateStr}-${techId}`}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className={`min-h-[80px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg p-1' : ''}`}
+                                  >
+                                    {assignments.map((assignment, index) => (
+                                      <Draggable 
+                                        key={assignment.dossierId} 
+                                        draggableId={assignment.dossierId} 
+                                        index={index}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className={snapshot.isDragging ? 'opacity-50' : ''}
+                                          >
+                                            <DossierCard dossier={assignment.dossier} />
+                                          </div>
+                                        )}
+                                      </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
                             </div>
-                          )}
-                        </Droppable>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))}
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 gap-2">
+                {days.map((day) => {
+                  const dateStr = format(day, "yyyy-MM-dd");
+                  const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+                  const assignedTechs = technicienAssignments[dateStr] || [];
+                  
+                  return (
+                    <Card 
+                      key={dateStr}
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
+                    >
+                      <div className="text-center mb-2 pb-2 border-b border-slate-700">
+                        <div className="text-slate-400 text-xs">
+                          {format(day, "EEE", { locale: fr })}
+                        </div>
+                        <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                          {format(day, "d", { locale: fr })}
+                        </div>
+                      </div>
+
+                      <Droppable droppableId={dateStr} type="TECHNICIEN">
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={`min-h-[60px] mb-2 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded-lg p-1' : ''}`}
+                          >
+                            {assignedTechs.map((techId, idx) => {
+                              const tech = techniciens.find(t => t.id === techId);
+                              if (!tech) return null;
+                              return (
+                                <Draggable key={techId} draggableId={techId} index={idx} type="TECHNICIEN">
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={snapshot.isDragging ? 'opacity-50' : ''}
+                                    >
+                                      <div className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1">
+                                        <div className="flex items-center gap-1">
+                                          <Users className="w-3 h-3 text-blue-400" />
+                                          <span className="text-white text-xs">{tech.prenom}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              );
+                            })}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+
+                      <div className="space-y-1">
+                        {assignedTechs.map(techId => {
+                          const assignments = getAssignmentsForDateAndTech(day, techId);
+                          return (
+                            <div key={techId}>
+                              <Droppable droppableId={`${dateStr}-${techId}`}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg p-1' : ''}`}
+                                  >
+                                    {assignments.map((assignment, index) => (
+                                      <Draggable 
+                                        key={assignment.dossierId} 
+                                        draggableId={assignment.dossierId} 
+                                        index={index}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className={snapshot.isDragging ? 'opacity-50' : ''}
+                                          >
+                                            <DossierCard dossier={assignment.dossier} />
+                                          </div>
+                                        )}
+                                      </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </DragDropContext>
