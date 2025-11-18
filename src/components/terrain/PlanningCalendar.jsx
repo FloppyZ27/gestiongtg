@@ -51,7 +51,7 @@ export default function PlanningCalendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
   const [assignments, setAssignments] = useState({});
-  const [technicienAssignments, setTechnicienAssignments] = useState({}); // { "date": ["techId1", "techId2"] }
+  const [equipes, setEquipes] = useState({}); // { "date": [{ id, nom, techniciens: [], vehicules: [], equipements: [], mandats: [] }] }
   const [activeResourceTab, setActiveResourceTab] = useState("mandats");
 
   const getClientsNames = (clientIds) => {
@@ -110,15 +110,43 @@ export default function PlanningCalendar({
     setCurrentDate(new Date());
   };
 
-  const removeTechnicienFromDate = (dateStr, techId) => {
-    const newTechAssignments = { ...technicienAssignments };
-    if (newTechAssignments[dateStr]) {
-      newTechAssignments[dateStr] = newTechAssignments[dateStr].filter(id => id !== techId);
-      if (newTechAssignments[dateStr].length === 0) {
-        delete newTechAssignments[dateStr];
+  const addEquipe = (dateStr) => {
+    const newEquipes = { ...equipes };
+    if (!newEquipes[dateStr]) {
+      newEquipes[dateStr] = [];
+    }
+    const newEquipe = {
+      id: `equipe-${Date.now()}`,
+      nom: `Équipe ${newEquipes[dateStr].length + 1}`,
+      techniciens: [],
+      vehicules: [],
+      equipements: [],
+      mandats: []
+    };
+    newEquipes[dateStr].push(newEquipe);
+    setEquipes(newEquipes);
+  };
+
+  const removeEquipe = (dateStr, equipeId) => {
+    const newEquipes = { ...equipes };
+    if (newEquipes[dateStr]) {
+      newEquipes[dateStr] = newEquipes[dateStr].filter(e => e.id !== equipeId);
+      if (newEquipes[dateStr].length === 0) {
+        delete newEquipes[dateStr];
       }
     }
-    setTechnicienAssignments(newTechAssignments);
+    setEquipes(newEquipes);
+  };
+
+  const removeFromEquipe = (dateStr, equipeId, type, itemId) => {
+    const newEquipes = { ...equipes };
+    if (newEquipes[dateStr]) {
+      const equipe = newEquipes[dateStr].find(e => e.id === equipeId);
+      if (equipe) {
+        equipe[type] = equipe[type].filter(id => id !== itemId);
+      }
+    }
+    setEquipes(newEquipes);
   };
 
   const onDragEnd = (result) => {
@@ -129,168 +157,147 @@ export default function PlanningCalendar({
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
 
+    // Format: "equipe-dateStr-equipeId-type"
+    const parseEquipeDroppableId = (id) => {
+      if (!id.startsWith('equipe-')) return null;
+      const parts = id.split('-');
+      // equipe-yyyy-MM-dd-equipeId-type
+      return {
+        dateStr: `${parts[1]}-${parts[2]}-${parts[3]}`,
+        equipeId: parts[4],
+        type: parts[5]
+      };
+    };
+
     // Drag & drop de technicien
     if (type === "TECHNICIEN") {
-      const newTechAssignments = { ...technicienAssignments };
+      const dest = parseEquipeDroppableId(destId);
+      if (!dest || destId === "techniciens-list") return;
+
+      const newEquipes = { ...equipes };
+      if (!newEquipes[dest.dateStr]) return;
       
-      // Ne jamais retirer de la liste principale - on garde toujours les techniciens visibles
-      // Retirer du source seulement si c'est une date (pas la liste principale)
-      if (sourceId !== "techniciens-list") {
-        newTechAssignments[sourceId] = (newTechAssignments[sourceId] || []).filter(id => id !== draggableId);
-        if (newTechAssignments[sourceId].length === 0) {
-          delete newTechAssignments[sourceId];
+      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      if (!equipe) return;
+
+      // Retirer du source si applicable
+      const source = parseEquipeDroppableId(sourceId);
+      if (source && sourceId !== "techniciens-list") {
+        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+        if (sourceEquipe) {
+          sourceEquipe.techniciens = sourceEquipe.techniciens.filter(id => id !== draggableId);
         }
       }
-      
-      // Ajouter à la destination si ce n'est pas la liste principale
-      if (destId !== "techniciens-list") {
-        if (!newTechAssignments[destId]) {
-          newTechAssignments[destId] = [];
-        }
-        // Vérifier si le technicien n'est pas déjà assigné à cette date
-        if (!newTechAssignments[destId].includes(draggableId)) {
-          newTechAssignments[destId].push(draggableId);
-        }
+
+      // Ajouter à la destination
+      if (!equipe.techniciens.includes(draggableId)) {
+        equipe.techniciens.push(draggableId);
       }
-      
-      setTechnicienAssignments(newTechAssignments);
+
+      setEquipes(newEquipes);
       return;
     }
     
     // Drag & drop de véhicule
     if (type === "VEHICULE") {
-      // TODO: Implémenter la logique pour les véhicules
+      const dest = parseEquipeDroppableId(destId);
+      if (!dest || destId === "vehicules-list") return;
+
+      const newEquipes = { ...equipes };
+      if (!newEquipes[dest.dateStr]) return;
+      
+      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      if (!equipe) return;
+
+      const source = parseEquipeDroppableId(sourceId);
+      if (source && sourceId !== "vehicules-list") {
+        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+        if (sourceEquipe) {
+          sourceEquipe.vehicules = sourceEquipe.vehicules.filter(id => id !== draggableId);
+        }
+      }
+
+      if (!equipe.vehicules.includes(draggableId)) {
+        equipe.vehicules.push(draggableId);
+      }
+
+      setEquipes(newEquipes);
       return;
     }
     
     // Drag & drop d'équipement
     if (type === "EQUIPEMENT") {
-      // TODO: Implémenter la logique pour les équipements
+      const dest = parseEquipeDroppableId(destId);
+      if (!dest || destId === "equipements-list") return;
+
+      const newEquipes = { ...equipes };
+      if (!newEquipes[dest.dateStr]) return;
+      
+      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      if (!equipe) return;
+
+      const source = parseEquipeDroppableId(sourceId);
+      if (source && sourceId !== "equipements-list") {
+        const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+        if (sourceEquipe) {
+          sourceEquipe.equipements = sourceEquipe.equipements.filter(id => id !== draggableId);
+        }
+      }
+
+      if (!equipe.equipements.includes(draggableId)) {
+        equipe.equipements.push(draggableId);
+      }
+
+      setEquipes(newEquipes);
       return;
     }
 
-    // Format: "date-technicienId" ou "unassigned"
-    const parseDroppableId = (id) => {
-      if (id === "unassigned") return { date: null, technicienId: null };
-      const parts = id.split('-');
-      return { 
-        date: parts.slice(0, 3).join('-'), // yyyy-MM-dd
-        technicienId: parts.slice(3).join('-') 
-      };
-    };
-
-    const source_parsed = parseDroppableId(sourceId);
-    const dest_parsed = parseDroppableId(destId);
-
-    // Trouver le dossier
-    const dossier = dossiers.find(d => d.id === draggableId);
-    if (!dossier) return;
-
-    if (sourceId === "unassigned") {
-      // Déplacer d'unassigned vers date-technicien
-      const newAssignments = { ...assignments };
-      if (!newAssignments[destId]) {
-        newAssignments[destId] = [];
-      }
-      newAssignments[destId].push({
-        dossierId: draggableId,
-        technicienId: dest_parsed.technicienId,
-        vehicule: null,
-        equipement: null
-      });
-      setAssignments(newAssignments);
-
-      // Mettre à jour le dossier
-      const updatedMandats = dossier.mandats?.map(m => 
-        m.tache_actuelle === "Cédule" ? { 
-          ...m, 
-          date_terrain: dest_parsed.date,
-          utilisateur_assigne: dest_parsed.technicienId 
-        } : m
-      );
-      onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
-    } else if (destId === "unassigned") {
-      // Déplacer vers unassigned
-      const newAssignments = { ...assignments };
-      if (newAssignments[sourceId]) {
-        newAssignments[sourceId] = newAssignments[sourceId].filter(a => a.dossierId !== draggableId);
-        if (newAssignments[sourceId].length === 0) {
-          delete newAssignments[sourceId];
-        }
-      }
-      setAssignments(newAssignments);
-
-      // Mettre à jour le dossier
-      const updatedMandats = dossier.mandats?.map(m => 
-        m.tache_actuelle === "Cédule" ? { 
-          ...m, 
-          date_terrain: null,
-          utilisateur_assigne: null 
-        } : m
-      );
-      onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
-    } else if (sourceId !== destId) {
-      // Déplacer d'un slot à un autre
-      const newAssignments = { ...assignments };
-      const item = newAssignments[sourceId]?.find(a => a.dossierId === draggableId);
-      if (item) {
-        newAssignments[sourceId] = newAssignments[sourceId].filter(a => a.dossierId !== draggableId);
-        if (newAssignments[sourceId].length === 0) {
-          delete newAssignments[sourceId];
-        }
-        if (!newAssignments[destId]) {
-          newAssignments[destId] = [];
-        }
-        newAssignments[destId].push({
-          ...item,
-          technicienId: dest_parsed.technicienId
+    // Drag & drop de mandat
+    const dest = parseEquipeDroppableId(destId);
+    if (!dest) {
+      // Si pas vers une équipe, peut-être vers unassigned
+      if (destId === "unassigned") {
+        // Retirer des équipes
+        const newEquipes = { ...equipes };
+        Object.keys(newEquipes).forEach(dateStr => {
+          newEquipes[dateStr].forEach(equipe => {
+            equipe.mandats = equipe.mandats.filter(id => id !== draggableId);
+          });
         });
-        setAssignments(newAssignments);
+        setEquipes(newEquipes);
+      }
+      return;
+    }
 
-        // Mettre à jour le dossier
-        const updatedMandats = dossier.mandats?.map(m => 
-          m.tache_actuelle === "Cédule" ? { 
-            ...m, 
-            date_terrain: dest_parsed.date,
-            utilisateur_assigne: dest_parsed.technicienId 
-          } : m
-        );
-        onUpdateDossier(draggableId, { ...dossier, mandats: updatedMandats });
+    const newEquipes = { ...equipes };
+    if (!newEquipes[dest.dateStr]) return;
+    
+    const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+    if (!equipe) return;
+
+    // Retirer du source
+    const source = parseEquipeDroppableId(sourceId);
+    if (source && sourceId !== "unassigned") {
+      const sourceEquipe = newEquipes[source.dateStr]?.find(e => e.id === source.equipeId);
+      if (sourceEquipe) {
+        sourceEquipe.mandats = sourceEquipe.mandats.filter(id => id !== draggableId);
       }
     }
+
+    // Ajouter à la destination
+    if (!equipe.mandats.includes(draggableId)) {
+      equipe.mandats.push(draggableId);
+    }
+
+    setEquipes(newEquipes);
   };
 
   const unassignedDossiers = dossiers.filter(d => {
-    const isAssigned = Object.values(assignments).some(dayAssignments => 
-      dayAssignments.some(a => a.dossierId === d.id)
+    const isAssignedInEquipe = Object.values(equipes).some(dayEquipes => 
+      dayEquipes.some(equipe => equipe.mandats.includes(d.id))
     );
-    const hasDateTerrain = d.mandats?.some(m => m.date_terrain && m.tache_actuelle === "Cédule");
-    return !isAssigned && !hasDateTerrain;
+    return !isAssignedInEquipe;
   });
-
-  const getAssignmentsForDateAndTech = (date, technicienId) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    const slotId = `${dateStr}-${technicienId}`;
-    const assigned = assignments[slotId] || [];
-    
-    // Ajouter aussi les dossiers qui ont cette date et ce technicien dans leur mandat
-    const fromMandats = dossiers.filter(d => {
-      const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-      return mandat?.date_terrain === dateStr && 
-             mandat?.utilisateur_assigne === technicienId;
-    }).filter(d => !assigned.some(a => a.dossierId === d.id));
-
-    return [
-      ...assigned.map(a => ({ ...a, dossier: dossiers.find(d => d.id === a.dossierId) })),
-      ...fromMandats.map(d => ({ 
-        dossierId: d.id, 
-        dossier: d, 
-        technicienId: technicienId,
-        vehicule: null, 
-        equipement: null 
-      }))
-    ];
-  };
 
   const DossierCard = ({ dossier }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
@@ -618,72 +625,157 @@ export default function PlanningCalendar({
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                  const assignedTechs = technicienAssignments[dateStr] || [];
-                  
+                  const dayEquipes = equipes[dateStr] || [];
+
                   return (
                     <Card 
                       key={dateStr}
                       className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
                     >
-                      <div className="text-center mb-2 pb-2 border-b border-slate-700">
-                        <div className="text-slate-400 text-xs">
-                          {format(day, "EEE", { locale: fr })}
+                      <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="text-slate-400 text-xs">
+                            {format(day, "EEE", { locale: fr })}
+                          </div>
+                          <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                            {format(day, "d MMM", { locale: fr })}
+                          </div>
                         </div>
-                        <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                          {format(day, "d MMM", { locale: fr })}
-                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => addEquipe(dateStr)}
+                          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-6 px-2"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
                       </div>
 
-                      <Droppable droppableId={dateStr} type="TECHNICIEN">
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`min-h-[100px] mb-3 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded-lg p-1' : ''}`}
-                          >
-                            {assignedTechs.map((techId, idx) => {
-                              const tech = techniciens.find(t => t.id === techId);
-                              if (!tech) return null;
-                              return (
-                                <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <div className="flex items-center gap-1">
-                                      <Users className="w-3 h-3 text-blue-400" />
-                                      <span className="text-white text-xs">{tech.prenom}</span>
-                                    </div>
-                                    <button
-                                      onClick={() => removeTechnicienFromDate(dateStr, techId)}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
+                      <div className="space-y-2">
+                        {dayEquipes.map((equipe) => (
+                          <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
+                            <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-700">
+                              <span className="text-white text-xs font-semibold">{equipe.nom}</span>
+                              <button
+                                onClick={() => removeEquipe(dateStr, equipe.id)}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
 
-                      <div className="space-y-1">
-                        {assignedTechs.map(techId => {
-                          const assignments = getAssignmentsForDateAndTech(day, techId);
-                          return (
-                            <div key={techId}>
-                              <Droppable droppableId={`${dateStr}-${techId}`}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={`min-h-[80px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg p-1' : ''}`}
-                                  >
-                                    {assignments.map((assignment, index) => (
-                                      <Draggable 
-                                        key={assignment.dossierId} 
-                                        draggableId={assignment.dossierId} 
-                                        index={index}
-                                      >
+                            {/* Techniciens */}
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={`min-h-[40px] mb-2 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded p-1' : ''}`}
+                                >
+                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    Techniciens
+                                  </div>
+                                  {equipe.techniciens.map(techId => {
+                                    const tech = techniciens.find(t => t.id === techId);
+                                    if (!tech) return null;
+                                    return (
+                                      <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group flex items-center justify-between">
+                                        <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
+                                        <button
+                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'techniciens', techId)}
+                                          className="opacity-0 group-hover:opacity-100 text-red-400"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            {/* Véhicules */}
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={`min-h-[30px] mb-2 ${snapshot.isDraggingOver ? 'bg-purple-500/10 rounded p-1' : ''}`}
+                                >
+                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
+                                    <Truck className="w-3 h-3" />
+                                    Véhicules
+                                  </div>
+                                  {equipe.vehicules.map(vId => {
+                                    const v = vehicules.find(v => v.id === vId);
+                                    if (!v) return null;
+                                    return (
+                                      <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded p-1 mb-1 group flex items-center justify-between">
+                                        <span className="text-white text-xs">{v.nom}</span>
+                                        <button
+                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'vehicules', vId)}
+                                          className="opacity-0 group-hover:opacity-100 text-red-400"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            {/* Équipements */}
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={`min-h-[30px] mb-2 ${snapshot.isDraggingOver ? 'bg-orange-500/10 rounded p-1' : ''}`}
+                                >
+                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
+                                    <Wrench className="w-3 h-3" />
+                                    Équipements
+                                  </div>
+                                  {equipe.equipements.map(eId => {
+                                    const e = equipements.find(e => e.id === eId);
+                                    if (!e) return null;
+                                    return (
+                                      <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded p-1 mb-1 group flex items-center justify-between">
+                                        <span className="text-white text-xs">{e.nom}</span>
+                                        <button
+                                          onClick={() => removeFromEquipe(dateStr, equipe.id, 'equipements', eId)}
+                                          className="opacity-0 group-hover:opacity-100 text-red-400"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            {/* Mandats */}
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
+                                >
+                                  <div className="text-slate-400 text-xs mb-1 flex items-center gap-1">
+                                    <FolderOpen className="w-3 h-3" />
+                                    Mandats
+                                  </div>
+                                  {equipe.mandats.map((dossierId, index) => {
+                                    const dossier = dossiers.find(d => d.id === dossierId);
+                                    if (!dossier) return null;
+                                    return (
+                                      <Draggable key={dossierId} draggableId={dossierId} index={index}>
                                         {(provided, snapshot) => (
                                           <div
                                             ref={provided.innerRef}
@@ -691,18 +783,18 @@ export default function PlanningCalendar({
                                             {...provided.dragHandleProps}
                                             className={snapshot.isDragging ? 'opacity-50' : ''}
                                           >
-                                            <DossierCard dossier={assignment.dossier} />
+                                            <DossierCard dossier={dossier} />
                                           </div>
                                         )}
                                       </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-                            </div>
-                          );
-                        })}
+                                    );
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+                          </div>
+                        ))}
                       </div>
                     </Card>
                   );
@@ -713,91 +805,79 @@ export default function PlanningCalendar({
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                  const assignedTechs = technicienAssignments[dateStr] || [];
-                  
+                  const dayEquipes = equipes[dateStr] || [];
+
                   return (
                     <Card 
                       key={dateStr}
                       className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
                     >
-                      <div className="text-center mb-2 pb-2 border-b border-slate-700">
-                        <div className="text-slate-400 text-xs">
-                          {format(day, "EEE", { locale: fr })}
+                      <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="text-slate-400 text-xs">
+                            {format(day, "EEE", { locale: fr })}
+                          </div>
+                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                            {format(day, "d", { locale: fr })}
+                          </div>
                         </div>
-                        <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                          {format(day, "d", { locale: fr })}
-                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => addEquipe(dateStr)}
+                          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-5 px-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
                       </div>
 
-                      <Droppable droppableId={dateStr} type="TECHNICIEN">
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`min-h-[60px] mb-2 ${snapshot.isDraggingOver ? 'bg-blue-500/10 rounded-lg p-1' : ''}`}
-                          >
-                            {assignedTechs.map((techId, idx) => {
-                              const tech = techniciens.find(t => t.id === techId);
-                              if (!tech) return null;
-                              return (
-                                <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded p-1 mb-1 group">
-                                  <div className="flex items-center justify-between gap-1">
-                                    <div className="flex items-center gap-1">
-                                      <Users className="w-3 h-3 text-blue-400" />
-                                      <span className="text-white text-xs">{tech.prenom}</span>
-                                    </div>
-                                    <button
-                                      onClick={() => removeTechnicienFromDate(dateStr, techId)}
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
+                      <div className="space-y-2">
+                        {dayEquipes.map((equipe) => (
+                          <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded p-1 text-xs">
+                            <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-700">
+                              <span className="text-white font-semibold text-xs">{equipe.nom}</span>
+                              <button
+                                onClick={() => removeEquipe(dateStr, equipe.id)}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
 
-                      <div className="space-y-1">
-                        {assignedTechs.map(techId => {
-                          const assignments = getAssignmentsForDateAndTech(day, techId);
-                          return (
-                            <div key={techId}>
-                              <Droppable droppableId={`${dateStr}-${techId}`}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded-lg p-1' : ''}`}
-                                  >
-                                    {assignments.map((assignment, index) => (
-                                      <Draggable 
-                                        key={assignment.dossierId} 
-                                        draggableId={assignment.dossierId} 
-                                        index={index}
-                                      >
-                                        {(provided, snapshot) => (
-                                          <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className={snapshot.isDragging ? 'opacity-50' : ''}
-                                          >
-                                            <DossierCard dossier={assignment.dossier} />
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="mb-1">
+                                  {equipe.techniciens.length > 0 && equipe.techniciens.map(techId => {
+                                    const tech = techniciens.find(t => t.id === techId);
+                                    return tech ? (
+                                      <div key={techId} className="bg-blue-500/20 rounded px-1 mb-0.5 text-xs text-white">{tech.prenom}</div>
+                                    ) : null;
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+
+                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px]">
+                                  {equipe.mandats.map((dId, idx) => {
+                                    const d = dossiers.find(d => d.id === dId);
+                                    return d ? (
+                                      <Draggable key={dId} draggableId={dId} index={idx}>
+                                        {(provided) => (
+                                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                            <DossierCard dossier={d} />
                                           </div>
                                         )}
                                       </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-                            </div>
-                          );
-                        })}
+                                    ) : null;
+                                  })}
+                                  {provided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+                          </div>
+                        ))}
                       </div>
                     </Card>
                   );
