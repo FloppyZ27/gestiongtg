@@ -388,31 +388,33 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+        className="bg-gradient-to-br from-emerald-900/25 to-teal-900/25 border-2 border-emerald-500/50 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
       >
-        {/* Type de mandat */}
-        <div className="text-center mb-2">
+        {/* Type de mandat à gauche */}
+        <div className="mb-2">
           <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
             {mandat?.type_mandat || 'Mandat'}
           </Badge>
         </div>
 
-        {/* Dossier + Clients */}
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+        {/* N° Dossier */}
+        <div className="mb-1">
+          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
             {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
           </Badge>
-          <div className="flex items-center gap-1 min-w-0 flex-1">
-            <User className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-xs text-white font-medium truncate">{getClientsNames(dossier.clients_ids)}</span>
-          </div>
         </div>
 
-        {/* Adresse */}
+        {/* Clients */}
+        <div className="flex items-center gap-1 mb-1">
+          <User className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+          <span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span>
+        </div>
+
+        {/* Adresse complète */}
         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
-          <div className="flex items-center gap-1 mb-1">
-            <MapPin className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-xs text-emerald-300 truncate">{formatAdresse(mandat.adresse_travaux)}</span>
+          <div className="flex items-start gap-1 mb-1">
+            <MapPin className="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-emerald-300 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
           </div>
         )}
 
