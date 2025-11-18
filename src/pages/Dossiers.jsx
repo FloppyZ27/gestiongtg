@@ -1502,10 +1502,17 @@ export default function Dossiers() {
 
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
-              if (!open) resetForm();
+              if (!open) {
+                resetForm();
+              }
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+                <Button 
+                  onClick={() => {
+                    resetForm();
+                    setIsDialogOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
                   <Plus className="w-5 h-5 mr-2" />
                   Nouveau dossier
                 </Button>
@@ -1795,7 +1802,10 @@ export default function Dossiers() {
                     </form>
 
                     <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                      <Button type="button" variant="outline" onClick={() => {
+                        setIsDialogOpen(false);
+                        resetForm();
+                      }}>Annuler</Button>
                       <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">{editingDossier ? "Modifier" : "Créer"}</Button>
                     </div>
                   </div>
