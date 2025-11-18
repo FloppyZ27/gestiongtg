@@ -64,6 +64,7 @@ export default function PlanningCalendar({
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
+  const [equipeActiveTabs, setEquipeActiveTabs] = useState({}); // { "equipeId": "techniciens" | "vehicules" | "equipements" }
 
   // Charger les équipes depuis localStorage au démarrage
   useEffect(() => {
@@ -155,6 +156,15 @@ export default function PlanningCalendar({
     };
     newEquipes[dateStr].push(newEquipe);
     setEquipes(newEquipes);
+    setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: "techniciens" });
+  };
+
+  const getEquipeActiveTab = (equipeId) => {
+    return equipeActiveTabs[equipeId] || "techniciens";
+  };
+
+  const setEquipeActiveTab = (equipeId, tab) => {
+    setEquipeActiveTabs({ ...equipeActiveTabs, [equipeId]: tab });
   };
 
   const removeEquipe = (dateStr, equipeId) => {
@@ -910,155 +920,185 @@ export default function PlanningCalendar({
                       </div>
 
                       <div className="space-y-2">
-                        {dayEquipes.map((equipe) => (
-                          <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
-                            <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-700">
-                              <span className="text-white text-xs font-semibold">{equipe.nom}</span>
-                              <button
-                                onClick={() => removeEquipe(dateStr, equipe.id)}
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
+                        {dayEquipes.map((equipe) => {
+                          const activeTab = getEquipeActiveTab(equipe.id);
+                          return (
+                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
+                              <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-700">
+                                <span className="text-white text-xs font-semibold">{equipe.nom}</span>
+                                
+                                {/* Tabs pour ressources */}
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                    className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Users className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                    className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Truck className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                    className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Wrench className="w-3 h-3" />
+                                  </button>
+                                </div>
+
+                                <button
+                                  onClick={() => removeEquipe(dateStr, equipe.id)}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              {/* Contenu du tab actif */}
+                              {activeTab === "techniciens" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.droppableProps}
+                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
+                                    >
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                        {equipe.techniciens.map(techId => {
+                                          const tech = techniciens.find(t => t.id === techId);
+                                          if (!tech) return null;
+                                          return (
+                                            <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                              <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeFromEquipe(dateStr, equipe.id, 'techniciens', techId);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 text-red-400"
+                                              >
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {activeTab === "vehicules" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.droppableProps}
+                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-purple-500/20 border-2 border-purple-500' : 'border border-slate-700'}`}
+                                    >
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Truck className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                        {equipe.vehicules.map(vId => {
+                                          const v = vehicules.find(v => v.id === vId);
+                                          if (!v) return null;
+                                          return (
+                                            <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                              <span className="text-white text-xs">{v.nom}</span>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeFromEquipe(dateStr, equipe.id, 'vehicules', vId);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 text-red-400"
+                                              >
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {activeTab === "equipements" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.droppableProps}
+                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-orange-500/20 border-2 border-orange-500' : 'border border-slate-700'}`}
+                                    >
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Wrench className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                                        {equipe.equipements.map(eId => {
+                                          const e = equipements.find(e => e.id === eId);
+                                          if (!e) return null;
+                                          return (
+                                            <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
+                                              <span className="text-white text-xs">{e.nom}</span>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeFromEquipe(dateStr, equipe.id, 'equipements', eId);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 text-red-400"
+                                              >
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {/* Mandats (toujours visibles) */}
+                              <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
+                                  >
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <FolderOpen className="w-3 h-3 text-cyan-400" />
+                                    </div>
+                                    {equipe.mandats.map((dossierId, index) => {
+                                      const dossier = dossiers.find(d => d.id === dossierId);
+                                      if (!dossier) return null;
+                                      return (
+                                        <Draggable key={dossierId} draggableId={dossierId} index={index}>
+                                          {(provided, snapshot) => (
+                                            <div
+                                              ref={provided.innerRef}
+                                              {...provided.draggableProps}
+                                              {...provided.dragHandleProps}
+                                              className={snapshot.isDragging ? 'opacity-50' : ''}
+                                            >
+                                              <DossierCard dossier={dossier} />
+                                            </div>
+                                          )}
+                                        </Draggable>
+                                      );
+                                    })}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
                             </div>
-
-                            {/* Techniciens */}
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
-                                >
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
-                                    {equipe.techniciens.map(techId => {
-                                      const tech = techniciens.find(t => t.id === techId);
-                                      if (!tech) return null;
-                                      return (
-                                        <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
-                                          <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              removeFromEquipe(dateStr, equipe.id, 'techniciens', techId);
-                                            }}
-                                            className="opacity-0 group-hover:opacity-100 text-red-400"
-                                          >
-                                            <X className="w-3 h-3" />
-                                          </button>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            {/* Véhicules */}
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-purple-500/20 border-2 border-purple-500' : 'border border-slate-700'}`}
-                                >
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Truck className="w-3 h-3 text-purple-400 flex-shrink-0" />
-                                    {equipe.vehicules.map(vId => {
-                                      const v = vehicules.find(v => v.id === vId);
-                                      if (!v) return null;
-                                      return (
-                                        <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
-                                          <span className="text-white text-xs">{v.nom}</span>
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              removeFromEquipe(dateStr, equipe.id, 'vehicules', vId);
-                                            }}
-                                            className="opacity-0 group-hover:opacity-100 text-red-400"
-                                          >
-                                            <X className="w-3 h-3" />
-                                          </button>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            {/* Équipements */}
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-orange-500/20 border-2 border-orange-500' : 'border border-slate-700'}`}
-                                >
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Wrench className="w-3 h-3 text-orange-400 flex-shrink-0" />
-                                    {equipe.equipements.map(eId => {
-                                      const e = equipements.find(e => e.id === eId);
-                                      if (!e) return null;
-                                      return (
-                                        <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1.5 py-0.5 group flex items-center gap-1">
-                                          <span className="text-white text-xs">{e.nom}</span>
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              removeFromEquipe(dateStr, equipe.id, 'equipements', eId);
-                                            }}
-                                            className="opacity-0 group-hover:opacity-100 text-red-400"
-                                          >
-                                            <X className="w-3 h-3" />
-                                          </button>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            {/* Mandats */}
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
-                                >
-                                  <div className="flex items-center gap-1 mb-1">
-                                    <FolderOpen className="w-3 h-3 text-cyan-400" />
-                                  </div>
-                                  {equipe.mandats.map((dossierId, index) => {
-                                    const dossier = dossiers.find(d => d.id === dossierId);
-                                    if (!dossier) return null;
-                                    return (
-                                      <Draggable key={dossierId} draggableId={dossierId} index={index}>
-                                        {(provided, snapshot) => (
-                                          <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className={snapshot.isDragging ? 'opacity-50' : ''}
-                                          >
-                                            <DossierCard dossier={dossier} />
-                                          </div>
-                                        )}
-                                      </Draggable>
-                                    );
-                                  })}
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </Card>
                   );
@@ -1095,90 +1135,124 @@ export default function PlanningCalendar({
                       </div>
 
                       <div className="space-y-2">
-                        {dayEquipes.map((equipe) => (
-                          <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded p-1 text-xs">
-                            <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-700">
-                              <span className="text-white font-semibold text-xs">{equipe.nom}</span>
-                              <button
-                                onClick={() => removeEquipe(dateStr, equipe.id)}
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
+                        {dayEquipes.map((equipe) => {
+                          const activeTab = getEquipeActiveTab(equipe.id);
+                          return (
+                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded p-1 text-xs">
+                              <div className="flex items-center justify-between mb-1 pb-1 border-b border-slate-700">
+                                <span className="text-white font-semibold text-xs">{equipe.nom}</span>
+                                
+                                {/* Tabs pour ressources */}
+                                <div className="flex items-center gap-0.5">
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Users className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Truck className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Wrench className="w-3 h-3" />
+                                  </button>
+                                </div>
+
+                                <button
+                                  onClick={() => removeEquipe(dateStr, equipe.id)}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              {/* Contenu du tab actif */}
+                              {activeTab === "techniciens" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                                  {(provided, snapshot) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-blue-500/20 border border-blue-500' : 'border border-slate-700'}`}>
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                        {equipe.techniciens.map(techId => {
+                                          const tech = techniciens.find(t => t.id === techId);
+                                          return tech ? (
+                                            <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white">{tech.prenom}</div>
+                                          ) : null;
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {activeTab === "vehicules" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
+                                  {(provided, snapshot) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-purple-500/20 border border-purple-500' : 'border border-slate-700'}`}>
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Truck className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                                        {equipe.vehicules.map(vId => {
+                                          const v = vehicules.find(v => v.id === vId);
+                                          return v ? (
+                                            <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white">{v.nom}</div>
+                                          ) : null;
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {activeTab === "equipements" && (
+                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
+                                  {(provided, snapshot) => (
+                                    <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-orange-500/20 border border-orange-500' : 'border border-slate-700'}`}>
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <Wrench className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                                        {equipe.equipements.map(eId => {
+                                          const e = equipements.find(e => e.id === eId);
+                                          return e ? (
+                                            <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white">{e.nom}</div>
+                                          ) : null;
+                                        })}
+                                      </div>
+                                      {provided.placeholder}
+                                    </div>
+                                  )}
+                                </Droppable>
+                              )}
+
+                              {/* Mandats (toujours visibles) */}
+                              <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
+                                {(provided) => (
+                                  <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px]">
+                                    {equipe.mandats.map((dId, idx) => {
+                                      const d = dossiers.find(d => d.id === dId);
+                                      return d ? (
+                                        <Draggable key={dId} draggableId={dId} index={idx}>
+                                          {(provided) => (
+                                            <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                              <DossierCard dossier={d} />
+                                            </div>
+                                          )}
+                                        </Draggable>
+                                      ) : null;
+                                    })}
+                                    {provided.placeholder}
+                                  </div>
+                                )}
+                              </Droppable>
                             </div>
-
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
-                              {(provided, snapshot) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-blue-500/20 border border-blue-500' : 'border border-slate-700'}`}>
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
-                                    {equipe.techniciens.map(techId => {
-                                      const tech = techniciens.find(t => t.id === techId);
-                                      return tech ? (
-                                        <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 text-xs text-white">{tech.prenom}</div>
-                                      ) : null;
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
-                              {(provided, snapshot) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-purple-500/20 border border-purple-500' : 'border border-slate-700'}`}>
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Truck className="w-3 h-3 text-purple-400 flex-shrink-0" />
-                                    {equipe.vehicules.map(vId => {
-                                      const v = vehicules.find(v => v.id === vId);
-                                      return v ? (
-                                        <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 text-xs text-white">{v.nom}</div>
-                                      ) : null;
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
-                              {(provided, snapshot) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-orange-500/20 border border-orange-500' : 'border border-slate-700'}`}>
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Wrench className="w-3 h-3 text-orange-400 flex-shrink-0" />
-                                    {equipe.equipements.map(eId => {
-                                      const e = equipements.find(e => e.id === eId);
-                                      return e ? (
-                                        <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 text-xs text-white">{e.nom}</div>
-                                      ) : null;
-                                    })}
-                                  </div>
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-
-                            <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
-                              {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px]">
-                                  {equipe.mandats.map((dId, idx) => {
-                                    const d = dossiers.find(d => d.id === dId);
-                                    return d ? (
-                                      <Draggable key={dId} draggableId={dId} index={idx}>
-                                        {(provided) => (
-                                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                            <DossierCard dossier={d} />
-                                          </div>
-                                        )}
-                                      </Draggable>
-                                    ) : null;
-                                  })}
-                                  {provided.placeholder}
-                                </div>
-                              )}
-                            </Droppable>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </Card>
                   );
