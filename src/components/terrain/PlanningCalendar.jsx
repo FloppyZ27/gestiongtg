@@ -156,15 +156,16 @@ export default function PlanningCalendar({
     };
     newEquipes[dateStr].push(newEquipe);
     setEquipes(newEquipes);
-    setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: "techniciens" });
+    setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
   };
 
   const getEquipeActiveTab = (equipeId) => {
-    return equipeActiveTabs[equipeId] || "techniciens";
+    return equipeActiveTabs[equipeId] !== undefined ? equipeActiveTabs[equipeId] : null;
   };
 
   const setEquipeActiveTab = (equipeId, tab) => {
-    setEquipeActiveTabs({ ...equipeActiveTabs, [equipeId]: tab });
+    const currentTab = getEquipeActiveTab(equipeId);
+    setEquipeActiveTabs({ ...equipeActiveTabs, [equipeId]: currentTab === tab ? null : tab });
   };
 
   const removeEquipe = (dateStr, equipeId) => {
@@ -929,39 +930,42 @@ export default function PlanningCalendar({
                               }).filter(n => n).join('-')
                             : equipe.nom;
                           return (
-                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-2">
-                              <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-slate-600 bg-slate-700/50 -m-2 mx-2 px-2 py-2 rounded-t-lg">
-                                <span className="text-white text-xs font-bold">{equipeNom}</span>
-                                
-                                {/* Tabs pour ressources */}
-                                <div className="flex items-center gap-1">
+                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
+                              <div className="bg-slate-700/50 px-2 py-2 border-b-2 border-slate-600">
+                                {/* Tabs et bouton supprimer */}
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                      className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Users className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                      className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Truck className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                      className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Wrench className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                   <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                    className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                    onClick={() => removeEquipe(dateStr, equipe.id)}
+                                    className="text-red-400 hover:text-red-300"
                                   >
-                                    <Users className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                    className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Truck className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                    className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Wrench className="w-3 h-3" />
+                                    <X className="w-3 h-3" />
                                   </button>
                                 </div>
-
-                                <button
-                                  onClick={() => removeEquipe(dateStr, equipe.id)}
-                                  className="text-red-400 hover:text-red-300"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
+                                {/* Nom de l'équipe */}
+                                <span className="text-white text-xs font-bold">{equipeNom}</span>
                               </div>
+                              
+                              <div className="p-2">
 
                               {/* Contenu du tab actif */}
                               {activeTab === "techniciens" && (
@@ -1077,9 +1081,6 @@ export default function PlanningCalendar({
                                     {...provided.droppableProps}
                                     className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
                                   >
-                                    <div className="flex items-center gap-1 mb-1">
-                                      <FolderOpen className="w-3 h-3 text-cyan-400" />
-                                    </div>
                                     {equipe.mandats.map((dossierId, index) => {
                                       const dossier = dossiers.find(d => d.id === dossierId);
                                       if (!dossier) return null;
@@ -1150,39 +1151,42 @@ export default function PlanningCalendar({
                               }).filter(n => n).join('-')
                             : equipe.nom;
                           return (
-                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded p-1 text-xs">
-                              <div className="flex items-center justify-between mb-1 pb-1 border-b-2 border-slate-600 bg-slate-700/50 -mx-1 -mt-1 px-1 py-1 rounded-t">
-                                <span className="text-white font-bold text-xs">{equipeNom}</span>
-                                
-                                {/* Tabs pour ressources */}
-                                <div className="flex items-center gap-0.5">
+                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded overflow-hidden text-xs">
+                              <div className="bg-slate-700/50 px-1 py-1 border-b-2 border-slate-600">
+                                {/* Tabs et bouton supprimer */}
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center gap-0.5">
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                      className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Users className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                      className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Truck className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                      className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                    >
+                                      <Wrench className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                   <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                    onClick={() => removeEquipe(dateStr, equipe.id)}
+                                    className="text-red-400 hover:text-red-300"
                                   >
-                                    <Users className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Truck className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Wrench className="w-3 h-3" />
+                                    <X className="w-3 h-3" />
                                   </button>
                                 </div>
-
-                                <button
-                                  onClick={() => removeEquipe(dateStr, equipe.id)}
-                                  className="text-red-400 hover:text-red-300"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
+                                {/* Nom de l'équipe */}
+                                <span className="text-white text-xs font-bold">{equipeNom}</span>
                               </div>
+                              
+                              <div className="p-1">
 
                               {/* Contenu du tab actif */}
                               {activeTab === "techniciens" && (
