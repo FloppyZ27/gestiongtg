@@ -349,21 +349,21 @@ export default function PlanningCalendar({
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-2 mb-2 hover:bg-slate-700 transition-colors">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+      <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 border-2 border-emerald-500/50 rounded-lg p-3 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02]">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-sm font-semibold`}>
             {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
           </Badge>
           {mandat && (
-            <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+            <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-sm font-semibold">
               {mandat.type_mandat}
             </Badge>
           )}
         </div>
-        <p className="text-slate-300 text-xs mb-1 line-clamp-1">
+        <p className="text-white text-sm font-medium mb-1 line-clamp-1">
           {getClientsNames(dossier.clients_ids)}
         </p>
-        <p className="text-slate-500 text-xs line-clamp-1">
+        <p className="text-emerald-300 text-xs line-clamp-1">
           {formatAdresse(mandat?.adresse_travaux)}
         </p>
       </div>
