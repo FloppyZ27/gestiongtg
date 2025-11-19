@@ -211,14 +211,14 @@ export default function GestionDeMandat() {
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
-    
+
     if (source.droppableId === destination.droppableId) return;
 
     const card = filteredCards.find(c => c.id === draggableId);
     if (!card) return;
 
     const dossier = card.dossier;
-    
+
     let updatedMandats = [...dossier.mandats];
 
     if (activeView === "taches") {
@@ -234,6 +234,15 @@ export default function GestionDeMandat() {
       updatedMandats = dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
           return { ...m, utilisateur_assigne: nouvelUtilisateur };
+        }
+        return m;
+      });
+    } else if (activeView === "calendrier") {
+      // Format: "day-YYYY-MM-DD"
+      const newDateStr = destination.droppableId.replace("day-", "");
+      updatedMandats = dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) {
+          return { ...m, date_livraison: newDateStr };
         }
         return m;
       });
@@ -833,98 +842,144 @@ export default function GestionDeMandat() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                {calendarMode === "week" ? (
-                  <div className="grid grid-cols-5 gap-3">
-                    {[0, 1, 2, 3, 4].map((dayOffset) => {
-                      const day = addDays(currentMonthStart, dayOffset);
-                      const cardsForDay = filteredCards.filter(card => 
-                        card.mandat.date_livraison && 
-                        isSameDay(new Date(card.mandat.date_livraison), day)
-                      );
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  {calendarMode === "week" ? (
+                    <div className="grid grid-cols-5 gap-3">
+                      {[0, 1, 2, 3, 4].map((dayOffset) => {
+                        const day = addDays(currentMonthStart, dayOffset);
+                        const dayId = `day-${format(day, "yyyy-MM-dd")}`;
+                        const cardsForDay = filteredCards.filter(card => 
+                          card.mandat.date_livraison && 
+                          isSameDay(new Date(card.mandat.date_livraison), day)
+                        );
 
-                      return (
-                        <div key={dayOffset} className="space-y-2">
-                          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
-                            <div className="text-center">
-                              <h3 className="font-semibold text-white text-sm">
-                                {format(day, "EEEE", { locale: fr })}
-                              </h3>
-                              <p className="text-xs text-slate-400">
-                                {format(day, "d MMM", { locale: fr })}
-                              </p>
+                        return (
+                          <div key={dayOffset} className="space-y-2">
+                            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                              <div className="text-center">
+                                <h3 className="font-semibold text-white text-sm">
+                                  {format(day, "EEEE", { locale: fr })}
+                                </h3>
+                                <p className="text-xs text-slate-400">
+                                  {format(day, "d MMM", { locale: fr })}
+                                </p>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="space-y-2 min-h-[400px]">
-                            {cardsForDay.map(card => (
-                              <div key={card.id}>
-                                {renderMandatCard(card)}
-                              </div>
-                            ))}
-                            {cardsForDay.length === 0 && (
-                              <div className="text-center py-8 text-slate-600 text-xs">
-                                Aucun mandat
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-                    {getWeeksToDisplay().map((weekStart, weekIndex) => {
-                      const weekEnd = endOfWeek(weekStart, { locale: fr });
-                      const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                        .filter(day => day.getDay() !== 0 && day.getDay() !== 6);
-
-                      return (
-                        <Card key={weekIndex} className="border-slate-700 bg-slate-800/30">
-                          <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
-                            <CardTitle className="text-sm text-slate-300">
-                              Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="p-0">
-                            <div className="grid grid-cols-5 divide-x divide-slate-700">
-                              {daysOfWeek.map((day, dayIndex) => {
-                                const cardsForDay = filteredCards.filter(card => 
-                                  card.mandat.date_livraison && 
-                                  isSameDay(new Date(card.mandat.date_livraison), day)
-                                );
-
-                                return (
-                                  <div key={dayIndex} className="p-3 min-h-[200px]">
-                                    <div className="text-center mb-3">
-                                      <p className="text-xs text-slate-500 uppercase">
-                                        {format(day, "EEE", { locale: fr })}
-                                      </p>
-                                      <p className="text-lg font-bold text-white">
-                                        {format(day, "d", { locale: fr })}
-                                      </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                      {cardsForDay.map(card => (
-                                        <div key={card.id}>
-                                          {renderMandatCard(card)}
-                                        </div>
-                                      ))}
-                                      {cardsForDay.length === 0 && (
-                                        <div className="text-center py-4 text-slate-600 text-xs">
-                                          Aucun mandat
+                            <Droppable droppableId={dayId}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={`space-y-2 min-h-[400px] p-2 rounded-lg transition-colors ${
+                                    snapshot.isDraggingOver ? 'bg-emerald-500/10 border-2 border-emerald-500/50' : ''
+                                  }`}
+                                >
+                                  {cardsForDay.map((card, index) => (
+                                    <Draggable key={card.id} draggableId={card.id} index={index}>
+                                      {(provided, snapshot) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                          data-is-dragging={snapshot.isDragging}
+                                          style={provided.draggableProps.style}
+                                        >
+                                          {renderMandatCard(card, provided, snapshot)}
                                         </div>
                                       )}
+                                    </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                                  {cardsForDay.length === 0 && !snapshot.isDraggingOver && (
+                                    <div className="text-center py-8 text-slate-600 text-xs">
+                                      Aucun mandat
                                     </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+                                  )}
+                                </div>
+                              )}
+                            </Droppable>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                      {getWeeksToDisplay().map((weekStart, weekIndex) => {
+                        const weekEnd = endOfWeek(weekStart, { locale: fr });
+                        const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
+                          .filter(day => day.getDay() !== 0 && day.getDay() !== 6);
+
+                        return (
+                          <Card key={weekIndex} className="border-slate-700 bg-slate-800/30">
+                            <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
+                              <CardTitle className="text-sm text-slate-300">
+                                Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                              <div className="grid grid-cols-5 divide-x divide-slate-700">
+                                {daysOfWeek.map((day, dayIndex) => {
+                                  const dayId = `day-${format(day, "yyyy-MM-dd")}`;
+                                  const cardsForDay = filteredCards.filter(card => 
+                                    card.mandat.date_livraison && 
+                                    isSameDay(new Date(card.mandat.date_livraison), day)
+                                  );
+
+                                  return (
+                                    <div key={dayIndex} className="p-3 min-h-[200px]">
+                                      <div className="text-center mb-3">
+                                        <p className="text-xs text-slate-500 uppercase">
+                                          {format(day, "EEE", { locale: fr })}
+                                        </p>
+                                        <p className="text-lg font-bold text-white">
+                                          {format(day, "d", { locale: fr })}
+                                        </p>
+                                      </div>
+                                      <Droppable droppableId={dayId}>
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`space-y-2 rounded-lg transition-colors ${
+                                              snapshot.isDraggingOver ? 'bg-emerald-500/10 border-2 border-emerald-500/50' : ''
+                                            }`}
+                                          >
+                                            {cardsForDay.map((card, index) => (
+                                              <Draggable key={card.id} draggableId={card.id} index={index}>
+                                                {(provided, snapshot) => (
+                                                  <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    data-is-dragging={snapshot.isDragging}
+                                                    style={provided.draggableProps.style}
+                                                  >
+                                                    {renderMandatCard(card, provided, snapshot)}
+                                                  </div>
+                                                )}
+                                              </Draggable>
+                                            ))}
+                                            {provided.placeholder}
+                                            {cardsForDay.length === 0 && !snapshot.isDraggingOver && (
+                                              <div className="text-center py-4 text-slate-600 text-xs">
+                                                Aucun mandat
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </Droppable>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </DragDropContext>
               </CardContent>
             </Card>
           </TabsContent>
