@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -435,7 +434,7 @@ export default function GestionDeMandat() {
         }
       `}</style>
       
-      <div className="max-w-[1265px] mx-auto">
+      <div className="w-full px-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -566,11 +565,10 @@ export default function GestionDeMandat() {
 
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
-            <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <div 
-                  className="flex gap-4 p-4 min-w-max"
-                >
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div 
+                className="flex gap-4 p-4 min-w-max overflow-x-auto"
+              >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
                     
@@ -643,11 +641,10 @@ export default function GestionDeMandat() {
 
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
-            <div className="overflow-x-auto pb-4 border-2 border-slate-800 rounded-lg bg-slate-900/30">
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <div 
-                  className="flex gap-4 p-4 min-w-max"
-                >
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div 
+                className="flex gap-4 p-4 min-w-max overflow-x-auto"
+              >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
                     const colorClass = getUserColor(userIndex);
@@ -729,12 +726,11 @@ export default function GestionDeMandat() {
                   })}
                 </div>
               </DragDropContext>
-            </div>
           </TabsContent>
 
           {/* Vue Calendrier */}
           <TabsContent value="calendrier" className="mt-0">
-            <div className="border-2 border-slate-800 rounded-lg bg-slate-900/30 p-4">
+            <div className="p-4">
               {/* Navigation du calendrier */}
               <div className="flex items-center justify-between mb-4 gap-4">
                 <Button
