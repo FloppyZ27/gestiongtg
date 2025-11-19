@@ -532,9 +532,9 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 pt-5 ml-[296px]">
+        <div className="pt-5 pl-[560px]">
           {/* Colonne gauche - Ressources avec tabs */}
-          <div className="fixed left-[312px] top-[116px] w-[240px] z-10">
+          <div className="fixed left-[16px] top-[116px] w-[240px] z-10">
             <Card className="bg-slate-900/50 border-slate-800 p-4 max-h-[calc(100vh-136px)] overflow-hidden">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
@@ -891,7 +891,7 @@ export default function PlanningCalendar({
           </div>
 
           {/* Grille calendrier */}
-          <div className="flex-1 ml-[504px] space-y-4">
+          <div className="space-y-4">
             {viewMode === "week" ? (
               <div className="grid grid-cols-5 gap-2">
                 {days.map((day) => {
