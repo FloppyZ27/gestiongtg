@@ -404,17 +404,17 @@ export default function PlanningCalendar({
       
       const diffDays = Math.floor((limite - placed) / (1000 * 60 * 60 * 24));
       
-      if (diffDays < 0) {
-        // Après la date limite - ROUGE
+      if (diffDays < 2) {
+        // Moins de 2 jours avant ou après - ROUGE
         colorClasses = "from-red-900/20 to-red-900/10 border-red-500/50 hover:shadow-red-500/20";
-      } else if (diffDays === 0) {
-        // Le jour de la date limite - ORANGE
+      } else if (diffDays === 2) {
+        // 2 jours avant la date limite - ORANGE
         colorClasses = "from-orange-900/20 to-orange-900/10 border-orange-500/50 hover:shadow-orange-500/20";
-      } else if (diffDays >= 1 && diffDays <= 3) {
-        // 1-3 jours avant - JAUNE
+      } else if (diffDays >= 3 && diffDays <= 5) {
+        // 3-5 jours avant - JAUNE
         colorClasses = "from-yellow-900/20 to-yellow-900/10 border-yellow-500/50 hover:shadow-yellow-500/20";
       }
-      // Sinon garde le vert par défaut
+      // Sinon garde le vert par défaut (6+ jours avant)
     }
     
     return (
