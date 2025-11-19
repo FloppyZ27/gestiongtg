@@ -86,12 +86,10 @@ export default function CeduleTerrain() {
 
   const queryClient = useQueryClient();
 
-  // Query for the current user
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.getCurrentUser(), // Assuming base44.auth.getCurrentUser() is available
-    staleTime: Infinity, // User info usually doesn't change frequently during a session
-    enabled: true,
+    queryFn: () => base44.auth.me(),
+    staleTime: Infinity,
   });
 
   const { data: dossiers = [] } = useQuery({
