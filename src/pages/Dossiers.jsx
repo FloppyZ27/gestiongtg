@@ -1517,6 +1517,83 @@ export default function Dossiers() {
     }
   };
 
+  const handleImportCSV = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        alert('Le fichier CSV est vide ou invalide.');
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+        const cleanValues = values.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+        
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = cleanValues[index] || '';
+        });
+        data.push(row);
+      }
+
+      setImportedData(data);
+      setIsImportDialogOpen(true);
+    };
+
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  };
+
+  const handleConfirmImport = async () => {
+    if (importedData.length === 0) return;
+
+    for (const row of importedData) {
+      const dossierData = {
+        numero_dossier: row['N° Dossier'] || row['Numéro Dossier'] || '',
+        arpenteur_geometre: row['Arpenteur'] || '',
+        date_ouverture: row['Date Ouverture'] || new Date().toISOString().split('T')[0],
+        statut: row['Statut'] || 'Ouvert',
+        clients_ids: [],
+        notaires_ids: [],
+        courtiers_ids: [],
+        mandats: row['Type Mandat'] ? [{
+          type_mandat: row['Type Mandat'],
+          tache_actuelle: row['Tâche actuelle'] || 'Ouverture',
+          adresse_travaux: {
+            ville: row['Ville'] || '',
+            numeros_civiques: [''],
+            rue: '',
+            code_postal: '',
+            province: ''
+          },
+          lots: [],
+          prix_estime: parseFloat(row['Prix estimé']) || 0,
+          rabais: parseFloat(row['Rabais']) || 0,
+          taxes_incluses: false,
+          date_livraison: '',
+          date_signature: '',
+          date_debut_travaux: '',
+          notes: ''
+        }] : [],
+        description: ''
+      };
+
+      await createDossierMutation.mutateAsync(dossierData);
+    }
+
+    setIsImportDialogOpen(false);
+    setImportedData([]);
+  };
+
   const handleExportCSV = () => {
     // Préparer les données pour le CSV
     const csvData = sortedDossiers.map(dossier => ({
