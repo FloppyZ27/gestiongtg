@@ -111,6 +111,17 @@ export default function MandatTabs({
                 disabled={true}
               />
             </div>
+
+            <div className="space-y-2">
+              <Label>Lots</Label>
+              <Textarea
+                value={mandat.lots_texte || ""}
+                onChange={(e) => updateMandat(mandatIndex, 'lots_texte', e.target.value)}
+                placeholder="Entrer les numéros de lots..."
+                className="bg-slate-700 border-slate-600 min-h-[100px]"
+                disabled={true}
+              />
+            </div>
           </>
         ) : (
           <>
@@ -211,25 +222,17 @@ export default function MandatTabs({
           </>
         )}
 
-        <div className="space-y-2">
+        {!isTTL && (
+          <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <Label>Lots {isTTL ? "" : "sélectionnés"}</Label>
-            {!isTTL && (
-              <Button type="button" size="sm" onClick={() => openLotSelector(mandatIndex)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                <Plus className="w-4 h-4 mr-1" />
-                Sélectionner des lots
-              </Button>
-            )}
+            <Label>Lots sélectionnés</Label>
+            <Button type="button" size="sm" onClick={() => openLotSelector(mandatIndex)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+              <Plus className="w-4 h-4 mr-1" />
+              Sélectionner des lots
+            </Button>
           </div>
 
-          {isTTL ? (
-            <Textarea
-              value={mandat.lots_texte || ""}
-              onChange={(e) => updateMandat(mandatIndex, 'lots_texte', e.target.value)}
-              placeholder="Entrer les numéros de lots..."
-              className="bg-slate-700 border-slate-600 min-h-[100px]"
-            />
-          ) : mandat.lots && mandat.lots.length > 0 ? (
+          {mandat.lots && mandat.lots.length > 0 ? (
             <div className="border border-slate-700 rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
@@ -275,8 +278,8 @@ export default function MandatTabs({
           ) : (
             <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucun lot sélectionné</p>
           )}
-          }
           </div>
+          )}
       </TabsContent>
 
       {/* Tab Minutes */}

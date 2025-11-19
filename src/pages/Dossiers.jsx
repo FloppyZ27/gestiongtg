@@ -1895,6 +1895,7 @@ export default function Dossiers() {
                               onChange={(e) => setFormData({...formData, clients_texte: e.target.value})}
                               placeholder="Entrer les noms des clients..."
                               className="bg-slate-800 border-slate-700 min-h-[100px]"
+                              disabled={true}
                             />
                           ) : formData.clients_ids.length > 0 ?
                           <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
@@ -3759,13 +3760,21 @@ export default function Dossiers() {
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {dossier.ttl === "Oui" ? (
-                              dossier.mandatInfo?.lots_texte || "-"
+                              dossier.mandatInfo?.lots_texte ? (
+                                <div className="flex flex-col gap-0.5">
+                                  {dossier.mandatInfo.lots_texte.split('\n').filter(l => l.trim()).map((lot, idx) => (
+                                    <div key={idx}>{lot.trim()}</div>
+                                  ))}
+                                </div>
+                              ) : "-"
                             ) : (
                               dossier.mandatInfo?.lots && dossier.mandatInfo.lots.length > 0 ? (
-                                dossier.mandatInfo.lots.map((lotId) => {
-                                  const lot = lots.find(l => l.id === lotId);
-                                  return lot ? lot.numero_lot : null;
-                                }).filter(n => n).join(', ')
+                                <div className="flex flex-col gap-0.5">
+                                  {dossier.mandatInfo.lots.map((lotId) => {
+                                    const lot = lots.find(l => l.id === lotId);
+                                    return lot ? <div key={lotId}>{lot.numero_lot}</div> : null;
+                                  })}
+                                </div>
                               ) : "-"
                             )}
                           </TableCell>
