@@ -423,6 +423,11 @@ export default function GestionDeMandat() {
           transition: none !important;
         }
 
+        /* Préserver la position de la carte lors du drag */
+        div[data-rbd-draggable-id][data-is-dragging="false"] {
+          transform: none !important;
+        }
+
         /* Carte en cours de drag au-dessus de tout */
         div[data-rbd-draggable-id][data-is-dragging="true"] {
           z-index: 99999 !important;
@@ -704,24 +709,24 @@ export default function GestionDeMandat() {
                         <Card 
                           className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
                         >
-                          <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
+                          <CardHeader className={`pb-3 pt-3 border-b-2 border-slate-800`} style={{ background: `linear-gradient(to right, ${gradientColor.includes('blue') ? 'rgba(59, 130, 246, 0.2)' : gradientColor.includes('purple') ? 'rgba(168, 85, 247, 0.2)' : gradientColor.includes('green') ? 'rgba(34, 197, 94, 0.2)' : gradientColor.includes('orange') ? 'rgba(249, 115, 22, 0.2)' : gradientColor.includes('pink') ? 'rgba(236, 72, 153, 0.2)' : gradientColor.includes('cyan') ? 'rgba(6, 182, 212, 0.2)' : gradientColor.includes('yellow') ? 'rgba(234, 179, 8, 0.2)' : 'rgba(239, 68, 68, 0.2)'}, ${gradientColor.includes('blue') ? 'rgba(37, 99, 235, 0.2)' : gradientColor.includes('purple') ? 'rgba(147, 51, 234, 0.2)' : gradientColor.includes('green') ? 'rgba(22, 163, 74, 0.2)' : gradientColor.includes('orange') ? 'rgba(234, 88, 12, 0.2)' : gradientColor.includes('pink') ? 'rgba(219, 39, 119, 0.2)' : gradientColor.includes('cyan') ? 'rgba(8, 145, 178, 0.2)' : gradientColor.includes('yellow') ? 'rgba(202, 138, 4, 0.2)' : 'rgba(220, 38, 38, 0.2)'})` }}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 {user.email !== "non-assigne" ? (
-                                  <Avatar className="w-8 h-8 border-2 border-white/20">
+                                  <Avatar className="w-6 h-6 border-2 border-white/20">
                                     <AvatarImage src={user.photo_url} />
                                     <AvatarFallback className="text-xs bg-slate-900 text-white">
                                       {getUserInitials(user.full_name)}
                                     </AvatarFallback>
                                   </Avatar>
                                 ) : (
-                                  <User className="w-8 h-8 text-white" />
+                                  <User className="w-5 h-5 text-white" />
                                 )}
-                                <CardTitle className="text-lg font-bold text-white tracking-wide">
+                                <CardTitle className="text-base font-bold text-white tracking-wide">
                                   {user.full_name}
                                 </CardTitle>
                               </div>
-                              <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
                                 {cardsInColumn.length}
                               </Badge>
                             </div>
