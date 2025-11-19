@@ -565,13 +565,14 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="overflow-x-auto mb-2" 
+                className="overflow-x-auto mb-2 bg-slate-800/30 rounded-lg" 
+                style={{ height: '20px' }}
                 onScroll={(e) => {
                   const bottomScroll = document.getElementById('taskColumnsScroll');
                   if (bottomScroll) bottomScroll.scrollLeft = e.target.scrollLeft;
                 }}
               >
-                <div style={{ width: `${TACHES.slice(0, 5).length * 216}px`, height: '1px' }}></div>
+                <div style={{ width: `${TACHES.length * 216}px`, height: '1px' }}></div>
               </div>
               <div 
                 id="taskColumnsScroll"
@@ -583,7 +584,7 @@ export default function GestionDeMandat() {
               >
                 <div className="flex gap-4 p-4">
 
-                      {TACHES.slice(0, 5).map(tache => {
+                      {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
 
                     return (
