@@ -715,8 +715,25 @@ export default function PlanningCalendar({
           .no-print {
             display: none !important;
           }
+          .print-only {
+            display: none;
+          }
+          @media print {
+            .print-only {
+              display: block !important;
+            }
+          }
         }
       `}</style>
+      
+      {/* Titre pour impression */}
+      <div className="print-only mb-4 text-center">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Cédule Terrain - {viewMode === "week" 
+            ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
+            : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+        </h1>
+      </div>
       
       {/* Header avec contrôles */}
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4 no-print">
