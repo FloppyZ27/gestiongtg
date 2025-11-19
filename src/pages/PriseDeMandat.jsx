@@ -1257,7 +1257,7 @@ export default function PriseDeMandat() {
 
                   <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
                   {/* Section pour les champs de base - tous en une seule colonne */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                       <Select
@@ -1309,22 +1309,6 @@ export default function PriseDeMandat() {
                           {editingDossier && (
                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                           )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>TTL</Label>
-                      <Select
-                        value={formData.ttl}
-                        onValueChange={(value) => setFormData({...formData, ttl: value})}
-                      >
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Non" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Non" className="text-white">Non</SelectItem>
-                          <SelectItem value="Oui" className="text-white">Oui</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
