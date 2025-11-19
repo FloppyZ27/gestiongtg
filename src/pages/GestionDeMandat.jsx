@@ -634,8 +634,8 @@ export default function GestionDeMandat() {
                       </div>
                     );
                   })}
-                </div>
-              </DragDropContext>
+              </div>
+            </DragDropContext>
           </TabsContent>
 
           {/* Vue par Utilisateur */}
@@ -723,8 +723,8 @@ export default function GestionDeMandat() {
                       </div>
                     );
                   })}
-                </div>
-              </DragDropContext>
+              </div>
+            </DragDropContext>
           </TabsContent>
 
           {/* Vue Calendrier */}
