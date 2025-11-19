@@ -611,14 +611,6 @@ export default function PlanningCalendar({
           </div>
         )}
 
-        {/* Instruments requis */}
-        {terrain.instruments_requis && (
-          <div className="flex items-center gap-1 mb-1">
-            <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
-          </div>
-        )}
-
         {/* Rendez-vous */}
         {terrain.a_rendez_vous && terrain.date_rendez_vous && (
           <div className="flex items-center gap-1 mb-1">
@@ -627,6 +619,14 @@ export default function PlanningCalendar({
               RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
               {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
             </span>
+          </div>
+        )}
+
+        {/* Instruments requis */}
+        {terrain.instruments_requis && (
+          <div className="flex items-center gap-1 mb-1">
+            <Wrench className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <span className="text-xs text-emerald-300 truncate">{terrain.instruments_requis}</span>
           </div>
         )}
 
