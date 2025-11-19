@@ -538,9 +538,28 @@ export default function GestionDeMandat() {
 
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
+            {/* Scrollbar du haut */}
+            <div 
+              className="overflow-x-auto mb-2" 
+              onScroll={(e) => {
+                const target = e.currentTarget;
+                const mainScroll = target.nextElementSibling;
+                if (mainScroll) mainScroll.scrollLeft = target.scrollLeft;
+              }}
+            >
+              <div style={{ width: 'calc(12 * 12.6rem + 11 * 1rem)', height: '1px' }}></div>
+            </div>
+
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="overflow-x-auto max-w-full" style={{ direction: 'rtl' }}>
-                <div className="flex gap-4 p-4" style={{ width: 'calc(5 * 12.6rem + 4 * 1rem)', direction: 'ltr' }}>
+              <div 
+                className="overflow-x-auto max-w-full"
+                onScroll={(e) => {
+                  const target = e.currentTarget;
+                  const topScroll = target.previousElementSibling;
+                  if (topScroll) topScroll.scrollLeft = target.scrollLeft;
+                }}
+              >
+                <div className="flex gap-4 p-4" style={{ minWidth: 'calc(12 * 12.6rem + 11 * 1rem)' }}>
               
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
