@@ -854,7 +854,11 @@ export default function GestionDeMandat() {
                         );
 
                         return (
-                          <div key={dayOffset} className="space-y-2">
+                          <div 
+                            key={dayOffset} 
+                            className="space-y-2"
+                            style={{ zIndex: 1 }}
+                          >
                             <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
                               <div className="text-center">
                                 <h3 className="font-semibold text-white text-sm">
@@ -927,7 +931,11 @@ export default function GestionDeMandat() {
                                   );
 
                                   return (
-                                    <div key={dayIndex} className="p-3 min-h-[200px]">
+                                    <div 
+                                      key={dayIndex} 
+                                      className="p-3 min-h-[200px]"
+                                      style={{ zIndex: 1 }}
+                                    >
                                       <div className="text-center mb-3">
                                         <p className="text-xs text-slate-500 uppercase">
                                           {format(day, "EEE", { locale: fr })}
