@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -579,6 +578,39 @@ export default function Lots() {
     }
   });
 
+  const handleExportCSV = () => {
+    const csvData = sortedLots.map(lot => ({
+      'Numéro de lot': lot.numero_lot,
+      'Circonscription foncière': lot.circonscription_fonciere,
+      'Cadastre': lot.cadastre || '-',
+      'Rang': lot.rang || '-',
+      'Date BPD': lot.date_bpd ? format(new Date(lot.date_bpd), "yyyy-MM-dd", { locale: fr }) : '-',
+      'Type d\'opération': lot.type_operation || '-'
+    }));
+
+    const headers = Object.keys(csvData[0]);
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => 
+        headers.map(header => {
+          const value = row[header];
+          const escaped = String(value).replace(/"/g, '""');
+          return `"${escaped}"`;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `lots_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const statsCards = [
     {
       title: "Total des lots",
@@ -612,16 +644,23 @@ export default function Lots() {
             <p className="text-slate-400">Gestion des lots cadastraux</p>
           </div>
           
-          <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
-            setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
-                <Plus className="w-5 h-5 mr-2" />
-                Nouveau lot
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3">
+            <Button
+              onClick={handleExportCSV}
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
+              <Download className="w-4 h-4 mr-2" />
+              Extraction CSV
+            </Button>
+            <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
+              setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
+              if (!open) resetForm();
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Nouveau lot
+                </Button>
+                </DialogTrigger>
             <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
@@ -899,6 +938,7 @@ export default function Lots() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* View Lot Dialog */}

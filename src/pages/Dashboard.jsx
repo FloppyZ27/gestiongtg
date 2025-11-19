@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Plus, Search, FileText, Calendar, TrendingUp, MapPin } from "lucide-react";
+import { Plus, Search, FileText, Calendar, TrendingUp, MapPin, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ActesList from "../components/actes/ActesList";
@@ -151,6 +150,41 @@ export default function Dashboard() {
     },
   ];
 
+  const handleExportCSV = () => {
+    const csvData = sortedActes.map(acte => ({
+      'Numéro acte': acte.numero_acte,
+      'Date BPD': acte.date_bpd ? format(new Date(acte.date_bpd), "yyyy-MM-dd", { locale: fr }) : '-',
+      'Type d\'acte': acte.type_acte,
+      'Type servitude': acte.type_servitude || '-',
+      'Circonscription': acte.circonscription_fonciere,
+      'Notaire': acte.notaire,
+      'Vendeurs': acte.vendeurs?.map(v => `${v.prenom} ${v.nom}`).join('; ') || '-',
+      'Acheteurs': acte.acheteurs?.map(a => `${a.prenom} ${a.nom}`).join('; ') || '-'
+    }));
+
+    const headers = Object.keys(csvData[0]);
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => 
+        headers.map(header => {
+          const value = row[header];
+          const escaped = String(value).replace(/"/g, '""');
+          return `"${escaped}"`;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `actes_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const typesActes = ["Vente", "Cession", "Donation", "Déclaration de Transmission", "Jugement", "Rectification", "Retrocession", "Servitude", "Bornage"];
   const circonscriptions = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
@@ -167,12 +201,20 @@ export default function Dashboard() {
             </div>
             <p className="text-slate-400">Gestion de vos actes d'arpentage</p>
           </div>
-          <Link to={createPageUrl("AjouterActe")}>
-            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-200 border-0">
-              <Plus className="w-5 h-5 mr-2" />
-              Nouvel acte
+          <div className="flex gap-3">
+            <Button
+              onClick={handleExportCSV}
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
+              <Download className="w-4 h-4 mr-2" />
+              Extraction CSV
             </Button>
-          </Link>
+            <Link to={createPageUrl("AjouterActe")}>
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-200 border-0">
+                <Plus className="w-5 h-5 mr-2" />
+                Nouvel acte
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
