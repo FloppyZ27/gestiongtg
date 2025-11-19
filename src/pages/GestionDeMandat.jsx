@@ -566,8 +566,8 @@ export default function GestionDeMandat() {
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="overflow-x-auto">
                 <div className="flex gap-4 p-4">
-              
-                      {TACHES.map(tache => {
+
+                      {TACHES.slice(0, 5).map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
 
                     return (
