@@ -627,12 +627,15 @@ export default function PlanningCalendar({
           </div>
 
           {assignedUser ? (
-            <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-              <AvatarImage src={assignedUser.photo_url} />
-              <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                {getUserInitials(assignedUser.full_name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
+              <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+                <AvatarImage src={assignedUser.photo_url} />
+                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  {getUserInitials(assignedUser.full_name)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           ) : (
             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
               <User className="w-3 h-3 text-emerald-500" />
