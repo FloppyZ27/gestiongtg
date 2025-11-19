@@ -448,8 +448,8 @@ export default function PlanningCalendar({
         {/* Adresse complète */}
         {mandat?.adresse_travaux && formatAdresse(mandat.adresse_travaux) && (
           <div className="flex items-start gap-1 mb-1">
-            <MapPin className="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5" />
-            <span className="text-xs text-emerald-300 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
+            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
           </div>
         )}
 
@@ -457,7 +457,7 @@ export default function PlanningCalendar({
         {terrain.date_limite_leve && (
           <div className="flex items-center gap-1 mb-1">
             <AlertCircle className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-            <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve), "dd MMM", { locale: fr })}</span>
+            <span className="text-xs text-yellow-300">Limite: {format(new Date(terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr })}</span>
           </div>
         )}
 
@@ -474,7 +474,7 @@ export default function PlanningCalendar({
           <div className="flex items-center gap-1 mb-1">
             <Clock className="w-3 h-3 text-orange-400 flex-shrink-0" />
             <span className="text-xs text-orange-300">
-              RDV: {format(new Date(terrain.date_rendez_vous), "dd MMM", { locale: fr })}
+              RDV: {format(new Date(terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}
               {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
             </span>
           </div>
