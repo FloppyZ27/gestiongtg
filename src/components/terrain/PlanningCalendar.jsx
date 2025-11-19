@@ -886,7 +886,7 @@ export default function PlanningCalendar({
                 </Droppable>
               </TabsContent>
             </Tabs>
-            </Card>
+          </Card>
 
           {/* Grille calendrier */}
           <div className="flex-1 space-y-4">
