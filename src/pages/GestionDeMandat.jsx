@@ -567,7 +567,10 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max overflow-x-auto max-w-full"
+                className="grid gap-4 p-4"
+                style={{ 
+                  gridTemplateColumns: `repeat(${TACHES.length}, minmax(0, 1fr))`,
+                }}
               >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -575,9 +578,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={tache} 
-                        className="flex-shrink-0" 
                         style={{ 
-                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
                           zIndex: 1 
                         }}
                       >
@@ -639,7 +640,10 @@ export default function GestionDeMandat() {
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max overflow-x-auto max-w-full"
+                className="grid gap-4 p-4"
+                style={{ 
+                  gridTemplateColumns: `repeat(${usersList.length}, minmax(0, 1fr))`,
+                }}
               >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
@@ -649,9 +653,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={user.email} 
-                        className="flex-shrink-0" 
                         style={{ 
-                          width: `calc(18rem * ${zoom})`, // w-72 is 18rem in Tailwind
                           zIndex: 1 
                         }}
                       >
