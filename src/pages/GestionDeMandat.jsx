@@ -562,9 +562,9 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div 
-                className="flex gap-4 p-4 overflow-x-auto"
-              >
+              <div className="overflow-x-auto">
+                <div className="flex gap-4 p-4 min-w-max">
+              
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
                     
@@ -626,6 +626,7 @@ export default function GestionDeMandat() {
                       </div>
                     );
                   })}
+                </div>
               </div>
             </DragDropContext>
           </TabsContent>
@@ -633,9 +634,9 @@ export default function GestionDeMandat() {
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div 
-                className="flex gap-4 p-4 overflow-x-auto"
-              >
+              <div className="overflow-x-auto">
+                <div className="flex gap-4 p-4 min-w-max">
+              
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
                     const colorClass = getUserColor(userIndex);
@@ -711,6 +712,7 @@ export default function GestionDeMandat() {
                       </div>
                     );
                   })}
+                </div>
               </div>
             </DragDropContext>
           </TabsContent>
