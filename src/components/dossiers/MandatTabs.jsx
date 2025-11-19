@@ -50,18 +50,22 @@ export default function MandatTabs({
         >
           Minutes
         </TabsTrigger>
-        <TabsTrigger
-          value="factures"
-          className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
-        >
-          Factures
-        </TabsTrigger>
-          <TabsTrigger
-            value="terrain"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
-          >
-            Terrain
-          </TabsTrigger>
+        {!isTTL && (
+          <>
+            <TabsTrigger
+              value="factures"
+              className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
+            >
+              Factures
+            </TabsTrigger>
+            <TabsTrigger
+              value="terrain"
+              className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 px-6 py-2 rounded-md transition-all"
+            >
+              Terrain
+            </TabsTrigger>
+          </>
+        )}
         </div>
         {onRemoveMandat && (
           <Button
@@ -80,96 +84,133 @@ export default function MandatTabs({
 
       {/* Tab Informations */}
       <TabsContent value="informations" className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label>Type de mandat <span className="text-red-400">*</span></Label>
-            <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Sélectionner" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                {TYPES_MANDATS.map((type) => (
-                  <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Tâche actuelle</Label>
-            <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(mandatIndex, 'tache_actuelle', value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Sélectionner la tâche" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                {TACHES.map((tache) => (
-                  <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>
-              Utilisateur assigné 
-              {formStatut === "Ouvert" && <span className="text-red-400"> *</span>}
-            </Label>
-            <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(mandatIndex, 'utilisateur_assigne', value)}>
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Sélectionner" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                {users?.map((user) => (
-                  <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        {isTTL ? (
+          <>
+            {/* Version simplifiée pour TTL */}
+            <div className="space-y-2">
+              <Label>Type de mandat <span className="text-red-400">*</span></Label>
+              <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)}>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue placeholder="Sélectionner" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  {TYPES_MANDATS.map((type) => (
+                    <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="grid grid-cols-[70%_30%] gap-4">
-          <div className="space-y-3">
-            <AddressInput
-              addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
-              onChange={(newAddresses) => updateMandatAddress(mandatIndex, newAddresses)}
-              showActuelle={false}
-              singleAddress={true}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label>Adresse des travaux</Label>
+              <Textarea
+                value={mandat.adresse_travaux_texte || ""}
+                onChange={(e) => updateMandat(mandatIndex, 'adresse_travaux_texte', e.target.value)}
+                placeholder="Entrer l'adresse des travaux..."
+                className="bg-slate-700 border-slate-600 min-h-[80px]"
+              />
+            </div>
 
-          <div className="space-y-3">
-            <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(mandatIndex, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Version complète normale */}
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Date de signature</Label>
-                <Input
-                  type="date"
-                  value={mandat.date_signature || ""}
-                  onChange={(e) => updateMandat(mandatIndex, 'date_signature', e.target.value)}
-                  className="bg-slate-700 border-slate-600"
-                />
+                <Label>Type de mandat <span className="text-red-400">*</span></Label>
+                <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {TYPES_MANDATS.map((type) => (
+                      <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <Label>Début des travaux</Label>
-                <Input
-                  type="date"
-                  value={mandat.date_debut_travaux || ""}
-                  onChange={(e) => updateMandat(mandatIndex, 'date_debut_travaux', e.target.value)}
-                  className="bg-slate-700 border-slate-600"
-                />
+                <Label>Tâche actuelle</Label>
+                <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(mandatIndex, 'tache_actuelle', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue placeholder="Sélectionner la tâche" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    {TACHES.map((tache) => (
+                      <SelectItem key={tache} value={tache} className="text-white">{tache}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-
               <div className="space-y-2">
-                <Label>Date de livraison</Label>
-                <Input
-                  type="date"
-                  value={mandat.date_livraison || ""}
-                  onChange={(e) => updateMandat(mandatIndex, 'date_livraison', e.target.value)}
-                  className="bg-slate-700 border-slate-600"
-                />
+                <Label>
+                  Utilisateur assigné 
+                  {formStatut === "Ouvert" && <span className="text-red-400"> *</span>}
+                </Label>
+                <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(mandatIndex, 'utilisateur_assigne', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                    {users?.map((user) => (
+                      <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </div>
-        </div>
+
+            <div className="grid grid-cols-[70%_30%] gap-4">
+              <div className="space-y-3">
+                <AddressInput
+                  addresses={mandat.adresse_travaux ? [mandat.adresse_travaux] : [{ ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" }]}
+                  onChange={(newAddresses) => updateMandatAddress(mandatIndex, newAddresses)}
+                  showActuelle={false}
+                  singleAddress={true}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg space-y-3">
+                  <div className="space-y-2">
+                    <Label>Date de signature</Label>
+                    <Input
+                      type="date"
+                      value={mandat.date_signature || ""}
+                      onChange={(e) => updateMandat(mandatIndex, 'date_signature', e.target.value)}
+                      className="bg-slate-700 border-slate-600"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Début des travaux</Label>
+                    <Input
+                      type="date"
+                      value={mandat.date_debut_travaux || ""}
+                      onChange={(e) => updateMandat(mandatIndex, 'date_debut_travaux', e.target.value)}
+                      className="bg-slate-700 border-slate-600"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Date de livraison</Label>
+                    <Input
+                      type="date"
+                      value={mandat.date_livraison || ""}
+                      onChange={(e) => updateMandat(mandatIndex, 'date_livraison', e.target.value)}
+                      className="bg-slate-700 border-slate-600"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
@@ -245,20 +286,47 @@ export default function MandatTabs({
 
       {/* Tab Minutes */}
       <TabsContent value="minutes" className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Label>Minutes</Label>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => openAddMinuteDialog(mandatIndex)}
-            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Ajouter minute
-          </Button>
-        </div>
-        
-        {mandat.minutes_list && mandat.minutes_list.length > 0 ? (
+        {isTTL ? (
+          <>
+            {/* Version simplifiée pour TTL */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Minute</Label>
+                <Input
+                  value={mandat.minute || ""}
+                  onChange={(e) => updateMandat(mandatIndex, 'minute', e.target.value)}
+                  placeholder="Ex: 12345"
+                  className="bg-slate-700 border-slate-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date de minute</Label>
+                <Input
+                  type="date"
+                  value={mandat.date_minute || ""}
+                  onChange={(e) => updateMandat(mandatIndex, 'date_minute', e.target.value)}
+                  className="bg-slate-700 border-slate-600"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Version complète normale */}
+            <div className="flex justify-between items-center">
+              <Label>Minutes</Label>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => openAddMinuteDialog(mandatIndex)}
+                className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Ajouter minute
+              </Button>
+            </div>
+            
+            {mandat.minutes_list && mandat.minutes_list.length > 0 ? (
           <div className="border border-slate-700 rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
@@ -303,10 +371,13 @@ export default function MandatTabs({
             <p className="text-sm mt-2">Cliquez sur "Ajouter minute" pour commencer</p>
           </div>
         )}
+          </>
+        )}
       </TabsContent>
 
-      {/* Tab Factures */}
-      <TabsContent value="factures" className="space-y-4">
+      {/* Tab Factures - Seulement si pas TTL */}
+      {!isTTL && (
+        <TabsContent value="factures" className="space-y-4">
         <Label className="text-slate-50 text-sm font-semibold block">Factures générées ({mandat.factures?.length || 0})</Label>
         {mandat.factures && mandat.factures.length > 0 ? (
           <div className="border border-slate-700 rounded-lg overflow-hidden">
@@ -337,10 +408,12 @@ export default function MandatTabs({
             <p className="text-sm mt-2">Les factures apparaîtront ici une fois créées</p>
           </div>
         )}
-      </TabsContent>
+        </TabsContent>
+      )}
 
-      {/* Tab Terrain */}
-      <TabsContent value="terrain" className="space-y-4">
+      {/* Tab Terrain - Seulement si pas TTL */}
+      {!isTTL && (
+        <TabsContent value="terrain" className="space-y-4">
         <div className="p-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50 rounded-lg">
           <Label className="text-cyan-300 font-semibold mb-3 block">Planification terrain</Label>
           <div className="grid grid-cols-2 gap-3">
@@ -431,7 +504,8 @@ export default function MandatTabs({
           <Label>Notes terrain</Label>
           <Textarea value={mandat.terrain?.notes || ""} onChange={(e) => updateMandat(mandatIndex, 'terrain', { ...mandat.terrain, notes: e.target.value })} placeholder="Notes concernant le terrain..." className="bg-slate-700 border-slate-600 h-20" />
         </div>
-      </TabsContent>
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

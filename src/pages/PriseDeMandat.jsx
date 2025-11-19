@@ -1460,8 +1460,8 @@ export default function PriseDeMandat() {
                     </div>
                   )}
 
-                  {/* Clients, Notaires et Courtiers - 3 colonnes */}
-                  <div className="grid grid-cols-3 gap-4">
+                  {/* Clients, Notaires et Courtiers */}
+                  <div className={`grid ${formData.ttl === "Oui" ? "grid-cols-1" : "grid-cols-3"} gap-4`}>
                     {/* Clients */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center mb-2">
@@ -1532,10 +1532,10 @@ export default function PriseDeMandat() {
                     </div>
 
                     {/* Notaires */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <Label>Notaires</Label>
-                        {formData.ttl === "Non" && (
+                    {formData.ttl === "Non" && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Notaires</Label>
                           <Button
                             type="button"
                             size="sm"
@@ -1546,16 +1546,8 @@ export default function PriseDeMandat() {
                             <UserPlus className="w-4 h-4 mr-1" />
                             Ajouter
                           </Button>
-                        )}
-                      </div>
-                      {formData.ttl === "Oui" ? (
-                        <Textarea
-                          value={formData.notaires_texte}
-                          onChange={(e) => setFormData({...formData, notaires_texte: e.target.value})}
-                          placeholder="Entrer les noms des notaires..."
-                          className="bg-slate-800 border-slate-700 min-h-[100px]"
-                        />
-                      ) : formData.notaires_ids.length > 0 ? (
+                        </div>
+                        {formData.notaires_ids.length > 0 ? (
                         <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                           {formData.notaires_ids.map(notaireId => {
                             const notaire = getClientById(notaireId);
@@ -1601,10 +1593,10 @@ export default function PriseDeMandat() {
                     </div>
 
                     {/* Courtiers */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <Label>Courtiers immobiliers</Label>
-                        {formData.ttl === "Non" && (
+                    {formData.ttl === "Non" && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Courtiers immobiliers</Label>
                           <Button
                             type="button"
                             size="sm"
@@ -1615,16 +1607,8 @@ export default function PriseDeMandat() {
                             <UserPlus className="w-4 h-4 mr-1" />
                             Ajouter
                           </Button>
-                        )}
-                      </div>
-                      {formData.ttl === "Oui" ? (
-                        <Textarea
-                          value={formData.courtiers_texte}
-                          onChange={(e) => setFormData({...formData, courtiers_texte: e.target.value})}
-                          placeholder="Entrer les noms des courtiers..."
-                          className="bg-slate-800 border-slate-700 min-h-[100px]"
-                        />
-                      ) : formData.courtiers_ids.length > 0 ? (
+                        </div>
+                        {formData.courtiers_ids.length > 0 ? (
                         <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                           {formData.courtiers_ids.map(courtierId => {
                             const courtier = getClientById(courtierId);
@@ -1752,7 +1736,7 @@ export default function PriseDeMandat() {
                   </div>
 
                   {/* Tableau Tarification - EN BAS */}
-                  {formData.mandats.length > 0 && (
+                  {formData.mandats.length > 0 && formData.ttl === "Non" && (
                     <div className="space-y-3 mt-6">
                       <Label className="text-lg font-semibold text-slate-300">Tarification</Label>
                       <div className="border border-slate-700 rounded-lg overflow-hidden">
