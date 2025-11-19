@@ -1566,13 +1566,32 @@ export default function Dossiers() {
   const handleConfirmImport = async () => {
     if (importedData.length === 0) return;
 
+    const dossiersNonImportes = [];
+    let dossiersImportesCount = 0;
+
     for (const row of importedData) {
+      const numeroDossier = row['N° dossier'] || '';
+      const arpenteurGeometre = row['Arpenteur-Géomètres'] || '';
       const ttlValue = row['TTL'] || 'Non';
       const mandatsTypes = row['Mandats'] ? row['Mandats'].split(',').map(m => m.trim()).filter(m => m) : [];
+
+      // Vérifier si le dossier existe déjà
+      const dossierExistant = dossiers.find((d) =>
+        d.numero_dossier === numeroDossier &&
+        d.arpenteur_geometre === arpenteurGeometre
+      );
+
+      if (dossierExistant) {
+        dossiersNonImportes.push({
+          numero: `${getArpenteurInitials(arpenteurGeometre)}${numeroDossier}`,
+          raison: 'Dossier existant'
+        });
+        continue;
+      }
       
       const dossierData = {
-        numero_dossier: row['N° dossier'] || '',
-        arpenteur_geometre: row['Arpenteur-géomètre'] || '',
+        numero_dossier: numeroDossier,
+        arpenteur_geometre: arpenteurGeometre,
         date_ouverture: row["Date d'ouverture"] || new Date().toISOString().split('T')[0],
         date_fermeture: row['Date de fermeture'] || '',
         statut: row['Statut'] || 'Ouvert',
@@ -1610,11 +1629,29 @@ export default function Dossiers() {
         description: ''
       };
 
-      await createDossierMutation.mutateAsync(dossierData);
+      try {
+        await createDossierMutation.mutateAsync(dossierData);
+        dossiersImportesCount++;
+      } catch (error) {
+        dossiersNonImportes.push({
+          numero: `${getArpenteurInitials(arpenteurGeometre)}${numeroDossier}`,
+          raison: 'Erreur lors de la création'
+        });
+      }
     }
 
     setIsImportDialogOpen(false);
     setImportedData([]);
+
+    // Afficher le résultat de l'importation
+    if (dossiersNonImportes.length > 0) {
+      const message = `${dossiersImportesCount} dossier(s) importé(s) avec succès.\n\n` +
+        `${dossiersNonImportes.length} dossier(s) NON importé(s) :\n` +
+        dossiersNonImportes.map(d => `- ${d.numero} (${d.raison})`).join('\n');
+      alert(message);
+    } else {
+      alert(`${dossiersImportesCount} dossier(s) importé(s) avec succès !`);
+    }
   };
 
   const handleExportCSV = () => {
@@ -2132,7 +2169,7 @@ export default function Dossiers() {
                 <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">N° dossier</TableHead>
-                    <TableHead className="text-slate-300">Arpenteur-géomètre</TableHead>
+                    <TableHead className="text-slate-300">Arpenteur-Géomètres</TableHead>
                     <TableHead className="text-slate-300">TTL</TableHead>
                     <TableHead className="text-slate-300">Clients</TableHead>
                     <TableHead className="text-slate-300">Mandats</TableHead>
@@ -2145,7 +2182,7 @@ export default function Dossiers() {
                   {importedData.map((row, index) => (
                     <TableRow key={index} className="border-slate-800">
                       <TableCell className="text-white">{row['N° dossier'] || '-'}</TableCell>
-                      <TableCell className="text-white">{row['Arpenteur-géomètre'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Arpenteur-Géomètres'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['TTL'] || 'Non'}</TableCell>
                       <TableCell className="text-white text-sm">{row['Clients'] || '-'}</TableCell>
                       <TableCell className="text-white text-sm">{row['Mandats'] || '-'}</TableCell>
