@@ -378,7 +378,7 @@ export default function GestionDeMandat() {
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
               <span className="text-xs text-yellow-300">
-                {format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}
+                {format(new Date(card.mandat.date_livraison + "T00:00:00"), "dd MMM", { locale: fr })}
               </span>
             </div>
           ) : (
@@ -850,7 +850,7 @@ export default function GestionDeMandat() {
                         const dayId = `day-${format(day, "yyyy-MM-dd")}`;
                         const cardsForDay = filteredCards.filter(card => 
                           card.mandat.date_livraison && 
-                          isSameDay(new Date(card.mandat.date_livraison), day)
+                          isSameDay(new Date(card.mandat.date_livraison + "T00:00:00"), day)
                         );
 
                         return (
@@ -923,7 +923,7 @@ export default function GestionDeMandat() {
                                   const dayId = `day-${format(day, "yyyy-MM-dd")}`;
                                   const cardsForDay = filteredCards.filter(card => 
                                     card.mandat.date_livraison && 
-                                    isSameDay(new Date(card.mandat.date_livraison), day)
+                                    isSameDay(new Date(card.mandat.date_livraison + "T00:00:00"), day)
                                   );
 
                                   return (
