@@ -146,14 +146,55 @@ export default function PlanningCalendar({
     if (!newEquipes[dateStr]) {
       newEquipes[dateStr] = [];
     }
-    const newEquipe = {
-      id: `eq${Date.now()}`,
-      nom: `Équipe ${newEquipes[dateStr].length + 1}`,
-      techniciens: [],
-      vehicules: [],
-      equipements: [],
-      mandats: []
-    };
+    
+    // Trouver la journée précédente
+    const currentDate = new Date(dateStr);
+    const previousDate = new Date(currentDate);
+    previousDate.setDate(previousDate.getDate() - 1);
+    const previousDateStr = format(previousDate, "yyyy-MM-dd");
+    
+    const previousEquipes = newEquipes[previousDateStr] || [];
+    
+    let newEquipe;
+    
+    // Si des équipes existent la veille, proposer de copier
+    if (previousEquipes.length > 0) {
+      const choice = confirm(`Voulez-vous copier une équipe de la veille (${format(previousDate, "dd MMM", { locale: fr })}) ?\n\nOui = Copier la dernière équipe\nNon = Créer une équipe vide`);
+      
+      if (choice) {
+        // Copier la dernière équipe de la veille
+        const equipeACopier = previousEquipes[previousEquipes.length - 1];
+        newEquipe = {
+          id: `eq${Date.now()}`,
+          nom: equipeACopier.nom,
+          techniciens: [...equipeACopier.techniciens],
+          vehicules: [...equipeACopier.vehicules],
+          equipements: [...equipeACopier.equipements],
+          mandats: []
+        };
+      } else {
+        // Créer équipe vide
+        newEquipe = {
+          id: `eq${Date.now()}`,
+          nom: `Équipe ${newEquipes[dateStr].length + 1}`,
+          techniciens: [],
+          vehicules: [],
+          equipements: [],
+          mandats: []
+        };
+      }
+    } else {
+      // Pas d'équipe la veille, créer équipe vide
+      newEquipe = {
+        id: `eq${Date.now()}`,
+        nom: `Équipe ${newEquipes[dateStr].length + 1}`,
+        techniciens: [],
+        vehicules: [],
+        equipements: [],
+        mandats: []
+      };
+    }
+    
     newEquipes[dateStr].push(newEquipe);
     setEquipes(newEquipes);
     setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
