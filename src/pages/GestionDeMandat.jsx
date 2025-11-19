@@ -329,73 +329,69 @@ export default function GestionDeMandat() {
     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
     
     return (
-      <Card 
-        className={`border-slate-700 bg-slate-800/80 backdrop-blur-sm hover:bg-slate-800 transition-all cursor-pointer ${
-          snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50 scale-110 rotate-3' : 'hover:shadow-lg'
-        }`}
+      <div 
         onClick={() => !snapshot?.isDragging && handleCardClick(card)}
+        className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
+          snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50' : ''
+        }`}
       >
-        <CardContent className="p-3 space-y-2">
-          {/* Mandat en haut */}
-          <div className="text-center pb-2 border-b border-slate-700">
-            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
-              {card.mandat.type_mandat}
-            </Badge>
+        {/* Type de mandat en haut */}
+        <div className="mb-2">
+          <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
+            {card.mandat.type_mandat}
+          </Badge>
+        </div>
+
+        {/* N° Dossier */}
+        <div className="mb-1">
+          <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
+            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+          </Badge>
+        </div>
+
+        {/* Clients */}
+        <div className="flex items-center gap-1 mb-1">
+          <User className="w-3 h-3 text-white flex-shrink-0" />
+          <span className="text-xs text-white font-medium">{getClientsNames(card.dossier.clients_ids)}</span>
+        </div>
+
+        {/* Adresse complète */}
+        {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
+          <div className="flex items-start gap-1 mb-1">
+            <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-slate-400 break-words">{formatAdresse(card.mandat.adresse_travaux)}</span>
           </div>
+        )}
 
-          {/* Dossier à gauche, Clients à droite */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="text-xs text-slate-500 mb-1">Dossier</p>
-              <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs w-full justify-center`}>
-                {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500 mb-1">Clients</p>
-              <p className="text-xs text-slate-300 font-medium truncate">
-                {getClientsNames(card.dossier.clients_ids)}
-              </p>
-            </div>
+        {/* Date de livraison */}
+        {card.mandat.date_livraison && (
+          <div className="flex items-center gap-1 mb-1">
+            <Calendar className="w-3 h-3 text-blue-400 flex-shrink-0" />
+            <span className="text-xs text-blue-300">
+              Livraison: {format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}
+            </span>
           </div>
+        )}
 
-          {/* Adresse des travaux */}
-          {card.mandat.adresse_travaux && formatAdresse(card.mandat.adresse_travaux) && (
-            <div className="pt-1">
-              <p className="text-xs text-slate-500 mb-1">Adresse</p>
-              <div className="flex items-start gap-1 text-xs text-slate-300">
-                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <span className="line-clamp-2">{formatAdresse(card.mandat.adresse_travaux)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Date de livraison et utilisateur */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
-            {card.mandat.date_livraison ? (
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-                <Calendar className="w-3 h-3" />
-                <span>{format(new Date(card.mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</span>
-              </div>
-            ) : (
-              <div className="text-xs text-slate-600">Pas de date</div>
-            )}
-
-            {assignedUser ? (
-              <Avatar className="w-7 h-7 border-2 border-slate-600">
+        {/* Utilisateur assigné en bas */}
+        <div className="flex items-center justify-end mt-2 pt-1 border-t border-emerald-500/30">
+          {assignedUser ? (
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
+              <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
                 <AvatarImage src={assignedUser.photo_url} />
                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
                   {getUserInitials(assignedUser.full_name)}
                 </AvatarFallback>
               </Avatar>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
-                <User className="w-4 h-4 text-slate-500" />
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+              <User className="w-3 h-3 text-emerald-500" />
+            </div>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -567,10 +563,7 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="grid gap-4 p-4"
-                style={{ 
-                  gridTemplateColumns: `repeat(${TACHES.length}, minmax(0, 1fr))`,
-                }}
+                className="flex gap-4 p-4 overflow-x-auto"
               >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -578,6 +571,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={tache} 
+                        className="flex-shrink-0 w-72"
                         style={{ 
                           zIndex: 1 
                         }}
@@ -640,10 +634,7 @@ export default function GestionDeMandat() {
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="grid gap-4 p-4"
-                style={{ 
-                  gridTemplateColumns: `repeat(${usersList.length}, minmax(0, 1fr))`,
-                }}
+                className="flex gap-4 p-4 overflow-x-auto"
               >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
@@ -653,6 +644,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={user.email} 
+                        className="flex-shrink-0 w-72"
                         style={{ 
                           zIndex: 1 
                         }}
