@@ -891,7 +891,7 @@ export default function PlanningCalendar({
             </div>
 
           {/* Grille calendrier */}
-          <div className="space-y-4">
+          <div className="flex-1 space-y-4">
             {viewMode === "week" ? (
               <div className="grid grid-cols-5 gap-2">
                 {days.map((day) => {
