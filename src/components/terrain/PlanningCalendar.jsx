@@ -959,13 +959,13 @@ export default function PlanningCalendar({
                                     className="text-red-400 hover:text-red-300"
                                   >
                                     <X className="w-3 h-3" />
-                                  </button>
-                                </div>
-                                {/* Nom de l'équipe */}
-                                <span className="text-white text-xs font-bold">{equipeNom}</span>
-                              </div>
-                              
-                              <div className="p-2">
+                                    </button>
+                                    </div>
+                                    {/* Nom de l'équipe */}
+                                    <span className="text-white text-sm font-bold">{equipeNom}</span>
+                                    </div>
+
+                                    <div className="p-2">
 
                               {/* Contenu du tab actif */}
                               {activeTab === "techniciens" && (
@@ -1182,12 +1182,12 @@ export default function PlanningCalendar({
                                   >
                                     <X className="w-3 h-3" />
                                   </button>
-                                </div>
-                                {/* Nom de l'équipe */}
-                                <span className="text-white text-xs font-bold">{equipeNom}</span>
-                              </div>
-                              
-                              <div className="p-1">
+                                  </div>
+                                  {/* Nom de l'équipe */}
+                                  <span className="text-white text-sm font-bold">{equipeNom}</span>
+                                  </div>
+
+                                  <div className="p-1">
 
                               {/* Contenu du tab actif */}
                               {activeTab === "techniciens" && (
