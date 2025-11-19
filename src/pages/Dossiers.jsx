@@ -128,9 +128,13 @@ export default function Dossiers() {
     date_ouverture: new Date().toISOString().split('T')[0],
     date_fermeture: "",
     statut: "Ouvert",
+    ttl: "Non",
     clients_ids: [],
+    clients_texte: "",
     notaires_ids: [],
+    notaires_texte: "",
     courtiers_ids: [],
+    courtiers_texte: "",
     mandats: [],
     description: ""
   });
@@ -518,9 +522,13 @@ export default function Dossiers() {
       date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
       date_fermeture: entity.date_fermeture || "",
       statut: entity.statut || "Ouvert",
+      ttl: entity.ttl || "Non",
       clients_ids: entity.clients_ids || [],
+      clients_texte: entity.clients_texte || "",
       notaires_ids: entity.notaires_ids || [],
+      notaires_texte: entity.notaires_texte || "",
       courtiers_ids: entity.courtiers_ids || [],
+      courtiers_texte: entity.courtiers_texte || "",
       mandats: entity.mandats?.map((m) => ({
         ...m,
         date_ouverture: m.date_ouverture || "",
@@ -533,6 +541,7 @@ export default function Dossiers() {
         statut_terrain: m.statut_terrain || "",
         adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
         lots: m.lots || [],
+        lots_texte: m.lots_texte || "",
         prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
         rabais: m.rabais !== undefined ? m.rabais : 0,
         taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
@@ -614,6 +623,7 @@ export default function Dossiers() {
         statut_terrain: "",
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
+        lots_texte: "",
         prix_estime: 0,
         rabais: 0,
         taxes_incluses: false,
@@ -1562,6 +1572,7 @@ export default function Dossiers() {
         arpenteur_geometre: row['Arpenteur'] || '',
         date_ouverture: row['Date Ouverture'] || new Date().toISOString().split('T')[0],
         statut: row['Statut'] || 'Ouvert',
+        ttl: row['TTL'] || 'Non',
         clients_ids: [],
         notaires_ids: [],
         courtiers_ids: [],
@@ -1599,6 +1610,7 @@ export default function Dossiers() {
     const csvData = sortedDossiers.map(dossier => ({
       'N° Dossier': getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier,
       'Arpenteur': dossier.arpenteur_geometre,
+      'TTL': dossier.ttl || 'Non',
       'Clients': getClientsNames(dossier.clients_ids),
       'Type Mandat': dossier.mandatInfo?.type_mandat || '-',
       'Minute': dossier.mandatInfo?.minutes_list && dossier.mandatInfo.minutes_list.length > 0 
@@ -1715,7 +1727,14 @@ export default function Dossiers() {
                 <div className="flex h-[90vh]">
                   <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                     <div className="mb-6 flex justify-between items-center">
-                      <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+                        {formData.ttl === "Oui" && (
+                          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
+                            🏢 TTL
+                          </Badge>
+                        )}
+                      </div>
                       {editingDossier &&
                       <div className="flex gap-2">
                           <Button
@@ -1740,7 +1759,7 @@ export default function Dossiers() {
                       }
                     </div>
                     <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-4 gap-4">
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                           <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })}>
@@ -1770,6 +1789,18 @@ export default function Dossiers() {
                             </SelectContent>
                           </Select>
                         </div>
+                        <div className="space-y-2">
+                          <Label>TTL</Label>
+                          <Select value={formData.ttl} onValueChange={(value) => setFormData({ ...formData, ttl: value })}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Non" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Non" className="text-white">Non</SelectItem>
+                              <SelectItem value="Oui" className="text-white">Oui</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -1789,12 +1820,21 @@ export default function Dossiers() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-2">
                             <Label>Clients</Label>
-                            <Button type="button" size="sm" onClick={() => setIsClientSelectorOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                              <UserPlus className="w-4 h-4 mr-1" />
-                              Ajouter
-                            </Button>
+                            {formData.ttl === "Non" && (
+                              <Button type="button" size="sm" onClick={() => setIsClientSelectorOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                                <UserPlus className="w-4 h-4 mr-1" />
+                                Ajouter
+                              </Button>
+                            )}
                           </div>
-                          {formData.clients_ids.length > 0 ?
+                          {formData.ttl === "Oui" ? (
+                            <Textarea
+                              value={formData.clients_texte}
+                              onChange={(e) => setFormData({...formData, clients_texte: e.target.value})}
+                              placeholder="Entrer les noms des clients..."
+                              className="bg-slate-800 border-slate-700 min-h-[100px]"
+                            />
+                          ) : formData.clients_ids.length > 0 ?
                           <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                               {formData.clients_ids.map((clientId) => {
                               const client = getClientById(clientId);
@@ -1826,12 +1866,21 @@ export default function Dossiers() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-2">
                             <Label>Notaires</Label>
-                            <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpen(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400">
-                              <UserPlus className="w-4 h-4 mr-1" />
-                              Ajouter
-                            </Button>
+                            {formData.ttl === "Non" && (
+                              <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpen(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400">
+                                <UserPlus className="w-4 h-4 mr-1" />
+                                Ajouter
+                              </Button>
+                            )}
                           </div>
-                          {formData.notaires_ids.length > 0 ?
+                          {formData.ttl === "Oui" ? (
+                            <Textarea
+                              value={formData.notaires_texte}
+                              onChange={(e) => setFormData({...formData, notaires_texte: e.target.value})}
+                              placeholder="Entrer les noms des notaires..."
+                              className="bg-slate-800 border-slate-700 min-h-[100px]"
+                            />
+                          ) : formData.notaires_ids.length > 0 ?
                           <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                               {formData.notaires_ids.map((notaireId) => {
                               const notaire = getClientById(notaireId);
@@ -1863,12 +1912,21 @@ export default function Dossiers() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-2">
                             <Label>Courtiers immobiliers</Label>
-                            <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpen(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400">
-                              <UserPlus className="w-4 h-4 mr-1" />
-                              Ajouter
-                            </Button>
+                            {formData.ttl === "Non" && (
+                              <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpen(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400">
+                                <UserPlus className="w-4 h-4 mr-1" />
+                                Ajouter
+                              </Button>
+                            )}
                           </div>
-                          {formData.courtiers_ids.length > 0 ?
+                          {formData.ttl === "Oui" ? (
+                            <Textarea
+                              value={formData.courtiers_texte}
+                              onChange={(e) => setFormData({...formData, courtiers_texte: e.target.value})}
+                              placeholder="Entrer les noms des courtiers..."
+                              className="bg-slate-800 border-slate-700 min-h-[100px]"
+                            />
+                          ) : formData.courtiers_ids.length > 0 ?
                           <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
                               {formData.courtiers_ids.map((courtierId) => {
                               const courtier = getClientById(courtierId);
@@ -1946,6 +2004,7 @@ export default function Dossiers() {
                                         }
                                       }}
                                       isReferenceDisabled={false}
+                                      isTTL={formData.ttl === "Oui"}
                                     />
                                   </CardContent>
                                 </Card>
@@ -2085,6 +2144,7 @@ export default function Dossiers() {
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">N° Dossier</TableHead>
                     <TableHead className="text-slate-300">Arpenteur</TableHead>
+                    <TableHead className="text-slate-300">TTL</TableHead>
                     <TableHead className="text-slate-300">Type Mandat</TableHead>
                     <TableHead className="text-slate-300">Date Ouverture</TableHead>
                     <TableHead className="text-slate-300">Statut</TableHead>
@@ -2095,6 +2155,7 @@ export default function Dossiers() {
                     <TableRow key={index} className="border-slate-800">
                       <TableCell className="text-white">{row['N° Dossier'] || row['Numéro Dossier'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['Arpenteur'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['TTL'] || 'Non'}</TableCell>
                       <TableCell className="text-white">{row['Type Mandat'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['Date Ouverture'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['Statut'] || 'Ouvert'}</TableCell>
@@ -2811,10 +2872,15 @@ export default function Dossiers() {
             {viewingDossier &&
             <div className="flex h-[90vh]">
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
+                  <div className="mb-6 flex items-center gap-3">
                     <h2 className="text-2xl font-bold text-white">
                       Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
                     </h2>
+                    {viewingDossier.ttl === "Oui" && (
+                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
+                        🏢 TTL
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="space-y-6">
@@ -2847,74 +2913,104 @@ export default function Dossiers() {
                   }
 
                     <div className="grid grid-cols-3 gap-4">
-                      {viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 &&
-                    <div>
-                          <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
-                          <div className="flex flex-col gap-2">
-                            {viewingDossier.clients_ids.map((clientId) => {
-                          const client = getClientById(clientId);
-                          return client ?
-                          <Badge
-                            key={clientId}
-                            className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
-                            onClick={() => {
-                              setIsViewDialogOpen(false);
-                              setViewingClientDetails(client);
-                            }}>
-
-                                  {client.prenom} {client.nom}
-                                </Badge> :
-                          null;
-                        })}
+                      {/* Clients */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.clients_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.clients_texte}</p>
                           </div>
-                        </div>
-                    }
-
-                      {viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 &&
-                    <div>
-                          <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
-                          <div className="flex flex-col gap-2">
-                            {viewingDossier.notaires_ids.map((notaireId) => {
-                          const notaire = getClientById(notaireId);
-                          return notaire ?
-                          <Badge
-                            key={notaireId}
-                            className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
-                            onClick={() => {
-                              setIsViewDialogOpen(false);
-                              setViewingClientDetails(notaire);
-                            }}>
-
-                                  {notaire.prenom} {notaire.nom}
-                                </Badge> :
-                          null;
-                        })}
+                        )
+                      ) : (
+                        viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.clients_ids.map((clientId) => {
+                                const client = getClientById(clientId);
+                                return client ? (
+                                  <Badge
+                                    key={clientId}
+                                    className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(client);
+                                    }}
+                                  >
+                                    {client.prenom} {client.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
                           </div>
-                        </div>
-                    }
+                        )
+                      )}
 
-                      {viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 &&
-                    <div>
-                          <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
-                          <div className="flex flex-col gap-2">
-                            {viewingDossier.courtiers_ids.map((courtierId) => {
-                          const courtier = getClientById(courtierId);
-                          return courtier ?
-                          <Badge
-                            key={courtierId}
-                            className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
-                            onClick={() => {
-                              setIsViewDialogOpen(false);
-                              setViewingClientDetails(courtier);
-                            }}>
-
-                                  {courtier.prenom} {courtier.nom}
-                                </Badge> :
-                          null;
-                        })}
+                      {/* Notaires */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.notaires_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.notaires_texte}</p>
                           </div>
-                        </div>
-                    }
+                        )
+                      ) : (
+                        viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.notaires_ids.map((notaireId) => {
+                                const notaire = getClientById(notaireId);
+                                return notaire ? (
+                                  <Badge
+                                    key={notaireId}
+                                    className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(notaire);
+                                    }}
+                                  >
+                                    {notaire.prenom} {notaire.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                      {/* Courtiers */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.courtiers_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.courtiers_texte}</p>
+                          </div>
+                        )
+                      ) : (
+                        viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.courtiers_ids.map((courtierId) => {
+                                const courtier = getClientById(courtierId);
+                                return courtier ? (
+                                  <Badge
+                                    key={courtierId}
+                                    className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(courtier);
+                                    }}
+                                  >
+                                    {courtier.prenom} {courtier.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      )}
                     </div>
 
                     {viewingDossier.mandats && viewingDossier.mandats.length > 0 &&
