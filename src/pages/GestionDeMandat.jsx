@@ -729,7 +729,7 @@ export default function GestionDeMandat() {
                       : format(currentMonthStart, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentMonthStart, "MMMM yyyy", { locale: fr }).slice(1)
                     }
                   </CardTitle>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <Button
                       size="sm"
                       variant="outline"
@@ -740,13 +740,14 @@ export default function GestionDeMandat() {
                           setCurrentMonthStart(subMonths(currentMonthStart, 1));
                         }
                       }}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
                     >
                       ← Précédent
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => setCurrentMonthStart(calendarMode === "week" ? startOfWeek(new Date(), { weekStartsOn: 1 }) : startOfMonth(new Date()))}
-                      className="bg-emerald-500/20 text-emerald-400"
+                      className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
                     >
                       Aujourd'hui
                     </Button>
@@ -760,29 +761,29 @@ export default function GestionDeMandat() {
                           setCurrentMonthStart(addMonths(currentMonthStart, 1));
                         }
                       }}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
                     >
                       Suivant →
                     </Button>
-                    <div className="border-l border-slate-700 pl-2 ml-2">
+                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                    <div className="flex gap-1">
                       <Button
                         size="sm"
-                        variant={calendarMode === "week" ? "default" : "outline"}
                         onClick={() => {
                           setCalendarMode("week");
                           setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
                         }}
-                        className={calendarMode === "week" ? "bg-emerald-500/20 text-emerald-400" : ""}
+                        className={calendarMode === "week" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
                       >
                         Semaine
                       </Button>
                       <Button
                         size="sm"
-                        variant={calendarMode === "month" ? "default" : "outline"}
                         onClick={() => {
                           setCalendarMode("month");
                           setCurrentMonthStart(startOfMonth(new Date()));
                         }}
-                        className={calendarMode === "month" ? "bg-emerald-500/20 text-emerald-400 ml-2" : "ml-2"}
+                        className={calendarMode === "month" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
                       >
                         Mois
                       </Button>
