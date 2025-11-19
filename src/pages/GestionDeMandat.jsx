@@ -569,7 +569,7 @@ export default function GestionDeMandat() {
                   <div className="overflow-x-auto">
                     <div className="flex gap-4 p-4">
               
-                  {TACHES.map(tache => {
+                      {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
 
                     return (
