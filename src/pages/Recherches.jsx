@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Grid3x3, FileText, Search as SearchIcon } from "lucide-react";
+import { Grid3x3, FileText, Search as SearchIcon, Link2 } from "lucide-react";
 import Lots from "./Lots";
 import Dashboard from "./Dashboard";
+import ChaineDeTitre from "./ChaineDeTitre";
 
 export default function Recherches() {
   const [activeTab, setActiveTab] = useState("lots");
@@ -22,7 +23,7 @@ export default function Recherches() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-slate-800/50 border border-slate-700 w-full md:w-auto grid grid-cols-2 h-auto mb-6">
+          <TabsList className="bg-slate-800/50 border border-slate-700 w-full md:w-auto grid grid-cols-3 h-auto mb-6">
             <TabsTrigger
               value="lots"
               className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3 text-base"
@@ -37,6 +38,13 @@ export default function Recherches() {
               <FileText className="w-4 h-4 mr-2" />
               Actes
             </TabsTrigger>
+            <TabsTrigger
+              value="chaine"
+              className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3 text-base"
+            >
+              <Link2 className="w-4 h-4 mr-2" />
+              Chaine de Titre
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="lots" className="mt-0">
@@ -45,6 +53,10 @@ export default function Recherches() {
 
           <TabsContent value="actes" className="mt-0">
             <Dashboard />
+          </TabsContent>
+
+          <TabsContent value="chaine" className="mt-0">
+            <ChaineDeTitre />
           </TabsContent>
         </Tabs>
       </div>

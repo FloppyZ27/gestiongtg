@@ -74,11 +74,6 @@ const navigationItems = [
     url: createPageUrl("Recherches"),
     icon: Search,
   },
-  {
-    title: "Chaine de Titre",
-    url: createPageUrl("ChaineDeTitre"),
-    icon: Link2,
-  },
 ];
 
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
