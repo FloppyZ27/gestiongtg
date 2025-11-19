@@ -770,7 +770,7 @@ export default function PlanningCalendar({
                         return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
                       }).length})
                     </h3>
-                    <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto">
+                    <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                       {unassignedDossiers
                           .filter(d => {
                             const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
@@ -828,7 +828,7 @@ export default function PlanningCalendar({
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                          className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2 ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
                         >
                           {unassignedDossiers
                             .filter(d => {
