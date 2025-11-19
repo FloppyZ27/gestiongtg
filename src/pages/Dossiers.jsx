@@ -1531,11 +1531,11 @@ export default function Dossiers() {
         return;
       }
 
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const headers = lines[0].split(';').map(h => h.replace(/"/g, '').trim());
       const data = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+        const values = lines[i].match(/(".*?"|[^;]+)(?=\s*;|\s*$)/g) || [];
         const cleanValues = values.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
         
         const row = {};
