@@ -607,10 +607,7 @@ export default function CeduleTerrain() {
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
                 size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditTerrain(item, e);
-                }}
+                onClick={(e) => handleEditTerrain(item, e)}
                 disabled={!isAssignedToCurrentUser}
                 className={`flex-1 text-xs h-8 p-0 ${
                   isAssignedToCurrentUser 
@@ -624,7 +621,10 @@ export default function CeduleTerrain() {
               
               <Button
                 size="sm"
-                onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain");
+                }}
                 disabled={!isAssignedToCurrentUser}
                 className={`flex-1 text-xs h-8 p-0 ${
                   isAssignedToCurrentUser 
