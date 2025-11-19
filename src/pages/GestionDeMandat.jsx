@@ -567,7 +567,7 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max overflow-x-auto"
+                className="flex gap-4 p-4 min-w-max overflow-x-auto h-[calc(100vh-280px)]"
               >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -582,10 +582,7 @@ export default function GestionDeMandat() {
                         }}
                       >
                         <Card 
-                          className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ 
-                            height: 'calc(100vh - 340px)'
-                          }}
+                          className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col h-full`}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
                             <div className="flex items-center justify-between">
@@ -642,7 +639,7 @@ export default function GestionDeMandat() {
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max overflow-x-auto"
+                className="flex gap-4 p-4 min-w-max overflow-x-auto h-[calc(100vh-280px)]"
               >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
@@ -659,10 +656,7 @@ export default function GestionDeMandat() {
                         }}
                       >
                         <Card 
-                          className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
-                          style={{ 
-                            height: 'calc(100vh - 340px)'
-                          }}
+                          className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col h-full`}
                         >
                           <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${gradientColor}`}>
                             <div className="flex items-center justify-between">
