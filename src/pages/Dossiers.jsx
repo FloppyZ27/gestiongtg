@@ -1571,7 +1571,7 @@ export default function Dossiers() {
 
     for (const row of importedData) {
       const numeroDossier = row['N° dossier'] || '';
-      const arpenteurGeometre = row['Arpenteur-Géomètre'] || '';
+      const arpenteurGeometre = row['Arpenteur-Géomètre'] || row['Arpenteur-Géomètres'] || '';
       const ttlValue = row['TTL'] || 'Non';
       const mandatsTypes = row['Mandats'] ? row['Mandats'].split(',').map(m => m.trim()).filter(m => m) : [];
 
@@ -1602,6 +1602,7 @@ export default function Dossiers() {
         notaires_texte: '',
         courtiers_ids: [],
         courtiers_texte: '',
+        adresse_texte: row['Adresse des travaux'] || '',
         mandats: mandatsTypes.map(typeMandat => ({
           type_mandat: typeMandat,
           tache_actuelle: 'Ouverture',
@@ -2182,7 +2183,7 @@ export default function Dossiers() {
                   {importedData.map((row, index) => (
                     <TableRow key={index} className="border-slate-800">
                       <TableCell className="text-white">{row['N° dossier'] || '-'}</TableCell>
-                      <TableCell className="text-white">{row['Arpenteur-Géomètre'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Arpenteur-Géomètre'] || row['Arpenteur-Géomètres'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['TTL'] || 'Non'}</TableCell>
                       <TableCell className="text-white text-sm">{row['Clients'] || '-'}</TableCell>
                       <TableCell className="text-white text-sm">{row['Mandats'] || '-'}</TableCell>
@@ -3737,7 +3738,7 @@ export default function Dossiers() {
                       }
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.ttl === "Oui" ? (dossier.mandatInfo?.adresse_travaux_texte || "-") : getFirstAdresseTravaux(dossier.mandats)}
+                            {dossier.ttl === "Oui" ? (dossier.adresse_texte || dossier.mandatInfo?.adresse_travaux_texte || "-") : getFirstAdresseTravaux(dossier.mandats)}
                           </TableCell>
                           <TableCell className="text-slate-300">{dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
                           <TableCell>
