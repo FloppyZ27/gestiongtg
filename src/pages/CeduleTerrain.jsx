@@ -606,13 +606,8 @@ export default function CeduleTerrain() {
               <Button
                 size="sm"
                 onClick={(e) => handleEditTerrain(item, e)}
-                disabled={!isAssignedToCurrentUser}
-                className={`flex-1 text-xs h-8 p-0 ${
-                  isAssignedToCurrentUser 
-                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400' 
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                }`}
-                title={isAssignedToCurrentUser ? "Oui, terrain requis" : "Vous devez être assigné à ce mandat"}
+                className="flex-1 text-xs h-8 p-0 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                title="Oui, terrain requis"
               >
                 <CheckCircle className="w-4 h-4" />
               </Button>
