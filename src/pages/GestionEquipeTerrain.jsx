@@ -57,6 +57,12 @@ export default function GestionEquipeTerrain() {
     initialData: [],
   });
 
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
+
   const { data: vehicules = [] } = useQuery({
     queryKey: ['vehicules'],
     queryFn: () => base44.entities.Vehicule.list(),
@@ -236,7 +242,7 @@ export default function GestionEquipeTerrain() {
           vehicules={vehicules}
           equipements={equipements}
           clients={clients}
-          users={employes}
+          users={users}
           lots={[]}
           onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
           onAddTechnicien={() => {
