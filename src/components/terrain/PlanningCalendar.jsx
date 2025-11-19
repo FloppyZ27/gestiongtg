@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import EditDossierDialog from "../dossiers/EditDossierDialog";
@@ -220,6 +220,42 @@ export default function PlanningCalendar({
   const setEquipeActiveTab = (equipeId, tab) => {
     const currentTab = getEquipeActiveTab(equipeId);
     setEquipeActiveTabs({ ...equipeActiveTabs, [equipeId]: currentTab === tab ? null : tab });
+  };
+
+  const copyEquipe = (dateStr, equipeId) => {
+    const currentDate = new Date(dateStr + 'T00:00:00');
+    let nextDate = new Date(currentDate);
+    
+    // Trouver la prochaine journée ouvrable
+    do {
+      nextDate.setDate(nextDate.getDate() + 1);
+    } while (nextDate.getDay() === 0 || nextDate.getDay() === 6); // Ignorer weekend
+    
+    const nextDateStr = format(nextDate, "yyyy-MM-dd");
+    
+    const newEquipes = { ...equipes };
+    const equipe = newEquipes[dateStr]?.find(e => e.id === equipeId);
+    
+    if (!equipe) return;
+    
+    // Créer une copie de l'équipe sans les mandats
+    const copiedEquipe = {
+      id: `eq${Date.now()}`,
+      nom: equipe.nom,
+      techniciens: [...equipe.techniciens],
+      vehicules: [...equipe.vehicules],
+      equipements: [...equipe.equipements],
+      mandats: []
+    };
+    
+    // Initialiser le tableau si la date n'existe pas
+    if (!newEquipes[nextDateStr]) {
+      newEquipes[nextDateStr] = [];
+    }
+    
+    newEquipes[nextDateStr].push(copiedEquipe);
+    setEquipes(newEquipes);
+    setEquipeActiveTabs({ ...equipeActiveTabs, [copiedEquipe.id]: null });
   };
 
   const removeEquipe = (dateStr, equipeId) => {
@@ -1032,13 +1068,21 @@ export default function PlanningCalendar({
                                       <Wrench className="w-3 h-3" />
                                     </button>
                                   </div>
-                                  <button
-                                    onClick={() => removeEquipe(dateStr, equipe.id)}
-                                    className="text-red-400 hover:text-red-300"
-                                  >
-                                    <X className="w-3 h-3" />
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => copyEquipe(dateStr, equipe.id)}
+                                      className="text-cyan-400 hover:text-cyan-300"
+                                    >
+                                      <Copy className="w-3 h-3" />
                                     </button>
-                                    </div>
+                                    <button
+                                      onClick={() => removeEquipe(dateStr, equipe.id)}
+                                      className="text-red-400 hover:text-red-300"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
                                     {/* Nom de l'équipe */}
                                     <span className="text-white text-sm font-bold">{equipeNom}</span>
                                     </div>
@@ -1234,33 +1278,41 @@ export default function PlanningCalendar({
                               <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
                                 {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1">
-                                  <div className="flex items-center gap-0.5">
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                      className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Users className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                      className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Truck className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                      className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Wrench className="w-3 h-3" />
-                                    </button>
-                                  </div>
+                                <div className="flex items-center gap-0.5">
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Users className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Truck className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                    className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                  >
+                                    <Wrench className="w-3 h-3" />
+                                  </button>
+                                </div>
+                                <div className="flex items-center gap-0.5">
+                                  <button
+                                    onClick={() => copyEquipe(dateStr, equipe.id)}
+                                    className="text-cyan-400 hover:text-cyan-300"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                  </button>
                                   <button
                                     onClick={() => removeEquipe(dateStr, equipe.id)}
                                     className="text-red-400 hover:text-red-300"
                                   >
                                     <X className="w-3 h-3" />
                                   </button>
-                                  </div>
+                                </div>
+                                </div>
                                   {/* Nom de l'équipe */}
                                   <span className="text-white text-sm font-bold">{equipeNom}</span>
                                   </div>
