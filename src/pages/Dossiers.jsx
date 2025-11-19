@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,6 +119,8 @@ export default function Dossiers() {
   const [terrainSectionExpanded, setTerrainSectionExpanded] = useState({});
   const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importedData, setImportedData] = useState([]);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -1576,9 +1578,31 @@ export default function Dossiers() {
 
           <div className="flex gap-3">
             <Button
+              onClick={handleExportCSV}
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
+              <Download className="w-5 h-5 mr-2" />
+              Extraction CSV
+            </Button>
+
+            <div className="relative">
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleImportCSV}
+                className="hidden"
+                id="csv-import-input"
+              />
+              <Button
+                onClick={() => document.getElementById('csv-import-input').click()}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg">
+                <FileUp className="w-5 h-5 mr-2" />
+                Importation CSV
+              </Button>
+            </div>
+
+            <Button
               onClick={openFacturationDialog}
               className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50">
-
               <FileText className="w-5 h-5 mr-2" />
               Facturation
             </Button>
@@ -1586,7 +1610,6 @@ export default function Dossiers() {
             <Button
               onClick={openCloseDossierDialog}
               className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50">
-
               <Check className="w-5 h-5 mr-2" />
               Fermer dossier
             </Button>
@@ -3289,21 +3312,13 @@ export default function Dossiers() {
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
               <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
-              <div className="flex gap-3 items-center">
-                <div className="relative w-96">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
-                </div>
-                <Button
-                  onClick={handleExportCSV}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
-                  <Download className="w-4 h-4 mr-2" />
-                  Extraction CSV
-                </Button>
+              <div className="relative w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
