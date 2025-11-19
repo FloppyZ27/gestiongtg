@@ -452,48 +452,7 @@ export default function GestionDeMandat() {
           z-index: 99999 !important;
         }
 
-        /* Scrollbar personnalisée */
-        #taches-scroll-container::-webkit-scrollbar,
-        #taches-scroll-container + div::-webkit-scrollbar {
-          height: 10px;
-        }
 
-        #taches-scroll-container::-webkit-scrollbar-track,
-        #taches-scroll-container + div::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
-          border-radius: 10px;
-        }
-
-        #taches-scroll-container::-webkit-scrollbar-thumb,
-        #taches-scroll-container + div::-webkit-scrollbar-thumb {
-          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
-        }
-
-        #taches-scroll-container::-webkit-scrollbar-thumb:hover,
-        #taches-scroll-container + div::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
-        }
-
-        .sticky.overflow-x-auto::-webkit-scrollbar {
-          height: 10px;
-        }
-
-        .sticky.overflow-x-auto::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5);
-          border-radius: 10px;
-        }
-
-        .sticky.overflow-x-auto::-webkit-scrollbar-thumb {
-          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.5);
-        }
-
-        .sticky.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
-        }
       `}</style>
       
       <div className="w-full px-0">
@@ -605,19 +564,16 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div 
-                id="taches-scroll-container"
-                className="overflow-x-auto"
-              >
-                <div className="flex gap-4 p-4">
+              <div id="taches-scroll-container">
+                <div className="grid grid-cols-12 gap-4 p-4">
               
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
-                    
+
                     return (
                       <div 
                         key={tache} 
-                        className="flex-shrink-0 w-[12.6rem]"
+                        className="col-span-1"
                         style={{ 
                           zIndex: 1 
                         }}
