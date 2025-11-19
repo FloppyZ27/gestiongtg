@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -445,9 +444,15 @@ export default function CeduleTerrain() {
     if (!dossier) return;
 
     const updatedMandats = [...dossier.mandats];
+    const currentMandat = updatedMandats[editingTerrainItem.mandatIndex];
+    
+    // Si le mandat était en vérification, le passer à "a_ceduler"
+    const newStatut = currentMandat.statut_terrain === "en_verification" ? "a_ceduler" : currentMandat.statut_terrain;
+    
     updatedMandats[editingTerrainItem.mandatIndex] = {
-      ...updatedMandats[editingTerrainItem.mandatIndex],
-      terrain: terrainForm
+      ...currentMandat,
+      terrain: terrainForm,
+      statut_terrain: newStatut
     };
 
     updateDossierMutation.mutate({
@@ -602,14 +607,17 @@ export default function CeduleTerrain() {
             <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
               <Button
                 size="sm"
-                onClick={() => updateMandatStatut(item.dossier.id, item.mandatIndex, "a_ceduler")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditTerrain(item, e);
+                }}
                 disabled={!isAssignedToCurrentUser}
                 className={`flex-1 text-xs h-8 p-0 ${
                   isAssignedToCurrentUser 
                     ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400' 
                     : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 }`}
-                title={isAssignedToCurrentUser ? "Marquer à céduler" : "Vous devez être assigné à ce mandat"}
+                title={isAssignedToCurrentUser ? "Oui, terrain requis" : "Vous devez être assigné à ce mandat"}
               >
                 <CheckCircle className="w-4 h-4" />
               </Button>
