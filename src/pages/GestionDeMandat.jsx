@@ -721,115 +721,77 @@ export default function GestionDeMandat() {
 
           {/* Vue Calendrier */}
           <TabsContent value="calendrier" className="mt-0">
-            <div className="p-4">
-              {/* Navigation du calendrier */}
-              <div className="flex items-center justify-between mb-4 gap-4">
-                <Button
-                  onClick={() => setCurrentMonthStart(subMonths(currentMonthStart, 1))}
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-800 border-slate-700 text-white"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                
-                <div className="flex items-center gap-2">
-                  <Select 
-                    value={currentMonthStart.getMonth().toString()} 
-                    onValueChange={handleMonthChange}
-                  >
-                    <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {MONTHS.map(month => (
-                        <SelectItem key={month.value} value={month.value.toString()} className="text-white">
-                          {month.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={currentMonthStart.getFullYear().toString()} 
-                    onValueChange={handleYearChange}
-                  >
-                    <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                      {YEARS.map(year => (
-                        <SelectItem key={year} value={year.toString()} className="text-white">
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+              <CardHeader className="border-b border-slate-800">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-white">
+                    Semaine du {format(currentMonthStart, "d MMMM", { locale: fr })} au {format(addDays(currentMonthStart, 4), "d MMMM yyyy", { locale: fr })}
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentMonthStart(addDays(currentMonthStart, -7))}
+                    >
+                      ← Précédent
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => setCurrentMonthStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+                      className="bg-emerald-500/20 text-emerald-400"
+                    >
+                      Aujourd'hui
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCurrentMonthStart(addDays(currentMonthStart, 7))}
+                    >
+                      Suivant →
+                    </Button>
+                  </div>
                 </div>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-5 gap-3">
+                  {[0, 1, 2, 3, 4].map((dayOffset) => {
+                    const day = addDays(currentMonthStart, dayOffset);
+                    const cardsForDay = filteredCards.filter(card => 
+                      card.mandat.date_livraison && 
+                      isSameDay(new Date(card.mandat.date_livraison), day)
+                    );
 
-                <Button
-                  onClick={() => setCurrentMonthStart(addMonths(currentMonthStart, 1))}
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-800 border-slate-700 text-white"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {/* Calendrier avec semaines verticales */}
-              <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-                {getWeeksToDisplay().map((weekStart, weekIndex) => {
-                  const weekEnd = endOfWeek(weekStart, { locale: fr });
-                  const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd })
-                    .filter(day => day.getDay() !== 0 && day.getDay() !== 6); // Lundi à Vendredi seulement
-
-                  return (
-                    <Card key={weekIndex} className="border-slate-700 bg-slate-800/30">
-                      <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
-                        <CardTitle className="text-sm text-slate-300">
-                          Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-0">
-                        <div className="grid grid-cols-5 divide-x divide-slate-700">
-                          {daysOfWeek.map((day, dayIndex) => {
-                            const cardsForDay = filteredCards.filter(card => 
-                              card.mandat.date_livraison && 
-                              isSameDay(new Date(card.mandat.date_livraison), day)
-                            );
-
-                            return (
-                              <div key={dayIndex} className="p-3 min-h-[200px]">
-                                <div className="text-center mb-3">
-                                  <p className="text-xs text-slate-500 uppercase">
-                                    {format(day, "EEE", { locale: fr })}
-                                  </p>
-                                  <p className="text-lg font-bold text-white">
-                                    {format(day, "d", { locale: fr })}
-                                  </p>
-                                </div>
-                                <div className="space-y-2">
-                                  {cardsForDay.map(card => (
-                                    <div key={card.id} onClick={() => handleCardClick(card)}>
-                                      {renderMandatCard(card)}
-                                    </div>
-                                  ))}
-                                  {cardsForDay.length === 0 && (
-                                    <div className="text-center py-4 text-slate-600 text-xs">
-                                      Aucun mandat
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
+                    return (
+                      <div key={dayOffset} className="space-y-2">
+                        <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                          <div className="text-center">
+                            <h3 className="font-semibold text-white text-sm">
+                              {format(day, "EEEE", { locale: fr })}
+                            </h3>
+                            <p className="text-xs text-slate-400">
+                              {format(day, "d MMM", { locale: fr })}
+                            </p>
+                          </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
+
+                        <div className="space-y-2 min-h-[400px]">
+                          {cardsForDay.map(card => (
+                            <div key={card.id}>
+                              {renderMandatCard(card)}
+                            </div>
+                          ))}
+                          {cardsForDay.length === 0 && (
+                            <div className="text-center py-8 text-slate-600 text-xs">
+                              Aucun mandat
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
