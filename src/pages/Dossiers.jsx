@@ -1831,7 +1831,7 @@ export default function Dossiers() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                          <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })}>
+                          <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })} disabled={formData.ttl === "Oui"}>
                             <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
@@ -1844,36 +1844,36 @@ export default function Dossiers() {
                         </div>
                         <div className="space-y-2">
                           <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                          <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
+                          <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" disabled={formData.ttl === "Oui"} />
                         </div>
                         <div className="space-y-2">
-                         <Label>Statut <span className="text-red-400">*</span></Label>
-                         <Select value={formData.statut} onValueChange={(value) => {
-                           const updatedMandats = value === "Fermé" 
-                             ? formData.mandats.map(m => ({ ...m, tache_actuelle: "", utilisateur_assigne: "" }))
-                             : formData.mandats;
-                           setFormData({ ...formData, statut: value, mandats: updatedMandats });
-                         }}>
-                           <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                             <SelectValue placeholder="Sélectionner le statut" />
-                           </SelectTrigger>
-                           <SelectContent className="bg-slate-800 border-slate-700">
-                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                             <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                           </SelectContent>
-                         </Select>
+                          <Label>Statut <span className="text-red-400">*</span></Label>
+                          <Select value={formData.statut} onValueChange={(value) => {
+                            const updatedMandats = value === "Fermé" 
+                              ? formData.mandats.map(m => ({ ...m, tache_actuelle: "", utilisateur_assigne: "" }))
+                              : formData.mandats;
+                            setFormData({ ...formData, statut: value, mandats: updatedMandats });
+                          }} disabled={formData.ttl === "Oui"}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Sélectionner le statut" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                              <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                          <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" />
+                          <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" disabled={formData.ttl === "Oui"} />
                         </div>
                         {formData.statut === "Fermé" && (
                           <div className="space-y-2">
                             <Label>Date de fermeture</Label>
-                            <Input type="date" value={formData.date_fermeture || ""} onChange={(e) => setFormData({ ...formData, date_fermeture: e.target.value })} className="bg-slate-800 border-slate-700" />
+                            <Input type="date" value={formData.date_fermeture || ""} onChange={(e) => setFormData({ ...formData, date_fermeture: e.target.value })} className="bg-slate-800 border-slate-700" disabled={formData.ttl === "Oui"} />
                           </div>
                         )}
                       </div>
