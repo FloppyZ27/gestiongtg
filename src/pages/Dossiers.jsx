@@ -1736,7 +1736,7 @@ export default function Dossiers() {
                           </div>
                         )}
                       </div>
-                      {editingDossier &&
+                      {editingDossier && formData.ttl === "Non" &&
                       <div className="flex gap-2">
                           <Button
                           type="button"
@@ -1934,10 +1934,12 @@ export default function Dossiers() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <Label>Mandats</Label>
-                          <Button type="button" size="sm" onClick={addMandat} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                            <Plus className="w-4 h-4 mr-1" />
-                            Ajouter un mandat
-                          </Button>
+                          {formData.ttl === "Non" && (
+                            <Button type="button" size="sm" onClick={addMandat} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                              <Plus className="w-4 h-4 mr-1" />
+                              Ajouter un mandat
+                            </Button>
+                          )}
                         </div>
 
                         {formData.mandats.length > 0 ?
@@ -1970,15 +1972,15 @@ export default function Dossiers() {
                                       getLotById={getLotById}
                                       users={users}
                                       formStatut={formData.statut}
-                                      onRemoveMandat={() => {
+                                      onRemoveMandat={formData.ttl === "Non" ? () => {
                                         removeMandat(index);
                                         if (formData.mandats.length > 1) {
                                           setActiveTabMandat(Math.max(0, index - 1).toString());
                                         } else {
                                           setActiveTabMandat("0");
                                         }
-                                      }}
-                                      isReferenceDisabled={false}
+                                      } : null}
+                                      isReferenceDisabled={formData.ttl === "Oui"}
                                       isTTL={formData.ttl === "Oui"}
                                     />
                                   </CardContent>
@@ -1991,7 +1993,7 @@ export default function Dossiers() {
                         }
                       </div>
 
-                      {formData.mandats.length > 0 &&
+                      {formData.mandats.length > 0 && formData.ttl === "Non" &&
                       <div className="space-y-3 mt-6">
                           <Label className="text-lg font-semibold text-slate-300">Tarification</Label>
                           <div className="border border-slate-700 rounded-lg overflow-hidden">
