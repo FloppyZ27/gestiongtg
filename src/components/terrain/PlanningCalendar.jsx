@@ -578,11 +578,13 @@ export default function PlanningCalendar({
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <span className="text-white font-semibold text-lg absolute left-1/2 transform -translate-x-1/2">
-          {viewMode === "week" 
-            ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
-            : format(currentDate, "MMMM yyyy", { locale: fr })}
-        </span>
+        <div className="flex-1 flex justify-center">
+          <span className="text-white font-semibold text-lg">
+            {viewMode === "week" 
+              ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
+              : format(currentDate, "MMMM yyyy", { locale: fr })}
+          </span>
+        </div>
         <Select value={viewMode} onValueChange={setViewMode}>
           <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
             <SelectValue />
@@ -967,11 +969,8 @@ export default function PlanningCalendar({
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="text-slate-400 text-xs">
-                            {format(day, "EEE", { locale: fr })}
-                          </div>
                           <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                            {format(day, "d MMM", { locale: fr })}
+                            {format(day, "EEEE d MMM", { locale: fr })}
                           </div>
                         </div>
                         <Button
@@ -1197,11 +1196,8 @@ export default function PlanningCalendar({
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="text-slate-400 text-xs">
-                            {format(day, "EEE", { locale: fr })}
-                          </div>
                           <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                            {format(day, "d", { locale: fr })}
+                            {format(day, "EEEE d", { locale: fr })}
                           </div>
                         </div>
                         <Button
