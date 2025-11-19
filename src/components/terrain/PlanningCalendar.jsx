@@ -1271,7 +1271,7 @@ export default function PlanningCalendar({
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className={`min-h-[50px] ${snapshot.isDraggingOver ? 'bg-cyan-500/10 rounded p-1' : ''}`}
+                                    className={`min-h-[50px] -mx-2 ${snapshot.isDraggingOver ? 'bg-cyan-500/10' : ''}`}
                                   >
                                     {equipe.mandats.map((dossierId, index) => {
                                       const dossier = dossiers.find(d => d.id === dossierId);
@@ -1453,7 +1453,7 @@ export default function PlanningCalendar({
                               {/* Mandats (toujours visibles) */}
                               <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
                                 {(provided) => (
-                                  <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px]">
+                                  <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px] -mx-1">
                                     {equipe.mandats.map((dId, idx) => {
                                       const d = dossiers.find(d => d.id === dId);
                                       return d ? (
