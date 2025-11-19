@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -126,6 +126,10 @@ export default function PlanningCalendar({
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [equipeActiveTabs, setEquipeActiveTabs] = useState({}); // { "equipeId": "techniciens" | "vehicules" | "equipements" }
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   // Charger les équipes depuis localStorage au démarrage
   useEffect(() => {
@@ -694,8 +698,28 @@ export default function PlanningCalendar({
 
   return (
     <div className="space-y-4">
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #planning-print, #planning-print * {
+            visibility: visible;
+          }
+          #planning-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+      
       {/* Header avec contrôles */}
-      <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4">
+      <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4 no-print">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -734,23 +758,34 @@ export default function PlanningCalendar({
                 </span>
               </div>
             </div>
-            <Select value={viewMode} onValueChange={setViewMode}>
-              <SelectTrigger className="w-32 bg-slate-800/50 border-slate-600 text-white hover:border-emerald-500/50 transition-all">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="week" className="text-white">Semaine</SelectItem>
-                <SelectItem value="month" className="text-white">Mois</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                size="sm"
+                className="bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+              >
+                <Printer className="w-4 h-4 mr-2" />
+                Imprimer {viewMode === "week" ? "la semaine" : "le mois"}
+              </Button>
+              <Select value={viewMode} onValueChange={setViewMode}>
+                <SelectTrigger className="w-32 bg-slate-800/50 border-slate-600 text-white hover:border-emerald-500/50 transition-all">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="week" className="text-white">Semaine</SelectItem>
+                  <SelectItem value="month" className="text-white">Mois</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4">
+        <div className="flex gap-4" id="planning-print">
           {/* Colonne gauche - Ressources avec tabs */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
+          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start no-print" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
