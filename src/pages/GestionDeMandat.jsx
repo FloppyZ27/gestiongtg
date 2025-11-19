@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -74,7 +74,6 @@ export default function GestionDeMandat() {
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [activeView, setActiveView] = useState("taches");
   const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
-  const [zoom, setZoom] = useState(1);
   const [calendarMode, setCalendarMode] = useState("week"); // "week" or "month"
 
   const queryClient = useQueryClient();
@@ -248,20 +247,20 @@ export default function GestionDeMandat() {
 
   const getTacheColor = (tache) => {
     const colors = {
-      "Ouverture": "bg-blue-500/20 border-blue-500/30",
-      "Cédule": "bg-cyan-500/20 border-cyan-500/30",
-      "Montage": "bg-purple-500/20 border-purple-500/30",
-      "Terrain": "bg-green-500/20 border-green-500/30",
-      "Compilation": "bg-yellow-500/20 border-yellow-500/30",
-      "Reliage": "bg-orange-500/20 border-orange-500/30",
-      "Décision/Calcul": "bg-pink-500/20 border-pink-500/30",
-      "Mise en plan": "bg-indigo-500/20 border-indigo-500/30",
-      "Analyse": "bg-teal-500/20 border-teal-500/30",
-      "Rapport": "bg-red-500/20 border-red-500/30",
-      "Vérification": "bg-amber-500/20 border-amber-500/30",
-      "Facturer": "bg-emerald-500/20 border-emerald-500/30"
+      "Ouverture": "bg-blue-500/10 border-blue-500/15",
+      "Cédule": "bg-cyan-500/10 border-cyan-500/15",
+      "Montage": "bg-purple-500/10 border-purple-500/15",
+      "Terrain": "bg-green-500/10 border-green-500/15",
+      "Compilation": "bg-yellow-500/10 border-yellow-500/15",
+      "Reliage": "bg-orange-500/10 border-orange-500/15",
+      "Décision/Calcul": "bg-pink-500/10 border-pink-500/15",
+      "Mise en plan": "bg-indigo-500/10 border-indigo-500/15",
+      "Analyse": "bg-teal-500/10 border-teal-500/15",
+      "Rapport": "bg-red-500/10 border-red-500/15",
+      "Vérification": "bg-amber-500/10 border-amber-500/15",
+      "Facturer": "bg-emerald-500/10 border-emerald-500/15"
     };
-    return colors[tache] || "bg-slate-500/20 border-slate-500/30";
+    return colors[tache] || "bg-slate-500/10 border-slate-500/15";
   };
 
   const getTacheHeaderColor = (tache) => {
@@ -441,30 +440,7 @@ export default function GestionDeMandat() {
               <Kanban className="w-6 h-6 text-emerald-400" />
             </div>
             <p className="text-slate-400">Vue Kanban de vos mandats</p>
-          </div>
-          
-          {/* Contrôles de zoom */}
-          <div className="flex items-center gap-2 px-3 py-1 bg-slate-800/50 rounded-lg border border-slate-700">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-slate-400 hover:text-white"
-              onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))}
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            <span className="text-sm text-slate-400 font-mono w-12 text-center">
-              {Math.round(zoom * 100)}%
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-slate-400 hover:text-white"
-              onClick={() => setZoom(prev => Math.min(1.5, prev + 0.1))}
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-          </div>
+            </div>
         </div>
 
         {/* Filtres et recherche */}
@@ -563,8 +539,8 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="overflow-x-auto max-w-full">
-                <div className="flex gap-4 p-4" style={{ width: 'calc(5 * 12.6rem + 4 * 1rem)' }}>
+              <div className="overflow-x-auto max-w-full" style={{ direction: 'rtl' }}>
+                <div className="flex gap-4 p-4" style={{ width: 'calc(5 * 12.6rem + 4 * 1rem)', direction: 'ltr' }}>
               
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -580,12 +556,12 @@ export default function GestionDeMandat() {
                         <Card 
                           className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
                         >
-                          <CardHeader className={`pb-4 pt-4 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`}>
+                          <CardHeader className={`pb-3 pt-3 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)} opacity-50`}>
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-xl font-bold text-white tracking-wide">
+                              <CardTitle className="text-base font-bold text-white tracking-wide">
                                 {tache}
                               </CardTitle>
-                              <Badge className="bg-slate-900/80 text-white font-bold text-sm px-3 py-1">
+                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
                                 {cardsInColumn.length}
                               </Badge>
                             </div>
