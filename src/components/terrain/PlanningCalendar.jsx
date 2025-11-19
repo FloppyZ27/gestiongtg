@@ -1103,6 +1103,7 @@ export default function PlanningCalendar({
                                   </div>
                                 )}
                               </Droppable>
+                              </div>
                             </div>
                           );
                         })}
