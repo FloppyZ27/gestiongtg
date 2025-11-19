@@ -566,35 +566,57 @@ export default function PlanningCalendar({
   return (
     <div className="space-y-4">
       {/* Header avec contrôles */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button onClick={goToPrevious} variant="outline" size="sm" className="bg-slate-800 border-slate-700">
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button onClick={goToToday} variant="outline" size="sm" className="bg-slate-800 border-slate-700">
-            Aujourd'hui
-          </Button>
-          <Button onClick={goToNext} variant="outline" size="sm" className="bg-slate-800 border-slate-700">
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <span className="text-white font-semibold text-lg">
-            {viewMode === "week" 
-              ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
-              : format(currentDate, "MMMM yyyy", { locale: fr })}
-          </span>
-        </div>
-        <Select value={viewMode} onValueChange={setViewMode}>
-          <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
-            <SelectItem value="week" className="text-white">Semaine</SelectItem>
-            <SelectItem value="month" className="text-white">Mois</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={goToPrevious} 
+                variant="outline" 
+                size="sm" 
+                className="bg-slate-800/50 border-slate-600 hover:bg-slate-700 hover:border-emerald-500/50 transition-all"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button 
+                onClick={goToToday} 
+                variant="outline" 
+                size="sm" 
+                className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400 hover:from-emerald-500/30 hover:to-teal-500/30 font-semibold transition-all"
+              >
+                <Calendar className="w-3 h-3 mr-1" />
+                Aujourd'hui
+              </Button>
+              <Button 
+                onClick={goToNext} 
+                variant="outline" 
+                size="sm" 
+                className="bg-slate-800/50 border-slate-600 hover:bg-slate-700 hover:border-emerald-500/50 transition-all"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex-1 flex justify-center px-4">
+              <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-2 border-emerald-500/30 rounded-lg px-6 py-2 shadow-lg">
+                <span className="text-white font-bold text-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                  {viewMode === "week" 
+                    ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
+                    : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                </span>
+              </div>
+            </div>
+            <Select value={viewMode} onValueChange={setViewMode}>
+              <SelectTrigger className="w-32 bg-slate-800/50 border-slate-600 text-white hover:border-emerald-500/50 transition-all">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectItem value="week" className="text-white">Semaine</SelectItem>
+                <SelectItem value="month" className="text-white">Mois</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4">
