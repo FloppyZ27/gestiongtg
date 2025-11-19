@@ -67,7 +67,7 @@ export default function MandatTabs({
           </>
         )}
         </div>
-        {onRemoveMandat && (
+        {onRemoveMandat && !isTTL && (
           <Button
             type="button"
             size="sm"
@@ -89,7 +89,7 @@ export default function MandatTabs({
             {/* Version simplifiée pour TTL */}
             <div className="space-y-2">
               <Label>Type de mandat <span className="text-red-400">*</span></Label>
-              <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)}>
+              <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)} disabled={true}>
                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
@@ -108,12 +108,8 @@ export default function MandatTabs({
                 onChange={(e) => updateMandat(mandatIndex, 'adresse_travaux_texte', e.target.value)}
                 placeholder="Entrer l'adresse des travaux..."
                 className="bg-slate-700 border-slate-600 min-h-[80px]"
+                disabled={true}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(mandatIndex, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
             </div>
           </>
         ) : (
@@ -122,7 +118,7 @@ export default function MandatTabs({
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Type de mandat <span className="text-red-400">*</span></Label>
-                <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)}>
+                <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(mandatIndex, 'type_mandat', value)} disabled={isReferenceDisabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
@@ -135,7 +131,7 @@ export default function MandatTabs({
               </div>
               <div className="space-y-2">
                 <Label>Tâche actuelle</Label>
-                <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(mandatIndex, 'tache_actuelle', value)}>
+                <Select value={mandat.tache_actuelle || ""} onValueChange={(value) => updateMandat(mandatIndex, 'tache_actuelle', value)} disabled={isReferenceDisabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                     <SelectValue placeholder="Sélectionner la tâche" />
                   </SelectTrigger>
@@ -151,7 +147,7 @@ export default function MandatTabs({
                   Utilisateur assigné 
                   {formStatut === "Ouvert" && <span className="text-red-400"> *</span>}
                 </Label>
-                <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(mandatIndex, 'utilisateur_assigne', value)}>
+                <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(mandatIndex, 'utilisateur_assigne', value)} disabled={isReferenceDisabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
@@ -184,6 +180,7 @@ export default function MandatTabs({
                       value={mandat.date_signature || ""}
                       onChange={(e) => updateMandat(mandatIndex, 'date_signature', e.target.value)}
                       className="bg-slate-700 border-slate-600"
+                      disabled={isReferenceDisabled}
                     />
                   </div>
 
@@ -194,6 +191,7 @@ export default function MandatTabs({
                       value={mandat.date_debut_travaux || ""}
                       onChange={(e) => updateMandat(mandatIndex, 'date_debut_travaux', e.target.value)}
                       className="bg-slate-700 border-slate-600"
+                      disabled={isReferenceDisabled}
                     />
                   </div>
 
@@ -204,6 +202,7 @@ export default function MandatTabs({
                       value={mandat.date_livraison || ""}
                       onChange={(e) => updateMandat(mandatIndex, 'date_livraison', e.target.value)}
                       className="bg-slate-700 border-slate-600"
+                      disabled={isReferenceDisabled}
                     />
                   </div>
                 </div>
@@ -276,12 +275,8 @@ export default function MandatTabs({
           ) : (
             <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">Aucun lot sélectionné</p>
           )}
-        </div>
-
-        <div className="space-y-2">
-          <Label>Notes</Label>
-          <Textarea value={mandat.notes || ""} onChange={(e) => updateMandat(mandatIndex, 'notes', e.target.value)} className="bg-slate-700 border-slate-600 h-20" />
-        </div>
+          }
+          </div>
       </TabsContent>
 
       {/* Tab Minutes */}
@@ -297,6 +292,7 @@ export default function MandatTabs({
                   onChange={(e) => updateMandat(mandatIndex, 'minute', e.target.value)}
                   placeholder="Ex: 12345"
                   className="bg-slate-700 border-slate-600"
+                  disabled={true}
                 />
               </div>
               <div className="space-y-2">
@@ -306,6 +302,7 @@ export default function MandatTabs({
                   value={mandat.date_minute || ""}
                   onChange={(e) => updateMandat(mandatIndex, 'date_minute', e.target.value)}
                   className="bg-slate-700 border-slate-600"
+                  disabled={true}
                 />
               </div>
             </div>

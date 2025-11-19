@@ -1660,16 +1660,18 @@ export default function PriseDeMandat() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <Label>Mandats</Label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={addMandat}
-                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                        disabled={!!dossierReferenceId}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter un mandat
-                      </Button>
+                      {formData.ttl === "Non" && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addMandat}
+                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                          disabled={!!dossierReferenceId}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Ajouter un mandat
+                        </Button>
+                      )}
                     </div>
 
                     {formData.mandats.length > 0 ? (
@@ -1690,27 +1692,6 @@ export default function PriseDeMandat() {
                           <TabsContent key={index} value={index.toString()}>
                             <Card className="border-slate-700 bg-slate-800/30">
                               <CardContent className="p-4 space-y-4">
-                                <div className="flex justify-end">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      removeMandat(index);
-                                      if (formData.mandats.length > 1) {
-                                        setActiveTabMandat(Math.max(0, index - 1).toString());
-                                      } else {
-                                        setActiveTabMandat("0");
-                                      }
-                                    }}
-                                    className="text-red-400 hover:text-red-300"
-                                    disabled={!!dossierReferenceId}
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Supprimer ce mandat
-                                  </Button>
-                                </div>
-
                                 <MandatTabs
                                   mandat={mandat}
                                   mandatIndex={index}
@@ -1723,6 +1704,15 @@ export default function PriseDeMandat() {
                                   getLotById={getLotById}
                                   users={users}
                                   formStatut={formData.statut}
+                                  onRemoveMandat={formData.ttl === "Non" ? () => {
+                                    removeMandat(index);
+                                    if (formData.mandats.length > 1) {
+                                      setActiveTabMandat(Math.max(0, index - 1).toString());
+                                    } else {
+                                      setActiveTabMandat("0");
+                                    }
+                                  } : null}
+                                  isReferenceDisabled={!!dossierReferenceId || formData.ttl === "Oui"}
                                   isTTL={formData.ttl === "Oui"}
                                 />
                               </CardContent>
