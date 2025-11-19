@@ -534,8 +534,8 @@ export default function PlanningCalendar({
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-[240px_1fr] gap-4">
           {/* Colonne gauche - Ressources avec tabs */}
-          <div className="h-fit">
-            <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden sticky top-[84px]" style={{ maxHeight: 'calc(100vh - 88px)' }}>
+          <div className="sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
+            <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden h-full">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
