@@ -3689,8 +3689,8 @@ export default function Dossiers() {
 
                           <TableCell className="text-center">
                             {dossier.ttl === "Oui" && (
-                              <div className="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-bold">T</span>
+                              <div className="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">TTL</span>
                               </div>
                             )}
                           </TableCell>
