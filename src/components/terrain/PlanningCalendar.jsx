@@ -1267,12 +1267,12 @@ export default function PlanningCalendar({
                                   </div>
                                 )}
                               </Droppable>
-                              </div>
-                              </div>
-                              );
-                              })}
-                              </div>
-                    </Card>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
                   );
                 })}
               </div>
