@@ -556,8 +556,8 @@ export default function GestionDeMandat() {
                         <Card 
                           className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
                         >
-                          <CardHeader className={`pb-3 pt-3 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)} opacity-50`}>
-                            <div className="flex items-center justify-between">
+                          <CardHeader className={`pb-3 pt-3 border-b-2 border-slate-800 bg-gradient-to-r ${getTacheHeaderColor(tache)}`} style={{ opacity: 0.5 }}>
+                            <div className="flex items-center justify-between" style={{ opacity: 1 }}>
                               <CardTitle className="text-base font-bold text-white tracking-wide">
                                 {tache}
                               </CardTitle>
