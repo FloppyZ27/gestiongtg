@@ -8,6 +8,8 @@ import { createPageUrl } from "@/utils";
 import { Plus, Search, FileText, Calendar, TrendingUp, MapPin, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import ActesList from "../components/actes/ActesList";
 import ActeDetails from "../components/actes/ActeDetails";
 
