@@ -532,9 +532,9 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="relative pt-2">
+        <div className="relative pt-5">
           {/* Colonne gauche - Ressources avec tabs */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4 fixed left-[400px] top-32 w-[220px] max-h-[calc(100vh-150px)] overflow-hidden flex flex-col z-[9999]">
+          <Card className="bg-slate-900/50 border-slate-800 p-4 fixed left-8 top-32 w-[240px] max-h-[calc(100vh-150px)] overflow-hidden flex flex-col z-10">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
@@ -889,9 +889,9 @@ export default function PlanningCalendar({
           </Card>
 
           {/* Grille calendrier */}
-          <div className="space-y-4 ml-[620px] w-full">
+          <div className="space-y-4 ml-[260px]">
             {viewMode === "week" ? (
-              <div className="grid grid-cols-5 gap-2 w-full">
+              <div className="grid grid-cols-5 gap-2">
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
@@ -1113,7 +1113,7 @@ export default function PlanningCalendar({
                 })}
               </div>
             ) : (
-              <div className="grid grid-cols-5 gap-2 w-full">
+              <div className="grid grid-cols-5 gap-2">
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
