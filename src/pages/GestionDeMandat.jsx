@@ -630,10 +630,12 @@ export default function GestionDeMandat() {
                         </Card>
                       </div>
                     );
-                  })}
-                </div>
-              </div>
-            </DragDropContext>
+                      })}
+                    </div>
+                  </div>
+                </DragDropContext>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Vue par Utilisateur */}
