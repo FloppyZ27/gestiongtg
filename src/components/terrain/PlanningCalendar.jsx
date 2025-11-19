@@ -627,13 +627,13 @@ export default function PlanningCalendar({
                                   >
                                     Non
                                   </Button>
-                                  </div>
-                                  </div>
-                                  </div>
-                                  );
-                                  })}
-                                  </div>
-                                  </TabsContent>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </TabsContent>
 
                   <TabsContent value="planifier" className="mt-0">
                     <h3 className="text-white font-semibold mb-3 text-sm">
