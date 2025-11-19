@@ -598,7 +598,6 @@ export default function GestionDeMandat() {
             {/* Scrollbar du haut - fixe */}
             <div 
               className="overflow-x-auto mb-2 sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm pb-2" 
-              style={{ maxWidth: 'calc(5 * 12.6rem + 4 * 1rem)' }}
               onScroll={(e) => {
                 const target = e.currentTarget;
                 const mainScroll = document.getElementById('taches-scroll-container');
@@ -612,7 +611,6 @@ export default function GestionDeMandat() {
               <div 
                 id="taches-scroll-container"
                 className="overflow-x-auto"
-                style={{ maxWidth: 'calc(5 * 12.6rem + 4 * 1rem)' }}
                 onScroll={(e) => {
                   const target = e.currentTarget;
                   const topScroll = target.parentElement.querySelector('.sticky');
@@ -701,7 +699,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={user.email} 
-                        className="flex-shrink-0 w-[12.6rem]"
+                        className="flex-shrink-0 w-[15.12rem]"
                         style={{ 
                           zIndex: 1 
                         }}
