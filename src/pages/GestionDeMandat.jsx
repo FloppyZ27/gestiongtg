@@ -564,7 +564,23 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="overflow-x-auto">
+              <div 
+                className="overflow-x-auto mb-2" 
+                onScroll={(e) => {
+                  const bottomScroll = document.getElementById('taskColumnsScroll');
+                  if (bottomScroll) bottomScroll.scrollLeft = e.target.scrollLeft;
+                }}
+              >
+                <div style={{ width: `${TACHES.slice(0, 5).length * 216}px`, height: '1px' }}></div>
+              </div>
+              <div 
+                id="taskColumnsScroll"
+                className="overflow-x-auto"
+                onScroll={(e) => {
+                  const topScroll = e.target.previousElementSibling;
+                  if (topScroll) topScroll.scrollLeft = e.target.scrollLeft;
+                }}
+              >
                 <div className="flex gap-4 p-4">
 
                       {TACHES.slice(0, 5).map(tache => {
