@@ -450,7 +450,7 @@ export default function PlanningCalendar({
     if (!dest) {
       // Si pas vers une équipe, peut-être vers unassigned
       if (destId === "unassigned") {
-        // Retirer des équipes
+        // Retirer des équipes et réinitialiser la date terrain et équipe
         const newEquipes = { ...equipes };
         Object.keys(newEquipes).forEach(dateStr => {
           newEquipes[dateStr].forEach(equipe => {
@@ -458,6 +458,18 @@ export default function PlanningCalendar({
           });
         });
         setEquipes(newEquipes);
+        
+        // Réinitialiser date_terrain et equipe_assignee
+        const dossier = dossiers.find(d => d.id === draggableId);
+        if (dossier && onUpdateDossier) {
+          const updatedMandats = dossier.mandats.map(m => {
+            if (m.tache_actuelle === "Cédule") {
+              return { ...m, date_terrain: null, equipe_assignee: null };
+            }
+            return m;
+          });
+          onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+        }
       }
       return;
     }
@@ -483,6 +495,25 @@ export default function PlanningCalendar({
     }
 
     setEquipes(newEquipes);
+
+    // Mettre à jour la date_terrain et equipe_assignee du mandat
+    const dossier = dossiers.find(d => d.id === draggableId);
+    if (dossier && onUpdateDossier) {
+      const equipeNom = equipe.techniciens.length > 0
+        ? equipe.techniciens.map(techId => {
+            const tech = techniciens.find(t => t.id === techId);
+            return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+          }).filter(n => n).join('-')
+        : equipe.nom;
+
+      const updatedMandats = dossier.mandats.map(m => {
+        if (m.tache_actuelle === "Cédule") {
+          return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom };
+        }
+        return m;
+      });
+      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+    }
   };
 
   const unassignedDossiers = dossiers.filter(d => {
@@ -560,7 +591,7 @@ export default function PlanningCalendar({
 
         {/* Clients */}
         <div className="flex items-center gap-1 mb-1">
-          <User className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+          <User className="w-3 h-3 text-white flex-shrink-0" />
           <span className="text-xs text-white font-medium">{getClientsNames(dossier.clients_ids)}</span>
         </div>
 
