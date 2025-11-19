@@ -567,7 +567,7 @@ export default function GestionDeMandat() {
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max"
+                className="flex gap-4 p-4 min-w-max overflow-x-auto max-w-full"
               >
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -639,7 +639,7 @@ export default function GestionDeMandat() {
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
-                className="flex gap-4 p-4 min-w-max"
+                className="flex gap-4 p-4 min-w-max overflow-x-auto max-w-full"
               >
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
