@@ -50,11 +50,6 @@ const navigationItems = [
     icon: Phone,
   },
   {
-    title: "Gestion de Mandat",
-    url: createPageUrl("GestionDeMandat"),
-    icon: Kanban,
-  },
-  {
     title: "Dossiers",
     url: createPageUrl("Dossiers"),
     icon: FolderOpen,
@@ -65,19 +60,19 @@ const navigationItems = [
     icon: User,
   },
   {
+    title: "Gestion de Mandat",
+    url: createPageUrl("GestionDeMandat"),
+    icon: Kanban,
+  },
+  {
     title: "Cédule Terrain",
     url: createPageUrl("GestionEquipeTerrain"),
     icon: CalendarDays,
   },
   {
-    title: "Lots",
-    url: createPageUrl("Lots"),
-    icon: Grid3x3,
-  },
-  {
-    title: "Actes",
-    url: createPageUrl("Dashboard"),
-    icon: FileText,
+    title: "Recherches",
+    url: createPageUrl("Recherches"),
+    icon: Search,
   },
   {
     title: "Chaine de Titre",
