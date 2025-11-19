@@ -577,12 +577,12 @@ export default function PlanningCalendar({
           <Button onClick={goToNext} variant="outline" size="sm" className="bg-slate-800 border-slate-700">
             <ChevronRight className="w-4 h-4" />
           </Button>
-          <span className="text-white font-semibold text-lg">
-            {viewMode === "week" 
-              ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
-              : format(currentDate, "MMMM yyyy", { locale: fr })}
-          </span>
         </div>
+        <span className="text-white font-semibold text-lg absolute left-1/2 transform -translate-x-1/2">
+          {viewMode === "week" 
+            ? format(days[0], "d MMM", { locale: fr }) + " - " + format(days[days.length - 1], "d MMM yyyy", { locale: fr })
+            : format(currentDate, "MMMM yyyy", { locale: fr })}
+        </span>
         <Select value={viewMode} onValueChange={setViewMode}>
           <SelectTrigger className="w-32 bg-slate-800 border-slate-700 text-white">
             <SelectValue />
