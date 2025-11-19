@@ -401,15 +401,15 @@ export default function GestionDeMandat() {
         [data-rbd-draggable-context-id] {
           cursor: grab !important;
         }
-        
+
         [data-rbd-draggable-context-id]:active {
           cursor: grabbing !important;
         }
-        
+
         [data-rbd-drag-handle-context-id] {
           cursor: grab !important;
         }
-        
+
         div[data-rbd-draggable-id] {
           transition: none !important;
         }
@@ -427,6 +427,49 @@ export default function GestionDeMandat() {
         /* S'assurer que le conteneur de drag est au-dessus */
         [data-rbd-drag-handle-draggable-id] {
           z-index: 99999 !important;
+        }
+
+        /* Scrollbar personnalisée */
+        #taches-scroll-container::-webkit-scrollbar,
+        #taches-scroll-container + div::-webkit-scrollbar {
+          height: 10px;
+        }
+
+        #taches-scroll-container::-webkit-scrollbar-track,
+        #taches-scroll-container + div::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+        }
+
+        #taches-scroll-container::-webkit-scrollbar-thumb,
+        #taches-scroll-container + div::-webkit-scrollbar-thumb {
+          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+        }
+
+        #taches-scroll-container::-webkit-scrollbar-thumb:hover,
+        #taches-scroll-container + div::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
+
+        .sticky.overflow-x-auto::-webkit-scrollbar {
+          height: 10px;
+        }
+
+        .sticky.overflow-x-auto::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+        }
+
+        .sticky.overflow-x-auto::-webkit-scrollbar-thumb {
+          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+        }
+
+        .sticky.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
         }
       `}</style>
       
