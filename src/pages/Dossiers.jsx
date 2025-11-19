@@ -3673,9 +3673,11 @@ export default function Dossiers() {
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('clients')}>Clients {getSortIcon('clients')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('type_mandat')}>Mandat {getSortIcon('type_mandat')}</TableHead>
                       <TableHead className="text-slate-300">Minute</TableHead>
+                      <TableHead className="text-slate-300">Lot</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('tache_actuelle')}>Tâche actuelle {getSortIcon('tache_actuelle')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('ville')}>Adresse Travaux {getSortIcon('ville')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_ouverture')}>Date ouverture {getSortIcon('date_ouverture')}</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_fermeture')}>Date fermeture {getSortIcon('date_fermeture')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('statut')}>Statut {getSortIcon('statut')}</TableHead>
                       <TableHead className="text-slate-300 text-right">Actions</TableHead>
                     </TableRow>
@@ -3758,7 +3760,7 @@ export default function Dossiers() {
                   ) :
 
                   <TableRow>
-                        <TableCell colSpan={10} className="text-center py-12 text-slate-500">
+                        <TableCell colSpan={12} className="text-center py-12 text-slate-500">
                           <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                           <p>Aucun dossier trouvé.</p>
                         </TableCell>
