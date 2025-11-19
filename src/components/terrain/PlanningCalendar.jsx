@@ -889,9 +889,9 @@ export default function PlanningCalendar({
           </Card>
 
           {/* Grille calendrier */}
-          <div className="space-y-4 ml-[620px]">
+          <div className="space-y-4 ml-[620px] w-full">
             {viewMode === "week" ? (
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2 w-full">
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
@@ -1113,7 +1113,7 @@ export default function PlanningCalendar({
                 })}
               </div>
             ) : (
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2 w-full">
                 {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
