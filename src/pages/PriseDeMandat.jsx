@@ -1590,10 +1590,11 @@ export default function PriseDeMandat() {
                           Aucun notaire
                         </p>
                       )}
-                    </div>
+                      </div>
+                      )}
 
-                    {/* Courtiers */}
-                    {formData.ttl === "Non" && (
+                      {/* Courtiers */}
+                      {formData.ttl === "Non" && (
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
                           <Label>Courtiers immobiliers</Label>
