@@ -969,7 +969,7 @@ export default function PlanningCalendar({
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
                             {format(day, "EEEE d MMM", { locale: fr })}
                           </div>
                         </div>
@@ -1196,8 +1196,8 @@ export default function PlanningCalendar({
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                            {format(day, "EEEE d", { locale: fr })}
+                          <div className={`text-xs font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                            {format(day, "EEEE d MMM", { locale: fr })}
                           </div>
                         </div>
                         <Button
