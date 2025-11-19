@@ -14,14 +14,53 @@ import { fr } from "date-fns/locale";
 
 // Congés fériés canadiens et québécois
 const getHolidays = (year) => {
+  // Calcul de Pâques (algorithme de Meeus)
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  const easter = new Date(year, month - 1, day);
+  
+  // Vendredi saint (2 jours avant Pâques)
+  const goodFriday = new Date(easter);
+  goodFriday.setDate(easter.getDate() - 2);
+  
+  // Lundi de Pâques (1 jour après Pâques)
+  const easterMonday = new Date(easter);
+  easterMonday.setDate(easter.getDate() + 1);
+  
+  // Fête du Travail: 1er lundi de septembre
+  const labourDay = new Date(year, 8, 1); // Sept = mois 8
+  while (labourDay.getDay() !== 1) labourDay.setDate(labourDay.getDate() + 1);
+  
+  // Action de grâces: 2e lundi d'octobre
+  const thanksgiving = new Date(year, 9, 1); // Oct = mois 9
+  let mondayCount = 0;
+  while (mondayCount < 2) {
+    if (thanksgiving.getDay() === 1) mondayCount++;
+    if (mondayCount < 2) thanksgiving.setDate(thanksgiving.getDate() + 1);
+  }
+  
   return [
     { date: `${year}-01-01`, name: "Jour de l'An" },
     { date: `${year}-01-02`, name: "Lendemain du Jour de l'An (QC)" },
-    { date: `${year}-05-19`, name: "Fête de la Reine" }, // 3e lundi de mai (approximatif)
+    { date: format(goodFriday, "yyyy-MM-dd"), name: "Vendredi saint" },
+    { date: format(easterMonday, "yyyy-MM-dd"), name: "Lundi de Pâques" },
+    { date: format(new Date(year, 4, 1 + (1 - new Date(year, 4, 1).getDay() + 7) % 7 + 14), "yyyy-MM-dd"), name: "Fête de la Reine" },
     { date: `${year}-06-24`, name: "Fête nationale du Québec" },
     { date: `${year}-07-01`, name: "Fête du Canada" },
-    { date: `${year}-09-07`, name: "Fête du Travail" }, // 1er lundi de septembre (approximatif)
-    { date: `${year}-10-12`, name: "Action de grâces" }, // 2e lundi d'octobre (approximatif)
+    { date: format(labourDay, "yyyy-MM-dd"), name: "Fête du Travail" },
+    { date: format(thanksgiving, "yyyy-MM-dd"), name: "Action de grâces" },
     { date: `${year}-12-25`, name: "Noël" },
     { date: `${year}-12-26`, name: "Lendemain de Noël" },
   ];
