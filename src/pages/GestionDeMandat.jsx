@@ -363,18 +363,18 @@ export default function GestionDeMandat() {
           </div>
         )}
 
-        {/* Date de livraison */}
-        {card.mandat.date_livraison && (
-          <div className="flex items-center gap-1 mb-1">
-            <Calendar className="w-3 h-3 text-blue-400 flex-shrink-0" />
-            <span className="text-xs text-blue-300">
-              Livraison: {format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}
-            </span>
-          </div>
-        )}
-
-        {/* Utilisateur assigné en bas */}
-        <div className="flex items-center justify-end mt-2 pt-1 border-t border-emerald-500/30">
+        {/* Date de livraison et utilisateur assigné en bas */}
+        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+          {card.mandat.date_livraison ? (
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+              <span className="text-xs text-yellow-300">
+                {format(new Date(card.mandat.date_livraison), "dd MMM", { locale: fr })}
+              </span>
+            </div>
+          ) : (
+            <div />
+          )}
           {assignedUser ? (
             <div className="flex items-center gap-1">
               <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
@@ -571,8 +571,9 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={tache} 
-                        className="flex-shrink-0 w-72"
+                        className="flex-shrink-0"
                         style={{ 
+                          width: '12.6rem',
                           zIndex: 1 
                         }}
                       >
@@ -645,8 +646,9 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={user.email} 
-                        className="flex-shrink-0 w-72"
+                        className="flex-shrink-0"
                         style={{ 
+                          width: '12.6rem',
                           zIndex: 1 
                         }}
                       >
