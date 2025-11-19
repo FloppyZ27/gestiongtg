@@ -308,6 +308,36 @@ function LayoutContent({ children, currentPageName }) {
           --input: 217.2 32.6% 17.5%;
           --ring: 224.3 76.3% 48%;
         }
+
+        /* Scrollbar personnalisée globale */
+        *::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
+        }
+
+        *::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
+
+        /* Scrollbar verticale */
+        *::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
       `}</style>
       
       {/* Notification Banner */}
