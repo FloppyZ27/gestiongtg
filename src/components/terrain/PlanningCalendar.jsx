@@ -170,13 +170,32 @@ export default function PlanningCalendar({
       const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // Lundi
       return Array.from({ length: 5 }, (_, i) => addDays(start, i)); // Seulement lun-ven
     } else {
+      // Mode mois: organiser en semaines complètes (lun-ven)
       const start = startOfMonth(currentDate);
       const end = endOfMonth(currentDate);
-      const allDays = eachDayOfInterval({ start, end });
-      return allDays.filter(day => {
-        const dayOfWeek = day.getDay();
-        return dayOfWeek !== 0 && dayOfWeek !== 6; // Exclure dimanche (0) et samedi (6)
-      });
+      
+      // Trouver le premier lundi avant ou au début du mois
+      let firstMonday = startOfWeek(start, { weekStartsOn: 1 });
+      
+      // Trouver le dernier vendredi après ou à la fin du mois
+      let lastFriday = new Date(end);
+      while (lastFriday.getDay() !== 5) {
+        lastFriday = addDays(lastFriday, 1);
+      }
+      
+      // Générer tous les jours ouvrables (lun-ven) entre ces dates
+      const days = [];
+      let current = firstMonday;
+      
+      while (current <= lastFriday) {
+        const dayOfWeek = current.getDay();
+        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Lundi à vendredi
+          days.push(new Date(current));
+        }
+        current = addDays(current, 1);
+      }
+      
+      return days;
     }
   };
 
