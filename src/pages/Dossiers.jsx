@@ -1399,13 +1399,20 @@ export default function Dossiers() {
         minutes_list: newMinutesList,
         minute: minuteData?.minute || mandat.minute || "",
         date_minute: minuteData?.date_minute || mandat.date_minute || "",
-        type_minute: minuteData?.type_minute || mandat.type_minute || "Initiale"
+        type_minute: minuteData?.type_minute || mandat.type_minute || "Initiale",
+        tache_actuelle: "",
+        utilisateur_assigne: ""
       };
     });
 
     updateDossierMutation.mutate({
       id: closingDossierId,
-      dossierData: { ...dossier, statut: "Fermé", mandats: updatedMandats }
+      dossierData: { 
+        ...dossier, 
+        statut: "Fermé", 
+        date_fermeture: new Date().toISOString().split('T')[0],
+        mandats: updatedMandats 
+      }
     });
   };
 
@@ -3692,7 +3699,7 @@ export default function Dossiers() {
                   <TableRow
                     key={dossier.displayId}
                     className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                    onClick={() => handleView(dossier)}>
+                    onClick={() => handleEdit(dossier)}>
 
                           <TableCell className="text-center">
                             {dossier.ttl === "Oui" && (
@@ -3739,6 +3746,35 @@ export default function Dossiers() {
                             )}
                           </TableCell>
                           <TableCell className="text-slate-300">
+                            {dossier.ttl === "Oui" ? (
+                              dossier.mandatInfo?.lots_texte ? (
+                                <span className="text-xs">{dossier.mandatInfo.lots_texte}</span>
+                              ) : (
+                                <span className="text-slate-600 text-xs">-</span>
+                              )
+                            ) : (
+                              dossier.mandatInfo?.lots && dossier.mandatInfo.lots.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {dossier.mandatInfo.lots.slice(0, 2).map((lotId, idx) => {
+                                    const lot = lots.find(l => l.id === lotId);
+                                    return lot ? (
+                                      <Badge key={idx} className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                        {lot.numero_lot}
+                                      </Badge>
+                                    ) : null;
+                                  })}
+                                  {dossier.mandatInfo.lots.length > 2 && (
+                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                      +{dossier.mandatInfo.lots.length - 2}
+                                    </Badge>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-slate-600 text-xs">-</span>
+                              )
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
                             {dossier.mandatInfo?.tache_actuelle &&
                       <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
                       }
@@ -3755,9 +3791,6 @@ export default function Dossiers() {
                           </TableCell>
                           <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
-                                <Edit className="w-4 h-4" />
-                              </Button>
                               <Button variant="ghost" size="sm" onClick={() => handleDelete(dossier.id, getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                 <Trash2 className="w-4 h-4" />
                               </Button>
