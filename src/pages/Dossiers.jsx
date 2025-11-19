@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -1513,6 +1513,51 @@ export default function Dossiers() {
       setIsAddMinuteDialogOpen(false);
       setCurrentMinuteMandatIndex(null);
     }
+  };
+
+  const handleExportCSV = () => {
+    // Préparer les données pour le CSV
+    const csvData = sortedDossiers.map(dossier => ({
+      'N° Dossier': getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier,
+      'Arpenteur': dossier.arpenteur_geometre,
+      'Clients': getClientsNames(dossier.clients_ids),
+      'Type Mandat': dossier.mandatInfo?.type_mandat || '-',
+      'Minute': dossier.mandatInfo?.minutes_list && dossier.mandatInfo.minutes_list.length > 0 
+        ? dossier.mandatInfo.minutes_list.map(m => m.minute).join(', ')
+        : dossier.mandatInfo?.minute || '-',
+      'Tâche actuelle': dossier.mandatInfo?.tache_actuelle || '-',
+      'Adresse Travaux': formatAdresse(dossier.mandatInfo?.adresse_travaux) || '-',
+      'Ville': dossier.mandatInfo?.adresse_travaux?.ville || '-',
+      'Date Ouverture': dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "yyyy-MM-dd", { locale: fr }) : '-',
+      'Statut': dossier.statut,
+      'Prix estimé': dossier.mandatInfo?.prix_estime || 0,
+      'Rabais': dossier.mandatInfo?.rabais || 0
+    }));
+
+    // Créer le CSV
+    const headers = Object.keys(csvData[0]);
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => 
+        headers.map(header => {
+          const value = row[header];
+          // Échapper les guillemets et virgules
+          const escaped = String(value).replace(/"/g, '""');
+          return `"${escaped}"`;
+        }).join(',')
+      )
+    ].join('\n');
+
+    // Télécharger le fichier
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `dossiers_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -3244,14 +3289,21 @@ export default function Dossiers() {
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
               <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
-              <div className="relative w-96">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
-
+              <div className="flex gap-3 items-center">
+                <div className="relative w-96">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
+                </div>
+                <Button
+                  onClick={handleExportCSV}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
+                  <Download className="w-4 h-4 mr-2" />
+                  Extraction CSV
+                </Button>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
