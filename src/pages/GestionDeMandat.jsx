@@ -636,7 +636,6 @@ export default function GestionDeMandat() {
                   })}
                 </div>
               </DragDropContext>
-            </div>
           </TabsContent>
 
           {/* Vue par Utilisateur */}
