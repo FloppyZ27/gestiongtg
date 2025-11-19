@@ -609,7 +609,7 @@ export default function GestionDeMandat() {
                 id="taches-scroll-container"
                 className="overflow-x-auto"
               >
-                <div className="flex gap-4 p-4" style={{ minWidth: 'calc(12 * 12.6rem + 11 * 1rem)' }}>
+                <div className="flex gap-4 p-4">
               
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
