@@ -9,8 +9,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy } from "lucide-react";
-import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
 import { fr } from "date-fns/locale";
+
+// Congés fériés canadiens et québécois
+const getHolidays = (year) => {
+  return [
+    { date: `${year}-01-01`, name: "Jour de l'An" },
+    { date: `${year}-01-02`, name: "Lendemain du Jour de l'An (QC)" },
+    { date: `${year}-05-19`, name: "Fête de la Reine" }, // 3e lundi de mai (approximatif)
+    { date: `${year}-06-24`, name: "Fête nationale du Québec" },
+    { date: `${year}-07-01`, name: "Fête du Canada" },
+    { date: `${year}-09-07`, name: "Fête du Travail" }, // 1er lundi de septembre (approximatif)
+    { date: `${year}-10-12`, name: "Action de grâces" }, // 2e lundi d'octobre (approximatif)
+    { date: `${year}-12-25`, name: "Noël" },
+    { date: `${year}-12-26`, name: "Lendemain de Noël" },
+  ];
+};
+
+const isHoliday = (date) => {
+  const year = date.getFullYear();
+  const holidays = getHolidays(year);
+  const dateStr = format(date, "yyyy-MM-dd");
+  return holidays.find(h => h.date === dateStr);
+};
 import EditDossierDialog from "../dossiers/EditDossierDialog";
 import CommentairesSection from "../dossiers/CommentairesSection";
 
@@ -658,67 +680,47 @@ export default function PlanningCalendar({
                     </h3>
                     <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto">
                       {unassignedDossiers
-                        .filter(d => {
-                          const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-                          return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
-                        })
-                        .map((dossier) => {
-                          const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
-                          return (
+                          .filter(d => {
+                            const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
+                            return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
+                          })
+                          .map((dossier) => (
                             <div key={dossier.id} className="mb-2">
-                              <div className="bg-slate-800 border border-slate-700 rounded-lg p-2">
-                                <div className="flex items-start justify-between gap-2 mb-2">
-                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                  </Badge>
-                                  {mandat && (
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                      {mandat.type_mandat}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-slate-300 text-xs mb-1 line-clamp-1">
-                                  {getClientsNames(dossier.clients_ids)}
-                                </p>
-                                <p className="text-slate-500 text-xs line-clamp-1 mb-2">
-                                  {formatAdresse(mandat?.adresse_travaux)}
-                                </p>
-                                <div className="flex gap-2 pt-2 border-t border-slate-700">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      const updatedMandats = dossier.mandats.map(m => {
-                                        if (m.tache_actuelle === "Cédule") {
-                                          return { ...m, statut_terrain: "a_ceduler" };
-                                        }
-                                        return m;
-                                      });
-                                      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
-                                    }}
-                                    className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
-                                  >
-                                    Oui, terrain requis
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      const updatedMandats = dossier.mandats.map(m => {
-                                        if (m.tache_actuelle === "Cédule") {
-                                          return { ...m, statut_terrain: "pas_de_terrain" };
-                                        }
-                                        return m;
-                                      });
-                                      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
-                                    }}
-                                    className="flex-1 bg-slate-600/20 hover:bg-slate-600/30 text-slate-400 text-xs h-7"
-                                  >
-                                    Non
-                                  </Button>
-                                </div>
+                              <DossierCard dossier={dossier} />
+                              <div className="flex gap-2 mt-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const updatedMandats = dossier.mandats.map(m => {
+                                      if (m.tache_actuelle === "Cédule") {
+                                        return { ...m, statut_terrain: "a_ceduler" };
+                                      }
+                                      return m;
+                                    });
+                                    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                  }}
+                                  className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
+                                >
+                                  Oui, terrain requis
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const updatedMandats = dossier.mandats.map(m => {
+                                      if (m.tache_actuelle === "Cédule") {
+                                        return { ...m, statut_terrain: "pas_de_terrain" };
+                                      }
+                                      return m;
+                                    });
+                                    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                  }}
+                                  className="flex-1 bg-slate-600/20 hover:bg-slate-600/30 text-slate-400 text-xs h-7"
+                                >
+                                  Non
+                                </Button>
                               </div>
                             </div>
-                          );
-                        })}
+                          ))}
                     </div>
                   </TabsContent>
 
@@ -984,16 +986,22 @@ export default function PlanningCalendar({
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
                   const dayEquipes = equipes[dateStr] || [];
 
+                  const holiday = isHoliday(day);
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-white'}`}>
                             {format(day, "EEEE d MMM", { locale: fr })}
                           </div>
+                          {holiday && (
+                            <div className="text-xs text-red-400 mt-1">
+                              {holiday.name}
+                            </div>
+                          )}
                         </div>
                         <Button
                           size="sm"
@@ -1211,16 +1219,22 @@ export default function PlanningCalendar({
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
                   const dayEquipes = equipes[dateStr] || [];
 
+                  const holiday = isHoliday(day);
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''}`}
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
                     >
                       <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
                         <div className="flex-1">
-                          <div className={`text-xs font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                          <div className={`text-xs font-bold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-white'}`}>
                             {format(day, "EEEE d MMM", { locale: fr })}
                           </div>
+                          {holiday && (
+                            <div className="text-xs text-red-400">
+                              {holiday.name}
+                            </div>
+                          )}
                         </div>
                         <Button
                           size="sm"
