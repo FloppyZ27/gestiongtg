@@ -2073,6 +2073,54 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
+        {/* Dialog d'importation CSV */}
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Importation CSV - Aperçu</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+              <Table>
+                <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
+                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                    <TableHead className="text-slate-300">N° Dossier</TableHead>
+                    <TableHead className="text-slate-300">Arpenteur</TableHead>
+                    <TableHead className="text-slate-300">Type Mandat</TableHead>
+                    <TableHead className="text-slate-300">Date Ouverture</TableHead>
+                    <TableHead className="text-slate-300">Statut</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {importedData.map((row, index) => (
+                    <TableRow key={index} className="border-slate-800">
+                      <TableCell className="text-white">{row['N° Dossier'] || row['Numéro Dossier'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Arpenteur'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Type Mandat'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Date Ouverture'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Statut'] || 'Ouvert'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800">
+              <p className="text-slate-400">{importedData.length} dossier(s) à importer</p>
+              <div className="flex gap-3">
+                <Button type="button" variant="outline" onClick={() => {
+                  setIsImportDialogOpen(false);
+                  setImportedData([]);
+                }}>
+                  Annuler
+                </Button>
+                <Button type="button" onClick={handleConfirmImport} className="bg-gradient-to-r from-green-500 to-emerald-600">
+                  <Check className="w-4 h-4 mr-2" />
+                  Confirmer l'importation
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Dialog for local facturation (from editing dossier) */}
         <Dialog open={isFacturationMandatsDialogOpen} onOpenChange={setIsFacturationMandatsDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
