@@ -538,7 +538,7 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
-  const DossierCard = ({ dossier, placedDate }) => {
+  const DossierCard = ({ dossier, placedDate, isInEquipe = false }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
     const terrain = mandat?.terrain || {};
@@ -573,7 +573,7 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className={`bg-gradient-to-br ${colorClasses} border-2 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
+        className={`bg-gradient-to-br ${colorClasses} border-2 rounded-lg ${isInEquipe ? 'p-2 mb-1' : 'p-2 mb-2'} hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
       >
         {/* Type de mandat à gauche */}
         <div className="mb-2">
@@ -735,7 +735,7 @@ export default function PlanningCalendar({
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4">
           {/* Colonne gauche - Ressources avec tabs */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
+          <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden flex-shrink-0 sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)', width: 'calc((100% - 240px - 16px) / 5)' }}>
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
@@ -1285,7 +1285,7 @@ export default function PlanningCalendar({
                                               {...provided.dragHandleProps}
                                               className={snapshot.isDragging ? 'opacity-50' : ''}
                                             >
-                                              <DossierCard dossier={dossier} placedDate={dateStr} />
+                                              <DossierCard dossier={dossier} placedDate={dateStr} isInEquipe={true} />
                                             </div>
                                           )}
                                         </Draggable>
@@ -1460,7 +1460,7 @@ export default function PlanningCalendar({
                                         <Draggable key={dId} draggableId={dId} index={idx}>
                                           {(provided) => (
                                             <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                              <DossierCard dossier={d} placedDate={dateStr} />
+                                              <DossierCard dossier={d} placedDate={dateStr} isInEquipe={true} />
                                             </div>
                                           )}
                                         </Draggable>
