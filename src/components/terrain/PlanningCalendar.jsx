@@ -147,22 +147,35 @@ export default function PlanningCalendar({
       newEquipes[dateStr] = [];
     }
     
-    // Trouver la journée précédente
-    const currentDate = new Date(dateStr);
-    const previousDate = new Date(currentDate);
-    previousDate.setDate(previousDate.getDate() - 1);
-    const previousDateStr = format(previousDate, "yyyy-MM-dd");
+    // Trouver la dernière journée ouvrable précédente avec des équipes
+    const currentDate = new Date(dateStr + 'T00:00:00');
+    let previousDate = new Date(currentDate);
+    let previousEquipes = [];
+    let previousDateStr = '';
     
-    const previousEquipes = newEquipes[previousDateStr] || [];
+    // Chercher jusqu'à 10 jours en arrière
+    for (let i = 1; i <= 10; i++) {
+      previousDate = new Date(currentDate);
+      previousDate.setDate(previousDate.getDate() - i);
+      
+      // Ignorer les weekends
+      const dayOfWeek = previousDate.getDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+      
+      previousDateStr = format(previousDate, "yyyy-MM-dd");
+      previousEquipes = newEquipes[previousDateStr] || [];
+      
+      if (previousEquipes.length > 0) break;
+    }
     
     let newEquipe;
     
-    // Si des équipes existent la veille, proposer de copier
+    // Si des équipes existent dans une journée précédente, proposer de copier
     if (previousEquipes.length > 0) {
-      const choice = confirm(`Voulez-vous copier une équipe de la veille (${format(previousDate, "dd MMM", { locale: fr })}) ?\n\nOui = Copier la dernière équipe\nNon = Créer une équipe vide`);
+      const choice = confirm(`Voulez-vous copier une équipe du ${format(previousDate, "dd MMM", { locale: fr })} ?\n\nOui = Copier la dernière équipe\nNon = Créer une équipe vide`);
       
       if (choice) {
-        // Copier la dernière équipe de la veille
+        // Copier la dernière équipe trouvée
         const equipeACopier = previousEquipes[previousEquipes.length - 1];
         newEquipe = {
           id: `eq${Date.now()}`,
@@ -184,7 +197,7 @@ export default function PlanningCalendar({
         };
       }
     } else {
-      // Pas d'équipe la veille, créer équipe vide
+      // Pas d'équipe précédente, créer équipe vide
       newEquipe = {
         id: `eq${Date.now()}`,
         nom: `Équipe ${newEquipes[dateStr].length + 1}`,
