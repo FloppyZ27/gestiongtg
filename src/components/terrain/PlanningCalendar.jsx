@@ -399,7 +399,7 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className="bg-gradient-to-br from-emerald-900/25 to-teal-900/25 border-2 border-emerald-500/50 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+        className="bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
       >
         {/* Type de mandat à gauche */}
         <div className="mb-2">
@@ -532,7 +532,7 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-[240px_1fr] gap-4">
+        <div className="grid grid-cols-[240px_1fr] gap-4 pt-5">
           {/* Colonne gauche - Ressources avec tabs */}
           <Card className="bg-slate-900/50 border-slate-800 p-4">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
@@ -931,7 +931,7 @@ export default function PlanningCalendar({
                             : equipe.nom;
                           return (
                             <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
-                              <div className="bg-slate-700/50 px-2 py-2 border-b-2 border-slate-600">
+                              <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                                 {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1.5">
                                   <div className="flex items-center gap-1">
@@ -1153,7 +1153,7 @@ export default function PlanningCalendar({
                             : equipe.nom;
                           return (
                             <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded overflow-hidden text-xs">
-                              <div className="bg-slate-700/50 px-1 py-1 border-b-2 border-slate-600">
+                              <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
                                 {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center gap-0.5">
