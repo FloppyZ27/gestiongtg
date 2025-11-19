@@ -564,8 +564,8 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="overflow-x-auto">
-                <div className="flex gap-4 p-4" style={{ minWidth: 'max-content' }}>
+              <div id="taches-scroll-container">
+                <div className="grid grid-cols-12 gap-4 p-4">
               
                   {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -573,9 +573,8 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                         key={tache} 
-                        className="flex-shrink-0"
+                        className="col-span-1"
                         style={{ 
-                          width: '280px',
                           zIndex: 1 
                         }}
                       >
