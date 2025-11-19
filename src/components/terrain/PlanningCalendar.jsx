@@ -532,9 +532,10 @@ export default function PlanningCalendar({
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-[240px_1fr] gap-4 pt-5">
+        <div className="grid grid-cols-[240px_1fr] gap-4">
           {/* Colonne gauche - Ressources avec tabs */}
-          <Card className="bg-slate-900/50 border-slate-800 p-4 sticky top-[68px] self-start max-h-[calc(100vh-72px)] overflow-hidden flex flex-col">
+          <div className="sticky top-[84px] self-start" style={{ maxHeight: 'calc(100vh - 88px)' }}>
+            <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col h-full overflow-hidden">
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
               <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
@@ -886,7 +887,8 @@ export default function PlanningCalendar({
                 </Droppable>
               </TabsContent>
             </Tabs>
-          </Card>
+            </Card>
+            </div>
 
           {/* Grille calendrier */}
           <div className="space-y-4">
