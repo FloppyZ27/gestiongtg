@@ -487,11 +487,14 @@ export default function PlanningCalendar({
       if (sourceEquipe) {
         sourceEquipe.mandats = sourceEquipe.mandats.filter(id => id !== draggableId);
       }
+    } else if (sourceId === "unassigned") {
+      // Si provient de unassigned, on retire juste de là
+      equipe.mandats = equipe.mandats.filter(id => id !== draggableId);
     }
 
-    // Ajouter à la destination
+    // Ajouter à la destination à l'index spécifié
     if (!equipe.mandats.includes(draggableId)) {
-      equipe.mandats.push(draggableId);
+      equipe.mandats.splice(destination.index, 0, draggableId);
     }
 
     setEquipes(newEquipes);
