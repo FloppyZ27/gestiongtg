@@ -683,7 +683,14 @@ export default function Dossiers() {
 
   const getFirstAdresseTravaux = (mandats) => {
     if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
-    return formatAdresse(mandats[0].adresse_travaux);
+    const addr = mandats[0].adresse_travaux;
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter((n) => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    return parts.filter((p) => p).join(', ');
   };
 
   const updateMandat = (index, field, value) => {
@@ -1840,16 +1847,21 @@ export default function Dossiers() {
                           <Input value={formData.numero_dossier} onChange={(e) => setFormData({ ...formData, numero_dossier: e.target.value })} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
                         </div>
                         <div className="space-y-2">
-                          <Label>Statut <span className="text-red-400">*</span></Label>
-                          <Select value={formData.statut} onValueChange={(value) => setFormData({ ...formData, statut: value })}>
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Sélectionner le statut" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                              <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                            </SelectContent>
-                          </Select>
+                         <Label>Statut <span className="text-red-400">*</span></Label>
+                         <Select value={formData.statut} onValueChange={(value) => {
+                           const updatedMandats = value === "Fermé" 
+                             ? formData.mandats.map(m => ({ ...m, tache_actuelle: "", utilisateur_assigne: "" }))
+                             : formData.mandats;
+                           setFormData({ ...formData, statut: value, mandats: updatedMandats });
+                         }}>
+                           <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                             <SelectValue placeholder="Sélectionner le statut" />
+                           </SelectTrigger>
+                           <SelectContent className="bg-slate-800 border-slate-700">
+                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                             <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                           </SelectContent>
+                         </Select>
                         </div>
                       </div>
 
@@ -3745,33 +3757,16 @@ export default function Dossiers() {
                               <span className="text-slate-600 text-xs">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300">
+                          <TableCell className="text-slate-300 text-sm">
                             {dossier.ttl === "Oui" ? (
-                              dossier.mandatInfo?.lots_texte ? (
-                                <span className="text-xs">{dossier.mandatInfo.lots_texte}</span>
-                              ) : (
-                                <span className="text-slate-600 text-xs">-</span>
-                              )
+                              dossier.mandatInfo?.lots_texte || "-"
                             ) : (
                               dossier.mandatInfo?.lots && dossier.mandatInfo.lots.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {dossier.mandatInfo.lots.slice(0, 2).map((lotId, idx) => {
-                                    const lot = lots.find(l => l.id === lotId);
-                                    return lot ? (
-                                      <Badge key={idx} className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                        {lot.numero_lot}
-                                      </Badge>
-                                    ) : null;
-                                  })}
-                                  {dossier.mandatInfo.lots.length > 2 && (
-                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                      +{dossier.mandatInfo.lots.length - 2}
-                                    </Badge>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-slate-600 text-xs">-</span>
-                              )
+                                dossier.mandatInfo.lots.map((lotId) => {
+                                  const lot = lots.find(l => l.id === lotId);
+                                  return lot ? lot.numero_lot : null;
+                                }).filter(n => n).join(', ')
+                              ) : "-"
                             )}
                           </TableCell>
                           <TableCell className="text-slate-300">
