@@ -1340,6 +1340,10 @@ export default function Dossiers() {
         aValue = (a.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
         bValue = (b.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
         break;
+      case 'date_fermeture':
+        aValue = a.date_fermeture ? new Date(a.date_fermeture).getTime() : 0;
+        bValue = b.date_fermeture ? new Date(b.date_fermeture).getTime() : 0;
+        break;
       default:
         return 0;
     }
@@ -3743,6 +3747,9 @@ export default function Dossiers() {
                             {dossier.ttl === "Oui" ? (dossier.adresse_texte || dossier.mandatInfo?.adresse_travaux_texte || "-") : getFirstAdresseTravaux(dossier.mandats)}
                           </TableCell>
                           <TableCell className="text-slate-300">{dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.date_fermeture ? format(new Date(dossier.date_fermeture), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
                           <TableCell>
                             <Badge variant="outline" className={`border ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{dossier.statut}</Badge>
                           </TableCell>
