@@ -372,6 +372,15 @@ export default function GestionDeMandat() {
           </div>
         )}
 
+        {/* Tâche actuelle */}
+        {card.mandat.tache_actuelle && (
+          <div className="mb-1">
+            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
+              {card.mandat.tache_actuelle}
+            </Badge>
+          </div>
+        )}
+
         {/* Date de livraison et utilisateur assigné en bas */}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
           {card.mandat.date_livraison ? (
@@ -595,27 +604,10 @@ export default function GestionDeMandat() {
 
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
-            {/* Scrollbar du haut - fixe */}
-            <div 
-              className="overflow-x-auto mb-2 sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm pb-2" 
-              onScroll={(e) => {
-                const target = e.currentTarget;
-                const mainScroll = document.getElementById('taches-scroll-container');
-                if (mainScroll) mainScroll.scrollLeft = target.scrollLeft;
-              }}
-            >
-              <div style={{ width: 'calc(12 * 12.6rem + 11 * 1rem)', height: '1px' }}></div>
-            </div>
-
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
                 id="taches-scroll-container"
                 className="overflow-x-auto"
-                onScroll={(e) => {
-                  const target = e.currentTarget;
-                  const topScroll = target.parentElement.querySelector('.sticky');
-                  if (topScroll) topScroll.scrollLeft = target.scrollLeft;
-                }}
               >
                 <div className="flex gap-4 p-4" style={{ minWidth: 'calc(12 * 12.6rem + 11 * 1rem)' }}>
               
