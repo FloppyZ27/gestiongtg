@@ -388,10 +388,34 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
-  const DossierCard = ({ dossier }) => {
+  const DossierCard = ({ dossier, placedDate }) => {
     const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
     const terrain = mandat?.terrain || {};
+    
+    // Calculer la couleur en fonction de la date placée vs date limite
+    let colorClasses = "from-emerald-900/10 to-teal-900/10 border-emerald-500/30 hover:shadow-emerald-500/20";
+    
+    if (placedDate && terrain.date_limite_leve) {
+      const placed = new Date(placedDate);
+      const limite = new Date(terrain.date_limite_leve);
+      placed.setHours(0, 0, 0, 0);
+      limite.setHours(0, 0, 0, 0);
+      
+      const diffDays = Math.floor((limite - placed) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays < 0) {
+        // Après la date limite - ROUGE
+        colorClasses = "from-red-900/20 to-red-900/10 border-red-500/50 hover:shadow-red-500/20";
+      } else if (diffDays === 0) {
+        // Le jour de la date limite - ORANGE
+        colorClasses = "from-orange-900/20 to-orange-900/10 border-orange-500/50 hover:shadow-orange-500/20";
+      } else if (diffDays >= 1 && diffDays <= 3) {
+        // 1-3 jours avant - JAUNE
+        colorClasses = "from-yellow-900/20 to-yellow-900/10 border-yellow-500/50 hover:shadow-yellow-500/20";
+      }
+      // Sinon garde le vert par défaut
+    }
     
     return (
       <div 
@@ -399,7 +423,7 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className="bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg hover:shadow-emerald-500/20 transition-all hover:scale-[1.02] cursor-pointer"
+        className={`bg-gradient-to-br ${colorClasses} border-2 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
       >
         {/* Type de mandat à gauche */}
         <div className="mb-2">
@@ -1093,7 +1117,7 @@ export default function PlanningCalendar({
                                               {...provided.dragHandleProps}
                                               className={snapshot.isDragging ? 'opacity-50' : ''}
                                             >
-                                              <DossierCard dossier={dossier} />
+                                              <DossierCard dossier={dossier} placedDate={dateStr} />
                                             </div>
                                           )}
                                         </Draggable>
@@ -1257,7 +1281,7 @@ export default function PlanningCalendar({
                                         <Draggable key={dId} draggableId={dId} index={idx}>
                                           {(provided) => (
                                             <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                              <DossierCard dossier={d} />
+                                              <DossierCard dossier={d} placedDate={dateStr} />
                                             </div>
                                           )}
                                         </Draggable>
