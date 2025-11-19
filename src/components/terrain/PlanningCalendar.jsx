@@ -887,7 +887,6 @@ export default function PlanningCalendar({
               </TabsContent>
             </Tabs>
             </Card>
-            </div>
 
           {/* Grille calendrier */}
           <div className="flex-1 space-y-4">
