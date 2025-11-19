@@ -1752,6 +1752,7 @@ export default function PriseDeMandat() {
                                   getLotById={getLotById}
                                   users={users}
                                   formStatut={formData.statut}
+                                  isTTL={formData.ttl === "Oui"}
                                 />
                               </CardContent>
                             </Card>
