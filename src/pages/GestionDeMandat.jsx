@@ -563,11 +563,9 @@ export default function GestionDeMandat() {
 
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardContent className="p-0">
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <div className="overflow-x-auto">
-                    <div className="flex gap-4 p-4">
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="overflow-x-auto">
+                <div className="flex gap-4 p-4">
               
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -630,12 +628,10 @@ export default function GestionDeMandat() {
                         </Card>
                       </div>
                     );
-                      })}
-                    </div>
-                  </div>
-                </DragDropContext>
-              </CardContent>
-            </Card>
+                  })}
+                </div>
+              </div>
+            </DragDropContext>
           </TabsContent>
 
           {/* Vue par Utilisateur */}
