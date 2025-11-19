@@ -538,12 +538,12 @@ export default function GestionDeMandat() {
 
           {/* Vue par Tâches */}
           <TabsContent value="taches" className="mt-0">
-            {/* Scrollbar du haut */}
+            {/* Scrollbar du haut - fixe */}
             <div 
-              className="overflow-x-auto mb-2" 
+              className="overflow-x-auto mb-2 sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm pb-2" 
               onScroll={(e) => {
                 const target = e.currentTarget;
-                const mainScroll = target.nextElementSibling;
+                const mainScroll = document.getElementById('taches-scroll-container');
                 if (mainScroll) mainScroll.scrollLeft = target.scrollLeft;
               }}
             >
@@ -552,10 +552,11 @@ export default function GestionDeMandat() {
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
+                id="taches-scroll-container"
                 className="overflow-x-auto max-w-full"
                 onScroll={(e) => {
                   const target = e.currentTarget;
-                  const topScroll = target.previousElementSibling;
+                  const topScroll = target.parentElement.querySelector('.sticky');
                   if (topScroll) topScroll.scrollLeft = target.scrollLeft;
                 }}
               >
