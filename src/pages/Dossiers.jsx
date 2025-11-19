@@ -3667,6 +3667,7 @@ export default function Dossiers() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300 w-8"></TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('numero_dossier')}>N° Dossier {getSortIcon('numero_dossier')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('clients')}>Clients {getSortIcon('clients')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('type_mandat')}>Mandat {getSortIcon('type_mandat')}</TableHead>
@@ -3686,10 +3687,19 @@ export default function Dossiers() {
                     className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
                     onClick={() => handleView(dossier)}>
 
+                          <TableCell className="text-center">
+                            {dossier.ttl === "Oui" && (
+                              <div className="w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs font-bold">T</span>
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium text-white">
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>{getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}</Badge>
                           </TableCell>
-                          <TableCell className="text-slate-300">{getClientsNames(dossier.clients_ids)}</TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.ttl === "Oui" ? (dossier.clients_texte || "-") : getClientsNames(dossier.clients_ids)}
+                          </TableCell>
                           <TableCell className="text-slate-300">
                             {dossier.mandatInfo?.type_mandat ?
                       <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
@@ -3726,7 +3736,9 @@ export default function Dossiers() {
                       <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{dossier.mandatInfo.tache_actuelle}</Badge>
                       }
                           </TableCell>
-                          <TableCell className="text-slate-300">{getFirstAdresseTravaux(dossier.mandats)}</TableCell>
+                          <TableCell className="text-slate-300">
+                            {dossier.ttl === "Oui" ? (dossier.mandatInfo?.adresse_travaux_texte || "-") : getFirstAdresseTravaux(dossier.mandats)}
+                          </TableCell>
                           <TableCell className="text-slate-300">{dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className={`border ${dossier.statut === 'Ouvert' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{dossier.statut}</Badge>
@@ -3745,7 +3757,7 @@ export default function Dossiers() {
                   ) :
 
                   <TableRow>
-                        <TableCell colSpan={9} className="text-center py-12 text-slate-500">
+                        <TableCell colSpan={10} className="text-center py-12 text-slate-500">
                           <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                           <p>Aucun dossier trouvé.</p>
                         </TableCell>
