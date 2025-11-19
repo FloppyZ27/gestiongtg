@@ -1248,9 +1248,10 @@ export default function PriseDeMandat() {
                       {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
                     </h2>
                     {formData.ttl === "Oui" && (
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
-                        🏢 TTL
-                      </Badge>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                      </div>
                     )}
                   </div>
 
@@ -2443,9 +2444,10 @@ export default function PriseDeMandat() {
                       Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
                     </h2>
                     {viewingDossier.ttl === "Oui" && (
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
-                        🏢 TTL
-                      </Badge>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                      </div>
                     )}
                   </div>
 

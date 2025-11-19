@@ -1730,9 +1730,10 @@ export default function Dossiers() {
                       <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
                         {formData.ttl === "Oui" && (
-                          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
-                            🏢 TTL
-                          </Badge>
+                          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                            <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                          </div>
                         )}
                       </div>
                       {editingDossier &&
@@ -1759,7 +1760,7 @@ export default function Dossiers() {
                       }
                     </div>
                     <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                           <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({ ...formData, arpenteur_geometre: value })}>
@@ -1786,18 +1787,6 @@ export default function Dossiers() {
                             <SelectContent className="bg-slate-800 border-slate-700">
                               <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                               <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>TTL</Label>
-                          <Select value={formData.ttl} onValueChange={(value) => setFormData({ ...formData, ttl: value })}>
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue placeholder="Non" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Non" className="text-white">Non</SelectItem>
-                              <SelectItem value="Oui" className="text-white">Oui</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -2877,9 +2866,10 @@ export default function Dossiers() {
                       Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
                     </h2>
                     {viewingDossier.ttl === "Oui" && (
-                      <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm px-3 py-1">
-                        🏢 TTL
-                      </Badge>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                      </div>
                     )}
                   </div>
 
