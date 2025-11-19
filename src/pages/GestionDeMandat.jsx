@@ -566,7 +566,7 @@ export default function GestionDeMandat() {
             <DragDropContext onDragEnd={handleDragEnd}>
               <div 
                 className="overflow-x-auto mb-2 bg-slate-800/30 rounded-lg" 
-                style={{ height: '20px' }}
+                style={{ height: '20px', maxWidth: '1064px', margin: '0 auto' }}
                 onScroll={(e) => {
                   const bottomScroll = document.getElementById('taskColumnsScroll');
                   if (bottomScroll) bottomScroll.scrollLeft = e.target.scrollLeft;
@@ -577,6 +577,7 @@ export default function GestionDeMandat() {
               <div 
                 id="taskColumnsScroll"
                 className="overflow-x-auto"
+                style={{ maxWidth: '1064px', margin: '0 auto' }}
                 onScroll={(e) => {
                   const topScroll = e.target.previousElementSibling;
                   if (topScroll) topScroll.scrollLeft = e.target.scrollLeft;
