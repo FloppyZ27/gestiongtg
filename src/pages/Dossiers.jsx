@@ -1567,34 +1567,46 @@ export default function Dossiers() {
     if (importedData.length === 0) return;
 
     for (const row of importedData) {
+      const ttlValue = row['TTL'] || 'Non';
+      const mandatsTypes = row['Mandats'] ? row['Mandats'].split(',').map(m => m.trim()).filter(m => m) : [];
+      
       const dossierData = {
-        numero_dossier: row['N° Dossier'] || row['Numéro Dossier'] || '',
-        arpenteur_geometre: row['Arpenteur'] || '',
-        date_ouverture: row['Date Ouverture'] || new Date().toISOString().split('T')[0],
+        numero_dossier: row['N° dossier'] || '',
+        arpenteur_geometre: row['Arpenteur-géomètre'] || '',
+        date_ouverture: row["Date d'ouverture"] || new Date().toISOString().split('T')[0],
+        date_fermeture: row['Date de fermeture'] || '',
         statut: row['Statut'] || 'Ouvert',
-        ttl: row['TTL'] || 'Non',
+        ttl: ttlValue,
         clients_ids: [],
+        clients_texte: row['Clients'] || '',
         notaires_ids: [],
+        notaires_texte: '',
         courtiers_ids: [],
-        mandats: row['Type Mandat'] ? [{
-          type_mandat: row['Type Mandat'],
-          tache_actuelle: row['Tâche actuelle'] || 'Ouverture',
-          adresse_travaux: {
-            ville: row['Ville'] || '',
+        courtiers_texte: '',
+        mandats: mandatsTypes.map(typeMandat => ({
+          type_mandat: typeMandat,
+          tache_actuelle: 'Ouverture',
+          adresse_travaux_texte: row['Adresse des travaux'] || '',
+          adresse_travaux: ttlValue === "Non" ? {
+            ville: '',
             numeros_civiques: [''],
             rue: '',
             code_postal: '',
             province: ''
-          },
+          } : undefined,
           lots: [],
-          prix_estime: parseFloat(row['Prix estimé']) || 0,
-          rabais: parseFloat(row['Rabais']) || 0,
+          lots_texte: '',
+          prix_estime: 0,
+          rabais: 0,
           taxes_incluses: false,
           date_livraison: '',
           date_signature: '',
           date_debut_travaux: '',
-          notes: ''
-        }] : [],
+          notes: '',
+          minute: '',
+          date_minute: '',
+          minutes_list: []
+        })),
         description: ''
       };
 
@@ -2119,22 +2131,26 @@ export default function Dossiers() {
               <Table>
                 <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300">N° Dossier</TableHead>
-                    <TableHead className="text-slate-300">Arpenteur</TableHead>
+                    <TableHead className="text-slate-300">N° dossier</TableHead>
+                    <TableHead className="text-slate-300">Arpenteur-géomètre</TableHead>
                     <TableHead className="text-slate-300">TTL</TableHead>
-                    <TableHead className="text-slate-300">Type Mandat</TableHead>
-                    <TableHead className="text-slate-300">Date Ouverture</TableHead>
+                    <TableHead className="text-slate-300">Clients</TableHead>
+                    <TableHead className="text-slate-300">Mandats</TableHead>
+                    <TableHead className="text-slate-300">Adresse des travaux</TableHead>
+                    <TableHead className="text-slate-300">Date d'ouverture</TableHead>
                     <TableHead className="text-slate-300">Statut</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {importedData.map((row, index) => (
                     <TableRow key={index} className="border-slate-800">
-                      <TableCell className="text-white">{row['N° Dossier'] || row['Numéro Dossier'] || '-'}</TableCell>
-                      <TableCell className="text-white">{row['Arpenteur'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['N° dossier'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row['Arpenteur-géomètre'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['TTL'] || 'Non'}</TableCell>
-                      <TableCell className="text-white">{row['Type Mandat'] || '-'}</TableCell>
-                      <TableCell className="text-white">{row['Date Ouverture'] || '-'}</TableCell>
+                      <TableCell className="text-white text-sm">{row['Clients'] || '-'}</TableCell>
+                      <TableCell className="text-white text-sm">{row['Mandats'] || '-'}</TableCell>
+                      <TableCell className="text-white text-sm">{row['Adresse des travaux'] || '-'}</TableCell>
+                      <TableCell className="text-white">{row["Date d'ouverture"] || '-'}</TableCell>
                       <TableCell className="text-white">{row['Statut'] || 'Ouvert'}</TableCell>
                     </TableRow>
                   ))}
