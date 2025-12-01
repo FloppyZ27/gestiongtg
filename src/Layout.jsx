@@ -47,7 +47,7 @@ const navigationItems = [
   {
     title: "Prise de mandat",
     url: createPageUrl("PriseDeMandat"),
-    icon: Phone,
+    icon: FolderOpen,
   },
   {
     title: "Retours d'appel",
