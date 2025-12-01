@@ -50,6 +50,11 @@ const navigationItems = [
     icon: Phone,
   },
   {
+    title: "Retours d'appel",
+    url: createPageUrl("RetoursAppel"),
+    icon: Phone,
+  },
+  {
     title: "Dossiers",
     url: createPageUrl("Dossiers"),
     icon: FolderOpen,

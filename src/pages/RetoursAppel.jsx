@@ -1,0 +1,1018 @@
+import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import ClientDetailView from "../components/clients/ClientDetailView";
+import CommentairesSection from "../components/dossiers/CommentairesSection";
+import ClientFormDialog from "../components/clients/ClientFormDialog";
+import MandatTabs from "../components/dossiers/MandatTabs";
+
+const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
+
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
+const getArpenteurInitials = (arpenteur) => {
+  if (!arpenteur) return "";
+  const mapping = {
+    "Samuel Guay": "SG-",
+    "Dany Gaboury": "DG-",
+    "Pierre-Luc Pilote": "PLP-",
+    "Benjamin Larouche": "BL-",
+    "Frédéric Gilbert": "FG-"
+  };
+  return mapping[arpenteur] || "";
+};
+
+export default function RetoursAppel() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingDossier, setEditingDossier] = useState(null);
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
+  const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
+  const [isClientFormDialogOpen, setIsClientFormDialogOpen] = useState(false);
+  const [clientTypeForForm, setClientTypeForForm] = useState('Client');
+  const [editingClientForForm, setEditingClientForForm] = useState(null);
+  const [viewingClientDetails, setViewingClientDetails] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [viewingDossier, setViewingDossier] = useState(null);
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [notaireSearchTerm, setNotaireSearchTerm] = useState("");
+  const [courtierSearchTerm, setCourtierSearchTerm] = useState("");
+  const [activeTabMandat, setActiveTabMandat] = useState("0");
+  const [dossierReferenceId, setDossierReferenceId] = useState(null);
+  const [dossierSearchForReference, setDossierSearchForReference] = useState("");
+  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  const [filterArpenteur, setFilterArpenteur] = useState("all");
+  const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const [formData, setFormData] = useState({
+    numero_dossier: "",
+    arpenteur_geometre: "",
+    date_ouverture: new Date().toISOString().split('T')[0],
+    statut: "Retour d'appel",
+    ttl: "Non",
+    utilisateur_assigne: "",
+    clients_ids: [],
+    clients_texte: "",
+    notaires_ids: [],
+    notaires_texte: "",
+    courtiers_ids: [],
+    courtiers_texte: "",
+    mandats: []
+  });
+
+  const queryClient = useQueryClient();
+
+  const { data: dossiers = [], isLoading } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list('-created_date'),
+    initialData: [],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots'],
+    queryFn: () => base44.entities.Lot.list(),
+    initialData: [],
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => base44.entities.User.list(),
+    initialData: [],
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dossierIdFromUrl = urlParams.get('dossier_id');
+    if (dossierIdFromUrl && dossiers.length > 0) {
+      const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
+      if (dossier) {
+        handleView(dossier);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [dossiers]);
+
+  const createDossierMutation = useMutation({
+    mutationFn: async (dossierData) => {
+      const newDossier = await base44.entities.Dossier.create(dossierData);
+      if (commentairesTemporaires.length > 0) {
+        const commentairePromises = commentairesTemporaires.map(comment =>
+          base44.entities.CommentaireDossier.create({
+            dossier_id: newDossier.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
+        );
+        await Promise.all(commentairePromises);
+      }
+      if (dossierData.utilisateur_assigne) {
+        const clientsNames = getClientsNames(dossierData.clients_ids);
+        await base44.entities.Notification.create({
+          utilisateur_email: dossierData.utilisateur_assigne,
+          titre: "Nouveau retour d'appel assigné",
+          message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+          type: "retour_appel",
+          dossier_id: newDossier.id,
+          lue: false
+        });
+      }
+      return newDossier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setIsDialogOpen(false);
+      resetForm();
+      setCommentairesTemporaires([]);
+    },
+  });
+
+  const updateDossierMutation = useMutation({
+    mutationFn: async ({ id, dossierData }) => {
+      const oldDossier = dossiers.find(d => d.id === id);
+      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
+      if (dossierData.utilisateur_assigne && oldDossier?.utilisateur_assigne !== dossierData.utilisateur_assigne) {
+        const clientsNames = getClientsNames(dossierData.clients_ids);
+        await base44.entities.Notification.create({
+          utilisateur_email: dossierData.utilisateur_assigne,
+          titre: "Nouveau retour d'appel assigné",
+          message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+          type: "retour_appel",
+          dossier_id: updatedDossier.id,
+          lue: false
+        });
+      }
+      return updatedDossier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setIsDialogOpen(false);
+      resetForm();
+    },
+  });
+
+  const deleteDossierMutation = useMutation({
+    mutationFn: (id) => base44.entities.Dossier.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dossiers'] }),
+  });
+
+  const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
+  const notaires = clients.filter(c => c.type_client === 'Notaire');
+  const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
+
+  const getClientById = (id) => clients.find(c => c.id === id);
+  const getLotById = (lotId) => lots.find(l => l.id === lotId);
+
+  const formatAdresse = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques?.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    return parts.filter(p => p).join(', ');
+  };
+
+  const getClientsNames = (clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map(id => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  };
+
+  const getFirstAdresseTravaux = (mandats) => {
+    if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
+    return formatAdresse(mandats[0].adresse_travaux);
+  };
+
+  const loadDossierReference = (dossierId) => {
+    const dossier = dossiers.find(d => d.id === dossierId);
+    if (!dossier) return;
+    setFormData({
+      numero_dossier: dossier.numero_dossier || "",
+      arpenteur_geometre: dossier.arpenteur_geometre || "",
+      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+      statut: "Retour d'appel",
+      ttl: dossier.ttl || "Non",
+      utilisateur_assigne: formData.utilisateur_assigne || "",
+      clients_ids: dossier.clients_ids || [],
+      clients_texte: dossier.clients_texte || "",
+      notaires_ids: dossier.notaires_ids || [],
+      notaires_texte: dossier.notaires_texte || "",
+      courtiers_ids: dossier.courtiers_ids || [],
+      courtiers_texte: dossier.courtiers_texte || "",
+      mandats: dossier.mandats?.map(m => ({
+        ...m,
+        adresse_travaux: m.adresse_travaux || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        lots: m.lots || [],
+        prix_estime: m.prix_estime || 0,
+        rabais: m.rabais || 0,
+        taxes_incluses: m.taxes_incluses || false,
+        tache_actuelle: "",
+        utilisateur_assigne: ""
+      })) || []
+    });
+    setActiveTabMandat("0");
+    setDossierReferenceId(dossierId);
+    setDossierSearchForReference("");
+  };
+
+  const retourAppelDossiers = dossiers.filter(d => d.statut === "Retour d'appel" && d.statut !== "Rejeté");
+
+  const applyFilters = (dossiersList) => {
+    return dossiersList.filter(dossier => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = (
+        dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+        dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+        dossier.clients_ids.some(id => {
+          const client = getClientById(id);
+          return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
+        }) ||
+        dossier.mandats?.some(m =>
+          m.type_mandat?.toLowerCase().includes(searchLower) ||
+          formatAdresse(m.adresse_travaux)?.toLowerCase().includes(searchLower)
+        )
+      );
+      const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
+      let matchesUtilisateurAssigne;
+      if (filterUtilisateurAssigne === "all") {
+        matchesUtilisateurAssigne = true;
+      } else if (filterUtilisateurAssigne === "non-assigne") {
+        matchesUtilisateurAssigne = !dossier.utilisateur_assigne;
+      } else {
+        matchesUtilisateurAssigne = dossier.utilisateur_assigne === filterUtilisateurAssigne;
+      }
+      return matchesSearch && matchesArpenteur && matchesUtilisateurAssigne;
+    });
+  };
+
+  const filteredRetourAppel = applyFilters(retourAppelDossiers);
+
+  const filteredDossiersForReference = dossiers.filter(dossier => {
+    const searchLower = dossierSearchForReference.toLowerCase();
+    const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
+    const clientsNames = getClientsNames(dossier.clients_ids);
+    return (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      clientsNames.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const filteredClientsForSelector = clientsReguliers.filter(c =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(clientSearchTerm.toLowerCase())
+  );
+
+  const filteredNotairesForSelector = notaires.filter(n =>
+    `${n.prenom} ${n.nom}`.toLowerCase().includes(notaireSearchTerm.toLowerCase())
+  );
+
+  const filteredCourtiersForSelector = courtiers.filter(c =>
+    `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
+  );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editingDossier) {
+      updateDossierMutation.mutate({ id: editingDossier.id, dossierData: formData });
+    } else {
+      createDossierMutation.mutate(formData);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      numero_dossier: "",
+      arpenteur_geometre: "",
+      date_ouverture: new Date().toISOString().split('T')[0],
+      statut: "Retour d'appel",
+      ttl: "Non",
+      utilisateur_assigne: "",
+      clients_ids: [],
+      clients_texte: "",
+      notaires_ids: [],
+      notaires_texte: "",
+      courtiers_ids: [],
+      courtiers_texte: "",
+      mandats: []
+    });
+    setEditingDossier(null);
+    setActiveTabMandat("0");
+    setDossierReferenceId(null);
+    setDossierSearchForReference("");
+    setCommentairesTemporaires([]);
+  };
+
+  const handleEdit = (dossier) => {
+    setIsViewDialogOpen(false);
+    setViewingDossier(null);
+    setDossierReferenceId(null);
+    setEditingDossier(dossier);
+    setFormData({
+      numero_dossier: dossier.numero_dossier || "",
+      arpenteur_geometre: dossier.arpenteur_geometre || "",
+      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+      statut: "Retour d'appel",
+      ttl: dossier.ttl || "Non",
+      utilisateur_assigne: dossier.utilisateur_assigne || "",
+      clients_ids: dossier.clients_ids || [],
+      clients_texte: dossier.clients_texte || "",
+      notaires_ids: dossier.notaires_ids || [],
+      notaires_texte: dossier.notaires_texte || "",
+      courtiers_ids: dossier.courtiers_ids || [],
+      courtiers_texte: dossier.courtiers_texte || "",
+      mandats: dossier.mandats?.map(m => ({
+        ...m,
+        adresse_travaux: m.adresse_travaux || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        lots: m.lots || []
+      })) || []
+    });
+    setIsDialogOpen(true);
+    setActiveTabMandat("0");
+  };
+
+  const handleView = (dossier) => {
+    setViewingDossier(dossier);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditFromView = () => {
+    if (viewingDossier) handleEdit(viewingDossier);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
+      deleteDossierMutation.mutate(id);
+    }
+  };
+
+  const toggleClient = (clientId, type) => {
+    const field = `${type}_ids`;
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].includes(clientId)
+        ? prev[field].filter(id => id !== clientId)
+        : [...prev[field], clientId]
+    }));
+  };
+
+  const removeClient = (clientId, type) => {
+    const field = `${type}_ids`;
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].filter(id => id !== clientId)
+    }));
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortDossiers = (dossiersList) => {
+    if (!sortField) return dossiersList;
+    return [...dossiersList].sort((a, b) => {
+      let aValue, bValue;
+      switch (sortField) {
+        case 'numero_dossier':
+          aValue = (getArpenteurInitials(a.arpenteur_geometre) + (a.numero_dossier || '')).toLowerCase();
+          bValue = (getArpenteurInitials(b.arpenteur_geometre) + (b.numero_dossier || '')).toLowerCase();
+          break;
+        case 'created_date':
+          aValue = new Date(a.created_date || 0).getTime();
+          bValue = new Date(b.created_date || 0).getTime();
+          break;
+        case 'clients':
+          aValue = getClientsNames(a.clients_ids).toLowerCase();
+          bValue = getClientsNames(b.clients_ids).toLowerCase();
+          break;
+        case 'adresse_travaux':
+          aValue = getFirstAdresseTravaux(a.mandats).toLowerCase();
+          bValue = getFirstAdresseTravaux(b.mandats).toLowerCase();
+          break;
+        case 'utilisateur_assigne':
+          aValue = (a.utilisateur_assigne || '').toLowerCase();
+          bValue = (b.utilisateur_assigne || '').toLowerCase();
+          break;
+        default:
+          aValue = (a[sortField] || '').toString().toLowerCase();
+          bValue = (b[sortField] || '').toString().toLowerCase();
+      }
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const sortedRetourAppel = sortDossiers(filteredRetourAppel);
+
+  const getCurrentValue = (items, key) => {
+    const current = items?.find(item => item.actuel || item.actuelle);
+    return current?.[key] || "";
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                Retours d'appel
+              </h1>
+              <Phone className="w-6 h-6 text-blue-400" />
+            </div>
+            <p className="text-slate-400">Gestion des retours d'appel</p>
+          </div>
+
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) resetForm();
+          }}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/50">
+                <Plus className="w-5 h-5 mr-2" />
+                Nouveau retour d'appel
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+              <DialogHeader className="sr-only">
+                <DialogTitle>{editingDossier ? "Modifier" : "Nouveau retour d'appel"}</DialogTitle>
+              </DialogHeader>
+
+              <div className="flex h-[90vh]">
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <h2 className="text-2xl font-bold text-white mb-6">
+                    {editingDossier ? "Modifier le retour d'appel" : "Nouveau retour d'appel"}
+                  </h2>
+
+                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                        <Select
+                          value={formData.arpenteur_geometre}
+                          onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                          disabled={!!dossierReferenceId}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {ARPENTEURS.map((arpenteur) => (
+                              <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Utilisateur assigné</Label>
+                        <Select
+                          value={formData.utilisateur_assigne || ""}
+                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner un utilisateur" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
+                            {users.map((user) => (
+                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          placeholder="Rechercher un dossier par numéro, client, etc."
+                          value={dossierSearchForReference}
+                          onChange={(e) => setDossierSearchForReference(e.target.value)}
+                          className="pl-10 bg-slate-700 border-slate-600"
+                        />
+                      </div>
+                      {dossierSearchForReference && (
+                        <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
+                          {filteredDossiersForReference.length > 0 ? (
+                            filteredDossiersForReference.map(d => (
+                              <div
+                                key={d.id}
+                                className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
+                                onClick={() => loadDossierReference(d.id)}
+                              >
+                                <div>
+                                  <p className="font-medium text-white">
+                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""} - {getClientsNames(d.clients_ids)}
+                                  </p>
+                                  <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
+                                </div>
+                                <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
+                                  <Plus className="w-4 h-4 mr-1" /> Sélectionner
+                                </Button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
+                          )}
+                        </div>
+                      )}
+                      {dossierReferenceId && (
+                        <div className="mt-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => { setDossierReferenceId(null); resetForm(); }}
+                            className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                          >
+                            Effacer le dossier de référence
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    {dossierReferenceId && (
+                      <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <div className="space-y-2">
+                          <Label>N° de dossier de référence</Label>
+                          <Input value={formData.numero_dossier} className="bg-slate-800 border-slate-700" disabled />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Date d'ouverture du dossier de référence</Label>
+                          <Input type="date" value={formData.date_ouverture} className="bg-slate-800 border-slate-700" disabled />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Clients</Label>
+                          <Button type="button" size="sm" onClick={() => setIsClientSelectorOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400" disabled={!!dossierReferenceId}>
+                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        </div>
+                        {formData.clients_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {formData.clients_ids.map(clientId => {
+                              const client = getClientById(clientId);
+                              return client ? (
+                                <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
+                                  <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
+                                  {!dossierReferenceId && (
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(clientId, 'clients'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun client</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Notaires</Label>
+                          <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpen(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400" disabled={!!dossierReferenceId}>
+                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        </div>
+                        {formData.notaires_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {formData.notaires_ids.map(notaireId => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ? (
+                                <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
+                                  <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
+                                  {!dossierReferenceId && (
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun notaire</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Courtiers immobiliers</Label>
+                          <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpen(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400" disabled={!!dossierReferenceId}>
+                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
+                          </Button>
+                        </div>
+                        {formData.courtiers_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {formData.courtiers_ids.map(courtierId => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ? (
+                                <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
+                                  <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
+                                  {!dossierReferenceId && (
+                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun courtier</p>
+                        )}
+                      </div>
+                    </div>
+                  </form>
+
+                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-blue-500 to-cyan-600">
+                      {editingDossier ? "Modifier" : "Créer"}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
+                  <div className="p-6 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-hidden p-6">
+                    <CommentairesSection
+                      dossierId={editingDossier?.id}
+                      dossierTemporaire={!editingDossier}
+                      onCommentairesTempChange={setCommentairesTemporaires}
+                    />
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Client Selector Dialogs */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+            <DialogHeader><DialogTitle>Sélectionner des clients</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                </div>
+                <Button type="button" onClick={() => { setEditingClientForForm(null); setClientTypeForForm("Client"); setIsClientFormDialogOpen(true); }} className="bg-emerald-500 hover:bg-emerald-600">
+                  <Plus className="w-4 h-4 mr-2" /> Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredClientsForSelector.map((client) => (
+                    <div key={client.id} className={`p-3 rounded-lg cursor-pointer transition-colors ${formData.clients_ids.includes(client.id) ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`} onClick={() => toggleClient(client.id, 'clients')}>
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {getCurrentValue(client.courriels, 'courriel') && <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>}
+                        {getCurrentValue(client.telephones, 'telephone') && <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">Valider</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+            <DialogHeader><DialogTitle>Sélectionner des notaires</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                </div>
+                <Button type="button" onClick={() => { setEditingClientForForm(null); setClientTypeForForm("Notaire"); setIsClientFormDialogOpen(true); }} className="bg-purple-500 hover:bg-purple-600">
+                  <Plus className="w-4 h-4 mr-2" /> Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.map((notaire) => (
+                    <div key={notaire.id} className={`p-3 rounded-lg cursor-pointer transition-colors ${formData.notaires_ids.includes(notaire.id) ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`} onClick={() => toggleClient(notaire.id, 'notaires')}>
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">Valider</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+            <DialogHeader><DialogTitle>Sélectionner des courtiers</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                </div>
+                <Button type="button" onClick={() => { setEditingClientForForm(null); setClientTypeForForm("Courtier immobilier"); setIsClientFormDialogOpen(true); }} className="bg-orange-500 hover:bg-orange-600">
+                  <Plus className="w-4 h-4 mr-2" /> Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.map((courtier) => (
+                    <div key={courtier.id} className={`p-3 rounded-lg cursor-pointer transition-colors ${formData.courtiers_ids.includes(courtier.id) ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'}`} onClick={() => toggleClient(courtier.id, 'courtiers')}>
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">Valider</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <ClientFormDialog
+          open={isClientFormDialogOpen}
+          onOpenChange={(open) => { setIsClientFormDialogOpen(open); if (!open) setEditingClientForForm(null); }}
+          editingClient={editingClientForForm}
+          defaultType={clientTypeForForm}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);
+            if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
+            if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
+          }}
+        />
+
+        <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+              <DialogTitle className="text-2xl">Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden p-6">
+              {viewingClientDetails && <ClientDetailView client={viewingClientDetails} onClose={() => setViewingClientDetails(null)} />}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only"><DialogTitle>Détails du retour d'appel</DialogTitle></DialogHeader>
+            {viewingDossier && (
+              <div className="flex h-[90vh]">
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <h2 className="text-2xl font-bold text-white mb-6">
+                    Détails - {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
+                  </h2>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                      <div>
+                        <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                        <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Utilisateur assigné</Label>
+                        <p className="text-white font-medium mt-1">{users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne || "-"}</p>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Date de création</Label>
+                        <p className="text-white font-medium mt-1">{viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      {viewingDossier.clients_ids?.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.clients_ids.map(clientId => {
+                              const client = getClientById(clientId);
+                              return client ? (
+                                <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30" onClick={() => { setIsViewDialogOpen(false); setViewingClientDetails(client); }}>
+                                  {client.prenom} {client.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {viewingDossier.notaires_ids?.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.notaires_ids.map(notaireId => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ? (
+                                <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30" onClick={() => { setIsViewDialogOpen(false); setViewingClientDetails(notaire); }}>
+                                  {notaire.prenom} {notaire.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {viewingDossier.courtiers_ids?.length > 0 && (
+                        <div>
+                          <Label className="text-slate-400 text-sm mb-2 block">Courtiers</Label>
+                          <div className="flex flex-col gap-2">
+                            {viewingDossier.courtiers_ids.map(courtierId => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ? (
+                                <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30" onClick={() => { setIsViewDialogOpen(false); setViewingClientDetails(courtier); }}>
+                                  {courtier.prenom} {courtier.nom}
+                                </Badge>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>Fermer</Button>
+                    <Button type="button" className="bg-gradient-to-r from-blue-500 to-cyan-600" onClick={handleEditFromView}>
+                      <Edit className="w-4 h-4 mr-2" /> Modifier
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-hidden p-4">
+                    <CommentairesSection dossierId={viewingDossier?.id} dossierTemporaire={false} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Main Table */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardHeader className="border-b border-slate-800">
+            <div className="flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[250px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
+              </div>
+
+              <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Arpenteur" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                  {ARPENTEURS.map((arp) => (
+                    <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={filterUtilisateurAssigne} onValueChange={setFilterUtilisateurAssigne}>
+                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectValue placeholder="Utilisateur assigné" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
+                  <SelectItem value="non-assigne" className="text-white">Non assigné</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {(filterArpenteur !== "all" || filterUtilisateurAssigne !== "all") && (
+                <Button variant="outline" size="sm" onClick={() => { setFilterArpenteur("all"); setFilterUtilisateurAssigne("all"); }} className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+                  Réinitialiser les filtres
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('numero_dossier')}>
+                      Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('created_date')}>
+                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('utilisateur_assigne')}>
+                      Utilisateur assigné {sortField === 'utilisateur_assigne' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('clients')}>
+                      Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('adresse_travaux')}>
+                      Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedRetourAppel.map((dossier) => (
+                    <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => handleView(dossier)}>
+                      <TableCell className="font-medium">
+                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                          {dossier.numero_dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-300">{dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">{dossier.utilisateur_assigne ? (users.find(u => u.email === dossier.utilisateur_assigne)?.full_name || dossier.utilisateur_assigne) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{getClientsNames(dossier.clients_ids)}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{getFirstAdresseTravaux(dossier.mandats)}</TableCell>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(dossier.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {sortedRetourAppel.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-12 text-slate-500">Aucun retour d'appel</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

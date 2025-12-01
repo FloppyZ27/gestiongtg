@@ -2693,78 +2693,11 @@ export default function PriseDeMandat() {
         </Dialog>
 
 
-        {/* Stats compactes - Un seul encadré */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-cyan-500/20 to-teal-600/20">
-                <FileCheck className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <CardTitle className="text-xl text-white">Nouveaux mandats</CardTitle>
-                <p className="text-sm text-slate-400">Statistique par période</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byDay}</p>
-                  {nouveauMandatStats.percentages.day !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {nouveauMandatStats.percentages.day > 0 ? '+' : ''}{nouveauMandatStats.percentages.day}%
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byWeek}</p>
-                  {nouveauMandatStats.percentages.week !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {nouveauMandatStats.percentages.week > 0 ? '+' : ''}{nouveauMandatStats.percentages.week}%
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Ce mois</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byMonth}</p>
-                  {nouveauMandatStats.percentages.month !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {nouveauMandatStats.percentages.month > 0 ? '+' : ''}{nouveauMandatStats.percentages.month}%
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Cette année</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{nouveauMandatStats.byYear}</p>
-                  {nouveauMandatStats.percentages.year !== 0 && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${nouveauMandatStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {nouveauMandatStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {nouveauMandatStats.percentages.year > 0 ? '+' : ''}{nouveauMandatStats.percentages.year}%
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Tabs and Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <Tabs defaultValue="nouveau-mandat" className="w-full">
             <CardHeader className="border-b border-slate-800 pb-0">
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 h-auto">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto">
                 <TabsTrigger
                   value="nouveau-mandat"
                   className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 py-3"
@@ -2785,13 +2718,6 @@ export default function PriseDeMandat() {
                 >
                   <X className="w-5 h-5 mr-2" />
                   Mandats non octroyés ({mandatNonOctroyeDossiers.length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="retour-appel"
-                  className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3"
-                >
-                  <Phone className="w-4 h-4 mr-2" />
-                  Retours d'appel ({retourAppelDossiers.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -2867,132 +2793,6 @@ export default function PriseDeMandat() {
                 </div>
               </div>
             </CardHeader>
-
-            <TabsContent value="retour-appel" className="p-0">
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('numero_dossier')}
-                        >
-                          Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('created_date')}
-                        >
-                          Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('utilisateur_assigne')}
-                        >
-                          Utilisateur assigné {sortField === 'utilisateur_assigne' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('clients')}
-                        >
-                          Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('adresse_travaux')}
-                        >
-                          Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead
-                          className="text-slate-300 cursor-pointer hover:text-white"
-                          onClick={() => handleSort('mandats')}
-                        >
-                          Mandat {sortField === 'mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
-                        </TableHead>
-                        <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedRetourAppel.map((dossier) => (
-                        <TableRow 
-                          key={dossier.id} 
-                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                          onClick={() => handleView(dossier)}
-                        >
-                          <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                              {dossier.numero_dossier
-                                ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}`
-                                : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
-                            {dossier.utilisateur_assigne
-                              ? (users.find(u => u.email === dossier.utilisateur_assigne)?.full_name || dossier.utilisateur_assigne)
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {getClientsNames(dossier.clients_ids)}
-                          </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {getFirstAdresseTravaux(dossier.mandats)}
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.mandats && dossier.mandats.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                  <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                    {mandat.type_mandat}
-                                  </Badge>
-                                ))}
-                                {dossier.mandats.length > 2 && (
-                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                    +{dossier.mandats.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-slate-600 text-xs">Aucun</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(dossier)}
-                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(dossier.id)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {sortedRetourAppel.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-12 text-slate-500">
-                            Aucun retour d'appel
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </TabsContent>
 
             <TabsContent value="nouveau-mandat" className="p-0">
               <CardContent className="p-0">

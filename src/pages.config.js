@@ -16,6 +16,7 @@ import GestionDeMandat from './pages/GestionDeMandat';
 import Administration from './pages/Administration';
 import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import Recherches from './pages/Recherches';
+import RetoursAppel from './pages/RetoursAppel';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "Administration": Administration,
     "GestionEquipeTerrain": GestionEquipeTerrain,
     "Recherches": Recherches,
+    "RetoursAppel": RetoursAppel,
 }
 
 export const pagesConfig = {
