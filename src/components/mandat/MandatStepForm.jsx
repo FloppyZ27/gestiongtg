@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const OBJECTIFS = ["Vente", "Refinancement", "Projet de construction", "Litige"];
@@ -12,47 +13,62 @@ const ECHEANCES = ["Dès que possible", "D'ici un mois", "Date précise"];
 const URGENCES = ["Pas pressé", "Normal", "Rapide"];
 
 export default function MandatStepForm({ 
-  mandat,
-  onMandatChange,
+  mandats = [],
+  onMandatsChange,
   isCollapsed,
   onToggleCollapse
 }) {
-  const [mandatForm, setMandatForm] = useState({
-    type_mandat: mandat?.type_mandat || "",
-    objectif: mandat?.objectif || "",
-    echeance_souhaitee: mandat?.echeance_souhaitee || "",
-    date_signature: mandat?.date_signature || "",
-    date_debut_travaux: mandat?.date_debut_travaux || "",
-    urgence_percue: mandat?.urgence_percue || ""
-  });
+  const [localMandats, setLocalMandats] = useState(mandats.length > 0 ? mandats : [{
+    type_mandat: "",
+    objectif: "",
+    echeance_souhaitee: "",
+    date_signature: "",
+    date_debut_travaux: "",
+    urgence_percue: ""
+  }]);
 
   useEffect(() => {
-    if (mandat) {
-      setMandatForm({
-        type_mandat: mandat.type_mandat || "",
-        objectif: mandat.objectif || "",
-        echeance_souhaitee: mandat.echeance_souhaitee || "",
-        date_signature: mandat.date_signature || "",
-        date_debut_travaux: mandat.date_debut_travaux || "",
-        urgence_percue: mandat.urgence_percue || ""
-      });
+    if (mandats && mandats.length > 0) {
+      setLocalMandats(mandats);
     }
-  }, [mandat]);
+  }, [mandats]);
 
-  const handleFieldChange = (field, value) => {
-    const newForm = { ...mandatForm, [field]: value };
-    
-    // Reset date fields if echeance is not "Date précise"
-    if (field === 'echeance_souhaitee' && value !== "Date précise") {
-      newForm.date_signature = "";
-      newForm.date_debut_travaux = "";
-    }
-    
-    setMandatForm(newForm);
-    onMandatChange(newForm);
+  const handleFieldChange = (index, field, value) => {
+    const updatedMandats = localMandats.map((m, i) => {
+      if (i === index) {
+        const updated = { ...m, [field]: value };
+        // Reset date fields if echeance is not "Date précise"
+        if (field === 'echeance_souhaitee' && value !== "Date précise") {
+          updated.date_signature = "";
+          updated.date_debut_travaux = "";
+        }
+        return updated;
+      }
+      return m;
+    });
+    setLocalMandats(updatedMandats);
+    onMandatsChange(updatedMandats);
   };
 
-  const hasMandat = mandatForm.type_mandat;
+  const addMandat = () => {
+    const newMandats = [...localMandats, {
+      type_mandat: "",
+      objectif: "",
+      echeance_souhaitee: "",
+      date_signature: "",
+      date_debut_travaux: "",
+      urgence_percue: ""
+    }];
+    setLocalMandats(newMandats);
+    onMandatsChange(newMandats);
+  };
+
+  const removeMandat = (index) => {
+    if (localMandats.length <= 1) return;
+    const newMandats = localMandats.filter((_, i) => i !== index);
+    setLocalMandats(newMandats);
+    onMandatsChange(newMandats);
+  };
 
   const getUrgenceColor = (urgence) => {
     switch (urgence) {
@@ -63,6 +79,8 @@ export default function MandatStepForm({
     }
   };
 
+  const selectedMandatsCount = localMandats.filter(m => m.type_mandat).length;
+
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
@@ -72,16 +90,15 @@ export default function MandatStepForm({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
-            <CardTitle className="text-orange-300 text-base">Mandat</CardTitle>
-            {hasMandat && (
-              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                {mandatForm.type_mandat}
-              </Badge>
-            )}
-            {mandatForm.urgence_percue && (
-              <Badge className={`${getUrgenceColor(mandatForm.urgence_percue)} text-xs`}>
-                {mandatForm.urgence_percue}
-              </Badge>
+            <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
+            {selectedMandatsCount > 0 && (
+              <div className="flex gap-1 flex-wrap">
+                {localMandats.filter(m => m.type_mandat).map((m, idx) => (
+                  <Badge key={idx} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                    {m.type_mandat}
+                  </Badge>
+                ))}
+              </div>
             )}
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -90,88 +107,118 @@ export default function MandatStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-2 pb-4">
-          <div className="space-y-3">
-            {/* Première ligne: Type de mandat, Objectif et Urgence perçue */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Type de mandat</Label>
-                <Select value={mandatForm.type_mandat} onValueChange={(value) => handleFieldChange('type_mandat', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {TYPES_MANDATS.map((type) => (
-                      <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Objectif</Label>
-                <Select value={mandatForm.objectif} onValueChange={(value) => handleFieldChange('objectif', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {OBJECTIFS.map((objectif) => (
-                      <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Urgence perçue</Label>
-                <Select value={mandatForm.urgence_percue} onValueChange={(value) => handleFieldChange('urgence_percue', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {URGENCES.map((urgence) => (
-                      <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+          <div className="space-y-4">
+            {localMandats.map((mandat, index) => (
+              <div key={index} className="p-3 bg-slate-700/20 rounded-lg border border-slate-600/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-300">Mandat {index + 1}</span>
+                  {localMandats.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeMandat(index)}
+                      className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Première ligne: Type de mandat, Objectif et Urgence perçue */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Type de mandat</Label>
+                    <Select value={mandat.type_mandat} onValueChange={(value) => handleFieldChange(index, 'type_mandat', value)}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {TYPES_MANDATS.map((type) => (
+                          <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Objectif</Label>
+                    <Select value={mandat.objectif} onValueChange={(value) => handleFieldChange(index, 'objectif', value)}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {OBJECTIFS.map((objectif) => (
+                          <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Urgence perçue</Label>
+                    <Select value={mandat.urgence_percue} onValueChange={(value) => handleFieldChange(index, 'urgence_percue', value)}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {URGENCES.map((urgence) => (
+                          <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-            {/* Deuxième ligne: Échéance souhaitée et dates */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                <Select value={mandatForm.echeance_souhaitee} onValueChange={(value) => handleFieldChange('echeance_souhaitee', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {ECHEANCES.map((echeance) => (
-                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Deuxième ligne: Échéance souhaitée et dates */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                    <Select value={mandat.echeance_souhaitee} onValueChange={(value) => handleFieldChange(index, 'echeance_souhaitee', value)}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                        <SelectValue placeholder="Sélectionner..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {ECHEANCES.map((echeance) => (
+                          <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {mandat.echeance_souhaitee === "Date précise" && (
+                    <>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Date de signature</Label>
+                        <Input
+                          type="date"
+                          value={mandat.date_signature}
+                          onChange={(e) => handleFieldChange(index, 'date_signature', e.target.value)}
+                          className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                        <Input
+                          type="date"
+                          value={mandat.date_debut_travaux}
+                          onChange={(e) => handleFieldChange(index, 'date_debut_travaux', e.target.value)}
+                          className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-              {mandatForm.echeance_souhaitee === "Date précise" && (
-                <>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Date de signature</Label>
-                    <Input
-                      type="date"
-                      value={mandatForm.date_signature}
-                      onChange={(e) => handleFieldChange('date_signature', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                    <Input
-                      type="date"
-                      value={mandatForm.date_debut_travaux}
-                      onChange={(e) => handleFieldChange('date_debut_travaux', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addMandat}
+              className="w-full border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-orange-500/50 hover:bg-orange-500/10"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Ajouter un autre mandat
+            </Button>
           </div>
         </CardContent>
       )}

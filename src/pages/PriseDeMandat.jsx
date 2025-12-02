@@ -23,6 +23,7 @@ import MandatTabs from "../components/dossiers/MandatTabs";
 import ClientStepForm from "../components/mandat/ClientStepForm";
 import AddressStepForm from "../components/mandat/AddressStepForm";
 import MandatStepForm from "../components/mandat/MandatStepForm";
+import TarificationStepForm from "../components/mandat/TarificationStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -185,6 +186,7 @@ export default function PriseDeMandat() {
   const [clientStepCollapsed, setClientStepCollapsed] = useState(false);
   const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
   const [mandatStepCollapsed, setMandatStepCollapsed] = useState(false);
+  const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(false);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -192,14 +194,17 @@ export default function PriseDeMandat() {
     province: "Québec",
     code_postal: ""
   });
-  const [mandatInfo, setMandatInfo] = useState({
+  const [mandatsInfo, setMandatsInfo] = useState([{
     type_mandat: "",
     objectif: "",
     echeance_souhaitee: "",
     date_signature: "",
     date_debut_travaux: "",
-    urgence_percue: ""
-  });
+    urgence_percue: "",
+    prix_estime: 0,
+    rabais: 0,
+    taxes_incluses: false
+  }]);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -1329,12 +1334,20 @@ export default function PriseDeMandat() {
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
                   />
 
-                  {/* Étape 3: Mandat */}
+                  {/* Étape 3: Mandats */}
                   <MandatStepForm
-                    mandat={mandatInfo}
-                    onMandatChange={setMandatInfo}
+                    mandats={mandatsInfo}
+                    onMandatsChange={setMandatsInfo}
                     isCollapsed={mandatStepCollapsed}
                     onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
+                  />
+
+                  {/* Étape 4: Tarification */}
+                  <TarificationStepForm
+                    mandats={mandatsInfo}
+                    onTarificationChange={setMandatsInfo}
+                    isCollapsed={tarificationStepCollapsed}
+                    onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
