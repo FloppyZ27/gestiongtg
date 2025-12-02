@@ -1350,45 +1350,45 @@ export default function PriseDeMandat() {
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
-                  {/* Boutons d'action */}
-                  <div className="flex gap-4 pt-4">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setFormData({...formData, statut: "Nouveau mandat/Demande d'information"});
-                        // Soumettre le formulaire
-                        document.getElementById('dossier-form').requestSubmit();
-                      }}
-                      className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white py-6 text-lg font-semibold"
-                    >
-                      <FileCheck className="w-5 h-5 mr-2" />
-                      Nouveau mandat / Demande d'informations
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setFormData({...formData, statut: "Mandats à ouvrir"});
-                        document.getElementById('dossier-form').requestSubmit();
-                      }}
-                      className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-6 text-lg font-semibold"
-                    >
-                      <Send className="w-5 h-5 mr-2" />
-                      Mandat à ouvrir
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setFormData({...formData, statut: "Mandat non octroyé"});
-                        document.getElementById('dossier-form').requestSubmit();
-                      }}
-                      className="flex-1 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white py-6 text-lg font-semibold"
-                    >
-                      <X className="w-5 h-5 mr-2" />
-                      Mandat non-octroyé
-                    </Button>
+                  {/* Sélection du statut */}
+                  <div className="space-y-2">
+                    <Label>Statut du dossier</Label>
+                    <div className="flex gap-2">
+                      {[
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
+                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple" },
+                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red" }
+                      ].map((statut) => {
+                        const isSelected = formData.statut === statut.value;
+                        const colorClasses = {
+                          "cyan": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400",
+                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
+                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
+                        };
+                        return (
+                          <button
+                            key={statut.value}
+                            type="button"
+                            onClick={() => setFormData({...formData, statut: statut.value})}
+                            className={`flex-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
+                          >
+                            {statut.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </form>
 
+                {/* Boutons Annuler/Créer tout en bas */}
+                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {editingDossier ? "Modifier" : "Créer"}
+                  </Button>
+                </div>
                 </div>
 
                 {/* Commentaires Sidebar - 30% */}
