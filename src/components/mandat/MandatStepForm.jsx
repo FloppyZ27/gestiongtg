@@ -30,15 +30,21 @@ export default function MandatStepForm({
   // Types de mandats sélectionnés
   const [selectedTypes, setSelectedTypes] = useState([]);
 
+  // Initialiser une seule fois au montage
+  const initialized = React.useRef(false);
+  
   useEffect(() => {
-    if (mandats && mandats.length > 0) {
+    if (!initialized.current && mandats && mandats.length > 0) {
+      initialized.current = true;
       // Extraire les types sélectionnés
       const types = mandats.map(m => m.type_mandat).filter(t => t);
-      setSelectedTypes(types);
+      if (types.length > 0) {
+        setSelectedTypes(types);
+      }
       
       // Prendre les infos du premier mandat comme référence
       const first = mandats[0];
-      if (first) {
+      if (first && (first.objectif || first.echeance_souhaitee || first.urgence_percue)) {
         setSharedInfo({
           objectif: first.objectif || "",
           echeance_souhaitee: first.echeance_souhaitee || "",
@@ -48,7 +54,7 @@ export default function MandatStepForm({
         });
       }
     }
-  }, []);
+  }, [mandats]);
 
   const toggleMandatType = (type) => {
     let newSelectedTypes;
