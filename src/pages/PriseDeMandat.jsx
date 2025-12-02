@@ -1337,7 +1337,7 @@ export default function PriseDeMandat() {
                   {/* Étape 3: Mandats */}
                   <MandatStepForm
                     mandats={mandatsInfo}
-                    onMandatsChange={setMandatsInfo}
+                    onMandatsChange={(newMandats) => setMandatsInfo(newMandats)}
                     isCollapsed={mandatStepCollapsed}
                     onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
                   />
@@ -1345,7 +1345,7 @@ export default function PriseDeMandat() {
                   {/* Étape 4: Tarification */}
                   <TarificationStepForm
                     mandats={mandatsInfo}
-                    onTarificationChange={setMandatsInfo}
+                    onTarificationChange={(newMandats) => setMandatsInfo(newMandats)}
                     isCollapsed={tarificationStepCollapsed}
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
