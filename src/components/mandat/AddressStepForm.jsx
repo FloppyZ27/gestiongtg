@@ -162,13 +162,13 @@ export default function AddressStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
+        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 bg-blue-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xs">2</div>
-            <CardTitle className="text-blue-300 text-sm">Adresse</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm">2</div>
+            <CardTitle className="text-blue-300 text-base">Adresse des travaux</CardTitle>
             {hasAddress && (
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
                 {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}
@@ -185,67 +185,87 @@ export default function AddressStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1 pb-2">
-          <div className="flex gap-2 items-center">
+        <CardContent className="pt-2 pb-4">
+          <div className="space-y-3">
             {/* Barre de recherche */}
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Rechercher..."
-                className="bg-slate-700 border-slate-600 text-white h-7 text-xs pl-7"
-              />
-              {isSearching && (
-                <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 animate-spin" />
-              )}
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Rechercher une adresse..."
+                  className="bg-slate-700 border-slate-600 text-white h-9 text-sm pl-10"
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
+                )}
+              </div>
+              
               {suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-32 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                   {suggestions.map((suggestion, idx) => (
                     <div
                       key={idx}
                       onClick={() => selectSuggestion(suggestion)}
-                      className="px-2 py-1.5 cursor-pointer hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1.5 border-b border-slate-700 last:border-b-0"
+                      className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
                     >
-                      <MapPin className="w-3 h-3 text-blue-400 flex-shrink-0" />
-                      <span className="truncate">{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
+                      <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Champs manuels en ligne */}
-            <Input
-              value={addressForm.numero_civique}
-              onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
-              placeholder="N°"
-              className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-14"
-            />
-            <Input
-              value={addressForm.rue}
-              onChange={(e) => handleFieldChange('rue', e.target.value)}
-              placeholder="Rue"
-              className="bg-slate-700 border-slate-600 text-white h-7 text-xs flex-1"
-            />
-            <Input
-              value={addressForm.ville}
-              onChange={(e) => handleFieldChange('ville', e.target.value)}
-              placeholder="Ville"
-              className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-28"
-            />
-            <Input
-              value={addressForm.code_postal}
-              onChange={(e) => handleFieldChange('code_postal', e.target.value)}
-              placeholder="Code postal"
-              className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24"
-            />
-            <Input
-              value={addressForm.numero_lot}
-              onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
-              placeholder="N° lot"
-              className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24"
-            />
+            {/* Champs manuels */}
+            <div className="grid grid-cols-[80px_1fr_1fr_100px_120px] gap-2">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">N° civique</Label>
+                <Input
+                  value={addressForm.numero_civique}
+                  onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
+                  placeholder="123"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Rue</Label>
+                <Input
+                  value={addressForm.rue}
+                  onChange={(e) => handleFieldChange('rue', e.target.value)}
+                  placeholder="Nom de la rue"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Ville</Label>
+                <Input
+                  value={addressForm.ville}
+                  onChange={(e) => handleFieldChange('ville', e.target.value)}
+                  placeholder="Ville"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Code postal</Label>
+                <Input
+                  value={addressForm.code_postal}
+                  onChange={(e) => handleFieldChange('code_postal', e.target.value)}
+                  placeholder="G0V 0A0"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">N° de lot</Label>
+                <Input
+                  value={addressForm.numero_lot}
+                  onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
+                  placeholder="1234567"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
       )}

@@ -92,13 +92,13 @@ export default function MandatStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
+        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-3 bg-orange-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-xs">3</div>
-            <CardTitle className="text-orange-300 text-sm">Mandats</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
+            <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
             {selectedTypes.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 {selectedTypes.map((type, idx) => (
@@ -119,44 +119,45 @@ export default function MandatStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1 pb-2">
-          <div className="space-y-2">
-            {/* Ligne unique avec sélecteur de mandats et options */}
-            <div className="flex gap-2 items-center">
+        <CardContent className="pt-2 pb-4">
+          <div className="space-y-3">
+            {/* Sélection multiple des types de mandats via menu déroulant */}
+            <div className="space-y-2">
+              <Label className="text-slate-400 text-xs">Types de mandats (sélection multiple)</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="flex-1 justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-xs"
+                    className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-10"
                   >
                     {selectedTypes.length > 0 ? (
                       <div className="flex flex-wrap gap-1 max-w-[90%] overflow-hidden">
-                        {selectedTypes.slice(0, 4).map((type) => (
-                          <Badge key={type} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-[10px] py-0">
+                        {selectedTypes.slice(0, 3).map((type) => (
+                          <Badge key={type} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
                             {type}
                           </Badge>
                         ))}
-                        {selectedTypes.length > 4 && (
-                          <Badge className="bg-slate-600 text-slate-300 text-[10px] py-0">
-                            +{selectedTypes.length - 4}
+                        {selectedTypes.length > 3 && (
+                          <Badge className="bg-slate-600 text-slate-300 text-xs">
+                            +{selectedTypes.length - 3}
                           </Badge>
                         )}
                       </div>
                     ) : (
-                      <span className="text-slate-400 text-xs">Types de mandats...</span>
+                      <span className="text-slate-400">Sélectionner les types de mandats...</span>
                     )}
-                    <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
+                    <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 p-0 bg-slate-800 border-slate-700" align="start">
-                  <div className="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
+                <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" align="start">
+                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
                     {TYPES_MANDATS.map((type) => {
                       const isSelected = selectedTypes.includes(type);
                       return (
                         <div
                           key={type}
                           onClick={() => toggleMandatType(type)}
-                          className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all text-xs ${
+                          className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all text-sm ${
                             isSelected 
                               ? 'bg-orange-500/20 text-orange-400' 
                               : 'text-slate-300 hover:bg-slate-700'
@@ -164,7 +165,7 @@ export default function MandatStepForm({
                         >
                           <Checkbox
                             checked={isSelected}
-                            className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 h-3 w-3"
+                            className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                           />
                           <span>{type}</span>
                         </div>
@@ -173,59 +174,75 @@ export default function MandatStepForm({
                   </div>
                 </PopoverContent>
               </Popover>
+            </div>
 
-              <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-32">
-                  <SelectValue placeholder="Objectif" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {OBJECTIFS.map((objectif) => (
-                    <SelectItem key={objectif} value={objectif} className="text-white text-xs">{objectif}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Première ligne: Objectif et Urgence perçue */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Objectif</Label>
+                <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {OBJECTIFS.map((objectif) => (
+                      <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Urgence perçue</Label>
+                <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {URGENCES.map((urgence) => (
+                      <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {ECHEANCES.map((echeance) => (
+                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-              <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-28">
-                  <SelectValue placeholder="Urgence" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {URGENCES.map((urgence) => (
-                    <SelectItem key={urgence} value={urgence} className="text-white text-xs">{urgence}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-36">
-                  <SelectValue placeholder="Échéance" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {ECHEANCES.map((echeance) => (
-                    <SelectItem key={echeance} value={echeance} className="text-white text-xs">{echeance}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {sharedInfo.echeance_souhaitee === "Date précise" && (
-                <>
+            {/* Dates conditionnelles */}
+            {sharedInfo.echeance_souhaitee === "Date précise" && (
+              <div className="grid grid-cols-3 gap-3">
+                <div></div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Date de signature</Label>
                   <Input
                     type="date"
                     value={sharedInfo.date_signature}
                     onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-32"
-                    title="Date signature"
+                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
                   />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Début des travaux</Label>
                   <Input
                     type="date"
                     value={sharedInfo.date_debut_travaux}
                     onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-32"
-                    title="Début travaux"
+                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
                   />
-                </>
-              )}
-            </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       )}

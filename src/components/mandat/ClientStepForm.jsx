@@ -69,13 +69,13 @@ export default function ClientStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
+        className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 bg-emerald-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs">1</div>
-            <CardTitle className="text-emerald-300 text-sm">Client</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
+            <CardTitle className="text-emerald-300 text-base">Informations du client</CardTitle>
             {selectedClientIds.length > 0 && (
               <div className="flex gap-1">
                 {selectedClientIds.map(clientId => {
@@ -94,53 +94,67 @@ export default function ClientStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1 pb-2">
-          <div className="grid grid-cols-[70%_30%] gap-3">
-            <div className="space-y-1">
-              <div className="grid grid-cols-4 gap-2">
-                <Input
-                  value={clientForm.prenom}
-                  onChange={(e) => setClientForm({ ...clientForm, prenom: e.target.value })}
-                  placeholder="Prénom"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                />
-                <Input
-                  value={clientForm.nom}
-                  onChange={(e) => setClientForm({ ...clientForm, nom: e.target.value })}
-                  placeholder="Nom"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                />
-                <div className="flex gap-1">
+        <CardContent className="pt-2 pb-4">
+          <div className="grid grid-cols-[70%_30%] gap-4">
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Prénom</Label>
                   <Input
-                    value={clientForm.telephone}
-                    onChange={(e) => setClientForm({ ...clientForm, telephone: e.target.value })}
-                    placeholder="Téléphone"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-xs flex-1"
+                    value={clientForm.prenom}
+                    onChange={(e) => setClientForm({ ...clientForm, prenom: e.target.value })}
+                    placeholder="Prénom"
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                   />
-                  <Select value={clientForm.type_telephone} onValueChange={(value) => setClientForm({ ...clientForm, type_telephone: value })}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-16">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
-                      <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
-                      <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
-                <Input
-                  type="email"
-                  value={clientForm.courriel}
-                  onChange={(e) => setClientForm({ ...clientForm, courriel: e.target.value })}
-                  placeholder="Courriel"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                />
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Nom</Label>
+                  <Input
+                    value={clientForm.nom}
+                    onChange={(e) => setClientForm({ ...clientForm, nom: e.target.value })}
+                    placeholder="Nom"
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Téléphone</Label>
+                  <div className="flex gap-1">
+                    <Input
+                      value={clientForm.telephone}
+                      onChange={(e) => setClientForm({ ...clientForm, telephone: e.target.value })}
+                      placeholder="(000) 000-0000"
+                      className="bg-slate-700 border-slate-600 text-white h-8 text-sm flex-1"
+                    />
+                    <Select value={clientForm.type_telephone} onValueChange={(value) => setClientForm({ ...clientForm, type_telephone: value })}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
+                        <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
+                        <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Courriel</Label>
+                  <Input
+                    type="email"
+                    value={clientForm.courriel}
+                    onChange={(e) => setClientForm({ ...clientForm, courriel: e.target.value })}
+                    placeholder="exemple@courriel.com"
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="border-l border-slate-700 pl-2">
-              <p className="text-slate-500 text-[10px] mb-1">Existants ({filteredClients.length})</p>
-              <div className="max-h-[60px] overflow-y-auto space-y-0.5">
+            <div className="border-l border-slate-700 pl-3">
+              <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClients.length})</p>
+              <div className="max-h-[100px] overflow-y-auto space-y-1">
                 {filteredClients.length > 0 ? (
                   filteredClients.slice(0, 15).map((client) => {
                     const isSelected = selectedClientIds.includes(client.id);
@@ -148,13 +162,17 @@ export default function ClientStepForm({
                       <div
                         key={client.id}
                         onClick={() => handleClientClick(client, isSelected)}
-                        className={`px-1.5 py-1 rounded cursor-pointer text-[10px] ${
+                        className={`px-2 py-1.5 rounded cursor-pointer text-xs ${
                           isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium truncate">{client.prenom} {client.nom}</span>
-                          {isSelected && <Check className="w-2.5 h-2.5 flex-shrink-0" />}
+                          {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                          {getCurrentPhone(client) && <p>📞 {getCurrentPhone(client)}</p>}
+                          {getCurrentEmail(client) && <p className="truncate">✉️ {getCurrentEmail(client)}</p>}
                         </div>
                       </div>
                     );
