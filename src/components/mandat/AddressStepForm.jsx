@@ -266,13 +266,13 @@ export default function AddressStepForm({
               </div>
 
               {/* Colonne centrale - N° de lot */}
-              <div className="border-l border-slate-700 pl-3 flex flex-col">
+              <div className="border-l border-slate-700 pl-3 flex flex-col h-full">
                 <p className="text-slate-400 text-xs mb-1.5">N° de lot</p>
-                <Input
+                <textarea
                   value={addressForm.numero_lot}
                   onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
                   placeholder="1234567"
-                  className="bg-slate-700 border-slate-600 text-white flex-1 text-sm"
+                  className="bg-slate-700 border border-slate-600 text-white flex-1 text-sm rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 

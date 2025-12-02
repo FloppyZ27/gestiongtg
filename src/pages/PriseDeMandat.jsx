@@ -1345,7 +1345,7 @@ export default function PriseDeMandat() {
                     )}
                   </div>
 
-                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-3">
+                  <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
