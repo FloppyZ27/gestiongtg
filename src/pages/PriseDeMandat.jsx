@@ -1350,379 +1350,43 @@ export default function PriseDeMandat() {
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
-                  {/* Champs conditionnels pour statut "Ouvert" */}
-                  {formData.statut === "Ouvert" && (
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <div className="space-y-2">
-                        <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                        <Input
-                          value={formData.numero_dossier}
-                          onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})}
-                          required
-                          placeholder="Ex: SG-2024-001"
-                          className="bg-slate-800 border-slate-700"
-                          disabled={!!dossierReferenceId}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                        <Input
-                          type="date"
-                          value={formData.date_ouverture}
-                          onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
-                          required
-                          className="bg-slate-800 border-slate-700"
-                          disabled={!!dossierReferenceId}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Description field - CACHER pour Soumission, Ouvert, Retour d'appel et Nouveau mandat */}
-                  {formData.statut !== "Soumission" && formData.statut !== "Ouvert" && formData.statut !== "Retour d'appel" && formData.statut !== "Nouveau mandat/Demande d'information" && formData.statut !== "Mandats à ouvrir" && formData.statut !== "Mandat non octroyé" && (
-                    <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        className="bg-slate-800 border-slate-700 min-h-[120px]"
-                        placeholder="Ajouter une description ou des notes générales pour ce dossier..."
-                      />
-                    </div>
-                  )}
-
-                  {/* Clients, Notaires et Courtiers */}
-                  <div className={`grid ${formData.ttl === "Oui" ? "grid-cols-1" : "grid-cols-3"} gap-4`}>
-                    {/* Clients */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <Label>Clients</Label>
-                        {formData.ttl === "Non" && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => setIsClientSelectorOpen(true)}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                            disabled={!!dossierReferenceId}
-                          >
-                            <UserPlus className="w-4 h-4 mr-1" />
-                            Ajouter
-                          </Button>
-                        )}
-                      </div>
-                      {formData.ttl === "Oui" ? (
-                        <Textarea
-                          value={formData.clients_texte}
-                          onChange={(e) => setFormData({...formData, clients_texte: e.target.value})}
-                          placeholder="Entrer les noms des clients..."
-                          className="bg-slate-800 border-slate-700 min-h-[100px]"
-                        />
-                      ) : formData.clients_ids.length > 0 ? (
-                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                          {formData.clients_ids.map(clientId => {
-                            const client = getClientById(clientId);
-                            return client ? (
-                              <div key={clientId} className="space-y-1">
-                                <Badge
-                                  variant="outline"
-                                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start"
-                                >
-                                  <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">
-                                    {client.prenom} {client.nom}
-                                  </span>
-                                  {!dossierReferenceId && (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeClient(clientId, 'clients');
-                                      }}
-                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                                {client.preferences_livraison && client.preferences_livraison.length > 0 && (
-                                  <div className="flex gap-1 ml-2">
-                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
-                                    <span className="text-xs text-slate-400">
-                                      {client.preferences_livraison.join(', ')}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
-                          Aucun client
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Notaires */}
-                    {formData.ttl === "Non" && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Notaires</Label>
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => setIsNotaireSelectorOpen(true)}
-                            className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400"
-                            disabled={!!dossierReferenceId}
-                          >
-                            <UserPlus className="w-4 h-4 mr-1" />
-                            Ajouter
-                          </Button>
-                        </div>
-                        {formData.notaires_ids.length > 0 ? (
-                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                          {formData.notaires_ids.map(notaireId => {
-                            const notaire = getClientById(notaireId);
-                            return notaire ? (
-                              <div key={notaireId} className="space-y-1">
-                                <Badge
-                                  variant="outline"
-                                  className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start"
-                                >
-                                  <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">
-                                    {notaire.prenom} {notaire.nom}
-                                  </span>
-                                  {!dossierReferenceId && (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeClient(notaireId, 'notaires');
-                                      }}
-                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                                {notaire.preferences_livraison && notaire.preferences_livraison.length > 0 && (
-                                  <div className="flex gap-1 ml-2">
-                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
-                                    <span className="text-xs text-slate-400">
-                                      {notaire.preferences_livraison.join(', ')}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
-                          Aucun notaire
-                        </p>
-                      )}
-                      </div>
-                      )}
-
-                      {/* Courtiers */}
-                      {formData.ttl === "Non" && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Courtiers immobiliers</Label>
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => setIsCourtierSelectorOpen(true)}
-                            className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400"
-                            disabled={!!dossierReferenceId}
-                          >
-                            <UserPlus className="w-4 h-4 mr-1" />
-                            Ajouter
-                          </Button>
-                        </div>
-                        {formData.courtiers_ids.length > 0 ? (
-                        <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                          {formData.courtiers_ids.map(courtierId => {
-                            const courtier = getClientById(courtierId);
-                            return courtier ? (
-                              <div key={courtierId} className="space-y-1">
-                                <Badge
-                                  variant="outline"
-                                  className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start"
-                                >
-                                  <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">
-                                    {courtier.prenom} {courtier.nom}
-                                  </span>
-                                  {!dossierReferenceId && (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeClient(courtierId, 'courtiers');
-                                      }}
-                                      className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                                {courtier.preferences_livraison && courtier.preferences_livraison.length > 0 && (
-                                  <div className="flex gap-1 ml-2">
-                                    <Package className="w-3 h-3 text-slate-500 mt-0.5" />
-                                    <span className="text-xs text-slate-400">
-                                      {courtier.preferences_livraison.join(', ')}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">
-                          Aucun courtier
-                        </p>
-                      )}
-                    </div>
-                    )}
+                  {/* Boutons d'action */}
+                  <div className="flex gap-4 pt-4">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setFormData({...formData, statut: "Nouveau mandat/Demande d'information"});
+                        // Soumettre le formulaire
+                        document.getElementById('dossier-form').requestSubmit();
+                      }}
+                      className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white py-6 text-lg font-semibold"
+                    >
+                      <FileCheck className="w-5 h-5 mr-2" />
+                      Nouveau mandat / Demande d'informations
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setFormData({...formData, statut: "Mandats à ouvrir"});
+                        document.getElementById('dossier-form').requestSubmit();
+                      }}
+                      className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-6 text-lg font-semibold"
+                    >
+                      <Send className="w-5 h-5 mr-2" />
+                      Mandat à ouvrir
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setFormData({...formData, statut: "Mandat non octroyé"});
+                        document.getElementById('dossier-form').requestSubmit();
+                      }}
+                      className="flex-1 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white py-6 text-lg font-semibold"
+                    >
+                      <X className="w-5 h-5 mr-2" />
+                      Mandat non-octroyé
+                    </Button>
                   </div>
-
-                  {/* Mandats */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <Label>Mandats</Label>
-                      {formData.ttl === "Non" && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={addMandat}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                          disabled={!!dossierReferenceId}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Ajouter un mandat
-                        </Button>
-                      )}
-                    </div>
-
-                    {formData.mandats.length > 0 ? (
-                      <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
-                        <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
-                          {formData.mandats.map((mandat, index) => (
-                            <TabsTrigger
-                              key={index}
-                              value={index.toString()}
-                              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
-                            >
-                              {getMandatTabLabel(mandat, index)}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
-
-                        {formData.mandats.map((mandat, index) => (
-                          <TabsContent key={index} value={index.toString()}>
-                            <Card className="border-slate-700 bg-slate-800/30">
-                              <CardContent className="p-4 space-y-4">
-                                <MandatTabs
-                                  mandat={mandat}
-                                  mandatIndex={index}
-                                  updateMandat={updateMandat}
-                                  updateMandatAddress={updateMandatAddress}
-                                  openLotSelector={openLotSelector}
-                                  openAddMinuteDialog={openAddMinuteDialog}
-                                  removeLotFromMandat={removeLotFromMandat}
-                                  removeMinuteFromMandat={removeMinuteFromMandat}
-                                  getLotById={getLotById}
-                                  users={users}
-                                  formStatut={formData.statut}
-                                  onRemoveMandat={formData.ttl === "Non" ? () => {
-                                    removeMandat(index);
-                                    if (formData.mandats.length > 1) {
-                                      setActiveTabMandat(Math.max(0, index - 1).toString());
-                                    } else {
-                                      setActiveTabMandat("0");
-                                    }
-                                  } : null}
-                                  isReferenceDisabled={!!dossierReferenceId || formData.ttl === "Oui"}
-                                  isTTL={formData.ttl === "Oui"}
-                                />
-                              </CardContent>
-                            </Card>
-                          </TabsContent>
-                        ))}
-                      </Tabs>
-                    ) : (
-                      <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">
-                        Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tableau Tarification - EN BAS */}
-                  {formData.mandats.length > 0 && formData.ttl === "Non" && (
-                    <div className="space-y-3 mt-6">
-                      <Label className="text-lg font-semibold text-slate-300">Tarification</Label>
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300">Type de mandat</TableHead>
-                              <TableHead className="text-slate-300">Prix estimé ($)</TableHead>
-                              <TableHead className="text-slate-300">Rabais ($)</TableHead>
-                              <TableHead className="text-slate-300">Taxes incluses</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {formData.mandats.map((mandat, index) => (
-                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="font-medium text-white">
-                                  {mandat.type_mandat || `Mandat ${index + 1}`}
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={mandat.prix_estime || ""}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/[^0-9.]/g, '');
-                                      updateMandat(index, 'prix_estime', value ? parseFloat(value) : 0);
-                                    }}
-                                    placeholder="0.00"
-                                    className="bg-slate-700 border-slate-600 text-white"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={mandat.rabais || ""}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/[^0-9.]/g, '');
-                                      updateMandat(index, 'rabais', value ? parseFloat(value) : 0);
-                                    }}
-                                    placeholder="0.00"
-                                    className="bg-slate-700 border-slate-600 text-white"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <input
-                                    type="checkbox"
-                                    id={`taxes_incluses_${index}`}
-                                    checked={mandat.taxes_incluses}
-                                    onChange={(e) => updateMandat(index, 'taxes_incluses', e.target.checked)}
-                                    className="form-checkbox h-5 w-5 text-emerald-600 transition duration-150 ease-in-out bg-slate-700 border-slate-600 rounded"
-                                    disabled={!!dossierReferenceId}
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  )}
                 </form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
