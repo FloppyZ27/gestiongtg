@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, MapPin, Search, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Search, Loader2, Home } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AddressStepForm({ 
@@ -171,8 +171,10 @@ export default function AddressStepForm({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm">2</div>
-            <CardTitle className="text-blue-300 text-base">Adresse des travaux</CardTitle>
+              <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                <Home className="w-3.5 h-3.5 text-blue-400" />
+              </div>
+              <CardTitle className="text-blue-300 text-base">Adresse des travaux</CardTitle>
             {hasAddress && (
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
                 {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}

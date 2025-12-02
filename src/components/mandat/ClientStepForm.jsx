@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, User, Check } from "lucide-react";
+import { ChevronDown, ChevronUp, Users, Check } from "lucide-react";
 
 export default function ClientStepForm({ 
   clients = [], 
@@ -74,7 +74,9 @@ export default function ClientStepForm({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
+            <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-emerald-400" />
+            </div>
             <CardTitle className="text-emerald-300 text-base">Informations du client</CardTitle>
             {selectedClientIds.length > 0 && (
               <div className="flex gap-1">

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -97,8 +97,10 @@ export default function MandatStepForm({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
-            <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
+              <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                <ClipboardList className="w-3.5 h-3.5 text-orange-400" />
+              </div>
+              <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
             {selectedTypes.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 {selectedTypes.map((type, idx) => (

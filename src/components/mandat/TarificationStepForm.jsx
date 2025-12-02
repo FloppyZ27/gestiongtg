@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, DollarSign } from "lucide-react";
+import { ChevronDown, ChevronUp, DollarSign, Receipt } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -36,8 +36,10 @@ export default function TarificationStepForm({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-sm">4</div>
-            <CardTitle className="text-purple-300 text-base">Tarification</CardTitle>
+              <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                <Receipt className="w-3.5 h-3.5 text-purple-400" />
+              </div>
+              <CardTitle className="text-purple-300 text-base">Tarification</CardTitle>
             {totalEstime > 0 && (
               <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
                 Total: {totalEstime.toFixed(2)} $

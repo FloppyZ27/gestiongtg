@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -1496,7 +1496,7 @@ export default function PriseDeMandat() {
                     onClick={() => setMapCollapsed(!mapCollapsed)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">📍</div>
+                      <MapPin className="w-5 h-5 text-slate-400" />
                       <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
                     </div>
                     {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -1532,7 +1532,7 @@ export default function PriseDeMandat() {
                     onClick={() => setCommentsCollapsed(!commentsCollapsed)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">💬</div>
+                      <MessageSquare className="w-5 h-5 text-slate-400" />
                       <h3 className="text-slate-300 text-base font-semibold">Commentaires</h3>
                     </div>
                     {commentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
