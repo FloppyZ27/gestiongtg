@@ -73,22 +73,26 @@ export default function TarificationStepForm({
                         </TableCell>
                         <TableCell>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
+                            type="text"
+                            inputMode="decimal"
                             value={mandat.prix_estime || ""}
-                            onChange={(e) => handleFieldChange(index, 'prix_estime', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.]/g, '');
+                              handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
+                            }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-8 text-sm w-28"
                           />
                         </TableCell>
                         <TableCell>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
+                            type="text"
+                            inputMode="decimal"
                             value={mandat.rabais || ""}
-                            onChange={(e) => handleFieldChange(index, 'rabais', parseFloat(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.]/g, '');
+                              handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
+                            }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-8 text-sm w-28"
                           />
