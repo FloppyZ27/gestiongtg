@@ -1335,7 +1335,10 @@ export default function PriseDeMandat() {
               <div className="flex h-[90vh]">
                 {/* Main form content - 75% */}
                 <div className="flex-[0_0_75%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6 flex items-center gap-3">
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-white">
+                      {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
+                    </h2>
                     <Button
                       type="button"
                       variant="ghost"
@@ -1350,16 +1353,14 @@ export default function PriseDeMandat() {
                     >
                       <X className="w-5 h-5" />
                     </Button>
-                    <h2 className="text-2xl font-bold text-white">
-                      {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
-                    </h2>
+                  </div>
+                  <div className="flex items-center gap-3 mb-6">
                     {formData.ttl === "Oui" && (
                       <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
                         <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
                         <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
                       </div>
                     )}
-                  </div>
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
