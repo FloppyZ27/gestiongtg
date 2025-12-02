@@ -132,18 +132,7 @@ export default function MandatStepForm({
                       className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-sm"
                     >
                       {selectedTypes.length > 0 ? (
-                        <div className="flex flex-wrap gap-1 max-w-[90%] overflow-hidden">
-                          {selectedTypes.slice(0, 2).map((type) => (
-                            <Badge key={type} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                              {type}
-                            </Badge>
-                          ))}
-                          {selectedTypes.length > 2 && (
-                            <Badge className="bg-slate-600 text-slate-300 text-xs">
-                              +{selectedTypes.length - 2}
-                            </Badge>
-                          )}
-                        </div>
+                        <span className="text-white truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
                       ) : (
                         <span className="text-slate-400">Sélectionner...</span>
                       )}
