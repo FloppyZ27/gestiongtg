@@ -1336,6 +1336,20 @@ export default function PriseDeMandat() {
                 {/* Main form content - 75% */}
                 <div className="flex-[0_0_75%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6 flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+                          setIsDialogOpen(false);
+                          resetFullForm();
+                        }
+                      }}
+                      className="text-slate-400 hover:text-white hover:bg-slate-800"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
                     <h2 className="text-2xl font-bold text-white">
                       {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
                     </h2>
