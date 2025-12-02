@@ -72,13 +72,48 @@ export default function AddressStepForm({
       if (data.candidates && data.candidates.length > 0) {
         const formattedAddresses = data.candidates.map(candidate => {
           const attrs = candidate.attributes || {};
+          const fullAddr = candidate.address || attrs.Match_addr || "";
+          
+          // Parser l'adresse complète pour extraire les composants
+          // Format typique: "123 Rue des Pins, Alma, QC, G8B 5V8"
+          let numero_civique = attrs.AddNum || "";
+          let rue = attrs.StName || "";
+          let ville = attrs.City || attrs.Municipalit || "";
+          let code_postal = attrs.Postal || "";
+          
+          // Si les attributs sont vides, essayer de parser l'adresse complète
+          if (!numero_civique || !rue) {
+            const parts = fullAddr.split(',');
+            if (parts.length > 0) {
+              const streetPart = parts[0].trim();
+              // Extraire le numéro civique (premiers chiffres)
+              const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
+              if (numMatch) {
+                numero_civique = numMatch[1];
+                rue = numMatch[2];
+              } else {
+                rue = streetPart;
+              }
+            }
+            if (parts.length > 1 && !ville) {
+              ville = parts[1].trim();
+            }
+            // Chercher le code postal dans les dernières parties
+            if (!code_postal) {
+              const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+              if (postalMatch) {
+                code_postal = postalMatch[1].toUpperCase();
+              }
+            }
+          }
+          
           return {
-            numero_civique: attrs.AddNum || "",
-            rue: attrs.StName || attrs.StAddr || "",
-            ville: attrs.City || attrs.Municipalit || "",
+            numero_civique,
+            rue,
+            ville,
             province: "Québec",
-            code_postal: attrs.Postal || "",
-            full_address: candidate.address || attrs.Match_addr || ""
+            code_postal,
+            full_address: fullAddr
           };
         });
         setSuggestions(formattedAddresses);
