@@ -1372,13 +1372,12 @@ export default function PriseDeMandat() {
                       <X className="w-5 h-5" />
                     </Button>
                   </div>
-                  <div className="flex items-center gap-3 mb-6">
-                    {formData.ttl === "Oui" && (
-                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
-                      </div>
-                    )}
+                  {formData.ttl === "Oui" && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg mb-6">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                      <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                    </div>
+                  )}
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
