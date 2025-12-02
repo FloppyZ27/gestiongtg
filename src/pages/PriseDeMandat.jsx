@@ -1496,15 +1496,15 @@ export default function PriseDeMandat() {
                     onClick={() => setMapCollapsed(!mapCollapsed)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm">📍</div>
-                      <h3 className="text-indigo-300 text-base font-semibold">Carte</h3>
+                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">📍</div>
+                      <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
                     </div>
                     {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
                   {!mapCollapsed && (workAddress.rue || workAddress.ville) && (
-                    <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                      <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
-                        <div className="aspect-square w-full">
+                    <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
+                      <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
+                        <div className="aspect-square w-full max-h-[calc(100%-28px)]">
                           <iframe
                             width="100%"
                             height="100%"
@@ -1532,8 +1532,8 @@ export default function PriseDeMandat() {
                     onClick={() => setCommentsCollapsed(!commentsCollapsed)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-pink-500/30 flex items-center justify-center text-pink-400 font-bold text-sm">💬</div>
-                      <h3 className="text-pink-300 text-base font-semibold">Commentaires</h3>
+                      <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">💬</div>
+                      <h3 className="text-slate-300 text-base font-semibold">Commentaires</h3>
                     </div>
                     {commentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
