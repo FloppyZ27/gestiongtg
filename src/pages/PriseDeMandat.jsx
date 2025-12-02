@@ -1521,7 +1521,7 @@ export default function PriseDeMandat() {
                 </div>
 
                 {/* Commentaires Sidebar - 25% */}
-                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden">
+                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-12">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
