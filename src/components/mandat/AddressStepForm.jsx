@@ -60,10 +60,11 @@ export default function AddressStepForm({
 
     setIsSearching(true);
     try {
-      // Utiliser l'API de géocodage du gouvernement du Québec
+      // Utiliser l'API de géocodage du gouvernement du Québec avec position centrée sur Alma
       const encodedQuery = encodeURIComponent(query);
+      // Coordonnées d'Alma, Québec: Lat 48.5501, Lon -71.6525
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10&location=-71.6525,48.5501&distance=100000`
       );
       const data = await response.json();
       
@@ -104,7 +105,8 @@ export default function AddressStepForm({
       rue: suggestion.rue || "",
       ville: suggestion.ville || "",
       province: suggestion.province || "Québec",
-      code_postal: suggestion.code_postal || ""
+      code_postal: suggestion.code_postal || "",
+      numero_lot: addressForm.numero_lot || ""
     };
     setAddressForm(newForm);
     setSearchQuery("");

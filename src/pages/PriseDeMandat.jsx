@@ -1277,65 +1277,31 @@ export default function PriseDeMandat() {
                   </div>
 
                   <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
-                  {/* Section pour les champs de base - tous en une seule colonne */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                      <Select
-                        value={formData.arpenteur_geometre}
-                        onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
-                        disabled={!!dossierReferenceId}
-                      >
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {ARPENTEURS.map((arpenteur) => (
-                            <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                              {arpenteur}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Statut <span className="text-red-400">*</span></Label>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFormData({...formData, statut: "Nouveau mandat/Demande d'information"})}
-                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            formData.statut === "Nouveau mandat/Demande d'information"
-                              ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500"
-                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
-                          }`}
-                        >
-                          Nouveau mandat
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({...formData, statut: "Mandats à ouvrir"})}
-                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            formData.statut === "Mandats à ouvrir"
-                              ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500"
-                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
-                          }`}
-                        >
-                          Mandat à ouvrir
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({...formData, statut: "Mandat non octroyé"})}
-                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                            formData.statut === "Mandat non octroyé"
-                              ? "bg-red-500/30 text-red-400 border-2 border-red-500"
-                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
-                          }`}
-                        >
-                          Non octroyé
-                        </button>
-                      </div>
+                  {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
+                  <div className="space-y-2">
+                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                    <div className="flex gap-2">
+                      {ARPENTEURS.map((arpenteur) => {
+                        const isSelected = formData.arpenteur_geometre === arpenteur;
+                        const colorClasses = {
+                          "Samuel Guay": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400",
+                          "Pierre-Luc Pilote": isSelected ? "bg-slate-500/30 text-slate-300 border-2 border-slate-400" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-500/10 hover:text-slate-300",
+                          "Frédéric Gilbert": isSelected ? "bg-orange-500/30 text-orange-400 border-2 border-orange-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-orange-500/10 hover:text-orange-400",
+                          "Dany Gaboury": isSelected ? "bg-yellow-500/30 text-yellow-400 border-2 border-yellow-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-yellow-500/10 hover:text-yellow-400",
+                          "Benjamin Larouche": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
+                        };
+                        return (
+                          <button
+                            key={arpenteur}
+                            type="button"
+                            onClick={() => setFormData({...formData, arpenteur_geometre: arpenteur})}
+                            disabled={!!dossierReferenceId}
+                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {getArpenteurInitials(arpenteur).slice(0, -1)}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
