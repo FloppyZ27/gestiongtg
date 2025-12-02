@@ -69,7 +69,7 @@ export default function ClientStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
+                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ export default function ClientStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1.5 pb-3">
+        <CardContent className="pt-1 pb-2">
           <div className="grid grid-cols-[70%_30%] gap-4">
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
@@ -104,7 +104,7 @@ export default function ClientStepForm({
                     value={clientForm.prenom}
                     onChange={(e) => setClientForm({ ...clientForm, prenom: e.target.value })}
                     placeholder="Prénom"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -113,7 +113,7 @@ export default function ClientStepForm({
                     value={clientForm.nom}
                     onChange={(e) => setClientForm({ ...clientForm, nom: e.target.value })}
                     placeholder="Nom"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default function ClientStepForm({
                     value={clientForm.courriel}
                     onChange={(e) => setClientForm({ ...clientForm, courriel: e.target.value })}
                     placeholder="exemple@courriel.com"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
               </div>

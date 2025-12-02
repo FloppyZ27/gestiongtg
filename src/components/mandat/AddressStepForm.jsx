@@ -164,7 +164,7 @@ export default function AddressStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
@@ -187,7 +187,7 @@ export default function AddressStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1.5 pb-3">
+        <CardContent className="pt-1 pb-2">
           <div className="grid grid-cols-[70%_30%] gap-3">
             {/* Colonne gauche - Formulaire d'adresse */}
             <div className="space-y-2">
@@ -199,7 +199,7 @@ export default function AddressStepForm({
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Rechercher une adresse..."
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm pl-10"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm pl-10"
                   />
                   {isSearching && (
                     <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
@@ -230,7 +230,7 @@ export default function AddressStepForm({
                     value={addressForm.numero_civique}
                     onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
                     placeholder="123"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -239,7 +239,7 @@ export default function AddressStepForm({
                     value={addressForm.rue}
                     onChange={(e) => handleFieldChange('rue', e.target.value)}
                     placeholder="Nom de la rue"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -248,7 +248,7 @@ export default function AddressStepForm({
                     value={addressForm.ville}
                     onChange={(e) => handleFieldChange('ville', e.target.value)}
                     placeholder="Ville"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -257,7 +257,7 @@ export default function AddressStepForm({
                     value={addressForm.code_postal}
                     onChange={(e) => handleFieldChange('code_postal', e.target.value)}
                     placeholder="G0V 0A0"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -266,7 +266,7 @@ export default function AddressStepForm({
                     value={addressForm.numero_lot}
                     onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
                     placeholder="1234567"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
               </div>
