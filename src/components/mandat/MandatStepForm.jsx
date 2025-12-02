@@ -80,7 +80,7 @@ export default function MandatStepForm({
     updateMandats(selectedTypes, newInfo);
   };
 
-  const updateMandats = (types, info) => {
+  const updateMandats = React.useCallback((types, info) => {
     if (types.length === 0) {
       onMandatsChange([{
         type_mandat: "",
@@ -103,7 +103,7 @@ export default function MandatStepForm({
       });
       onMandatsChange(newMandats);
     }
-  };
+  }, [mandats, onMandatsChange]);
 
   const getUrgenceColor = (urgence) => {
     switch (urgence) {
