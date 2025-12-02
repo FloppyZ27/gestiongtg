@@ -1326,17 +1326,7 @@ export default function PriseDeMandat() {
             <p className="text-slate-400">Gestion des prise de mandat</p>
           </div>
 
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            if (!open) {
-              // Demander confirmation avant de fermer
-              if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
-                setIsDialogOpen(false);
-                resetFullForm();
-              }
-            } else {
-              setIsDialogOpen(open);
-            }
-          }}>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
                 <Plus className="w-5 h-5 mr-2" />
@@ -1490,20 +1480,6 @@ export default function PriseDeMandat() {
                   </div>
                 </form>
 
-                {/* Boutons Annuler/Créer tout en bas */}
-                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                  <Button type="button" variant="outline" onClick={() => {
-                    if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
-                      setIsDialogOpen(false);
-                      resetFullForm();
-                    }
-                  }}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingDossier ? "Modifier" : "Créer"}
-                  </Button>
-                </div>
                 </div>
 
                 {/* Commentaires Sidebar - 25% */}
@@ -1565,6 +1541,16 @@ export default function PriseDeMandat() {
                       />
                     </div>
                   )}
+                </div>
+
+                {/* Boutons Annuler/Créer tout en bas */}
+                <div className="flex justify-end gap-3 p-4 border-t border-slate-800 bg-slate-900/95 backdrop-blur flex-shrink-0">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {editingDossier ? "Modifier" : "Créer"}
+                  </Button>
                 </div>
               </div>
             </DialogContent>
