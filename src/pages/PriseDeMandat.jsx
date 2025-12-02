@@ -20,6 +20,7 @@ import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
+import ClientStepForm from "../components/mandat/ClientStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -179,13 +180,14 @@ export default function PriseDeMandat() {
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [clientStepCollapsed, setClientStepCollapsed] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     date_fermeture: "",
-    statut: "Retour d'appel",
+    statut: "Nouveau mandat/Demande d'information",
     ttl: "Non",
     utilisateur_assigne: "",
     clients_ids: [],
@@ -815,7 +817,7 @@ export default function PriseDeMandat() {
       arpenteur_geometre: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
-      statut: "Retour d'appel",
+      statut: "Nouveau mandat/Demande d'information",
       ttl: "Non",
       utilisateur_assigne: "",
       clients_ids: [],
@@ -1245,7 +1247,7 @@ export default function PriseDeMandat() {
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6 flex items-center gap-3">
                     <h2 className="text-2xl font-bold text-white">
-                      {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
+                      {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
                     </h2>
                     {formData.ttl === "Oui" && (
                       <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
@@ -1281,30 +1283,14 @@ export default function PriseDeMandat() {
                     <div className="space-y-2">
                       <Label>Statut <span className="text-red-400">*</span></Label>
                       <Select value={formData.statut} onValueChange={(value) => {
-                        // Si on change le statut et qu'on avait un dossier de référence, reset tout
-                        if (dossierReferenceId && value !== "Retour d'appel") {
-                          resetForm();
-                          setFormData(prev => ({
-                            ...prev,
-                            statut: value,
-                            arpenteur_geometre: formData.arpenteur_geometre
-                          }));
-                        } else {
-                          setFormData({...formData, statut: value, utilisateur_assigne: value !== "Retour d'appel" ? "" : formData.utilisateur_assigne});
-                          if (value !== "Retour d'appel") {
-                            setDossierReferenceId(null);
-                            setDossierSearchForReference("");
-                          }
-                        }
+                        setFormData({...formData, statut: value});
                       }}>
                         <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                           <SelectValue placeholder="Sélectionner le statut" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Retour d'appel" className="text-white">Retour d'appel</SelectItem>
                           <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
-                          <SelectItem value="Soumission" className="text-white">Soumission</SelectItem>
-                          <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
+                          <SelectItem value="Mandats à ouvrir" className="text-white">Mandat à ouvrir</SelectItem>
                           <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
                           {editingDossier && (
                             <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
@@ -1314,110 +1300,29 @@ export default function PriseDeMandat() {
                     </div>
                   </div>
 
-                  {/* Champ "Créer à partir d'un dossier existant" - Visible SEULEMENT pour Retour d'appel */}
-                  {formData.statut === "Retour d'appel" && (
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                        <Input
-                          placeholder="Rechercher un dossier par numéro, client, etc."
-                          value={dossierSearchForReference}
-                          onChange={(e) => setDossierSearchForReference(e.target.value)}
-                          className="pl-10 bg-slate-700 border-slate-600"
-                        />
-                      </div>
-                      {dossierSearchForReference && (
-                        <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
-                          {filteredDossiersForReference.length > 0 ? (
-                            filteredDossiersForReference.map(d => (
-                              <div
-                                key={d.id}
-                                className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
-                                onClick={() => loadDossierReference(d.id)}
-                              >
-                                <div>
-                                  <p className="font-medium text-white">
-                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""}
-                                    {d.numero_dossier && d.arpenteur_geometre && " - "}
-                                    {getClientsNames(d.clients_ids)}
-                                  </p>
-                                  <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
-                                </div>
-                                <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
-                                  <Plus className="w-4 h-4 mr-1" /> Sélectionner
-                                </Button>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
-                          )}
-                        </div>
-                      )}
-                      {dossierReferenceId && (
-                        <div className="mt-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setDossierReferenceId(null);
-                              resetForm();
-                            }}
-                            className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
-                          >
-                            Effacer le dossier de référence
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Utilisateur assigné pour Retour d'appel */}
-                  {formData.statut === "Retour d'appel" && (
-                    <div className="space-y-2">
-                      <Label>Utilisateur assigné</Label>
-                      <Select
-                        value={formData.utilisateur_assigne || ""}
-                        onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                      >
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner un utilisateur" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                          {users.map((user) => (
-                            <SelectItem key={user.email} value={user.email} className="text-white">
-                              {user.full_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* Informations du dossier de référence - Only visible for "Retour d'appel" with reference dossier */}
-                  {formData.statut === "Retour d'appel" && dossierReferenceId && (
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                      <div className="space-y-2">
-                        <Label>N° de dossier de référence</Label>
-                        <Input
-                          value={formData.numero_dossier}
-                          className="bg-slate-800 border-slate-700"
-                          disabled
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Date d'ouverture du dossier de référence</Label>
-                        <Input
-                          type="date"
-                          value={formData.date_ouverture}
-                          className="bg-slate-800 border-slate-700"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  )}
+                  {/* Étape 1: Informations du client */}
+                  <ClientStepForm
+                    clients={clientsReguliers}
+                    selectedClientIds={formData.clients_ids}
+                    onSelectClient={(clientId) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        clients_ids: prev.clients_ids.includes(clientId)
+                          ? prev.clients_ids.filter(id => id !== clientId)
+                          : [...prev.clients_ids, clientId]
+                      }));
+                    }}
+                    onCreateClient={async (clientData) => {
+                      const newClient = await base44.entities.Client.create(clientData);
+                      queryClient.invalidateQueries({ queryKey: ['clients'] });
+                      setFormData(prev => ({
+                        ...prev,
+                        clients_ids: [...prev.clients_ids, newClient.id]
+                      }));
+                    }}
+                    isCollapsed={clientStepCollapsed}
+                    onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
+                  />
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
                   {formData.statut === "Ouvert" && (
