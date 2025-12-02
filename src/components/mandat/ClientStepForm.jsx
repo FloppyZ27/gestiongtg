@@ -77,9 +77,16 @@ export default function ClientStepForm({
             <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
             <CardTitle className="text-white text-base">Informations du client</CardTitle>
             {selectedClientIds.length > 0 && (
-              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                {selectedClientIds.length} sélectionné(s)
-              </Badge>
+              <div className="flex gap-1">
+                {selectedClientIds.map(clientId => {
+                  const client = clients.find(c => c.id === clientId);
+                  return client ? (
+                    <Badge key={clientId} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      {client.prenom} {client.nom}
+                    </Badge>
+                  ) : null;
+                })}
+              </div>
             )}
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}

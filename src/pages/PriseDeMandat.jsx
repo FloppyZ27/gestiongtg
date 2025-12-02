@@ -1291,21 +1291,41 @@ export default function PriseDeMandat() {
 
                     <div className="space-y-2">
                       <Label>Statut <span className="text-red-400">*</span></Label>
-                      <Select value={formData.statut} onValueChange={(value) => {
-                        setFormData({...formData, statut: value});
-                      }}>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner le statut" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
-                          <SelectItem value="Mandats à ouvrir" className="text-white">Mandat à ouvrir</SelectItem>
-                          <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
-                          {editingDossier && (
-                            <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, statut: "Nouveau mandat/Demande d'information"})}
+                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            formData.statut === "Nouveau mandat/Demande d'information"
+                              ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500"
+                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          Nouveau mandat
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, statut: "Mandats à ouvrir"})}
+                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            formData.statut === "Mandats à ouvrir"
+                              ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500"
+                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          Mandat à ouvrir
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, statut: "Mandat non octroyé"})}
+                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            formData.statut === "Mandat non octroyé"
+                              ? "bg-red-500/30 text-red-400 border-2 border-red-500"
+                              : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          Non octroyé
+                        </button>
+                      </div>
                     </div>
                   </div>
 
