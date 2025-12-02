@@ -1336,15 +1336,17 @@ export default function PriseDeMandat() {
                       formData.clients_ids.length > 0 && 
                       formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId))
                     )}
-                    onSelectExistingAddress={(addr) => {
+                    onSelectExistingAddress={(addr, lots) => {
                       if (addr) {
+                        // Combiner les numéros de lots s'il y en a plusieurs
+                        const lotNumbers = lots && lots.length > 0 ? lots.join(', ') : (addr.numero_lot || "");
                         setWorkAddress({
                           numeros_civiques: addr.numeros_civiques || [""],
                           rue: addr.rue || "",
                           ville: addr.ville || "",
                           province: addr.province || "Québec",
                           code_postal: addr.code_postal || "",
-                          numero_lot: addr.numero_lot || ""
+                          numero_lot: lotNumbers
                         });
                       }
                     }}

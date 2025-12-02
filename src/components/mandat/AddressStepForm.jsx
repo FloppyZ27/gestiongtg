@@ -18,6 +18,7 @@ export default function AddressStepForm({
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchTimeout, setSearchTimeoutState] = useState(null);
+  const [selectedMandatKey, setSelectedMandatKey] = useState(null);
 
   const [addressForm, setAddressForm] = useState({
     numero_civique: address?.numeros_civiques?.[0] || "",
@@ -282,17 +283,26 @@ export default function AddressStepForm({
                       const addr = mandat.adresse_travaux;
                       const addrText = addr ? `${addr.numeros_civiques?.[0] || ''} ${addr.rue || ''}, ${addr.ville || ''}`.trim() : '';
                       if (!addrText || addrText === ', ') return null;
+                      const mandatKey = `${dossier.id}-${mIdx}`;
+                      const isSelected = selectedMandatKey === mandatKey;
                       return (
                         <div
-                          key={`${dossier.id}-${mIdx}`}
-                          onClick={() => onSelectExistingAddress && onSelectExistingAddress(addr)}
-                          className="px-2 py-1 rounded cursor-pointer bg-slate-700/50 text-slate-300 hover:bg-blue-500/20 hover:text-blue-400 text-xs"
+                          key={mandatKey}
+                          onClick={() => {
+                            setSelectedMandatKey(mandatKey);
+                            onSelectExistingAddress && onSelectExistingAddress(addr, mandat.lots);
+                          }}
+                          className={`px-2 py-1 rounded cursor-pointer text-xs ${
+                            isSelected 
+                              ? 'bg-emerald-500/20 text-emerald-400' 
+                              : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                          }`}
                         >
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{addrText}</span>
                           </div>
-                          <span className="text-[10px] text-slate-500">{mandat.type_mandat}</span>
+                          <span className={`text-[10px] ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>{mandat.type_mandat}</span>
                         </div>
                       );
                     })
