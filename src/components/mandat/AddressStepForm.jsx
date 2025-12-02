@@ -10,7 +10,9 @@ export default function AddressStepForm({
   address,
   onAddressChange,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  clientDossiers = [],
+  onSelectExistingAddress
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -186,84 +188,118 @@ export default function AddressStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1.5 pb-3">
-          <div className="space-y-3">
-            {/* Barre de recherche */}
-            <div className="relative">
+          <div className="grid grid-cols-[70%_30%] gap-3">
+            {/* Colonne gauche - Formulaire d'adresse */}
+            <div className="space-y-2">
+              {/* Barre de recherche */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Rechercher une adresse..."
-                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm pl-10"
-                />
-                {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder="Rechercher une adresse..."
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm pl-10"
+                  />
+                  {isSearching && (
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
+                  )}
+                </div>
+                
+                {suggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                    {suggestions.map((suggestion, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => selectSuggestion(suggestion)}
+                        className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
+                      >
+                        <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                        <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-              
-              {suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                  {suggestions.map((suggestion, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => selectSuggestion(suggestion)}
-                      className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
-                    >
-                      <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                      <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
-                    </div>
-                  ))}
+
+              {/* Champs manuels */}
+              <div className="grid grid-cols-[80px_1fr_1fr_100px_120px] gap-2">
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">N° civique</Label>
+                  <Input
+                    value={addressForm.numero_civique}
+                    onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
+                    placeholder="123"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
                 </div>
-              )}
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Rue</Label>
+                  <Input
+                    value={addressForm.rue}
+                    onChange={(e) => handleFieldChange('rue', e.target.value)}
+                    placeholder="Nom de la rue"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Ville</Label>
+                  <Input
+                    value={addressForm.ville}
+                    onChange={(e) => handleFieldChange('ville', e.target.value)}
+                    placeholder="Ville"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Code postal</Label>
+                  <Input
+                    value={addressForm.code_postal}
+                    onChange={(e) => handleFieldChange('code_postal', e.target.value)}
+                    placeholder="G0V 0A0"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">N° de lot</Label>
+                  <Input
+                    value={addressForm.numero_lot}
+                    onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
+                    placeholder="1234567"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Champs manuels */}
-            <div className="grid grid-cols-[80px_1fr_1fr_100px_120px] gap-2">
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">N° civique</Label>
-                <Input
-                  value={addressForm.numero_civique}
-                  onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
-                  placeholder="123"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Rue</Label>
-                <Input
-                  value={addressForm.rue}
-                  onChange={(e) => handleFieldChange('rue', e.target.value)}
-                  placeholder="Nom de la rue"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Ville</Label>
-                <Input
-                  value={addressForm.ville}
-                  onChange={(e) => handleFieldChange('ville', e.target.value)}
-                  placeholder="Ville"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Code postal</Label>
-                <Input
-                  value={addressForm.code_postal}
-                  onChange={(e) => handleFieldChange('code_postal', e.target.value)}
-                  placeholder="G0V 0A0"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">N° de lot</Label>
-                <Input
-                  value={addressForm.numero_lot}
-                  onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
-                  placeholder="1234567"
-                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                />
+            {/* Colonne droite - Mandats existants du client */}
+            <div className="border-l border-slate-700 pl-3">
+              <p className="text-slate-400 text-xs mb-1.5">Mandats existants du client</p>
+              <div className="max-h-[85px] overflow-y-auto space-y-1">
+                {clientDossiers.length > 0 ? (
+                  clientDossiers.map((dossier) => (
+                    dossier.mandats?.map((mandat, mIdx) => {
+                      const addr = mandat.adresse_travaux;
+                      const addrText = addr ? `${addr.numeros_civiques?.[0] || ''} ${addr.rue || ''}, ${addr.ville || ''}`.trim() : '';
+                      if (!addrText || addrText === ', ') return null;
+                      return (
+                        <div
+                          key={`${dossier.id}-${mIdx}`}
+                          onClick={() => onSelectExistingAddress && onSelectExistingAddress(addr)}
+                          className="px-2 py-1 rounded cursor-pointer bg-slate-700/50 text-slate-300 hover:bg-blue-500/20 hover:text-blue-400 text-xs"
+                        >
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{addrText}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-500">{mandat.type_mandat}</span>
+                        </div>
+                      );
+                    })
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-xs text-center py-2">Aucun mandat</p>
+                )}
               </div>
             </div>
           </div>
