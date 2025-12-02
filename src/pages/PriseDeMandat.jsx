@@ -1520,6 +1520,7 @@ export default function PriseDeMandat() {
                     <CommentairesSection
                       dossierId={editingDossier?.id}
                       dossierTemporaire={!editingDossier}
+                      commentairesTemp={commentairesTemporaires}
                       onCommentairesTempChange={setCommentairesTemporaires}
                     />
                   </div>
