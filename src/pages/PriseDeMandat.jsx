@@ -1298,7 +1298,7 @@ export default function PriseDeMandat() {
                             disabled={!!dossierReferenceId}
                             className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
-                            {getArpenteurInitials(arpenteur).slice(0, -1)}
+                            {arpenteur}
                           </button>
                         );
                       })}
