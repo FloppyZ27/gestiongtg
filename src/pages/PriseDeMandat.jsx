@@ -1332,6 +1332,22 @@ export default function PriseDeMandat() {
                     onAddressChange={setWorkAddress}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
+                    clientDossiers={dossiers.filter(d => 
+                      formData.clients_ids.length > 0 && 
+                      formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId))
+                    )}
+                    onSelectExistingAddress={(addr) => {
+                      if (addr) {
+                        setWorkAddress({
+                          numeros_civiques: addr.numeros_civiques || [""],
+                          rue: addr.rue || "",
+                          ville: addr.ville || "",
+                          province: addr.province || "Québec",
+                          code_postal: addr.code_postal || "",
+                          numero_lot: addr.numero_lot || ""
+                        });
+                      }
+                    }}
                   />
 
                   {/* Étape 3: Mandats */}
