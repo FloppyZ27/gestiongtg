@@ -193,39 +193,50 @@ export default function AddressStepForm({
           <div className="grid grid-cols-[70%_30%] gap-3">
             {/* Colonne gauche - Formulaire d'adresse */}
             <div className="space-y-2">
-              {/* Barre de recherche */}
-              <div className="relative mt-4">
+              {/* Barre de recherche et N° de lot sur la même ligne */}
+              <div className="grid grid-cols-[1fr_120px] gap-2 mt-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                  <Input
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder="Rechercher une adresse..."
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm pl-10"
-                  />
-                  {isSearching && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      placeholder="Rechercher une adresse..."
+                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm pl-10"
+                    />
+                    {isSearching && (
+                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
+                    )}
+                  </div>
+
+                  {suggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                      {suggestions.map((suggestion, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => selectSuggestion(suggestion)}
+                          className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
+                        >
+                          <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                          <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-                
-                {suggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                    {suggestions.map((suggestion, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => selectSuggestion(suggestion)}
-                        className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
-                      >
-                        <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                        <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">N° de lot</Label>
+                  <Input
+                    value={addressForm.numero_lot}
+                    onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
+                    placeholder="1234567"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  />
+                </div>
               </div>
 
               {/* Champs manuels */}
-              <div className="grid grid-cols-[80px_1fr_1fr_100px_120px] gap-2">
+              <div className="grid grid-cols-[80px_1fr_1fr_100px] gap-2">
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">N° civique</Label>
                   <Input
@@ -259,15 +270,6 @@ export default function AddressStepForm({
                     value={addressForm.code_postal}
                     onChange={(e) => handleFieldChange('code_postal', e.target.value)}
                     placeholder="G0V 0A0"
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">N° de lot</Label>
-                  <Input
-                    value={addressForm.numero_lot}
-                    onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
-                    placeholder="1234567"
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>

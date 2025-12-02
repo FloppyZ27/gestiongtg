@@ -204,7 +204,7 @@ export default function MandatStepForm({
               </div>
             </div>
 
-            {/* Deuxième ligne: Échéance souhaitée */}
+            {/* Deuxième ligne: Échéance souhaitée et dates */}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
@@ -219,32 +219,29 @@ export default function MandatStepForm({
                   </SelectContent>
                 </Select>
               </div>
+              {sharedInfo.echeance_souhaitee === "Date précise" && (
+                <>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Date de signature</Label>
+                    <Input
+                      type="date"
+                      value={sharedInfo.date_signature}
+                      onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                    <Input
+                      type="date"
+                      value={sharedInfo.date_debut_travaux}
+                      onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                    />
+                  </div>
+                </>
+              )}
             </div>
-
-            {/* Dates conditionnelles */}
-            {sharedInfo.echeance_souhaitee === "Date précise" && (
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Date de signature</Label>
-                  <Input
-                    type="date"
-                    value={sharedInfo.date_signature}
-                    onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                  <Input
-                    type="date"
-                    value={sharedInfo.date_debut_travaux}
-                    onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                  />
-                </div>
-                <div></div>
-              </div>
-            )}
           </div>
         </CardContent>
       )}
