@@ -66,13 +66,13 @@ export default function MandatStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-slate-800/50 transition-colors rounded-t-lg py-3"
+        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-3 bg-orange-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
-            <CardTitle className="text-white text-base">Mandat</CardTitle>
+            <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
+            <CardTitle className="text-orange-300 text-base">Mandat</CardTitle>
             {hasMandat && (
               <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
                 {mandatForm.type_mandat}
@@ -91,8 +91,8 @@ export default function MandatStepForm({
       {!isCollapsed && (
         <CardContent className="pt-2 pb-4">
           <div className="space-y-3">
-            {/* Première ligne: Type de mandat et Objectif */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Première ligne: Type de mandat, Objectif et Urgence perçue */}
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Type de mandat</Label>
                 <Select value={mandatForm.type_mandat} onValueChange={(value) => handleFieldChange('type_mandat', value)}>
@@ -119,23 +119,6 @@ export default function MandatStepForm({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            {/* Deuxième ligne: Échéance souhaitée et Urgence perçue */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                <Select value={mandatForm.echeance_souhaitee} onValueChange={(value) => handleFieldChange('echeance_souhaitee', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {ECHEANCES.map((echeance) => (
-                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Urgence perçue</Label>
                 <Select value={mandatForm.urgence_percue} onValueChange={(value) => handleFieldChange('urgence_percue', value)}>
@@ -151,29 +134,44 @@ export default function MandatStepForm({
               </div>
             </div>
 
-            {/* Champs de date conditionnels */}
-            {mandatForm.echeance_souhaitee === "Date précise" && (
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-700/30 rounded-lg border border-slate-600">
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Date de signature</Label>
-                  <Input
-                    type="date"
-                    value={mandatForm.date_signature}
-                    onChange={(e) => handleFieldChange('date_signature', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                  <Input
-                    type="date"
-                    value={mandatForm.date_debut_travaux}
-                    onChange={(e) => handleFieldChange('date_debut_travaux', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                  />
-                </div>
+            {/* Deuxième ligne: Échéance souhaitée et dates */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                <Select value={mandatForm.echeance_souhaitee} onValueChange={(value) => handleFieldChange('echeance_souhaitee', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {ECHEANCES.map((echeance) => (
+                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+              {mandatForm.echeance_souhaitee === "Date précise" && (
+                <>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Date de signature</Label>
+                    <Input
+                      type="date"
+                      value={mandatForm.date_signature}
+                      onChange={(e) => handleFieldChange('date_signature', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                    <Input
+                      type="date"
+                      value={mandatForm.date_debut_travaux}
+                      onChange={(e) => handleFieldChange('date_debut_travaux', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       )}

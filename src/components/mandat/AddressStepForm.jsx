@@ -60,11 +60,12 @@ export default function AddressStepForm({
 
     setIsSearching(true);
     try {
-      // Utiliser l'API de géocodage du gouvernement du Québec avec position centrée sur Alma
-      const encodedQuery = encodeURIComponent(query);
-      // Coordonnées d'Alma, Québec: Lat 48.5501, Lon -71.6525
+      // Ajouter "Alma" à la recherche pour prioriser cette région
+      const searchQuery = query.toLowerCase().includes('alma') ? query : `${query}, Alma, Québec`;
+      const encodedQuery = encodeURIComponent(searchQuery);
+      
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10&location=-71.6525,48.5501&distance=100000`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
       );
       const data = await response.json();
       
@@ -126,13 +127,13 @@ export default function AddressStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-slate-800/50 transition-colors rounded-t-lg py-3"
+        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 bg-blue-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">2</div>
-            <CardTitle className="text-white text-base">Adresse des travaux</CardTitle>
+            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm">2</div>
+            <CardTitle className="text-blue-300 text-base">Adresse des travaux</CardTitle>
             {hasAddress && (
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
                 {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}

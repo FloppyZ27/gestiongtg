@@ -69,13 +69,13 @@ export default function ClientStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-slate-800/50 transition-colors rounded-t-lg py-3"
+        className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 bg-emerald-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
-            <CardTitle className="text-white text-base">Informations du client</CardTitle>
+            <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
+            <CardTitle className="text-emerald-300 text-base">Informations du client</CardTitle>
             {selectedClientIds.length > 0 && (
               <div className="flex gap-1">
                 {selectedClientIds.map(clientId => {
