@@ -21,6 +21,7 @@ import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
 import ClientStepForm from "../components/mandat/ClientStepForm";
+import AddressStepForm from "../components/mandat/AddressStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -181,6 +182,14 @@ export default function PriseDeMandat() {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [clientStepCollapsed, setClientStepCollapsed] = useState(false);
+  const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
+  const [workAddress, setWorkAddress] = useState({
+    numeros_civiques: [""],
+    rue: "",
+    ville: "",
+    province: "Québec",
+    code_postal: ""
+  });
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -1314,6 +1323,14 @@ export default function PriseDeMandat() {
                     }}
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
+                  />
+
+                  {/* Étape 2: Adresse des travaux */}
+                  <AddressStepForm
+                    address={workAddress}
+                    onAddressChange={setWorkAddress}
+                    isCollapsed={addressStepCollapsed}
+                    onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
                   />
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
