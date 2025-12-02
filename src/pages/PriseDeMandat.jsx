@@ -1312,14 +1312,6 @@ export default function PriseDeMandat() {
                           : [...prev.clients_ids, clientId]
                       }));
                     }}
-                    onCreateClient={async (clientData) => {
-                      const newClient = await base44.entities.Client.create(clientData);
-                      queryClient.invalidateQueries({ queryKey: ['clients'] });
-                      setFormData(prev => ({
-                        ...prev,
-                        clients_ids: [...prev.clients_ids, newClient.id]
-                      }));
-                    }}
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
                   />
