@@ -60,33 +60,29 @@ export default function AddressStepForm({
 
     setIsSearching(true);
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Recherche d'adresses au Québec, Canada pour: "${query}". 
-        Retourne les 5 adresses les plus pertinentes avec numéro civique, rue, ville, province et code postal.
-        IMPORTANT: Prioriser la région d'Alma et du Lac-Saint-Jean en premier, puis le Saguenay-Lac-Saint-Jean.
-        Point de départ de la recherche: Alma, Québec, Canada.`,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            addresses: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  numero_civique: { type: "string" },
-                  rue: { type: "string" },
-                  ville: { type: "string" },
-                  province: { type: "string" },
-                  code_postal: { type: "string" },
-                  full_address: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
-      setSuggestions(response.addresses || []);
+      // Utiliser l'API de géocodage du gouvernement du Québec
+      const encodedQuery = encodeURIComponent(query);
+      const response = await fetch(
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
+      );
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates.length > 0) {
+        const formattedAddresses = data.candidates.map(candidate => {
+          const attrs = candidate.attributes || {};
+          return {
+            numero_civique: attrs.AddNum || "",
+            rue: attrs.StName || attrs.StAddr || "",
+            ville: attrs.City || attrs.Municipalit || "",
+            province: "Québec",
+            code_postal: attrs.Postal || "",
+            full_address: candidate.address || attrs.Match_addr || ""
+          };
+        });
+        setSuggestions(formattedAddresses);
+      } else {
+        setSuggestions([]);
+      }
     } catch (error) {
       console.error("Erreur recherche adresse:", error);
       setSuggestions([]);
