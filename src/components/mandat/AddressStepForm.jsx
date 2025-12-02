@@ -266,16 +266,14 @@ export default function AddressStepForm({
               </div>
 
               {/* Colonne centrale - N° de lot */}
-              <div className="border-l border-slate-700 pl-3 mt-4">
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">N° de lot</Label>
-                  <Input
-                    value={addressForm.numero_lot}
-                    onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
-                    placeholder="1234567"
-                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                  />
-                </div>
+              <div className="border-l border-slate-700 pl-3">
+                <p className="text-slate-400 text-xs mb-1.5">N° de lot</p>
+                <Input
+                  value={addressForm.numero_lot}
+                  onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
+                  placeholder="1234567"
+                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                />
               </div>
 
               {/* Colonne droite - Mandats existants du client */}
