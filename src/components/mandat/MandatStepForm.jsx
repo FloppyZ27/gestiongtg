@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Check } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -18,45 +18,17 @@ export default function MandatStepForm({
   isCollapsed,
   onToggleCollapse
 }) {
-  // État partagé pour tous les mandats
-  const [sharedInfo, setSharedInfo] = useState({
-    objectif: "",
-    echeance_souhaitee: "",
-    date_signature: "",
-    date_debut_travaux: "",
-    urgence_percue: ""
-  });
+  // Extraire les types sélectionnés directement des props
+  const selectedTypes = mandats.map(m => m.type_mandat).filter(t => t);
   
-  // Types de mandats sélectionnés
-  const [selectedTypes, setSelectedTypes] = useState([]);
-
-  // Initialiser une seule fois au montage
-  const initialized = React.useRef(false);
-  
-  useEffect(() => {
-    if (!initialized.current) {
-      initialized.current = true;
-      if (mandats && mandats.length > 0) {
-        // Extraire les types sélectionnés
-        const types = mandats.map(m => m.type_mandat).filter(t => t);
-        if (types.length > 0) {
-          setSelectedTypes(types);
-        }
-        
-        // Prendre les infos du premier mandat comme référence
-        const first = mandats[0];
-        if (first && (first.objectif || first.echeance_souhaitee || first.urgence_percue)) {
-          setSharedInfo({
-            objectif: first.objectif || "",
-            echeance_souhaitee: first.echeance_souhaitee || "",
-            date_signature: first.date_signature || "",
-            date_debut_travaux: first.date_debut_travaux || "",
-            urgence_percue: first.urgence_percue || ""
-          });
-        }
-      }
-    }
-  }, []);
+  // Prendre les infos partagées du premier mandat
+  const sharedInfo = {
+    objectif: mandats[0]?.objectif || "",
+    echeance_souhaitee: mandats[0]?.echeance_souhaitee || "",
+    date_signature: mandats[0]?.date_signature || "",
+    date_debut_travaux: mandats[0]?.date_debut_travaux || "",
+    urgence_percue: mandats[0]?.urgence_percue || ""
+  };
 
   const toggleMandatType = (type) => {
     let newSelectedTypes;
@@ -65,8 +37,28 @@ export default function MandatStepForm({
     } else {
       newSelectedTypes = [...selectedTypes, type];
     }
-    setSelectedTypes(newSelectedTypes);
-    updateMandats(newSelectedTypes, sharedInfo);
+    
+    if (newSelectedTypes.length === 0) {
+      onMandatsChange([{
+        type_mandat: "",
+        ...sharedInfo,
+        prix_estime: 0,
+        rabais: 0,
+        taxes_incluses: false
+      }]);
+    } else {
+      const newMandats = newSelectedTypes.map(t => {
+        const existingMandat = mandats.find(m => m.type_mandat === t);
+        return {
+          type_mandat: t,
+          ...sharedInfo,
+          prix_estime: existingMandat?.prix_estime || 0,
+          rabais: existingMandat?.rabais || 0,
+          taxes_incluses: existingMandat?.taxes_incluses || false
+        };
+      });
+      onMandatsChange(newMandats);
+    }
   };
 
   const handleSharedInfoChange = (field, value) => {
@@ -78,34 +70,13 @@ export default function MandatStepForm({
       newInfo.date_debut_travaux = "";
     }
     
-    setSharedInfo(newInfo);
-    updateMandats(selectedTypes, newInfo);
+    // Mettre à jour tous les mandats avec les nouvelles infos partagées
+    const updatedMandats = mandats.map(m => ({
+      ...m,
+      ...newInfo
+    }));
+    onMandatsChange(updatedMandats);
   };
-
-  const updateMandats = React.useCallback((types, info) => {
-    if (types.length === 0) {
-      onMandatsChange([{
-        type_mandat: "",
-        ...info,
-        prix_estime: 0,
-        rabais: 0,
-        taxes_incluses: false
-      }]);
-    } else {
-      const newMandats = types.map(type => {
-        // Préserver les infos de tarification existantes si le mandat existait déjà
-        const existingMandat = mandats.find(m => m.type_mandat === type);
-        return {
-          type_mandat: type,
-          ...info,
-          prix_estime: existingMandat?.prix_estime || 0,
-          rabais: existingMandat?.rabais || 0,
-          taxes_incluses: existingMandat?.taxes_incluses || false
-        };
-      });
-      onMandatsChange(newMandats);
-    }
-  }, [mandats, onMandatsChange]);
 
   const getUrgenceColor = (urgence) => {
     switch (urgence) {
