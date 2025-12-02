@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp, Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const OBJECTIFS = ["Vente", "Refinancement", "Projet de construction", "Litige"];
@@ -18,56 +18,85 @@ export default function MandatStepForm({
   isCollapsed,
   onToggleCollapse
 }) {
-  const [localMandats, setLocalMandats] = useState(mandats.length > 0 ? mandats : [{
-    type_mandat: "",
+  // État partagé pour tous les mandats
+  const [sharedInfo, setSharedInfo] = useState({
     objectif: "",
     echeance_souhaitee: "",
     date_signature: "",
     date_debut_travaux: "",
     urgence_percue: ""
-  }]);
+  });
+  
+  // Types de mandats sélectionnés
+  const [selectedTypes, setSelectedTypes] = useState([]);
 
   useEffect(() => {
     if (mandats && mandats.length > 0) {
-      setLocalMandats(mandats);
-    }
-  }, [mandats]);
-
-  const handleFieldChange = (index, field, value) => {
-    const updatedMandats = localMandats.map((m, i) => {
-      if (i === index) {
-        const updated = { ...m, [field]: value };
-        // Reset date fields if echeance is not "Date précise"
-        if (field === 'echeance_souhaitee' && value !== "Date précise") {
-          updated.date_signature = "";
-          updated.date_debut_travaux = "";
-        }
-        return updated;
+      // Extraire les types sélectionnés
+      const types = mandats.map(m => m.type_mandat).filter(t => t);
+      setSelectedTypes(types);
+      
+      // Prendre les infos du premier mandat comme référence
+      const first = mandats[0];
+      if (first) {
+        setSharedInfo({
+          objectif: first.objectif || "",
+          echeance_souhaitee: first.echeance_souhaitee || "",
+          date_signature: first.date_signature || "",
+          date_debut_travaux: first.date_debut_travaux || "",
+          urgence_percue: first.urgence_percue || ""
+        });
       }
-      return m;
-    });
-    setLocalMandats(updatedMandats);
-    onMandatsChange(updatedMandats);
+    }
+  }, []);
+
+  const toggleMandatType = (type) => {
+    let newSelectedTypes;
+    if (selectedTypes.includes(type)) {
+      newSelectedTypes = selectedTypes.filter(t => t !== type);
+    } else {
+      newSelectedTypes = [...selectedTypes, type];
+    }
+    setSelectedTypes(newSelectedTypes);
+    updateMandats(newSelectedTypes, sharedInfo);
   };
 
-  const addMandat = () => {
-    const newMandats = [...localMandats, {
-      type_mandat: "",
-      objectif: "",
-      echeance_souhaitee: "",
-      date_signature: "",
-      date_debut_travaux: "",
-      urgence_percue: ""
-    }];
-    setLocalMandats(newMandats);
-    onMandatsChange(newMandats);
+  const handleSharedInfoChange = (field, value) => {
+    const newInfo = { ...sharedInfo, [field]: value };
+    
+    // Reset date fields if echeance is not "Date précise"
+    if (field === 'echeance_souhaitee' && value !== "Date précise") {
+      newInfo.date_signature = "";
+      newInfo.date_debut_travaux = "";
+    }
+    
+    setSharedInfo(newInfo);
+    updateMandats(selectedTypes, newInfo);
   };
 
-  const removeMandat = (index) => {
-    if (localMandats.length <= 1) return;
-    const newMandats = localMandats.filter((_, i) => i !== index);
-    setLocalMandats(newMandats);
-    onMandatsChange(newMandats);
+  const updateMandats = (types, info) => {
+    if (types.length === 0) {
+      onMandatsChange([{
+        type_mandat: "",
+        ...info,
+        prix_estime: 0,
+        rabais: 0,
+        taxes_incluses: false
+      }]);
+    } else {
+      const newMandats = types.map(type => {
+        // Préserver les infos de tarification existantes si le mandat existait déjà
+        const existingMandat = mandats.find(m => m.type_mandat === type);
+        return {
+          type_mandat: type,
+          ...info,
+          prix_estime: existingMandat?.prix_estime || 0,
+          rabais: existingMandat?.rabais || 0,
+          taxes_incluses: existingMandat?.taxes_incluses || false
+        };
+      });
+      onMandatsChange(newMandats);
+    }
   };
 
   const getUrgenceColor = (urgence) => {
@@ -79,8 +108,6 @@ export default function MandatStepForm({
     }
   };
 
-  const selectedMandatsCount = localMandats.filter(m => m.type_mandat).length;
-
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
@@ -91,14 +118,19 @@ export default function MandatStepForm({
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-sm">3</div>
             <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
-            {selectedMandatsCount > 0 && (
+            {selectedTypes.length > 0 && (
               <div className="flex gap-1 flex-wrap">
-                {localMandats.filter(m => m.type_mandat).map((m, idx) => (
+                {selectedTypes.map((type, idx) => (
                   <Badge key={idx} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                    {m.type_mandat}
+                    {type}
                   </Badge>
                 ))}
               </div>
+            )}
+            {sharedInfo.urgence_percue && (
+              <Badge className={`${getUrgenceColor(sharedInfo.urgence_percue)} text-xs`}>
+                {sharedInfo.urgence_percue}
+              </Badge>
             )}
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -107,118 +139,101 @@ export default function MandatStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-2 pb-4">
-          <div className="space-y-4">
-            {localMandats.map((mandat, index) => (
-              <div key={index} className="p-3 bg-slate-700/20 rounded-lg border border-slate-600/50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-300">Mandat {index + 1}</span>
-                  {localMandats.length > 1 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeMandat(index)}
-                      className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          <div className="space-y-3">
+            {/* Sélection multiple des types de mandats */}
+            <div className="space-y-2">
+              <Label className="text-slate-400 text-xs">Types de mandats (sélection multiple)</Label>
+              <div className="grid grid-cols-4 gap-2 p-3 bg-slate-700/30 rounded-lg border border-slate-600">
+                {TYPES_MANDATS.map((type) => {
+                  const isSelected = selectedTypes.includes(type);
+                  return (
+                    <div
+                      key={type}
+                      onClick={() => toggleMandatType(type)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all text-sm ${
+                        isSelected 
+                          ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50' 
+                          : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 hover:text-white'
+                      }`}
                     >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-                
-                {/* Première ligne: Type de mandat, Objectif et Urgence perçue */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Type de mandat</Label>
-                    <Select value={mandat.type_mandat} onValueChange={(value) => handleFieldChange(index, 'type_mandat', value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {TYPES_MANDATS.map((type) => (
-                          <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Objectif</Label>
-                    <Select value={mandat.objectif} onValueChange={(value) => handleFieldChange(index, 'objectif', value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {OBJECTIFS.map((objectif) => (
-                          <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Urgence perçue</Label>
-                    <Select value={mandat.urgence_percue} onValueChange={(value) => handleFieldChange(index, 'urgence_percue', value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {URGENCES.map((urgence) => (
-                          <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                      <Checkbox
+                        checked={isSelected}
+                        className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                      />
+                      <span className="truncate">{type}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                {/* Deuxième ligne: Échéance souhaitée et dates */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                    <Select value={mandat.echeance_souhaitee} onValueChange={(value) => handleFieldChange(index, 'echeance_souhaitee', value)}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {ECHEANCES.map((echeance) => (
-                          <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {mandat.echeance_souhaitee === "Date précise" && (
-                    <>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Date de signature</Label>
-                        <Input
-                          type="date"
-                          value={mandat.date_signature}
-                          onChange={(e) => handleFieldChange(index, 'date_signature', e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                        <Input
-                          type="date"
-                          value={mandat.date_debut_travaux}
-                          onChange={(e) => handleFieldChange(index, 'date_debut_travaux', e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
-                        />
-                      </div>
-                    </>
-                  )}
+            {/* Première ligne: Objectif et Urgence perçue */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Objectif</Label>
+                <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {OBJECTIFS.map((objectif) => (
+                      <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Urgence perçue</Label>
+                <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {URGENCES.map((urgence) => (
+                      <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                    <SelectValue placeholder="Sélectionner..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {ECHEANCES.map((echeance) => (
+                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Dates conditionnelles */}
+            {sharedInfo.echeance_souhaitee === "Date précise" && (
+              <div className="grid grid-cols-3 gap-3">
+                <div></div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Date de signature</Label>
+                  <Input
+                    type="date"
+                    value={sharedInfo.date_signature}
+                    onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                  <Input
+                    type="date"
+                    value={sharedInfo.date_debut_travaux}
+                    onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                  />
                 </div>
               </div>
-            ))}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addMandat}
-              className="w-full border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-orange-500/50 hover:bg-orange-500/10"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter un autre mandat
-            </Button>
+            )}
           </div>
         </CardContent>
       )}
