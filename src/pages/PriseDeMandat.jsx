@@ -860,6 +860,63 @@ export default function PriseDeMandat() {
     setCommentairesTemporaires([]);
   };
 
+  const resetFullForm = () => {
+    // Reset du formData principal
+    setFormData({
+      numero_dossier: "",
+      arpenteur_geometre: "",
+      date_ouverture: new Date().toISOString().split('T')[0],
+      date_fermeture: "",
+      statut: "Nouveau mandat/Demande d'information",
+      ttl: "Non",
+      utilisateur_assigne: "",
+      clients_ids: [],
+      clients_texte: "",
+      notaires_ids: [],
+      notaires_texte: "",
+      courtiers_ids: [],
+      courtiers_texte: "",
+      mandats: [],
+      description: ""
+    });
+    
+    // Reset de l'adresse de travail
+    setWorkAddress({
+      numeros_civiques: [""],
+      rue: "",
+      ville: "",
+      province: "Québec",
+      code_postal: "",
+      numero_lot: ""
+    });
+    
+    // Reset des mandats
+    setMandatsInfo([{
+      type_mandat: "",
+      objectif: "",
+      echeance_souhaitee: "",
+      date_signature: "",
+      date_debut_travaux: "",
+      urgence_percue: "",
+      prix_estime: 0,
+      rabais: 0,
+      taxes_incluses: false
+    }]);
+    
+    // Reset des états de collapse
+    setClientStepCollapsed(false);
+    setAddressStepCollapsed(false);
+    setMandatStepCollapsed(false);
+    setTarificationStepCollapsed(false);
+    
+    // Reset des autres états
+    setEditingDossier(null);
+    setActiveTabMandat("0");
+    setDossierReferenceId(null);
+    setDossierSearchForReference("");
+    setCommentairesTemporaires([]);
+  };
+
   // NEW FUNCTION
   const resetLotForm = () => {
     setNewLotForm({
@@ -1250,8 +1307,15 @@ export default function PriseDeMandat() {
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
+            if (!open) {
+              // Demander confirmation avant de fermer
+              if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+                setIsDialogOpen(false);
+                resetFullForm();
+              }
+            } else {
+              setIsDialogOpen(open);
+            }
           }}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
@@ -1336,6 +1400,7 @@ export default function PriseDeMandat() {
                       formData.clients_ids.length > 0 && 
                       formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId))
                     )}
+                    allLots={lots}
                     onSelectExistingAddress={(addr, mandatLots) => {
                       if (addr) {
                         // Récupérer les numéros de lots depuis l'entité Lot
@@ -1407,7 +1472,12 @@ export default function PriseDeMandat() {
 
                 {/* Boutons Annuler/Créer tout en bas */}
                 <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => {
+                    if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+                      setIsDialogOpen(false);
+                      resetFullForm();
+                    }
+                  }}>
                     Annuler
                   </Button>
                   <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">

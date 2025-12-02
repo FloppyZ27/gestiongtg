@@ -12,7 +12,8 @@ export default function AddressStepForm({
   isCollapsed,
   onToggleCollapse,
   clientDossiers = [],
-  onSelectExistingAddress
+  onSelectExistingAddress,
+  allLots = []
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -285,6 +286,15 @@ export default function AddressStepForm({
                       if (!addrText || addrText === ', ') return null;
                       const mandatKey = `${dossier.id}-${mIdx}`;
                       const isSelected = selectedMandatKey === mandatKey;
+                      
+                      // Récupérer les numéros de lots
+                      const lotNumbers = mandat.lots && mandat.lots.length > 0 
+                        ? mandat.lots.map(lotId => {
+                            const foundLot = allLots.find(l => l.id === lotId);
+                            return foundLot?.numero_lot || lotId;
+                          }).join(', ')
+                        : '';
+                      
                       return (
                         <div
                           key={mandatKey}
@@ -302,10 +312,12 @@ export default function AddressStepForm({
                             <MapPin className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{addrText}</span>
                           </div>
-                          <span className={`text-[10px] ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>{mandat.type_mandat}</span>
-                          {mandat.lots && mandat.lots.length > 0 && (
-                            <span className={`text-[10px] ml-1 ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>• Lot: {mandat.lots.join(', ')}</span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            <span className={`text-[10px] ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>{mandat.type_mandat}</span>
+                            {lotNumbers && (
+                              <span className={`text-[10px] ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>• {lotNumbers}</span>
+                            )}
+                          </div>
                         </div>
                       );
                     })
