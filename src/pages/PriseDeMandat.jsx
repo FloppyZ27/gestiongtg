@@ -1338,8 +1338,21 @@ export default function PriseDeMandat() {
                     )}
                     onSelectExistingAddress={(addr, lots) => {
                       if (addr) {
-                        // Combiner les numéros de lots s'il y en a plusieurs
-                        const lotNumbers = lots && lots.length > 0 ? lots.join(', ') : (addr.numero_lot || "");
+                        // Récupérer les numéros de lots depuis l'entité Lot
+                        let lotNumbers = "";
+                        if (lots && lots.length > 0) {
+                          const lotNumeros = lots.map(lotId => {
+                            const lot = lots.find(l => l === lotId);
+                            const lotEntity = lots.find(l => l.id === lotId) || lots.find(l => l === lotId);
+                            // Chercher dans les lots chargés
+                            const foundLot = lots.find(lotItem => {
+                              // Si c'est un ID, on le retourne tel quel pour l'instant
+                              return lotItem === lotId;
+                            });
+                            return foundLot || lotId;
+                          });
+                          lotNumbers = lotNumeros.join(', ');
+                        }
                         setWorkAddress({
                           numeros_civiques: addr.numeros_civiques || [""],
                           rue: addr.rue || "",
@@ -1370,7 +1383,6 @@ export default function PriseDeMandat() {
 
                   {/* Sélection du statut */}
                   <div className="space-y-2">
-                    <Label>Statut du dossier</Label>
                     <div className="flex gap-2">
                       {[
                         { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
