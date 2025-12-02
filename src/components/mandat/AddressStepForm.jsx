@@ -140,6 +140,11 @@ export default function AddressStepForm({
                 {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}
               </Badge>
             )}
+            {addressForm.numero_lot && (
+              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                Lot: {addressForm.numero_lot}
+              </Badge>
+            )}
           </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
