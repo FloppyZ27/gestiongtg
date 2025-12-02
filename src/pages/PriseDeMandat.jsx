@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -187,6 +187,8 @@ export default function PriseDeMandat() {
   const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
   const [mandatStepCollapsed, setMandatStepCollapsed] = useState(false);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(false);
+  const [mapCollapsed, setMapCollapsed] = useState(false);
+  const [commentsCollapsed, setCommentsCollapsed] = useState(false);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -1331,8 +1333,8 @@ export default function PriseDeMandat() {
               </DialogHeader>
 
               <div className="flex h-[90vh]">
-                {/* Main form content - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                {/* Main form content - 75% */}
+                <div className="flex-[0_0_75%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6 flex items-center gap-3">
                     <h2 className="text-2xl font-bold text-white">
                       {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
@@ -1486,10 +1488,20 @@ export default function PriseDeMandat() {
                 </div>
                 </div>
 
-                {/* Commentaires Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
-                  {/* Carte de l'adresse des travaux */}
-                  {(workAddress.rue || workAddress.ville) && (
+                {/* Commentaires Sidebar - 25% */}
+                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden">
+                  {/* Carte de l'adresse des travaux - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setMapCollapsed(!mapCollapsed)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm">📍</div>
+                      <h3 className="text-indigo-300 text-base font-semibold">Carte</h3>
+                    </div>
+                    {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                  {!mapCollapsed && (workAddress.rue || workAddress.ville) && (
                     <div className="p-4 border-b border-slate-800 flex-shrink-0">
                       <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                         <div className="aspect-square w-full">
@@ -1513,17 +1525,28 @@ export default function PriseDeMandat() {
                       </div>
                     </div>
                   )}
-                  <div className="p-6 border-b border-slate-800 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  
+                  {/* Commentaires - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setCommentsCollapsed(!commentsCollapsed)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-pink-500/30 flex items-center justify-center text-pink-400 font-bold text-sm">💬</div>
+                      <h3 className="text-pink-300 text-base font-semibold">Commentaires</h3>
+                    </div>
+                    {commentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  <div className="flex-1 overflow-hidden p-6">
-                    <CommentairesSection
-                      dossierId={editingDossier?.id}
-                      dossierTemporaire={!editingDossier}
-                      commentairesTemp={commentairesTemporaires}
-                      onCommentairesTempChange={setCommentairesTemporaires}
-                    />
-                  </div>
+                  {!commentsCollapsed && (
+                    <div className="flex-1 overflow-hidden p-4">
+                      <CommentairesSection
+                        dossierId={editingDossier?.id}
+                        dossierTemporaire={!editingDossier}
+                        commentairesTemp={commentairesTemporaires}
+                        onCommentairesTempChange={setCommentairesTemporaires}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </DialogContent>
