@@ -81,7 +81,7 @@ export default function TarificationStepForm({
                               handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
                             }}
                             placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-8 text-sm w-28"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-28"
                           />
                         </TableCell>
                         <TableCell>
@@ -94,7 +94,7 @@ export default function TarificationStepForm({
                               handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
                             }}
                             placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-8 text-sm w-28"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-28"
                           />
                         </TableCell>
                         <TableCell className="text-center">

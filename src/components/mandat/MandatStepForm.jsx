@@ -128,7 +128,7 @@ export default function MandatStepForm({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-10"
+                    className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-9"
                   >
                     {selectedTypes.length > 0 ? (
                       <div className="flex flex-wrap gap-1 max-w-[90%] overflow-hidden">
@@ -181,7 +181,7 @@ export default function MandatStepForm({
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Objectif</Label>
                 <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -194,7 +194,7 @@ export default function MandatStepForm({
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Urgence perçue</Label>
                 <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -207,7 +207,7 @@ export default function MandatStepForm({
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
                 <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-9 text-sm">
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -229,7 +229,7 @@ export default function MandatStepForm({
                     type="date"
                     value={sharedInfo.date_signature}
                     onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -238,7 +238,7 @@ export default function MandatStepForm({
                     type="date"
                     value={sharedInfo.date_debut_travaux}
                     onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white h-9 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                   />
                 </div>
               </div>

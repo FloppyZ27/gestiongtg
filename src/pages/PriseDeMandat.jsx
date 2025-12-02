@@ -1301,7 +1301,7 @@ export default function PriseDeMandat() {
                             type="button"
                             onClick={() => setFormData({...formData, arpenteur_geometre: arpenteur})}
                             disabled={!!dossierReferenceId}
-                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             {arpenteur}
                           </button>
@@ -1370,7 +1370,7 @@ export default function PriseDeMandat() {
                             key={statut.value}
                             type="button"
                             onClick={() => setFormData({...formData, statut: statut.value})}
-                            className={`flex-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
+                            className={`flex-1 px-2 py-2.5 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
                           >
                             {statut.label}
                           </button>

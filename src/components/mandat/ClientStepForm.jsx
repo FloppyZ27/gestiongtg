@@ -104,7 +104,7 @@ export default function ClientStepForm({
                     value={clientForm.prenom}
                     onChange={(e) => setClientForm({ ...clientForm, prenom: e.target.value })}
                     placeholder="Prénom"
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -113,7 +113,7 @@ export default function ClientStepForm({
                     value={clientForm.nom}
                     onChange={(e) => setClientForm({ ...clientForm, nom: e.target.value })}
                     placeholder="Nom"
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                   />
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default function ClientStepForm({
                     value={clientForm.courriel}
                     onChange={(e) => setClientForm({ ...clientForm, courriel: e.target.value })}
                     placeholder="exemple@courriel.com"
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                    className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                   />
                 </div>
               </div>
