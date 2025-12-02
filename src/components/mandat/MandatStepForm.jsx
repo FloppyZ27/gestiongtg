@@ -92,7 +92,7 @@ export default function MandatStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-3 bg-orange-900/20"
+                    className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
@@ -119,7 +119,7 @@ export default function MandatStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-4">
+        <CardContent className="pt-1.5 pb-3">
           <div className="space-y-3">
             {/* Sélection multiple des types de mandats via menu déroulant */}
             <div className="space-y-2">

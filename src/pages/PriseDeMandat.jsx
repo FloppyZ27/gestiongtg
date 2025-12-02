@@ -1281,7 +1281,7 @@ export default function PriseDeMandat() {
                     )}
                   </div>
 
-                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
+                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-4">
                   {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>

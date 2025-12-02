@@ -162,7 +162,7 @@ export default function AddressStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 bg-blue-900/20"
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function AddressStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-4">
+        <CardContent className="pt-1.5 pb-3">
           <div className="space-y-3">
             {/* Barre de recherche */}
             <div className="relative">

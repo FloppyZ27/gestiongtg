@@ -31,7 +31,7 @@ export default function TarificationStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-3 bg-purple-900/20"
+                    className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ export default function TarificationStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-4">
+        <CardContent className="pt-1.5 pb-3">
           {mandatsWithType.length > 0 ? (
             <div className="border border-slate-700 rounded-lg overflow-hidden">
               <Table>
