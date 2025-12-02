@@ -121,63 +121,61 @@ export default function MandatStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="space-y-3">
-            {/* Sélection multiple des types de mandats via menu déroulant */}
-            <div className="space-y-2">
-              <Label className="text-slate-400 text-xs">Types de mandats (sélection multiple)</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-8"
-                  >
-                    {selectedTypes.length > 0 ? (
-                      <div className="flex flex-wrap gap-1 max-w-[90%] overflow-hidden">
-                        {selectedTypes.slice(0, 3).map((type) => (
-                          <Badge key={type} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                            {type}
-                          </Badge>
-                        ))}
-                        {selectedTypes.length > 3 && (
-                          <Badge className="bg-slate-600 text-slate-300 text-xs">
-                            +{selectedTypes.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-slate-400">Sélectionner les types de mandats...</span>
-                    )}
-                    <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" align="start">
-                  <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                    {TYPES_MANDATS.map((type) => {
-                      const isSelected = selectedTypes.includes(type);
-                      return (
-                        <div
-                          key={type}
-                          onClick={() => toggleMandatType(type)}
-                          className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all text-sm ${
-                            isSelected 
-                              ? 'bg-orange-500/20 text-orange-400' 
-                              : 'text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          <Checkbox
-                            checked={isSelected}
-                            className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                          />
-                          <span>{type}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Première ligne: Objectif et Urgence perçue */}
+            {/* Première ligne: Types de mandats, Objectif et Urgence perçue */}
             <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Types de mandats</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-sm"
+                    >
+                      {selectedTypes.length > 0 ? (
+                        <div className="flex flex-wrap gap-1 max-w-[90%] overflow-hidden">
+                          {selectedTypes.slice(0, 2).map((type) => (
+                            <Badge key={type} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                              {type}
+                            </Badge>
+                          ))}
+                          {selectedTypes.length > 2 && (
+                            <Badge className="bg-slate-600 text-slate-300 text-xs">
+                              +{selectedTypes.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">Sélectionner...</span>
+                      )}
+                      <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" align="start">
+                    <div className="max-h-64 overflow-y-auto p-2 space-y-1">
+                      {TYPES_MANDATS.map((type) => {
+                        const isSelected = selectedTypes.includes(type);
+                        return (
+                          <div
+                            key={type}
+                            onClick={() => toggleMandatType(type)}
+                            className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all text-sm ${
+                              isSelected 
+                                ? 'bg-orange-500/20 text-orange-400' 
+                                : 'text-slate-300 hover:bg-slate-700'
+                            }`}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              className="border-slate-500 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                            />
+                            <span>{type}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Objectif</Label>
                 <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
@@ -204,6 +202,10 @@ export default function MandatStepForm({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Deuxième ligne: Échéance souhaitée */}
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
                 <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>

@@ -125,10 +125,10 @@ export default function ClientStepForm({
                       value={clientForm.telephone}
                       onChange={(e) => setClientForm({ ...clientForm, telephone: e.target.value })}
                       placeholder="(000) 000-0000"
-                      className="bg-slate-700 border-slate-600 text-white h-8 text-sm flex-1"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm flex-1"
                     />
                     <Select value={clientForm.type_telephone} onValueChange={(value) => setClientForm({ ...clientForm, type_telephone: value })}>
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-20">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
