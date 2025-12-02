@@ -1336,20 +1336,15 @@ export default function PriseDeMandat() {
                       formData.clients_ids.length > 0 && 
                       formData.clients_ids.some(clientId => d.clients_ids?.includes(clientId))
                     )}
-                    onSelectExistingAddress={(addr, lots) => {
+                    onSelectExistingAddress={(addr, mandatLots) => {
                       if (addr) {
                         // Récupérer les numéros de lots depuis l'entité Lot
                         let lotNumbers = "";
-                        if (lots && lots.length > 0) {
-                          const lotNumeros = lots.map(lotId => {
-                            const lot = lots.find(l => l === lotId);
-                            const lotEntity = lots.find(l => l.id === lotId) || lots.find(l => l === lotId);
-                            // Chercher dans les lots chargés
-                            const foundLot = lots.find(lotItem => {
-                              // Si c'est un ID, on le retourne tel quel pour l'instant
-                              return lotItem === lotId;
-                            });
-                            return foundLot || lotId;
+                        if (mandatLots && mandatLots.length > 0) {
+                          const lotNumeros = mandatLots.map(lotId => {
+                            // Chercher le lot dans la liste des lots chargés
+                            const foundLot = lots.find(l => l.id === lotId);
+                            return foundLot?.numero_lot || lotId;
                           });
                           lotNumbers = lotNumeros.join(', ');
                         }
