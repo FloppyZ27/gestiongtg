@@ -1281,33 +1281,30 @@ export default function PriseDeMandat() {
                     )}
                   </div>
 
-                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
+                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
-                  <div className="space-y-2">
-                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <div className="flex gap-2">
-                      {ARPENTEURS.map((arpenteur) => {
-                        const isSelected = formData.arpenteur_geometre === arpenteur;
-                        const colorClasses = {
-                          "Samuel Guay": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400",
-                          "Pierre-Luc Pilote": isSelected ? "bg-slate-500/30 text-slate-300 border-2 border-slate-400" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-500/10 hover:text-slate-300",
-                          "Frédéric Gilbert": isSelected ? "bg-orange-500/30 text-orange-400 border-2 border-orange-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-orange-500/10 hover:text-orange-400",
-                          "Dany Gaboury": isSelected ? "bg-yellow-500/30 text-yellow-400 border-2 border-yellow-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-yellow-500/10 hover:text-yellow-400",
-                          "Benjamin Larouche": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
-                        };
-                        return (
-                          <button
-                            key={arpenteur}
-                            type="button"
-                            onClick={() => setFormData({...formData, arpenteur_geometre: arpenteur})}
-                            disabled={!!dossierReferenceId}
-                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
-                          >
-                            {arpenteur}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div className="flex gap-1.5">
+                    {ARPENTEURS.map((arpenteur) => {
+                      const isSelected = formData.arpenteur_geometre === arpenteur;
+                      const colorClasses = {
+                        "Samuel Guay": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400",
+                        "Pierre-Luc Pilote": isSelected ? "bg-slate-500/30 text-slate-300 border-2 border-slate-400" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-500/10 hover:text-slate-300",
+                        "Frédéric Gilbert": isSelected ? "bg-orange-500/30 text-orange-400 border-2 border-orange-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-orange-500/10 hover:text-orange-400",
+                        "Dany Gaboury": isSelected ? "bg-yellow-500/30 text-yellow-400 border-2 border-yellow-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-yellow-500/10 hover:text-yellow-400",
+                        "Benjamin Larouche": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
+                      };
+                      return (
+                        <button
+                          key={arpenteur}
+                          type="button"
+                          onClick={() => setFormData({...formData, arpenteur_geometre: arpenteur})}
+                          disabled={!!dossierReferenceId}
+                          className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {arpenteur}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Étape 1: Informations du client */}
@@ -1350,14 +1347,13 @@ export default function PriseDeMandat() {
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
-                  {/* Sélection du statut */}
-                  <div className="space-y-2">
-                    <Label>Statut du dossier</Label>
-                    <div className="flex gap-2">
+                  {/* Sélection du statut + Boutons Annuler/Créer */}
+                  <div className="flex items-center gap-3 pt-2">
+                    <div className="flex gap-1.5 flex-1">
                       {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
-                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple" },
-                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red" }
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan" },
+                        { value: "Mandats à ouvrir", label: "À ouvrir", color: "purple" },
+                        { value: "Mandat non octroyé", label: "Non-octroyé", color: "red" }
                       ].map((statut) => {
                         const isSelected = formData.statut === statut.value;
                         const colorClasses = {
@@ -1370,25 +1366,23 @@ export default function PriseDeMandat() {
                             key={statut.value}
                             type="button"
                             onClick={() => setFormData({...formData, statut: statut.value})}
-                            className={`flex-1 px-3 py-3 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${colorClasses[statut.color]}`}
                           >
                             {statut.label}
                           </button>
                         );
                       })}
                     </div>
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" size="sm" onClick={() => setIsDialogOpen(false)}>
+                        Annuler
+                      </Button>
+                      <Button type="submit" form="dossier-form" size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                        {editingDossier ? "Modifier" : "Créer"}
+                      </Button>
+                    </div>
                   </div>
                 </form>
-
-                {/* Boutons Annuler/Créer tout en bas */}
-                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingDossier ? "Modifier" : "Créer"}
-                  </Button>
-                </div>
                 </div>
 
                 {/* Commentaires Sidebar - 30% */}
