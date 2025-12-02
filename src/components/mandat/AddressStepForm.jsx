@@ -22,7 +22,8 @@ export default function AddressStepForm({
     rue: address?.rue || "",
     ville: address?.ville || "",
     province: address?.province || "Québec",
-    code_postal: address?.code_postal || ""
+    code_postal: address?.code_postal || "",
+    numero_lot: address?.numero_lot || ""
   });
 
   useEffect(() => {
@@ -32,7 +33,8 @@ export default function AddressStepForm({
         rue: address.rue || "",
         ville: address.ville || "",
         province: address.province || "Québec",
-        code_postal: address.code_postal || ""
+        code_postal: address.code_postal || "",
+        numero_lot: address.numero_lot || ""
       });
     }
   }, [address]);
@@ -45,7 +47,8 @@ export default function AddressStepForm({
       rue: newForm.rue,
       ville: newForm.ville,
       province: newForm.province,
-      code_postal: newForm.code_postal
+      code_postal: newForm.code_postal,
+      numero_lot: newForm.numero_lot
     });
   };
 
@@ -60,7 +63,8 @@ export default function AddressStepForm({
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: `Recherche d'adresses au Québec, Canada pour: "${query}". 
         Retourne les 5 adresses les plus pertinentes avec numéro civique, rue, ville, province et code postal.
-        Focus sur le Saguenay-Lac-Saint-Jean si possible.`,
+        IMPORTANT: Prioriser la région d'Alma et du Lac-Saint-Jean en premier, puis le Saguenay-Lac-Saint-Jean.
+        Point de départ de la recherche: Alma, Québec, Canada.`,
         add_context_from_internet: true,
         response_json_schema: {
           type: "object",
@@ -114,7 +118,8 @@ export default function AddressStepForm({
       rue: newForm.rue,
       ville: newForm.ville,
       province: newForm.province,
-      code_postal: newForm.code_postal
+      code_postal: newForm.code_postal,
+      numero_lot: newForm.numero_lot
     });
   };
 
@@ -175,7 +180,7 @@ export default function AddressStepForm({
             </div>
 
             {/* Champs manuels */}
-            <div className="grid grid-cols-[100px_1fr_1fr_120px] gap-2">
+            <div className="grid grid-cols-[80px_1fr_1fr_100px_120px] gap-2">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">N° civique</Label>
                 <Input
@@ -209,6 +214,15 @@ export default function AddressStepForm({
                   value={addressForm.code_postal}
                   onChange={(e) => handleFieldChange('code_postal', e.target.value)}
                   placeholder="G0V 0A0"
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">N° de lot</Label>
+                <Input
+                  value={addressForm.numero_lot}
+                  onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
+                  placeholder="1234567"
                   className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                 />
               </div>
