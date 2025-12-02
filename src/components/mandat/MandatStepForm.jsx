@@ -34,27 +34,29 @@ export default function MandatStepForm({
   const initialized = React.useRef(false);
   
   useEffect(() => {
-    if (!initialized.current && mandats && mandats.length > 0) {
+    if (!initialized.current) {
       initialized.current = true;
-      // Extraire les types sélectionnés
-      const types = mandats.map(m => m.type_mandat).filter(t => t);
-      if (types.length > 0) {
-        setSelectedTypes(types);
-      }
-      
-      // Prendre les infos du premier mandat comme référence
-      const first = mandats[0];
-      if (first && (first.objectif || first.echeance_souhaitee || first.urgence_percue)) {
-        setSharedInfo({
-          objectif: first.objectif || "",
-          echeance_souhaitee: first.echeance_souhaitee || "",
-          date_signature: first.date_signature || "",
-          date_debut_travaux: first.date_debut_travaux || "",
-          urgence_percue: first.urgence_percue || ""
-        });
+      if (mandats && mandats.length > 0) {
+        // Extraire les types sélectionnés
+        const types = mandats.map(m => m.type_mandat).filter(t => t);
+        if (types.length > 0) {
+          setSelectedTypes(types);
+        }
+        
+        // Prendre les infos du premier mandat comme référence
+        const first = mandats[0];
+        if (first && (first.objectif || first.echeance_souhaitee || first.urgence_percue)) {
+          setSharedInfo({
+            objectif: first.objectif || "",
+            echeance_souhaitee: first.echeance_souhaitee || "",
+            date_signature: first.date_signature || "",
+            date_debut_travaux: first.date_debut_travaux || "",
+            urgence_percue: first.urgence_percue || ""
+          });
+        }
       }
     }
-  }, [mandats]);
+  }, []);
 
   const toggleMandatType = (type) => {
     let newSelectedTypes;
