@@ -224,7 +224,6 @@ export default function MandatStepForm({
             {/* Dates conditionnelles */}
             {sharedInfo.echeance_souhaitee === "Date précise" && (
               <div className="grid grid-cols-3 gap-3">
-                <div></div>
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Date de signature</Label>
                   <Input
@@ -243,6 +242,7 @@ export default function MandatStepForm({
                     className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                   />
                 </div>
+                <div></div>
               </div>
             )}
           </div>
