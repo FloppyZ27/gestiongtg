@@ -22,6 +22,7 @@ import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
 import ClientStepForm from "../components/mandat/ClientStepForm";
 import AddressStepForm from "../components/mandat/AddressStepForm";
+import MandatStepForm from "../components/mandat/MandatStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -183,12 +184,21 @@ export default function PriseDeMandat() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [clientStepCollapsed, setClientStepCollapsed] = useState(false);
   const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
+  const [mandatStepCollapsed, setMandatStepCollapsed] = useState(false);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
     ville: "",
     province: "Québec",
     code_postal: ""
+  });
+  const [mandatInfo, setMandatInfo] = useState({
+    type_mandat: "",
+    objectif: "",
+    echeance_souhaitee: "",
+    date_signature: "",
+    date_debut_travaux: "",
+    urgence_percue: ""
   });
 
   const [formData, setFormData] = useState({
@@ -1351,6 +1361,14 @@ export default function PriseDeMandat() {
                     onAddressChange={setWorkAddress}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
+                  />
+
+                  {/* Étape 3: Mandat */}
+                  <MandatStepForm
+                    mandat={mandatInfo}
+                    onMandatChange={setMandatInfo}
+                    isCollapsed={mandatStepCollapsed}
+                    onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
                   />
 
                   {/* Champs conditionnels pour statut "Ouvert" */}
