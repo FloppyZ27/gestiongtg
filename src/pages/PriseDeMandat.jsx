@@ -1411,7 +1411,7 @@ export default function PriseDeMandat() {
                             const foundLot = lots.find(l => l.id === lotId);
                             return foundLot?.numero_lot || lotId;
                           });
-                          lotNumbers = lotNumeros.join(', ');
+                          lotNumbers = lotNumeros.join('\n');
                         }
                         setWorkAddress({
                           numeros_civiques: addr.numeros_civiques || [""],
