@@ -1492,17 +1492,19 @@ export default function PriseDeMandat() {
                   {(workAddress.rue || workAddress.ville) && (
                     <div className="p-4 border-b border-slate-800 flex-shrink-0">
                       <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
-                        <iframe
-                          width="100%"
-                          height="150"
-                          style={{ border: 0 }}
-                          loading="lazy"
-                          allowFullScreen
-                          referrerPolicy="no-referrer-when-downgrade"
-                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-                            `${workAddress.numeros_civiques?.[0] || ''} ${workAddress.rue || ''}, ${workAddress.ville || ''}, ${workAddress.province || 'Québec'}, Canada`
-                          )}&zoom=15`}
-                        />
+                        <div className="aspect-square w-full">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                              `${workAddress.numeros_civiques?.[0] || ''} ${workAddress.rue || ''}, ${workAddress.ville || ''}, ${workAddress.province || 'Québec'}, Canada`
+                            )}&zoom=15`}
+                          />
+                        </div>
                         <div className="p-2 bg-slate-800/80">
                           <p className="text-xs text-slate-300 truncate">
                             📍 {workAddress.numeros_civiques?.[0]} {workAddress.rue}, {workAddress.ville}
