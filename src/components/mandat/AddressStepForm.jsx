@@ -193,7 +193,7 @@ export default function AddressStepForm({
             {/* Colonne gauche - Formulaire d'adresse */}
             <div className="space-y-2">
               {/* Barre de recherche */}
-              <div className="relative">
+              <div className="relative mt-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -303,6 +303,9 @@ export default function AddressStepForm({
                             <span className="truncate">{addrText}</span>
                           </div>
                           <span className={`text-[10px] ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>{mandat.type_mandat}</span>
+                          {mandat.lots && mandat.lots.length > 0 && (
+                            <span className={`text-[10px] ml-1 ${isSelected ? 'text-emerald-500' : 'text-slate-500'}`}>• Lot: {mandat.lots.join(', ')}</span>
+                          )}
                         </div>
                       );
                     })
