@@ -176,16 +176,58 @@ export default function Dossiers() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Détecter si un dossier_id est passé dans l'URL
+  // Détecter si un dossier_id est passé dans l'URL OU si on vient de PriseDeMandat
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const dossierIdFromUrl = urlParams.get('dossier_id');
+    const fromPriseMandat = urlParams.get('from_prise_mandat');
     
     if (dossierIdFromUrl && dossiers.length > 0) {
       const dossier = dossiers.find(d => d.id === dossierIdFromUrl);
       if (dossier) {
         handleView(dossier);
         // Nettoyer l'URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    } else if (fromPriseMandat === 'true') {
+      // Charger les données depuis sessionStorage
+      const storedData = sessionStorage.getItem('priseMandat_toDossier');
+      if (storedData) {
+        const data = JSON.parse(storedData);
+        setFormData({
+          numero_dossier: "",
+          arpenteur_geometre: data.arpenteur_geometre || "",
+          date_ouverture: new Date().toISOString().split('T')[0],
+          date_fermeture: "",
+          statut: "Ouvert",
+          ttl: "Non",
+          clients_ids: data.clients_ids || [],
+          clients_texte: "",
+          notaires_ids: [],
+          notaires_texte: "",
+          courtiers_ids: [],
+          courtiers_texte: "",
+          mandats: data.mandats || [],
+          description: ""
+        });
+        
+        // Charger les commentaires temporaires
+        if (data.commentaires && data.commentaires.length > 0) {
+          setCommentairesTemporaires(data.commentaires);
+        }
+        
+        // Ouvrir le dialog
+        setIsDialogOpen(true);
+        
+        // Supprimer la prise de mandat si on a son ID
+        if (data.priseMandat_id) {
+          base44.entities.PriseMandat.delete(data.priseMandat_id).then(() => {
+            queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+          });
+        }
+        
+        // Nettoyer le sessionStorage et l'URL
+        sessionStorage.removeItem('priseMandat_toDossier');
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
