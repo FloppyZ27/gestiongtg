@@ -252,6 +252,12 @@ export default function PriseDeMandat() {
     initialData: [],
   });
 
+  const { data: priseMandats = [], isLoading: isLoadingPriseMandats } = useQuery({
+    queryKey: ['priseMandats'],
+    queryFn: () => base44.entities.PriseMandat.list('-created_date'),
+    initialData: [],
+  });
+
   const { data: clients } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
@@ -301,6 +307,50 @@ export default function PriseDeMandat() {
       }
     }
   }, [dossiers]);
+
+  const createPriseMandatMutation = useMutation({
+    mutationFn: async (data) => {
+      // Préparer les commentaires à inclure dans l'entité
+      const commentsToSave = commentairesTemporaires.map(c => ({
+        contenu: c.contenu,
+        utilisateur_email: c.utilisateur_email,
+        utilisateur_nom: c.utilisateur_nom,
+        date: c.created_date || new Date().toISOString()
+      }));
+
+      const priseMandatData = {
+        arpenteur_geometre: data.arpenteur_geometre,
+        clients_ids: data.clients_ids,
+        adresse_travaux: data.adresse_travaux,
+        types_mandats: data.types_mandats,
+        objectif: data.objectif,
+        echeance_souhaitee: data.echeance_souhaitee,
+        date_signature: data.date_signature,
+        date_debut_travaux: data.date_debut_travaux,
+        urgence_percue: data.urgence_percue,
+        prix_estime: data.prix_estime,
+        rabais: data.rabais,
+        taxes_incluses: data.taxes_incluses,
+        statut: data.statut,
+        commentaires: commentsToSave
+      };
+
+      return await base44.entities.PriseMandat.create(priseMandatData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+      setIsDialogOpen(false);
+      resetFullForm();
+      setCommentairesTemporaires([]);
+    },
+  });
+
+  const deletePriseMandatMutation = useMutation({
+    mutationFn: (id) => base44.entities.PriseMandat.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+    },
+  });
 
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
