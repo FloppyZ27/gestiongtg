@@ -199,6 +199,9 @@ export default function PriseDeMandat() {
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
   const [activeListTab, setActiveListTab] = useState("nouveau");
+  const [filterVille, setFilterVille] = useState("all");
+  const [filterTypeMandat, setFilterTypeMandat] = useState("all");
+  const [filterUrgence, setFilterUrgence] = useState("all");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
@@ -2608,14 +2611,14 @@ export default function PriseDeMandat() {
             <div className="flex flex-col gap-4">
               <CardTitle className="text-white">Liste des prises de mandat</CardTitle>
               
-              {/* Tabs pour les statuts */}
-              <div className="flex gap-2">
+              {/* Tabs pour les statuts - style tabs pleine largeur */}
+              <div className="flex w-full border-b border-slate-700">
                 <button
                   onClick={() => setActiveListTab("nouveau")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "nouveau"
-                      ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500"
-                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
+                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
+                      : "border-transparent text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
                   }`}
                 >
                   <FileQuestion className="w-4 h-4" />
@@ -2626,10 +2629,10 @@ export default function PriseDeMandat() {
                 </button>
                 <button
                   onClick={() => setActiveListTab("ouvrir")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "ouvrir"
-                      ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500"
-                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400"
+                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
+                      : "border-transparent text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
                   }`}
                 >
                   <FolderOpen className="w-4 h-4" />
@@ -2640,10 +2643,10 @@ export default function PriseDeMandat() {
                 </button>
                 <button
                   onClick={() => setActiveListTab("non-octroye")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "non-octroye"
-                      ? "bg-red-500/30 text-red-400 border-2 border-red-500"
-                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
+                      ? "border-red-500 text-red-400 bg-red-500/10"
+                      : "border-transparent text-slate-400 hover:text-red-400 hover:bg-red-500/5"
                   }`}
                 >
                   <XCircle className="w-4 h-4" />
@@ -2655,7 +2658,7 @@ export default function PriseDeMandat() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <div className="relative flex-1 min-w-[250px]">
+                <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
                     placeholder="Rechercher..."
@@ -2666,7 +2669,7 @@ export default function PriseDeMandat() {
                 </div>
 
                 <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="w-44 bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Arpenteur" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -2679,14 +2682,59 @@ export default function PriseDeMandat() {
                   </SelectContent>
                 </Select>
 
-                {filterArpenteur !== "all" && (
+                <Select value={filterVille} onValueChange={setFilterVille}>
+                  <SelectTrigger className="w-40 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Ville" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                    {[...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort().map((ville) => (
+                      <SelectItem key={ville} value={ville} className="text-white">
+                        {ville}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
+                  <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Type de mandat" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                    {TYPES_MANDATS.map((type) => (
+                      <SelectItem key={type} value={type} className="text-white">
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterUrgence} onValueChange={setFilterUrgence}>
+                  <SelectTrigger className="w-36 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Urgence" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes</SelectItem>
+                    <SelectItem value="Pas pressé" className="text-white">Pas pressé</SelectItem>
+                    <SelectItem value="Normal" className="text-white">Normal</SelectItem>
+                    <SelectItem value="Rapide" className="text-white">Rapide</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {(filterArpenteur !== "all" || filterVille !== "all" || filterTypeMandat !== "all" || filterUrgence !== "all") && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setFilterArpenteur("all")}
+                    onClick={() => {
+                      setFilterArpenteur("all");
+                      setFilterVille("all");
+                      setFilterTypeMandat("all");
+                      setFilterUrgence("all");
+                    }}
                     className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                   >
-                    Réinitialiser le filtre
+                    Réinitialiser
                   </Button>
                 )}
               </div>
@@ -2721,7 +2769,12 @@ export default function PriseDeMandat() {
                     >
                       Adresse des travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
-                    <TableHead className="text-slate-300">Ville</TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('ville')}
+                    >
+                      Ville {sortField === 'ville' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('types_mandats')}
@@ -2759,7 +2812,58 @@ export default function PriseDeMandat() {
                         pm.types_mandats?.some(t => t.toLowerCase().includes(searchLower))
                       );
                       const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
-                      return matchesSearch && matchesArpenteur;
+                      const matchesVille = filterVille === "all" || pm.adresse_travaux?.ville === filterVille;
+                      const matchesTypeMandat = filterTypeMandat === "all" || pm.types_mandats?.includes(filterTypeMandat);
+                      const matchesUrgence = filterUrgence === "all" || pm.urgence_percue === filterUrgence;
+                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence;
+                    })
+                    .sort((a, b) => {
+                      if (!sortField) return 0;
+                      let aValue, bValue;
+                      switch (sortField) {
+                        case 'arpenteur_geometre':
+                          aValue = (a.arpenteur_geometre || '').toLowerCase();
+                          bValue = (b.arpenteur_geometre || '').toLowerCase();
+                          break;
+                        case 'created_date':
+                          aValue = new Date(a.created_date || 0).getTime();
+                          bValue = new Date(b.created_date || 0).getTime();
+                          break;
+                        case 'clients':
+                          const aClientName = a.client_info?.prenom || a.client_info?.nom 
+                            ? `${a.client_info.prenom || ''} ${a.client_info.nom || ''}`.trim()
+                            : getClientsNames(a.clients_ids);
+                          const bClientName = b.client_info?.prenom || b.client_info?.nom 
+                            ? `${b.client_info.prenom || ''} ${b.client_info.nom || ''}`.trim()
+                            : getClientsNames(b.clients_ids);
+                          aValue = aClientName.toLowerCase();
+                          bValue = bClientName.toLowerCase();
+                          break;
+                        case 'adresse_travaux':
+                          aValue = `${a.adresse_travaux?.numeros_civiques?.[0] || ''} ${a.adresse_travaux?.rue || ''}`.toLowerCase();
+                          bValue = `${b.adresse_travaux?.numeros_civiques?.[0] || ''} ${b.adresse_travaux?.rue || ''}`.toLowerCase();
+                          break;
+                        case 'ville':
+                          aValue = (a.adresse_travaux?.ville || '').toLowerCase();
+                          bValue = (b.adresse_travaux?.ville || '').toLowerCase();
+                          break;
+                        case 'types_mandats':
+                          aValue = (a.types_mandats?.[0] || '').toLowerCase();
+                          bValue = (b.types_mandats?.[0] || '').toLowerCase();
+                          break;
+                        case 'urgence_percue':
+                          const urgenceOrder = { 'Rapide': 1, 'Normal': 2, 'Pas pressé': 3 };
+                          aValue = urgenceOrder[a.urgence_percue] || 4;
+                          bValue = urgenceOrder[b.urgence_percue] || 4;
+                          break;
+                        default:
+                          aValue = '';
+                          bValue = '';
+                      }
+                      if (typeof aValue === 'string' && typeof bValue === 'string') {
+                        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                      }
+                      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                     })
                     .map((pm) => {
                       const getUrgenceColor = (urgence) => {
