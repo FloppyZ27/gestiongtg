@@ -18,19 +18,22 @@ export default function MandatStepForm({
   mandats = [],
   onMandatsChange,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  statut = ""
 }) {
   // Extraire les types sélectionnés directement des props
   const selectedTypes = mandats.map(m => m.type_mandat).filter(t => t);
   
   // Prendre les infos partagées du premier mandat
   const sharedInfo = {
-    objectif: mandats[0]?.objectif || "",
     echeance_souhaitee: mandats[0]?.echeance_souhaitee || "",
     date_signature: mandats[0]?.date_signature || "",
     date_debut_travaux: mandats[0]?.date_debut_travaux || "",
+    date_livraison: mandats[0]?.date_livraison || "",
     urgence_percue: mandats[0]?.urgence_percue || ""
   };
+  
+  const isDateLivraisonRequired = statut === "Mandats à ouvrir";
 
   const toggleMandatType = (type) => {
     let newSelectedTypes;
@@ -46,7 +49,8 @@ export default function MandatStepForm({
         ...sharedInfo,
         prix_estime: 0,
         rabais: 0,
-        taxes_incluses: false
+        taxes_incluses: false,
+        date_livraison: sharedInfo.date_livraison || ""
       }]);
     } else {
       const newMandats = newSelectedTypes.map(t => {
@@ -56,7 +60,8 @@ export default function MandatStepForm({
           ...sharedInfo,
           prix_estime: existingMandat?.prix_estime || 0,
           rabais: existingMandat?.rabais || 0,
-          taxes_incluses: existingMandat?.taxes_incluses || false
+          taxes_incluses: existingMandat?.taxes_incluses || false,
+          date_livraison: existingMandat?.date_livraison || sharedInfo.date_livraison || ""
         };
       });
       onMandatsChange(newMandats);
@@ -123,7 +128,7 @@ export default function MandatStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="space-y-3">
-            {/* Première ligne: Types de mandats, Objectif et Urgence perçue */}
+            {/* Première ligne: Types de mandats, Échéance souhaitée et Urgence perçue */}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
@@ -168,14 +173,14 @@ export default function MandatStepForm({
                 </Popover>
               </div>
               <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Objectif</Label>
-                <Select value={sharedInfo.objectif} onValueChange={(value) => handleSharedInfoChange('objectif', value)}>
+                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
+                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {OBJECTIFS.map((objectif) => (
-                      <SelectItem key={objectif} value={objectif} className="text-white">{objectif}</SelectItem>
+                    {ECHEANCES.map((echeance) => (
+                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -195,43 +200,38 @@ export default function MandatStepForm({
               </div>
             </div>
 
-            {/* Deuxième ligne: Échéance souhaitée et dates */}
+            {/* Deuxième ligne: Dates sur la même ligne */}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                    <SelectValue placeholder="Sélectionner..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {ECHEANCES.map((echeance) => (
-                      <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-slate-400 text-xs">Date de signature</Label>
+                <Input
+                  type="date"
+                  value={sharedInfo.date_signature}
+                  onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                />
               </div>
-              {sharedInfo.echeance_souhaitee === "Date précise" && (
-                <>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Date de signature</Label>
-                    <Input
-                      type="date"
-                      value={sharedInfo.date_signature}
-                      onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                    <Input
-                      type="date"
-                      value={sharedInfo.date_debut_travaux}
-                      onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
-                    />
-                  </div>
-                </>
-              )}
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                <Input
+                  type="date"
+                  value={sharedInfo.date_debut_travaux}
+                  onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">
+                  Date de livraison {isDateLivraisonRequired && <span className="text-red-400">*</span>}
+                </Label>
+                <Input
+                  type="date"
+                  value={sharedInfo.date_livraison}
+                  onChange={(e) => handleSharedInfoChange('date_livraison', e.target.value)}
+                  className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
+                  required={isDateLivraisonRequired}
+                />
+              </div>
             </div>
           </div>
         </CardContent>
