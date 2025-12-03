@@ -26,15 +26,25 @@ export default function ClientStepForm({
   selectedClientIds = [], 
   onSelectClient, 
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  clientInfo = {},
+  onClientInfoChange
 }) {
   const [clientForm, setClientForm] = useState({
-    prenom: "",
-    nom: "",
-    telephone: "",
-    type_telephone: "Cellulaire",
-    courriel: ""
+    prenom: clientInfo.prenom || "",
+    nom: clientInfo.nom || "",
+    telephone: clientInfo.telephone || "",
+    type_telephone: clientInfo.type_telephone || "Cellulaire",
+    courriel: clientInfo.courriel || ""
   });
+
+  // Mettre à jour le parent quand le formulaire change
+  const updateClientForm = (newForm) => {
+    setClientForm(newForm);
+    if (onClientInfoChange) {
+      onClientInfoChange(newForm);
+    }
+  };
 
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
@@ -62,7 +72,7 @@ export default function ClientStepForm({
 
   const handleClientClick = (client, isAlreadySelected) => {
     if (isAlreadySelected) {
-      setClientForm({
+      updateClientForm({
         prenom: "",
         nom: "",
         telephone: "",
@@ -70,7 +80,7 @@ export default function ClientStepForm({
         courriel: ""
       });
     } else {
-      setClientForm({
+      updateClientForm({
         prenom: client.prenom || "",
         nom: client.nom || "",
         telephone: getCurrentPhone(client),
@@ -119,7 +129,7 @@ export default function ClientStepForm({
                   <Label className="text-slate-400 text-xs">Prénom</Label>
                   <Input
                     value={clientForm.prenom}
-                    onChange={(e) => setClientForm({ ...clientForm, prenom: e.target.value })}
+                    onChange={(e) => updateClientForm({ ...clientForm, prenom: e.target.value })}
                     placeholder="Prénom"
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
@@ -128,7 +138,7 @@ export default function ClientStepForm({
                   <Label className="text-slate-400 text-xs">Nom</Label>
                   <Input
                     value={clientForm.nom}
-                    onChange={(e) => setClientForm({ ...clientForm, nom: e.target.value })}
+                    onChange={(e) => updateClientForm({ ...clientForm, nom: e.target.value })}
                     placeholder="Nom"
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
@@ -140,11 +150,11 @@ export default function ClientStepForm({
                   <div className="flex gap-1">
                     <Input
                       value={clientForm.telephone}
-                      onChange={(e) => setClientForm({ ...clientForm, telephone: formatPhoneNumber(e.target.value) })}
+                      onChange={(e) => updateClientForm({ ...clientForm, telephone: formatPhoneNumber(e.target.value) })}
                       placeholder="(000) 000-0000"
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm flex-1"
                     />
-                    <Select value={clientForm.type_telephone} onValueChange={(value) => setClientForm({ ...clientForm, type_telephone: value })}>
+                    <Select value={clientForm.type_telephone} onValueChange={(value) => updateClientForm({ ...clientForm, type_telephone: value })}>
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
                         <SelectValue />
                       </SelectTrigger>
@@ -161,7 +171,7 @@ export default function ClientStepForm({
                   <Input
                     type="email"
                     value={clientForm.courriel}
-                    onChange={(e) => setClientForm({ ...clientForm, courriel: e.target.value })}
+                    onChange={(e) => updateClientForm({ ...clientForm, courriel: e.target.value })}
                     placeholder="exemple@courriel.com"
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
