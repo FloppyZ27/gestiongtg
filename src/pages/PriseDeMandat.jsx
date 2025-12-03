@@ -1530,7 +1530,7 @@ export default function PriseDeMandat() {
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur et sélection du statut sur la même ligne */}
-                  <div className="flex gap-4 items-end mb-16">
+                  <div className="flex gap-4 items-end">
                     <div className="space-y-2 w-1/3">
                       <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                       <Select 
