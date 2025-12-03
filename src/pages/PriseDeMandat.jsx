@@ -1774,6 +1774,7 @@ export default function PriseDeMandat() {
                     onMandatsChange={(newMandats) => setMandatsInfo(newMandats)}
                     isCollapsed={mandatStepCollapsed}
                     onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
+                    statut={formData.statut}
                   />
 
                   {/* Étape 4: Tarification */}
