@@ -1013,7 +1013,6 @@ export default function PriseDeMandat() {
     setDossierReferenceId(null);
     setDossierSearchForReference("");
     setCommentairesTemporaires([]);
-    setEditingPriseMandat(null);
   };
 
   const resetFullForm = () => {
