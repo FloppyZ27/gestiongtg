@@ -53,67 +53,56 @@ export default function TarificationStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           {mandatsWithType.length > 0 ? (
-            <div className="border border-slate-700 rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300 text-xs">Type de mandat</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Prix estimé ($)</TableHead>
-                    <TableHead className="text-slate-300 text-xs">Rabais ($)</TableHead>
-                    <TableHead className="text-slate-300 text-xs text-center">Taxes incluses</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mandats.map((mandat, index) => {
-                    if (!mandat.type_mandat) return null;
-                    return (
-                      <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                        <TableCell className="font-medium text-white text-sm">
-                          <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-                            {mandat.type_mandat}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            value={mandat.prix_estime || ""}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
-                            }}
-                            placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-6 text-sm w-28"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            value={mandat.rabais || ""}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
-                            }}
-                            placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-6 text-sm w-28"
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Checkbox
-                            checked={mandat.taxes_incluses || false}
-                            onCheckedChange={(checked) => handleFieldChange(index, 'taxes_incluses', checked)}
-                            className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            <div className="space-y-2">
+              {mandats.map((mandat, index) => {
+                if (!mandat.type_mandat) return null;
+                return (
+                  <div key={index} className="flex items-center gap-4 py-2">
+                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 min-w-[140px] justify-center">
+                      {mandat.type_mandat}
+                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={mandat.prix_estime || ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                          handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
+                        }}
+                        placeholder="0.00"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={mandat.rabais || ""}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                          handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
+                        }}
+                        placeholder="0.00"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={mandat.taxes_incluses || false}
+                        onCheckedChange={(checked) => handleFieldChange(index, 'taxes_incluses', checked)}
+                        className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                      />
+                      <Label className="text-slate-400 text-xs whitespace-nowrap">Taxes incluses</Label>
+                    </div>
+                  </div>
+                );
+              })}
               
               {/* Résumé */}
-              <div className="p-3 bg-slate-800/50 border-t border-slate-700 flex justify-end gap-6">
+              <div className="pt-2 border-t border-slate-700 flex justify-end gap-6">
                 <div className="text-sm">
                   <span className="text-slate-400">Total estimé: </span>
                   <span className="text-white font-semibold">{totalEstime.toFixed(2)} $</span>
