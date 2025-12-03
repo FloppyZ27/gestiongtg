@@ -1897,33 +1897,33 @@ export default function PriseDeMandat() {
                       alert("Erreur lors de la création du dossier.");
                     }
                   }} className="space-y-3">
-                    {/* Section Informations du dossier - Collapsible */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                      <CardHeader 
-                        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
-                        onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                              <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Colonne gauche - Section Informations du dossier */}
+                      <Card className="border-slate-700 bg-slate-800/30">
+                        <CardHeader 
+                          className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                          onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                                <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                              </div>
+                              <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+                              {nouveauDossierForm.numero_dossier && (
+                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                  {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
+                                </Badge>
+                              )}
                             </div>
-                            <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
-                            {nouveauDossierForm.numero_dossier && (
-                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
-                              </Badge>
-                            )}
+                            {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                           </div>
-                          {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                        </div>
-                      </CardHeader>
+                        </CardHeader>
 
-                      {!infoDossierCollapsed && (
-                        <CardContent className="pt-1 pb-2">
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Colonne gauche - Informations de base */}
-                            <div className="space-y-2">
+                        {!infoDossierCollapsed && (
+                          <CardContent className="pt-2 pb-3 space-y-3">
+                            {/* Informations de base */}
+                            <div className="grid grid-cols-3 gap-2">
                               <div className="space-y-1">
                                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                                 <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
@@ -1947,109 +1947,128 @@ export default function PriseDeMandat() {
                               </div>
                             </div>
 
-                            {/* Colonne droite - Tabs Clients/Notaires/Courtiers */}
-                            <div className="space-y-2">
-                              <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
-                                <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
-                                  <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
-                                    Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
-                                  </TabsTrigger>
-                                  <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400">
-                                    Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
-                                  </TabsTrigger>
-                                  <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400">
-                                    Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
-                                  </TabsTrigger>
-                                </TabsList>
+                            {/* Tabs Clients/Notaires/Courtiers */}
+                            <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
+                              <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
+                                <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                                  Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
+                                </TabsTrigger>
+                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400">
+                                  Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
+                                </TabsTrigger>
+                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400">
+                                  Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
+                                </TabsTrigger>
+                              </TabsList>
 
-                                <TabsContent value="clients" className="mt-2">
-                                  <div className="space-y-1">
-                                    <Button type="button" size="sm" onClick={() => setIsClientSelectorOpenDossier(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full h-6 text-xs">
-                                      <UserPlus className="w-3 h-3 mr-1" />
-                                      Ajouter
-                                    </Button>
-                                    {nouveauDossierForm.clients_ids.length > 0 ? (
-                                      <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
-                                        {nouveauDossierForm.clients_ids.map((clientId) => {
-                                          const client = getClientById(clientId);
-                                          return client ? (
-                                            <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs">
-                                              <span className="flex-1 truncate">{client.prenom} {client.nom}</span>
-                                              <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                                <X className="w-2.5 h-2.5" />
-                                              </button>
-                                            </Badge>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun client</p>
-                                    )}
-                                  </div>
-                                </TabsContent>
+                              <TabsContent value="clients" className="mt-2">
+                                <div className="space-y-1">
+                                  <Button type="button" size="sm" onClick={() => setIsClientSelectorOpenDossier(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full h-6 text-xs">
+                                    <UserPlus className="w-3 h-3 mr-1" />
+                                    Ajouter
+                                  </Button>
+                                  {nouveauDossierForm.clients_ids.length > 0 ? (
+                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                      {nouveauDossierForm.clients_ids.map((clientId) => {
+                                        const client = getClientById(clientId);
+                                        return client ? (
+                                          <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs">
+                                            <span className="flex-1 truncate">{client.prenom} {client.nom}</span>
+                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
+                                          </Badge>
+                                        ) : null;
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun client</p>
+                                  )}
+                                </div>
+                              </TabsContent>
 
-                                <TabsContent value="notaires" className="mt-2">
-                                  <div className="space-y-1">
-                                    <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpenDossier(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full h-6 text-xs">
-                                      <UserPlus className="w-3 h-3 mr-1" />
-                                      Ajouter
-                                    </Button>
-                                    {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                      <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
-                                        {nouveauDossierForm.notaires_ids.map((notaireId) => {
-                                          const notaire = getClientById(notaireId);
-                                          return notaire ? (
-                                            <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 relative pr-6 w-full justify-start text-xs">
-                                              <span className="flex-1 truncate">{notaire.prenom} {notaire.nom}</span>
-                                              <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                                <X className="w-2.5 h-2.5" />
-                                              </button>
-                                            </Badge>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun notaire</p>
-                                    )}
-                                  </div>
-                                </TabsContent>
+                              <TabsContent value="notaires" className="mt-2">
+                                <div className="space-y-1">
+                                  <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpenDossier(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full h-6 text-xs">
+                                    <UserPlus className="w-3 h-3 mr-1" />
+                                    Ajouter
+                                  </Button>
+                                  {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                      {nouveauDossierForm.notaires_ids.map((notaireId) => {
+                                        const notaire = getClientById(notaireId);
+                                        return notaire ? (
+                                          <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 relative pr-6 w-full justify-start text-xs">
+                                            <span className="flex-1 truncate">{notaire.prenom} {notaire.nom}</span>
+                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
+                                          </Badge>
+                                        ) : null;
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun notaire</p>
+                                  )}
+                                </div>
+                              </TabsContent>
 
-                                <TabsContent value="courtiers" className="mt-2">
-                                  <div className="space-y-1">
-                                    <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpenDossier(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 w-full h-6 text-xs">
-                                      <UserPlus className="w-3 h-3 mr-1" />
-                                      Ajouter
-                                    </Button>
-                                    {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                      <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
-                                        {nouveauDossierForm.courtiers_ids.map((courtierId) => {
-                                          const courtier = getClientById(courtierId);
-                                          return courtier ? (
-                                            <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 relative pr-6 w-full justify-start text-xs">
-                                              <span className="flex-1 truncate">{courtier.prenom} {courtier.nom}</span>
-                                              <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                                <X className="w-2.5 h-2.5" />
-                                              </button>
-                                            </Badge>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun courtier</p>
-                                    )}
-                                  </div>
-                                </TabsContent>
-                              </Tabs>
+                              <TabsContent value="courtiers" className="mt-2">
+                                <div className="space-y-1">
+                                  <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpenDossier(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 w-full h-6 text-xs">
+                                    <UserPlus className="w-3 h-3 mr-1" />
+                                    Ajouter
+                                  </Button>
+                                  {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                      {nouveauDossierForm.courtiers_ids.map((courtierId) => {
+                                        const courtier = getClientById(courtierId);
+                                        return courtier ? (
+                                          <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 relative pr-6 w-full justify-start text-xs">
+                                            <span className="flex-1 truncate">{courtier.prenom} {courtier.nom}</span>
+                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
+                                          </Badge>
+                                        ) : null;
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun courtier</p>
+                                  )}
+                                </div>
+                              </TabsContent>
+                            </Tabs>
+                          </CardContent>
+                        )}
+                      </Card>
+
+                      {/* Colonne droite - Section Mandats */}
+                      <Card className="border-slate-700 bg-slate-800/30">
+                        <CardHeader 
+                          className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
+                          onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                                <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                              </div>
+                              <CardTitle className="text-emerald-300 text-base">Mandats</CardTitle>
+                              {nouveauDossierForm.mandats.length > 0 && (
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                  {nouveauDossierForm.mandats.length} mandat{nouveauDossierForm.mandats.length > 1 ? 's' : ''}
+                                </Badge>
+                              )}
                             </div>
+                            {mandatStepCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                           </div>
-                        </CardContent>
-                      )}
-                    </Card>
+                        </CardHeader>
 
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <Label>Mandats</Label>
-                        <Button type="button" size="sm" onClick={() => {
+                        {!mandatStepCollapsed && (
+                          <CardContent className="pt-2 pb-3">
+                            <div className="flex justify-end mb-2">
+                              <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
                           const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" };
@@ -2092,31 +2111,61 @@ export default function PriseDeMandat() {
                             }]
                           }));
                           setActiveTabMandatDossier(newIndex.toString());
-                        }} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                          <Plus className="w-4 h-4 mr-1" />
-                          Ajouter un mandat
-                        </Button>
-                      </div>
+                              }} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-6 text-xs">
+                                <Plus className="w-3 h-3 mr-1" />
+                                Ajouter
+                              </Button>
+                            </div>
 
-                      {nouveauDossierForm.mandats.length > 0 ? (
-                        <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
-                          <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
-                            {nouveauDossierForm.mandats.map((mandat, index) => (
-                              <TabsTrigger
-                                key={index}
-                                value={index.toString()}
-                                className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
-                              >
-                                {mandat.type_mandat || `Mandat ${index + 1}`}
-                              </TabsTrigger>
-                            ))}
-                          </TabsList>
+                            {nouveauDossierForm.mandats.length > 0 ? (
+                              <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
+                                <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border border-blue-500/30 w-full h-auto justify-start p-1 rounded-lg">
+                                  {nouveauDossierForm.mandats.map((mandat, index) => (
+                                    <TabsTrigger
+                                      key={index}
+                                      value={index.toString()}
+                                      className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
+                                    >
+                                      {mandat.type_mandat || `Mandat ${index + 1}`}
+                                    </TabsTrigger>
+                                  ))}
+                                </TabsList>
 
+                                {nouveauDossierForm.mandats.map((mandat, index) => (
+                                  <TabsContent key={index} value={index.toString()} className="mt-2">
+                                    <div className="text-xs text-slate-400 mb-1">Type: {mandat.type_mandat || 'Non défini'}</div>
+                                    <div className="text-xs text-slate-400">Adresse: {formatAdresse(mandat.adresse_travaux) || 'Non définie'}</div>
+                                  </TabsContent>
+                                ))}
+                              </Tabs>
+                            ) : (
+                              <div className="text-center py-4 text-slate-400 bg-slate-800/30 rounded-lg text-xs">Aucun mandat</div>
+                            )}
+                          </CardContent>
+                        )}
+                      </Card>
+                    </div>
+
+                    {/* Section détaillée des mandats en pleine largeur */}
+                    {nouveauDossierForm.mandats.length > 0 && (
+                      <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
+                        <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
                           {nouveauDossierForm.mandats.map((mandat, index) => (
-                            <TabsContent key={index} value={index.toString()}>
-                              <Card className="border-slate-700 bg-slate-800/30">
-                                <CardContent className="p-4 space-y-4">
-                                  <MandatTabs
+                            <TabsTrigger
+                              key={index}
+                              value={index.toString()}
+                              className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
+                            >
+                              {mandat.type_mandat || `Mandat ${index + 1}`}
+                            </TabsTrigger>
+                          ))}
+                        </TabsList>
+
+                        {nouveauDossierForm.mandats.map((mandat, index) => (
+                          <TabsContent key={index} value={index.toString()}>
+                            <Card className="border-slate-700 bg-slate-800/30">
+                              <CardContent className="p-4 space-y-4">
+                                <MandatTabs
                                     mandat={mandat}
                                     mandatIndex={index}
                                     updateMandat={(idx, field, value) => {
@@ -2215,12 +2264,9 @@ export default function PriseDeMandat() {
                                 </CardContent>
                               </Card>
                             </TabsContent>
-                          ))}
-                        </Tabs>
-                      ) : (
-                        <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.</div>
-                      )}
-                    </div>
+                        ))}
+                      </Tabs>
+                    )}
                   </form>
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
