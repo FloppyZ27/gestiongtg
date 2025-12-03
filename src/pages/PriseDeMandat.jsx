@@ -2151,16 +2151,26 @@ export default function PriseDeMandat() {
           {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
             if (!open) {
-              // Vérifier si des données ont été saisies
-              const hasData = nouveauDossierForm.numero_dossier || 
-                nouveauDossierForm.clients_ids.length > 0 ||
+              // Vérifier si des modifications ont été faites par rapport à l'état initial
+              const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                type_mandat: m.type_mandat,
+                date_livraison: m.date_livraison || ""
+              }));
+              const currentMandats = nouveauDossierForm.mandats.map(m => ({
+                type_mandat: m.type_mandat,
+                date_livraison: m.date_livraison || ""
+              }));
+              
+              const hasChanges = nouveauDossierForm.numero_dossier || 
+                JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
                 nouveauDossierForm.notaires_ids.length > 0 ||
                 nouveauDossierForm.courtiers_ids.length > 0 ||
-                nouveauDossierForm.mandats.some(m => m.type_mandat || m.utilisateur_assigne || m.date_livraison) ||
-                commentairesTemporairesDossier.length > 0 ||
+                nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
+                JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
+                commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                 dossierDocuments.length > 0;
               
-              if (hasData) {
+              if (hasChanges) {
                 if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
                   setIsOuvrirDossierDialogOpen(false);
                 }
@@ -2399,6 +2409,26 @@ export default function PriseDeMandat() {
                         {!mandatStepCollapsed && (
                           <CardContent className="pt-2 pb-3">
                             <div className="flex justify-end mb-2 gap-1">
+                              {nouveauDossierForm.mandats.length > 1 && (
+                                <Button 
+                                  type="button" 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => {
+                                    const indexToRemove = parseInt(activeTabMandatDossier);
+                                    if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.filter((_, i) => i !== indexToRemove)
+                                      }));
+                                      setActiveTabMandatDossier(Math.max(0, indexToRemove - 1).toString());
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              )}
                               <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
@@ -2950,13 +2980,13 @@ export default function PriseDeMandat() {
                                   <p className="text-amber-400 text-sm">Upload en cours...</p>
                                 </div>
                               )}
-                              <div className="space-y-1">
+                              <div className="grid grid-cols-2 gap-2">
                                 {dossierDocuments.map((doc, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                    <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                                    <span className="text-slate-300 text-xs truncate flex-1">{doc.name}</span>
-                                    <span className="text-slate-500 text-xs flex-shrink-0">
-                                      {doc.uploaded_at ? format(new Date(doc.uploaded_at), "dd MMM yyyy", { locale: fr }) : "-"}
+                                  <div key={idx} className="flex items-center gap-1 p-1.5 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <File className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                                    <span className="text-slate-300 text-[10px] truncate flex-1" title={doc.name}>{doc.name}</span>
+                                    <span className="text-slate-500 text-[10px] flex-shrink-0">
+                                      {doc.uploaded_at ? format(new Date(doc.uploaded_at), "dd/MM/yy", { locale: fr }) : "-"}
                                     </span>
                                     <Button
                                       type="button"
@@ -2966,25 +2996,10 @@ export default function PriseDeMandat() {
                                         setViewingPdfUrl(doc.url);
                                         setViewingPdfName(doc.name);
                                       }}
-                                      className="text-slate-400 hover:text-amber-400 h-6 w-6 p-0"
-                                      title="Voir le document"
+                                      className="text-slate-400 hover:text-amber-400 h-5 w-5 p-0"
+                                      title="Voir"
                                     >
-                                      <Eye className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
-                                        const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
-                                        navigator.clipboard.writeText(sharePointLink);
-                                        alert("Lien SharePoint copié dans le presse-papier !");
-                                      }}
-                                      className="text-slate-400 hover:text-blue-400 h-6 w-6 p-0"
-                                      title="Copier lien SharePoint"
-                                    >
-                                      <ExternalLink className="w-3 h-3" />
+                                      <Eye className="w-2.5 h-2.5" />
                                     </Button>
                                     <Button
                                       type="button"
@@ -2994,10 +3009,10 @@ export default function PriseDeMandat() {
                                         setDossierDocuments(prev => prev.filter((_, i) => i !== idx));
                                         addHistoriqueEntry("Suppression de document", `Document supprimé: ${doc.name}`);
                                       }}
-                                      className="text-slate-400 hover:text-red-400 h-6 w-6 p-0"
+                                      className="text-slate-400 hover:text-red-400 h-5 w-5 p-0"
                                       title="Supprimer"
                                     >
-                                      <X className="w-3 h-3" />
+                                      <X className="w-2.5 h-2.5" />
                                     </Button>
                                   </div>
                                 ))}
@@ -3011,15 +3026,25 @@ export default function PriseDeMandat() {
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
                     <Button type="button" variant="outline" onClick={() => {
-                      const hasData = nouveauDossierForm.numero_dossier || 
-                        nouveauDossierForm.clients_ids.length > 0 ||
+                      const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                        type_mandat: m.type_mandat,
+                        date_livraison: m.date_livraison || ""
+                      }));
+                      const currentMandats = nouveauDossierForm.mandats.map(m => ({
+                        type_mandat: m.type_mandat,
+                        date_livraison: m.date_livraison || ""
+                      }));
+                      
+                      const hasChanges = nouveauDossierForm.numero_dossier || 
+                        JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
                         nouveauDossierForm.notaires_ids.length > 0 ||
                         nouveauDossierForm.courtiers_ids.length > 0 ||
-                        nouveauDossierForm.mandats.some(m => m.type_mandat || m.utilisateur_assigne || m.date_livraison) ||
-                        commentairesTemporairesDossier.length > 0 ||
+                        nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
+                        JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
+                        commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                         dossierDocuments.length > 0;
                       
-                      if (hasData) {
+                      if (hasChanges) {
                         if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
                           setIsOuvrirDossierDialogOpen(false);
                         }
