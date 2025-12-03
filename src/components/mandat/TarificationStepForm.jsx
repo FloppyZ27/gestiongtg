@@ -25,7 +25,13 @@ export default function TarificationStepForm({
     onTarificationChange(updatedMandats);
   };
 
-  const totalEstime = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.prix_estime) || 0), 0);
+  const totalEstime = mandatsWithType.reduce((sum, m) => {
+    const isMultiLot = m.type_mandat === "Description Technique" || m.type_mandat === "OCTR";
+    if (isMultiLot) {
+      return sum + (parseFloat(m.prix_premier_lot) || 0) + (parseFloat(m.prix_autres_lots) || 0);
+    }
+    return sum + (parseFloat(m.prix_estime) || 0);
+  }, 0);
   const totalRabais = mandatsWithType.reduce((sum, m) => sum + (parseFloat(m.rabais) || 0), 0);
 
   return (
@@ -56,26 +62,62 @@ export default function TarificationStepForm({
             <div className="space-y-2">
               {mandats.map((mandat, index) => {
                 if (!mandat.type_mandat) return null;
+                const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
                 return (
-                  <div key={index} className="flex items-center gap-4 py-2">
-                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 min-w-[140px] justify-center">
+                  <div key={index} className="flex items-center gap-4 py-2 w-full">
+                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 min-w-[160px] justify-center flex-shrink-0">
                       {mandat.type_mandat}
                     </Badge>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={mandat.prix_estime || ""}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9.]/g, '');
-                          handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
-                        }}
-                        placeholder="0.00"
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
+                    
+                    {isMultiLotType ? (
+                      <>
+                        <div className="flex items-center gap-2 flex-1">
+                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix 1er lot ($)</Label>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={mandat.prix_premier_lot || ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.]/g, '');
+                              handleFieldChange(index, 'prix_premier_lot', value ? parseFloat(value) : 0);
+                            }}
+                            placeholder="0.00"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 flex-1">
+                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix autres lots ($)</Label>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={mandat.prix_autres_lots || ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.]/g, '');
+                              handleFieldChange(index, 'prix_autres_lots', value ? parseFloat(value) : 0);
+                            }}
+                            placeholder="0.00"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-1">
+                        <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          value={mandat.prix_estime || ""}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.]/g, '');
+                            handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
+                          }}
+                          placeholder="0.00"
+                          className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 flex-1">
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
                       <Input
                         type="text"
@@ -86,10 +128,10 @@ export default function TarificationStepForm({
                           handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
                         }}
                         placeholder="0.00"
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
                       />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <Checkbox
                         checked={mandat.taxes_incluses || false}
                         onCheckedChange={(checked) => handleFieldChange(index, 'taxes_incluses', checked)}
