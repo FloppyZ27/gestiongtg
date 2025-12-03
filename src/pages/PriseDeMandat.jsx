@@ -1233,8 +1233,10 @@ export default function PriseDeMandat() {
       creationDetails.push(`Statut: ${formData.statut}`);
       const mandatTypes = mandatsToSave.map(m => m.type_mandat).filter(t => t);
       if (mandatTypes.length > 0) creationDetails.push(`Mandats: ${mandatTypes.join(', ')}`);
-      if (newClientName) creationDetails.push(`Client: ${newClientName}`);
-      if (newAdresse) creationDetails.push(`Adresse: ${newAdresse}`);
+      const creationClientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+      const creationAdresse = formatAdresse(workAddress);
+      if (creationClientName) creationDetails.push(`Client: ${creationClientName}`);
+      if (creationAdresse) creationDetails.push(`Adresse: ${creationAdresse}`);
       const totalPrix = mandatsToSave.reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
       if (totalPrix > 0) creationDetails.push(`Prix: ${totalPrix.toFixed(2)} $`);
       
