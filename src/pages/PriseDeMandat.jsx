@@ -2198,7 +2198,28 @@ export default function PriseDeMandat() {
           </Dialog>
 
           {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
-          <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}>
+          <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
+            if (!open) {
+              // Vérifier si des données ont été saisies
+              const hasData = nouveauDossierForm.numero_dossier || 
+                nouveauDossierForm.clients_ids.length > 0 ||
+                nouveauDossierForm.notaires_ids.length > 0 ||
+                nouveauDossierForm.courtiers_ids.length > 0 ||
+                nouveauDossierForm.mandats.some(m => m.type_mandat || m.utilisateur_assigne || m.date_livraison) ||
+                commentairesTemporairesDossier.length > 0 ||
+                dossierDocuments.length > 0;
+              
+              if (hasData) {
+                if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
+                  setIsOuvrirDossierDialogOpen(false);
+                }
+              } else {
+                setIsOuvrirDossierDialogOpen(false);
+              }
+            } else {
+              setIsOuvrirDossierDialogOpen(open);
+            }
+          }}>
             <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
@@ -2738,7 +2759,7 @@ export default function PriseDeMandat() {
                                         <Label className="text-slate-400 text-xs">Date de livraison <span className="text-red-400">*</span></Label>
                                         <Input 
                                           type="date" 
-                                          value={mandat.date_livraison || ""} 
+                                          value={mandat.date_livraison || mandatsInfo[0]?.date_livraison || ""} 
                                           onChange={(e) => {
                                             setNouveauDossierForm(prev => ({
                                               ...prev,
@@ -3038,7 +3059,23 @@ export default function PriseDeMandat() {
                   </form>
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                    <Button type="button" variant="outline" onClick={() => setIsOuvrirDossierDialogOpen(false)}>Annuler</Button>
+                    <Button type="button" variant="outline" onClick={() => {
+                      const hasData = nouveauDossierForm.numero_dossier || 
+                        nouveauDossierForm.clients_ids.length > 0 ||
+                        nouveauDossierForm.notaires_ids.length > 0 ||
+                        nouveauDossierForm.courtiers_ids.length > 0 ||
+                        nouveauDossierForm.mandats.some(m => m.type_mandat || m.utilisateur_assigne || m.date_livraison) ||
+                        commentairesTemporairesDossier.length > 0 ||
+                        dossierDocuments.length > 0;
+                      
+                      if (hasData) {
+                        if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
+                          setIsOuvrirDossierDialogOpen(false);
+                        }
+                      } else {
+                        setIsOuvrirDossierDialogOpen(false);
+                      }
+                    }}>Annuler</Button>
                     <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
                   </div>
                 </div>
