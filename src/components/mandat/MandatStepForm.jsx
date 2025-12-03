@@ -58,22 +58,29 @@ export default function MandatStepForm({
       const newMandats = newSelectedTypes.map(t => {
         const existingMandat = mandats.find(m => m.type_mandat === t);
         if (existingMandat) {
-          // Conserver toutes les valeurs existantes du mandat
-          return {
-            ...existingMandat,
-            ...sharedInfo
-          };
+          // Créer une copie profonde pour préserver les valeurs uniques
+          const copy = JSON.parse(JSON.stringify(existingMandat));
+          // Mettre à jour seulement les infos partagées
+          copy.echeance_souhaitee = sharedInfo.echeance_souhaitee;
+          copy.date_signature = sharedInfo.date_signature;
+          copy.date_debut_travaux = sharedInfo.date_debut_travaux;
+          copy.date_livraison = sharedInfo.date_livraison;
+          copy.urgence_percue = sharedInfo.urgence_percue;
+          return copy;
         }
         // Nouveau mandat - initialiser avec des valeurs par défaut
         return {
           type_mandat: t,
-          ...sharedInfo,
+          echeance_souhaitee: sharedInfo.echeance_souhaitee,
+          date_signature: sharedInfo.date_signature,
+          date_debut_travaux: sharedInfo.date_debut_travaux,
+          date_livraison: sharedInfo.date_livraison || "",
+          urgence_percue: sharedInfo.urgence_percue,
           prix_estime: 0,
           prix_premier_lot: 0,
           prix_autres_lots: 0,
           rabais: 0,
-          taxes_incluses: false,
-          date_livraison: sharedInfo.date_livraison || ""
+          taxes_incluses: false
         };
       });
       onMandatsChange(newMandats);
@@ -89,11 +96,16 @@ export default function MandatStepForm({
       newInfo.date_debut_travaux = "";
     }
     
-    // Mettre à jour tous les mandats avec les nouvelles infos partagées
-    const updatedMandats = mandats.map(m => ({
-      ...m,
-      ...newInfo
-    }));
+    // Mettre à jour tous les mandats avec les nouvelles infos partagées (copie profonde)
+    const updatedMandats = mandats.map(m => {
+      const copy = JSON.parse(JSON.stringify(m));
+      copy.echeance_souhaitee = newInfo.echeance_souhaitee;
+      copy.date_signature = newInfo.date_signature;
+      copy.date_debut_travaux = newInfo.date_debut_travaux;
+      copy.date_livraison = newInfo.date_livraison;
+      copy.urgence_percue = newInfo.urgence_percue;
+      return copy;
+    });
     onMandatsChange(updatedMandats);
   };
 
