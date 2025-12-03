@@ -117,25 +117,17 @@ export default function TarificationStepForm({
                       <>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">1er lot ($)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={mandat.prix_premier_lot || ""}
-                            onChange={(e) => handleFieldChange(index, 'prix_premier_lot', e.target.value)}
-                            placeholder="0.00"
+                          <PriceInput
+                            value={mandat.prix_premier_lot || 0}
+                            onChange={(val) => handleFieldChange(index, 'prix_premier_lot', val)}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Autres ($)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={mandat.prix_autres_lots || ""}
-                            onChange={(e) => handleFieldChange(index, 'prix_autres_lots', e.target.value)}
-                            placeholder="0.00"
+                          <PriceInput
+                            value={mandat.prix_autres_lots || 0}
+                            onChange={(val) => handleFieldChange(index, 'prix_autres_lots', val)}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -144,13 +136,9 @@ export default function TarificationStepForm({
                       <>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Prix ($)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={mandat.prix_estime || ""}
-                            onChange={(e) => handleFieldChange(index, 'prix_estime', e.target.value)}
-                            placeholder="0.00"
+                          <PriceInput
+                            value={mandat.prix_estime || 0}
+                            onChange={(val) => handleFieldChange(index, 'prix_estime', val)}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -160,13 +148,9 @@ export default function TarificationStepForm({
                     
                     <div className="flex items-center gap-2">
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={mandat.rabais || ""}
-                        onChange={(e) => handleFieldChange(index, 'rabais', e.target.value)}
-                        placeholder="0.00"
+                      <PriceInput
+                        value={mandat.rabais || 0}
+                        onChange={(val) => handleFieldChange(index, 'rabais', val)}
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                       />
                     </div>
