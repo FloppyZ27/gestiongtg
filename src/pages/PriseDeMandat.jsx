@@ -2748,14 +2748,6 @@ export default function PriseDeMandat() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleEditPriseMandat(pm)}
-                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => {
                                   if (confirm("Êtes-vous sûr de vouloir supprimer cette prise de mandat ?")) {
                                     deletePriseMandatMutation.mutate(pm.id);
