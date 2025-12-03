@@ -1909,7 +1909,7 @@ export default function PriseDeMandat() {
                           setCommentairesTemporairesDossier(commentairesTemporaires);
                           setHistoriqueDossier(historique);
                           setActiveTabMandatDossier("0");
-                          setInfoDossierCollapsed(true);
+                          setInfoDossierCollapsed(false);
                           setMandatStepCollapsed(false);
                           setIsOuvrirDossierDialogOpen(true);
                         }}
@@ -2553,37 +2553,12 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                     
+                                    {/* Ligne délimitative */}
+                                    <div className="border-t border-slate-600 my-2"></div>
+                                    
                                     {/* Adresse des travaux avec recherche LLM */}
                                     <div className="space-y-1">
-                                      <div className="flex items-center justify-between">
-                                        <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
-                                        <div className="flex items-center gap-2">
-                                          <Checkbox
-                                            id={`same-address-${index}`}
-                                            checked={sameAddressForAllMandats}
-                                            onCheckedChange={(checked) => {
-                                              setSameAddressForAllMandats(checked);
-                                              if (checked && nouveauDossierForm.mandats.length > 1) {
-                                                // Copier l'adresse du premier mandat à tous les autres
-                                                const firstAddress = nouveauDossierForm.mandats[0]?.adresse_travaux;
-                                                if (firstAddress) {
-                                                  setNouveauDossierForm(prev => ({
-                                                    ...prev,
-                                                    mandats: prev.mandats.map(m => ({
-                                                      ...m,
-                                                      adresse_travaux: JSON.parse(JSON.stringify(firstAddress))
-                                                    }))
-                                                  }));
-                                                }
-                                              }
-                                            }}
-                                            className="border-slate-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 h-3 w-3"
-                                          />
-                                          <label htmlFor={`same-address-${index}`} className="text-slate-400 text-xs cursor-pointer">
-                                            Identique pour tous les mandats
-                                          </label>
-                                        </div>
-                                      </div>
+                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
                                       
                                       {/* Barre de recherche d'adresse */}
                                       <div className="relative">
@@ -2748,6 +2723,9 @@ export default function PriseDeMandat() {
                                         </div>
                                       </div>
                                     </div>
+                                    
+                                    {/* Ligne délimitative */}
+                                    <div className="border-t border-slate-600 my-2"></div>
                                     
                                     <div className="grid grid-cols-4 gap-2">
                                       <div className="space-y-1">
