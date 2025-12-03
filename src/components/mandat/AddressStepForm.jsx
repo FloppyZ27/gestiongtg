@@ -227,42 +227,57 @@ export default function AddressStepForm({
               </div>
 
               {/* Champs manuels */}
-              <div className="grid grid-cols-[80px_1fr_1fr_100px] gap-2">
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">N° civique</Label>
-                  <Input
-                    value={addressForm.numero_civique}
-                    onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
-                    placeholder="123"
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
+              <div className="space-y-2">
+                {/* Ligne 1: N° civique et Rue */}
+                <div className="grid grid-cols-[100px_1fr] gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">N° civique</Label>
+                    <Input
+                      value={addressForm.numero_civique}
+                      onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
+                      placeholder="123"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Rue</Label>
+                    <Input
+                      value={addressForm.rue}
+                      onChange={(e) => handleFieldChange('rue', e.target.value)}
+                      placeholder="Nom de la rue"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Rue</Label>
-                  <Input
-                    value={addressForm.rue}
-                    onChange={(e) => handleFieldChange('rue', e.target.value)}
-                    placeholder="Nom de la rue"
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Ville</Label>
-                  <Input
-                    value={addressForm.ville}
-                    onChange={(e) => handleFieldChange('ville', e.target.value)}
-                    placeholder="Ville"
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-slate-400 text-xs">Code postal</Label>
-                  <Input
-                    value={addressForm.code_postal}
-                    onChange={(e) => handleFieldChange('code_postal', e.target.value)}
-                    placeholder="G0V 0A0"
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
+                {/* Ligne 2: Ville, Code postal et Province */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Ville</Label>
+                    <Input
+                      value={addressForm.ville}
+                      onChange={(e) => handleFieldChange('ville', e.target.value)}
+                      placeholder="Ville"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Code postal</Label>
+                    <Input
+                      value={addressForm.code_postal}
+                      onChange={(e) => handleFieldChange('code_postal', e.target.value)}
+                      placeholder="G0V 0A0"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-slate-400 text-xs">Province</Label>
+                    <Input
+                      value={addressForm.province}
+                      onChange={(e) => handleFieldChange('province', e.target.value)}
+                      placeholder="Québec"
+                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                    />
+                  </div>
                 </div>
               </div>
               </div>
