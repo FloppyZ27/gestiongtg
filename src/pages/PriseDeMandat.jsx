@@ -499,7 +499,8 @@ export default function PriseDeMandat() {
         rabais: data.rabais,
         taxes_incluses: data.taxes_incluses,
         statut: data.statut,
-        commentaires: commentsToSave
+        commentaires: commentsToSave,
+        historique: data.historique
       };
 
       return await base44.entities.PriseMandat.update(id, priseMandatData);
@@ -1155,9 +1156,60 @@ export default function PriseDeMandat() {
 
       // Vérifier changement de date de livraison
       if (editingPriseMandat.date_livraison !== (mandatsInfo[0]?.date_livraison || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
         newHistoriqueEntries.push({
           action: "Modification de la date de livraison",
-          details: `${editingPriseMandat.date_livraison || 'Non définie'} → ${mandatsInfo[0]?.date_livraison || 'Non définie'}`,
+          details: `${formatDate(editingPriseMandat.date_livraison)} → ${formatDate(mandatsInfo[0]?.date_livraison)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de signature
+      if (editingPriseMandat.date_signature !== (mandatsInfo[0]?.date_signature || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
+        newHistoriqueEntries.push({
+          action: "Modification de la date de signature",
+          details: `${formatDate(editingPriseMandat.date_signature)} → ${formatDate(mandatsInfo[0]?.date_signature)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de début des travaux
+      if (editingPriseMandat.date_debut_travaux !== (mandatsInfo[0]?.date_debut_travaux || "")) {
+        const formatDate = (date) => date ? format(new Date(date), "dd MMM yyyy", { locale: fr }) : 'Non définie';
+        newHistoriqueEntries.push({
+          action: "Modification de la date de début des travaux",
+          details: `${formatDate(editingPriseMandat.date_debut_travaux)} → ${formatDate(mandatsInfo[0]?.date_debut_travaux)}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'échéance souhaitée
+      if (editingPriseMandat.echeance_souhaitee !== (mandatsInfo[0]?.echeance_souhaitee || "")) {
+        newHistoriqueEntries.push({
+          action: "Modification de l'échéance souhaitée",
+          details: `${editingPriseMandat.echeance_souhaitee || 'Non définie'} → ${mandatsInfo[0]?.echeance_souhaitee || 'Non définie'}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de clients_ids
+      const oldClientsIds = (editingPriseMandat.clients_ids || []).sort().join(',');
+      const newClientsIds = (formData.clients_ids || []).sort().join(',');
+      if (oldClientsIds !== newClientsIds) {
+        const oldNames = getClientsNames(editingPriseMandat.clients_ids || []);
+        const newNames = getClientsNames(formData.clients_ids || []);
+        newHistoriqueEntries.push({
+          action: "Modification des clients sélectionnés",
+          details: oldNames !== '-' ? `${oldNames} → ${newNames}` : `Ajout: ${newNames}`,
           utilisateur_nom: userName,
           utilisateur_email: userEmail,
           date: now
