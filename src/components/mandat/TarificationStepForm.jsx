@@ -64,15 +64,15 @@ export default function TarificationStepForm({
                 if (!mandat.type_mandat) return null;
                 const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
                 return (
-                  <div key={index} className="flex items-center gap-4 py-2 w-full">
-                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 min-w-[160px] justify-center flex-shrink-0">
+                  <div key={index} className="grid grid-cols-[180px_1fr_1fr_1fr_140px] items-center gap-4 py-2">
+                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 justify-center">
                       {mandat.type_mandat}
                     </Badge>
                     
                     {isMultiLotType ? (
                       <>
-                        <div className="flex items-center gap-2 flex-1">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix 1er lot ($)</Label>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-slate-400 text-xs whitespace-nowrap">1er lot ($)</Label>
                           <Input
                             type="text"
                             inputMode="decimal"
@@ -82,11 +82,11 @@ export default function TarificationStepForm({
                               handleFieldChange(index, 'prix_premier_lot', value ? parseFloat(value) : 0);
                             }}
                             placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
-                        <div className="flex items-center gap-2 flex-1">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix autres lots ($)</Label>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-slate-400 text-xs whitespace-nowrap">Autres ($)</Label>
                           <Input
                             type="text"
                             inputMode="decimal"
@@ -96,28 +96,31 @@ export default function TarificationStepForm({
                               handleFieldChange(index, 'prix_autres_lots', value ? parseFloat(value) : 0);
                             }}
                             placeholder="0.00"
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center gap-2 flex-1">
-                        <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={mandat.prix_estime || ""}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/[^0-9.]/g, '');
-                            handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
-                          }}
-                          placeholder="0.00"
-                          className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
-                        />
-                      </div>
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={mandat.prix_estime || ""}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.]/g, '');
+                              handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
+                            }}
+                            placeholder="0.00"
+                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
+                          />
+                        </div>
+                        <div></div>
+                      </>
                     )}
                     
-                    <div className="flex items-center gap-2 flex-1">
+                    <div className="flex items-center gap-2">
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
                       <Input
                         type="text"
@@ -128,10 +131,10 @@ export default function TarificationStepForm({
                           handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
                         }}
                         placeholder="0.00"
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm flex-1 max-w-[100px]"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                       />
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2">
                       <Checkbox
                         checked={mandat.taxes_incluses || false}
                         onCheckedChange={(checked) => handleFieldChange(index, 'taxes_incluses', checked)}
