@@ -1491,7 +1491,7 @@ export default function PriseDeMandat() {
                 </form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
-                <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                <div className="flex justify-end gap-3 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
                   <Button type="button" variant="outline" onClick={() => {
                     if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
                       setIsDialogOpen(false);
@@ -1507,7 +1507,7 @@ export default function PriseDeMandat() {
                 </div>
 
                 {/* Commentaires Sidebar - 25% */}
-                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-4">
+                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-8">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
