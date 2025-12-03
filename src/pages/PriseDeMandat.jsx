@@ -2571,93 +2571,147 @@ export default function PriseDeMandat() {
 
                       {!documentsCollapsed && (
                         <CardContent className="pt-2 pb-3">
-                          {/* Zone de drag & drop */}
-                          <div
-                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                              uploadingDocuments 
-                                ? 'border-amber-500 bg-amber-500/10' 
-                                : 'border-slate-600 hover:border-amber-500/50 hover:bg-slate-800/50'
-                            }`}
-                            onDragOver={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onDragEnter={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onDrop={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-                              if (files.length === 0) {
-                                alert("Seuls les fichiers PDF sont acceptés.");
-                                return;
-                              }
-                              setUploadingDocuments(true);
-                              try {
-                                for (const file of files) {
-                                  const response = await base44.integrations.Core.UploadFile({ file });
-                                  setDossierDocuments(prev => [...prev, {
-                                    name: file.name,
-                                    url: response.file_url,
-                                    uploaded_at: new Date().toISOString()
-                                  }]);
-                                }
-                              } catch (error) {
-                                console.error("Erreur upload:", error);
-                                alert("Erreur lors de l'upload des fichiers.");
-                              } finally {
-                                setUploadingDocuments(false);
-                              }
-                            }}
-                          >
-                            {uploadingDocuments ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-                                <p className="text-amber-400 text-sm">Upload en cours...</p>
-                              </div>
-                            ) : (
-                              <>
-                                <Upload className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                                <p className="text-slate-400 text-sm">Glissez-déposez vos fichiers PDF ici</p>
-                                <p className="text-slate-500 text-xs mt-1">ou</p>
-                                <label className="cursor-pointer">
-                                  <span className="text-amber-400 text-sm hover:underline">Parcourir les fichiers</span>
-                                  <input
-                                    type="file"
-                                    accept=".pdf"
-                                    multiple
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      const files = Array.from(e.target.files || []);
-                                      if (files.length === 0) return;
-                                      setUploadingDocuments(true);
-                                      try {
-                                        for (const file of files) {
-                                          const response = await base44.integrations.Core.UploadFile({ file });
-                                          setDossierDocuments(prev => [...prev, {
-                                            name: file.name,
-                                            url: response.file_url,
-                                            uploaded_at: new Date().toISOString()
-                                          }]);
-                                        }
-                                      } catch (error) {
-                                        console.error("Erreur upload:", error);
-                                        alert("Erreur lors de l'upload des fichiers.");
-                                      } finally {
-                                        setUploadingDocuments(false);
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </>
-                            )}
+                          {/* Bouton parcourir en haut */}
+                          <div className="flex justify-end mb-2">
+                            <label className="cursor-pointer">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-7 text-xs"
+                                asChild
+                              >
+                                <span>
+                                  <Upload className="w-3 h-3 mr-1" />
+                                  Parcourir les fichiers
+                                </span>
+                              </Button>
+                              <input
+                                type="file"
+                                accept=".pdf"
+                                multiple
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  if (files.length === 0) return;
+                                  setUploadingDocuments(true);
+                                  try {
+                                    for (const file of files) {
+                                      const response = await base44.integrations.Core.UploadFile({ file });
+                                      setDossierDocuments(prev => [...prev, {
+                                        name: file.name,
+                                        url: response.file_url,
+                                        uploaded_at: new Date().toISOString()
+                                      }]);
+                                    }
+                                  } catch (error) {
+                                    console.error("Erreur upload:", error);
+                                    alert("Erreur lors de l'upload des fichiers.");
+                                  } finally {
+                                    setUploadingDocuments(false);
+                                  }
+                                }}
+                              />
+                            </label>
                           </div>
 
-                          {/* Liste des documents uploadés */}
-                          {dossierDocuments.length > 0 && (
-                            <div className="mt-3 space-y-2">
+                          {/* Zone de drag & drop - affichée seulement si aucun document */}
+                          {dossierDocuments.length === 0 ? (
+                            <div
+                              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                                uploadingDocuments 
+                                  ? 'border-amber-500 bg-amber-500/10' 
+                                  : 'border-slate-600 hover:border-amber-500/50 hover:bg-slate-800/50'
+                              }`}
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDragEnter={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDrop={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                                if (files.length === 0) {
+                                  alert("Seuls les fichiers PDF sont acceptés.");
+                                  return;
+                                }
+                                setUploadingDocuments(true);
+                                try {
+                                  for (const file of files) {
+                                    const response = await base44.integrations.Core.UploadFile({ file });
+                                    setDossierDocuments(prev => [...prev, {
+                                      name: file.name,
+                                      url: response.file_url,
+                                      uploaded_at: new Date().toISOString()
+                                    }]);
+                                  }
+                                } catch (error) {
+                                  console.error("Erreur upload:", error);
+                                  alert("Erreur lors de l'upload des fichiers.");
+                                } finally {
+                                  setUploadingDocuments(false);
+                                }
+                              }}
+                            >
+                              {uploadingDocuments ? (
+                                <div className="flex flex-col items-center gap-2">
+                                  <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+                                  <p className="text-amber-400 text-sm">Upload en cours...</p>
+                                </div>
+                              ) : (
+                                <>
+                                  <Upload className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                                  <p className="text-slate-400 text-sm">Glissez-déposez vos fichiers PDF ici</p>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            /* Liste des documents avec drag & drop invisible */
+                            <div
+                              className="space-y-2"
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDragEnter={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              onDrop={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                                if (files.length === 0) {
+                                  alert("Seuls les fichiers PDF sont acceptés.");
+                                  return;
+                                }
+                                setUploadingDocuments(true);
+                                try {
+                                  for (const file of files) {
+                                    const response = await base44.integrations.Core.UploadFile({ file });
+                                    setDossierDocuments(prev => [...prev, {
+                                      name: file.name,
+                                      url: response.file_url,
+                                      uploaded_at: new Date().toISOString()
+                                    }]);
+                                  }
+                                } catch (error) {
+                                  console.error("Erreur upload:", error);
+                                  alert("Erreur lors de l'upload des fichiers.");
+                                } finally {
+                                  setUploadingDocuments(false);
+                                }
+                              }}
+                            >
+                              {uploadingDocuments && (
+                                <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg mb-2">
+                                  <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+                                  <p className="text-amber-400 text-sm">Upload en cours...</p>
+                                </div>
+                              )}
                               {dossierDocuments.map((doc, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border border-slate-700">
                                   <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -3369,20 +3423,11 @@ export default function PriseDeMandat() {
         {/* PDF Viewer Dialog */}
         <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-800 flex-shrink-0 min-h-0">
+            <div className="flex items-center px-3 py-1.5 border-b border-slate-800 flex-shrink-0 min-h-0">
               <div className="flex items-center gap-2 text-sm">
                 <File className="w-4 h-4 text-amber-400" />
-                <span className="truncate max-w-[400px] text-white">{viewingPdfName}</span>
+                <span className="truncate max-w-[600px] text-white">{viewingPdfName}</span>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open(viewingPdfUrl, '_blank')}
-                className="text-slate-400 hover:text-white h-6 px-2 text-xs"
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Nouvel onglet
-              </Button>
             </div>
             <DialogHeader className="sr-only">
               <DialogTitle>{viewingPdfName}</DialogTitle>
