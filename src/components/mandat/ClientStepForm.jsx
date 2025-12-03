@@ -6,6 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Users, Check } from "lucide-react";
 
+// Fonction pour formater le téléphone au format (000) 000-0000
+const formatPhoneNumber = (value) => {
+  // Enlever tout sauf les chiffres
+  const cleaned = value.replace(/\D/g, '');
+  
+  // Limiter à 10 chiffres
+  const limited = cleaned.slice(0, 10);
+  
+  // Formater selon la longueur
+  if (limited.length === 0) return '';
+  if (limited.length <= 3) return `(${limited}`;
+  if (limited.length <= 6) return `(${limited.slice(0, 3)}) ${limited.slice(3)}`;
+  return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`;
+};
+
 export default function ClientStepForm({ 
   clients = [], 
   selectedClientIds = [], 
@@ -125,7 +140,7 @@ export default function ClientStepForm({
                   <div className="flex gap-1">
                     <Input
                       value={clientForm.telephone}
-                      onChange={(e) => setClientForm({ ...clientForm, telephone: e.target.value })}
+                      onChange={(e) => setClientForm({ ...clientForm, telephone: formatPhoneNumber(e.target.value) })}
                       placeholder="(000) 000-0000"
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm flex-1"
                     />

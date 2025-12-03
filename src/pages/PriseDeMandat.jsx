@@ -352,6 +352,101 @@ export default function PriseDeMandat() {
     },
   });
 
+  const [editingPriseMandat, setEditingPriseMandat] = useState(null);
+
+  const handleEditPriseMandat = (pm) => {
+    setEditingPriseMandat(pm);
+    
+    // Remplir le formulaire avec les données existantes
+    setFormData({
+      ...formData,
+      arpenteur_geometre: pm.arpenteur_geometre || "",
+      clients_ids: pm.clients_ids || [],
+      statut: pm.statut || "Nouveau mandat/Demande d'information"
+    });
+    
+    setWorkAddress(pm.adresse_travaux || {
+      numeros_civiques: [""],
+      rue: "",
+      ville: "",
+      province: "Québec",
+      code_postal: "",
+      numero_lot: ""
+    });
+    
+    // Reconstruire les mandatsInfo à partir des types_mandats
+    const mandatsFromTypes = (pm.types_mandats || []).map(type => ({
+      type_mandat: type,
+      objectif: pm.objectif || "",
+      echeance_souhaitee: pm.echeance_souhaitee || "",
+      date_signature: pm.date_signature || "",
+      date_debut_travaux: pm.date_debut_travaux || "",
+      urgence_percue: pm.urgence_percue || "",
+      prix_estime: pm.prix_estime || 0,
+      rabais: pm.rabais || 0,
+      taxes_incluses: pm.taxes_incluses || false
+    }));
+    
+    setMandatsInfo(mandatsFromTypes.length > 0 ? mandatsFromTypes : [{
+      type_mandat: "",
+      objectif: pm.objectif || "",
+      echeance_souhaitee: pm.echeance_souhaitee || "",
+      date_signature: pm.date_signature || "",
+      date_debut_travaux: pm.date_debut_travaux || "",
+      urgence_percue: pm.urgence_percue || "",
+      prix_estime: pm.prix_estime || 0,
+      rabais: pm.rabais || 0,
+      taxes_incluses: pm.taxes_incluses || false
+    }]);
+    
+    setCommentairesTemporaires(pm.commentaires?.map((c, idx) => ({
+      id: `temp-${idx}`,
+      contenu: c.contenu,
+      utilisateur_email: c.utilisateur_email,
+      utilisateur_nom: c.utilisateur_nom,
+      created_date: c.date
+    })) || []);
+    
+    setIsDialogOpen(true);
+  };
+
+  const updatePriseMandatMutation = useMutation({
+    mutationFn: async ({ id, data }) => {
+      const commentsToSave = commentairesTemporaires.map(c => ({
+        contenu: c.contenu,
+        utilisateur_email: c.utilisateur_email,
+        utilisateur_nom: c.utilisateur_nom,
+        date: c.created_date || new Date().toISOString()
+      }));
+
+      const priseMandatData = {
+        arpenteur_geometre: data.arpenteur_geometre,
+        clients_ids: data.clients_ids,
+        adresse_travaux: data.adresse_travaux,
+        types_mandats: data.types_mandats,
+        objectif: data.objectif,
+        echeance_souhaitee: data.echeance_souhaitee,
+        date_signature: data.date_signature,
+        date_debut_travaux: data.date_debut_travaux,
+        urgence_percue: data.urgence_percue,
+        prix_estime: data.prix_estime,
+        rabais: data.rabais,
+        taxes_incluses: data.taxes_incluses,
+        statut: data.statut,
+        commentaires: commentsToSave
+      };
+
+      return await base44.entities.PriseMandat.update(id, priseMandatData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+      setIsDialogOpen(false);
+      resetFullForm();
+      setCommentairesTemporaires([]);
+      setEditingPriseMandat(null);
+    },
+  });
+
   const createDossierMutation = useMutation({
     mutationFn: async (dossierData) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
@@ -879,7 +974,11 @@ export default function PriseDeMandat() {
       statut: formData.statut
     };
 
-    createPriseMandatMutation.mutate(dataToSubmit);
+    if (editingPriseMandat) {
+      updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: dataToSubmit });
+    } else {
+      createPriseMandatMutation.mutate(dataToSubmit);
+    }
   };
 
   // handleNewClientSubmit removed, logic moved to ClientFormDialog
@@ -914,6 +1013,7 @@ export default function PriseDeMandat() {
     setDossierReferenceId(null);
     setDossierSearchForReference("");
     setCommentairesTemporaires([]);
+    setEditingPriseMandat(null);
   };
 
   const resetFullForm = () => {
@@ -971,6 +1071,7 @@ export default function PriseDeMandat() {
     setDossierReferenceId(null);
     setDossierSearchForReference("");
     setCommentairesTemporaires([]);
+    setEditingPriseMandat(null);
   };
 
   // NEW FUNCTION
@@ -1391,7 +1492,7 @@ export default function PriseDeMandat() {
                 <div className="flex-[0_0_75%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">
-                      {editingDossier ? "Modifier le mandat" : "Nouveau mandat"}
+                      {editingPriseMandat ? "Modifier la prise de mandat" : "Nouveau mandat"}
                     </h2>
                   </div>
                   {formData.ttl === "Oui" && (
@@ -1530,7 +1631,7 @@ export default function PriseDeMandat() {
                     Annuler
                   </Button>
                   <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingDossier ? "Modifier" : "Créer"}
+                    {editingPriseMandat ? "Modifier" : "Créer"}
                   </Button>
                 </div>
                 </div>
@@ -2599,7 +2700,8 @@ export default function PriseDeMandat() {
                       return (
                         <TableRow 
                           key={pm.id} 
-                          className="hover:bg-slate-800/30 border-slate-800"
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleEditPriseMandat(pm)}
                         >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
@@ -2642,8 +2744,16 @@ export default function PriseDeMandat() {
                               <span className="text-slate-600 text-xs">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditPriseMandat(pm)}
+                                className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
