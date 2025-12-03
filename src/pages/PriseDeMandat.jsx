@@ -2426,7 +2426,7 @@ export default function PriseDeMandat() {
 
                         {!mandatStepCollapsed && (
                           <CardContent className="pt-2 pb-3">
-                            <div className="flex justify-end mb-2">
+                            <div className="flex justify-end mb-2 gap-1">
                               <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
@@ -2492,28 +2492,6 @@ export default function PriseDeMandat() {
 
                                 {nouveauDossierForm.mandats.map((mandat, index) => (
                                   <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
-                                    <div className="flex justify-end">
-                                      <Button 
-                                        type="button" 
-                                        size="sm" 
-                                        variant="ghost"
-                                        onClick={() => {
-                                          if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.filter((_, i) => i !== index)
-                                            }));
-                                            if (nouveauDossierForm.mandats.length > 1) {
-                                              setActiveTabMandatDossier(Math.max(0, index - 1).toString());
-                                            }
-                                          }
-                                        }}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 text-xs px-2"
-                                      >
-                                        <Trash2 className="w-3 h-3 mr-1" />
-                                        Supprimer
-                                      </Button>
-                                    </div>
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="space-y-1">
                                         <Label className="text-slate-400 text-xs">Type de mandat</Label>
@@ -2727,7 +2705,7 @@ export default function PriseDeMandat() {
                                     {/* Ligne délimitative */}
                                     <div className="border-t border-slate-600 my-2"></div>
                                     
-                                    <div className="grid grid-cols-4 gap-2">
+                                    <div className="grid grid-cols-3 gap-2">
                                       <div className="space-y-1">
                                         <Label className="text-slate-400 text-xs">Date de signature</Label>
                                         <Input 
@@ -2772,6 +2750,9 @@ export default function PriseDeMandat() {
                                         />
                                       </div>
                                     </div>
+                                    
+                                    {/* Ligne délimitative */}
+                                    <div className="border-t border-slate-600 my-2"></div>
                                     
                                     {/* Section Lots */}
                                     <div className="space-y-1">
@@ -2997,57 +2978,55 @@ export default function PriseDeMandat() {
                                   <p className="text-amber-400 text-sm">Upload en cours...</p>
                                 </div>
                               )}
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-1">
                                 {dossierDocuments.map((doc, idx) => (
-                                  <div key={idx} className="flex flex-col p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                                      <span className="text-slate-300 text-xs truncate flex-1">{doc.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          setViewingPdfUrl(doc.url);
-                                          setViewingPdfName(doc.name);
-                                        }}
-                                        className="text-slate-400 hover:text-amber-400 h-6 flex-1 text-xs"
-                                        title="Voir le document"
-                                      >
-                                        <Eye className="w-3 h-3 mr-1" />
-                                        Voir
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
-                                          const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
-                                          navigator.clipboard.writeText(sharePointLink);
-                                          alert("Lien SharePoint copié dans le presse-papier !");
-                                        }}
-                                        className="text-slate-400 hover:text-blue-400 h-6 w-6 p-0"
-                                        title="Copier lien SharePoint"
-                                      >
-                                        <ExternalLink className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          setDossierDocuments(prev => prev.filter((_, i) => i !== idx));
-                                          addHistoriqueEntry("Suppression de document", `Document supprimé: ${doc.name}`);
-                                        }}
-                                        className="text-slate-400 hover:text-red-400 h-6 w-6 p-0"
-                                        title="Supprimer"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </Button>
-                                    </div>
+                                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                                    <span className="text-slate-300 text-xs truncate flex-1">{doc.name}</span>
+                                    <span className="text-slate-500 text-xs flex-shrink-0">
+                                      {doc.uploaded_at ? format(new Date(doc.uploaded_at), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setViewingPdfUrl(doc.url);
+                                        setViewingPdfName(doc.name);
+                                      }}
+                                      className="text-slate-400 hover:text-amber-400 h-6 w-6 p-0"
+                                      title="Voir le document"
+                                    >
+                                      <Eye className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
+                                        const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
+                                        navigator.clipboard.writeText(sharePointLink);
+                                        alert("Lien SharePoint copié dans le presse-papier !");
+                                      }}
+                                      className="text-slate-400 hover:text-blue-400 h-6 w-6 p-0"
+                                      title="Copier lien SharePoint"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setDossierDocuments(prev => prev.filter((_, i) => i !== idx));
+                                        addHistoriqueEntry("Suppression de document", `Document supprimé: ${doc.name}`);
+                                      }}
+                                      className="text-slate-400 hover:text-red-400 h-6 w-6 p-0"
+                                      title="Supprimer"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
                                   </div>
                                 ))}
                               </div>
