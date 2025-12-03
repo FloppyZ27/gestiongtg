@@ -1,44 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, DollarSign, Receipt } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// Composant d'input contrôlé pour les prix
-function PriceInput({ value, onChange, placeholder = "0.00", className }) {
-  const [localValue, setLocalValue] = useState(value > 0 ? String(value) : "");
-  
-  // Synchroniser avec la valeur externe seulement si elle change significativement
-  useEffect(() => {
-    const numericLocal = localValue === "" ? 0 : parseFloat(localValue) || 0;
-    if (value !== numericLocal) {
-      setLocalValue(value > 0 ? String(value) : "");
-    }
-  }, [value]);
-  
-  const handleChange = (e) => {
-    const newValue = e.target.value;
-    // Permettre seulement les chiffres et un point décimal
-    if (newValue === "" || /^\d*\.?\d*$/.test(newValue)) {
-      setLocalValue(newValue);
-      const numericValue = newValue === "" ? 0 : parseFloat(newValue) || 0;
-      onChange(numericValue);
-    }
-  };
-  
-  return (
-    <Input
-      type="text"
-      inputMode="decimal"
-      value={localValue}
-      onChange={handleChange}
-      placeholder={placeholder}
-      className={className}
-    />
-  );
-}
 
 export default function TarificationStepForm({ 
   mandats = [],
@@ -47,16 +13,81 @@ export default function TarificationStepForm({
   onToggleCollapse
 }) {
   const mandatsWithType = mandats.filter(m => m.type_mandat);
+  
+  // Stocker les valeurs locales pour éviter les problèmes de curseur
+  const [localInputs, setLocalInputs] = useState({});
+  const debounceTimers = useRef({});
 
-  const handleFieldChange = (index, field, numericValue) => {
-    // Créer une copie profonde pour éviter les mutations
-    const updatedMandats = mandats.map((m, i) => {
-      if (i === index) {
-        return { ...m, [field]: numericValue };
-      }
-      return { ...m };
-    });
-    onTarificationChange(updatedMandats);
+  const getLocalValue = (index, field) => {
+    const key = `${index}_${field}`;
+    if (localInputs[key] !== undefined) {
+      return localInputs[key];
+    }
+    const mandat = mandats[index];
+    const value = mandat?.[field];
+    return value > 0 ? String(value) : "";
+  };
+
+  const handleInputChange = (index, field, value) => {
+    const key = `${index}_${field}`;
+    
+    // Mettre à jour la valeur locale immédiatement
+    setLocalInputs(prev => ({
+      ...prev,
+      [key]: value
+    }));
+    
+    // Annuler le timer précédent
+    if (debounceTimers.current[key]) {
+      clearTimeout(debounceTimers.current[key]);
+    }
+    
+    // Débounce la mise à jour du parent
+    debounceTimers.current[key] = setTimeout(() => {
+      const numericValue = value === "" ? 0 : parseFloat(value) || 0;
+      const updatedMandats = mandats.map((m, i) => {
+        if (i === index) {
+          return { ...m, [field]: numericValue };
+        }
+        return m;
+      });
+      onTarificationChange(updatedMandats);
+      
+      // Nettoyer la valeur locale après sync
+      setLocalInputs(prev => {
+        const newState = { ...prev };
+        delete newState[key];
+        return newState;
+      });
+    }, 300);
+  };
+
+  const handleInputBlur = (index, field) => {
+    const key = `${index}_${field}`;
+    
+    // Annuler le timer de débounce et appliquer immédiatement
+    if (debounceTimers.current[key]) {
+      clearTimeout(debounceTimers.current[key]);
+    }
+    
+    const localValue = localInputs[key];
+    if (localValue !== undefined) {
+      const numericValue = localValue === "" ? 0 : parseFloat(localValue) || 0;
+      const updatedMandats = mandats.map((m, i) => {
+        if (i === index) {
+          return { ...m, [field]: numericValue };
+        }
+        return m;
+      });
+      onTarificationChange(updatedMandats);
+      
+      // Nettoyer la valeur locale
+      setLocalInputs(prev => {
+        const newState = { ...prev };
+        delete newState[key];
+        return newState;
+      });
+    }
   };
   
   const handleCheckboxChange = (index, field, value) => {
@@ -64,7 +95,7 @@ export default function TarificationStepForm({
       if (i === index) {
         return { ...m, [field]: value };
       }
-      return { ...m };
+      return m;
     });
     onTarificationChange(updatedMandats);
   };
@@ -117,17 +148,31 @@ export default function TarificationStepForm({
                       <>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">1er lot ($)</Label>
-                          <PriceInput
-                            value={mandat.prix_premier_lot || 0}
-                            onChange={(val) => handleFieldChange(index, 'prix_premier_lot', val)}
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={getLocalValue(index, 'prix_premier_lot')}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, '');
+                              handleInputChange(index, 'prix_premier_lot', val);
+                            }}
+                            onBlur={() => handleInputBlur(index, 'prix_premier_lot')}
+                            placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Autres ($)</Label>
-                          <PriceInput
-                            value={mandat.prix_autres_lots || 0}
-                            onChange={(val) => handleFieldChange(index, 'prix_autres_lots', val)}
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={getLocalValue(index, 'prix_autres_lots')}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, '');
+                              handleInputChange(index, 'prix_autres_lots', val);
+                            }}
+                            onBlur={() => handleInputBlur(index, 'prix_autres_lots')}
+                            placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -136,9 +181,16 @@ export default function TarificationStepForm({
                       <>
                         <div className="flex items-center gap-2">
                           <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Prix ($)</Label>
-                          <PriceInput
-                            value={mandat.prix_estime || 0}
-                            onChange={(val) => handleFieldChange(index, 'prix_estime', val)}
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={getLocalValue(index, 'prix_estime')}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, '');
+                              handleInputChange(index, 'prix_estime', val);
+                            }}
+                            onBlur={() => handleInputBlur(index, 'prix_estime')}
+                            placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -148,9 +200,16 @@ export default function TarificationStepForm({
                     
                     <div className="flex items-center gap-2">
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
-                      <PriceInput
-                        value={mandat.rabais || 0}
-                        onChange={(val) => handleFieldChange(index, 'rabais', val)}
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={getLocalValue(index, 'rabais')}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, '');
+                          handleInputChange(index, 'rabais', val);
+                        }}
+                        onBlur={() => handleInputBlur(index, 'rabais')}
+                        placeholder="0.00"
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                       />
                     </div>
