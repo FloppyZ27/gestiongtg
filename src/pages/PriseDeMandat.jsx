@@ -3391,7 +3391,7 @@ export default function PriseDeMandat() {
             <div className="flex-1 overflow-hidden bg-slate-950">
               {viewingPdfUrl && (
                 <iframe
-                  src={viewingPdfUrl}
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingPdfUrl)}&embedded=true`}
                   className="w-full h-full border-0"
                   title={viewingPdfName}
                 />
