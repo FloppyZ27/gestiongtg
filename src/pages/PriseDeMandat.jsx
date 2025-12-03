@@ -3369,23 +3369,21 @@ export default function PriseDeMandat() {
         {/* PDF Viewer Dialog */}
         <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden">
-            <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
+            <DialogHeader className="px-3 py-2 border-b border-slate-800 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-lg flex items-center gap-2">
-                  <File className="w-5 h-5 text-amber-400" />
-                  {viewingPdfName}
+                <DialogTitle className="text-sm flex items-center gap-2">
+                  <File className="w-4 h-4 text-amber-400" />
+                  <span className="truncate max-w-[400px]">{viewingPdfName}</span>
                 </DialogTitle>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(viewingPdfUrl, '_blank')}
-                    className="text-slate-300"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Ouvrir dans un nouvel onglet
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(viewingPdfUrl, '_blank')}
+                  className="text-slate-400 hover:text-white h-7 px-2 text-xs"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                  Nouvel onglet
+                </Button>
               </div>
             </DialogHeader>
             <div className="flex-1 overflow-hidden bg-slate-950">
