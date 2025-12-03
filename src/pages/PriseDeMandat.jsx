@@ -1523,13 +1523,51 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex h-[90vh]">
+              <div className="flex flex-col h-[90vh]">
+                <div className="flex flex-1 overflow-hidden">
                 {/* Main form content - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
+                  <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
                       {editingPriseMandat ? "Modifier la prise de mandat" : "Nouveau mandat"}
                     </h2>
+                    {formData.statut === "Mandats à ouvrir" && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          // Ouvrir la page Dossiers avec les données pré-remplies
+                          const dossierData = {
+                            arpenteur_geometre: formData.arpenteur_geometre,
+                            clients_ids: formData.clients_ids,
+                            mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                              type_mandat: m.type_mandat,
+                              adresse_travaux: workAddress,
+                              prix_estime: m.prix_estime || 0,
+                              rabais: m.rabais || 0,
+                              taxes_incluses: m.taxes_incluses || false,
+                              date_signature: m.date_signature || "",
+                              date_debut_travaux: m.date_debut_travaux || "",
+                              lots: [],
+                              tache_actuelle: "Ouverture",
+                              utilisateur_assigne: ""
+                            }))
+                          };
+                          // Stocker les données dans sessionStorage pour les récupérer dans Dossiers
+                          sessionStorage.setItem('priseMandat_toDossier', JSON.stringify({
+                            ...dossierData,
+                            priseMandat_id: editingPriseMandat?.id,
+                            client_info: clientInfo,
+                            commentaires: commentairesTemporaires
+                          }));
+                          // Rediriger vers la page Dossiers
+                          window.location.href = createPageUrl("Dossiers") + "?from_prise_mandat=true";
+                        }}
+                        className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+                      >
+                        <FolderOpen className="w-5 h-5 mr-2" />
+                        Ouvrir dossier
+                      </Button>
+                    )}
                   </div>
                   {formData.ttl === "Oui" && (
                     <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg mb-6">
@@ -1660,8 +1698,10 @@ export default function PriseDeMandat() {
 
                 </form>
 
-                {/* Boutons Annuler/Créer tout en bas */}
-                <div className="flex justify-end gap-3 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                </div>
+                
+                {/* Boutons Annuler/Créer tout en bas - sticky */}
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
                   <Button type="button" variant="outline" onClick={() => {
                     if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
                       setIsDialogOpen(false);
@@ -1674,10 +1714,10 @@ export default function PriseDeMandat() {
                     {editingPriseMandat ? "Modifier" : "Créer"}
                   </Button>
                 </div>
-                </div>
+                
 
                 {/* Commentaires Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden pt-10">
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -1735,6 +1775,7 @@ export default function PriseDeMandat() {
                       />
                     </div>
                   )}
+                </div>
                 </div>
               </div>
             </DialogContent>
