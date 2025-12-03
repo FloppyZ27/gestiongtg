@@ -127,9 +127,9 @@ export default function TarificationStepForm({
                 <Receipt className="w-3.5 h-3.5 text-purple-400" />
               </div>
               <CardTitle className="text-purple-300 text-base">Tarification</CardTitle>
-            {totalEstime > 0 && (
+            {(totalEstime > 0 || totalRabais > 0) && (
               <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                Total: {totalEstime.toFixed(2)} $
+                Net: {(totalEstime - totalRabais).toFixed(2)} $
               </Badge>
             )}
           </div>
