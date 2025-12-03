@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,46 @@ export default function TarificationStepForm({
   onToggleCollapse
 }) {
   const mandatsWithType = mandats.filter(m => m.type_mandat);
+  
+  // État local pour les valeurs d'input en cours d'édition
+  const [localValues, setLocalValues] = useState({});
+  const initializedRef = useRef(false);
+  
+  // Initialiser les valeurs locales seulement une fois au montage ou quand les mandats changent de type
+  useEffect(() => {
+    const mandatTypes = mandats.map(m => m.type_mandat).join(',');
+    if (!initializedRef.current || mandatTypes !== initializedRef.current) {
+      const newLocalValues = {};
+      mandats.forEach((m, i) => {
+        newLocalValues[`${i}_prix_estime`] = m.prix_estime || "";
+        newLocalValues[`${i}_prix_premier_lot`] = m.prix_premier_lot || "";
+        newLocalValues[`${i}_prix_autres_lots`] = m.prix_autres_lots || "";
+        newLocalValues[`${i}_rabais`] = m.rabais || "";
+      });
+      setLocalValues(newLocalValues);
+      initializedRef.current = mandatTypes;
+    }
+  }, [mandats]);
 
   const handleFieldChange = (index, field, value) => {
+    // Mettre à jour la valeur locale
+    setLocalValues(prev => ({
+      ...prev,
+      [`${index}_${field}`]: value
+    }));
+    
+    // Mettre à jour uniquement le mandat concerné avec la valeur parsée
+    const numericValue = value === "" ? 0 : parseFloat(value) || 0;
+    const updatedMandats = mandats.map((m, i) => {
+      if (i === index) {
+        return { ...m, [field]: numericValue };
+      }
+      return m;
+    });
+    onTarificationChange(updatedMandats);
+  };
+  
+  const handleCheckboxChange = (index, field, value) => {
     const updatedMandats = mandats.map((m, i) => {
       if (i === index) {
         return { ...m, [field]: value };
