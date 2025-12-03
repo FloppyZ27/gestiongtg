@@ -1366,32 +1366,25 @@ export default function PriseDeMandat() {
                   )}
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
-                  {/* Section pour le choix de l'arpenteur - 5 boutons colorés */}
+                  {/* Section pour le choix de l'arpenteur */}
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <div className="flex gap-2">
-                      {ARPENTEURS.map((arpenteur) => {
-                        const isSelected = formData.arpenteur_geometre === arpenteur;
-                        const colorClasses = {
-                          "Samuel Guay": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400",
-                          "Pierre-Luc Pilote": isSelected ? "bg-slate-500/30 text-slate-300 border-2 border-slate-400" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-500/10 hover:text-slate-300",
-                          "Frédéric Gilbert": isSelected ? "bg-orange-500/30 text-orange-400 border-2 border-orange-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-orange-500/10 hover:text-orange-400",
-                          "Dany Gaboury": isSelected ? "bg-yellow-500/30 text-yellow-400 border-2 border-yellow-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-yellow-500/10 hover:text-yellow-400",
-                          "Benjamin Larouche": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
-                        };
-                        return (
-                          <button
-                            key={arpenteur}
-                            type="button"
-                            onClick={() => setFormData({...formData, arpenteur_geometre: arpenteur})}
-                            disabled={!!dossierReferenceId}
-                            className={`flex-1 px-2 py-1 rounded-lg text-sm font-medium transition-all ${colorClasses[arpenteur]} disabled:opacity-50 disabled:cursor-not-allowed`}
-                          >
+                    <Select 
+                      value={formData.arpenteur_geometre} 
+                      onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                      disabled={!!dossierReferenceId}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner un arpenteur-géomètre" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {ARPENTEURS.map((arpenteur) => (
+                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
                             {arpenteur}
-                          </button>
-                        );
-                      })}
-                    </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Étape 1: Informations du client */}
@@ -1507,7 +1500,7 @@ export default function PriseDeMandat() {
                 </div>
 
                 {/* Commentaires Sidebar - 25% */}
-                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-8">
+                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-10">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
