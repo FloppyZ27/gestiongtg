@@ -114,10 +114,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_premier_lot !== undefined && mandat.prix_premier_lot !== 0 ? mandat.prix_premier_lot : ""}
+                            value={localValues[`${index}_prix_premier_lot`] !== undefined ? localValues[`${index}_prix_premier_lot`] : (mandat.prix_premier_lot || "")}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_premier_lot', value === "" ? 0 : parseFloat(value) || 0);
+                              handleFieldChange(index, 'prix_premier_lot', value);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -128,10 +128,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_autres_lots !== undefined && mandat.prix_autres_lots !== 0 ? mandat.prix_autres_lots : ""}
+                            value={localValues[`${index}_prix_autres_lots`] !== undefined ? localValues[`${index}_prix_autres_lots`] : (mandat.prix_autres_lots || "")}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_autres_lots', value === "" ? 0 : parseFloat(value) || 0);
+                              handleFieldChange(index, 'prix_autres_lots', value);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -145,10 +145,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_estime !== undefined && mandat.prix_estime !== 0 ? mandat.prix_estime : ""}
+                            value={localValues[`${index}_prix_estime`] !== undefined ? localValues[`${index}_prix_estime`] : (mandat.prix_estime || "")}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_estime', value === "" ? 0 : parseFloat(value) || 0);
+                              handleFieldChange(index, 'prix_estime', value);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -163,10 +163,10 @@ export default function TarificationStepForm({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={mandat.rabais !== undefined && mandat.rabais !== 0 ? mandat.rabais : ""}
+                        value={localValues[`${index}_rabais`] !== undefined ? localValues[`${index}_rabais`] : (mandat.rabais || "")}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9.]/g, '');
-                          handleFieldChange(index, 'rabais', value === "" ? 0 : parseFloat(value) || 0);
+                          handleFieldChange(index, 'rabais', value);
                         }}
                         placeholder="0.00"
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -175,7 +175,7 @@ export default function TarificationStepForm({
                     <div className="flex items-center gap-2">
                       <Checkbox
                         checked={mandat.taxes_incluses || false}
-                        onCheckedChange={(checked) => handleFieldChange(index, 'taxes_incluses', checked)}
+                        onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
                         className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                       />
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Taxes incluses</Label>
