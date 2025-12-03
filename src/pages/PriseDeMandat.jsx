@@ -236,6 +236,9 @@ export default function PriseDeMandat() {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [activeContactTab, setActiveContactTab] = useState("clients");
   const [mapCollapsedDossier, setMapCollapsedDossier] = useState(false);
+  const [commentsCollapsedDossier, setCommentsCollapsedDossier] = useState(false);
+  const [sidebarTabDossier, setSidebarTabDossier] = useState("commentaires");
+  const [historiqueDossier, setHistoriqueDossier] = useState([]);
   const [addressSearchQuery, setAddressSearchQuery] = useState("");
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
@@ -1093,9 +1096,11 @@ export default function PriseDeMandat() {
         });
       }
 
-      // Vérifier changement de client info
+      // Vérifier changement de client info (déclaré avant pour réutilisation)
       const oldClientName = `${editingPriseMandat.client_info?.prenom || ''} ${editingPriseMandat.client_info?.nom || ''}`.trim();
       const newClientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+      const oldAdresse = formatAdresse(editingPriseMandat.adresse_travaux);
+      const newAdresse = formatAdresse(workAddress);
       if (oldClientName !== newClientName && newClientName) {
         newHistoriqueEntries.push({
           action: "Modification des informations client",
@@ -1107,8 +1112,6 @@ export default function PriseDeMandat() {
       }
 
       // Vérifier changement d'adresse
-      const oldAdresse = formatAdresse(editingPriseMandat.adresse_travaux);
-      const newAdresse = formatAdresse(workAddress);
       if (oldAdresse !== newAdresse && newAdresse) {
         newHistoriqueEntries.push({
           action: "Modification de l'adresse des travaux",
@@ -1220,9 +1223,17 @@ export default function PriseDeMandat() {
       updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
     } else {
       // Création
+      const creationDetails = [];
+      creationDetails.push(`Arpenteur: ${formData.arpenteur_geometre}`);
+      creationDetails.push(`Statut: ${formData.statut}`);
+      if (typesMandats.length > 0) creationDetails.push(`Mandats: ${typesMandats.join(', ')}`);
+      if (newClientName) creationDetails.push(`Client: ${newClientName}`);
+      if (newAdresse) creationDetails.push(`Adresse: ${newAdresse}`);
+      if (totalPrix > 0) creationDetails.push(`Prix: ${totalPrix.toFixed(2)} $`);
+      
       const creationHistorique = [{
         action: "Création de la prise de mandat",
-        details: `Arpenteur: ${formData.arpenteur_geometre}, Statut: ${formData.statut}${typesMandats.length > 0 ? `, Mandats: ${typesMandats.join(', ')}` : ''}`,
+        details: creationDetails.join(' | '),
         utilisateur_nom: user?.full_name || "Utilisateur",
         utilisateur_email: user?.email || "",
         date: new Date().toISOString()
@@ -1848,6 +1859,58 @@ export default function PriseDeMandat() {
                           setIsOuvrirDossierDialogOpen(true);
                         }}
                         className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+                        onClick={() => {
+                          // Pré-remplir le formulaire de nouveau dossier
+                          setNouveauDossierForm({
+                            numero_dossier: "",
+                            arpenteur_geometre: formData.arpenteur_geometre,
+                            date_ouverture: new Date().toISOString().split('T')[0],
+                            statut: "Ouvert",
+                            ttl: "Non",
+                            clients_ids: formData.clients_ids,
+                            notaires_ids: [],
+                            courtiers_ids: [],
+                            mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                              type_mandat: m.type_mandat,
+                              adresse_travaux: workAddress,
+                              prix_estime: m.prix_estime || 0,
+                              prix_premier_lot: m.prix_premier_lot || 0,
+                              prix_autres_lots: m.prix_autres_lots || 0,
+                              rabais: m.rabais || 0,
+                              taxes_incluses: m.taxes_incluses || false,
+                              date_signature: m.date_signature || "",
+                              date_debut_travaux: m.date_debut_travaux || "",
+                              date_livraison: "",
+                              lots: [],
+                              tache_actuelle: "Ouverture",
+                              utilisateur_assigne: "",
+                              minute: "",
+                              date_minute: "",
+                              type_minute: "Initiale",
+                              minutes_list: [],
+                              terrain: {
+                                date_limite_leve: "",
+                                instruments_requis: "",
+                                a_rendez_vous: false,
+                                date_rendez_vous: "",
+                                heure_rendez_vous: "",
+                                donneur: "",
+                                technicien: "",
+                                dossier_simultane: "",
+                                temps_prevu: "",
+                                notes: ""
+                              },
+                              factures: [],
+                              notes: ""
+                            }))
+                          });
+                          setCommentairesTemporairesDossier(commentairesTemporaires);
+                          setHistoriqueDossier(historique);
+                          setActiveTabMandatDossier("0");
+                          setInfoDossierCollapsed(true);
+                          setMandatStepCollapsed(false);
+                          setIsOuvrirDossierDialogOpen(true);
+                        }}
                       >
                         <FolderOpen className="w-5 h-5 mr-2" />
                         Ouvrir dossier
@@ -3045,13 +3108,56 @@ export default function PriseDeMandat() {
                     </div>
                   )}
                   
-                  {/* Commentaires */}
-                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                    <h3 className="text-slate-300 text-base font-semibold">Commentaires</h3>
-                  </div>
-                  <div className="flex-1 overflow-hidden p-4">
-                    <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporairesDossier} onCommentairesTempChange={setCommentairesTemporairesDossier} />
-                  </div>
+                  {/* Tabs Commentaires/Historique */}
+                  <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
+                    <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mr-6 mt-2 flex-shrink-0">
+                      <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Commentaires
+                      </TabsTrigger>
+                      <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                        <Clock className="w-3 h-3 mr-1" />
+                        Historique
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                      <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporairesDossier} onCommentairesTempChange={setCommentairesTemporairesDossier} />
+                    </TabsContent>
+                    
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+                      {historiqueDossier.length > 0 ? (
+                        <div className="space-y-2">
+                          {historiqueDossier.map((entry, idx) => (
+                            <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-sm font-medium">{entry.action}</p>
+                                  {entry.details && (
+                                    <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                                  )}
+                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                                    <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                                    <span>•</span>
+                                    <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-center">
+                          <div>
+                            <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                            <p className="text-slate-500">Aucune action enregistrée</p>
+                            <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </div>
             </DialogContent>
