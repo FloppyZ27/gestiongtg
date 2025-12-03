@@ -1529,25 +1529,52 @@ export default function PriseDeMandat() {
                   )}
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
-                  {/* Section pour le choix de l'arpenteur */}
-                  <div className="space-y-2 w-1/3">
-                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <Select 
-                      value={formData.arpenteur_geometre} 
-                      onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
-                      disabled={!!dossierReferenceId}
-                    >
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner un arpenteur-géomètre" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {ARPENTEURS.map((arpenteur) => (
-                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                            {arpenteur}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  {/* Section pour le choix de l'arpenteur et sélection du statut sur la même ligne */}
+                  <div className="flex gap-4 items-end mb-16">
+                    <div className="space-y-2 w-1/3">
+                      <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                      <Select 
+                        value={formData.arpenteur_geometre} 
+                        onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                        disabled={!!dossierReferenceId}
+                      >
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue placeholder="Sélectionner un arpenteur-géomètre" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          {ARPENTEURS.map((arpenteur) => (
+                            <SelectItem key={arpenteur} value={arpenteur} className="text-white">
+                              {arpenteur}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex-1 flex gap-2">
+                      {[
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
+                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple" },
+                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red" }
+                      ].map((statut) => {
+                        const isSelected = formData.statut === statut.value;
+                        const colorClasses = {
+                          "cyan": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400",
+                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
+                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
+                        };
+                        return (
+                          <button
+                            key={statut.value}
+                            type="button"
+                            onClick={() => setFormData({...formData, statut: statut.value})}
+                            className={`flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
+                          >
+                            {statut.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Étape 1: Informations du client */}
@@ -1619,33 +1646,6 @@ export default function PriseDeMandat() {
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
-                  {/* Sélection du statut */}
-                  <div className="space-y-2 mb-16">
-                    <div className="flex gap-2">
-                      {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
-                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple" },
-                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red" }
-                      ].map((statut) => {
-                        const isSelected = formData.statut === statut.value;
-                        const colorClasses = {
-                          "cyan": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400",
-                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
-                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
-                        };
-                        return (
-                          <button
-                            key={statut.value}
-                            type="button"
-                            onClick={() => setFormData({...formData, statut: statut.value})}
-                            className={`flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
-                          >
-                            {statut.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </form>
 
                 {/* Boutons Annuler/Créer tout en bas */}
@@ -2686,6 +2686,7 @@ export default function PriseDeMandat() {
                     >
                       Adresse des travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
+                    <TableHead className="text-slate-300">Ville</TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('types_mandats')}
@@ -2705,9 +2706,12 @@ export default function PriseDeMandat() {
                   {priseMandats
                     .filter(pm => {
                       const searchLower = searchTerm.toLowerCase();
+                      const clientName = pm.client_info?.prenom || pm.client_info?.nom 
+                        ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
+                        : getClientsNames(pm.clients_ids).toLowerCase();
                       const matchesSearch = (
                         pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-                        getClientsNames(pm.clients_ids).toLowerCase().includes(searchLower) ||
+                        clientName.includes(searchLower) ||
                         formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
                         pm.types_mandats?.some(t => t.toLowerCase().includes(searchLower))
                       );
@@ -2745,7 +2749,12 @@ export default function PriseDeMandat() {
                               : getClientsNames(pm.clients_ids)}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                            {formatAdresse(pm.adresse_travaux) || "-"}
+                            {pm.adresse_travaux?.numeros_civiques?.[0] || pm.adresse_travaux?.rue
+                              ? `${pm.adresse_travaux.numeros_civiques?.[0] || ''} ${pm.adresse_travaux.rue || ''}`.trim()
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {pm.adresse_travaux?.ville || '-'}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {pm.types_mandats && pm.types_mandats.length > 0 ? (
@@ -2795,7 +2804,7 @@ export default function PriseDeMandat() {
                     })}
                   {priseMandats.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-12 text-slate-500">
+                      <TableCell colSpan={8} className="text-center py-12 text-slate-500">
                         Aucune prise de mandat
                       </TableCell>
                     </TableRow>
