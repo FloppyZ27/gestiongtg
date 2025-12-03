@@ -1640,7 +1640,7 @@ export default function PriseDeMandat() {
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur et sélection du statut sur la même ligne */}
-                  <div className="flex gap-4 items-end">
+                  <div className="flex gap-4 items-stretch">
                     <div className="space-y-2 w-1/3">
                       <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                       <Select 
@@ -1648,7 +1648,7 @@ export default function PriseDeMandat() {
                         onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
                         disabled={!!dossierReferenceId}
                       >
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-9">
                           <SelectValue placeholder="Sélectionner un arpenteur-géomètre" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
@@ -1661,9 +1661,9 @@ export default function PriseDeMandat() {
                       </Select>
                     </div>
 
-                    <div className="flex-1 flex gap-2">
+                    <div className="flex-1 flex gap-2 items-end">
                       {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan", icon: FileQuestion },
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan", icon: FileQuestion },
                         { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple", icon: FolderOpen },
                         { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red", icon: XCircle }
                       ].map((statut) => {
@@ -1679,7 +1679,7 @@ export default function PriseDeMandat() {
                             key={statut.value}
                             type="button"
                             onClick={() => setFormData({...formData, statut: statut.value})}
-                            className={`flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${colorClasses[statut.color]}`}
+                            className={`flex-1 h-9 px-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${colorClasses[statut.color]}`}
                           >
                             <IconComponent className="w-4 h-4" />
                             {statut.label}
@@ -2132,9 +2132,136 @@ export default function PriseDeMandat() {
                                 </TabsList>
 
                                 {nouveauDossierForm.mandats.map((mandat, index) => (
-                                  <TabsContent key={index} value={index.toString()} className="mt-2">
-                                    <div className="text-xs text-slate-400 mb-1">Type: {mandat.type_mandat || 'Non défini'}</div>
-                                    <div className="text-xs text-slate-400">Adresse: {formatAdresse(mandat.adresse_travaux) || 'Non définie'}</div>
+                                  <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div className="space-y-1">
+                                        <Label className="text-slate-400 text-xs">Type de mandat</Label>
+                                        <Select value={mandat.type_mandat} onValueChange={(value) => {
+                                          setNouveauDossierForm(prev => ({
+                                            ...prev,
+                                            mandats: prev.mandats.map((m, i) => i === index ? { ...m, type_mandat: value } : m)
+                                          }));
+                                        }}>
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                            <SelectValue placeholder="Sélectionner" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700">
+                                            {TYPES_MANDATS.map((type) => (
+                                              <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                                        <Select value={mandat.utilisateur_assigne} onValueChange={(value) => {
+                                          setNouveauDossierForm(prev => ({
+                                            ...prev,
+                                            mandats: prev.mandats.map((m, i) => i === index ? { ...m, utilisateur_assigne: value } : m)
+                                          }));
+                                        }}>
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                            <SelectValue placeholder="Sélectionner" />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700">
+                                            {users.map((u) => (
+                                              <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                      <div className="grid grid-cols-4 gap-1">
+                                        <Input 
+                                          placeholder="N° civique" 
+                                          value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
+                                              } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                        <Input 
+                                          placeholder="Rue" 
+                                          value={mandat.adresse_travaux?.rue || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
+                                              } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs col-span-2"
+                                        />
+                                        <Input 
+                                          placeholder="Ville" 
+                                          value={mandat.adresse_travaux?.ville || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                              } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div className="space-y-1">
+                                        <Label className="text-slate-400 text-xs">Date de signature</Label>
+                                        <Input 
+                                          type="date" 
+                                          value={mandat.date_signature || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                                        <Input 
+                                          type="date" 
+                                          value={mandat.date_debut_travaux || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <Label className="text-slate-400 text-xs">Date de livraison</Label>
+                                        <Input 
+                                          type="date" 
+                                          value={mandat.date_livraison || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                      </div>
+                                    </div>
                                   </TabsContent>
                                 ))}
                               </Tabs>
