@@ -427,6 +427,12 @@ export default function PriseDeMandat() {
       created_date: c.date
     })) || []);
     
+    // Collapser toutes les sections en mode modification
+    setClientStepCollapsed(true);
+    setAddressStepCollapsed(true);
+    setMandatStepCollapsed(true);
+    setTarificationStepCollapsed(true);
+    
     setIsDialogOpen(true);
   };
 

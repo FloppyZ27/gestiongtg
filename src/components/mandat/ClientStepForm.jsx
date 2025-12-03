@@ -103,7 +103,14 @@ export default function ClientStepForm({
               <Users className="w-3.5 h-3.5 text-emerald-400" />
             </div>
             <CardTitle className="text-emerald-300 text-base">Informations du client</CardTitle>
-            {selectedClientIds.length > 0 && (
+            {/* Afficher le nom complet du formulaire si rempli */}
+            {(clientForm.prenom || clientForm.nom) && (
+              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                {`${clientForm.prenom || ''} ${clientForm.nom || ''}`.trim()}
+              </Badge>
+            )}
+            {/* Afficher les clients sélectionnés si pas de nom dans le formulaire */}
+            {!clientForm.prenom && !clientForm.nom && selectedClientIds.length > 0 && (
               <div className="flex gap-1">
                 {selectedClientIds.map(clientId => {
                   const client = clients.find(c => c.id === clientId);
