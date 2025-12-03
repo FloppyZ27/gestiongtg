@@ -1530,7 +1530,7 @@ export default function PriseDeMandat() {
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section pour le choix de l'arpenteur */}
-                  <div className="space-y-2 w-2/3">
+                  <div className="space-y-2 w-1/3">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                     <Select 
                       value={formData.arpenteur_geometre} 
@@ -1620,7 +1620,7 @@ export default function PriseDeMandat() {
                   />
 
                   {/* Sélection du statut */}
-                  <div className="space-y-2 mb-8">
+                  <div className="space-y-2 mb-16">
                     <div className="flex gap-2">
                       {[
                         { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
