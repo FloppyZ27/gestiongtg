@@ -1833,7 +1833,7 @@ export default function PriseDeMandat() {
                               taxes_incluses: m.taxes_incluses || false,
                               date_signature: m.date_signature || "",
                               date_debut_travaux: m.date_debut_travaux || "",
-                              date_livraison: "",
+                              date_livraison: m.date_livraison || "",
                               lots: [],
                               tache_actuelle: "Ouverture",
                               utilisateur_assigne: "",
