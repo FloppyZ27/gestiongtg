@@ -1,11 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, DollarSign, Receipt } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+
+// Composant d'input contrôlé pour les prix
+function PriceInput({ value, onChange, placeholder = "0.00", className }) {
+  const [localValue, setLocalValue] = useState(value > 0 ? String(value) : "");
+  
+  // Synchroniser avec la valeur externe seulement si elle change significativement
+  useEffect(() => {
+    const numericLocal = localValue === "" ? 0 : parseFloat(localValue) || 0;
+    if (value !== numericLocal) {
+      setLocalValue(value > 0 ? String(value) : "");
+    }
+  }, [value]);
+  
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    // Permettre seulement les chiffres et un point décimal
+    if (newValue === "" || /^\d*\.?\d*$/.test(newValue)) {
+      setLocalValue(newValue);
+      const numericValue = newValue === "" ? 0 : parseFloat(newValue) || 0;
+      onChange(numericValue);
+    }
+  };
+  
+  return (
+    <Input
+      type="text"
+      inputMode="decimal"
+      value={localValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+}
 
 export default function TarificationStepForm({ 
   mandats = [],
@@ -15,19 +48,24 @@ export default function TarificationStepForm({
 }) {
   const mandatsWithType = mandats.filter(m => m.type_mandat);
 
-  const handleFieldChange = (index, field, value) => {
-    // Mettre à jour uniquement le mandat concerné
-    const updatedMandats = [...mandats];
-    updatedMandats[index] = { 
-      ...updatedMandats[index], 
-      [field]: value === "" ? 0 : parseFloat(value) || 0 
-    };
+  const handleFieldChange = (index, field, numericValue) => {
+    // Créer une copie profonde pour éviter les mutations
+    const updatedMandats = mandats.map((m, i) => {
+      if (i === index) {
+        return { ...m, [field]: numericValue };
+      }
+      return { ...m };
+    });
     onTarificationChange(updatedMandats);
   };
   
   const handleCheckboxChange = (index, field, value) => {
-    const updatedMandats = [...mandats];
-    updatedMandats[index] = { ...updatedMandats[index], [field]: value };
+    const updatedMandats = mandats.map((m, i) => {
+      if (i === index) {
+        return { ...m, [field]: value };
+      }
+      return { ...m };
+    });
     onTarificationChange(updatedMandats);
   };
 
