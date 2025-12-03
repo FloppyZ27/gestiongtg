@@ -243,6 +243,8 @@ export default function PriseDeMandat() {
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [dossierDocuments, setDossierDocuments] = useState([]);
+  const [viewingPdfUrl, setViewingPdfUrl] = useState(null);
+  const [viewingPdfName, setViewingPdfName] = useState("");
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -2667,7 +2669,10 @@ export default function PriseDeMandat() {
                                       type="button"
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => window.open(doc.url, '_blank')}
+                                      onClick={() => {
+                                        setViewingPdfUrl(doc.url);
+                                        setViewingPdfName(doc.name);
+                                      }}
                                       className="text-slate-400 hover:text-amber-400 h-7 w-7 p-0"
                                       title="Voir le document"
                                     >
@@ -3357,6 +3362,40 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
                 Valider
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* PDF Viewer Dialog */}
+        <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="p-4 border-b border-slate-800 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-lg flex items-center gap-2">
+                  <File className="w-5 h-5 text-amber-400" />
+                  {viewingPdfName}
+                </DialogTitle>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(viewingPdfUrl, '_blank')}
+                    className="text-slate-300"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Ouvrir dans un nouvel onglet
+                  </Button>
+                </div>
+              </div>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden bg-slate-950">
+              {viewingPdfUrl && (
+                <iframe
+                  src={viewingPdfUrl}
+                  className="w-full h-full border-0"
+                  title={viewingPdfName}
+                />
+              )}
             </div>
           </DialogContent>
         </Dialog>
