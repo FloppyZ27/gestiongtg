@@ -45,11 +45,13 @@ export default function TarificationStepForm({
     // Débounce la mise à jour du parent
     debounceTimers.current[key] = setTimeout(() => {
       const numericValue = value === "" ? 0 : parseFloat(value) || 0;
+      // Créer une copie profonde pour éviter les références partagées
       const updatedMandats = mandats.map((m, i) => {
+        const copy = JSON.parse(JSON.stringify(m));
         if (i === index) {
-          return { ...m, [field]: numericValue };
+          copy[field] = numericValue;
         }
-        return m;
+        return copy;
       });
       onTarificationChange(updatedMandats);
       
@@ -73,11 +75,13 @@ export default function TarificationStepForm({
     const localValue = localInputs[key];
     if (localValue !== undefined) {
       const numericValue = localValue === "" ? 0 : parseFloat(localValue) || 0;
+      // Créer une copie profonde pour éviter les références partagées
       const updatedMandats = mandats.map((m, i) => {
+        const copy = JSON.parse(JSON.stringify(m));
         if (i === index) {
-          return { ...m, [field]: numericValue };
+          copy[field] = numericValue;
         }
-        return m;
+        return copy;
       });
       onTarificationChange(updatedMandats);
       
@@ -91,11 +95,13 @@ export default function TarificationStepForm({
   };
   
   const handleCheckboxChange = (index, field, value) => {
+    // Créer une copie profonde pour éviter les références partagées
     const updatedMandats = mandats.map((m, i) => {
+      const copy = JSON.parse(JSON.stringify(m));
       if (i === index) {
-        return { ...m, [field]: value };
+        copy[field] = value;
       }
-      return m;
+      return copy;
     });
     onTarificationChange(updatedMandats);
   };
