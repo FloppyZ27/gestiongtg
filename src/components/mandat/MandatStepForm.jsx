@@ -48,6 +48,8 @@ export default function MandatStepForm({
         type_mandat: "",
         ...sharedInfo,
         prix_estime: 0,
+        prix_premier_lot: 0,
+        prix_autres_lots: 0,
         rabais: 0,
         taxes_incluses: false,
         date_livraison: sharedInfo.date_livraison || ""
@@ -55,13 +57,23 @@ export default function MandatStepForm({
     } else {
       const newMandats = newSelectedTypes.map(t => {
         const existingMandat = mandats.find(m => m.type_mandat === t);
+        if (existingMandat) {
+          // Conserver toutes les valeurs existantes du mandat
+          return {
+            ...existingMandat,
+            ...sharedInfo
+          };
+        }
+        // Nouveau mandat - initialiser avec des valeurs par défaut
         return {
           type_mandat: t,
           ...sharedInfo,
-          prix_estime: existingMandat?.prix_estime || 0,
-          rabais: existingMandat?.rabais || 0,
-          taxes_incluses: existingMandat?.taxes_incluses || false,
-          date_livraison: existingMandat?.date_livraison || sharedInfo.date_livraison || ""
+          prix_estime: 0,
+          prix_premier_lot: 0,
+          prix_autres_lots: 0,
+          rabais: 0,
+          taxes_incluses: false,
+          date_livraison: sharedInfo.date_livraison || ""
         };
       });
       onMandatsChange(newMandats);
