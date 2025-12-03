@@ -1950,13 +1950,16 @@ export default function PriseDeMandat() {
                             {/* Tabs Clients/Notaires/Courtiers */}
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
                               <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
-                                <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                                <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 flex items-center gap-1">
+                                  <User className="w-3 h-3" />
                                   Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400">
+                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400 flex items-center gap-1">
+                                  <FileText className="w-3 h-3" />
                                   Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400">
+                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400 flex items-center gap-1">
+                                  <User className="w-3 h-3" />
                                   Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
                                 </TabsTrigger>
                               </TabsList>
@@ -2133,6 +2136,28 @@ export default function PriseDeMandat() {
 
                                 {nouveauDossierForm.mandats.map((mandat, index) => (
                                   <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
+                                    <div className="flex justify-end">
+                                      <Button 
+                                        type="button" 
+                                        size="sm" 
+                                        variant="ghost"
+                                        onClick={() => {
+                                          if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.filter((_, i) => i !== index)
+                                            }));
+                                            if (nouveauDossierForm.mandats.length > 1) {
+                                              setActiveTabMandatDossier(Math.max(0, index - 1).toString());
+                                            }
+                                          }
+                                        }}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 text-xs px-2"
+                                      >
+                                        <Trash2 className="w-3 h-3 mr-1" />
+                                        Supprimer
+                                      </Button>
+                                    </div>
                                     <div className="grid grid-cols-2 gap-2">
                                       <div className="space-y-1">
                                         <Label className="text-slate-400 text-xs">Type de mandat</Label>
@@ -2173,7 +2198,7 @@ export default function PriseDeMandat() {
                                     </div>
                                     <div className="space-y-1">
                                       <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
-                                      <div className="grid grid-cols-4 gap-1">
+                                      <div className="grid grid-cols-5 gap-1">
                                         <Input 
                                           placeholder="N° civique" 
                                           value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
@@ -2211,6 +2236,36 @@ export default function PriseDeMandat() {
                                               mandats: prev.mandats.map((m, i) => i === index ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                              } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                        <Input 
+                                          placeholder="Province" 
+                                          value={mandat.adresse_travaux?.province || "Québec"} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, province: e.target.value } 
+                                              } : m)
+                                            }));
+                                          }}
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                        />
+                                      </div>
+                                      <div className="grid grid-cols-5 gap-1">
+                                        <Input 
+                                          placeholder="Code postal" 
+                                          value={mandat.adresse_travaux?.code_postal || ""} 
+                                          onChange={(e) => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
                                               } : m)
                                             }));
                                           }}
@@ -2261,6 +2316,53 @@ export default function PriseDeMandat() {
                                           className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                         />
                                       </div>
+                                    </div>
+                                    {/* Section Lots */}
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between items-center">
+                                        <Label className="text-slate-400 text-xs">Lots</Label>
+                                        <Button 
+                                          type="button" 
+                                          size="sm" 
+                                          onClick={() => {
+                                            setCurrentMandatIndexDossier(index);
+                                            setIsLotSelectorOpenDossier(true);
+                                          }}
+                                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-5 text-xs px-2"
+                                        >
+                                          <Plus className="w-3 h-3 mr-1" />
+                                          Ajouter
+                                        </Button>
+                                      </div>
+                                      {mandat.lots && mandat.lots.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
+                                          {mandat.lots.map((lotId) => {
+                                            const lot = getLotById(lotId);
+                                            return (
+                                              <Badge key={lotId} variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs pr-1">
+                                                {lot?.numero_lot || lotId}
+                                                <button 
+                                                  type="button" 
+                                                  onClick={() => {
+                                                    setNouveauDossierForm(prev => ({
+                                                      ...prev,
+                                                      mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                        ...m, 
+                                                        lots: m.lots.filter(id => id !== lotId) 
+                                                      } : m)
+                                                    }));
+                                                  }}
+                                                  className="ml-1 hover:text-red-400"
+                                                >
+                                                  <X className="w-2.5 h-2.5" />
+                                                </button>
+                                              </Badge>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <p className="text-slate-500 text-xs text-center py-2 bg-slate-800/30 rounded-lg">Aucun lot</p>
+                                      )}
                                     </div>
                                   </TabsContent>
                                 ))}
