@@ -375,15 +375,12 @@ export default function PriseDeMandat() {
         clients_ids: data.clients_ids,
         client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
-        types_mandats: data.types_mandats,
+        mandats: data.mandats,
         echeance_souhaitee: data.echeance_souhaitee,
         date_signature: data.date_signature,
         date_debut_travaux: data.date_debut_travaux,
         date_livraison: data.date_livraison,
         urgence_percue: data.urgence_percue,
-        prix_estime: data.prix_estime,
-        rabais: data.rabais,
-        taxes_incluses: data.taxes_incluses,
         statut: data.statut,
         commentaires: commentsToSave
       };
@@ -438,29 +435,33 @@ export default function PriseDeMandat() {
       courriel: ""
     });
     
-    // Reconstruire les mandatsInfo à partir des types_mandats
-    const mandatsFromTypes = (pm.types_mandats || []).map(type => ({
-      type_mandat: type,
+    // Reconstruire les mandatsInfo à partir des mandats stockés
+    const mandatsFromDb = (pm.mandats || []).map(m => ({
+      type_mandat: m.type_mandat || "",
       echeance_souhaitee: pm.echeance_souhaitee || "",
       date_signature: pm.date_signature || "",
       date_debut_travaux: pm.date_debut_travaux || "",
       date_livraison: pm.date_livraison || "",
       urgence_percue: pm.urgence_percue || "",
-      prix_estime: pm.prix_estime || 0,
-      rabais: pm.rabais || 0,
-      taxes_incluses: pm.taxes_incluses || false
+      prix_estime: m.prix_estime || 0,
+      prix_premier_lot: m.prix_premier_lot || 0,
+      prix_autres_lots: m.prix_autres_lots || 0,
+      rabais: m.rabais || 0,
+      taxes_incluses: m.taxes_incluses || false
     }));
     
-    setMandatsInfo(mandatsFromTypes.length > 0 ? mandatsFromTypes : [{
+    setMandatsInfo(mandatsFromDb.length > 0 ? mandatsFromDb : [{
       type_mandat: "",
       echeance_souhaitee: pm.echeance_souhaitee || "",
       date_signature: pm.date_signature || "",
       date_debut_travaux: pm.date_debut_travaux || "",
       date_livraison: pm.date_livraison || "",
       urgence_percue: pm.urgence_percue || "",
-      prix_estime: pm.prix_estime || 0,
-      rabais: pm.rabais || 0,
-      taxes_incluses: pm.taxes_incluses || false
+      prix_estime: 0,
+      prix_premier_lot: 0,
+      prix_autres_lots: 0,
+      rabais: 0,
+      taxes_incluses: false
     }]);
     
     setCommentairesTemporaires(pm.commentaires?.map((c, idx) => ({
@@ -494,15 +495,12 @@ export default function PriseDeMandat() {
         clients_ids: data.clients_ids,
         client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
-        types_mandats: data.types_mandats,
+        mandats: data.mandats,
         echeance_souhaitee: data.echeance_souhaitee,
         date_signature: data.date_signature,
         date_debut_travaux: data.date_debut_travaux,
         date_livraison: data.date_livraison,
         urgence_percue: data.urgence_percue,
-        prix_estime: data.prix_estime,
-        rabais: data.rabais,
-        taxes_incluses: data.taxes_incluses,
         statut: data.statut,
         commentaires: commentsToSave,
         historique: data.historique
@@ -1033,28 +1031,29 @@ export default function PriseDeMandat() {
       return;
     }
 
-    // Extraire les types de mandats sélectionnés
-    const typesMandats = mandatsInfo.map(m => m.type_mandat).filter(t => t);
-
-    // Calculer les totaux de tarification
-    const totalPrix = mandatsInfo.reduce((sum, m) => sum + (m.prix_estime || 0), 0);
-    const totalRabais = mandatsInfo.reduce((sum, m) => sum + (m.rabais || 0), 0);
-    const taxesIncluses = mandatsInfo.some(m => m.taxes_incluses);
+    // Préparer les mandats avec leur tarification
+    const mandatsToSave = mandatsInfo
+      .filter(m => m.type_mandat)
+      .map(m => ({
+        type_mandat: m.type_mandat,
+        prix_estime: m.prix_estime || 0,
+        prix_premier_lot: m.prix_premier_lot || 0,
+        prix_autres_lots: m.prix_autres_lots || 0,
+        rabais: m.rabais || 0,
+        taxes_incluses: m.taxes_incluses || false
+      }));
 
     const dataToSubmit = {
       arpenteur_geometre: formData.arpenteur_geometre,
       clients_ids: formData.clients_ids,
       client_info: clientInfo,
       adresse_travaux: workAddress,
-      types_mandats: typesMandats,
+      mandats: mandatsToSave,
       echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
       date_signature: mandatsInfo[0]?.date_signature || "",
       date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
       date_livraison: mandatsInfo[0]?.date_livraison || "",
       urgence_percue: mandatsInfo[0]?.urgence_percue || "",
-      prix_estime: totalPrix,
-      rabais: totalRabais,
-      taxes_incluses: taxesIncluses,
       statut: formData.statut
     };
 
@@ -1125,34 +1124,38 @@ export default function PriseDeMandat() {
       }
 
       // Vérifier changement de types de mandats
-      const oldMandats = (editingPriseMandat.types_mandats || []).join(', ');
-      const newMandats = typesMandats.join(', ');
-      if (oldMandats !== newMandats) {
+      const oldMandatTypes = (editingPriseMandat.mandats || []).map(m => m.type_mandat).join(', ');
+      const newMandatTypes = mandatsToSave.map(m => m.type_mandat).join(', ');
+      if (oldMandatTypes !== newMandatTypes) {
         newHistoriqueEntries.push({
           action: "Modification des types de mandats",
-          details: oldMandats ? `${oldMandats} → ${newMandats}` : `Ajout: ${newMandats}`,
+          details: oldMandatTypes ? `${oldMandatTypes} → ${newMandatTypes}` : `Ajout: ${newMandatTypes}`,
           utilisateur_nom: userName,
           utilisateur_email: userEmail,
           date: now
         });
       }
 
-      // Vérifier changement de prix
-      if (editingPriseMandat.prix_estime !== totalPrix) {
+      // Vérifier changement de prix total
+      const oldTotalPrix = (editingPriseMandat.mandats || []).reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
+      const newTotalPrix = mandatsToSave.reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
+      if (oldTotalPrix !== newTotalPrix) {
         newHistoriqueEntries.push({
           action: "Modification du prix estimé",
-          details: `${editingPriseMandat.prix_estime?.toFixed(2) || '0.00'} $ → ${totalPrix.toFixed(2)} $`,
+          details: `${oldTotalPrix.toFixed(2)} $ → ${newTotalPrix.toFixed(2)} $`,
           utilisateur_nom: userName,
           utilisateur_email: userEmail,
           date: now
         });
       }
 
-      // Vérifier changement de rabais
-      if (editingPriseMandat.rabais !== totalRabais) {
+      // Vérifier changement de rabais total
+      const oldTotalRabais = (editingPriseMandat.mandats || []).reduce((sum, m) => sum + (m.rabais || 0), 0);
+      const newTotalRabais = mandatsToSave.reduce((sum, m) => sum + (m.rabais || 0), 0);
+      if (oldTotalRabais !== newTotalRabais) {
         newHistoriqueEntries.push({
           action: "Modification du rabais",
-          details: `${editingPriseMandat.rabais?.toFixed(2) || '0.00'} $ → ${totalRabais.toFixed(2)} $`,
+          details: `${oldTotalRabais.toFixed(2)} $ → ${newTotalRabais.toFixed(2)} $`,
           utilisateur_nom: userName,
           utilisateur_email: userEmail,
           date: now
@@ -1228,9 +1231,11 @@ export default function PriseDeMandat() {
       const creationDetails = [];
       creationDetails.push(`Arpenteur: ${formData.arpenteur_geometre}`);
       creationDetails.push(`Statut: ${formData.statut}`);
-      if (typesMandats.length > 0) creationDetails.push(`Mandats: ${typesMandats.join(', ')}`);
+      const mandatTypes = mandatsToSave.map(m => m.type_mandat).filter(t => t);
+      if (mandatTypes.length > 0) creationDetails.push(`Mandats: ${mandatTypes.join(', ')}`);
       if (newClientName) creationDetails.push(`Client: ${newClientName}`);
       if (newAdresse) creationDetails.push(`Adresse: ${newAdresse}`);
+      const totalPrix = mandatsToSave.reduce((sum, m) => sum + (m.prix_estime || 0) + (m.prix_premier_lot || 0) + (m.prix_autres_lots || 0), 0);
       if (totalPrix > 0) creationDetails.push(`Prix: ${totalPrix.toFixed(2)} $`);
       
       const creationHistorique = [{
@@ -4610,11 +4615,11 @@ export default function PriseDeMandat() {
                         pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
                         clientName.includes(searchLower) ||
                         formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
-                        pm.types_mandats?.some(t => t.toLowerCase().includes(searchLower))
+                        pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
                       );
                       const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
                       const matchesVille = filterVille === "all" || pm.adresse_travaux?.ville === filterVille;
-                      const matchesTypeMandat = filterTypeMandat === "all" || pm.types_mandats?.includes(filterTypeMandat);
+                      const matchesTypeMandat = filterTypeMandat === "all" || pm.mandats?.some(m => m.type_mandat === filterTypeMandat);
                       const matchesUrgence = filterUrgence === "all" || pm.urgence_percue === filterUrgence;
                       return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence;
                     })
@@ -4649,8 +4654,8 @@ export default function PriseDeMandat() {
                           bValue = (b.adresse_travaux?.ville || '').toLowerCase();
                           break;
                         case 'types_mandats':
-                          aValue = (a.types_mandats?.[0] || '').toLowerCase();
-                          bValue = (b.types_mandats?.[0] || '').toLowerCase();
+                          aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
+                          bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
                           break;
                         case 'urgence_percue':
                           const urgenceOrder = { 'Rapide': 1, 'Normal': 2, 'Pas pressé': 3 };
@@ -4704,16 +4709,16 @@ export default function PriseDeMandat() {
                             {pm.adresse_travaux?.ville || '-'}
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {pm.types_mandats && pm.types_mandats.length > 0 ? (
+                            {pm.mandats && pm.mandats.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                {pm.types_mandats.slice(0, 2).map((type, idx) => (
-                                  <Badge key={idx} className={`${getMandatColor(type)} border text-xs`}>
-                                    {type}
+                                {pm.mandats.slice(0, 2).map((m, idx) => (
+                                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                    {m.type_mandat}
                                   </Badge>
                                 ))}
-                                {pm.types_mandats.length > 2 && (
+                                {pm.mandats.length > 2 && (
                                   <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                    +{pm.types_mandats.length - 2}
+                                    +{pm.mandats.length - 2}
                                   </Badge>
                                 )}
                               </div>
