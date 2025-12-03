@@ -76,10 +76,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_premier_lot || ""}
+                            value={mandat.prix_premier_lot !== undefined && mandat.prix_premier_lot !== 0 ? mandat.prix_premier_lot : ""}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_premier_lot', value ? parseFloat(value) : 0);
+                              handleFieldChange(index, 'prix_premier_lot', value === "" ? 0 : parseFloat(value) || 0);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -90,10 +90,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_autres_lots || ""}
+                            value={mandat.prix_autres_lots !== undefined && mandat.prix_autres_lots !== 0 ? mandat.prix_autres_lots : ""}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_autres_lots', value ? parseFloat(value) : 0);
+                              handleFieldChange(index, 'prix_autres_lots', value === "" ? 0 : parseFloat(value) || 0);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -107,10 +107,10 @@ export default function TarificationStepForm({
                           <Input
                             type="text"
                             inputMode="decimal"
-                            value={mandat.prix_estime || ""}
+                            value={mandat.prix_estime !== undefined && mandat.prix_estime !== 0 ? mandat.prix_estime : ""}
                             onChange={(e) => {
                               const value = e.target.value.replace(/[^0-9.]/g, '');
-                              handleFieldChange(index, 'prix_estime', value ? parseFloat(value) : 0);
+                              handleFieldChange(index, 'prix_estime', value === "" ? 0 : parseFloat(value) || 0);
                             }}
                             placeholder="0.00"
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
@@ -125,10 +125,10 @@ export default function TarificationStepForm({
                       <Input
                         type="text"
                         inputMode="decimal"
-                        value={mandat.rabais || ""}
+                        value={mandat.rabais !== undefined && mandat.rabais !== 0 ? mandat.rabais : ""}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^0-9.]/g, '');
-                          handleFieldChange(index, 'rabais', value ? parseFloat(value) : 0);
+                          handleFieldChange(index, 'rabais', value === "" ? 0 : parseFloat(value) || 0);
                         }}
                         placeholder="0.00"
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
