@@ -28,6 +28,7 @@ import TarificationStepForm from "../components/mandat/TarificationStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
 const getMandatColor = (typeMandat) => {
   const colors = {
@@ -216,8 +217,21 @@ export default function PriseDeMandat() {
   const [nouveauDossierForm, setNouveauDossierForm] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
+    date_ouverture: new Date().toISOString().split('T')[0],
+    statut: "Ouvert",
+    ttl: "Non",
+    clients_ids: [],
+    notaires_ids: [],
+    courtiers_ids: [],
     mandats: []
   });
+  const [isClientSelectorOpenDossier, setIsClientSelectorOpenDossier] = useState(false);
+  const [isNotaireSelectorOpenDossier, setIsNotaireSelectorOpenDossier] = useState(false);
+  const [isCourtierSelectorOpenDossier, setIsCourtierSelectorOpenDossier] = useState(false);
+  const [isLotSelectorOpenDossier, setIsLotSelectorOpenDossier] = useState(false);
+  const [currentMandatIndexDossier, setCurrentMandatIndexDossier] = useState(null);
+  const [activeTabMandatDossier, setActiveTabMandatDossier] = useState("0");
+  const [commentairesTemporairesDossier, setCommentairesTemporairesDossier] = useState([]);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -1328,9 +1342,12 @@ export default function PriseDeMandat() {
 
   const handleAddMinuteFromDialog = () => {
     if (currentMinuteMandatIndex !== null && newMinuteForm.minute && newMinuteForm.date_minute) {
+      // Déterminer quel form utiliser (nouveau dossier ou mandat form)
+      const arpenteur = isOuvrirDossierDialogOpen ? nouveauDossierForm.arpenteur_geometre : formData.arpenteur_geometre;
+      
       // Vérifier si la minute existe déjà pour cet arpenteur
       const minuteExiste = dossiers.some(d => 
-        d.arpenteur_geometre === formData.arpenteur_geometre &&
+        d.arpenteur_geometre === arpenteur &&
         d.mandats?.some(m => 
           m.minutes_list?.some(min => min.minute === newMinuteForm.minute) ||
           m.minute === newMinuteForm.minute
@@ -1338,11 +1355,25 @@ export default function PriseDeMandat() {
       );
 
       if (minuteExiste) {
-        alert(`La minute ${newMinuteForm.minute} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+        alert(`La minute ${newMinuteForm.minute} existe déjà pour ${arpenteur}. Veuillez choisir un autre numéro.`);
         return;
       }
 
-      addMinuteToMandat(currentMinuteMandatIndex);
+      if (isOuvrirDossierDialogOpen) {
+        // Ajouter à nouveauDossierForm
+        const currentMinutes = nouveauDossierForm.mandats[currentMinuteMandatIndex].minutes_list || [];
+        setNouveauDossierForm(prev => ({
+          ...prev,
+          mandats: prev.mandats.map((m, i) =>
+            i === currentMinuteMandatIndex ? { ...m, minutes_list: [...currentMinutes, { ...newMinuteForm }] } : m
+          )
+        }));
+      } else {
+        // Ajouter à formData (ancien comportement)
+        addMinuteToMandat(currentMinuteMandatIndex);
+      }
+      
+      setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
       setIsAddMinuteDialogOpen(false);
       setCurrentMinuteMandatIndex(null);
     }
@@ -1546,19 +1577,48 @@ export default function PriseDeMandat() {
                           setNouveauDossierForm({
                             numero_dossier: "",
                             arpenteur_geometre: formData.arpenteur_geometre,
+                            date_ouverture: new Date().toISOString().split('T')[0],
+                            statut: "Ouvert",
+                            ttl: "Non",
+                            clients_ids: formData.clients_ids,
+                            notaires_ids: [],
+                            courtiers_ids: [],
                             mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({
                               type_mandat: m.type_mandat,
                               adresse_travaux: workAddress,
                               prix_estime: m.prix_estime || 0,
+                              prix_premier_lot: m.prix_premier_lot || 0,
+                              prix_autres_lots: m.prix_autres_lots || 0,
                               rabais: m.rabais || 0,
                               taxes_incluses: m.taxes_incluses || false,
                               date_signature: m.date_signature || "",
                               date_debut_travaux: m.date_debut_travaux || "",
+                              date_livraison: "",
                               lots: [],
                               tache_actuelle: "Ouverture",
-                              utilisateur_assigne: ""
+                              utilisateur_assigne: "",
+                              minute: "",
+                              date_minute: "",
+                              type_minute: "Initiale",
+                              minutes_list: [],
+                              terrain: {
+                                date_limite_leve: "",
+                                instruments_requis: "",
+                                a_rendez_vous: false,
+                                date_rendez_vous: "",
+                                heure_rendez_vous: "",
+                                donneur: "",
+                                technicien: "",
+                                dossier_simultane: "",
+                                temps_prevu: "",
+                                notes: ""
+                              },
+                              factures: [],
+                              notes: ""
                             }))
                           });
+                          setCommentairesTemporairesDossier(commentairesTemporaires);
+                          setActiveTabMandatDossier("0");
                           setIsOuvrirDossierDialogOpen(true);
                         }}
                         className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
@@ -1778,137 +1838,683 @@ export default function PriseDeMandat() {
             </DialogContent>
           </Dialog>
 
-          {/* Dialog pour ouvrir un dossier */}
+          {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">Ouvrir un dossier</DialogTitle>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+              <DialogHeader className="sr-only">
+                <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                    <Select 
-                      value={nouveauDossierForm.arpenteur_geometre} 
-                      onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}
-                    >
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
-                        {ARPENTEURS.map((arpenteur) => (
-                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                            {arpenteur}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <div className="flex h-[90vh]">
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
                   </div>
-                  <div className="space-y-2">
-                    <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                    <Input
-                      value={nouveauDossierForm.numero_dossier}
-                      onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})}
-                      placeholder="Ex: 2024-001"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                </div>
+                  <form id="nouveau-dossier-form" onSubmit={async (e) => {
+                    e.preventDefault();
+                    
+                    // Vérifier que le numéro de dossier n'existe pas déjà
+                    const dossierExistant = dossiers.find(d => 
+                      d.numero_dossier === nouveauDossierForm.numero_dossier &&
+                      d.arpenteur_geometre === nouveauDossierForm.arpenteur_geometre
+                    );
+                    
+                    if (dossierExistant) {
+                      alert(`Le numéro de dossier ${nouveauDossierForm.numero_dossier} existe déjà pour ${nouveauDossierForm.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
+                      return;
+                    }
 
-                {/* Résumé des informations qui seront transférées */}
-                <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
-                  <h4 className="text-sm font-semibold text-slate-300">Informations transférées depuis la prise de mandat</h4>
-                  
-                  {/* Client */}
-                  {(clientInfo.prenom || clientInfo.nom || formData.clients_ids.length > 0) && (
-                    <div className="text-sm">
-                      <span className="text-slate-400">Client: </span>
-                      <span className="text-white">
-                        {clientInfo.prenom || clientInfo.nom 
-                          ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
-                          : getClientsNames(formData.clients_ids)}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Adresse */}
-                  {(workAddress.rue || workAddress.ville) && (
-                    <div className="text-sm">
-                      <span className="text-slate-400">Adresse: </span>
-                      <span className="text-white">{formatAdresse(workAddress)}</span>
-                    </div>
-                  )}
-                  
-                  {/* Mandats */}
-                  {nouveauDossierForm.mandats.length > 0 && (
-                    <div className="text-sm">
-                      <span className="text-slate-400">Mandats: </span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {nouveauDossierForm.mandats.map((m, idx) => (
-                          <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                            {m.type_mandat}
-                          </Badge>
-                        ))}
+                    // Validation : au moins un mandat doit exister
+                    if (nouveauDossierForm.mandats.length === 0) {
+                      alert("Vous devez ajouter au moins un mandat avant d'ouvrir un dossier.");
+                      return;
+                    }
+
+                    // Validation : tous les mandats doivent avoir un utilisateur assigné
+                    const mandatsSansUtilisateur = nouveauDossierForm.mandats.filter(m => !m.utilisateur_assigne);
+                    if (mandatsSansUtilisateur.length > 0) {
+                      alert("Tous les mandats doivent avoir un utilisateur assigné.");
+                      return;
+                    }
+
+                    try {
+                      await createDossierMutation.mutateAsync(nouveauDossierForm);
+                      
+                      // Supprimer la prise de mandat si elle existe
+                      if (editingPriseMandat?.id) {
+                        await deletePriseMandatMutation.mutateAsync(editingPriseMandat.id);
+                      }
+                      
+                      setIsOuvrirDossierDialogOpen(false);
+                      setIsDialogOpen(false);
+                      resetFullForm();
+                      setCommentairesTemporairesDossier([]);
+                      alert(`Dossier ${getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}${nouveauDossierForm.numero_dossier} créé avec succès !`);
+                    } catch (error) {
+                      console.error("Erreur lors de la création du dossier:", error);
+                      alert("Erreur lors de la création du dossier.");
+                    }
+                  }} className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                        <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {ARPENTEURS.map((arpenteur) => (
+                              <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                        <Input value={nouveauDossierForm.numero_dossier} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-800 border-slate-700" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Statut <span className="text-red-400">*</span></Label>
+                        <Select value={nouveauDossierForm.statut} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, statut: value})}>
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner le statut" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                            <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
+                        <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-800 border-slate-700" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Clients</Label>
+                          <Button type="button" size="sm" onClick={() => setIsClientSelectorOpenDossier(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                            <UserPlus className="w-4 h-4 mr-1" />
+                            Ajouter
+                          </Button>
+                        </div>
+                        {nouveauDossierForm.clients_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {nouveauDossierForm.clients_ids.map((clientId) => {
+                              const client = getClientById(clientId);
+                              return client ? (
+                                <div key={clientId} className="space-y-1">
+                                  <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
+                                    <span className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
+                                    <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </Badge>
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun client</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Notaires</Label>
+                          <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpenDossier(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400">
+                            <UserPlus className="w-4 h-4 mr-1" />
+                            Ajouter
+                          </Button>
+                        </div>
+                        {nouveauDossierForm.notaires_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {nouveauDossierForm.notaires_ids.map((notaireId) => {
+                              const notaire = getClientById(notaireId);
+                              return notaire ? (
+                                <div key={notaireId} className="space-y-1">
+                                  <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
+                                    <span className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
+                                    <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </Badge>
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun notaire</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <Label>Courtiers immobiliers</Label>
+                          <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpenDossier(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400">
+                            <UserPlus className="w-4 h-4 mr-1" />
+                            Ajouter
+                          </Button>
+                        </div>
+                        {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
+                            {nouveauDossierForm.courtiers_ids.map((courtierId) => {
+                              const courtier = getClientById(courtierId);
+                              return courtier ? (
+                                <div key={courtierId} className="space-y-1">
+                                  <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
+                                    <span className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
+                                    <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </Badge>
+                                </div>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun courtier</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label>Mandats</Label>
+                        <Button type="button" size="sm" onClick={() => {
+                          const newIndex = nouveauDossierForm.mandats.length;
+                          const firstMandat = nouveauDossierForm.mandats[0];
+                          const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" };
+                          const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
+                          
+                          setNouveauDossierForm(prev => ({
+                            ...prev,
+                            mandats: [...prev.mandats, {
+                              type_mandat: "",
+                              date_ouverture: "",
+                              minute: "",
+                              date_minute: "",
+                              type_minute: "Initiale",
+                              minutes_list: [],
+                              tache_actuelle: "",
+                              statut_terrain: "",
+                              adresse_travaux: defaultAdresse,
+                              lots: defaultLots,
+                              prix_estime: 0,
+                              rabais: 0,
+                              taxes_incluses: false,
+                              date_livraison: "",
+                              date_signature: "",
+                              date_debut_travaux: "",
+                              terrain: {
+                                date_limite_leve: "",
+                                instruments_requis: "",
+                                a_rendez_vous: false,
+                                date_rendez_vous: "",
+                                heure_rendez_vous: "",
+                                donneur: "",
+                                technicien: "",
+                                dossier_simultane: "",
+                                temps_prevu: "",
+                                notes: ""
+                              },
+                              factures: [],
+                              notes: "",
+                              utilisateur_assigne: ""
+                            }]
+                          }));
+                          setActiveTabMandatDossier(newIndex.toString());
+                        }} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                          <Plus className="w-4 h-4 mr-1" />
+                          Ajouter un mandat
+                        </Button>
+                      </div>
+
+                      {nouveauDossierForm.mandats.length > 0 ? (
+                        <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
+                          <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500/30 w-full h-auto justify-start p-2 rounded-lg">
+                            {nouveauDossierForm.mandats.map((mandat, index) => (
+                              <TabsTrigger
+                                key={index}
+                                value={index.toString()}
+                                className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:shadow-lg text-slate-300 px-8 py-4 text-lg font-bold rounded-md transition-all"
+                              >
+                                {mandat.type_mandat || `Mandat ${index + 1}`}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+
+                          {nouveauDossierForm.mandats.map((mandat, index) => (
+                            <TabsContent key={index} value={index.toString()}>
+                              <Card className="border-slate-700 bg-slate-800/30">
+                                <CardContent className="p-4 space-y-4">
+                                  <MandatTabs
+                                    mandat={mandat}
+                                    mandatIndex={index}
+                                    updateMandat={(idx, field, value) => {
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map((m, i) => {
+                                          if (i === idx) {
+                                            const updatedMandat = { ...m, [field]: value };
+                                            if (field === 'tache_actuelle') {
+                                              if (value === "Cédule") {
+                                                updatedMandat.statut_terrain = "en_verification";
+                                              } else {
+                                                updatedMandat.statut_terrain = "";
+                                              }
+                                            }
+                                            if (field === 'terrain') {
+                                              return { ...m, terrain: { ...m.terrain, ...value } };
+                                            }
+                                            if (field === 'date_livraison' && value) {
+                                              const dateLivraison = new Date(value);
+                                              const dateLimiteLeve = new Date(dateLivraison);
+                                              dateLimiteLeve.setDate(dateLimiteLeve.getDate() - 14);
+                                              updatedMandat.terrain = {
+                                                ...m.terrain,
+                                                date_limite_leve: dateLimiteLeve.toISOString().split('T')[0]
+                                              };
+                                            }
+                                            return updatedMandat;
+                                          }
+                                          return m;
+                                        })
+                                      }));
+                                    }}
+                                    updateMandatAddress={(idx, newAddresses) => {
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map((m, i) =>
+                                          i === idx ? { ...m, adresse_travaux: newAddresses[0] || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" } } : m
+                                        )
+                                      }));
+                                    }}
+                                    openLotSelector={(idx) => {
+                                      setCurrentMandatIndexDossier(idx);
+                                      setIsLotSelectorOpenDossier(true);
+                                    }}
+                                    openAddMinuteDialog={(idx) => {
+                                      setCurrentMinuteMandatIndex(idx);
+                                      setNewMinuteForm({ minute: "", date_minute: "", type_minute: "Initiale" });
+                                      setIsAddMinuteDialogOpen(true);
+                                    }}
+                                    removeMinuteFromMandat={(idx, minuteIdx) => {
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map((m, i) =>
+                                          i === idx ? { ...m, minutes_list: m.minutes_list.filter((_, mIdx) => mIdx !== minuteIdx) } : m
+                                        )
+                                      }));
+                                    }}
+                                    removeLotFromMandat={(idx, lotId) => {
+                                      if (confirm(`Êtes-vous sûr de vouloir retirer ce lot de ce mandat ?`)) {
+                                        setNouveauDossierForm(prev => ({
+                                          ...prev,
+                                          mandats: prev.mandats.map((m, i) =>
+                                            i === idx ? { ...m, lots: m.lots.filter(id => id !== lotId) } : m
+                                          )
+                                        }));
+                                      }
+                                    }}
+                                    removeMinuteFromMandat={(idx, minuteIdx) => {
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map((m, i) =>
+                                          i === idx ? { ...m, minutes_list: m.minutes_list.filter((_, mIdx) => mIdx !== minuteIdx) } : m
+                                        )
+                                      }));
+                                    }}
+                                    getLotById={getLotById}
+                                    users={users}
+                                    formStatut={nouveauDossierForm.statut}
+                                    onRemoveMandat={() => {
+                                      if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.")) {
+                                        setNouveauDossierForm(prev => ({
+                                          ...prev,
+                                          mandats: prev.mandats.filter((_, i) => i !== index)
+                                        }));
+                                        if (nouveauDossierForm.mandats.length > 1) {
+                                          setActiveTabMandatDossier(Math.max(0, index - 1).toString());
+                                        } else {
+                                          setActiveTabMandatDossier("0");
+                                        }
+                                      }
+                                    }}
+                                    isReferenceDisabled={false}
+                                    isTTL={false}
+                                  />
+                                </CardContent>
+                              </Card>
+                            </TabsContent>
+                          ))}
+                        </Tabs>
+                      ) : (
+                        <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">Aucun mandat. Cliquez sur "Ajouter un mandat" pour commencer.</div>
+                      )}
+                    </div>
+                  </form>
+
+                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
+                    <Button type="button" variant="outline" onClick={() => setIsOuvrirDossierDialogOpen(false)}>Annuler</Button>
+                    <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
+                  </div>
+                </div>
+
+                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
+                  <div className="p-6 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-hidden p-6">
+                    <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporairesDossier} onCommentairesTempChange={setCommentairesTemporairesDossier} />
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialogs de sélection pour le formulaire de dossier */}
+          <Dialog open={isClientSelectorOpenDossier} onOpenChange={setIsClientSelectorOpenDossier}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
+                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Client");setIsClientSelectorOpenDossier(false);}} className="bg-blue-500 hover:bg-blue-600 border-0 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouveau
+                  </Button>
+                </div>
+              </DialogHeader>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {filteredClientsForSelector.length > 0 ? (
+                    filteredClientsForSelector.map((client) => (
+                      <div
+                        key={client.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          nouveauDossierForm.clients_ids.includes(client.id) ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                        }`}
+                        onClick={() => {
+                          setNouveauDossierForm(prev => ({
+                            ...prev,
+                            clients_ids: prev.clients_ids.includes(client.id)
+                              ? prev.clients_ids.filter(id => id !== client.id)
+                              : [...prev.clients_ids, client.id]
+                          }));
+                        }}
+                      >
+                        <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
+                            <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {client.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {client.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-500">
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucun client trouvé</p>
+                    </div>
                   )}
                 </div>
+              </div>
+              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+                <Button onClick={() => setIsClientSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                  <Button type="button" variant="outline" onClick={() => setIsOuvrirDossierDialogOpen(false)}>
-                    Annuler
-                  </Button>
-                  <Button
-                    type="button"
-                    disabled={!nouveauDossierForm.arpenteur_geometre || !nouveauDossierForm.numero_dossier}
-                    onClick={async () => {
-                      // Vérifier si le numéro de dossier existe déjà
-                      const dossierExistant = dossiers.find(d => 
-                        d.numero_dossier === nouveauDossierForm.numero_dossier &&
-                        d.arpenteur_geometre === nouveauDossierForm.arpenteur_geometre
-                      );
-                      
-                      if (dossierExistant) {
-                        alert(`Le numéro de dossier ${nouveauDossierForm.numero_dossier} existe déjà pour ${nouveauDossierForm.arpenteur_geometre}.`);
-                        return;
-                      }
-
-                      // Créer le nouveau dossier
-                      const dossierData = {
-                        numero_dossier: nouveauDossierForm.numero_dossier,
-                        arpenteur_geometre: nouveauDossierForm.arpenteur_geometre,
-                        date_ouverture: new Date().toISOString().split('T')[0],
-                        statut: "Ouvert",
-                        ttl: "Non",
-                        clients_ids: formData.clients_ids,
-                        notaires_ids: [],
-                        courtiers_ids: [],
-                        mandats: nouveauDossierForm.mandats
-                      };
-
-                      try {
-                        await createDossierMutation.mutateAsync(dossierData);
-                        
-                        // Supprimer la prise de mandat si elle existe
-                        if (editingPriseMandat?.id) {
-                          await deletePriseMandatMutation.mutateAsync(editingPriseMandat.id);
-                        }
-                        
-                        setIsOuvrirDossierDialogOpen(false);
-                        setIsDialogOpen(false);
-                        resetFullForm();
-                        alert(`Dossier ${getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}${nouveauDossierForm.numero_dossier} créé avec succès !`);
-                      } catch (error) {
-                        console.error("Erreur lors de la création du dossier:", error);
-                        alert("Erreur lors de la création du dossier.");
-                      }
-                    }}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600"
-                  >
-                    <FolderOpen className="w-4 h-4 mr-2" />
-                    Créer le dossier
+          <Dialog open={isNotaireSelectorOpenDossier} onOpenChange={setIsNotaireSelectorOpenDossier}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
+                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Notaire");setIsNotaireSelectorOpenDossier(false);}} className="bg-purple-500 hover:bg-purple-600 border-0 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouveau
                   </Button>
                 </div>
+              </DialogHeader>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {filteredNotairesForSelector.length > 0 ? (
+                    filteredNotairesForSelector.map((notaire) => (
+                      <div
+                        key={notaire.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          nouveauDossierForm.notaires_ids.includes(notaire.id) ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                        }`}
+                        onClick={() => {
+                          setNouveauDossierForm(prev => ({
+                            ...prev,
+                            notaires_ids: prev.notaires_ids.includes(notaire.id)
+                              ? prev.notaires_ids.filter(id => id !== notaire.id)
+                              : [...prev.notaires_ids, notaire.id]
+                          }));
+                        }}
+                      >
+                        <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
+                            <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-500">
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucun notaire trouvé</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+                <Button onClick={() => setIsNotaireSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isCourtierSelectorOpenDossier} onOpenChange={setIsCourtierSelectorOpenDossier}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
+                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Courtier immobilier");setIsCourtierSelectorOpenDossier(false);}} className="bg-orange-500 hover:bg-orange-600 border-0 text-white">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouveau
+                  </Button>
+                </div>
+              </DialogHeader>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3 p-4">
+                  {filteredCourtiersForSelector.length > 0 ? (
+                    filteredCourtiersForSelector.map((courtier) => (
+                      <div
+                        key={courtier.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          nouveauDossierForm.courtiers_ids.includes(courtier.id) ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                        }`}
+                        onClick={() => {
+                          setNouveauDossierForm(prev => ({
+                            ...prev,
+                            courtiers_ids: prev.courtiers_ids.includes(courtier.id)
+                              ? prev.courtiers_ids.filter(id => id !== courtier.id)
+                              : [...prev.courtiers_ids, courtier.id]
+                          }));
+                        }}
+                      >
+                        <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                        <div className="text-sm text-slate-400 space-y-1 mt-1">
+                          {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
+                            <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
+                          )}
+                          {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                            <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
+                          )}
+                          {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                            <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-slate-500">
+                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucun courtier trouvé</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
+                <Button onClick={() => setIsCourtierSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isLotSelectorOpenDossier} onOpenChange={(open) => {
+            setIsLotSelectorOpenDossier(open);
+            if (!open) {
+              setLotCirconscriptionFilter("all");
+              setLotSearchTerm("");
+              setLotCadastreFilter("Québec");
+            }
+          }}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                    <Input placeholder="Rechercher par numéro, rang..." value={lotSearchTerm} onChange={(e) => setLotSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
+                  </div>
+                  <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                    <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Circonscription" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                        <SelectItem key={circ} value={circ} className="text-white">{circ}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                    <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Cadastre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                      <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                      <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" onClick={() => setIsNewLotDialogOpen(true)} className="bg-emerald-500 hover:bg-emerald-600">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouveau lot
+                  </Button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700 sticky top-0 z-10">
+                        <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                        <TableHead className="text-slate-300">Circonscription</TableHead>
+                        <TableHead className="text-slate-300">Cadastre</TableHead>
+                        <TableHead className="text-slate-300">Rang</TableHead>
+                        <TableHead className="text-slate-300 text-right">Sélection</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLotsForSelector.length > 0 ? (
+                        filteredLotsForSelector.map((lot) => {
+                          const isSelected = currentMandatIndexDossier !== null && nouveauDossierForm.mandats[currentMandatIndexDossier]?.lots?.includes(lot.id);
+                          return (
+                            <TableRow
+                              key={lot.id}
+                              className={`cursor-pointer transition-colors border-slate-800 ${isSelected ? 'bg-emerald-500/20 hover:bg-emerald-500/30' : 'hover:bg-slate-800/30'}`}
+                              onClick={() => {
+                                if (currentMandatIndexDossier !== null) {
+                                  setNouveauDossierForm(prev => ({
+                                    ...prev,
+                                    mandats: prev.mandats.map((m, i) =>
+                                      i === currentMandatIndexDossier ? {
+                                        ...m,
+                                        lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                      } : m
+                                    )
+                                  }));
+                                }
+                              }}
+                            >
+                              <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
+                              <TableCell className="text-slate-300">
+                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                  {lot.circonscription_fonciere}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
+                              <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
+                              <TableCell className="text-right">
+                                {isSelected && (
+                                  <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Sélectionné
+                                  </Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-12">
+                            <div className="text-slate-400">
+                              <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                              <p>Aucun lot trouvé</p>
+                              <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <Button onClick={() => setIsLotSelectorOpenDossier(false)} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Valider la sélection
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -2218,9 +2824,18 @@ export default function PriseDeMandat() {
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
             // Optionally re-open the selector if creating from there
-            if (clientTypeForForm === "Client") setIsClientSelectorOpen(true);
-            if (clientTypeForForm === "Notaire") setIsNotaireSelectorOpen(true);
-            if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
+            if (clientTypeForForm === "Client") {
+              if (isOuvrirDossierDialogOpen) setIsClientSelectorOpenDossier(true);
+              else setIsClientSelectorOpen(true);
+            }
+            if (clientTypeForForm === "Notaire") {
+              if (isOuvrirDossierDialogOpen) setIsNotaireSelectorOpenDossier(true);
+              else setIsNotaireSelectorOpen(true);
+            }
+            if (clientTypeForForm === "Courtier immobilier") {
+              if (isOuvrirDossierDialogOpen) setIsCourtierSelectorOpenDossier(true);
+              else setIsCourtierSelectorOpen(true);
+            }
           }}
         />
 
