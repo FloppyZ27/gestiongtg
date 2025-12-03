@@ -1516,7 +1516,7 @@ export default function PriseDeMandat() {
                 Nouveau mandat
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden" hideClose>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -1524,8 +1524,8 @@ export default function PriseDeMandat() {
               </DialogHeader>
 
               <div className="flex h-[90vh]">
-                {/* Main form content - 75% */}
-                <div className="flex-[0_0_75%] overflow-y-auto p-6 border-r border-slate-800">
+                {/* Main form content - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">
                       {editingPriseMandat ? "Modifier la prise de mandat" : "Nouveau mandat"}
@@ -1676,8 +1676,8 @@ export default function PriseDeMandat() {
                 </div>
                 </div>
 
-                {/* Commentaires Sidebar - 25% */}
-                <div className="flex-[0_0_25%] flex flex-col h-full overflow-hidden pt-10">
+                {/* Commentaires Sidebar - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden pt-10">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
