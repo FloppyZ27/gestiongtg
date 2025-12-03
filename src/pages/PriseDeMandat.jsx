@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -235,6 +236,10 @@ export default function PriseDeMandat() {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [activeContactTab, setActiveContactTab] = useState("clients");
   const [mapCollapsedDossier, setMapCollapsedDossier] = useState(false);
+  const [addressSearchQuery, setAddressSearchQuery] = useState("");
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
