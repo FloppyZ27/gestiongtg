@@ -1547,8 +1547,29 @@ export default function PriseDeMandat() {
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             if (!open) {
-              // Demander confirmation avant de fermer
-              if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+              // Vérifier si des données ont été saisies
+              const hasData = formData.arpenteur_geometre || 
+                formData.clients_ids.length > 0 ||
+                clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
+                workAddress.rue || workAddress.ville || workAddress.numeros_civiques?.[0] ||
+                mandatsInfo.some(m => m.type_mandat || m.prix_estime > 0) ||
+                commentairesTemporaires.length > 0;
+              
+              // En mode édition, vérifier si des modifications ont été faites
+              const hasChanges = editingPriseMandat ? (
+                formData.arpenteur_geometre !== editingPriseMandat.arpenteur_geometre ||
+                JSON.stringify(formData.clients_ids) !== JSON.stringify(editingPriseMandat.clients_ids || []) ||
+                JSON.stringify(clientInfo) !== JSON.stringify(editingPriseMandat.client_info || {}) ||
+                JSON.stringify(workAddress) !== JSON.stringify(editingPriseMandat.adresse_travaux || {}) ||
+                formData.statut !== editingPriseMandat.statut
+              ) : hasData;
+              
+              if (hasChanges) {
+                if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
+                  setIsDialogOpen(false);
+                  resetFullForm();
+                }
+              } else {
                 setIsDialogOpen(false);
                 resetFullForm();
               }
@@ -1769,7 +1790,25 @@ export default function PriseDeMandat() {
                   {/* Boutons Annuler/Créer en bas de la colonne gauche */}
                   <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
                     <Button type="button" variant="outline" onClick={() => {
-                      if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+                      const hasData = formData.arpenteur_geometre || 
+                        formData.clients_ids.length > 0 ||
+                        clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
+                        workAddress.rue || workAddress.ville || workAddress.numeros_civiques?.[0] ||
+                        mandatsInfo.some(m => m.type_mandat || m.prix_estime > 0) ||
+                        commentairesTemporaires.length > 0;
+                      
+                      const hasChanges = editingPriseMandat ? (
+                        formData.arpenteur_geometre !== editingPriseMandat.arpenteur_geometre ||
+                        JSON.stringify(formData.clients_ids) !== JSON.stringify(editingPriseMandat.clients_ids || []) ||
+                        formData.statut !== editingPriseMandat.statut
+                      ) : hasData;
+                      
+                      if (hasChanges) {
+                        if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
+                          setIsDialogOpen(false);
+                          resetFullForm();
+                        }
+                      } else {
                         setIsDialogOpen(false);
                         resetFullForm();
                       }
