@@ -1049,29 +1049,133 @@ export default function PriseDeMandat() {
       prix_estime: totalPrix,
       rabais: totalRabais,
       taxes_incluses: taxesIncluses,
-      statut: formData.statut,
-      historique: editingPriseMandat ? historique : [{
-        action: "Création de la prise de mandat",
-        details: `Statut: ${formData.statut}`,
-        utilisateur_nom: user?.full_name || "Utilisateur",
-        utilisateur_email: user?.email || "",
-        date: new Date().toISOString()
-      }]
+      statut: formData.statut
     };
 
     if (editingPriseMandat) {
-      // Ajouter une entrée d'historique pour la modification
-      const updatedHistorique = [{
-        action: "Modification de la prise de mandat",
-        details: `Statut: ${formData.statut}`,
+      // Détecter les changements et créer des entrées d'historique
+      const newHistoriqueEntries = [];
+      const now = new Date().toISOString();
+      const userName = user?.full_name || "Utilisateur";
+      const userEmail = user?.email || "";
+
+      // Vérifier changement de statut
+      if (editingPriseMandat.statut !== formData.statut) {
+        newHistoriqueEntries.push({
+          action: "Changement de statut",
+          details: `${editingPriseMandat.statut} → ${formData.statut}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'arpenteur
+      if (editingPriseMandat.arpenteur_geometre !== formData.arpenteur_geometre) {
+        newHistoriqueEntries.push({
+          action: "Changement d'arpenteur-géomètre",
+          details: `${editingPriseMandat.arpenteur_geometre || 'Non défini'} → ${formData.arpenteur_geometre}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'urgence
+      if (editingPriseMandat.urgence_percue !== (mandatsInfo[0]?.urgence_percue || "")) {
+        newHistoriqueEntries.push({
+          action: "Changement d'urgence",
+          details: `${editingPriseMandat.urgence_percue || 'Non définie'} → ${mandatsInfo[0]?.urgence_percue || 'Non définie'}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de client info
+      const oldClientName = `${editingPriseMandat.client_info?.prenom || ''} ${editingPriseMandat.client_info?.nom || ''}`.trim();
+      const newClientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+      if (oldClientName !== newClientName && newClientName) {
+        newHistoriqueEntries.push({
+          action: "Modification des informations client",
+          details: oldClientName ? `${oldClientName} → ${newClientName}` : `Ajout: ${newClientName}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement d'adresse
+      const oldAdresse = formatAdresse(editingPriseMandat.adresse_travaux);
+      const newAdresse = formatAdresse(workAddress);
+      if (oldAdresse !== newAdresse && newAdresse) {
+        newHistoriqueEntries.push({
+          action: "Modification de l'adresse des travaux",
+          details: oldAdresse ? `${oldAdresse} → ${newAdresse}` : `Ajout: ${newAdresse}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de types de mandats
+      const oldMandats = (editingPriseMandat.types_mandats || []).join(', ');
+      const newMandats = typesMandats.join(', ');
+      if (oldMandats !== newMandats) {
+        newHistoriqueEntries.push({
+          action: "Modification des types de mandats",
+          details: oldMandats ? `${oldMandats} → ${newMandats}` : `Ajout: ${newMandats}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de prix
+      if (editingPriseMandat.prix_estime !== totalPrix) {
+        newHistoriqueEntries.push({
+          action: "Modification du prix estimé",
+          details: `${editingPriseMandat.prix_estime?.toFixed(2) || '0.00'} $ → ${totalPrix.toFixed(2)} $`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de rabais
+      if (editingPriseMandat.rabais !== totalRabais) {
+        newHistoriqueEntries.push({
+          action: "Modification du rabais",
+          details: `${editingPriseMandat.rabais?.toFixed(2) || '0.00'} $ → ${totalRabais.toFixed(2)} $`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      // Vérifier changement de date de livraison
+      if (editingPriseMandat.date_livraison !== (mandatsInfo[0]?.date_livraison || "")) {
+        newHistoriqueEntries.push({
+          action: "Modification de la date de livraison",
+          details: `${editingPriseMandat.date_livraison || 'Non définie'} → ${mandatsInfo[0]?.date_livraison || 'Non définie'}`,
+          utilisateur_nom: userName,
+          utilisateur_email: userEmail,
+          date: now
+        });
+      }
+
+      const updatedHistorique = [...newHistoriqueEntries, ...historique];
+      updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
+    } else {
+      // Création
+      const creationHistorique = [{
+        action: "Création de la prise de mandat",
+        details: `Arpenteur: ${formData.arpenteur_geometre}, Statut: ${formData.statut}${typesMandats.length > 0 ? `, Mandats: ${typesMandats.join(', ')}` : ''}`,
         utilisateur_nom: user?.full_name || "Utilisateur",
         utilisateur_email: user?.email || "",
         date: new Date().toISOString()
-      }, ...historique];
-      
-      updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
-    } else {
-      createPriseMandatMutation.mutate(dataToSubmit);
+      }];
+      createPriseMandatMutation.mutate({ ...dataToSubmit, historique: creationHistorique });
     }
   };
 
@@ -1903,7 +2007,7 @@ export default function PriseDeMandat() {
                   
                   {/* Tabs Commentaires/Historique */}
                   <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
-                    <TabsList className="w-full grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mt-2 flex-shrink-0">
+                    <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mr-6 mt-2 flex-shrink-0">
                       <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
                         <MessageSquare className="w-3 h-3 mr-1" />
                         Commentaires
@@ -1914,7 +2018,7 @@ export default function PriseDeMandat() {
                       </TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
                       <CommentairesSection
                         dossierId={editingDossier?.id}
                         dossierTemporaire={!editingDossier}
@@ -1923,22 +2027,22 @@ export default function PriseDeMandat() {
                       />
                     </TabsContent>
                     
-                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
                       {historique.length > 0 ? (
                         <div className="space-y-2">
                           {historique.map((entry, idx) => (
                             <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                              <div className="flex items-start gap-2 mb-1">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-white text-sm font-medium">{entry.action}</p>
                                   {entry.details && (
-                                    <p className="text-slate-400 text-xs mt-1">{entry.details}</p>
+                                    <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
                                   )}
-                                  <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                                    <span>{entry.utilisateur_nom}</span>
+                                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                                    <span className="text-emerald-400">{entry.utilisateur_nom}</span>
                                     <span>•</span>
-                                    <span>{format(new Date(entry.date), "dd MMM à HH:mm", { locale: fr })}</span>
+                                    <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1948,6 +2052,7 @@ export default function PriseDeMandat() {
                       ) : (
                         <div className="flex items-center justify-center h-full text-center">
                           <div>
+                            <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                             <p className="text-slate-500">Aucune action enregistrée</p>
                             <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
                           </div>
