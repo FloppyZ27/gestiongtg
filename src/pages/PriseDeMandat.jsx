@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -240,6 +240,9 @@ export default function PriseDeMandat() {
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
+  const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
+  const [uploadingDocuments, setUploadingDocuments] = useState(false);
+  const [dossierDocuments, setDossierDocuments] = useState([]);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -2438,7 +2441,7 @@ export default function PriseDeMandat() {
                                       </div>
                                     </div>
                                     
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-4 gap-2">
                                       <div className="space-y-1">
                                         <Label className="text-slate-400 text-xs">Date de signature</Label>
                                         <Input 
@@ -2468,7 +2471,7 @@ export default function PriseDeMandat() {
                                         />
                                       </div>
                                       <div className="space-y-1">
-                                        <Label className="text-slate-400 text-xs">Date de livraison</Label>
+                                        <Label className="text-slate-400 text-xs">Date de livraison <span className="text-red-400">*</span></Label>
                                         <Input 
                                           type="date" 
                                           value={mandat.date_livraison || ""} 
@@ -2478,6 +2481,7 @@ export default function PriseDeMandat() {
                                               mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
                                             }));
                                           }}
+                                          required
                                           className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                         />
                                       </div>
@@ -2540,6 +2544,169 @@ export default function PriseDeMandat() {
                         )}
                       </Card>
                     </div>
+
+                    {/* Section Documents PDF */}
+                    <Card className="border-slate-700 bg-slate-800/30 mt-4">
+                      <CardHeader 
+                        className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
+                        onClick={() => setDocumentsCollapsed(!documentsCollapsed)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center">
+                              <File className="w-3.5 h-3.5 text-amber-400" />
+                            </div>
+                            <CardTitle className="text-amber-300 text-base">Documents</CardTitle>
+                            {dossierDocuments.length > 0 && (
+                              <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                                {dossierDocuments.length} fichier{dossierDocuments.length > 1 ? 's' : ''}
+                              </Badge>
+                            )}
+                          </div>
+                          {documentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                        </div>
+                      </CardHeader>
+
+                      {!documentsCollapsed && (
+                        <CardContent className="pt-2 pb-3">
+                          {/* Zone de drag & drop */}
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                              uploadingDocuments 
+                                ? 'border-amber-500 bg-amber-500/10' 
+                                : 'border-slate-600 hover:border-amber-500/50 hover:bg-slate-800/50'
+                            }`}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDragEnter={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                              if (files.length === 0) {
+                                alert("Seuls les fichiers PDF sont acceptés.");
+                                return;
+                              }
+                              setUploadingDocuments(true);
+                              try {
+                                for (const file of files) {
+                                  const response = await base44.integrations.Core.UploadFile({ file });
+                                  setDossierDocuments(prev => [...prev, {
+                                    name: file.name,
+                                    url: response.file_url,
+                                    uploaded_at: new Date().toISOString()
+                                  }]);
+                                }
+                              } catch (error) {
+                                console.error("Erreur upload:", error);
+                                alert("Erreur lors de l'upload des fichiers.");
+                              } finally {
+                                setUploadingDocuments(false);
+                              }
+                            }}
+                          >
+                            {uploadingDocuments ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+                                <p className="text-amber-400 text-sm">Upload en cours...</p>
+                              </div>
+                            ) : (
+                              <>
+                                <Upload className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                                <p className="text-slate-400 text-sm">Glissez-déposez vos fichiers PDF ici</p>
+                                <p className="text-slate-500 text-xs mt-1">ou</p>
+                                <label className="cursor-pointer">
+                                  <span className="text-amber-400 text-sm hover:underline">Parcourir les fichiers</span>
+                                  <input
+                                    type="file"
+                                    accept=".pdf"
+                                    multiple
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const files = Array.from(e.target.files || []);
+                                      if (files.length === 0) return;
+                                      setUploadingDocuments(true);
+                                      try {
+                                        for (const file of files) {
+                                          const response = await base44.integrations.Core.UploadFile({ file });
+                                          setDossierDocuments(prev => [...prev, {
+                                            name: file.name,
+                                            url: response.file_url,
+                                            uploaded_at: new Date().toISOString()
+                                          }]);
+                                        }
+                                      } catch (error) {
+                                        console.error("Erreur upload:", error);
+                                        alert("Erreur lors de l'upload des fichiers.");
+                                      } finally {
+                                        setUploadingDocuments(false);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Liste des documents uploadés */}
+                          {dossierDocuments.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {dossierDocuments.map((doc, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                                    <span className="text-slate-300 text-sm truncate">{doc.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => window.open(doc.url, '_blank')}
+                                      className="text-slate-400 hover:text-amber-400 h-7 w-7 p-0"
+                                      title="Voir le document"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        // Générer un lien SharePoint (placeholder - à adapter selon votre config SharePoint)
+                                        const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
+                                        const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
+                                        navigator.clipboard.writeText(sharePointLink);
+                                        alert("Lien SharePoint copié dans le presse-papier !");
+                                      }}
+                                      className="text-slate-400 hover:text-blue-400 h-7 w-7 p-0"
+                                      title="Copier lien SharePoint"
+                                    >
+                                      <ExternalLink className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setDossierDocuments(prev => prev.filter((_, i) => i !== idx))}
+                                      className="text-slate-400 hover:text-red-400 h-7 w-7 p-0"
+                                      title="Supprimer"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      )}
+                    </Card>
                   </form>
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
