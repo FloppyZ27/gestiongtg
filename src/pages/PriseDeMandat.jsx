@@ -2079,7 +2079,7 @@ export default function PriseDeMandat() {
                               <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
-                          const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" };
+                          const defaultAdresse = sameAddressForAllMandats && firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "Québec" };
                           const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
                           
                           setNouveauDossierForm(prev => ({
@@ -2201,83 +2201,203 @@ export default function PriseDeMandat() {
                                         </Select>
                                       </div>
                                     </div>
+                                    
+                                    {/* Adresse des travaux avec recherche LLM */}
                                     <div className="space-y-1">
-                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                      <div className="flex items-center justify-between">
+                                        <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox
+                                            id={`same-address-${index}`}
+                                            checked={sameAddressForAllMandats}
+                                            onCheckedChange={(checked) => {
+                                              setSameAddressForAllMandats(checked);
+                                              if (checked && nouveauDossierForm.mandats.length > 1) {
+                                                // Copier l'adresse du premier mandat à tous les autres
+                                                const firstAddress = nouveauDossierForm.mandats[0]?.adresse_travaux;
+                                                if (firstAddress) {
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map(m => ({
+                                                      ...m,
+                                                      adresse_travaux: JSON.parse(JSON.stringify(firstAddress))
+                                                    }))
+                                                  }));
+                                                }
+                                              }
+                                            }}
+                                            className="border-slate-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 h-3 w-3"
+                                          />
+                                          <label htmlFor={`same-address-${index}`} className="text-slate-400 text-xs cursor-pointer">
+                                            Identique pour tous les mandats
+                                          </label>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Barre de recherche d'adresse */}
+                                      <div className="relative">
+                                        <div className="flex gap-1">
+                                          <Input
+                                            placeholder="Rechercher une adresse..."
+                                            value={addressSearchQuery}
+                                            onChange={(e) => setAddressSearchQuery(e.target.value)}
+                                            onKeyDown={async (e) => {
+                                              if (e.key === 'Enter' && addressSearchQuery.trim()) {
+                                                e.preventDefault();
+                                                setIsSearchingAddress(true);
+                                                try {
+                                                  const result = await base44.integrations.Core.InvokeLLM({
+                                                    prompt: `Extrais les composantes de cette adresse québécoise: "${addressSearchQuery}". Retourne un JSON avec les champs: numero_civique, rue, ville, province, code_postal. Si un champ n'est pas présent, laisse-le vide.`,
+                                                    response_json_schema: {
+                                                      type: "object",
+                                                      properties: {
+                                                        numero_civique: { type: "string" },
+                                                        rue: { type: "string" },
+                                                        ville: { type: "string" },
+                                                        province: { type: "string" },
+                                                        code_postal: { type: "string" }
+                                                      }
+                                                    }
+                                                  });
+                                                  
+                                                  const newAddress = {
+                                                    numeros_civiques: [result.numero_civique || ""],
+                                                    rue: result.rue || "",
+                                                    ville: result.ville || "",
+                                                    province: result.province || "Québec",
+                                                    code_postal: result.code_postal || ""
+                                                  };
+                                                  
+                                                  if (sameAddressForAllMandats) {
+                                                    setNouveauDossierForm(prev => ({
+                                                      ...prev,
+                                                      mandats: prev.mandats.map(m => ({
+                                                        ...m,
+                                                        adresse_travaux: JSON.parse(JSON.stringify(newAddress))
+                                                      }))
+                                                    }));
+                                                  } else {
+                                                    setNouveauDossierForm(prev => ({
+                                                      ...prev,
+                                                      mandats: prev.mandats.map((m, i) => i === index ? {
+                                                        ...m,
+                                                        adresse_travaux: newAddress
+                                                      } : m)
+                                                    }));
+                                                  }
+                                                  setAddressSearchQuery("");
+                                                } catch (error) {
+                                                  console.error("Erreur lors de la recherche d'adresse:", error);
+                                                } finally {
+                                                  setIsSearchingAddress(false);
+                                                }
+                                              }
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
+                                          />
+                                          {isSearchingAddress && (
+                                            <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-2 top-1/2 -translate-y-1/2" />
+                                          )}
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Champs d'adresse avec labels */}
                                       <div className="grid grid-cols-5 gap-1">
-                                        <Input 
-                                          placeholder="N° civique" 
-                                          value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">N° civique</Label>
+                                          <Input 
+                                            placeholder="123" 
+                                            value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
-                                              } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
-                                        <Input 
-                                          placeholder="Rue" 
-                                          value={mandat.adresse_travaux?.rue || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="col-span-2 space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Rue</Label>
+                                          <Input 
+                                            placeholder="Rue principale" 
+                                            value={mandat.adresse_travaux?.rue || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
-                                              } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs col-span-2"
-                                        />
-                                        <Input 
-                                          placeholder="Ville" 
-                                          value={mandat.adresse_travaux?.ville || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Ville</Label>
+                                          <Input 
+                                            placeholder="Ville" 
+                                            value={mandat.adresse_travaux?.ville || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
-                                              } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
-                                        <Input 
-                                          placeholder="Province" 
-                                          value={mandat.adresse_travaux?.province || "Québec"} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Province</Label>
+                                          <Input 
+                                            placeholder="Québec" 
+                                            value={mandat.adresse_travaux?.province || "Québec"} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, province: e.target.value } 
-                                              } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
                                       </div>
                                       <div className="grid grid-cols-5 gap-1">
-                                        <Input 
-                                          placeholder="Code postal" 
-                                          value={mandat.adresse_travaux?.code_postal || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                          <Input 
+                                            placeholder="G0A 1A0" 
+                                            value={mandat.adresse_travaux?.code_postal || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
                                                 adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
-                                              } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
                                       </div>
                                     </div>
+                                    
                                     <div className="grid grid-cols-3 gap-2">
                                       <div className="space-y-1">
                                         <Label className="text-slate-400 text-xs">Date de signature</Label>
@@ -2322,6 +2442,7 @@ export default function PriseDeMandat() {
                                         />
                                       </div>
                                     </div>
+                                    
                                     {/* Section Lots */}
                                     <div className="space-y-1">
                                       <div className="flex justify-between items-center">
