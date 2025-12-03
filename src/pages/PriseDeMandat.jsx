@@ -1811,7 +1811,7 @@ export default function PriseDeMandat() {
                   <div className="flex-1 overflow-y-auto p-6">
                   <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                      {editingPriseMandat ? "Modifier la prise de mandat" : "Nouveau mandat"}
+                      {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
                     </h2>
                     {formData.statut === "Mandats à ouvrir" && (
                       <Button
@@ -2631,7 +2631,8 @@ export default function PriseDeMandat() {
                                       </div>
                                       
                                       {/* Champs d'adresse avec labels */}
-                                      <div className="grid grid-cols-5 gap-1">
+                                      {/* Ligne 1: N° civique et Rue */}
+                                      <div className="grid grid-cols-[100px_1fr] gap-1">
                                         <div className="space-y-0.5">
                                           <Label className="text-slate-500 text-[10px]">N° civique</Label>
                                           <Input 
@@ -2650,7 +2651,7 @@ export default function PriseDeMandat() {
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
                                         </div>
-                                        <div className="col-span-2 space-y-0.5">
+                                        <div className="space-y-0.5">
                                           <Label className="text-slate-500 text-[10px]">Rue</Label>
                                           <Input 
                                             placeholder="Rue principale" 
@@ -2668,6 +2669,9 @@ export default function PriseDeMandat() {
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
                                         </div>
+                                      </div>
+                                      {/* Ligne 2: Ville, Code postal et Province */}
+                                      <div className="grid grid-cols-3 gap-1">
                                         <div className="space-y-0.5">
                                           <Label className="text-slate-500 text-[10px]">Ville</Label>
                                           <Input 
@@ -2687,14 +2691,14 @@ export default function PriseDeMandat() {
                                           />
                                         </div>
                                         <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Province</Label>
+                                          <Label className="text-slate-500 text-[10px]">Code postal</Label>
                                           <Input 
-                                            placeholder="Québec" 
-                                            value={mandat.adresse_travaux?.province || "Québec"} 
+                                            placeholder="G0A 1A0" 
+                                            value={mandat.adresse_travaux?.code_postal || ""} 
                                             onChange={(e) => {
                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, province: e.target.value } 
+                                                adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
                                               } : m;
                                               setNouveauDossierForm(prev => ({
                                                 ...prev,
@@ -2704,17 +2708,15 @@ export default function PriseDeMandat() {
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
                                         </div>
-                                      </div>
-                                      <div className="grid grid-cols-5 gap-1">
                                         <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                          <Label className="text-slate-500 text-[10px]">Province</Label>
                                           <Input 
-                                            placeholder="G0A 1A0" 
-                                            value={mandat.adresse_travaux?.code_postal || ""} 
+                                            placeholder="Québec" 
+                                            value={mandat.adresse_travaux?.province || "Québec"} 
                                             onChange={(e) => {
                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
+                                                adresse_travaux: { ...m.adresse_travaux, province: e.target.value } 
                                               } : m;
                                               setNouveauDossierForm(prev => ({
                                                 ...prev,
