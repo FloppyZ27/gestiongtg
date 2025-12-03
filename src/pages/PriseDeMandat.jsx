@@ -2818,10 +2818,9 @@ export default function PriseDeMandat() {
                     <Card className="border-slate-700 bg-slate-800/30 mt-4">
                       <CardHeader 
                         className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
-                        onClick={() => setDocumentsCollapsed(!documentsCollapsed)}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3" onClick={() => setDocumentsCollapsed(!documentsCollapsed)}>
                             <div className="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center">
                               <File className="w-3.5 h-3.5 text-amber-400" />
                             </div>
@@ -2832,24 +2831,17 @@ export default function PriseDeMandat() {
                               </Badge>
                             )}
                           </div>
-                          {documentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                        </div>
-                      </CardHeader>
-
-                      {!documentsCollapsed && (
-                        <CardContent className="pt-2 pb-3">
-                          {/* Bouton parcourir en haut */}
-                          <div className="flex justify-end mb-2">
-                            <label className="cursor-pointer">
+                          <div className="flex items-center gap-2">
+                            <label className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
                               <Button
                                 type="button"
                                 size="sm"
-                                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-7 text-xs"
+                                className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-6 text-xs"
                                 asChild
                               >
                                 <span>
                                   <Upload className="w-3 h-3 mr-1" />
-                                  Parcourir les fichiers
+                                  Parcourir
                                 </span>
                               </Button>
                               <input
@@ -2880,7 +2872,15 @@ export default function PriseDeMandat() {
                                 }}
                               />
                             </label>
+                            <div onClick={() => setDocumentsCollapsed(!documentsCollapsed)}>
+                              {documentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                            </div>
                           </div>
+                        </div>
+                      </CardHeader>
+
+                      {!documentsCollapsed && (
+                        <CardContent className="pt-2 pb-3">
 
                           {/* Zone de drag & drop - affichée seulement si aucun document */}
                           {dossierDocuments.length === 0 ? (
@@ -2982,10 +2982,10 @@ export default function PriseDeMandat() {
                               )}
                               <div className="grid grid-cols-2 gap-2">
                                 {dossierDocuments.map((doc, idx) => (
-                                  <div key={idx} className="flex items-center gap-1 p-1.5 bg-slate-800/50 rounded-lg border border-slate-700">
-                                    <File className="w-3 h-3 text-amber-400 flex-shrink-0" />
-                                    <span className="text-slate-300 text-[10px] truncate flex-1" title={doc.name}>{doc.name}</span>
-                                    <span className="text-slate-500 text-[10px] flex-shrink-0">
+                                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                                    <span className="text-slate-300 text-sm truncate flex-1" title={doc.name}>{doc.name}</span>
+                                    <span className="text-slate-500 text-xs flex-shrink-0">
                                       {doc.uploaded_at ? format(new Date(doc.uploaded_at), "dd/MM/yy", { locale: fr }) : "-"}
                                     </span>
                                     <Button
@@ -2996,10 +2996,10 @@ export default function PriseDeMandat() {
                                         setViewingPdfUrl(doc.url);
                                         setViewingPdfName(doc.name);
                                       }}
-                                      className="text-slate-400 hover:text-amber-400 h-5 w-5 p-0"
+                                      className="text-slate-400 hover:text-amber-400 h-6 w-6 p-0"
                                       title="Voir"
                                     >
-                                      <Eye className="w-2.5 h-2.5" />
+                                      <Eye className="w-3 h-3" />
                                     </Button>
                                     <Button
                                       type="button"
@@ -3009,10 +3009,10 @@ export default function PriseDeMandat() {
                                         setDossierDocuments(prev => prev.filter((_, i) => i !== idx));
                                         addHistoriqueEntry("Suppression de document", `Document supprimé: ${doc.name}`);
                                       }}
-                                      className="text-slate-400 hover:text-red-400 h-5 w-5 p-0"
+                                      className="text-slate-400 hover:text-red-400 h-6 w-6 p-0"
                                       title="Supprimer"
                                     >
-                                      <X className="w-2.5 h-2.5" />
+                                      <X className="w-3 h-3" />
                                     </Button>
                                   </div>
                                 ))}
