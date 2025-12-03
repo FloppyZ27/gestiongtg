@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink, Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -245,6 +245,8 @@ export default function PriseDeMandat() {
   const [dossierDocuments, setDossierDocuments] = useState([]);
   const [viewingPdfUrl, setViewingPdfUrl] = useState(null);
   const [viewingPdfName, setViewingPdfName] = useState("");
+  const [sidebarTab, setSidebarTab] = useState("commentaires");
+  const [historique, setHistorique] = useState([]);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -402,6 +404,9 @@ export default function PriseDeMandat() {
 
   const handleEditPriseMandat = (pm) => {
     setEditingPriseMandat(pm);
+    
+    // Charger l'historique si présent
+    setHistorique(pm.historique || []);
     
     // Remplir le formulaire avec les données existantes
     setFormData({
@@ -1002,6 +1007,17 @@ export default function PriseDeMandat() {
     }
   };
 
+  const addHistoriqueEntry = (action, details = "") => {
+    const newEntry = {
+      action,
+      details,
+      utilisateur_nom: user?.full_name || "Utilisateur",
+      utilisateur_email: user?.email || "",
+      date: new Date().toISOString()
+    };
+    setHistorique(prev => [newEntry, ...prev]);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -1033,11 +1049,27 @@ export default function PriseDeMandat() {
       prix_estime: totalPrix,
       rabais: totalRabais,
       taxes_incluses: taxesIncluses,
-      statut: formData.statut
+      statut: formData.statut,
+      historique: editingPriseMandat ? historique : [{
+        action: "Création de la prise de mandat",
+        details: `Statut: ${formData.statut}`,
+        utilisateur_nom: user?.full_name || "Utilisateur",
+        utilisateur_email: user?.email || "",
+        date: new Date().toISOString()
+      }]
     };
 
     if (editingPriseMandat) {
-      updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: dataToSubmit });
+      // Ajouter une entrée d'historique pour la modification
+      const updatedHistorique = [{
+        action: "Modification de la prise de mandat",
+        details: `Statut: ${formData.statut}`,
+        utilisateur_nom: user?.full_name || "Utilisateur",
+        utilisateur_email: user?.email || "",
+        date: new Date().toISOString()
+      }, ...historique];
+      
+      updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
     } else {
       createPriseMandatMutation.mutate(dataToSubmit);
     }
@@ -1096,6 +1128,10 @@ export default function PriseDeMandat() {
       mandats: [],
       description: ""
     });
+    
+    // Reset sidebar et historique
+    setSidebarTab("commentaires");
+    setHistorique([]);
     
     // Reset de l'adresse de travail
     setWorkAddress({
@@ -1827,7 +1863,7 @@ export default function PriseDeMandat() {
                   </div>
                 </div>
 
-                {/* Commentaires Sidebar - 30% */}
+                {/* Sidebar - 30% */}
                 <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
@@ -1865,27 +1901,60 @@ export default function PriseDeMandat() {
                     </div>
                   )}
                   
-                  {/* Commentaires - Collapsible */}
-                  <div 
-                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
-                    onClick={() => setCommentsCollapsed(!commentsCollapsed)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-slate-400" />
-                      <h3 className="text-slate-300 text-base font-semibold">Commentaires</h3>
-                    </div>
-                    {commentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                  </div>
-                  {!commentsCollapsed && (
-                    <div className="flex-1 overflow-hidden p-4">
+                  {/* Tabs Commentaires/Historique */}
+                  <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                    <TabsList className="w-full grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mt-2 flex-shrink-0">
+                      <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Commentaires
+                      </TabsTrigger>
+                      <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                        <Clock className="w-3 h-3 mr-1" />
+                        Historique
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
                       <CommentairesSection
                         dossierId={editingDossier?.id}
                         dossierTemporaire={!editingDossier}
                         commentairesTemp={commentairesTemporaires}
                         onCommentairesTempChange={setCommentairesTemporaires}
                       />
-                    </div>
-                  )}
+                    </TabsContent>
+                    
+                    <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                      {historique.length > 0 ? (
+                        <div className="space-y-2">
+                          {historique.map((entry, idx) => (
+                            <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                              <div className="flex items-start gap-2 mb-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-sm font-medium">{entry.action}</p>
+                                  {entry.details && (
+                                    <p className="text-slate-400 text-xs mt-1">{entry.details}</p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                                    <span>{entry.utilisateur_nom}</span>
+                                    <span>•</span>
+                                    <span>{format(new Date(entry.date), "dd MMM à HH:mm", { locale: fr })}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-center">
+                          <div>
+                            <p className="text-slate-500">Aucune action enregistrée</p>
+                            <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </div>
               </div>
             </DialogContent>
@@ -2602,6 +2671,7 @@ export default function PriseDeMandat() {
                                         url: response.file_url,
                                         uploaded_at: new Date().toISOString()
                                       }]);
+                                      addHistoriqueEntry("Ajout de document", `Document ajouté: ${file.name}`);
                                     }
                                   } catch (error) {
                                     console.error("Erreur upload:", error);
@@ -2712,55 +2782,60 @@ export default function PriseDeMandat() {
                                   <p className="text-amber-400 text-sm">Upload en cours...</p>
                                 </div>
                               )}
-                              {dossierDocuments.map((doc, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                                    <span className="text-slate-300 text-sm truncate">{doc.name}</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                {dossierDocuments.map((doc, idx) => (
+                                  <div key={idx} className="flex flex-col p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <File className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                                      <span className="text-slate-300 text-xs truncate flex-1">{doc.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          setViewingPdfUrl(doc.url);
+                                          setViewingPdfName(doc.name);
+                                        }}
+                                        className="text-slate-400 hover:text-amber-400 h-6 flex-1 text-xs"
+                                        title="Voir le document"
+                                      >
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        Voir
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
+                                          const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
+                                          navigator.clipboard.writeText(sharePointLink);
+                                          alert("Lien SharePoint copié dans le presse-papier !");
+                                        }}
+                                        className="text-slate-400 hover:text-blue-400 h-6 w-6 p-0"
+                                        title="Copier lien SharePoint"
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          setDossierDocuments(prev => prev.filter((_, i) => i !== idx));
+                                          addHistoriqueEntry("Suppression de document", `Document supprimé: ${doc.name}`);
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 h-6 w-6 p-0"
+                                        title="Supprimer"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-1 flex-shrink-0">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setViewingPdfUrl(doc.url);
-                                        setViewingPdfName(doc.name);
-                                      }}
-                                      className="text-slate-400 hover:text-amber-400 h-7 w-7 p-0"
-                                      title="Voir le document"
-                                    >
-                                      <Eye className="w-3.5 h-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        // Générer un lien SharePoint (placeholder - à adapter selon votre config SharePoint)
-                                        const sharePointBaseUrl = "https://votre-organisation.sharepoint.com/sites/dossiers/";
-                                        const sharePointLink = sharePointBaseUrl + encodeURIComponent(doc.name);
-                                        navigator.clipboard.writeText(sharePointLink);
-                                        alert("Lien SharePoint copié dans le presse-papier !");
-                                      }}
-                                      className="text-slate-400 hover:text-blue-400 h-7 w-7 p-0"
-                                      title="Copier lien SharePoint"
-                                    >
-                                      <ExternalLink className="w-3.5 h-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setDossierDocuments(prev => prev.filter((_, i) => i !== idx))}
-                                      className="text-slate-400 hover:text-red-400 h-7 w-7 p-0"
-                                      title="Supprimer"
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
                           )}
                         </CardContent>
