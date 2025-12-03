@@ -214,6 +214,13 @@ export default function PriseDeMandat() {
     province: "Québec",
     code_postal: ""
   });
+  const [clientInfo, setClientInfo] = useState({
+    prenom: "",
+    nom: "",
+    telephone: "",
+    type_telephone: "Cellulaire",
+    courriel: ""
+  });
   const [mandatsInfo, setMandatsInfo] = useState([{
     type_mandat: "",
     objectif: "",
@@ -321,6 +328,7 @@ export default function PriseDeMandat() {
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
         clients_ids: data.clients_ids,
+        client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
         types_mandats: data.types_mandats,
         objectif: data.objectif,
@@ -374,6 +382,14 @@ export default function PriseDeMandat() {
       numero_lot: ""
     });
     
+    setClientInfo(pm.client_info || {
+      prenom: "",
+      nom: "",
+      telephone: "",
+      type_telephone: "Cellulaire",
+      courriel: ""
+    });
+    
     // Reconstruire les mandatsInfo à partir des types_mandats
     const mandatsFromTypes = (pm.types_mandats || []).map(type => ({
       type_mandat: type,
@@ -422,6 +438,7 @@ export default function PriseDeMandat() {
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
         clients_ids: data.clients_ids,
+        client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
         types_mandats: data.types_mandats,
         objectif: data.objectif,
@@ -961,6 +978,7 @@ export default function PriseDeMandat() {
     const dataToSubmit = {
       arpenteur_geometre: formData.arpenteur_geometre,
       clients_ids: formData.clients_ids,
+      client_info: clientInfo,
       adresse_travaux: workAddress,
       types_mandats: typesMandats,
       objectif: mandatsInfo[0]?.objectif || "",
@@ -1043,6 +1061,15 @@ export default function PriseDeMandat() {
       province: "Québec",
       code_postal: "",
       numero_lot: ""
+    });
+    
+    // Reset des infos client
+    setClientInfo({
+      prenom: "",
+      nom: "",
+      telephone: "",
+      type_telephone: "Cellulaire",
+      courriel: ""
     });
     
     // Reset des mandats
@@ -1537,6 +1564,8 @@ export default function PriseDeMandat() {
                     }}
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
+                    clientInfo={clientInfo}
+                    onClientInfoChange={setClientInfo}
                   />
 
                   {/* Étape 2: Adresse des travaux */}
@@ -2711,7 +2740,9 @@ export default function PriseDeMandat() {
                             {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
-                            {getClientsNames(pm.clients_ids)}
+                            {pm.client_info?.prenom || pm.client_info?.nom 
+                              ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
+                              : getClientsNames(pm.clients_ids)}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                             {formatAdresse(pm.adresse_travaux) || "-"}
