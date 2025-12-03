@@ -849,51 +849,37 @@ export default function PriseDeMandat() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation: vérifier que le numéro de dossier ne contient que des chiffres pour le statut "Ouvert"
-    if (formData.statut === "Ouvert" && formData.numero_dossier) {
-      const isNumericOnly = /^\d+$/.test(formData.numero_dossier);
-      if (!isNumericOnly) {
-        alert("Le numéro de dossier doit contenir uniquement des chiffres.");
-        return;
-      }
-      
-      // Vérifier que le numéro de dossier n'existe pas déjà pour cet arpenteur
-      const dossierExistant = dossiers.find(d => 
-        d.id !== editingDossier?.id && // Exclure le dossier en cours d'édition
-        d.numero_dossier === formData.numero_dossier && 
-        d.arpenteur_geometre === formData.arpenteur_geometre
-      );
-      
-      if (dossierExistant) {
-        alert(`Le numéro de dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
-        return;
-      }
-
-      // Validation: Chaque mandat doit avoir un utilisateur assigné si le statut est "Ouvert"
-      const mandatsWithoutAssignedUser = formData.mandats.filter(m => !m.utilisateur_assigne);
-      if (mandatsWithoutAssignedUser.length > 0) {
-        alert("Chaque mandat doit avoir un utilisateur assigné lorsque le dossier est 'Ouvert'.");
-        return;
-      }
+    // Validation: arpenteur requis
+    if (!formData.arpenteur_geometre) {
+      alert("Veuillez sélectionner un arpenteur-géomètre.");
+      return;
     }
 
-    let dataToSubmit = { ...formData };
+    // Extraire les types de mandats sélectionnés
+    const typesMandats = mandatsInfo.map(m => m.type_mandat).filter(t => t);
 
-    if (formData.statut === "Ouvert") {
-      dataToSubmit = {
-        ...dataToSubmit,
-        mandats: formData.mandats.map(m => ({
-          ...m,
-          tache_actuelle: "Cédule"
-        }))
-      };
-    }
+    // Calculer les totaux de tarification
+    const totalPrix = mandatsInfo.reduce((sum, m) => sum + (m.prix_estime || 0), 0);
+    const totalRabais = mandatsInfo.reduce((sum, m) => sum + (m.rabais || 0), 0);
+    const taxesIncluses = mandatsInfo.some(m => m.taxes_incluses);
 
-    if (editingDossier) {
-      updateDossierMutation.mutate({ id: editingDossier.id, dossierData: dataToSubmit });
-    } else {
-      createDossierMutation.mutate(dataToSubmit);
-    }
+    const dataToSubmit = {
+      arpenteur_geometre: formData.arpenteur_geometre,
+      clients_ids: formData.clients_ids,
+      adresse_travaux: workAddress,
+      types_mandats: typesMandats,
+      objectif: mandatsInfo[0]?.objectif || "",
+      echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
+      date_signature: mandatsInfo[0]?.date_signature || "",
+      date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
+      urgence_percue: mandatsInfo[0]?.urgence_percue || "",
+      prix_estime: totalPrix,
+      rabais: totalRabais,
+      taxes_incluses: taxesIncluses,
+      statut: formData.statut
+    };
+
+    createPriseMandatMutation.mutate(dataToSubmit);
   };
 
   // handleNewClientSubmit removed, logic moved to ClientFormDialog
