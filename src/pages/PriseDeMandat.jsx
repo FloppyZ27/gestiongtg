@@ -2170,12 +2170,30 @@ export default function PriseDeMandat() {
                 commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                 dossierDocuments.length > 0;
               
+              const closeAndReset = () => {
+                setIsOuvrirDossierDialogOpen(false);
+                setNouveauDossierForm({
+                  numero_dossier: "",
+                  arpenteur_geometre: "",
+                  date_ouverture: new Date().toISOString().split('T')[0],
+                  statut: "Ouvert",
+                  ttl: "Non",
+                  clients_ids: [],
+                  notaires_ids: [],
+                  courtiers_ids: [],
+                  mandats: []
+                });
+                setCommentairesTemporairesDossier([]);
+                setDossierDocuments([]);
+                setActiveTabMandatDossier("0");
+              };
+              
               if (hasChanges) {
                 if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
-                  setIsOuvrirDossierDialogOpen(false);
+                  closeAndReset();
                 }
               } else {
-                setIsOuvrirDossierDialogOpen(false);
+                closeAndReset();
               }
             } else {
               setIsOuvrirDossierDialogOpen(open);
@@ -3044,12 +3062,30 @@ export default function PriseDeMandat() {
                         commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                         dossierDocuments.length > 0;
                       
+                      const closeAndReset = () => {
+                        setIsOuvrirDossierDialogOpen(false);
+                        setNouveauDossierForm({
+                          numero_dossier: "",
+                          arpenteur_geometre: "",
+                          date_ouverture: new Date().toISOString().split('T')[0],
+                          statut: "Ouvert",
+                          ttl: "Non",
+                          clients_ids: [],
+                          notaires_ids: [],
+                          courtiers_ids: [],
+                          mandats: []
+                        });
+                        setCommentairesTemporairesDossier([]);
+                        setDossierDocuments([]);
+                        setActiveTabMandatDossier("0");
+                      };
+                      
                       if (hasChanges) {
                         if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
-                          setIsOuvrirDossierDialogOpen(false);
+                          closeAndReset();
                         }
                       } else {
-                        setIsOuvrirDossierDialogOpen(false);
+                        closeAndReset();
                       }
                     }}>Annuler</Button>
                     <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
