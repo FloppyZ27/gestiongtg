@@ -212,6 +212,12 @@ export default function PriseDeMandat() {
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);
+  const [isOuvrirDossierDialogOpen, setIsOuvrirDossierDialogOpen] = useState(false);
+  const [nouveauDossierForm, setNouveauDossierForm] = useState({
+    numero_dossier: "",
+    arpenteur_geometre: "",
+    mandats: []
+  });
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -1524,10 +1530,10 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex flex-col h-[90vh]">
-                <div className="flex flex-1 overflow-hidden">
+              <div className="flex h-[90vh]">
                 {/* Main form content - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
+                  <div className="flex-1 overflow-y-auto p-6">
                   <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
                       {editingPriseMandat ? "Modifier la prise de mandat" : "Nouveau mandat"}
@@ -1536,10 +1542,10 @@ export default function PriseDeMandat() {
                       <Button
                         type="button"
                         onClick={() => {
-                          // Ouvrir la page Dossiers avec les données pré-remplies
-                          const dossierData = {
+                          // Pré-remplir le formulaire de nouveau dossier
+                          setNouveauDossierForm({
+                            numero_dossier: "",
                             arpenteur_geometre: formData.arpenteur_geometre,
-                            clients_ids: formData.clients_ids,
                             mandats: mandatsInfo.filter(m => m.type_mandat).map(m => ({
                               type_mandat: m.type_mandat,
                               adresse_travaux: workAddress,
@@ -1552,16 +1558,8 @@ export default function PriseDeMandat() {
                               tache_actuelle: "Ouverture",
                               utilisateur_assigne: ""
                             }))
-                          };
-                          // Stocker les données dans sessionStorage pour les récupérer dans Dossiers
-                          sessionStorage.setItem('priseMandat_toDossier', JSON.stringify({
-                            ...dossierData,
-                            priseMandat_id: editingPriseMandat?.id,
-                            client_info: clientInfo,
-                            commentaires: commentairesTemporaires
-                          }));
-                          // Rediriger vers la page Dossiers
-                          window.location.href = createPageUrl("Dossiers") + "?from_prise_mandat=true";
+                          });
+                          setIsOuvrirDossierDialogOpen(true);
                         }}
                         className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
                       >
@@ -1698,24 +1696,23 @@ export default function PriseDeMandat() {
                   />
 
                 </form>
-
-                </div>
+                  </div>
                 
-                {/* Boutons Annuler/Créer tout en bas - sticky */}
-                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                  <Button type="button" variant="outline" onClick={() => {
-                    if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
-                      setIsDialogOpen(false);
-                      resetFullForm();
-                    }
-                  }}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    {editingPriseMandat ? "Modifier" : "Créer"}
-                  </Button>
+                  {/* Boutons Annuler/Créer en bas de la colonne gauche */}
+                  <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                    <Button type="button" variant="outline" onClick={() => {
+                      if (confirm("Êtes-vous sûr de vouloir annuler l'ouverture du mandat ? Toutes les informations saisies seront perdues.")) {
+                        setIsDialogOpen(false);
+                        resetFullForm();
+                      }
+                    }}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      {editingPriseMandat ? "Modifier" : "Créer"}
+                    </Button>
+                  </div>
                 </div>
-                
 
                 {/* Commentaires Sidebar - 30% */}
                 <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
@@ -1777,6 +1774,140 @@ export default function PriseDeMandat() {
                     </div>
                   )}
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog pour ouvrir un dossier */}
+          <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={setIsOuvrirDossierDialogOpen}>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Ouvrir un dossier</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                    <Select 
+                      value={nouveauDossierForm.arpenteur_geometre} 
+                      onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {ARPENTEURS.map((arpenteur) => (
+                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">
+                            {arpenteur}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                    <Input
+                      value={nouveauDossierForm.numero_dossier}
+                      onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})}
+                      placeholder="Ex: 2024-001"
+                      className="bg-slate-800 border-slate-700"
+                    />
+                  </div>
+                </div>
+
+                {/* Résumé des informations qui seront transférées */}
+                <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
+                  <h4 className="text-sm font-semibold text-slate-300">Informations transférées depuis la prise de mandat</h4>
+                  
+                  {/* Client */}
+                  {(clientInfo.prenom || clientInfo.nom || formData.clients_ids.length > 0) && (
+                    <div className="text-sm">
+                      <span className="text-slate-400">Client: </span>
+                      <span className="text-white">
+                        {clientInfo.prenom || clientInfo.nom 
+                          ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
+                          : getClientsNames(formData.clients_ids)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Adresse */}
+                  {(workAddress.rue || workAddress.ville) && (
+                    <div className="text-sm">
+                      <span className="text-slate-400">Adresse: </span>
+                      <span className="text-white">{formatAdresse(workAddress)}</span>
+                    </div>
+                  )}
+                  
+                  {/* Mandats */}
+                  {nouveauDossierForm.mandats.length > 0 && (
+                    <div className="text-sm">
+                      <span className="text-slate-400">Mandats: </span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {nouveauDossierForm.mandats.map((m, idx) => (
+                          <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                            {m.type_mandat}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                  <Button type="button" variant="outline" onClick={() => setIsOuvrirDossierDialogOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={!nouveauDossierForm.arpenteur_geometre || !nouveauDossierForm.numero_dossier}
+                    onClick={async () => {
+                      // Vérifier si le numéro de dossier existe déjà
+                      const dossierExistant = dossiers.find(d => 
+                        d.numero_dossier === nouveauDossierForm.numero_dossier &&
+                        d.arpenteur_geometre === nouveauDossierForm.arpenteur_geometre
+                      );
+                      
+                      if (dossierExistant) {
+                        alert(`Le numéro de dossier ${nouveauDossierForm.numero_dossier} existe déjà pour ${nouveauDossierForm.arpenteur_geometre}.`);
+                        return;
+                      }
+
+                      // Créer le nouveau dossier
+                      const dossierData = {
+                        numero_dossier: nouveauDossierForm.numero_dossier,
+                        arpenteur_geometre: nouveauDossierForm.arpenteur_geometre,
+                        date_ouverture: new Date().toISOString().split('T')[0],
+                        statut: "Ouvert",
+                        ttl: "Non",
+                        clients_ids: formData.clients_ids,
+                        notaires_ids: [],
+                        courtiers_ids: [],
+                        mandats: nouveauDossierForm.mandats
+                      };
+
+                      try {
+                        await createDossierMutation.mutateAsync(dossierData);
+                        
+                        // Supprimer la prise de mandat si elle existe
+                        if (editingPriseMandat?.id) {
+                          await deletePriseMandatMutation.mutateAsync(editingPriseMandat.id);
+                        }
+                        
+                        setIsOuvrirDossierDialogOpen(false);
+                        setIsDialogOpen(false);
+                        resetFullForm();
+                        alert(`Dossier ${getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}${nouveauDossierForm.numero_dossier} créé avec succès !`);
+                      } catch (error) {
+                        console.error("Erreur lors de la création du dossier:", error);
+                        alert("Erreur lors de la création du dossier.");
+                      }
+                    }}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                  >
+                    <FolderOpen className="w-4 h-4 mr-2" />
+                    Créer le dossier
+                  </Button>
                 </div>
               </div>
             </DialogContent>
