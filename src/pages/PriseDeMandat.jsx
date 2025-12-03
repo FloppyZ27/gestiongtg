@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -198,6 +198,7 @@ export default function PriseDeMandat() {
 
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
+  const [activeListTab, setActiveListTab] = useState("nouveau");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
@@ -1553,9 +1554,9 @@ export default function PriseDeMandat() {
 
                     <div className="flex-1 flex gap-2">
                       {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan" },
-                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple" },
-                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red" }
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat / Demande d'informations", color: "cyan", icon: FileQuestion },
+                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple", icon: FolderOpen },
+                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red", icon: XCircle }
                       ].map((statut) => {
                         const isSelected = formData.statut === statut.value;
                         const colorClasses = {
@@ -1563,13 +1564,15 @@ export default function PriseDeMandat() {
                           "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
                           "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
                         };
+                        const IconComponent = statut.icon;
                         return (
                           <button
                             key={statut.value}
                             type="button"
                             onClick={() => setFormData({...formData, statut: statut.value})}
-                            className={`flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all ${colorClasses[statut.color]}`}
+                            className={`flex-1 px-2 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${colorClasses[statut.color]}`}
                           >
+                            <IconComponent className="w-4 h-4" />
                             {statut.label}
                           </button>
                         );
@@ -2604,6 +2607,53 @@ export default function PriseDeMandat() {
           <CardHeader className="border-b border-slate-800">
             <div className="flex flex-col gap-4">
               <CardTitle className="text-white">Liste des prises de mandat</CardTitle>
+              
+              {/* Tabs pour les statuts */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveListTab("nouveau")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeListTab === "nouveau"
+                      ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500"
+                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400"
+                  }`}
+                >
+                  <FileQuestion className="w-4 h-4" />
+                  Nouveau mandat / Demande d'informations
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
+                  </Badge>
+                </button>
+                <button
+                  onClick={() => setActiveListTab("ouvrir")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeListTab === "ouvrir"
+                      ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500"
+                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400"
+                  }`}
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Mandat à ouvrir
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
+                  </Badge>
+                </button>
+                <button
+                  onClick={() => setActiveListTab("non-octroye")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeListTab === "non-octroye"
+                      ? "bg-red-500/30 text-red-400 border-2 border-red-500"
+                      : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
+                  }`}
+                >
+                  <XCircle className="w-4 h-4" />
+                  Mandat non-octroyé
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
+                  </Badge>
+                </button>
+              </div>
+
               <div className="flex flex-wrap gap-3">
                 <div className="relative flex-1 min-w-[250px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -2629,29 +2679,14 @@ export default function PriseDeMandat() {
                   </SelectContent>
                 </Select>
 
-                <Select value={filterStatut} onValueChange={setFilterStatut}>
-                  <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
-                    <SelectItem value="Nouveau mandat/Demande d'information" className="text-white">Nouveau mandat/Demande d'information</SelectItem>
-                    <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
-                    <SelectItem value="Mandat non octroyé" className="text-white">Mandat non octroyé</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {(filterArpenteur !== "all" || filterStatut !== "all") && (
+                {filterArpenteur !== "all" && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setFilterArpenteur("all");
-                      setFilterStatut("all");
-                    }}
+                    onClick={() => setFilterArpenteur("all")}
                     className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                   >
-                    Réinitialiser les filtres
+                    Réinitialiser le filtre
                   </Button>
                 )}
               </div>
@@ -2705,6 +2740,14 @@ export default function PriseDeMandat() {
                 <TableBody>
                   {priseMandats
                     .filter(pm => {
+                      // Filtre par tab actif
+                      const tabStatut = activeListTab === "nouveau" 
+                        ? "Nouveau mandat/Demande d'information"
+                        : activeListTab === "ouvrir"
+                        ? "Mandats à ouvrir"
+                        : "Mandat non octroyé";
+                      if (pm.statut !== tabStatut) return false;
+
                       const searchLower = searchTerm.toLowerCase();
                       const clientName = pm.client_info?.prenom || pm.client_info?.nom 
                         ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
@@ -2716,8 +2759,7 @@ export default function PriseDeMandat() {
                         pm.types_mandats?.some(t => t.toLowerCase().includes(searchLower))
                       );
                       const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
-                      const matchesStatut = filterStatut === "all" || pm.statut === filterStatut;
-                      return matchesSearch && matchesArpenteur && matchesStatut;
+                      return matchesSearch && matchesArpenteur;
                     })
                     .map((pm) => {
                       const getUrgenceColor = (urgence) => {
@@ -2802,10 +2844,17 @@ export default function PriseDeMandat() {
                         </TableRow>
                       );
                     })}
-                  {priseMandats.length === 0 && (
+                  {priseMandats.filter(pm => {
+                    const tabStatut = activeListTab === "nouveau" 
+                      ? "Nouveau mandat/Demande d'information"
+                      : activeListTab === "ouvrir"
+                      ? "Mandats à ouvrir"
+                      : "Mandat non octroyé";
+                    return pm.statut === tabStatut;
+                  }).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-12 text-slate-500">
-                        Aucune prise de mandat
+                        Aucune prise de mandat dans cette catégorie
                       </TableCell>
                     </TableRow>
                   )}
