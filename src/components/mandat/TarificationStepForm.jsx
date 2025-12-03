@@ -72,7 +72,7 @@ export default function TarificationStepForm({
                     {isMultiLotType ? (
                       <>
                         <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap">1er lot ($)</Label>
+                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">1er lot ($)</Label>
                           <Input
                             type="text"
                             inputMode="decimal"
@@ -86,7 +86,7 @@ export default function TarificationStepForm({
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap">Autres ($)</Label>
+                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Autres ($)</Label>
                           <Input
                             type="text"
                             inputMode="decimal"
@@ -103,7 +103,7 @@ export default function TarificationStepForm({
                     ) : (
                       <>
                         <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap">Prix ($)</Label>
+                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Prix ($)</Label>
                           <Input
                             type="text"
                             inputMode="decimal"
