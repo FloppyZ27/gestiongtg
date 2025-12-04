@@ -410,9 +410,12 @@ export default function PriseDeMandat() {
     // Charger l'historique si présent
     setHistorique(pm.historique || []);
     
-    // Calculer le numéro de dossier si statut "Mandats à ouvrir"
-    let numeroDossier = "";
-    if (pm.statut === "Mandats à ouvrir" && pm.arpenteur_geometre) {
+    // Utiliser le numéro de dossier existant si disponible, sinon calculer
+    let numeroDossier = pm.numero_dossier || "";
+    let dateOuverture = pm.date_ouverture || new Date().toISOString().split('T')[0];
+    
+    // Si pas de numéro de dossier existant et statut "Mandats à ouvrir", calculer
+    if (!numeroDossier && pm.statut === "Mandats à ouvrir" && pm.arpenteur_geometre) {
       // Trouver le max dans les dossiers existants
       const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === pm.arpenteur_geometre && d.numero_dossier);
       const maxDossier = arpenteurDossiers.reduce((max, d) => {
@@ -439,7 +442,7 @@ export default function PriseDeMandat() {
       clients_ids: pm.clients_ids || [],
       statut: pm.statut || "Nouveau mandat/Demande d'information",
       numero_dossier: numeroDossier,
-      date_ouverture: new Date().toISOString().split('T')[0]
+      date_ouverture: dateOuverture
     });
     
     setWorkAddress(pm.adresse_travaux || {
