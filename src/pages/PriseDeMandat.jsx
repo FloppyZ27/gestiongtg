@@ -2026,12 +2026,27 @@ export default function PriseDeMandat() {
                       }
                     }}
                     statut={formData.statut}
-                    onStatutChange={(value) => {
-                      // Si des documents existent, un numéro de dossier existe et qu'on change de statut, demander confirmation
-                      if (hasDocuments && formData.numero_dossier && value !== formData.statut) {
-                        setPendingStatutChange(value);
-                        setShowStatutChangeConfirm(true);
-                        return;
+                    onStatutChange={async (value) => {
+                      // Si un numéro de dossier existe et qu'on change de statut, vérifier les documents SharePoint
+                      if (formData.numero_dossier && formData.arpenteur_geometre && value !== formData.statut) {
+                        // Vérifier si des documents existent dans SharePoint
+                        try {
+                          const initials = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
+                          const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
+                          const response = await base44.functions.invoke('sharepoint', {
+                            action: 'list',
+                            folderPath: folderPath
+                          });
+                          const files = response.data?.files || [];
+                          if (files.length > 0) {
+                            setPendingStatutChange(value);
+                            setShowStatutChangeConfirm(true);
+                            return;
+                          }
+                        } catch (error) {
+                          // Si erreur, continuer sans bloquer
+                          console.log("Erreur vérification SharePoint:", error);
+                        }
                       }
                       
                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
