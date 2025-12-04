@@ -15,6 +15,9 @@ async function getAccessToken() {
   params.append('scope', 'https://graph.microsoft.com/.default');
   params.append('grant_type', 'client_credentials');
 
+  console.log("Fetching token for tenant:", TENANT_ID);
+  console.log("Using Drive ID:", DRIVE_ID);
+
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -22,7 +25,10 @@ async function getAccessToken() {
   });
 
   const data = await response.json();
+  console.log("Token response status:", response.status);
+  
   if (!response.ok) {
+    console.error("Token error:", JSON.stringify(data));
     throw new Error(`Token error: ${data.error_description || data.error}`);
   }
   return data.access_token;
@@ -51,12 +57,17 @@ Deno.serve(async (req) => {
         ? `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root/children`
         : `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${folderId}/children`;
 
+      console.log("Fetching files from:", endpoint);
+
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
       const data = await response.json();
+      console.log("Files response status:", response.status);
+      
       if (!response.ok) {
+        console.error("Files error:", JSON.stringify(data));
         throw new Error(data.error?.message || 'Erreur lors de la récupération des fichiers');
       }
 
