@@ -330,7 +330,7 @@ export default function DocumentsStepForm({
 
       {/* Dialog de prévisualisation */}
       <Dialog open={!!previewFile} onOpenChange={closePreview}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-4xl max-h-[90vh] p-0">
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[80vh]">
           <DialogHeader className="p-4 border-b border-slate-700">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-white flex items-center gap-2">
