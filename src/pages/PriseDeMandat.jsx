@@ -1812,21 +1812,16 @@ export default function PriseDeMandat() {
                 <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6">
                   <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-white">
-                      {editingPriseMandat ? (
-                        formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre ? (
-                          <>Modifier le mandat - <span className="text-emerald-400">{getArpenteurInitials(formData.arpenteur_geometre)}{(() => {
-                            // Calculer le prochain numéro de dossier pour cet arpenteur
-                            const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
-                            const maxNumero = arpenteurDossiers.reduce((max, d) => {
-                              const num = parseInt(d.numero_dossier, 10);
-                              return isNaN(num) ? max : Math.max(max, num);
-                            }, 0);
-                            return maxNumero + 1;
-                          })()}</span></>
-                        ) : "Modifier le mandat"
-                      ) : "Nouveau mandat"}
-                    </h2>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
+                      </h2>
+                      {formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre && formData.numero_dossier && (
+                        <p className="text-emerald-400 text-lg font-semibold mt-1">
+                          {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                        </p>
+                      )}
+                    </div>
                     {formData.statut === "Mandats à ouvrir" && (
                       <Button
                         type="button"
@@ -1911,7 +1906,29 @@ export default function PriseDeMandat() {
                       <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
                       <Select 
                         value={formData.arpenteur_geometre} 
-                        onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
+                        onValueChange={(value) => {
+                          // Si statut "Mandats à ouvrir", calculer le prochain numéro
+                          if (formData.statut === "Mandats à ouvrir") {
+                            const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === value && d.numero_dossier);
+                            const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === value && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id);
+                            const maxDossier = arpenteurDossiers.reduce((max, d) => {
+                              const num = parseInt(d.numero_dossier, 10);
+                              return isNaN(num) ? max : Math.max(max, num);
+                            }, 0);
+                            // Aussi vérifier les prises de mandat en attente
+                            const numerosUtilises = new Set([
+                              ...arpenteurDossiers.map(d => d.numero_dossier),
+                              ...arpenteurPriseMandats.map(pm => pm.numero_dossier).filter(n => n)
+                            ]);
+                            let prochainNumero = maxDossier + 1;
+                            while (numerosUtilises.has(prochainNumero.toString())) {
+                              prochainNumero++;
+                            }
+                            setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero.toString()});
+                          } else {
+                            setFormData({...formData, arpenteur_geometre: value});
+                          }
+                        }}
                         disabled={!!dossierReferenceId}
                       >
                         <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-9">
@@ -1944,7 +1961,28 @@ export default function PriseDeMandat() {
                           <button
                             key={statut.value}
                             type="button"
-                            onClick={() => setFormData({...formData, statut: statut.value})}
+                            onClick={() => {
+                              // Si on passe à "Mandats à ouvrir", calculer le prochain numéro
+                              if (statut.value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
+                                const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
+                                const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === formData.arpenteur_geometre && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id);
+                                const maxDossier = arpenteurDossiers.reduce((max, d) => {
+                                  const num = parseInt(d.numero_dossier, 10);
+                                  return isNaN(num) ? max : Math.max(max, num);
+                                }, 0);
+                                const numerosUtilises = new Set([
+                                  ...arpenteurDossiers.map(d => d.numero_dossier),
+                                  ...arpenteurPriseMandats.map(pm => pm.numero_dossier).filter(n => n)
+                                ]);
+                                let prochainNumero = maxDossier + 1;
+                                while (numerosUtilises.has(prochainNumero.toString())) {
+                                  prochainNumero++;
+                                }
+                                setFormData({...formData, statut: statut.value, numero_dossier: prochainNumero.toString()});
+                              } else {
+                                setFormData({...formData, statut: statut.value});
+                              }
+                            }}
                             className={`flex-1 h-9 px-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${colorClasses[statut.color]}`}
                           >
                             <IconComponent className="w-4 h-4" />
@@ -1954,6 +1992,30 @@ export default function PriseDeMandat() {
                       })}
                     </div>
                   </div>
+
+                  {/* Champs N° de dossier et Date d'ouverture si statut "Mandats à ouvrir" */}
+                  {formData.statut === "Mandats à ouvrir" && (
+                    <div className="flex gap-4">
+                      <div className="space-y-2 w-1/3">
+                        <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                        <Input
+                          value={formData.numero_dossier}
+                          onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})}
+                          placeholder="Ex: 12345"
+                          className="bg-slate-800 border-slate-700 text-white h-9"
+                        />
+                      </div>
+                      <div className="space-y-2 w-1/3">
+                        <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
+                        <Input
+                          type="date"
+                          value={formData.date_ouverture}
+                          onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
+                          className="bg-slate-800 border-slate-700 text-white h-9"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Étape 1: Informations du client */}
                   <ClientStepForm
