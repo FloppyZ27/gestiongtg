@@ -26,6 +26,7 @@ import ClientStepForm from "../components/mandat/ClientStepForm";
 import AddressStepForm from "../components/mandat/AddressStepForm";
 import MandatStepForm from "../components/mandat/MandatStepForm";
 import TarificationStepForm from "../components/mandat/TarificationStepForm";
+import ProfessionnelStepForm from "../components/mandat/ProfessionnelStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -212,6 +213,8 @@ export default function PriseDeMandat() {
   const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
   const [mandatStepCollapsed, setMandatStepCollapsed] = useState(false);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(false);
+  const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(false);
+  const [professionnelInfo, setProfessionnelInfo] = useState({ notaire: "", courtier: "", compagnie: "" });
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);
   const [isOuvrirDossierDialogOpen, setIsOuvrirDossierDialogOpen] = useState(false);
@@ -2021,22 +2024,26 @@ export default function PriseDeMandat() {
 
                     <div className="flex-1 flex gap-2 items-end">
                       {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan", icon: FileQuestion },
-                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple", icon: FolderOpen },
-                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red", icon: XCircle }
+                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan", icon: FileQuestion, requiresArpenteur: false },
+                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple", icon: FolderOpen, requiresArpenteur: true },
+                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red", icon: XCircle, requiresArpenteur: true }
                       ].map((statut) => {
                         const isSelected = formData.statut === statut.value;
+                        const isDisabled = statut.requiresArpenteur && !formData.arpenteur_geometre;
                         const colorClasses = {
                           "cyan": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400",
-                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
-                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
+                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : isDisabled ? "bg-slate-800/50 text-slate-600 border border-slate-700 cursor-not-allowed" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
+                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : isDisabled ? "bg-slate-800/50 text-slate-600 border border-slate-700 cursor-not-allowed" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
                         };
                         const IconComponent = statut.icon;
                         return (
                           <button
                             key={statut.value}
                             type="button"
+                            disabled={isDisabled}
+                            title={isDisabled ? "Sélectionnez d'abord un arpenteur-géomètre" : ""}
                             onClick={() => {
+                              if (isDisabled) return;
                               // Si on passe à "Mandats à ouvrir" et pas encore de numéro attribué, calculer le prochain
                               if (statut.value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
                                 const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
@@ -2100,7 +2107,45 @@ export default function PriseDeMandat() {
                     onClientInfoChange={setClientInfo}
                   />
 
-                  {/* Étape 2: Adresse des travaux */}
+                  {/* Étape 2: Professionnel */}
+                  <ProfessionnelStepForm
+                    notaires={notaires}
+                    courtiers={courtiers}
+                    compagnies={clients.filter(c => c.type_client === 'Compagnie')}
+                    selectedNotaireIds={formData.notaires_ids || []}
+                    selectedCourtierIds={formData.courtiers_ids || []}
+                    selectedCompagnieIds={formData.compagnies_ids || []}
+                    onSelectNotaire={(id) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        notaires_ids: (prev.notaires_ids || []).includes(id)
+                          ? prev.notaires_ids.filter(nid => nid !== id)
+                          : [...(prev.notaires_ids || []), id]
+                      }));
+                    }}
+                    onSelectCourtier={(id) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        courtiers_ids: (prev.courtiers_ids || []).includes(id)
+                          ? prev.courtiers_ids.filter(cid => cid !== id)
+                          : [...(prev.courtiers_ids || []), id]
+                      }));
+                    }}
+                    onSelectCompagnie={(id) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        compagnies_ids: (prev.compagnies_ids || []).includes(id)
+                          ? prev.compagnies_ids.filter(cid => cid !== id)
+                          : [...(prev.compagnies_ids || []), id]
+                      }));
+                    }}
+                    professionnelInfo={professionnelInfo}
+                    onProfessionnelInfoChange={setProfessionnelInfo}
+                    isCollapsed={professionnelStepCollapsed}
+                    onToggleCollapse={() => setProfessionnelStepCollapsed(!professionnelStepCollapsed)}
+                  />
+
+                  {/* Étape 3: Adresse des travaux */}
                   <AddressStepForm
                     address={workAddress}
                     onAddressChange={setWorkAddress}
@@ -2135,7 +2180,7 @@ export default function PriseDeMandat() {
                     }}
                   />
 
-                  {/* Étape 3: Mandats */}
+                  {/* Étape 4: Mandats */}
                   <MandatStepForm
                     mandats={mandatsInfo}
                     onMandatsChange={(newMandats) => setMandatsInfo(newMandats)}
@@ -2144,7 +2189,7 @@ export default function PriseDeMandat() {
                     statut={formData.statut}
                   />
 
-                  {/* Étape 4: Tarification */}
+                  {/* Étape 5: Tarification */}
                   <TarificationStepForm
                     mandats={mandatsInfo}
                     onTarificationChange={(newMandats) => setMandatsInfo(newMandats)}
