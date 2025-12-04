@@ -1833,8 +1833,16 @@ export default function PriseDeMandat() {
                         className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
                         onClick={() => {
                           // Pré-remplir le formulaire de nouveau dossier
+                          // Calculer le prochain numéro de dossier pour cet arpenteur
+                          const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
+                          const maxNumero = arpenteurDossiers.reduce((max, d) => {
+                            const num = parseInt(d.numero_dossier, 10);
+                            return isNaN(num) ? max : Math.max(max, num);
+                          }, 0);
+                          const prochainNumero = (maxNumero + 1).toString();
+                          
                           setNouveauDossierForm({
-                            numero_dossier: "",
+                            numero_dossier: prochainNumero,
                             arpenteur_geometre: formData.arpenteur_geometre,
                             date_ouverture: new Date().toISOString().split('T')[0],
                             statut: "Ouvert",
