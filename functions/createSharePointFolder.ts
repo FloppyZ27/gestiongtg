@@ -35,21 +35,25 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-async function ensureFolderExists(accessToken, parentPath, folderName) {
-  // Vérifier si le dossier existe déjà
-  const checkUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${parentPath}/${folderName}`;
+async function getFolderContents(accessToken, folderPath) {
+  const url = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${folderPath}:/children`;
   
-  const checkResponse = await fetch(checkUrl, {
+  const response = await fetch(url, {
     headers: { 'Authorization': `Bearer ${accessToken}` }
   });
 
-  if (checkResponse.ok) {
-    // Le dossier existe déjà
-    return await checkResponse.json();
+  if (!response.ok) {
+    return [];
   }
 
-  // Créer le dossier
-  const createUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${parentPath}:/children`;
+  const data = await response.json();
+  return data.value || [];
+}
+
+async function createFolder(accessToken, parentPath, folderName) {
+  const createUrl = parentPath 
+    ? `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${parentPath}:/children`
+    : `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root/children`;
   
   const createResponse = await fetch(createUrl, {
     method: 'POST',
@@ -66,7 +70,6 @@ async function ensureFolderExists(accessToken, parentPath, folderName) {
 
   if (!createResponse.ok) {
     const errorData = await createResponse.json();
-    // Si le dossier existe déjà (conflit), ce n'est pas une erreur
     if (errorData.error?.code === 'nameAlreadyExists') {
       return { exists: true };
     }
@@ -74,6 +77,38 @@ async function ensureFolderExists(accessToken, parentPath, folderName) {
   }
 
   return await createResponse.json();
+}
+
+async function copyFolderStructure(accessToken, sourcePath, destParentPath, destFolderName) {
+  // Créer le dossier destination
+  await createFolder(accessToken, destParentPath, destFolderName);
+  
+  const destPath = destParentPath ? `${destParentPath}/${destFolderName}` : destFolderName;
+  
+  // Récupérer le contenu du dossier source
+  const contents = await getFolderContents(accessToken, sourcePath);
+  
+  // Copier récursivement les sous-dossiers
+  for (const item of contents) {
+    if (item.folder) {
+      await copyFolderStructure(
+        accessToken, 
+        `${sourcePath}/${item.name}`, 
+        destPath, 
+        item.name
+      );
+    }
+  }
+}
+
+async function folderExists(accessToken, folderPath) {
+  const checkUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${folderPath}`;
+  
+  const checkResponse = await fetch(checkUrl, {
+    headers: { 'Authorization': `Bearer ${accessToken}` }
+  });
+
+  return checkResponse.ok;
 }
 
 Deno.serve(async (req) => {
@@ -99,25 +134,37 @@ Deno.serve(async (req) => {
 
     const accessToken = await getAccessToken();
 
-    // Structure: ARPENTEUR/{initiales}/DOSSIER/{initiales-numeroDossier}
-    // Étape 1: Créer le dossier ARPENTEUR si nécessaire
-    await ensureFolderExists(accessToken, '', 'ARPENTEUR');
-
-    // Étape 2: Créer le dossier des initiales de l'arpenteur
-    await ensureFolderExists(accessToken, 'ARPENTEUR', initials);
-
-    // Étape 3: Créer le dossier DOSSIER
-    await ensureFolderExists(accessToken, `ARPENTEUR/${initials}`, 'DOSSIER');
-
-    // Étape 4: Créer le dossier du numéro de dossier
     const dossierName = `${initials}-${numero_dossier}`;
-    const result = await ensureFolderExists(accessToken, `ARPENTEUR/${initials}/DOSSIER`, dossierName);
+    const templatePath = `ARPENTEUR/${initials}/DOSSIER/${initials}-0`;
+    const destParentPath = `ARPENTEUR/${initials}/DOSSIER`;
+    const destPath = `${destParentPath}/${dossierName}`;
+
+    // Vérifier si le dossier existe déjà
+    if (await folderExists(accessToken, destPath)) {
+      return Response.json({ 
+        success: true, 
+        message: `Dossier ${dossierName} existe déjà`,
+        path: destPath,
+        alreadyExists: true
+      });
+    }
+
+    // Vérifier si le dossier modèle existe
+    const templateExists = await folderExists(accessToken, templatePath);
+    
+    if (templateExists) {
+      // Copier la structure du dossier modèle
+      await copyFolderStructure(accessToken, templatePath, destParentPath, dossierName);
+    } else {
+      // Créer simplement le dossier si le modèle n'existe pas
+      await createFolder(accessToken, destParentPath, dossierName);
+    }
 
     return Response.json({ 
       success: true, 
-      message: `Dossier ${dossierName} créé avec succès`,
-      path: `ARPENTEUR/${initials}/DOSSIER/${dossierName}`,
-      folder: result
+      message: `Dossier ${dossierName} créé avec succès${templateExists ? ' (structure copiée du modèle)' : ''}`,
+      path: destPath,
+      templateUsed: templateExists
     });
 
   } catch (error) {
