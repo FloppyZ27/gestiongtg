@@ -410,12 +410,34 @@ export default function PriseDeMandat() {
     // Charger l'historique si présent
     setHistorique(pm.historique || []);
     
+    // Calculer le numéro de dossier si statut "Mandats à ouvrir"
+    let numeroDossier = "";
+    if (pm.statut === "Mandats à ouvrir" && pm.arpenteur_geometre) {
+      const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === pm.arpenteur_geometre && d.numero_dossier);
+      const arpenteurPriseMandats = priseMandats.filter(p => p.arpenteur_geometre === pm.arpenteur_geometre && p.statut === "Mandats à ouvrir" && p.id !== pm.id);
+      const maxDossier = arpenteurDossiers.reduce((max, d) => {
+        const num = parseInt(d.numero_dossier, 10);
+        return isNaN(num) ? max : Math.max(max, num);
+      }, 0);
+      const numerosUtilises = new Set([
+        ...arpenteurDossiers.map(d => d.numero_dossier),
+        ...arpenteurPriseMandats.map(p => p.numero_dossier).filter(n => n)
+      ]);
+      let prochainNumero = maxDossier + 1;
+      while (numerosUtilises.has(prochainNumero.toString())) {
+        prochainNumero++;
+      }
+      numeroDossier = prochainNumero.toString();
+    }
+    
     // Remplir le formulaire avec les données existantes
     setFormData({
       ...formData,
       arpenteur_geometre: pm.arpenteur_geometre || "",
       clients_ids: pm.clients_ids || [],
-      statut: pm.statut || "Nouveau mandat/Demande d'information"
+      statut: pm.statut || "Nouveau mandat/Demande d'information",
+      numero_dossier: numeroDossier,
+      date_ouverture: new Date().toISOString().split('T')[0]
     });
     
     setWorkAddress(pm.adresse_travaux || {
