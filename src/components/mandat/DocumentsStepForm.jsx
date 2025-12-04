@@ -294,17 +294,6 @@ export default function DocumentsStepForm({
                         <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isPreviewable(file.name) && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
-                            className="h-6 px-2 text-slate-400 hover:text-white"
-                          >
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                        )}
                         <Button
                           type="button"
                           variant="ghost"
