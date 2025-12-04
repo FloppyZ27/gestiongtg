@@ -1120,6 +1120,21 @@ export default function PriseDeMandat() {
       statut: formData.statut
     };
 
+    // Créer le dossier SharePoint si statut "Mandats à ouvrir" et numéro de dossier attribué
+    const createSharePointFolder = async () => {
+      if (formData.statut === "Mandats à ouvrir" && formData.numero_dossier && formData.arpenteur_geometre) {
+        try {
+          await base44.functions.invoke('createSharePointFolder', {
+            arpenteur_geometre: formData.arpenteur_geometre,
+            numero_dossier: formData.numero_dossier
+          });
+        } catch (error) {
+          console.error("Erreur création dossier SharePoint:", error);
+          // Ne pas bloquer la sauvegarde si SharePoint échoue
+        }
+      }
+    };
+
     if (editingPriseMandat) {
       // Détecter les changements et créer des entrées d'historique
       const newHistoriqueEntries = [];
@@ -1288,6 +1303,12 @@ export default function PriseDeMandat() {
       }
 
       const updatedHistorique = [...newHistoriqueEntries, ...historique];
+      
+      // Créer le dossier SharePoint si nouveau statut "Mandats à ouvrir"
+      if (formData.statut === "Mandats à ouvrir" && editingPriseMandat.statut !== "Mandats à ouvrir") {
+        createSharePointFolder();
+      }
+      
       updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
     } else {
       // Création
@@ -1310,6 +1331,12 @@ export default function PriseDeMandat() {
         utilisateur_email: user?.email || "",
         date: new Date().toISOString()
       }];
+      
+      // Créer le dossier SharePoint si statut "Mandats à ouvrir"
+      if (formData.statut === "Mandats à ouvrir") {
+        createSharePointFolder();
+      }
+      
       createPriseMandatMutation.mutate({ ...dataToSubmit, historique: creationHistorique });
     }
   };
