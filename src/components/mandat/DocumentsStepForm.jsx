@@ -339,6 +339,52 @@ export default function DocumentsStepForm({
         </CardContent>
       )}
 
+        {/* Dialog de prévisualisation */}
+        <Dialog open={!!previewFile} onOpenChange={closePreview}>
+          <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="px-4 py-2 border-b border-slate-700 flex-shrink-0">
+              <DialogTitle className="flex items-center gap-2 text-sm">
+                {getFileIcon(previewFile?.name)}
+                <span className="truncate">{previewFile?.name}</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden">
+              {isLoadingPreview ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
+                </div>
+              ) : previewUrl ? (
+                isImageFile(previewFile?.name) ? (
+                  <div className="flex items-center justify-center h-full bg-slate-800/50 p-4">
+                    <img
+                      src={previewUrl}
+                      alt={previewFile?.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full border-0"
+                    title={previewFile?.name}
+                  />
+                )
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <FileText className="w-16 h-16 mb-4 opacity-50" />
+                  <p>Prévisualisation non disponible</p>
+                  <Button
+                    type="button"
+                    className="mt-4"
+                    onClick={() => previewFile?.webUrl && window.open(previewFile.webUrl, '_blank')}
+                  >
+                    Ouvrir dans SharePoint
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </Card>
   );
 }
