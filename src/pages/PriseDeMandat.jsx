@@ -413,21 +413,23 @@ export default function PriseDeMandat() {
     // Calculer le numéro de dossier si statut "Mandats à ouvrir"
     let numeroDossier = "";
     if (pm.statut === "Mandats à ouvrir" && pm.arpenteur_geometre) {
+      // Trouver le max dans les dossiers existants
       const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === pm.arpenteur_geometre && d.numero_dossier);
-      const arpenteurPriseMandats = priseMandats.filter(p => p.arpenteur_geometre === pm.arpenteur_geometre && p.statut === "Mandats à ouvrir" && p.id !== pm.id);
       const maxDossier = arpenteurDossiers.reduce((max, d) => {
         const num = parseInt(d.numero_dossier, 10);
         return isNaN(num) ? max : Math.max(max, num);
       }, 0);
-      const numerosUtilises = new Set([
-        ...arpenteurDossiers.map(d => d.numero_dossier),
-        ...arpenteurPriseMandats.map(p => p.numero_dossier).filter(n => n)
-      ]);
-      let prochainNumero = maxDossier + 1;
-      while (numerosUtilises.has(prochainNumero.toString())) {
-        prochainNumero++;
-      }
-      numeroDossier = prochainNumero.toString();
+      
+      // Trouver le max dans les prises de mandat "Mandats à ouvrir" (excluant celle en cours d'édition)
+      const arpenteurPriseMandats = priseMandats.filter(p => p.arpenteur_geometre === pm.arpenteur_geometre && p.statut === "Mandats à ouvrir" && p.id !== pm.id && p.numero_dossier);
+      const maxPriseMandat = arpenteurPriseMandats.reduce((max, p) => {
+        const num = parseInt(p.numero_dossier, 10);
+        return isNaN(num) ? max : Math.max(max, num);
+      }, 0);
+      
+      // Prendre le max des deux et ajouter 1
+      const maxTotal = Math.max(maxDossier, maxPriseMandat);
+      numeroDossier = (maxTotal + 1).toString();
     }
     
     // Remplir le formulaire avec les données existantes
@@ -1850,13 +1852,20 @@ export default function PriseDeMandat() {
                         className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
                         onClick={() => {
                           // Pré-remplir le formulaire de nouveau dossier
-                          // Calculer le prochain numéro de dossier pour cet arpenteur
+                          // Calculer le prochain numéro de dossier pour cet arpenteur (max entre dossiers et prises de mandat)
                           const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
-                          const maxNumero = arpenteurDossiers.reduce((max, d) => {
+                          const maxDossier = arpenteurDossiers.reduce((max, d) => {
                             const num = parseInt(d.numero_dossier, 10);
                             return isNaN(num) ? max : Math.max(max, num);
                           }, 0);
-                          const prochainNumero = (maxNumero + 1).toString();
+                          
+                          const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === formData.arpenteur_geometre && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id && pm.numero_dossier);
+                          const maxPriseMandat = arpenteurPriseMandats.reduce((max, pm) => {
+                            const num = parseInt(pm.numero_dossier, 10);
+                            return isNaN(num) ? max : Math.max(max, num);
+                          }, 0);
+                          
+                          const prochainNumero = (Math.max(maxDossier, maxPriseMandat) + 1).toString();
                           
                           setNouveauDossierForm({
                             numero_dossier: prochainNumero,
@@ -1932,21 +1941,19 @@ export default function PriseDeMandat() {
                           // Si statut "Mandats à ouvrir", calculer le prochain numéro
                           if (formData.statut === "Mandats à ouvrir") {
                             const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === value && d.numero_dossier);
-                            const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === value && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id);
                             const maxDossier = arpenteurDossiers.reduce((max, d) => {
                               const num = parseInt(d.numero_dossier, 10);
                               return isNaN(num) ? max : Math.max(max, num);
                             }, 0);
-                            // Aussi vérifier les prises de mandat en attente
-                            const numerosUtilises = new Set([
-                              ...arpenteurDossiers.map(d => d.numero_dossier),
-                              ...arpenteurPriseMandats.map(pm => pm.numero_dossier).filter(n => n)
-                            ]);
-                            let prochainNumero = maxDossier + 1;
-                            while (numerosUtilises.has(prochainNumero.toString())) {
-                              prochainNumero++;
-                            }
-                            setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero.toString()});
+                            
+                            const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === value && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id && pm.numero_dossier);
+                            const maxPriseMandat = arpenteurPriseMandats.reduce((max, pm) => {
+                              const num = parseInt(pm.numero_dossier, 10);
+                              return isNaN(num) ? max : Math.max(max, num);
+                            }, 0);
+                            
+                            const maxTotal = Math.max(maxDossier, maxPriseMandat);
+                            setFormData({...formData, arpenteur_geometre: value, numero_dossier: (maxTotal + 1).toString()});
                           } else {
                             setFormData({...formData, arpenteur_geometre: value});
                           }
@@ -1987,20 +1994,19 @@ export default function PriseDeMandat() {
                               // Si on passe à "Mandats à ouvrir", calculer le prochain numéro
                               if (statut.value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
                                 const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
-                                const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === formData.arpenteur_geometre && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id);
                                 const maxDossier = arpenteurDossiers.reduce((max, d) => {
                                   const num = parseInt(d.numero_dossier, 10);
                                   return isNaN(num) ? max : Math.max(max, num);
                                 }, 0);
-                                const numerosUtilises = new Set([
-                                  ...arpenteurDossiers.map(d => d.numero_dossier),
-                                  ...arpenteurPriseMandats.map(pm => pm.numero_dossier).filter(n => n)
-                                ]);
-                                let prochainNumero = maxDossier + 1;
-                                while (numerosUtilises.has(prochainNumero.toString())) {
-                                  prochainNumero++;
-                                }
-                                setFormData({...formData, statut: statut.value, numero_dossier: prochainNumero.toString()});
+                                
+                                const arpenteurPriseMandats = priseMandats.filter(pm => pm.arpenteur_geometre === formData.arpenteur_geometre && pm.statut === "Mandats à ouvrir" && pm.id !== editingPriseMandat?.id && pm.numero_dossier);
+                                const maxPriseMandat = arpenteurPriseMandats.reduce((max, pm) => {
+                                  const num = parseInt(pm.numero_dossier, 10);
+                                  return isNaN(num) ? max : Math.max(max, num);
+                                }, 0);
+                                
+                                const maxTotal = Math.max(maxDossier, maxPriseMandat);
+                                setFormData({...formData, statut: statut.value, numero_dossier: (maxTotal + 1).toString()});
                               } else {
                                 setFormData({...formData, statut: statut.value});
                               }
