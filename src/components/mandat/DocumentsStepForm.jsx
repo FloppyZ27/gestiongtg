@@ -148,8 +148,8 @@ export default function DocumentsStepForm({
   const handleDownload = async (file) => {
     try {
       const response = await base44.functions.invoke('sharepoint', {
-        action: 'download',
-        itemId: file.id
+        action: 'getDownloadUrl',
+        fileId: file.id
       });
       if (response.data?.downloadUrl) {
         window.open(response.data.downloadUrl, '_blank');
@@ -157,6 +157,44 @@ export default function DocumentsStepForm({
     } catch (error) {
       console.error("Erreur téléchargement:", error);
     }
+  };
+
+  const handlePreview = async (file) => {
+    setPreviewFile(file);
+    setIsLoadingPreview(true);
+    
+    try {
+      // D'abord essayer d'obtenir l'URL de téléchargement direct
+      const response = await base44.functions.invoke('sharepoint', {
+        action: 'getDownloadUrl',
+        fileId: file.id
+      });
+      
+      if (response.data?.downloadUrl) {
+        setPreviewUrl(response.data.downloadUrl);
+      } else if (response.data?.webUrl) {
+        setPreviewUrl(response.data.webUrl);
+      }
+    } catch (error) {
+      console.error("Erreur preview:", error);
+      // Fallback: ouvrir dans un nouvel onglet
+      if (file.webUrl) {
+        window.open(file.webUrl, '_blank');
+        setPreviewFile(null);
+      }
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewFile(null);
+    setPreviewUrl(null);
+  };
+
+  const isPreviewable = (fileName) => {
+    const ext = fileName?.split('.').pop()?.toLowerCase() || '';
+    return ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
   };
 
   return (
