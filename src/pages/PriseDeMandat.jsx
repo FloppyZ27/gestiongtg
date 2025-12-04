@@ -28,6 +28,7 @@ import MandatStepForm from "../components/mandat/MandatStepForm";
 import TarificationStepForm from "../components/mandat/TarificationStepForm";
 import ProfessionnelStepForm from "../components/mandat/ProfessionnelStepForm";
 import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
+import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
