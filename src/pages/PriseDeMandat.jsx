@@ -1412,7 +1412,7 @@ export default function PriseDeMandat() {
     setHistorique([]);
     
     // Reset professionnel
-    setProfessionnelStepCollapsed(false);
+    setProfessionnelStepCollapsed(true);
     setProfessionnelInfo({ notaire: "", courtier: "", compagnie: "" });
     
     // Reset de l'adresse de travail
@@ -1451,7 +1451,8 @@ export default function PriseDeMandat() {
     setClientStepCollapsed(false);
     setAddressStepCollapsed(false);
     setMandatStepCollapsed(false);
-    setTarificationStepCollapsed(false);
+    setTarificationStepCollapsed(true);
+    setProfessionnelStepCollapsed(true);
     
     // Reset des autres états
     setEditingDossier(null);
