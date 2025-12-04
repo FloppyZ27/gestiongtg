@@ -46,8 +46,10 @@ Deno.serve(async (req) => {
     const binaryContent = Uint8Array.from(atob(fileContent), c => c.charCodeAt(0));
 
     // Upload file to SharePoint
-    const encodedPath = encodeURIComponent(`${folderPath}/${fileName}`).replace(/%2F/g, '/');
-    const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drives/${DRIVE_ID}/root:/${encodedPath}:/content`;
+    const fullPath = `${folderPath}/${fileName}`;
+    const uploadUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${fullPath}:/content`;
+    
+    console.log("Uploading to:", uploadUrl);
 
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
