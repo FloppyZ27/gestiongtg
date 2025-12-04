@@ -1882,6 +1882,11 @@ export default function PriseDeMandat() {
                       {formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre && formData.numero_dossier && (
                         <p className="text-emerald-400 text-lg font-semibold mt-1">
                           {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                          {(clientInfo.prenom || clientInfo.nom || (formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-")) && (
+                            <span> - {clientInfo.prenom || clientInfo.nom 
+                              ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
+                              : getClientsNames(formData.clients_ids)}</span>
+                          )}
                         </p>
                       )}
                     </div>
