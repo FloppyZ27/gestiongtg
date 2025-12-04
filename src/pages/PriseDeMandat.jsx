@@ -3705,8 +3705,34 @@ export default function PriseDeMandat() {
                 <Button
                   type="button"
                   className="bg-red-500 hover:bg-red-600"
-                  onClick={() => {
+                  onClick={async () => {
                     const value = pendingStatutChange;
+                    
+                    // Supprimer les documents du dossier SharePoint
+                    if (formData.numero_dossier && formData.arpenteur_geometre) {
+                      try {
+                        const initials = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
+                        const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
+                        
+                        // Récupérer la liste des fichiers
+                        const response = await base44.functions.invoke('sharepoint', {
+                          action: 'list',
+                          folderPath: folderPath
+                        });
+                        const files = response.data?.files || [];
+                        
+                        // Supprimer chaque fichier
+                        for (const file of files) {
+                          await base44.functions.invoke('sharepoint', {
+                            action: 'delete',
+                            fileId: file.id
+                          });
+                        }
+                      } catch (error) {
+                        console.error("Erreur suppression documents SharePoint:", error);
+                      }
+                    }
+                    
                     if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
                       const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                       setFormData({...formData, statut: value, numero_dossier: prochainNumero});
