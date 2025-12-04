@@ -1813,7 +1813,19 @@ export default function PriseDeMandat() {
                   <div className="flex-1 overflow-y-auto p-6">
                   <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                      {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
+                      {editingPriseMandat ? (
+                        formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre ? (
+                          <>Modifier le mandat - <span className="text-emerald-400">{getArpenteurInitials(formData.arpenteur_geometre)}{(() => {
+                            // Calculer le prochain numéro de dossier pour cet arpenteur
+                            const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === formData.arpenteur_geometre && d.numero_dossier);
+                            const maxNumero = arpenteurDossiers.reduce((max, d) => {
+                              const num = parseInt(d.numero_dossier, 10);
+                              return isNaN(num) ? max : Math.max(max, num);
+                            }, 0);
+                            return maxNumero + 1;
+                          })()}</span></>
+                        ) : "Modifier le mandat"
+                      ) : "Nouveau mandat"}
                     </h2>
                     {formData.statut === "Mandats à ouvrir" && (
                       <Button
