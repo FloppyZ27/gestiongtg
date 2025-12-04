@@ -125,9 +125,9 @@ export default function ProfessionnelStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <div className="grid grid-cols-[1fr_1fr] gap-3">
-            {/* Colonne gauche - Champs de saisie */}
-            <div className="space-y-2">
+          <div className="grid grid-cols-[70%_30%] gap-3">
+            {/* Colonne gauche - Champs de saisie sur une ligne */}
+            <div className="grid grid-cols-3 gap-3">
               {/* Notaire */}
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Notaire</Label>
@@ -136,7 +136,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
                   onFocus={() => setActiveField("notaire")}
                   placeholder="Nom du notaire..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-purple-500 border-purple-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
                 />
                 {selectedNotaireIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -163,7 +163,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
                   onFocus={() => setActiveField("courtier")}
                   placeholder="Nom du courtier immobilier..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-orange-500 border-orange-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
                 />
                 {selectedCourtierIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -190,7 +190,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
                   onFocus={() => setActiveField("compagnie")}
                   placeholder="Nom de la compagnie..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-cyan-500 border-cyan-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
                 />
                 {selectedCompagnieIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -210,27 +210,22 @@ export default function ProfessionnelStepForm({
               </div>
             </div>
 
-            {/* Colonne droite - Liste associative */}
+            {/* Colonne droite - Liste associative (30%) */}
             <div className="border-l border-slate-700 pl-3">
               {activeListData ? (
                 <>
                   <Label className="text-slate-400 text-xs mb-1 block">
                     {activeListData.type === "notaire" ? "Notaires" : activeListData.type === "courtier" ? "Courtiers" : "Compagnies"}
                   </Label>
-                  <div className="max-h-32 overflow-y-auto space-y-1">
+                  <div className="max-h-24 overflow-y-auto space-y-1">
                     {activeListData.list.length > 0 ? (
                       activeListData.list.map(item => {
                         const isSelected = activeListData.selectedIds.includes(item.id);
-                        const colorClasses = {
-                          purple: isSelected ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700",
-                          orange: isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700",
-                          cyan: isSelected ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"
-                        };
                         return (
                           <div
                             key={item.id}
                             onClick={() => activeListData.onSelect(item.id)}
-                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${colorClasses[activeListData.color]}`}
+                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${isSelected ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
                           >
                             <p className="font-medium">{item.prenom} {item.nom}</p>
                             <div className="text-[10px] text-slate-500">
@@ -250,7 +245,7 @@ export default function ProfessionnelStepForm({
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center h-32 text-slate-500 text-xs">
+                <div className="flex items-center justify-center h-24 text-slate-500 text-xs">
                   Cliquez sur un champ pour afficher la liste
                 </div>
               )}
