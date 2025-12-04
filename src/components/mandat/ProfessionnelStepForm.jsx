@@ -135,7 +135,7 @@ export default function ProfessionnelStepForm({
                   value={professionnelInfo.notaire || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
                   onFocus={() => setActiveField("notaire")}
-                  placeholder="Rechercher un notaire..."
+                  placeholder="Nom du notaire..."
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-purple-500 border-purple-500" : ""}`}
                 />
                 {selectedNotaireIds.length > 0 && (
@@ -162,7 +162,7 @@ export default function ProfessionnelStepForm({
                   value={professionnelInfo.courtier || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
                   onFocus={() => setActiveField("courtier")}
-                  placeholder="Rechercher un courtier..."
+                  placeholder="Nom du courtier immobilier..."
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-orange-500 border-orange-500" : ""}`}
                 />
                 {selectedCourtierIds.length > 0 && (
@@ -189,7 +189,7 @@ export default function ProfessionnelStepForm({
                   value={professionnelInfo.compagnie || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
                   onFocus={() => setActiveField("compagnie")}
-                  placeholder="Rechercher une compagnie..."
+                  placeholder="Nom de la compagnie..."
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-cyan-500 border-cyan-500" : ""}`}
                 />
                 {selectedCompagnieIds.length > 0 && (
