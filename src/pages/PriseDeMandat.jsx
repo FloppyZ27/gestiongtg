@@ -516,6 +516,8 @@ export default function PriseDeMandat() {
 
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
+        numero_dossier: data.numero_dossier,
+        date_ouverture: data.date_ouverture,
         clients_ids: data.clients_ids,
         client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
@@ -1069,6 +1071,8 @@ export default function PriseDeMandat() {
 
     const dataToSubmit = {
       arpenteur_geometre: formData.arpenteur_geometre,
+      numero_dossier: formData.numero_dossier,
+      date_ouverture: formData.date_ouverture,
       clients_ids: formData.clients_ids,
       client_info: clientInfo,
       adresse_travaux: workAddress,
