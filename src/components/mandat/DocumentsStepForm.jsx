@@ -161,7 +161,9 @@ export default function DocumentsStepForm({
   };
 
   const handlePreview = async (file) => {
-    // Ouvrir directement dans un nouvel onglet via SharePoint
+    setPreviewFile(file);
+    setIsLoadingPreview(true);
+    
     try {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'preview',
@@ -169,17 +171,28 @@ export default function DocumentsStepForm({
       });
       
       if (response.data?.previewUrl) {
-        window.open(response.data.previewUrl, '_blank');
+        setPreviewUrl(response.data.previewUrl);
       } else if (file.webUrl) {
-        window.open(file.webUrl, '_blank');
+        setPreviewUrl(file.webUrl);
       }
     } catch (error) {
       console.error("Erreur preview:", error);
-      // Fallback: utiliser webUrl
       if (file.webUrl) {
-        window.open(file.webUrl, '_blank');
+        setPreviewUrl(file.webUrl);
       }
+    } finally {
+      setIsLoadingPreview(false);
     }
+  };
+
+  const closePreview = () => {
+    setPreviewFile(null);
+    setPreviewUrl(null);
+  };
+
+  const isImageFile = (fileName) => {
+    const ext = fileName?.split('.').pop()?.toLowerCase() || '';
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
   };
 
 
