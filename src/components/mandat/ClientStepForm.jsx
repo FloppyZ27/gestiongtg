@@ -102,7 +102,7 @@ export default function ClientStepForm({
             <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
               <Users className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <CardTitle className="text-emerald-300 text-base">Informations du client</CardTitle>
+            <CardTitle className="text-emerald-300 text-base">Client</CardTitle>
             {/* Afficher le nom complet du formulaire si rempli */}
             {(clientForm.prenom || clientForm.nom) && (
               <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
