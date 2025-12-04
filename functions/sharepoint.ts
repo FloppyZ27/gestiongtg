@@ -179,6 +179,31 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === 'delete') {
+      // Supprimer un fichier définitivement
+      if (!fileId) {
+        return Response.json({ error: 'fileId requis pour la suppression' }, { status: 400 });
+      }
+
+      console.log("Deleting file:", fileId);
+
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${fileId}`,
+        { 
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${accessToken}` } 
+        }
+      );
+
+      if (!response.ok && response.status !== 204) {
+        const data = await response.json().catch(() => ({}));
+        console.error("Delete error:", JSON.stringify(data));
+        throw new Error(data.error?.message || 'Erreur lors de la suppression du fichier');
+      }
+
+      return Response.json({ success: true, message: 'Fichier supprimé' });
+    }
+
     return Response.json({ error: 'Action non reconnue' }, { status: 400 });
 
   } catch (error) {
