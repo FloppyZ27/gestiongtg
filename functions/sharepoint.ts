@@ -7,7 +7,16 @@ const SITE_ID = Deno.env.get("SHAREPOINT_SITE_ID");
 const DRIVE_ID = Deno.env.get("SHAREPOINT_DRIVE_ID");
 
 async function getAccessToken() {
+  // Debug: Afficher les valeurs exactes des variables d'environnement
+  console.log("=== DEBUG VARIABLES D'ENVIRONNEMENT ===");
+  console.log("TENANT_ID raw value:", JSON.stringify(TENANT_ID));
+  console.log("TENANT_ID length:", TENANT_ID ? TENANT_ID.length : 'undefined');
+  console.log("CLIENT_ID raw value:", JSON.stringify(CLIENT_ID));
+  console.log("CLIENT_SECRET defined:", !!CLIENT_SECRET);
+  console.log("=========================================");
+  
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
+  console.log("Token URL:", tokenUrl);
   
   const params = new URLSearchParams();
   params.append('client_id', CLIENT_ID);
