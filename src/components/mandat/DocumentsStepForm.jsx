@@ -331,25 +331,11 @@ export default function DocumentsStepForm({
       {/* Dialog de prévisualisation */}
       <Dialog open={!!previewFile} onOpenChange={closePreview}>
         <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[80vh]">
-          <DialogHeader className="p-4 border-b border-slate-700">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-white flex items-center gap-2">
-                {previewFile && getFileIcon(previewFile.name)}
-                {previewFile?.name}
-              </DialogTitle>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => previewFile && handleDownload(previewFile)}
-                  className="text-slate-400 hover:text-white"
-                >
-                  <Download className="w-4 h-4 mr-1" />
-                  Télécharger
-                </Button>
-              </div>
-            </div>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-yellow-400" />
+              {previewFile?.name}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex-1 h-full">
             {isLoadingPreview ? (
