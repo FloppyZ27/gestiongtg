@@ -2,7 +2,8 @@ import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, Eye, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
