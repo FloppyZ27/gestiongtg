@@ -286,7 +286,7 @@ export default function DocumentsStepForm({
                     <div
                       key={file.id}
                       className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
-                      onClick={() => isPreviewable(file.name) ? handlePreview(file) : handleDownload(file)}
+                      onClick={() => handlePreview(file)}
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {getFileIcon(file.name)}
