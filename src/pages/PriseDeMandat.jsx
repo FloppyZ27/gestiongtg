@@ -467,6 +467,9 @@ export default function PriseDeMandat() {
       ...formData,
       arpenteur_geometre: pm.arpenteur_geometre || "",
       clients_ids: pm.clients_ids || [],
+      notaires_ids: pm.notaires_ids || [],
+      courtiers_ids: pm.courtiers_ids || [],
+      compagnies_ids: pm.compagnies_ids || [],
       statut: pm.statut || "Nouveau mandat/Demande d'information",
       numero_dossier: numeroDossier,
       date_ouverture: dateOuverture
@@ -549,6 +552,9 @@ export default function PriseDeMandat() {
         numero_dossier: data.numero_dossier,
         date_ouverture: data.date_ouverture,
         clients_ids: data.clients_ids,
+        notaires_ids: data.notaires_ids,
+        courtiers_ids: data.courtiers_ids,
+        compagnies_ids: data.compagnies_ids,
         client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
         mandats: data.mandats,
@@ -1112,6 +1118,9 @@ export default function PriseDeMandat() {
       numero_dossier: formData.numero_dossier,
       date_ouverture: formData.date_ouverture,
       clients_ids: formData.clients_ids,
+      notaires_ids: formData.notaires_ids || [],
+      courtiers_ids: formData.courtiers_ids || [],
+      compagnies_ids: formData.compagnies_ids || [],
       client_info: clientInfo,
       adresse_travaux: workAddress,
       mandats: mandatsToSave,
@@ -1401,6 +1410,10 @@ export default function PriseDeMandat() {
     // Reset sidebar et historique
     setSidebarTab("commentaires");
     setHistorique([]);
+    
+    // Reset professionnel
+    setProfessionnelStepCollapsed(false);
+    setProfessionnelInfo({ notaire: "", courtier: "", compagnie: "" });
     
     // Reset de l'adresse de travail
     setWorkAddress({
