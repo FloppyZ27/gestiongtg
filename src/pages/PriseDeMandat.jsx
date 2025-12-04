@@ -2163,8 +2163,9 @@ export default function PriseDeMandat() {
                     <DocumentsStepForm
                       arpenteurGeometre={formData.arpenteur_geometre}
                       numeroDossier={formData.numero_dossier}
-                      isCollapsed={documentsStepCollapsed}
+                      isCollapsed={true}
                       onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)}
+                      onDocumentsChange={setHasDocuments}
                     />
                   )}
 
@@ -3675,6 +3676,55 @@ export default function PriseDeMandat() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Dialog de confirmation de changement de statut */}
+        <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300">
+                Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
+              </p>
+              <p className="text-slate-400 text-sm">
+                Êtes-vous sûr de vouloir continuer ?
+              </p>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-red-500 hover:bg-red-600"
+                  onClick={() => {
+                    const value = pendingStatutChange;
+                    if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
+                      const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                      setFormData({...formData, statut: value, numero_dossier: prochainNumero});
+                    } else if (value !== "Mandats à ouvrir") {
+                      setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                    } else {
+                      setFormData({...formData, statut: value});
+                    }
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                    setHasDocuments(false);
+                  }}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
