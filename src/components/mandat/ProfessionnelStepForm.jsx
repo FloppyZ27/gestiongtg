@@ -215,7 +215,11 @@ export default function ProfessionnelStepForm({
               {activeListData ? (
                 <>
                   <Label className="text-slate-400 text-xs mb-1 block">
-                    {activeListData.type === "notaire" ? "Notaires" : activeListData.type === "courtier" ? "Courtiers" : "Compagnies"}
+                    {activeListData.type === "notaire" 
+                      ? `Notaire existant${activeListData.list.length > 1 ? 's' : ''} (${activeListData.list.length})` 
+                      : activeListData.type === "courtier" 
+                      ? `Courtier existant${activeListData.list.length > 1 ? 's' : ''} (${activeListData.list.length})` 
+                      : `Compagnie existante${activeListData.list.length > 1 ? 's' : ''} (${activeListData.list.length})`}
                   </Label>
                   <div className="max-h-24 overflow-y-auto space-y-1">
                     {activeListData.list.length > 0 ? (
@@ -228,14 +232,6 @@ export default function ProfessionnelStepForm({
                             className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${isSelected ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
                           >
                             <p className="font-medium">{item.prenom} {item.nom}</p>
-                            <div className="text-[10px] text-slate-500">
-                              {getCurrentValue(item.telephones, 'telephone') && (
-                                <span>{formatPhoneNumber(getCurrentValue(item.telephones, 'telephone'))}</span>
-                              )}
-                              {getCurrentValue(item.courriels, 'courriel') && (
-                                <span className="ml-2">{getCurrentValue(item.courriels, 'courriel')}</span>
-                              )}
-                            </div>
                           </div>
                         );
                       })
