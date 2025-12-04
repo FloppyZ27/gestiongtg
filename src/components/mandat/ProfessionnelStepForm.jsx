@@ -90,15 +90,15 @@ export default function ProfessionnelStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-indigo-900/40 transition-colors rounded-t-lg py-1.5 bg-indigo-900/20"
+        className="cursor-pointer hover:bg-pink-900/40 transition-colors rounded-t-lg py-1.5 bg-pink-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center">
-              <Briefcase className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="w-6 h-6 rounded-full bg-pink-500/30 flex items-center justify-center">
+              <Briefcase className="w-3.5 h-3.5 text-pink-400" />
             </div>
-            <CardTitle className="text-indigo-300 text-base">Professionnel</CardTitle>
+            <CardTitle className="text-pink-300 text-base">Professionnel</CardTitle>
             {hasSelections && (
               <div className="flex gap-1">
                 {selectedNotaireIds.length > 0 && (
@@ -136,7 +136,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
                   onFocus={() => setActiveField("notaire")}
                   placeholder="Nom du notaire..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedNotaireIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -163,7 +163,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
                   onFocus={() => setActiveField("courtier")}
                   placeholder="Nom du courtier immobilier..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedCourtierIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -190,7 +190,7 @@ export default function ProfessionnelStepForm({
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
                   onFocus={() => setActiveField("compagnie")}
                   placeholder="Nom de la compagnie..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-indigo-500 border-indigo-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedCompagnieIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -229,7 +229,7 @@ export default function ProfessionnelStepForm({
                           <div
                             key={item.id}
                             onClick={() => activeListData.onSelect(item.id)}
-                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${isSelected ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
+                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${isSelected ? "bg-pink-500/20 text-pink-400 border border-pink-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
                           >
                             <p className="font-medium">{item.prenom} {item.nom}</p>
                           </div>
