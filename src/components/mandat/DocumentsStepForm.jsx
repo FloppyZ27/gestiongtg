@@ -179,15 +179,7 @@ export default function DocumentsStepForm({
     }
   };
 
-  const closePreview = () => {
-    setPreviewFile(null);
-    setPreviewUrl(null);
-  };
 
-  const isPreviewable = (fileName) => {
-    const ext = fileName?.split('.').pop()?.toLowerCase() || '';
-    return ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
-  };
 
   return (
     <Card 
