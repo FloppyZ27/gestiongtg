@@ -50,11 +50,13 @@ Deno.serve(async (req) => {
     // Convert base64 to binary
     const binaryContent = Uint8Array.from(atob(fileContent), c => c.charCodeAt(0));
 
-    // Upload file to SharePoint
+    // Upload file to SharePoint - encode path properly
     const fullPath = `${folderPath}/${fileName}`;
-    const uploadUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${fullPath}:/content`;
+    const encodedPath = fullPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    const uploadUrl = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${encodedPath}:/content`;
     
     console.log("Uploading to:", uploadUrl);
+    console.log("File size:", binaryContent.length);
 
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
@@ -65,11 +67,16 @@ Deno.serve(async (req) => {
       body: binaryContent
     });
 
+    const responseText = await uploadResponse.text();
+    console.log("Upload response status:", uploadResponse.status);
+    console.log("Upload response:", responseText);
+
     if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json();
-      console.error("SharePoint upload error:", errorData);
-      return Response.json({ error: 'Upload failed', details: errorData }, { status: uploadResponse.status });
+      console.error("SharePoint upload error:", responseText);
+      return Response.json({ error: 'Upload failed', details: responseText }, { status: uploadResponse.status });
     }
+    
+    const result = JSON.parse(responseText);
 
     const result = await uploadResponse.json();
 
