@@ -17,6 +17,7 @@ import Administration from './pages/Administration';
 import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
+import SharePoint from './pages/SharePoint';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "GestionEquipeTerrain": GestionEquipeTerrain,
     "Recherches": Recherches,
     "RetoursAppel": RetoursAppel,
+    "SharePoint": SharePoint,
 }
 
 export const pagesConfig = {
