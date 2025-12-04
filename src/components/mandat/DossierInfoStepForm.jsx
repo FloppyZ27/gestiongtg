@@ -35,22 +35,22 @@ export default function DossierInfoStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-        className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+        className="cursor-pointer hover:bg-teal-900/40 transition-colors rounded-t-lg py-1.5 bg-teal-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-              <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+            <div className="w-6 h-6 rounded-full bg-teal-500/30 flex items-center justify-center">
+              <FolderOpen className="w-3.5 h-3.5 text-teal-400" />
             </div>
-            <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+            <CardTitle className="text-teal-300 text-base">Informations du dossier</CardTitle>
             {arpenteurGeometre && (
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
                 {arpenteurGeometre}
               </Badge>
             )}
             {numeroDossier && (
-              <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30 text-xs">
+              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
                 #{numeroDossier}
               </Badge>
             )}
@@ -60,14 +60,14 @@ export default function DossierInfoStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-3">
-          <div className="space-y-3">
+        <CardContent className="pt-1 pb-2">
+          <div className="space-y-2">
             {/* Ligne 1: Arpenteur et Statut */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                 <Select value={arpenteurGeometre} onValueChange={onArpenteurChange}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -79,7 +79,7 @@ export default function DossierInfoStepForm({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Statut du mandat</Label>
                 <div className="flex gap-1">
                   {STATUTS.map((s) => (
@@ -87,7 +87,7 @@ export default function DossierInfoStepForm({
                       key={s.value}
                       type="button"
                       onClick={() => onStatutChange(s.value)}
-                      className={`px-2 py-1 rounded text-xs border transition-all ${
+                      className={`px-2 py-0.5 rounded text-xs border transition-all ${
                         statut === s.value 
                           ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
                           : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
@@ -101,23 +101,23 @@ export default function DossierInfoStepForm({
             </div>
 
             {/* Ligne 2: N° Dossier et Date d'ouverture */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">N° de dossier</Label>
                 <Input
                   value={numeroDossier || ""}
                   onChange={(e) => onNumeroDossierChange(e.target.value)}
                   placeholder="Ex: 12345"
-                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                  className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Date d'ouverture</Label>
                 <Input
                   type="date"
                   value={dateOuverture || ""}
                   onChange={(e) => onDateOuvertureChange(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                  className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                 />
               </div>
             </div>
