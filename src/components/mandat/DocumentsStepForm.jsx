@@ -299,6 +299,16 @@ export default function DocumentsStepForm({
                           type="button"
                           variant="ghost"
                           size="sm"
+                          onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
+                          className="h-6 px-2 text-slate-400 hover:text-white"
+                          title="Visualiser"
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={(e) => { e.stopPropagation(); file.webUrl && window.open(file.webUrl, '_blank'); }}
                           className="h-6 px-2 text-slate-400 hover:text-white"
                           title="Ouvrir dans SharePoint"
