@@ -2010,102 +2010,35 @@ export default function PriseDeMandat() {
                   )}
 
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
-                  {/* Section pour le choix de l'arpenteur et sélection du statut sur la même ligne */}
-                  <div className="flex gap-4 items-stretch">
-                    <div className="space-y-2 w-1/3">
-                      <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                      <Select 
-                        value={formData.arpenteur_geometre} 
-                        onValueChange={(value) => {
-                          // Si statut "Mandats à ouvrir" et pas encore de numéro attribué, calculer le prochain
-                          if (formData.statut === "Mandats à ouvrir" && !editingPriseMandat?.numero_dossier) {
-                            const prochainNumero = calculerProchainNumeroDossier(value, editingPriseMandat?.id);
-                            setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero});
-                          } else {
-                            setFormData({...formData, arpenteur_geometre: value});
-                          }
-                        }}
-                        disabled={!!dossierReferenceId}
-                      >
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-9">
-                          <SelectValue placeholder="Sélectionner un arpenteur-géomètre" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {ARPENTEURS.map((arpenteur) => (
-                            <SelectItem key={arpenteur} value={arpenteur} className="text-white">
-                              {arpenteur}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex-1 flex gap-2 items-end">
-                      {[
-                        { value: "Nouveau mandat/Demande d'information", label: "Nouveau mandat", color: "cyan", icon: FileQuestion, requiresArpenteur: false },
-                        { value: "Mandats à ouvrir", label: "Mandat à ouvrir", color: "purple", icon: FolderOpen, requiresArpenteur: true },
-                        { value: "Mandat non octroyé", label: "Mandat non-octroyé", color: "red", icon: XCircle, requiresArpenteur: true }
-                      ].map((statut) => {
-                        const isSelected = formData.statut === statut.value;
-                        const isDisabled = statut.requiresArpenteur && !formData.arpenteur_geometre;
-                        const colorClasses = {
-                          "cyan": isSelected ? "bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-cyan-500/10 hover:text-cyan-400",
-                          "purple": isSelected ? "bg-purple-500/30 text-purple-400 border-2 border-purple-500" : isDisabled ? "bg-slate-800/50 text-slate-600 border border-slate-700 cursor-not-allowed" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-purple-500/10 hover:text-purple-400",
-                          "red": isSelected ? "bg-red-500/30 text-red-400 border-2 border-red-500" : isDisabled ? "bg-slate-800/50 text-slate-600 border border-slate-700 cursor-not-allowed" : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-red-500/10 hover:text-red-400"
-                        };
-                        const IconComponent = statut.icon;
-                        return (
-                          <button
-                            key={statut.value}
-                            type="button"
-                            disabled={isDisabled}
-                            title={isDisabled ? "Sélectionnez d'abord un arpenteur-géomètre" : ""}
-                            onClick={() => {
-                              if (isDisabled) return;
-                              // Si on passe à "Mandats à ouvrir" et pas encore de numéro attribué, calculer le prochain
-                              if (statut.value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
-                                const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                                setFormData({...formData, statut: statut.value, numero_dossier: prochainNumero});
-                              } else if (statut.value !== "Mandats à ouvrir") {
-                                // Si on quitte le statut "Mandats à ouvrir", supprimer le numéro de dossier
-                                setFormData({...formData, statut: statut.value, numero_dossier: "", date_ouverture: ""});
-                              } else {
-                                setFormData({...formData, statut: statut.value});
-                              }
-                            }}
-                            className={`flex-1 h-9 px-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${colorClasses[statut.color]}`}
-                          >
-                            <IconComponent className="w-4 h-4" />
-                            {statut.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Champs N° de dossier et Date d'ouverture si statut "Mandats à ouvrir" */}
-                  {formData.statut === "Mandats à ouvrir" && (
-                    <div className="flex gap-4">
-                      <div className="space-y-2 w-1/3">
-                        <Label>N° de dossier <span className="text-red-400">*</span></Label>
-                        <Input
-                          value={formData.numero_dossier}
-                          onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})}
-                          placeholder="Ex: 12345"
-                          className="bg-slate-800 border-slate-700 text-white h-9"
-                        />
-                      </div>
-                      <div className="space-y-2 w-1/3">
-                        <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
-                        <Input
-                          type="date"
-                          value={formData.date_ouverture}
-                          onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})}
-                          className="bg-slate-800 border-slate-700 text-white h-9"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  {/* Section Informations du dossier - Toujours en haut */}
+                  <DossierInfoStepForm
+                    arpenteurGeometre={formData.arpenteur_geometre}
+                    onArpenteurChange={(value) => {
+                      if (formData.statut === "Mandats à ouvrir" && !editingPriseMandat?.numero_dossier) {
+                        const prochainNumero = calculerProchainNumeroDossier(value, editingPriseMandat?.id);
+                        setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero});
+                      } else {
+                        setFormData({...formData, arpenteur_geometre: value});
+                      }
+                    }}
+                    statut={formData.statut}
+                    onStatutChange={(value) => {
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
+                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                        setFormData({...formData, statut: value, numero_dossier: prochainNumero});
+                      } else if (value !== "Mandats à ouvrir") {
+                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                      } else {
+                        setFormData({...formData, statut: value});
+                      }
+                    }}
+                    numeroDossier={formData.numero_dossier}
+                    onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
+                    dateOuverture={formData.date_ouverture}
+                    onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
+                    isCollapsed={dossierInfoStepCollapsed}
+                    onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
+                  />
 
                   {/* Étape 1: Informations du client */}
                   <ClientStepForm
