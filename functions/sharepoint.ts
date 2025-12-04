@@ -57,9 +57,18 @@ Deno.serve(async (req) => {
 
     if (action === 'list') {
       // Lister les fichiers d'un dossier
-      const endpoint = folderId === 'root'
-        ? `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root/children`
-        : `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${folderId}/children`;
+      const folderPath = body.folderPath;
+      let endpoint;
+      
+      if (folderPath) {
+        // Utiliser le chemin du dossier spécifique
+        const encodedPath = encodeURIComponent(folderPath).replace(/%2F/g, '/');
+        endpoint = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${encodedPath}:/children`;
+      } else if (folderId === 'root') {
+        endpoint = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root/children`;
+      } else {
+        endpoint = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${folderId}/children`;
+      }
 
       console.log("Fetching files from:", endpoint);
 
@@ -72,6 +81,10 @@ Deno.serve(async (req) => {
       
       if (!response.ok) {
         console.error("Files error:", JSON.stringify(data));
+        // Si le dossier n'existe pas, retourner une liste vide
+        if (response.status === 404) {
+          return Response.json({ files: [] });
+        }
         throw new Error(data.error?.message || 'Erreur lors de la récupération des fichiers');
       }
 
