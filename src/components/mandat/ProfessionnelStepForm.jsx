@@ -130,7 +130,7 @@ export default function ProfessionnelStepForm({
             <div className="space-y-2">
               {/* Notaire */}
               <div className="space-y-0.5">
-                <Label className="text-purple-400 text-xs">Notaire</Label>
+                <Label className="text-slate-400 text-xs">Notaire</Label>
                 <Input
                   value={professionnelInfo.notaire || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
@@ -157,7 +157,7 @@ export default function ProfessionnelStepForm({
 
               {/* Courtier */}
               <div className="space-y-0.5">
-                <Label className="text-orange-400 text-xs">Courtier immobilier</Label>
+                <Label className="text-slate-400 text-xs">Courtier immobilier</Label>
                 <Input
                   value={professionnelInfo.courtier || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
@@ -184,7 +184,7 @@ export default function ProfessionnelStepForm({
 
               {/* Compagnie */}
               <div className="space-y-0.5">
-                <Label className="text-cyan-400 text-xs">Compagnie</Label>
+                <Label className="text-slate-400 text-xs">Compagnie</Label>
                 <Input
                   value={professionnelInfo.compagnie || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
@@ -214,7 +214,7 @@ export default function ProfessionnelStepForm({
             <div className="border-l border-slate-700 pl-3">
               {activeListData ? (
                 <>
-                  <Label className={`text-${activeListData.color}-400 text-xs mb-1 block`}>
+                  <Label className="text-slate-400 text-xs mb-1 block">
                     {activeListData.type === "notaire" ? "Notaires" : activeListData.type === "courtier" ? "Courtiers" : "Compagnies"}
                   </Label>
                   <div className="max-h-32 overflow-y-auto space-y-1">
