@@ -124,26 +124,26 @@ export default function ProfessionnelStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-3">
-          <div className="grid grid-cols-[1fr_1fr] gap-4">
+        <CardContent className="pt-1 pb-2">
+          <div className="grid grid-cols-[1fr_1fr] gap-3">
             {/* Colonne gauche - Champs de saisie */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Notaire */}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label className="text-purple-400 text-xs">Notaire</Label>
                 <Input
                   value={professionnelInfo.notaire || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
                   onFocus={() => setActiveField("notaire")}
                   placeholder="Rechercher un notaire..."
-                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "notaire" ? "ring-2 ring-purple-500 border-purple-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-purple-500 border-purple-500" : ""}`}
                 />
                 {selectedNotaireIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1 mt-0.5">
                     {selectedNotaireIds.map(id => {
                       const notaire = getClientById(notaires, id);
                       return notaire ? (
-                        <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 pr-1 text-xs">
+                        <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 pr-1 text-xs py-0">
                           {notaire.prenom} {notaire.nom}
                           <button type="button" onClick={() => onSelectNotaire(id)} className="ml-1 hover:text-red-400">
                             <X className="w-3 h-3" />
@@ -156,21 +156,21 @@ export default function ProfessionnelStepForm({
               </div>
 
               {/* Courtier */}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label className="text-orange-400 text-xs">Courtier immobilier</Label>
                 <Input
                   value={professionnelInfo.courtier || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
                   onFocus={() => setActiveField("courtier")}
                   placeholder="Rechercher un courtier..."
-                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "courtier" ? "ring-2 ring-orange-500 border-orange-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-orange-500 border-orange-500" : ""}`}
                 />
                 {selectedCourtierIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1 mt-0.5">
                     {selectedCourtierIds.map(id => {
                       const courtier = getClientById(courtiers, id);
                       return courtier ? (
-                        <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 pr-1 text-xs">
+                        <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 pr-1 text-xs py-0">
                           {courtier.prenom} {courtier.nom}
                           <button type="button" onClick={() => onSelectCourtier(id)} className="ml-1 hover:text-red-400">
                             <X className="w-3 h-3" />
@@ -183,21 +183,21 @@ export default function ProfessionnelStepForm({
               </div>
 
               {/* Compagnie */}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label className="text-cyan-400 text-xs">Compagnie</Label>
                 <Input
                   value={professionnelInfo.compagnie || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
                   onFocus={() => setActiveField("compagnie")}
                   placeholder="Rechercher une compagnie..."
-                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "compagnie" ? "ring-2 ring-cyan-500 border-cyan-500" : ""}`}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-cyan-500 border-cyan-500" : ""}`}
                 />
                 {selectedCompagnieIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1 mt-0.5">
                     {selectedCompagnieIds.map(id => {
                       const compagnie = getClientById(compagnies, id);
                       return compagnie ? (
-                        <Badge key={id} className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 pr-1 text-xs">
+                        <Badge key={id} className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 pr-1 text-xs py-0">
                           {compagnie.prenom} {compagnie.nom}
                           <button type="button" onClick={() => onSelectCompagnie(id)} className="ml-1 hover:text-red-400">
                             <X className="w-3 h-3" />
@@ -211,13 +211,13 @@ export default function ProfessionnelStepForm({
             </div>
 
             {/* Colonne droite - Liste associative */}
-            <div className="border-l border-slate-700 pl-4">
+            <div className="border-l border-slate-700 pl-3">
               {activeListData ? (
                 <>
-                  <Label className={`text-${activeListData.color}-400 text-xs mb-2 block`}>
+                  <Label className={`text-${activeListData.color}-400 text-xs mb-1 block`}>
                     {activeListData.type === "notaire" ? "Notaires" : activeListData.type === "courtier" ? "Courtiers" : "Compagnies"}
                   </Label>
-                  <div className="max-h-40 overflow-y-auto space-y-1">
+                  <div className="max-h-32 overflow-y-auto space-y-1">
                     {activeListData.list.length > 0 ? (
                       activeListData.list.map(item => {
                         const isSelected = activeListData.selectedIds.includes(item.id);
@@ -230,10 +230,10 @@ export default function ProfessionnelStepForm({
                           <div
                             key={item.id}
                             onClick={() => activeListData.onSelect(item.id)}
-                            className={`p-2 rounded cursor-pointer text-xs transition-all ${colorClasses[activeListData.color]}`}
+                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${colorClasses[activeListData.color]}`}
                           >
                             <p className="font-medium">{item.prenom} {item.nom}</p>
-                            <div className="text-[10px] text-slate-500 mt-0.5">
+                            <div className="text-[10px] text-slate-500">
                               {getCurrentValue(item.telephones, 'telephone') && (
                                 <span>{formatPhoneNumber(getCurrentValue(item.telephones, 'telephone'))}</span>
                               )}
@@ -245,12 +245,12 @@ export default function ProfessionnelStepForm({
                         );
                       })
                     ) : (
-                      <p className="text-slate-500 text-xs text-center py-4">Aucun résultat</p>
+                      <p className="text-slate-500 text-xs text-center py-2">Aucun résultat</p>
                     )}
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-500 text-xs">
+                <div className="flex items-center justify-center h-32 text-slate-500 text-xs">
                   Cliquez sur un champ pour afficher la liste
                 </div>
               )}
