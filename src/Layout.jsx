@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -78,6 +78,11 @@ const navigationItems = [
     title: "Recherches",
     url: createPageUrl("Recherches"),
     icon: Search,
+  },
+  {
+    title: "SharePoint",
+    url: createPageUrl("SharePoint"),
+    icon: Cloud,
   },
 ];
 
