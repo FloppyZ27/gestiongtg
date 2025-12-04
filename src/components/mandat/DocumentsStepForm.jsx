@@ -164,23 +164,22 @@ export default function DocumentsStepForm({
     setIsLoadingPreview(true);
     
     try {
-      // D'abord essayer d'obtenir l'URL de téléchargement direct
+      // Utiliser l'action preview pour obtenir l'URL de prévisualisation Office
       const response = await base44.functions.invoke('sharepoint', {
-        action: 'getDownloadUrl',
+        action: 'preview',
         fileId: file.id
       });
       
-      if (response.data?.downloadUrl) {
-        setPreviewUrl(response.data.downloadUrl);
-      } else if (response.data?.webUrl) {
-        setPreviewUrl(response.data.webUrl);
+      if (response.data?.previewUrl) {
+        setPreviewUrl(response.data.previewUrl);
+      } else if (file.webUrl) {
+        setPreviewUrl(file.webUrl);
       }
     } catch (error) {
       console.error("Erreur preview:", error);
-      // Fallback: ouvrir dans un nouvel onglet
+      // Fallback: utiliser webUrl
       if (file.webUrl) {
-        window.open(file.webUrl, '_blank');
-        setPreviewFile(null);
+        setPreviewUrl(file.webUrl);
       }
     } finally {
       setIsLoadingPreview(false);
