@@ -76,11 +76,14 @@ export default function DossierInfoStepForm({
                     <button
                       key={s.value}
                       type="button"
-                      onClick={() => onStatutChange(s.value)}
+                      onClick={() => arpenteurGeometre && onStatutChange(s.value)}
+                      disabled={!arpenteurGeometre}
                       className={`px-2 py-0.5 rounded text-xs border transition-all ${
-                        statut === s.value 
-                          ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
-                          : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
+                        !arpenteurGeometre
+                          ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
+                          : statut === s.value 
+                            ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
+                            : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
                       }`}
                     >
                       {s.label}
