@@ -218,6 +218,9 @@ export default function PriseDeMandat() {
   const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(true);
   const [professionnelInfo, setProfessionnelInfo] = useState({ notaire: "", courtier: "", compagnie: "" });
   const [documentsStepCollapsed, setDocumentsStepCollapsed] = useState(true);
+  const [showStatutChangeConfirm, setShowStatutChangeConfirm] = useState(false);
+  const [pendingStatutChange, setPendingStatutChange] = useState(null);
+  const [hasDocuments, setHasDocuments] = useState(false);
   const [dossierInfoStepCollapsed, setDossierInfoStepCollapsed] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);
@@ -2023,6 +2026,13 @@ export default function PriseDeMandat() {
                     }}
                     statut={formData.statut}
                     onStatutChange={(value) => {
+                      // Si des documents existent et qu'on change de statut, demander confirmation
+                      if (hasDocuments && value !== formData.statut) {
+                        setPendingStatutChange(value);
+                        setShowStatutChangeConfirm(true);
+                        return;
+                      }
+                      
                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
                         const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                         setFormData({...formData, statut: value, numero_dossier: prochainNumero});
