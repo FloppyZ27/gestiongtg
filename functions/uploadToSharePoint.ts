@@ -78,8 +78,6 @@ Deno.serve(async (req) => {
     
     const result = JSON.parse(responseText);
 
-    const result = await uploadResponse.json();
-
     return Response.json({ 
       success: true, 
       file: {
