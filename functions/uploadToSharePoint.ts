@@ -1,27 +1,32 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-const TENANT_ID = Deno.env.get("MICROSOFT_TENANT_ID");
-const CLIENT_ID = Deno.env.get("MICROSOFT_CLIENT_ID");
-const CLIENT_SECRET = Deno.env.get("MICROSOFT_CLIENT_SECRET");
-const SITE_ID = Deno.env.get("SHAREPOINT_SITE_ID");
-const DRIVE_ID = Deno.env.get("SHAREPOINT_DRIVE_ID");
+// HARDCODED VALUES - same as sharepoint function
+const TENANT_ID = "31adb05b-e471-4daf-8831-4d46014be9b8";
+const CLIENT_ID = "1291551b-48b1-4e33-beff-d3cb64fa888a";
+const CLIENT_SECRET = "vTQ8Q~uhNn1dsGeHfGr3VZvLnQmkYZQ54~gcXcim";
+const DRIVE_ID = "b!bS8k36WRSEKjpEG35EBzonsdkmTo4p5MvX4xFGWq8w1fkwthDsxdQL8_MK0t_B3b";
 
 async function getAccessToken() {
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-    scope: "https://graph.microsoft.com/.default",
-    grant_type: "client_credentials",
-  });
+  
+  const bodyString = `grant_type=client_credentials&client_id=${encodeURIComponent(CLIENT_ID)}&client_secret=${encodeURIComponent(CLIENT_SECRET)}&scope=${encodeURIComponent('https://graph.microsoft.com/.default')}`;
 
   const response = await fetch(tokenUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString(),
+    headers: { 
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": "application/json"
+    },
+    body: bodyString,
   });
 
   const data = await response.json();
+  console.log("Token response status:", response.status);
+  
+  if (!response.ok) {
+    console.error("Token error:", JSON.stringify(data));
+    throw new Error(`Token error: ${data.error_description || data.error}`);
+  }
   return data.access_token;
 }
 
