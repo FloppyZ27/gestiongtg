@@ -8,29 +8,24 @@ const SITE_ID = "girardtremblaygilbert365.sharepoint.com,df242f6d-91a5-4248-a3a4
 const DRIVE_ID = "b!bS8k36WRSEKjpEG35EBzonsdkmTo4p5MvX4xFGWq8w1fkwthDsxdQL8_MK0t_B3b";
 
 async function getAccessToken() {
-  // Debug v3 - Hardcoded test
-  console.log("=== SHAREPOINT AUTH DEBUG v3 (HARDCODED) ===");
-  console.log("TENANT_ID:", TENANT_ID);
-  console.log("CLIENT_ID:", CLIENT_ID);
-  console.log("CLIENT_SECRET length:", CLIENT_SECRET.length);
-  console.log("================================");
+  // Debug v4 - Test avec body string direct
+  console.log("=== SHAREPOINT AUTH DEBUG v4 ===");
   
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
-  console.log("Token URL:", tokenUrl);
   
-  const params = new URLSearchParams();
-  params.append('client_id', CLIENT_ID);
-  params.append('client_secret', CLIENT_SECRET);
-  params.append('scope', 'https://graph.microsoft.com/.default');
-  params.append('grant_type', 'client_credentials');
-
-  console.log("Fetching token for tenant:", TENANT_ID);
-  console.log("Using Drive ID:", DRIVE_ID);
+  // Construire le body exactement comme PowerShell le ferait
+  const bodyString = `grant_type=client_credentials&client_id=${encodeURIComponent(CLIENT_ID)}&client_secret=${encodeURIComponent(CLIENT_SECRET)}&scope=${encodeURIComponent('https://graph.microsoft.com/.default')}`;
+  
+  console.log("Token URL:", tokenUrl);
+  console.log("Body (sans secret):", `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=***&scope=https://graph.microsoft.com/.default`);
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
+    },
+    body: bodyString
   });
 
   const data = await response.json();
