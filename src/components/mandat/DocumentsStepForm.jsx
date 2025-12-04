@@ -39,7 +39,8 @@ export default function DocumentsStepForm({
   arpenteurGeometre,
   numeroDossier,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  onDocumentsChange
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -67,6 +68,13 @@ export default function DocumentsStepForm({
   });
 
   const files = filesData?.files || [];
+
+  // Notifier le parent quand le nombre de fichiers change
+  React.useEffect(() => {
+    if (onDocumentsChange) {
+      onDocumentsChange(files.length > 0);
+    }
+  }, [files.length, onDocumentsChange]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
