@@ -343,11 +343,30 @@ export default function DocumentsStepForm({
                 <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
               </div>
             ) : previewUrl ? (
-              <iframe
-                src={previewUrl}
-                className="w-full h-[calc(80vh-100px)] rounded-lg border border-slate-700"
-                title={previewFile?.name}
-              />
+              (() => {
+                const ext = previewFile?.name?.split('.').pop()?.toLowerCase() || '';
+                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
+                
+                if (isImage) {
+                  return (
+                    <div className="flex items-center justify-center h-[calc(80vh-100px)] bg-slate-800/50 rounded-lg border border-slate-700">
+                      <img
+                        src={previewUrl}
+                        alt={previewFile?.name}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                  );
+                }
+                
+                return (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-[calc(80vh-100px)] rounded-lg border border-slate-700"
+                    title={previewFile?.name}
+                  />
+                );
+              })()
             ) : (
               <div className="flex flex-col items-center justify-center h-96 text-slate-400">
                 <FileText className="w-16 h-16 mb-4 opacity-50" />
