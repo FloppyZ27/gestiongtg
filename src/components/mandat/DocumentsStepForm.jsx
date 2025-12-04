@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -43,12 +43,11 @@ export default function DocumentsStepForm({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
-  const queryClient = useQueryClient();
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANT`;
 
-  // Fetch files from SharePoint
+  // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
     queryKey: ['sharepoint-intrant', arpenteurGeometre, numeroDossier],
     queryFn: async () => {
@@ -77,7 +76,6 @@ export default function DocumentsStepForm({
   }, []);
 
   const uploadFile = async (file) => {
-    // Convert file to base64
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = async () => {
@@ -158,7 +156,12 @@ export default function DocumentsStepForm({
   };
 
   return (
-    <Card className="border-slate-700 bg-slate-800/30">
+    <Card 
+      className={`border-slate-700 bg-slate-800/30 transition-all ${isDragOver ? 'ring-2 ring-teal-500 bg-teal-500/10' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <CardHeader 
         className="cursor-pointer hover:bg-teal-900/40 transition-colors rounded-t-lg py-1.5 bg-teal-900/20"
         onClick={onToggleCollapse}
@@ -175,15 +178,45 @@ export default function DocumentsStepForm({
               </Badge>
             )}
           </div>
-          {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+          <div className="flex items-center gap-2">
+            <label onClick={(e) => e.stopPropagation()}>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <span className="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
+                <Upload className="w-3 h-3" />
+                Ajouter
+              </span>
+            </label>
+            {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+          </div>
         </div>
       </CardHeader>
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <div className="space-y-3">
-            {/* Chemin du dossier */}
-            <div className="flex items-center justify-between">
+          {/* Message si drag over */}
+          {isDragOver && (
+            <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Déposez les fichiers ici
+            </div>
+          )}
+
+          {/* Message de progression */}
+          {isUploading && (
+            <div className="flex items-center gap-2 py-2 text-teal-400 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {uploadProgress}
+            </div>
+          )}
+
+          {/* Chemin et refresh */}
+          {!isDragOver && !isUploading && (
+            <div className="flex items-center justify-between mb-2">
               <p className="text-slate-500 text-xs truncate flex-1">
                 📁 {folderPath}
               </p>
@@ -191,86 +224,52 @@ export default function DocumentsStepForm({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => refetch()}
+                onClick={(e) => { e.stopPropagation(); refetch(); }}
                 className="text-slate-400 hover:text-white h-6 px-2"
               >
                 <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
             </div>
+          )}
 
-            {/* Zone de drop */}
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
-                isDragOver 
-                  ? 'border-teal-500 bg-teal-500/10' 
-                  : 'border-slate-600 hover:border-slate-500'
-              }`}
-            >
-              {isUploading ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-6 h-6 text-teal-400 animate-spin" />
-                  <p className="text-teal-400 text-sm">{uploadProgress}</p>
+          {/* Liste des fichiers */}
+          {!isDragOver && !isUploading && (
+            <>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                </div>
+              ) : files.length > 0 ? (
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {files.map((file) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group"
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {getFileIcon(file.name)}
+                        <span className="text-slate-300 text-sm truncate">{file.name}</span>
+                        <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 px-2 text-slate-400 hover:text-white"
+                      >
+                        <Download className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <>
-                  <Upload className="w-6 h-6 text-slate-500 mx-auto mb-2" />
-                  <p className="text-slate-400 text-sm">
-                    Glissez-déposez des fichiers ici
-                  </p>
-                  <p className="text-slate-500 text-xs mt-1">ou</p>
-                  <label className="mt-2 inline-block">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <span className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded cursor-pointer transition-colors">
-                      Parcourir
-                    </span>
-                  </label>
-                </>
+                <p className="text-slate-500 text-xs text-center py-3">
+                  Aucun fichier • Glissez des fichiers ici pour les ajouter
+                </p>
               )}
-            </div>
-
-            {/* Liste des fichiers */}
-            {isLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
-              </div>
-            ) : files.length > 0 ? (
-              <div className="max-h-40 overflow-y-auto space-y-1">
-                {files.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group"
-                  >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {getFileIcon(file.name)}
-                      <span className="text-slate-300 text-sm truncate">{file.name}</span>
-                      <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDownload(file)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-6 px-2 text-slate-400 hover:text-white"
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-slate-500 text-xs text-center py-2">
-                Aucun fichier dans ce dossier
-              </p>
-            )}
-          </div>
+            </>
+          )}
         </CardContent>
       )}
     </Card>
