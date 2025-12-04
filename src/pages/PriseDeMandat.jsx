@@ -2009,6 +2009,9 @@ export default function PriseDeMandat() {
                               if (statut.value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
                                 const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                                 setFormData({...formData, statut: statut.value, numero_dossier: prochainNumero});
+                              } else if (statut.value !== "Mandats à ouvrir") {
+                                // Si on quitte le statut "Mandats à ouvrir", supprimer le numéro de dossier
+                                setFormData({...formData, statut: statut.value, numero_dossier: "", date_ouverture: ""});
                               } else {
                                 setFormData({...formData, statut: statut.value});
                               }
