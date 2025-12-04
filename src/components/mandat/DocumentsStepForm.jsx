@@ -302,61 +302,6 @@ export default function DocumentsStepForm({
         </CardContent>
       )}
 
-      {/* Dialog de prévisualisation */}
-      <Dialog open={!!previewFile} onOpenChange={closePreview}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-yellow-400" />
-              {previewFile?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 h-full">
-            {isLoadingPreview ? (
-              <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
-              </div>
-            ) : previewUrl ? (
-              (() => {
-                const ext = previewFile?.name?.split('.').pop()?.toLowerCase() || '';
-                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
-                
-                if (isImage) {
-                  return (
-                    <div className="flex items-center justify-center h-[calc(80vh-100px)] bg-slate-800/50 rounded-lg border border-slate-700">
-                      <img
-                        src={previewUrl}
-                        alt={previewFile?.name}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  );
-                }
-                
-                return (
-                  <iframe
-                    src={previewUrl}
-                    className="w-full h-[calc(80vh-100px)] rounded-lg border border-slate-700"
-                    title={previewFile?.name}
-                  />
-                );
-              })()
-            ) : (
-              <div className="flex flex-col items-center justify-center h-96 text-slate-400">
-                <FileText className="w-16 h-16 mb-4 opacity-50" />
-                <p>Prévisualisation non disponible</p>
-                <Button
-                  type="button"
-                  className="mt-4"
-                  onClick={() => previewFile?.webUrl && window.open(previewFile.webUrl, '_blank')}
-                >
-                  Ouvrir dans SharePoint
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </Card>
+      </Card>
   );
 }
