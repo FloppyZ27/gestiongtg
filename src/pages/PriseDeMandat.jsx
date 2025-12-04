@@ -2027,8 +2027,8 @@ export default function PriseDeMandat() {
                     }}
                     statut={formData.statut}
                     onStatutChange={(value) => {
-                      // Si des documents existent et qu'on change de statut, demander confirmation
-                      if (hasDocuments && value !== formData.statut) {
+                      // Si des documents existent, un numéro de dossier existe et qu'on change de statut, demander confirmation
+                      if (hasDocuments && formData.numero_dossier && value !== formData.statut) {
                         setPendingStatutChange(value);
                         setShowStatutChangeConfirm(true);
                         return;
