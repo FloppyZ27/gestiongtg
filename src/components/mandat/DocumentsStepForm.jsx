@@ -160,29 +160,24 @@ export default function DocumentsStepForm({
   };
 
   const handlePreview = async (file) => {
-    setPreviewFile(file);
-    setIsLoadingPreview(true);
-    
+    // Ouvrir directement dans un nouvel onglet via SharePoint
     try {
-      // Utiliser l'action preview pour obtenir l'URL de prévisualisation Office
       const response = await base44.functions.invoke('sharepoint', {
         action: 'preview',
         fileId: file.id
       });
       
       if (response.data?.previewUrl) {
-        setPreviewUrl(response.data.previewUrl);
+        window.open(response.data.previewUrl, '_blank');
       } else if (file.webUrl) {
-        setPreviewUrl(file.webUrl);
+        window.open(file.webUrl, '_blank');
       }
     } catch (error) {
       console.error("Erreur preview:", error);
       // Fallback: utiliser webUrl
       if (file.webUrl) {
-        setPreviewUrl(file.webUrl);
+        window.open(file.webUrl, '_blank');
       }
-    } finally {
-      setIsLoadingPreview(false);
     }
   };
 
