@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
+// Force redeploy v2 - 2024-12-04
 const TENANT_ID = Deno.env.get("MICROSOFT_TENANT_ID");
 const CLIENT_ID = Deno.env.get("MICROSOFT_CLIENT_ID");
 const CLIENT_SECRET = Deno.env.get("MICROSOFT_CLIENT_SECRET");
@@ -7,13 +8,13 @@ const SITE_ID = Deno.env.get("SHAREPOINT_SITE_ID");
 const DRIVE_ID = Deno.env.get("SHAREPOINT_DRIVE_ID");
 
 async function getAccessToken() {
-  // Debug: Afficher les valeurs exactes des variables d'environnement
-  console.log("=== DEBUG VARIABLES D'ENVIRONNEMENT ===");
-  console.log("TENANT_ID raw value:", JSON.stringify(TENANT_ID));
-  console.log("TENANT_ID length:", TENANT_ID ? TENANT_ID.length : 'undefined');
-  console.log("CLIENT_ID raw value:", JSON.stringify(CLIENT_ID));
-  console.log("CLIENT_SECRET defined:", !!CLIENT_SECRET);
-  console.log("=========================================");
+  // Debug v2
+  console.log("=== SHAREPOINT AUTH DEBUG v2 ===");
+  console.log("TENANT_ID:", TENANT_ID);
+  console.log("CLIENT_ID:", CLIENT_ID);
+  console.log("CLIENT_SECRET length:", CLIENT_SECRET ? CLIENT_SECRET.length : 0);
+  console.log("DRIVE_ID:", DRIVE_ID);
+  console.log("================================");
   
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
   console.log("Token URL:", tokenUrl);
