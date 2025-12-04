@@ -213,7 +213,7 @@ export default function PriseDeMandat() {
   const [addressStepCollapsed, setAddressStepCollapsed] = useState(false);
   const [mandatStepCollapsed, setMandatStepCollapsed] = useState(false);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(false);
-  const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(false);
+  const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(true);
   const [professionnelInfo, setProfessionnelInfo] = useState({ notaire: "", courtier: "", compagnie: "" });
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);

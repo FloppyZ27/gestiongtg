@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Briefcase, X } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formatPhoneNumber = (phone) => {
   if (!phone) return "";
@@ -30,12 +29,12 @@ export default function ProfessionnelStepForm({
   isCollapsed,
   onToggleCollapse
 }) {
-  const [activeTab, setActiveTab] = useState("notaire");
+  const [activeField, setActiveField] = useState(null); // "notaire", "courtier", "compagnie"
 
   // Filtrer les listes basées sur les champs de saisie
   const filteredNotaires = useMemo(() => {
     const search = (professionnelInfo.notaire || "").toLowerCase();
-    if (!search) return notaires.slice(0, 10);
+    if (!search) return notaires.slice(0, 15);
     return notaires.filter(n => 
       `${n.prenom} ${n.nom}`.toLowerCase().includes(search) ||
       n.courriels?.some(c => c.courriel?.toLowerCase().includes(search)) ||
@@ -45,7 +44,7 @@ export default function ProfessionnelStepForm({
 
   const filteredCourtiers = useMemo(() => {
     const search = (professionnelInfo.courtier || "").toLowerCase();
-    if (!search) return courtiers.slice(0, 10);
+    if (!search) return courtiers.slice(0, 15);
     return courtiers.filter(c => 
       `${c.prenom} ${c.nom}`.toLowerCase().includes(search) ||
       c.courriels?.some(co => co.courriel?.toLowerCase().includes(search)) ||
@@ -55,7 +54,7 @@ export default function ProfessionnelStepForm({
 
   const filteredCompagnies = useMemo(() => {
     const search = (professionnelInfo.compagnie || "").toLowerCase();
-    if (!search) return compagnies.slice(0, 10);
+    if (!search) return compagnies.slice(0, 15);
     return compagnies.filter(c => 
       `${c.prenom} ${c.nom}`.toLowerCase().includes(search) ||
       c.courriels?.some(co => co.courriel?.toLowerCase().includes(search)) ||
@@ -71,6 +70,22 @@ export default function ProfessionnelStepForm({
   };
 
   const hasSelections = selectedNotaireIds.length > 0 || selectedCourtierIds.length > 0 || selectedCompagnieIds.length > 0;
+
+  // Déterminer quelle liste afficher
+  const getActiveList = () => {
+    if (activeField === "notaire") {
+      return { list: filteredNotaires, type: "notaire", color: "purple", selectedIds: selectedNotaireIds, onSelect: onSelectNotaire };
+    }
+    if (activeField === "courtier") {
+      return { list: filteredCourtiers, type: "courtier", color: "orange", selectedIds: selectedCourtierIds, onSelect: onSelectCourtier };
+    }
+    if (activeField === "compagnie") {
+      return { list: filteredCompagnies, type: "compagnie", color: "cyan", selectedIds: selectedCompagnieIds, onSelect: onSelectCompagnie };
+    }
+    return null;
+  };
+
+  const activeListData = getActiveList();
 
   return (
     <Card className="border-slate-700 bg-slate-800/30">
@@ -110,217 +125,137 @@ export default function ProfessionnelStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-2 pb-3">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-8">
-              <TabsTrigger value="notaire" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400">
-                Notaire
-              </TabsTrigger>
-              <TabsTrigger value="courtier" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400">
-                Courtier
-              </TabsTrigger>
-              <TabsTrigger value="compagnie" className="text-xs data-[state=active]:bg-cyan-500/30 data-[state=active]:text-cyan-400">
-                Compagnie
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="notaire" className="mt-2">
-              <div className="grid grid-cols-[1fr_1fr] gap-3">
-                {/* Champ de saisie */}
-                <div className="space-y-2">
-                  <Label className="text-slate-400 text-xs">Rechercher un notaire</Label>
-                  <Input
-                    value={professionnelInfo.notaire || ""}
-                    onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
-                    placeholder="Nom du notaire..."
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
-                  />
-                  {/* Notaires sélectionnés */}
-                  {selectedNotaireIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedNotaireIds.map(id => {
-                        const notaire = getClientById(notaires, id);
-                        return notaire ? (
-                          <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 pr-1">
-                            {notaire.prenom} {notaire.nom}
-                            <button
-                              type="button"
-                              onClick={() => onSelectNotaire(id)}
-                              className="ml-1 hover:text-red-400"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
-                </div>
-                {/* Liste des notaires */}
-                <div className="max-h-32 overflow-y-auto space-y-1">
-                  {filteredNotaires.length > 0 ? (
-                    filteredNotaires.map(notaire => {
-                      const isSelected = selectedNotaireIds.includes(notaire.id);
-                      return (
-                        <div
-                          key={notaire.id}
-                          onClick={() => onSelectNotaire(notaire.id)}
-                          className={`p-2 rounded cursor-pointer text-xs transition-all ${
-                            isSelected 
-                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
-                              : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          <p className="font-medium">{notaire.prenom} {notaire.nom}</p>
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            {getCurrentValue(notaire.telephones, 'telephone') && (
-                              <span>{formatPhoneNumber(getCurrentValue(notaire.telephones, 'telephone'))}</span>
-                            )}
-                            {getCurrentValue(notaire.courriels, 'courriel') && (
-                              <span className="ml-2">{getCurrentValue(notaire.courriels, 'courriel')}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-slate-500 text-xs text-center py-4">Aucun notaire trouvé</p>
-                  )}
-                </div>
+          <div className="grid grid-cols-[1fr_1fr] gap-4">
+            {/* Colonne gauche - Champs de saisie */}
+            <div className="space-y-3">
+              {/* Notaire */}
+              <div className="space-y-1">
+                <Label className="text-purple-400 text-xs">Notaire</Label>
+                <Input
+                  value={professionnelInfo.notaire || ""}
+                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
+                  onFocus={() => setActiveField("notaire")}
+                  placeholder="Rechercher un notaire..."
+                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "notaire" ? "ring-2 ring-purple-500 border-purple-500" : ""}`}
+                />
+                {selectedNotaireIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedNotaireIds.map(id => {
+                      const notaire = getClientById(notaires, id);
+                      return notaire ? (
+                        <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 pr-1 text-xs">
+                          {notaire.prenom} {notaire.nom}
+                          <button type="button" onClick={() => onSelectNotaire(id)} className="ml-1 hover:text-red-400">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
-            </TabsContent>
 
-            <TabsContent value="courtier" className="mt-2">
-              <div className="grid grid-cols-[1fr_1fr] gap-3">
-                {/* Champ de saisie */}
-                <div className="space-y-2">
-                  <Label className="text-slate-400 text-xs">Rechercher un courtier</Label>
-                  <Input
-                    value={professionnelInfo.courtier || ""}
-                    onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
-                    placeholder="Nom du courtier..."
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
-                  />
-                  {/* Courtiers sélectionnés */}
-                  {selectedCourtierIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedCourtierIds.map(id => {
-                        const courtier = getClientById(courtiers, id);
-                        return courtier ? (
-                          <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 pr-1">
-                            {courtier.prenom} {courtier.nom}
-                            <button
-                              type="button"
-                              onClick={() => onSelectCourtier(id)}
-                              className="ml-1 hover:text-red-400"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
-                </div>
-                {/* Liste des courtiers */}
-                <div className="max-h-32 overflow-y-auto space-y-1">
-                  {filteredCourtiers.length > 0 ? (
-                    filteredCourtiers.map(courtier => {
-                      const isSelected = selectedCourtierIds.includes(courtier.id);
-                      return (
-                        <div
-                          key={courtier.id}
-                          onClick={() => onSelectCourtier(courtier.id)}
-                          className={`p-2 rounded cursor-pointer text-xs transition-all ${
-                            isSelected 
-                              ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' 
-                              : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          <p className="font-medium">{courtier.prenom} {courtier.nom}</p>
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            {getCurrentValue(courtier.telephones, 'telephone') && (
-                              <span>{formatPhoneNumber(getCurrentValue(courtier.telephones, 'telephone'))}</span>
-                            )}
-                            {getCurrentValue(courtier.courriels, 'courriel') && (
-                              <span className="ml-2">{getCurrentValue(courtier.courriels, 'courriel')}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-slate-500 text-xs text-center py-4">Aucun courtier trouvé</p>
-                  )}
-                </div>
+              {/* Courtier */}
+              <div className="space-y-1">
+                <Label className="text-orange-400 text-xs">Courtier immobilier</Label>
+                <Input
+                  value={professionnelInfo.courtier || ""}
+                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
+                  onFocus={() => setActiveField("courtier")}
+                  placeholder="Rechercher un courtier..."
+                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "courtier" ? "ring-2 ring-orange-500 border-orange-500" : ""}`}
+                />
+                {selectedCourtierIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedCourtierIds.map(id => {
+                      const courtier = getClientById(courtiers, id);
+                      return courtier ? (
+                        <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 pr-1 text-xs">
+                          {courtier.prenom} {courtier.nom}
+                          <button type="button" onClick={() => onSelectCourtier(id)} className="ml-1 hover:text-red-400">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
-            </TabsContent>
 
-            <TabsContent value="compagnie" className="mt-2">
-              <div className="grid grid-cols-[1fr_1fr] gap-3">
-                {/* Champ de saisie */}
-                <div className="space-y-2">
-                  <Label className="text-slate-400 text-xs">Rechercher une compagnie</Label>
-                  <Input
-                    value={professionnelInfo.compagnie || ""}
-                    onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
-                    placeholder="Nom de la compagnie..."
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
-                  />
-                  {/* Compagnies sélectionnées */}
-                  {selectedCompagnieIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedCompagnieIds.map(id => {
-                        const compagnie = getClientById(compagnies, id);
-                        return compagnie ? (
-                          <Badge key={id} className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 pr-1">
-                            {compagnie.prenom} {compagnie.nom}
-                            <button
-                              type="button"
-                              onClick={() => onSelectCompagnie(id)}
-                              className="ml-1 hover:text-red-400"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
-                </div>
-                {/* Liste des compagnies */}
-                <div className="max-h-32 overflow-y-auto space-y-1">
-                  {filteredCompagnies.length > 0 ? (
-                    filteredCompagnies.map(compagnie => {
-                      const isSelected = selectedCompagnieIds.includes(compagnie.id);
-                      return (
-                        <div
-                          key={compagnie.id}
-                          onClick={() => onSelectCompagnie(compagnie.id)}
-                          className={`p-2 rounded cursor-pointer text-xs transition-all ${
-                            isSelected 
-                              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
-                              : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          <p className="font-medium">{compagnie.prenom} {compagnie.nom}</p>
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            {getCurrentValue(compagnie.telephones, 'telephone') && (
-                              <span>{formatPhoneNumber(getCurrentValue(compagnie.telephones, 'telephone'))}</span>
-                            )}
-                            {getCurrentValue(compagnie.courriels, 'courriel') && (
-                              <span className="ml-2">{getCurrentValue(compagnie.courriels, 'courriel')}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-slate-500 text-xs text-center py-4">Aucune compagnie trouvée</p>
-                  )}
-                </div>
+              {/* Compagnie */}
+              <div className="space-y-1">
+                <Label className="text-cyan-400 text-xs">Compagnie</Label>
+                <Input
+                  value={professionnelInfo.compagnie || ""}
+                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
+                  onFocus={() => setActiveField("compagnie")}
+                  placeholder="Rechercher une compagnie..."
+                  className={`bg-slate-700 border-slate-600 text-white h-8 text-sm ${activeField === "compagnie" ? "ring-2 ring-cyan-500 border-cyan-500" : ""}`}
+                />
+                {selectedCompagnieIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedCompagnieIds.map(id => {
+                      const compagnie = getClientById(compagnies, id);
+                      return compagnie ? (
+                        <Badge key={id} className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 pr-1 text-xs">
+                          {compagnie.prenom} {compagnie.nom}
+                          <button type="button" onClick={() => onSelectCompagnie(id)} className="ml-1 hover:text-red-400">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+
+            {/* Colonne droite - Liste associative */}
+            <div className="border-l border-slate-700 pl-4">
+              {activeListData ? (
+                <>
+                  <Label className={`text-${activeListData.color}-400 text-xs mb-2 block`}>
+                    {activeListData.type === "notaire" ? "Notaires" : activeListData.type === "courtier" ? "Courtiers" : "Compagnies"}
+                  </Label>
+                  <div className="max-h-40 overflow-y-auto space-y-1">
+                    {activeListData.list.length > 0 ? (
+                      activeListData.list.map(item => {
+                        const isSelected = activeListData.selectedIds.includes(item.id);
+                        const colorClasses = {
+                          purple: isSelected ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700",
+                          orange: isSelected ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700",
+                          cyan: isSelected ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"
+                        };
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => activeListData.onSelect(item.id)}
+                            className={`p-2 rounded cursor-pointer text-xs transition-all ${colorClasses[activeListData.color]}`}
+                          >
+                            <p className="font-medium">{item.prenom} {item.nom}</p>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              {getCurrentValue(item.telephones, 'telephone') && (
+                                <span>{formatPhoneNumber(getCurrentValue(item.telephones, 'telephone'))}</span>
+                              )}
+                              {getCurrentValue(item.courriels, 'courriel') && (
+                                <span className="ml-2">{getCurrentValue(item.courriels, 'courriel')}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-slate-500 text-xs text-center py-4">Aucun résultat</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-500 text-xs">
+                  Cliquez sur un champ pour afficher la liste
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       )}
     </Card>
