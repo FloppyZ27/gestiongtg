@@ -1,19 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
-// Force redeploy v2 - 2024-12-04
-const TENANT_ID = Deno.env.get("MICROSOFT_TENANT_ID");
-const CLIENT_ID = Deno.env.get("MICROSOFT_CLIENT_ID");
-const CLIENT_SECRET = Deno.env.get("MICROSOFT_CLIENT_SECRET");
-const SITE_ID = Deno.env.get("SHAREPOINT_SITE_ID");
-const DRIVE_ID = Deno.env.get("SHAREPOINT_DRIVE_ID");
+// HARDCODED VALUES FOR TESTING - v3
+const TENANT_ID = "31adb05b-e471-4daf-8831-4d46014be9b8";
+const CLIENT_ID = "1291551b-48b1-4e33-beff-d3cb8644a880";
+const CLIENT_SECRET = "0588Q~ROtUMc3N.AG0y36wpI1FrckbQ1IbekwddN";
+const SITE_ID = "girardtremblaygilbert365.sharepoint.com,df242f6d-91a5-4248-a3a4-41b7e44073a2,64921d7b-e2e8-4c9e-bd7e-311465aaf30d";
+const DRIVE_ID = "b!bS8k36WRSEKjpEG35EBzonsdkmTo4p5MvX4xFGWq8w1fkwthDsxdQL8_MK0t_B3b";
 
 async function getAccessToken() {
-  // Debug v2
-  console.log("=== SHAREPOINT AUTH DEBUG v2 ===");
+  // Debug v3 - Hardcoded test
+  console.log("=== SHAREPOINT AUTH DEBUG v3 (HARDCODED) ===");
   console.log("TENANT_ID:", TENANT_ID);
   console.log("CLIENT_ID:", CLIENT_ID);
-  console.log("CLIENT_SECRET length:", CLIENT_SECRET ? CLIENT_SECRET.length : 0);
-  console.log("DRIVE_ID:", DRIVE_ID);
+  console.log("CLIENT_SECRET length:", CLIENT_SECRET.length);
   console.log("================================");
   
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
