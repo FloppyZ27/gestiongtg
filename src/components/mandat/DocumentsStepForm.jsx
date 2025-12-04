@@ -328,6 +328,61 @@ export default function DocumentsStepForm({
           )}
         </CardContent>
       )}
+
+      {/* Dialog de prévisualisation */}
+      <Dialog open={!!previewFile} onOpenChange={closePreview}>
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="p-4 border-b border-slate-700">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-white flex items-center gap-2">
+                {previewFile && getFileIcon(previewFile.name)}
+                {previewFile?.name}
+              </DialogTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => previewFile && handleDownload(previewFile)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  Télécharger
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto p-4">
+            {isLoadingPreview ? (
+              <div className="flex items-center justify-center h-96">
+                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
+              </div>
+            ) : previewUrl ? (
+              <div className="w-full h-[70vh]">
+                {previewFile?.name?.toLowerCase().endsWith('.pdf') ? (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full rounded"
+                    title={previewFile?.name}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <img
+                      src={previewUrl}
+                      alt={previewFile?.name}
+                      className="max-w-full max-h-full object-contain rounded"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-96 text-slate-400">
+                Impossible de charger la prévisualisation
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
