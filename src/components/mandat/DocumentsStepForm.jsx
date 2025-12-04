@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, Eye, X } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, Eye } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -199,42 +199,28 @@ export default function DocumentsStepForm({
 
   return (
     <Card 
-      className={`border-slate-700 bg-slate-800/30 transition-all ${isDragOver ? 'ring-2 ring-teal-500 bg-teal-500/10' : ''}`}
+      className={`border-slate-700 bg-slate-800/30 transition-all ${isDragOver ? 'ring-2 ring-yellow-500 bg-yellow-500/10' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <CardHeader 
-        className="cursor-pointer hover:bg-teal-900/40 transition-colors rounded-t-lg py-1.5 bg-teal-900/20"
+        className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-teal-500/30 flex items-center justify-center">
-              <FolderOpen className="w-3.5 h-3.5 text-teal-400" />
+            <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
+              <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
             </div>
-            <CardTitle className="text-teal-300 text-base">Documents</CardTitle>
+            <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
             {files.length > 0 && (
-              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
+              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
                 {files.length} fichier{files.length > 1 ? 's' : ''}
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <label onClick={(e) => e.stopPropagation()}>
-              <input
-                type="file"
-                multiple
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <span className="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
-                <Upload className="w-3 h-3" />
-                Ajouter
-              </span>
-            </label>
-            {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-          </div>
+          {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
       </CardHeader>
 
@@ -262,15 +248,29 @@ export default function DocumentsStepForm({
               <p className="text-slate-500 text-xs truncate flex-1">
                 📁 {folderPath}
               </p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); refetch(); }}
-                className="text-slate-400 hover:text-white h-6 px-2"
-              >
-                <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
+              <div className="flex items-center gap-1">
+                <label onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <span className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
+                    <Upload className="w-3 h-3" />
+                    Ajouter
+                  </span>
+                </label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); refetch(); }}
+                  className="text-slate-400 hover:text-white h-6 px-2"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
             </div>
           )}
 
@@ -321,7 +321,7 @@ export default function DocumentsStepForm({
                 </div>
               ) : (
                 <p className="text-slate-500 text-xs text-center py-3">
-                  Aucun fichier • Glissez des fichiers ici pour les ajouter
+                  Aucun fichier • Glissez des fichiers ici ou cliquez sur Ajouter
                 </p>
               )}
             </>
@@ -355,7 +355,7 @@ export default function DocumentsStepForm({
           <div className="flex-1 overflow-auto p-4">
             {isLoadingPreview ? (
               <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
+                <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
               </div>
             ) : previewUrl ? (
               <div className="w-full h-[70vh]">
