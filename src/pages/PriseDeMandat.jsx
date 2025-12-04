@@ -541,6 +541,7 @@ export default function PriseDeMandat() {
     setAddressStepCollapsed(true);
     setMandatStepCollapsed(true);
     setTarificationStepCollapsed(true);
+    setDocumentsStepCollapsed(true);
     
     setIsDialogOpen(true);
   };
