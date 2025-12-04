@@ -2163,7 +2163,7 @@ export default function PriseDeMandat() {
                     <DocumentsStepForm
                       arpenteurGeometre={formData.arpenteur_geometre}
                       numeroDossier={formData.numero_dossier}
-                      isCollapsed={true}
+                      isCollapsed={documentsStepCollapsed}
                       onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)}
                       onDocumentsChange={setHasDocuments}
                     />
