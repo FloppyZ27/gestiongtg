@@ -351,32 +351,28 @@ export default function DocumentsStepForm({
               </div>
             </div>
           </DialogHeader>
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 h-full">
             {isLoadingPreview ? (
               <div className="flex items-center justify-center h-96">
                 <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
               </div>
             ) : previewUrl ? (
-              <div className="w-full h-[70vh]">
-                {previewFile?.name?.toLowerCase().endsWith('.pdf') ? (
-                  <iframe
-                    src={previewUrl}
-                    className="w-full h-full rounded"
-                    title={previewFile?.name}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <img
-                      src={previewUrl}
-                      alt={previewFile?.name}
-                      className="max-w-full max-h-full object-contain rounded"
-                    />
-                  </div>
-                )}
-              </div>
+              <iframe
+                src={previewUrl}
+                className="w-full h-[calc(80vh-100px)] rounded-lg border border-slate-700"
+                title={previewFile?.name}
+              />
             ) : (
-              <div className="flex items-center justify-center h-96 text-slate-400">
-                Impossible de charger la prévisualisation
+              <div className="flex flex-col items-center justify-center h-96 text-slate-400">
+                <FileText className="w-16 h-16 mb-4 opacity-50" />
+                <p>Prévisualisation non disponible</p>
+                <Button
+                  type="button"
+                  className="mt-4"
+                  onClick={() => previewFile?.webUrl && window.open(previewFile.webUrl, '_blank')}
+                >
+                  Ouvrir dans SharePoint
+                </Button>
               </div>
             )}
           </div>
