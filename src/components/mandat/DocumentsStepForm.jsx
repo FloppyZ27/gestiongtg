@@ -45,7 +45,7 @@ export default function DocumentsStepForm({
   const [uploadProgress, setUploadProgress] = useState("");
 
   const initials = getArpenteurInitials(arpenteurGeometre);
-  const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANT`;
+  const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
 
   // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
