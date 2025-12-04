@@ -218,6 +218,7 @@ export default function PriseDeMandat() {
   const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(true);
   const [professionnelInfo, setProfessionnelInfo] = useState({ notaire: "", courtier: "", compagnie: "" });
   const [documentsStepCollapsed, setDocumentsStepCollapsed] = useState(true);
+  const [dossierInfoStepCollapsed, setDossierInfoStepCollapsed] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);
   const [isOuvrirDossierDialogOpen, setIsOuvrirDossierDialogOpen] = useState(false);
