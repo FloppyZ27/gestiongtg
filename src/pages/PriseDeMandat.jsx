@@ -27,6 +27,7 @@ import AddressStepForm from "../components/mandat/AddressStepForm";
 import MandatStepForm from "../components/mandat/MandatStepForm";
 import TarificationStepForm from "../components/mandat/TarificationStepForm";
 import ProfessionnelStepForm from "../components/mandat/ProfessionnelStepForm";
+import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -215,6 +216,7 @@ export default function PriseDeMandat() {
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
   const [professionnelStepCollapsed, setProfessionnelStepCollapsed] = useState(true);
   const [professionnelInfo, setProfessionnelInfo] = useState({ notaire: "", courtier: "", compagnie: "" });
+  const [documentsStepCollapsed, setDocumentsStepCollapsed] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(false);
   const [commentsCollapsed, setCommentsCollapsed] = useState(false);
   const [isOuvrirDossierDialogOpen, setIsOuvrirDossierDialogOpen] = useState(false);
@@ -2210,6 +2212,16 @@ export default function PriseDeMandat() {
                     isCollapsed={tarificationStepCollapsed}
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
+
+                  {/* Étape 6: Documents - Visible uniquement si statut "Mandats à ouvrir" et numéro de dossier existe */}
+                  {formData.statut === "Mandats à ouvrir" && formData.numero_dossier && formData.arpenteur_geometre && (
+                    <DocumentsStepForm
+                      arpenteurGeometre={formData.arpenteur_geometre}
+                      numeroDossier={formData.numero_dossier}
+                      isCollapsed={documentsStepCollapsed}
+                      onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)}
+                    />
+                  )}
 
                 </form>
                   </div>
