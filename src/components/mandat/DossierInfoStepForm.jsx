@@ -40,21 +40,11 @@ export default function DossierInfoStepForm({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-teal-500/30 flex items-center justify-center">
-              <FolderOpen className="w-3.5 h-3.5 text-teal-400" />
+              <div className="w-6 h-6 rounded-full bg-teal-500/30 flex items-center justify-center">
+                <FolderOpen className="w-3.5 h-3.5 text-teal-400" />
+              </div>
+              <CardTitle className="text-teal-300 text-base">Informations du dossier</CardTitle>
             </div>
-            <CardTitle className="text-teal-300 text-base">Informations du dossier</CardTitle>
-            {arpenteurGeometre && (
-              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
-                {arpenteurGeometre}
-              </Badge>
-            )}
-            {numeroDossier && (
-              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
-                #{numeroDossier}
-              </Badge>
-            )}
-          </div>
           {isCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
         </div>
       </CardHeader>
@@ -100,27 +90,29 @@ export default function DossierInfoStepForm({
               </div>
             </div>
 
-            {/* Ligne 2: N° Dossier et Date d'ouverture */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-0.5">
-                <Label className="text-slate-400 text-xs">N° de dossier</Label>
-                <Input
-                  value={numeroDossier || ""}
-                  onChange={(e) => onNumeroDossierChange(e.target.value)}
-                  placeholder="Ex: 12345"
-                  className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                />
+            {/* Ligne 2: N° Dossier et Date d'ouverture - Visible uniquement si statut "Mandats à ouvrir" */}
+            {statut === "Mandats à ouvrir" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-0.5">
+                  <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                  <Input
+                    value={numeroDossier || ""}
+                    onChange={(e) => onNumeroDossierChange(e.target.value)}
+                    placeholder="Ex: 12345"
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                  />
+                </div>
+                <div className="space-y-0.5">
+                  <Label className="text-slate-400 text-xs">Date d'ouverture</Label>
+                  <Input
+                    type="date"
+                    value={dateOuverture || ""}
+                    onChange={(e) => onDateOuvertureChange(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
+                  />
+                </div>
               </div>
-              <div className="space-y-0.5">
-                <Label className="text-slate-400 text-xs">Date d'ouverture</Label>
-                <Input
-                  type="date"
-                  value={dateOuverture || ""}
-                  onChange={(e) => onDateOuvertureChange(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                />
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       )}
