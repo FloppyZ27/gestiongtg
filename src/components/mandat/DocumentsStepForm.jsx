@@ -286,22 +286,36 @@ export default function DocumentsStepForm({
                   {files.map((file) => (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group"
+                      className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
+                      onClick={() => isPreviewable(file.name) ? handlePreview(file) : handleDownload(file)}
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         {getFileIcon(file.name)}
                         <span className="text-slate-300 text-sm truncate">{file.name}</span>
                         <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-6 px-2 text-slate-400 hover:text-white"
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {isPreviewable(file.name) && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
+                            className="h-6 px-2 text-slate-400 hover:text-white"
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
+                          className="h-6 px-2 text-slate-400 hover:text-white"
+                        >
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
