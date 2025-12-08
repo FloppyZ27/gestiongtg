@@ -19,7 +19,8 @@ export default function MandatStepForm({
   onMandatsChange,
   isCollapsed,
   onToggleCollapse,
-  statut = ""
+  statut = "",
+  disabled = false
 }) {
   // Extraire les types sélectionnés directement des props
   const selectedTypes = mandats.map(m => m.type_mandat).filter(t => t);
@@ -160,6 +161,7 @@ export default function MandatStepForm({
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
+                      disabled={disabled}
                       className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-sm"
                     >
                       {selectedTypes.length > 0 ? (
@@ -198,7 +200,7 @@ export default function MandatStepForm({
               </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Échéance souhaitée</Label>
-                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)}>
+                <Select value={sharedInfo.echeance_souhaitee} onValueChange={(value) => handleSharedInfoChange('echeance_souhaitee', value)} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
@@ -211,7 +213,7 @@ export default function MandatStepForm({
               </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Urgence perçue</Label>
-                <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)}>
+                <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
@@ -232,6 +234,7 @@ export default function MandatStepForm({
                   type="date"
                   value={sharedInfo.date_signature}
                   onChange={(e) => handleSharedInfoChange('date_signature', e.target.value)}
+                  disabled={disabled}
                   className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                 />
               </div>
@@ -241,6 +244,7 @@ export default function MandatStepForm({
                   type="date"
                   value={sharedInfo.date_debut_travaux}
                   onChange={(e) => handleSharedInfoChange('date_debut_travaux', e.target.value)}
+                  disabled={disabled}
                   className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                 />
               </div>
@@ -252,6 +256,7 @@ export default function MandatStepForm({
                   type="date"
                   value={sharedInfo.date_livraison}
                   onChange={(e) => handleSharedInfoChange('date_livraison', e.target.value)}
+                  disabled={disabled}
                   className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                   required={isDateLivraisonRequired}
                 />

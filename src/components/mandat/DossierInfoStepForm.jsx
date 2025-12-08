@@ -30,7 +30,8 @@ export default function DossierInfoStepForm({
   dateOuverture,
   onDateOuvertureChange,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  disabled = false
 }) {
   return (
     <Card className="border-slate-700 bg-slate-800/30">
@@ -56,7 +57,7 @@ export default function DossierInfoStepForm({
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
-                <Select value={arpenteurGeometre} onValueChange={onArpenteurChange}>
+                <Select value={arpenteurGeometre} onValueChange={onArpenteurChange} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
@@ -76,10 +77,10 @@ export default function DossierInfoStepForm({
                     <button
                       key={s.value}
                       type="button"
-                      onClick={() => arpenteurGeometre && onStatutChange(s.value)}
-                      disabled={!arpenteurGeometre}
+                      onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
+                      disabled={!arpenteurGeometre || disabled}
                       className={`px-2 py-0.5 rounded text-xs border transition-all ${
-                        !arpenteurGeometre
+                        !arpenteurGeometre || disabled
                           ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
                           : statut === s.value 
                             ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
@@ -102,6 +103,7 @@ export default function DossierInfoStepForm({
                     value={numeroDossier || ""}
                     onChange={(e) => onNumeroDossierChange(e.target.value)}
                     placeholder="Ex: 12345"
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
@@ -111,6 +113,7 @@ export default function DossierInfoStepForm({
                     type="date"
                     value={dateOuverture || ""}
                     onChange={(e) => onDateOuvertureChange(e.target.value)}
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>

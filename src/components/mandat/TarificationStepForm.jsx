@@ -10,7 +10,8 @@ export default function TarificationStepForm({
   mandats = [],
   onTarificationChange,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  disabled = false
 }) {
   const mandatsWithType = mandats.filter(m => m.type_mandat);
   
@@ -164,6 +165,7 @@ export default function TarificationStepForm({
                             }}
                             onBlur={() => handleInputBlur(index, 'prix_premier_lot')}
                             placeholder="0.00"
+                            disabled={disabled}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -179,6 +181,7 @@ export default function TarificationStepForm({
                             }}
                             onBlur={() => handleInputBlur(index, 'prix_autres_lots')}
                             placeholder="0.00"
+                            disabled={disabled}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -197,6 +200,7 @@ export default function TarificationStepForm({
                             }}
                             onBlur={() => handleInputBlur(index, 'prix_estime')}
                             placeholder="0.00"
+                            disabled={disabled}
                             className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                           />
                         </div>
@@ -216,6 +220,7 @@ export default function TarificationStepForm({
                         }}
                         onBlur={() => handleInputBlur(index, 'rabais')}
                         placeholder="0.00"
+                        disabled={disabled}
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
                       />
                     </div>
@@ -223,6 +228,7 @@ export default function TarificationStepForm({
                       <Checkbox
                         checked={mandat.taxes_incluses || false}
                         onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
+                        disabled={disabled}
                         className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
                       />
                       <Label className="text-slate-400 text-xs whitespace-nowrap">Taxes incluses</Label>

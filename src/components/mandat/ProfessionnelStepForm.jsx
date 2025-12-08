@@ -27,7 +27,8 @@ export default function ProfessionnelStepForm({
   professionnelInfo = {},
   onProfessionnelInfoChange,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  disabled = false
 }) {
   const [activeField, setActiveField] = useState(null); // "notaire", "courtier", "compagnie"
 
@@ -134,9 +135,10 @@ export default function ProfessionnelStepForm({
                 <Input
                   value={professionnelInfo.notaire || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
-                  onFocus={() => setActiveField("notaire")}
+                  onFocus={() => !disabled && setActiveField("notaire")}
                   placeholder="Nom du notaire..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
+                  disabled={disabled}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedNotaireIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -161,9 +163,10 @@ export default function ProfessionnelStepForm({
                 <Input
                   value={professionnelInfo.courtier || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
-                  onFocus={() => setActiveField("courtier")}
+                  onFocus={() => !disabled && setActiveField("courtier")}
                   placeholder="Nom du courtier immobilier..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
+                  disabled={disabled}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedCourtierIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -188,9 +191,10 @@ export default function ProfessionnelStepForm({
                 <Input
                   value={professionnelInfo.compagnie || ""}
                   onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
-                  onFocus={() => setActiveField("compagnie")}
+                  onFocus={() => !disabled && setActiveField("compagnie")}
                   placeholder="Nom de la compagnie..."
-                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
+                  disabled={disabled}
+                  className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
                 {selectedCompagnieIds.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-0.5">
@@ -228,8 +232,10 @@ export default function ProfessionnelStepForm({
                         return (
                           <div
                             key={item.id}
-                            onClick={() => activeListData.onSelect(item.id)}
-                            className={`px-2 py-1 rounded cursor-pointer text-xs transition-all ${isSelected ? "bg-pink-500/20 text-pink-400 border border-pink-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
+                            onClick={() => !disabled && activeListData.onSelect(item.id)}
+                            className={`px-2 py-1 rounded text-xs transition-all ${
+                              disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                            } ${isSelected ? "bg-pink-500/20 text-pink-400 border border-pink-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
                           >
                             <p className="font-medium">{item.prenom} {item.nom}</p>
                           </div>

@@ -13,7 +13,8 @@ export default function AddressStepForm({
   onToggleCollapse,
   clientDossiers = [],
   onSelectExistingAddress,
-  allLots = []
+  allLots = [],
+  disabled = false
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -203,6 +204,7 @@ export default function AddressStepForm({
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     placeholder="Rechercher une adresse..."
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-7 text-sm pl-10"
                   />
                   {isSearching && (
@@ -236,6 +238,7 @@ export default function AddressStepForm({
                       value={addressForm.numero_civique}
                       onChange={(e) => handleFieldChange('numero_civique', e.target.value)}
                       placeholder="123"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                     />
                   </div>
@@ -245,6 +248,7 @@ export default function AddressStepForm({
                       value={addressForm.rue}
                       onChange={(e) => handleFieldChange('rue', e.target.value)}
                       placeholder="Nom de la rue"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                     />
                   </div>
@@ -257,6 +261,7 @@ export default function AddressStepForm({
                       value={addressForm.ville}
                       onChange={(e) => handleFieldChange('ville', e.target.value)}
                       placeholder="Ville"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                     />
                   </div>
@@ -266,6 +271,7 @@ export default function AddressStepForm({
                       value={addressForm.code_postal}
                       onChange={(e) => handleFieldChange('code_postal', e.target.value)}
                       placeholder="G0V 0A0"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                     />
                   </div>
@@ -275,6 +281,7 @@ export default function AddressStepForm({
                       value={addressForm.province}
                       onChange={(e) => handleFieldChange('province', e.target.value)}
                       placeholder="Québec"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                     />
                   </div>
@@ -289,6 +296,7 @@ export default function AddressStepForm({
                   value={addressForm.numero_lot}
                   onChange={(e) => handleFieldChange('numero_lot', e.target.value)}
                   placeholder="1234567"
+                  disabled={disabled}
                   className="bg-slate-700 border border-slate-600 text-white flex-1 text-sm rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
