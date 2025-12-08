@@ -94,23 +94,12 @@ export default function ProfessionnelStepForm({
   };
 
   const handleSelectProfessionnel = (item, type) => {
-    // Remplir le champ avec le nom du professionnel sélectionné
-    const fullName = `${item.prenom} ${item.nom}`;
-    
+    // Sélectionner depuis la liste n'affecte PAS les infos manuelles
     if (type === "notaire") {
-      const newInfo = { ...localInfo, notaire: fullName };
-      setLocalInfo(newInfo);
-      onProfessionnelInfoChange(newInfo);
       onSelectNotaire(item.id);
     } else if (type === "courtier") {
-      const newInfo = { ...localInfo, courtier: fullName };
-      setLocalInfo(newInfo);
-      onProfessionnelInfoChange(newInfo);
       onSelectCourtier(item.id);
     } else if (type === "compagnie") {
-      const newInfo = { ...localInfo, compagnie: fullName };
-      setLocalInfo(newInfo);
-      onProfessionnelInfoChange(newInfo);
       onSelectCompagnie(item.id);
     }
   };
