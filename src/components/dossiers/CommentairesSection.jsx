@@ -387,13 +387,13 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
   };
 
   const renderCommentaireContent = (contenu) => {
-    // D'abord gérer les mentions
-    const emailRegex = /@([^\s]+)/g;
-    let processedContent = contenu.replace(emailRegex, (match, email) => {
+    // Gérer les mentions (@ au début d'un mot, pas dans une adresse email)
+    const emailRegex = /(^|[\s\n])@([^\s]+)/g;
+    let processedContent = contenu.replace(emailRegex, (match, prefix, email) => {
       const taggedUser = users.find(u => u.email === email);
-      return `<span class="bg-blue-500/20 text-blue-400 px-1 rounded">@${taggedUser?.full_name || email}</span>`;
+      return `${prefix}<span class="bg-blue-500/20 text-blue-400 px-1 rounded">@${taggedUser?.full_name || email}</span>`;
     });
-    
+
     return (
       <div 
         className="prose prose-invert prose-sm max-w-none"
