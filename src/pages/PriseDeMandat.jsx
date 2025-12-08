@@ -2068,31 +2068,51 @@ export default function PriseDeMandat() {
                           // Créer un commentaire récapitulatif avec les infos MANUELLES du mandat
                           let commentaireInfoMandat = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                           
-                          // Client saisi manuellement
-                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
+                          // Vérifier si un texte saisi correspond à un professionnel sélectionné
+                          const selectedClientsNames = selectedClientIds.map(id => {
+                            const c = clients.find(cl => cl.id === id);
+                            return c ? `${c.prenom} ${c.nom}`.trim() : '';
+                          });
+                          const selectedNotairesNames = selectedNotaireIds.map(id => {
+                            const n = notaires.find(nt => nt.id === id);
+                            return n ? `${n.prenom} ${n.nom}`.trim() : '';
+                          });
+                          const selectedCourtiersNames = selectedCourtierIds.map(id => {
+                            const ct = courtiers.find(cr => cr.id === id);
+                            return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
+                          });
+                          const selectedCompagniesNames = selectedCompagnieIds.map(id => {
+                            const cp = compagnies.find(cmp => cmp.id === id);
+                            return cp ? `${cp.prenom} ${cp.nom}`.trim() : '';
+                          });
+                          
+                          // Client saisi manuellement (si différent des sélectionnés)
+                          const clientSaisiManuel = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+                          if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && 
+                              !selectedClientsNames.includes(clientSaisiManuel)) {
                             commentaireInfoMandat += `<strong><u>Client</u></strong>\n`;
                             if (clientInfo.prenom || clientInfo.nom) {
-                              commentaireInfoMandat += `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
+                              commentaireInfoMandat += clientSaisiManuel + "\n";
                             }
                             if (clientInfo.telephone) commentaireInfoMandat += `Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
                             if (clientInfo.courriel) commentaireInfoMandat += `Email: ${clientInfo.courriel}\n`;
                             commentaireInfoMandat += "\n";
                           }
                           
-                          // Notaire saisi manuellement
-                          if (professionnelInfo.notaire) {
+                          // Notaire saisi manuellement (si différent des sélectionnés)
+                          if (professionnelInfo.notaire && !selectedNotairesNames.includes(professionnelInfo.notaire.trim())) {
                             commentaireInfoMandat += `<strong><u>Notaire</u></strong>\n`;
                             commentaireInfoMandat += `${professionnelInfo.notaire}\n\n`;
                           }
                           
-                          // Courtier saisi manuellement
-                          if (professionnelInfo.courtier) {
+                          // Courtier saisi manuellement (si différent des sélectionnés)
+                          if (professionnelInfo.courtier && !selectedCourtiersNames.includes(professionnelInfo.courtier.trim())) {
                             commentaireInfoMandat += `<strong><u>Courtier immobilier</u></strong>\n`;
                             commentaireInfoMandat += `${professionnelInfo.courtier}\n\n`;
                           }
                           
-                          // Compagnie saisie manuellement
-                          if (professionnelInfo.compagnie) {
+                          // Compagnie saisie manuellement (si différente des sélectionnées)
+                          if (professionnelInfo.compagnie && !selectedCompagniesNames.includes(professionnelInfo.compagnie.trim())) {
                             commentaireInfoMandat += `<strong><u>Compagnie</u></strong>\n`;
                             commentaireInfoMandat += `${professionnelInfo.compagnie}\n\n`;
                           }
@@ -2580,34 +2600,54 @@ export default function PriseDeMandat() {
                       let infoCommentaire = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                       let hasAnyManualInfo = false;
                       
-                      // Client saisi manuellement
-                      if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
+                      // Vérifier si un texte saisi correspond à un professionnel sélectionné
+                      const selectedClientsNames = selectedClientIds.map(id => {
+                        const c = clients.find(cl => cl.id === id);
+                        return c ? `${c.prenom} ${c.nom}`.trim() : '';
+                      });
+                      const selectedNotairesNames = selectedNotaireIds.map(id => {
+                        const n = notaires.find(nt => nt.id === id);
+                        return n ? `${n.prenom} ${n.nom}`.trim() : '';
+                      });
+                      const selectedCourtiersNames = selectedCourtierIds.map(id => {
+                        const ct = courtiers.find(cr => cr.id === id);
+                        return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
+                      });
+                      const selectedCompagniesNames = selectedCompagnieIds.map(id => {
+                        const cp = compagnies.find(cmp => cmp.id === id);
+                        return cp ? `${cp.prenom} ${cp.nom}`.trim() : '';
+                      });
+                      
+                      // Client saisi manuellement (si différent des sélectionnés)
+                      const clientSaisiManuel = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim();
+                      if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && 
+                          !selectedClientsNames.includes(clientSaisiManuel)) {
                         hasAnyManualInfo = true;
                         infoCommentaire += `<strong><u>Client</u></strong>\n`;
                         if (clientInfo.prenom || clientInfo.nom) {
-                          infoCommentaire += `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
+                          infoCommentaire += clientSaisiManuel + "\n";
                         }
                         if (clientInfo.telephone) infoCommentaire += `Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
                         if (clientInfo.courriel) infoCommentaire += `Email: ${clientInfo.courriel}\n`;
                         infoCommentaire += "\n";
                       }
                       
-                      // Notaire saisi manuellement
-                      if (professionnelInfo.notaire) {
+                      // Notaire saisi manuellement (si différent des sélectionnés)
+                      if (professionnelInfo.notaire && !selectedNotairesNames.includes(professionnelInfo.notaire.trim())) {
                         hasAnyManualInfo = true;
                         infoCommentaire += `<strong><u>Notaire</u></strong>\n`;
                         infoCommentaire += `${professionnelInfo.notaire}\n\n`;
                       }
                       
-                      // Courtier saisi manuellement
-                      if (professionnelInfo.courtier) {
+                      // Courtier saisi manuellement (si différent des sélectionnés)
+                      if (professionnelInfo.courtier && !selectedCourtiersNames.includes(professionnelInfo.courtier.trim())) {
                         hasAnyManualInfo = true;
                         infoCommentaire += `<strong><u>Courtier immobilier</u></strong>\n`;
                         infoCommentaire += `${professionnelInfo.courtier}\n\n`;
                       }
                       
-                      // Compagnie saisie manuellement
-                      if (professionnelInfo.compagnie) {
+                      // Compagnie saisie manuellement (si différente des sélectionnées)
+                      if (professionnelInfo.compagnie && !selectedCompagniesNames.includes(professionnelInfo.compagnie.trim())) {
                         hasAnyManualInfo = true;
                         infoCommentaire += `<strong><u>Compagnie</u></strong>\n`;
                         infoCommentaire += `${professionnelInfo.compagnie}\n\n`;
