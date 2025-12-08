@@ -2808,6 +2808,17 @@ export default function PriseDeMandat() {
                                           }}
                                         >
                                           <p className="font-medium text-white">{client.prenom} {client.nom}</p>
+                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                            {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
+                                              <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
+                                            )}
+                                            {client.courriels?.find(c => c.actuel)?.courriel && (
+                                              <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
+                                            )}
+                                            {client.telephones?.find(t => t.actuel)?.telephone && (
+                                              <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
+                                            )}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -2867,6 +2878,17 @@ export default function PriseDeMandat() {
                                           }}
                                         >
                                           <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
+                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                            {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
+                                              <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
+                                            )}
+                                            {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                                              <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
+                                            )}
+                                            {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                                              <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
+                                            )}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -2926,6 +2948,17 @@ export default function PriseDeMandat() {
                                           }}
                                         >
                                           <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
+                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                            {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
+                                              <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
+                                            )}
+                                            {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                                              <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
+                                            )}
+                                            {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                                              <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
+                                            )}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
