@@ -2500,11 +2500,12 @@ export default function PriseDeMandat() {
                     }
 
                     try {
-                      // Créer un commentaire avec les infos saisies manuellement
+                      // Créer un commentaire avec les infos saisies manuellement (uniquement si pas de client existant sélectionné)
                       let infoCommentaire = "";
                       
-                      if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                        infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
+                      // Vérifier si des infos client sont saisies SANS client existant sélectionné
+                      if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && nouveauDossierForm.clients_ids.length === 0) {
+                        if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         
                         if (clientInfo.prenom || clientInfo.nom) {
                           infoCommentaire += `**Client:** ${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
@@ -2514,15 +2515,21 @@ export default function PriseDeMandat() {
                         }
                       }
                       
-                      if (professionnelInfo.notaire) {
+                      // Vérifier si des infos notaire sont saisies SANS notaire existant sélectionné
+                      if (professionnelInfo.notaire && nouveauDossierForm.notaires_ids.length === 0) {
+                        if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Notaire:** ${professionnelInfo.notaire}\n\n`;
                       }
                       
-                      if (professionnelInfo.courtier) {
+                      // Vérifier si des infos courtier sont saisies SANS courtier existant sélectionné
+                      if (professionnelInfo.courtier && nouveauDossierForm.courtiers_ids.length === 0) {
+                        if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Courtier immobilier:** ${professionnelInfo.courtier}\n\n`;
                       }
                       
-                      if (professionnelInfo.compagnie) {
+                      // Vérifier si des infos compagnie sont saisies SANS compagnie existante sélectionnée
+                      if (professionnelInfo.compagnie && (nouveauDossierForm.compagnies_ids || []).length === 0) {
+                        if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Compagnie:** ${professionnelInfo.compagnie}\n\n`;
                       }
                       
@@ -2530,6 +2537,7 @@ export default function PriseDeMandat() {
                       if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
                         const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
                         if (lotsArray.length > 0) {
+                          if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                           infoCommentaire += `**Lots mentionnés:**\n`;
                           lotsArray.forEach(lot => {
                             infoCommentaire += `  • ${lot.trim()}\n`;
