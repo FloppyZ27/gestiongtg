@@ -240,6 +240,7 @@ export default function PriseDeMandat() {
   const [notairesTabExpanded, setNotairesTabExpanded] = useState(false);
   const [courtiersTabExpanded, setCourtiersTabExpanded] = useState(false);
   const [isLotSelectorOpenDossier, setIsLotSelectorOpenDossier] = useState(false);
+  const [lotTabExpanded, setLotTabExpanded] = useState(false);
   const [currentMandatIndexDossier, setCurrentMandatIndexDossier] = useState(null);
   const [activeTabMandatDossier, setActiveTabMandatDossier] = useState("0");
   const [commentairesTemporairesDossier, setCommentairesTemporairesDossier] = useState([]);
@@ -3336,14 +3337,65 @@ export default function PriseDeMandat() {
                                           size="sm" 
                                           onClick={() => {
                                             setCurrentMandatIndexDossier(index);
-                                            setIsLotSelectorOpenDossier(true);
+                                            setLotTabExpanded(!lotTabExpanded);
                                           }}
                                           className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-5 text-xs px-2"
                                         >
-                                          <Plus className="w-3 h-3 mr-1" />
-                                          Ajouter
+                                          {lotTabExpanded && currentMandatIndexDossier === index ? <ChevronUp className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+                                          {lotTabExpanded && currentMandatIndexDossier === index ? 'Masquer' : 'Ajouter'}
                                         </Button>
                                       </div>
+                                      {lotTabExpanded && currentMandatIndexDossier === index && (
+                                        <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                          <div className="relative mb-2">
+                                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                            <Input
+                                              placeholder="Rechercher lot..."
+                                              value={lotSearchTerm}
+                                              onChange={(e) => setLotSearchTerm(e.target.value)}
+                                              className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="flex gap-1 mb-2">
+                                            <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                                <SelectValue placeholder="Circonscription" />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700">
+                                                <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
+                                                {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                                  <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                          {filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                            const isSelected = mandat.lots?.includes(lot.id);
+                                            return (
+                                              <div
+                                                key={lot.id}
+                                                className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                                  isSelected
+                                                    ? 'bg-emerald-500/20 border border-emerald-500/30'
+                                                    : 'bg-slate-700/50 hover:bg-slate-700'
+                                                }`}
+                                                onClick={() => {
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map((m, i) => i === index ? {
+                                                      ...m,
+                                                      lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                    } : m)
+                                                  }));
+                                                }}
+                                              >
+                                                <p className="font-medium text-white">{lot.numero_lot}</p>
+                                                <p className="text-slate-400 text-[10px]">{lot.circonscription_fonciere}</p>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
                                       {mandat.lots && mandat.lots.length > 0 ? (
                                         <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
                                           {mandat.lots.map((lotId) => {
@@ -3755,306 +3807,9 @@ export default function PriseDeMandat() {
           </Dialog>
 
           {/* Dialogs de sélection pour le formulaire de dossier */}
-          <Dialog open={isClientSelectorOpenDossier} onOpenChange={setIsClientSelectorOpenDossier}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
-                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Client");setIsClientSelectorOpenDossier(false);}} className="bg-blue-500 hover:bg-blue-600 border-0 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau
-                  </Button>
-                </div>
-              </DialogHeader>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input placeholder="Rechercher un client..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3 p-4">
-                  {filteredClientsForSelector.length > 0 ? (
-                    filteredClientsForSelector.map((client) => (
-                      <div
-                        key={client.id}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          nouveauDossierForm.clients_ids.includes(client.id) ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                        }`}
-                        onClick={() => {
-                          setNouveauDossierForm(prev => ({
-                            ...prev,
-                            clients_ids: prev.clients_ids.includes(client.id)
-                              ? prev.clients_ids.filter(id => id !== client.id)
-                              : [...prev.clients_ids, client.id]
-                          }));
-                        }}
-                      >
-                        <p className="text-white font-medium">{client.prenom} {client.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-1 mt-1">
-                          {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
-                            <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {client.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {client.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center py-12 text-slate-500">
-                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun client trouvé</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
-                <Button onClick={() => setIsClientSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <Dialog open={isNotaireSelectorOpenDossier} onOpenChange={setIsNotaireSelectorOpenDossier}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
-                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Notaire");setIsNotaireSelectorOpenDossier(false);}} className="bg-purple-500 hover:bg-purple-600 border-0 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau
-                  </Button>
-                </div>
-              </DialogHeader>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input placeholder="Rechercher un notaire..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3 p-4">
-                  {filteredNotairesForSelector.length > 0 ? (
-                    filteredNotairesForSelector.map((notaire) => (
-                      <div
-                        key={notaire.id}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          nouveauDossierForm.notaires_ids.includes(notaire.id) ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                        }`}
-                        onClick={() => {
-                          setNouveauDossierForm(prev => ({
-                            ...prev,
-                            notaires_ids: prev.notaires_ids.includes(notaire.id)
-                              ? prev.notaires_ids.filter(id => id !== notaire.id)
-                              : [...prev.notaires_ids, notaire.id]
-                          }));
-                        }}
-                      >
-                        <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-1 mt-1">
-                          {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
-                            <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center py-12 text-slate-500">
-                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun notaire trouvé</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
-                <Button onClick={() => setIsNotaireSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <Dialog open={isCourtierSelectorOpenDossier} onOpenChange={setIsCourtierSelectorOpenDossier}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
-                  <Button variant="outline" onClick={() => {setIsClientFormDialogOpen(true);setClientTypeForForm("Courtier immobilier");setIsCourtierSelectorOpenDossier(false);}} className="bg-orange-500 hover:bg-orange-600 border-0 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau
-                  </Button>
-                </div>
-              </DialogHeader>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input placeholder="Rechercher un courtier..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-3 p-4">
-                  {filteredCourtiersForSelector.length > 0 ? (
-                    filteredCourtiersForSelector.map((courtier) => (
-                      <div
-                        key={courtier.id}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          nouveauDossierForm.courtiers_ids.includes(courtier.id) ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
-                        }`}
-                        onClick={() => {
-                          setNouveauDossierForm(prev => ({
-                            ...prev,
-                            courtiers_ids: prev.courtiers_ids.includes(courtier.id)
-                              ? prev.courtiers_ids.filter(id => id !== courtier.id)
-                              : [...prev.courtiers_ids, courtier.id]
-                          }));
-                        }}
-                      >
-                        <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
-                        <div className="text-sm text-slate-400 space-y-1 mt-1">
-                          {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
-                            <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
-                          )}
-                          {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                            <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
-                          )}
-                          {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                            <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center py-12 text-slate-500">
-                      <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucun courtier trouvé</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end items-center pt-4 border-t border-slate-800">
-                <Button onClick={() => setIsCourtierSelectorOpenDossier(false)} className="bg-gradient-to-r from-emerald-500 to-teal-600">Fermer</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <Dialog open={isLotSelectorOpenDossier} onOpenChange={(open) => {
-            setIsLotSelectorOpenDossier(open);
-            if (!open) {
-              setLotCirconscriptionFilter("all");
-              setLotSearchTerm("");
-              setLotCadastreFilter("Québec");
-            }
-          }}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input placeholder="Rechercher par numéro, rang..." value={lotSearchTerm} onChange={(e) => setLotSearchTerm(e.target.value)} className="pl-10 bg-slate-800 border-slate-700" />
-                  </div>
-                  <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                    <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Circonscription" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                        <SelectItem key={circ} value={circ} className="text-white">{circ}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
-                    <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Cadastre" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                      <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
-                      <SelectItem value="Québec" className="text-white">Québec</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" onClick={() => setIsNewLotDialogOpen(true)} className="bg-emerald-500 hover:bg-emerald-600">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouveau lot
-                  </Button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700 sticky top-0 z-10">
-                        <TableHead className="text-slate-300">Numéro de lot</TableHead>
-                        <TableHead className="text-slate-300">Circonscription</TableHead>
-                        <TableHead className="text-slate-300">Cadastre</TableHead>
-                        <TableHead className="text-slate-300">Rang</TableHead>
-                        <TableHead className="text-slate-300 text-right">Sélection</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLotsForSelector.length > 0 ? (
-                        filteredLotsForSelector.map((lot) => {
-                          const isSelected = currentMandatIndexDossier !== null && nouveauDossierForm.mandats[currentMandatIndexDossier]?.lots?.includes(lot.id);
-                          return (
-                            <TableRow
-                              key={lot.id}
-                              className={`cursor-pointer transition-colors border-slate-800 ${isSelected ? 'bg-emerald-500/20 hover:bg-emerald-500/30' : 'hover:bg-slate-800/30'}`}
-                              onClick={() => {
-                                if (currentMandatIndexDossier !== null) {
-                                  setNouveauDossierForm(prev => ({
-                                    ...prev,
-                                    mandats: prev.mandats.map((m, i) =>
-                                      i === currentMandatIndexDossier ? {
-                                        ...m,
-                                        lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
-                                      } : m
-                                    )
-                                  }));
-                                }
-                              }}
-                            >
-                              <TableCell className="font-medium text-white">{lot.numero_lot}</TableCell>
-                              <TableCell className="text-slate-300">
-                                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                  {lot.circonscription_fonciere}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-slate-300">{lot.cadastre || "-"}</TableCell>
-                              <TableCell className="text-slate-300">{lot.rang || "-"}</TableCell>
-                              <TableCell className="text-right">
-                                {isSelected && (
-                                  <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
-                                    <Check className="w-3 h-3 mr-1" />
-                                    Sélectionné
-                                  </Badge>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-12">
-                            <div className="text-slate-400">
-                              <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                              <p>Aucun lot trouvé</p>
-                              <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                <Button onClick={() => setIsLotSelectorOpenDossier(false)} className="w-full bg-gradient-to-r from-emerald-500 to-teal-600">
-                  Valider la sélection
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Dialog de confirmation de changement de statut */}
