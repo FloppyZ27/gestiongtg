@@ -2497,6 +2497,54 @@ export default function PriseDeMandat() {
                     }
 
                     try {
+                      // Créer un commentaire avec les infos saisies manuellement si le client n'est pas sélectionné
+                      let infoCommentaire = "";
+                      
+                      if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
+                        infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
+                        
+                        if (clientInfo.prenom || clientInfo.nom) {
+                          infoCommentaire += `**Client:** ${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
+                          if (clientInfo.telephone) infoCommentaire += `  • Téléphone (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
+                          if (clientInfo.courriel) infoCommentaire += `  • Courriel: ${clientInfo.courriel}\n`;
+                          infoCommentaire += "\n";
+                        }
+                      }
+                      
+                      if (professionnelInfo.notaire) {
+                        infoCommentaire += `**Notaire:** ${professionnelInfo.notaire}\n\n`;
+                      }
+                      
+                      if (professionnelInfo.courtier) {
+                        infoCommentaire += `**Courtier immobilier:** ${professionnelInfo.courtier}\n\n`;
+                      }
+                      
+                      if (professionnelInfo.compagnie) {
+                        infoCommentaire += `**Compagnie:** ${professionnelInfo.compagnie}\n\n`;
+                      }
+                      
+                      // Ajouter les lots si renseignés
+                      if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
+                        const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
+                        if (lotsArray.length > 0) {
+                          infoCommentaire += `**Lots mentionnés:**\n`;
+                          lotsArray.forEach(lot => {
+                            infoCommentaire += `  • ${lot.trim()}\n`;
+                          });
+                        }
+                      }
+                      
+                      // Ajouter ce commentaire aux commentaires temporaires si des infos existent
+                      if (infoCommentaire) {
+                        const commentaireInfos = {
+                          contenu: infoCommentaire,
+                          utilisateur_email: user?.email || "",
+                          utilisateur_nom: user?.full_name || "Système",
+                          created_date: new Date().toISOString()
+                        };
+                        setCommentairesTemporairesDossier(prev => [commentaireInfos, ...prev]);
+                      }
+                      
                       await createDossierMutation.mutateAsync(nouveauDossierForm);
                       
                       // Supprimer la prise de mandat si elle existe
