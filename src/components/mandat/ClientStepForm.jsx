@@ -28,7 +28,8 @@ export default function ClientStepForm({
   isCollapsed,
   onToggleCollapse,
   clientInfo = {},
-  onClientInfoChange
+  onClientInfoChange,
+  disabled = false
 }) {
   const [clientForm, setClientForm] = useState({
     prenom: clientInfo.prenom || "",
@@ -138,6 +139,7 @@ export default function ClientStepForm({
                     value={clientForm.prenom}
                     onChange={(e) => updateClientForm({ ...clientForm, prenom: e.target.value })}
                     placeholder="Prénom"
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
@@ -147,6 +149,7 @@ export default function ClientStepForm({
                     value={clientForm.nom}
                     onChange={(e) => updateClientForm({ ...clientForm, nom: e.target.value })}
                     placeholder="Nom"
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
@@ -159,9 +162,10 @@ export default function ClientStepForm({
                       value={clientForm.telephone}
                       onChange={(e) => updateClientForm({ ...clientForm, telephone: formatPhoneNumber(e.target.value) })}
                       placeholder="(000) 000-0000"
+                      disabled={disabled}
                       className="bg-slate-700 border-slate-600 text-white h-6 text-sm flex-1"
                     />
-                    <Select value={clientForm.type_telephone} onValueChange={(value) => updateClientForm({ ...clientForm, type_telephone: value })}>
+                    <Select value={clientForm.type_telephone} onValueChange={(value) => updateClientForm({ ...clientForm, type_telephone: value })} disabled={disabled}>
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
                         <SelectValue />
                       </SelectTrigger>
@@ -180,6 +184,7 @@ export default function ClientStepForm({
                     value={clientForm.courriel}
                     onChange={(e) => updateClientForm({ ...clientForm, courriel: e.target.value })}
                     placeholder="exemple@courriel.com"
+                    disabled={disabled}
                     className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
                   />
                 </div>
@@ -195,8 +200,9 @@ export default function ClientStepForm({
                     return (
                       <div
                         key={client.id}
-                        onClick={() => handleClientClick(client, isSelected)}
-                        className={`px-2 py-1.5 rounded cursor-pointer text-xs ${
+                        onClick={() => !disabled && handleClientClick(client, isSelected)}
+                        className={`px-2 py-1.5 rounded text-xs ${
+                          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${
                           isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
                         }`}
                       >
