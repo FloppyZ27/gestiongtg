@@ -2643,30 +2643,111 @@ export default function PriseDeMandat() {
 
                         {!infoDossierCollapsed && (
                           <CardContent className="pt-2 pb-3 space-y-3">
-                            {/* Informations de base */}
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                                <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                    <SelectValue placeholder="Sélectionner" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                    {ARPENTEURS.map((arpenteur) => (
-                                      <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
-                                <Input value={nouveauDossierForm.numero_dossier} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
-                                <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                              </div>
-                            </div>
+                           {/* Informations de base */}
+                           <div className="grid grid-cols-3 gap-2">
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                               <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   {ARPENTEURS.map((arpenteur) => (
+                                     <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
+                               <Input value={nouveauDossierForm.numero_dossier} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
+                               <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                             </div>
+                           </div>
+
+                           {/* Section récapitulative - Informations du mandat (en lecture seule) */}
+                           <div className="border-t border-slate-700 pt-3 mt-3">
+                             <Label className="text-slate-400 text-xs mb-2 block">📋 Informations du mandat</Label>
+                             <div className="bg-slate-800/50 rounded-lg p-3 space-y-2 text-xs">
+                               {/* Clients */}
+                               {(formData.clients_ids.length > 0 || clientInfo.prenom || clientInfo.nom) && (
+                                 <div>
+                                   <span className="text-emerald-400 font-semibold">Clients: </span>
+                                   <span className="text-slate-300">
+                                     {clientInfo.prenom || clientInfo.nom 
+                                       ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
+                                       : getClientsNames(formData.clients_ids)}
+                                     {clientInfo.telephone && ` • ${clientInfo.telephone}`}
+                                     {clientInfo.courriel && ` • ${clientInfo.courriel}`}
+                                   </span>
+                                 </div>
+                               )}
+                               {/* Notaires */}
+                               {(formData.notaires_ids?.length > 0 || professionnelInfo.notaire) && (
+                                 <div>
+                                   <span className="text-purple-400 font-semibold">Notaires: </span>
+                                   <span className="text-slate-300">
+                                     {professionnelInfo.notaire || formData.notaires_ids.map(id => {
+                                       const n = getClientById(id);
+                                       return n ? `${n.prenom} ${n.nom}` : '';
+                                     }).filter(n => n).join(', ')}
+                                   </span>
+                                 </div>
+                               )}
+                               {/* Courtiers */}
+                               {(formData.courtiers_ids?.length > 0 || professionnelInfo.courtier) && (
+                                 <div>
+                                   <span className="text-orange-400 font-semibold">Courtiers: </span>
+                                   <span className="text-slate-300">
+                                     {professionnelInfo.courtier || formData.courtiers_ids.map(id => {
+                                       const c = getClientById(id);
+                                       return c ? `${c.prenom} ${c.nom}` : '';
+                                     }).filter(c => c).join(', ')}
+                                   </span>
+                                 </div>
+                               )}
+                               {/* Compagnies */}
+                               {(formData.compagnies_ids?.length > 0 || professionnelInfo.compagnie) && (
+                                 <div>
+                                   <span className="text-cyan-400 font-semibold">Compagnies: </span>
+                                   <span className="text-slate-300">
+                                     {professionnelInfo.compagnie || formData.compagnies_ids.map(id => {
+                                       const c = getClientById(id);
+                                       return c ? `${c.prenom} ${c.nom}` : '';
+                                     }).filter(c => c).join(', ')}
+                                   </span>
+                                 </div>
+                               )}
+                               {/* Adresse */}
+                               {(workAddress.rue || workAddress.ville) && (
+                                 <div>
+                                   <span className="text-blue-400 font-semibold">Adresse: </span>
+                                   <span className="text-slate-300">{formatAdresse(workAddress)}</span>
+                                 </div>
+                               )}
+                               {/* Lots */}
+                               {workAddress.numero_lot && (
+                                 <div>
+                                   <span className="text-purple-400 font-semibold">Lots: </span>
+                                   <span className="text-slate-300">
+                                     {workAddress.numero_lot.split('\n').filter(l => l.trim()).join(', ')}
+                                   </span>
+                                 </div>
+                               )}
+                               {/* Mandats */}
+                               {mandatsInfo.filter(m => m.type_mandat).length > 0 && (
+                                 <div>
+                                   <span className="text-teal-400 font-semibold">Mandats: </span>
+                                   <span className="text-slate-300">
+                                     {mandatsInfo.filter(m => m.type_mandat).map(m => m.type_mandat).join(', ')}
+                                   </span>
+                                 </div>
+                               )}
+                             </div>
+                           </div>
 
                             {/* Tabs Clients/Notaires/Courtiers */}
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
