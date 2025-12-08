@@ -2781,14 +2781,28 @@ export default function PriseDeMandat() {
                                   </Button>
                                   {clientsTabExpanded && (
                                     <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="relative mb-2">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={clientSearchTerm}
-                                          onChange={(e) => setClientSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
+                                      <div className="flex gap-2 mb-2">
+                                        <div className="relative flex-1">
+                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                          <Input
+                                            placeholder="Rechercher..."
+                                            value={clientSearchTerm}
+                                            onChange={(e) => setClientSearchTerm(e.target.value)}
+                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                          />
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => {
+                                            setIsClientFormDialogOpen(true);
+                                            setClientTypeForForm("Client");
+                                          }}
+                                          className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                        >
+                                          <Plus className="w-3 h-3 mr-1" />
+                                          Nouveau
+                                        </Button>
                                       </div>
                                       {filteredClientsForSelector.slice(0, 20).map((client) => (
                                         <div
@@ -2851,14 +2865,28 @@ export default function PriseDeMandat() {
                                   </Button>
                                   {notairesTabExpanded && (
                                     <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="relative mb-2">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={notaireSearchTerm}
-                                          onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
+                                      <div className="flex gap-2 mb-2">
+                                        <div className="relative flex-1">
+                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                          <Input
+                                            placeholder="Rechercher..."
+                                            value={notaireSearchTerm}
+                                            onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                          />
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => {
+                                            setIsClientFormDialogOpen(true);
+                                            setClientTypeForForm("Notaire");
+                                          }}
+                                          className="bg-purple-500 hover:bg-purple-600 h-6 text-xs px-2"
+                                        >
+                                          <Plus className="w-3 h-3 mr-1" />
+                                          Nouveau
+                                        </Button>
                                       </div>
                                       {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
                                         <div
@@ -2921,14 +2949,28 @@ export default function PriseDeMandat() {
                                   </Button>
                                   {courtiersTabExpanded && (
                                     <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="relative mb-2">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={courtierSearchTerm}
-                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
+                                      <div className="flex gap-2 mb-2">
+                                        <div className="relative flex-1">
+                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                          <Input
+                                            placeholder="Rechercher..."
+                                            value={courtierSearchTerm}
+                                            onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                          />
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          onClick={() => {
+                                            setIsClientFormDialogOpen(true);
+                                            setClientTypeForForm("Courtier immobilier");
+                                          }}
+                                          className="bg-orange-500 hover:bg-orange-600 h-6 text-xs px-2"
+                                        >
+                                          <Plus className="w-3 h-3 mr-1" />
+                                          Nouveau
+                                        </Button>
                                       </div>
                                       {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
                                         <div
