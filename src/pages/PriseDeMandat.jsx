@@ -2050,43 +2050,104 @@ export default function PriseDeMandat() {
                               notes: ""
                             }))
                           });
-                          // Créer un commentaire récapitulatif avec les infos manuelles du mandat
+                          // Créer un commentaire récapitulatif avec les infos du mandat
                           let commentaireInfoMandat = "📋 **Informations du mandat**\n\n";
                           
-                          // Clients
-                          if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                            commentaireInfoMandat += `**Client (saisi manuellement):**\n`;
-                            commentaireInfoMandat += `  • ${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
-                            if (clientInfo.telephone) commentaireInfoMandat += `    - Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
-                            if (clientInfo.courriel) commentaireInfoMandat += `    - Email: ${clientInfo.courriel}\n`;
+                          // Section Clients - inclure les clients sélectionnés ET les infos manuelles
+                          if (formData.clients_ids.length > 0 || clientInfo.prenom || clientInfo.nom) {
+                            commentaireInfoMandat += `**Clients:**\n`;
+                            
+                            // Clients sélectionnés
+                            formData.clients_ids.forEach(clientId => {
+                              const client = getClientById(clientId);
+                              if (client) {
+                                commentaireInfoMandat += `  • ${client.prenom} ${client.nom}\n`;
+                                const tel = getCurrentValue(client.telephones, 'telephone');
+                                const email = getCurrentValue(client.courriels, 'courriel');
+                                if (tel) commentaireInfoMandat += `    - Tél: ${tel}\n`;
+                                if (email) commentaireInfoMandat += `    - Email: ${email}\n`;
+                              }
+                            });
+                            
+                            // Client saisi manuellement
+                            if (clientInfo.prenom || clientInfo.nom) {
+                              commentaireInfoMandat += `  • ${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + " (saisi manuellement)\n";
+                              if (clientInfo.telephone) commentaireInfoMandat += `    - Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
+                              if (clientInfo.courriel) commentaireInfoMandat += `    - Email: ${clientInfo.courriel}\n`;
+                            }
                             commentaireInfoMandat += "\n";
                           }
                           
-                          // Notaires
-                          if (professionnelInfo.notaire) {
-                            commentaireInfoMandat += `**Notaire (saisi manuellement):**\n`;
-                            commentaireInfoMandat += `  • ${professionnelInfo.notaire}\n\n`;
+                          // Section Notaires
+                          if (formData.notaires_ids?.length > 0 || professionnelInfo.notaire) {
+                            commentaireInfoMandat += `**Notaires:**\n`;
+                            
+                            // Notaires sélectionnés
+                            (formData.notaires_ids || []).forEach(notaireId => {
+                              const notaire = getClientById(notaireId);
+                              if (notaire) {
+                                commentaireInfoMandat += `  • ${notaire.prenom} ${notaire.nom}\n`;
+                                const tel = getCurrentValue(notaire.telephones, 'telephone');
+                                const email = getCurrentValue(notaire.courriels, 'courriel');
+                                if (tel) commentaireInfoMandat += `    - Tél: ${tel}\n`;
+                                if (email) commentaireInfoMandat += `    - Email: ${email}\n`;
+                              }
+                            });
+                            
+                            // Notaire saisi manuellement
+                            if (professionnelInfo.notaire) {
+                              commentaireInfoMandat += `  • ${professionnelInfo.notaire} (saisi manuellement)\n`;
+                            }
+                            commentaireInfoMandat += "\n";
                           }
                           
-                          // Courtiers
-                          if (professionnelInfo.courtier) {
-                            commentaireInfoMandat += `**Courtier immobilier (saisi manuellement):**\n`;
-                            commentaireInfoMandat += `  • ${professionnelInfo.courtier}\n\n`;
+                          // Section Courtiers
+                          if (formData.courtiers_ids?.length > 0 || professionnelInfo.courtier) {
+                            commentaireInfoMandat += `**Courtiers immobiliers:**\n`;
+                            
+                            // Courtiers sélectionnés
+                            (formData.courtiers_ids || []).forEach(courtierId => {
+                              const courtier = getClientById(courtierId);
+                              if (courtier) {
+                                commentaireInfoMandat += `  • ${courtier.prenom} ${courtier.nom}\n`;
+                                const tel = getCurrentValue(courtier.telephones, 'telephone');
+                                const email = getCurrentValue(courtier.courriels, 'courriel');
+                                if (tel) commentaireInfoMandat += `    - Tél: ${tel}\n`;
+                                if (email) commentaireInfoMandat += `    - Email: ${email}\n`;
+                              }
+                            });
+                            
+                            // Courtier saisi manuellement
+                            if (professionnelInfo.courtier) {
+                              commentaireInfoMandat += `  • ${professionnelInfo.courtier} (saisi manuellement)\n`;
+                            }
+                            commentaireInfoMandat += "\n";
                           }
                           
-                          // Compagnies
-                          if (professionnelInfo.compagnie) {
-                            commentaireInfoMandat += `**Compagnie (saisie manuellement):**\n`;
-                            commentaireInfoMandat += `  • ${professionnelInfo.compagnie}\n\n`;
+                          // Section Compagnies
+                          if (formData.compagnies_ids?.length > 0 || professionnelInfo.compagnie) {
+                            commentaireInfoMandat += `**Compagnies:**\n`;
+                            
+                            // Compagnies sélectionnées
+                            (formData.compagnies_ids || []).forEach(compagnieId => {
+                              const compagnie = getClientById(compagnieId);
+                              if (compagnie) {
+                                commentaireInfoMandat += `  • ${compagnie.prenom} ${compagnie.nom}\n`;
+                                const tel = getCurrentValue(compagnie.telephones, 'telephone');
+                                const email = getCurrentValue(compagnie.courriels, 'courriel');
+                                if (tel) commentaireInfoMandat += `    - Tél: ${tel}\n`;
+                                if (email) commentaireInfoMandat += `    - Email: ${email}\n`;
+                              }
+                            });
+                            
+                            // Compagnie saisie manuellement
+                            if (professionnelInfo.compagnie) {
+                              commentaireInfoMandat += `  • ${professionnelInfo.compagnie} (saisie manuellement)\n`;
+                            }
+                            commentaireInfoMandat += "\n";
                           }
                           
-                          // Adresse
-                          if (workAddress.rue || workAddress.ville) {
-                            commentaireInfoMandat += `**Adresse des travaux:**\n`;
-                            commentaireInfoMandat += `  • ${formatAdresse(workAddress)}\n\n`;
-                          }
-                          
-                          // Lots (depuis workAddress.numero_lot)
+                          // Section Lots - depuis workAddress.numero_lot (manuel)
                           if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
                             const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
                             if (lotsArray.length > 0) {
@@ -2099,9 +2160,11 @@ export default function PriseDeMandat() {
                           }
                           
                           // Ajouter ce commentaire au début des commentaires temporaires s'il contient des infos
-                          const hasManualInfo = clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
-                                                professionnelInfo.notaire || professionnelInfo.courtier || professionnelInfo.compagnie ||
-                                                workAddress.rue || workAddress.ville || workAddress.numero_lot;
+                          const hasManualInfo = (formData.clients_ids.length > 0 || clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
+                                                formData.notaires_ids?.length > 0 || professionnelInfo.notaire || 
+                                                formData.courtiers_ids?.length > 0 || professionnelInfo.courtier || 
+                                                formData.compagnies_ids?.length > 0 || professionnelInfo.compagnie ||
+                                                workAddress.numero_lot);
                           
                           const commentairesAvecInfo = hasManualInfo ? [
                             {
