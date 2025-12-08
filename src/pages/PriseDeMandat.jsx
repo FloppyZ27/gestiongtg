@@ -612,12 +612,15 @@ export default function PriseDeMandat() {
   });
 
   const createDossierMutation = useMutation({
-    mutationFn: async (dossierData) => {
+    mutationFn: async ({ dossierData, commentairesToCreate = null }) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
 
+      // Utiliser les commentaires passés en paramètre ou les commentaires temporaires par défaut
+      const commentsToUse = commentairesToCreate !== null ? commentairesToCreate : commentairesTemporaires;
+      
       // Créer les commentaires temporaires si présents
-      if (commentairesTemporaires.length > 0) {
-        const commentairePromises = commentairesTemporaires.map(comment =>
+      if (commentsToUse.length > 0) {
+        const commentairePromises = commentsToUse.map(comment =>
           base44.entities.CommentaireDossier.create({
             dossier_id: newDossier.id,
             contenu: comment.contenu,
@@ -2497,7 +2500,7 @@ export default function PriseDeMandat() {
                     }
 
                     try {
-                      // Créer un commentaire avec les infos saisies manuellement si le client n'est pas sélectionné
+                      // Créer un commentaire avec les infos saisies manuellement
                       let infoCommentaire = "";
                       
                       if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
@@ -2534,7 +2537,8 @@ export default function PriseDeMandat() {
                         }
                       }
                       
-                      // Ajouter ce commentaire aux commentaires temporaires si des infos existent
+                      // Préparer les commentaires finaux
+                      let commentairesFinaux = [...commentairesTemporairesDossier];
                       if (infoCommentaire) {
                         const commentaireInfos = {
                           contenu: infoCommentaire,
@@ -2542,10 +2546,13 @@ export default function PriseDeMandat() {
                           utilisateur_nom: user?.full_name || "Système",
                           created_date: new Date().toISOString()
                         };
-                        setCommentairesTemporairesDossier(prev => [commentaireInfos, ...prev]);
+                        commentairesFinaux = [commentaireInfos, ...commentairesFinaux];
                       }
                       
-                      await createDossierMutation.mutateAsync(nouveauDossierForm);
+                      await createDossierMutation.mutateAsync({ 
+                        dossierData: nouveauDossierForm,
+                        commentairesToCreate: commentairesFinaux
+                      });
                       
                       // Supprimer la prise de mandat si elle existe
                       if (editingPriseMandat?.id) {
