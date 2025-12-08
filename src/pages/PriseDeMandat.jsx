@@ -502,6 +502,13 @@ export default function PriseDeMandat() {
       date_ouverture: dateOuverture
     });
     
+    // Charger les infos professionnelles si présentes
+    setProfessionnelInfo({
+      notaire: "",
+      courtier: "",
+      compagnie: ""
+    });
+    
     setWorkAddress(pm.adresse_travaux || {
       numeros_civiques: [""],
       rue: "",
@@ -517,6 +524,12 @@ export default function PriseDeMandat() {
       telephone: "",
       type_telephone: "Cellulaire",
       courriel: ""
+    });
+    
+    setProfessionnelInfo(pm.professionnel_info || {
+      notaire: "",
+      courtier: "",
+      compagnie: ""
     });
     
     // Reconstruire les mandatsInfo à partir des mandats stockés
@@ -1157,6 +1170,7 @@ export default function PriseDeMandat() {
       courtiers_ids: formData.courtiers_ids || [],
       compagnies_ids: formData.compagnies_ids || [],
       client_info: clientInfo,
+      professionnel_info: professionnelInfo,
       adresse_travaux: workAddress,
       mandats: mandatsToSave,
       echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
