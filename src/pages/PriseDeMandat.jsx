@@ -236,9 +236,9 @@ export default function PriseDeMandat() {
     courtiers_ids: [],
     mandats: []
   });
-  const [isClientSelectorOpenDossier, setIsClientSelectorOpenDossier] = useState(false);
-  const [isNotaireSelectorOpenDossier, setIsNotaireSelectorOpenDossier] = useState(false);
-  const [isCourtierSelectorOpenDossier, setIsCourtierSelectorOpenDossier] = useState(false);
+  const [clientsTabExpanded, setClientsTabExpanded] = useState(false);
+  const [notairesTabExpanded, setNotairesTabExpanded] = useState(false);
+  const [courtiersTabExpanded, setCourtiersTabExpanded] = useState(false);
   const [isLotSelectorOpenDossier, setIsLotSelectorOpenDossier] = useState(false);
   const [currentMandatIndexDossier, setCurrentMandatIndexDossier] = useState(null);
   const [activeTabMandatDossier, setActiveTabMandatDossier] = useState("0");
@@ -2774,10 +2774,43 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="clients" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setIsClientSelectorOpenDossier(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full h-6 text-xs">
-                                    <UserPlus className="w-3 h-3 mr-1" />
-                                    Ajouter
+                                  <Button type="button" size="sm" onClick={() => setClientsTabExpanded(!clientsTabExpanded)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full h-6 text-xs">
+                                    {clientsTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
+                                    {clientsTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
+                                  {clientsTabExpanded && (
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                      <div className="relative mb-2">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={clientSearchTerm}
+                                          onChange={(e) => setClientSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      {filteredClientsForSelector.slice(0, 20).map((client) => (
+                                        <div
+                                          key={client.id}
+                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                            nouveauDossierForm.clients_ids.includes(client.id)
+                                              ? 'bg-blue-500/20 border border-blue-500/30'
+                                              : 'bg-slate-700/50 hover:bg-slate-700'
+                                          }`}
+                                          onClick={() => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              clients_ids: prev.clients_ids.includes(client.id)
+                                                ? prev.clients_ids.filter(id => id !== client.id)
+                                                : [...prev.clients_ids, client.id]
+                                            }));
+                                          }}
+                                        >
+                                          <p className="font-medium text-white">{client.prenom} {client.nom}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                   {nouveauDossierForm.clients_ids.length > 0 ? (
                                     <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
                                       {nouveauDossierForm.clients_ids.map((clientId) => {
@@ -2800,10 +2833,43 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="notaires" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpenDossier(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full h-6 text-xs">
-                                    <UserPlus className="w-3 h-3 mr-1" />
-                                    Ajouter
+                                  <Button type="button" size="sm" onClick={() => setNotairesTabExpanded(!notairesTabExpanded)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full h-6 text-xs">
+                                    {notairesTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
+                                    {notairesTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
+                                  {notairesTabExpanded && (
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                      <div className="relative mb-2">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={notaireSearchTerm}
+                                          onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
+                                        <div
+                                          key={notaire.id}
+                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                            nouveauDossierForm.notaires_ids.includes(notaire.id)
+                                              ? 'bg-purple-500/20 border border-purple-500/30'
+                                              : 'bg-slate-700/50 hover:bg-slate-700'
+                                          }`}
+                                          onClick={() => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              notaires_ids: prev.notaires_ids.includes(notaire.id)
+                                                ? prev.notaires_ids.filter(id => id !== notaire.id)
+                                                : [...prev.notaires_ids, notaire.id]
+                                            }));
+                                          }}
+                                        >
+                                          <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                   {nouveauDossierForm.notaires_ids.length > 0 ? (
                                     <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
                                       {nouveauDossierForm.notaires_ids.map((notaireId) => {
@@ -2826,10 +2892,43 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="courtiers" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpenDossier(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 w-full h-6 text-xs">
-                                    <UserPlus className="w-3 h-3 mr-1" />
-                                    Ajouter
+                                  <Button type="button" size="sm" onClick={() => setCourtiersTabExpanded(!courtiersTabExpanded)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 w-full h-6 text-xs">
+                                    {courtiersTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
+                                    {courtiersTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
+                                  {courtiersTabExpanded && (
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                      <div className="relative mb-2">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={courtierSearchTerm}
+                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
+                                        <div
+                                          key={courtier.id}
+                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                            nouveauDossierForm.courtiers_ids.includes(courtier.id)
+                                              ? 'bg-orange-500/20 border border-orange-500/30'
+                                              : 'bg-slate-700/50 hover:bg-slate-700'
+                                          }`}
+                                          onClick={() => {
+                                            setNouveauDossierForm(prev => ({
+                                              ...prev,
+                                              courtiers_ids: prev.courtiers_ids.includes(courtier.id)
+                                                ? prev.courtiers_ids.filter(id => id !== courtier.id)
+                                                : [...prev.courtiers_ids, courtier.id]
+                                            }));
+                                          }}
+                                        >
+                                          <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                   {nouveauDossierForm.courtiers_ids.length > 0 ? (
                                     <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
                                       {nouveauDossierForm.courtiers_ids.map((courtierId) => {
@@ -4361,17 +4460,14 @@ export default function PriseDeMandat() {
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
             // Optionally re-open the selector if creating from there
-            if (clientTypeForForm === "Client") {
-              if (isOuvrirDossierDialogOpen) setIsClientSelectorOpenDossier(true);
-              else setIsClientSelectorOpen(true);
+            if (clientTypeForForm === "Client" && !isOuvrirDossierDialogOpen) {
+              setIsClientSelectorOpen(true);
             }
-            if (clientTypeForForm === "Notaire") {
-              if (isOuvrirDossierDialogOpen) setIsNotaireSelectorOpenDossier(true);
-              else setIsNotaireSelectorOpen(true);
+            if (clientTypeForForm === "Notaire" && !isOuvrirDossierDialogOpen) {
+              setIsNotaireSelectorOpen(true);
             }
-            if (clientTypeForForm === "Courtier immobilier") {
-              if (isOuvrirDossierDialogOpen) setIsCourtierSelectorOpenDossier(true);
-              else setIsCourtierSelectorOpen(true);
+            if (clientTypeForForm === "Courtier immobilier" && !isOuvrirDossierDialogOpen) {
+              setIsCourtierSelectorOpen(true);
             }
           }}
         />
