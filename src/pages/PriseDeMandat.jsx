@@ -2109,9 +2109,11 @@ export default function PriseDeMandat() {
 
                   {/* Étape 1: Informations du client */}
                   <ClientStepForm
+                    disabled={isLocked}
                     clients={clientsReguliers}
                     selectedClientIds={formData.clients_ids}
                     onSelectClient={(clientId) => {
+                      if (isLocked) return;
                       setFormData(prev => ({
                         ...prev,
                         clients_ids: prev.clients_ids.includes(clientId)
@@ -2127,6 +2129,7 @@ export default function PriseDeMandat() {
 
                   {/* Étape 2: Professionnel */}
                   <ProfessionnelStepForm
+                    disabled={isLocked}
                     notaires={notaires}
                     courtiers={courtiers}
                     compagnies={clients.filter(c => c.type_client === 'Compagnie')}
@@ -2134,6 +2137,7 @@ export default function PriseDeMandat() {
                     selectedCourtierIds={formData.courtiers_ids || []}
                     selectedCompagnieIds={formData.compagnies_ids || []}
                     onSelectNotaire={(id) => {
+                      if (isLocked) return;
                       setFormData(prev => ({
                         ...prev,
                         notaires_ids: (prev.notaires_ids || []).includes(id)
@@ -2142,6 +2146,7 @@ export default function PriseDeMandat() {
                       }));
                     }}
                     onSelectCourtier={(id) => {
+                      if (isLocked) return;
                       setFormData(prev => ({
                         ...prev,
                         courtiers_ids: (prev.courtiers_ids || []).includes(id)
@@ -2150,6 +2155,7 @@ export default function PriseDeMandat() {
                       }));
                     }}
                     onSelectCompagnie={(id) => {
+                      if (isLocked) return;
                       setFormData(prev => ({
                         ...prev,
                         compagnies_ids: (prev.compagnies_ids || []).includes(id)
@@ -2165,8 +2171,12 @@ export default function PriseDeMandat() {
 
                   {/* Étape 3: Adresse des travaux */}
                   <AddressStepForm
+                    disabled={isLocked}
                     address={workAddress}
-                    onAddressChange={setWorkAddress}
+                    onAddressChange={(addr) => {
+                      if (isLocked) return;
+                      setWorkAddress(addr);
+                    }}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
                     clientDossiers={dossiers.filter(d => 
@@ -2200,8 +2210,12 @@ export default function PriseDeMandat() {
 
                   {/* Étape 4: Mandats */}
                   <MandatStepForm
+                    disabled={isLocked}
                     mandats={mandatsInfo}
-                    onMandatsChange={(newMandats) => setMandatsInfo(newMandats)}
+                    onMandatsChange={(newMandats) => {
+                      if (isLocked) return;
+                      setMandatsInfo(newMandats);
+                    }}
                     isCollapsed={mandatStepCollapsed}
                     onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
                     statut={formData.statut}
@@ -2209,8 +2223,12 @@ export default function PriseDeMandat() {
 
                   {/* Étape 5: Tarification */}
                   <TarificationStepForm
+                    disabled={isLocked}
                     mandats={mandatsInfo}
-                    onTarificationChange={(newMandats) => setMandatsInfo(newMandats)}
+                    onTarificationChange={(newMandats) => {
+                      if (isLocked) return;
+                      setMandatsInfo(newMandats);
+                    }}
                     isCollapsed={tarificationStepCollapsed}
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
@@ -2231,7 +2249,16 @@ export default function PriseDeMandat() {
                 
                   {/* Boutons Annuler/Créer en bas de la colonne gauche */}
                   <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                    <Button type="button" variant="outline" onClick={() => {
+                    <Button type="button" variant="outline" onClick={async () => {
+                      // Déverrouiller le mandat si on annule
+                      if (editingPriseMandat && !isLocked) {
+                        await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                          ...editingPriseMandat,
+                          locked_by: null,
+                          locked_at: null
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                      }
                       const hasData = formData.arpenteur_geometre || 
                         formData.clients_ids.length > 0 ||
                         clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
@@ -2245,21 +2272,27 @@ export default function PriseDeMandat() {
                         formData.statut !== editingPriseMandat.statut
                       ) : hasData;
                       
-                      if (hasChanges) {
+                      if (hasChanges && !isLocked) {
                         if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
                           setIsDialogOpen(false);
                           resetFullForm();
+                          setIsLocked(false);
+                          setLockedBy("");
                         }
                       } else {
                         setIsDialogOpen(false);
                         resetFullForm();
+                        setIsLocked(false);
+                        setLockedBy("");
                       }
                     }}>
                       Annuler
                     </Button>
-                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      {editingPriseMandat ? "Modifier" : "Créer"}
-                    </Button>
+                    {!isLocked && (
+                      <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                        {editingPriseMandat ? "Modifier" : "Créer"}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
