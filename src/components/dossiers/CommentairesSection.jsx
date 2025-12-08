@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import ReactMarkdown from "react-markdown";
 
 export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
@@ -386,20 +387,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
   };
 
   const renderCommentaireContent = (contenu) => {
+    // D'abord gérer les mentions
     const emailRegex = /@([^\s]+)/g;
-    const parts = contenu.split(emailRegex);
-    
-    return parts.map((part, index) => {
-      if (index % 2 === 1) { // This part is an email (the matched group from regex)
-        const taggedUser = users.find(u => u.email === part);
-        return (
-          <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
-            @{taggedUser?.full_name || part}
-          </span>
-        );
-      }
-      return <span key={index}>{part}</span>;
+    let processedContent = contenu.replace(emailRegex, (match, email) => {
+      const taggedUser = users.find(u => u.email === email);
+      return `<span class="bg-blue-500/20 text-blue-400 px-1 rounded">@${taggedUser?.full_name || email}</span>`;
     });
+    
+    return (
+      <div 
+        className="prose prose-invert prose-sm max-w-none"
+        dangerouslySetInnerHTML={{ __html: processedContent.replace(/\n/g, '<br/>') }}
+      />
+    );
   };
 
   const allCommentaires = dossierTemporaire ? commentairesTemp : commentaires;
@@ -486,9 +486,9 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                       </div>
                     </div>
                   ) : (
-                    <p className="text-slate-300 text-sm whitespace-pre-wrap">
+                    <div className="text-slate-300 text-sm">
                       {renderCommentaireContent(commentaire.contenu)}
-                    </p>
+                    </div>
                   )}
                 </div>
               </div>
