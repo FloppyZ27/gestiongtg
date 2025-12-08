@@ -2518,12 +2518,6 @@ export default function PriseDeMandat() {
                           }
                         });
                         infoCommentaire += "\n";
-                      } else if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                        infoCommentaire += `**Client (saisi manuellement):**\n`;
-                        infoCommentaire += `  • ${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
-                        if (clientInfo.telephone) infoCommentaire += `    - Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
-                        if (clientInfo.courriel) infoCommentaire += `    - Email: ${clientInfo.courriel}\n`;
-                        infoCommentaire += "\n";
                       }
                       
                       // Section Notaires
@@ -2540,9 +2534,6 @@ export default function PriseDeMandat() {
                           }
                         });
                         infoCommentaire += "\n";
-                      } else if (professionnelInfo.notaire) {
-                        infoCommentaire += `**Notaire (saisi manuellement):**\n`;
-                        infoCommentaire += `  • ${professionnelInfo.notaire}\n\n`;
                       }
                       
                       // Section Courtiers
@@ -2559,9 +2550,6 @@ export default function PriseDeMandat() {
                           }
                         });
                         infoCommentaire += "\n";
-                      } else if (professionnelInfo.courtier) {
-                        infoCommentaire += `**Courtier immobilier (saisi manuellement):**\n`;
-                        infoCommentaire += `  • ${professionnelInfo.courtier}\n\n`;
                       }
                       
                       // Section Compagnies
@@ -2578,21 +2566,24 @@ export default function PriseDeMandat() {
                           }
                         });
                         infoCommentaire += "\n";
-                      } else if (professionnelInfo.compagnie) {
-                        infoCommentaire += `**Compagnie (saisie manuellement):**\n`;
-                        infoCommentaire += `  • ${professionnelInfo.compagnie}\n\n`;
                       }
                       
-                      // Section Lots
-                      if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
-                        const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
-                        if (lotsArray.length > 0) {
-                          infoCommentaire += `**Lots:**\n`;
-                          lotsArray.forEach(lot => {
-                            infoCommentaire += `  • ${lot.trim()}\n`;
+                      // Section Lots - récupérer depuis les mandats
+                      nouveauDossierForm.mandats.forEach(mandat => {
+                        if (mandat.lots && mandat.lots.length > 0) {
+                          if (!infoCommentaire.includes('**Lots:**')) {
+                            infoCommentaire += `**Lots:**\n`;
+                          }
+                          mandat.lots.forEach(lotId => {
+                            const lot = getLotById(lotId);
+                            if (lot) {
+                              infoCommentaire += `  • ${lot.numero_lot}\n`;
+                            }
                           });
-                          infoCommentaire += "\n";
                         }
+                      });
+                      if (infoCommentaire.includes('**Lots:**')) {
+                        infoCommentaire += "\n";
                       }
                       
                       // Préparer les commentaires finaux - toujours ajouter le commentaire récapitulatif
