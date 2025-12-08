@@ -2504,7 +2504,7 @@ export default function PriseDeMandat() {
                       let infoCommentaire = "";
                       
                       // Vérifier si des infos client sont saisies SANS client existant sélectionné
-                      if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && nouveauDossierForm.clients_ids.length === 0) {
+                      if ((clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) && formData.clients_ids.length === 0) {
                         if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         
                         if (clientInfo.prenom || clientInfo.nom) {
@@ -2516,19 +2516,19 @@ export default function PriseDeMandat() {
                       }
                       
                       // Vérifier si des infos notaire sont saisies SANS notaire existant sélectionné
-                      if (professionnelInfo.notaire && nouveauDossierForm.notaires_ids.length === 0) {
+                      if (professionnelInfo.notaire && (formData.notaires_ids || []).length === 0) {
                         if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Notaire:** ${professionnelInfo.notaire}\n\n`;
                       }
                       
                       // Vérifier si des infos courtier sont saisies SANS courtier existant sélectionné
-                      if (professionnelInfo.courtier && nouveauDossierForm.courtiers_ids.length === 0) {
+                      if (professionnelInfo.courtier && (formData.courtiers_ids || []).length === 0) {
                         if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Courtier immobilier:** ${professionnelInfo.courtier}\n\n`;
                       }
                       
                       // Vérifier si des infos compagnie sont saisies SANS compagnie existante sélectionnée
-                      if (professionnelInfo.compagnie && (nouveauDossierForm.compagnies_ids || []).length === 0) {
+                      if (professionnelInfo.compagnie && (formData.compagnies_ids || []).length === 0) {
                         if (!infoCommentaire) infoCommentaire += "📋 **Informations saisies manuellement**\n\n";
                         infoCommentaire += `**Compagnie:** ${professionnelInfo.compagnie}\n\n`;
                       }
