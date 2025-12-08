@@ -2604,6 +2604,9 @@ export default function PriseDeMandat() {
                       };
                       let commentairesFinaux = [commentaireInfos, ...commentairesTemporairesDossier];
                       
+                      console.log("Commentaire à créer:", infoCommentaire);
+                      console.log("Commentaires finaux:", commentairesFinaux);
+                      
                       await createDossierMutation.mutateAsync({ 
                         dossierData: nouveauDossierForm,
                         commentairesToCreate: commentairesFinaux
