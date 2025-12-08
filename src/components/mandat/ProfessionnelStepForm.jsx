@@ -73,15 +73,31 @@ export default function ProfessionnelStepForm({
   const hasSelections = selectedNotaireIds.length > 0 || selectedCourtierIds.length > 0 || selectedCompagnieIds.length > 0;
 
   // Déterminer quelle liste afficher
+  const handleSelectProfessionnel = (item, type) => {
+    // Remplir le champ avec le nom du professionnel sélectionné
+    const fullName = `${item.prenom} ${item.nom}`;
+    
+    if (type === "notaire") {
+      onProfessionnelInfoChange({ ...professionnelInfo, notaire: fullName });
+      onSelectNotaire(item.id);
+    } else if (type === "courtier") {
+      onProfessionnelInfoChange({ ...professionnelInfo, courtier: fullName });
+      onSelectCourtier(item.id);
+    } else if (type === "compagnie") {
+      onProfessionnelInfoChange({ ...professionnelInfo, compagnie: fullName });
+      onSelectCompagnie(item.id);
+    }
+  };
+
   const getActiveList = () => {
     if (activeField === "notaire") {
-      return { list: filteredNotaires, type: "notaire", color: "purple", selectedIds: selectedNotaireIds, onSelect: onSelectNotaire };
+      return { list: filteredNotaires, type: "notaire", color: "purple", selectedIds: selectedNotaireIds, onSelect: handleSelectProfessionnel };
     }
     if (activeField === "courtier") {
-      return { list: filteredCourtiers, type: "courtier", color: "orange", selectedIds: selectedCourtierIds, onSelect: onSelectCourtier };
+      return { list: filteredCourtiers, type: "courtier", color: "orange", selectedIds: selectedCourtierIds, onSelect: handleSelectProfessionnel };
     }
     if (activeField === "compagnie") {
-      return { list: filteredCompagnies, type: "compagnie", color: "cyan", selectedIds: selectedCompagnieIds, onSelect: onSelectCompagnie };
+      return { list: filteredCompagnies, type: "compagnie", color: "cyan", selectedIds: selectedCompagnieIds, onSelect: handleSelectProfessionnel };
     }
     return null;
   };
@@ -232,7 +248,7 @@ export default function ProfessionnelStepForm({
                         return (
                           <div
                             key={item.id}
-                            onClick={() => !disabled && activeListData.onSelect(item.id)}
+                            onClick={() => !disabled && activeListData.onSelect(item, activeListData.type)}
                             className={`px-2 py-1 rounded text-xs transition-all ${
                               disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                             } ${isSelected ? "bg-pink-500/20 text-pink-400 border border-pink-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-700"}`}
