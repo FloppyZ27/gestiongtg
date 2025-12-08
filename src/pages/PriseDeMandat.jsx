@@ -597,6 +597,7 @@ export default function PriseDeMandat() {
         courtiers_ids: data.courtiers_ids,
         compagnies_ids: data.compagnies_ids,
         client_info: data.client_info,
+        professionnel_info: data.professionnel_info,
         adresse_travaux: data.adresse_travaux,
         mandats: data.mandats,
         echeance_souhaitee: data.echeance_souhaitee,
