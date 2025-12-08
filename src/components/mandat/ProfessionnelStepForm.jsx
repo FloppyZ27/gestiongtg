@@ -31,37 +31,51 @@ export default function ProfessionnelStepForm({
   disabled = false
 }) {
   const [activeField, setActiveField] = useState(null); // "notaire", "courtier", "compagnie"
+  const [localInfo, setLocalInfo] = useState({
+    notaire: professionnelInfo.notaire || "",
+    courtier: professionnelInfo.courtier || "",
+    compagnie: professionnelInfo.compagnie || ""
+  });
+
+  // Synchroniser avec les props
+  React.useEffect(() => {
+    setLocalInfo({
+      notaire: professionnelInfo.notaire || "",
+      courtier: professionnelInfo.courtier || "",
+      compagnie: professionnelInfo.compagnie || ""
+    });
+  }, [professionnelInfo]);
 
   // Filtrer les listes basées sur les champs de saisie
   const filteredNotaires = useMemo(() => {
-    const search = (professionnelInfo.notaire || "").toLowerCase();
+    const search = (localInfo.notaire || "").toLowerCase();
     if (!search) return notaires.slice(0, 15);
     return notaires.filter(n => 
       `${n.prenom} ${n.nom}`.toLowerCase().includes(search) ||
       n.courriels?.some(c => c.courriel?.toLowerCase().includes(search)) ||
       n.telephones?.some(t => t.telephone?.includes(search))
     );
-  }, [notaires, professionnelInfo.notaire]);
+  }, [notaires, localInfo.notaire]);
 
   const filteredCourtiers = useMemo(() => {
-    const search = (professionnelInfo.courtier || "").toLowerCase();
+    const search = (localInfo.courtier || "").toLowerCase();
     if (!search) return courtiers.slice(0, 15);
     return courtiers.filter(c => 
       `${c.prenom} ${c.nom}`.toLowerCase().includes(search) ||
       c.courriels?.some(co => co.courriel?.toLowerCase().includes(search)) ||
       c.telephones?.some(t => t.telephone?.includes(search))
     );
-  }, [courtiers, professionnelInfo.courtier]);
+  }, [courtiers, localInfo.courtier]);
 
   const filteredCompagnies = useMemo(() => {
-    const search = (professionnelInfo.compagnie || "").toLowerCase();
+    const search = (localInfo.compagnie || "").toLowerCase();
     if (!search) return compagnies.slice(0, 15);
     return compagnies.filter(c => 
       `${c.prenom} ${c.nom}`.toLowerCase().includes(search) ||
       c.courriels?.some(co => co.courriel?.toLowerCase().includes(search)) ||
       c.telephones?.some(t => t.telephone?.includes(search))
     );
-  }, [compagnies, professionnelInfo.compagnie]);
+  }, [compagnies, localInfo.compagnie]);
 
   const getClientById = (list, id) => list.find(c => c.id === id);
 
@@ -73,18 +87,30 @@ export default function ProfessionnelStepForm({
   const hasSelections = selectedNotaireIds.length > 0 || selectedCourtierIds.length > 0 || selectedCompagnieIds.length > 0;
 
   // Déterminer quelle liste afficher
+  const handleInputChange = (field, value) => {
+    const newInfo = { ...localInfo, [field]: value };
+    setLocalInfo(newInfo);
+    onProfessionnelInfoChange(newInfo);
+  };
+
   const handleSelectProfessionnel = (item, type) => {
     // Remplir le champ avec le nom du professionnel sélectionné
     const fullName = `${item.prenom} ${item.nom}`;
     
     if (type === "notaire") {
-      onProfessionnelInfoChange({ ...professionnelInfo, notaire: fullName });
+      const newInfo = { ...localInfo, notaire: fullName };
+      setLocalInfo(newInfo);
+      onProfessionnelInfoChange(newInfo);
       onSelectNotaire(item.id);
     } else if (type === "courtier") {
-      onProfessionnelInfoChange({ ...professionnelInfo, courtier: fullName });
+      const newInfo = { ...localInfo, courtier: fullName };
+      setLocalInfo(newInfo);
+      onProfessionnelInfoChange(newInfo);
       onSelectCourtier(item.id);
     } else if (type === "compagnie") {
-      onProfessionnelInfoChange({ ...professionnelInfo, compagnie: fullName });
+      const newInfo = { ...localInfo, compagnie: fullName };
+      setLocalInfo(newInfo);
+      onProfessionnelInfoChange(newInfo);
       onSelectCompagnie(item.id);
     }
   };
@@ -149,8 +175,8 @@ export default function ProfessionnelStepForm({
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Notaire</Label>
                 <Input
-                  value={professionnelInfo.notaire || ""}
-                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, notaire: e.target.value })}
+                  value={localInfo.notaire}
+                  onChange={(e) => handleInputChange("notaire", e.target.value)}
                   onFocus={() => !disabled && setActiveField("notaire")}
                   placeholder="Nom du notaire..."
                   disabled={disabled}
@@ -177,8 +203,8 @@ export default function ProfessionnelStepForm({
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Courtier immobilier</Label>
                 <Input
-                  value={professionnelInfo.courtier || ""}
-                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, courtier: e.target.value })}
+                  value={localInfo.courtier}
+                  onChange={(e) => handleInputChange("courtier", e.target.value)}
                   onFocus={() => !disabled && setActiveField("courtier")}
                   placeholder="Nom du courtier immobilier..."
                   disabled={disabled}
@@ -205,8 +231,8 @@ export default function ProfessionnelStepForm({
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Compagnie</Label>
                 <Input
-                  value={professionnelInfo.compagnie || ""}
-                  onChange={(e) => onProfessionnelInfoChange({ ...professionnelInfo, compagnie: e.target.value })}
+                  value={localInfo.compagnie}
+                  onChange={(e) => handleInputChange("compagnie", e.target.value)}
                   onFocus={() => !disabled && setActiveField("compagnie")}
                   placeholder="Nom de la compagnie..."
                   disabled={disabled}
