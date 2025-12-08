@@ -2505,9 +2505,9 @@ export default function PriseDeMandat() {
                       let infoCommentaire = "📋 **Informations du dossier**\n\n";
                       
                       // Section Clients
-                      if (formData.clients_ids.length > 0) {
+                      if (nouveauDossierForm.clients_ids.length > 0) {
                         infoCommentaire += `**Clients:**\n`;
-                        formData.clients_ids.forEach(clientId => {
+                        nouveauDossierForm.clients_ids.forEach(clientId => {
                           const client = getClientById(clientId);
                           if (client) {
                             infoCommentaire += `  • ${client.prenom} ${client.nom}\n`;
@@ -2527,9 +2527,9 @@ export default function PriseDeMandat() {
                       }
                       
                       // Section Notaires
-                      if ((formData.notaires_ids || []).length > 0) {
+                      if (nouveauDossierForm.notaires_ids.length > 0) {
                         infoCommentaire += `**Notaires:**\n`;
-                        formData.notaires_ids.forEach(notaireId => {
+                        nouveauDossierForm.notaires_ids.forEach(notaireId => {
                           const notaire = getClientById(notaireId);
                           if (notaire) {
                             infoCommentaire += `  • ${notaire.prenom} ${notaire.nom}\n`;
@@ -2546,9 +2546,9 @@ export default function PriseDeMandat() {
                       }
                       
                       // Section Courtiers
-                      if ((formData.courtiers_ids || []).length > 0) {
+                      if (nouveauDossierForm.courtiers_ids.length > 0) {
                         infoCommentaire += `**Courtiers immobiliers:**\n`;
-                        formData.courtiers_ids.forEach(courtierId => {
+                        nouveauDossierForm.courtiers_ids.forEach(courtierId => {
                           const courtier = getClientById(courtierId);
                           if (courtier) {
                             infoCommentaire += `  • ${courtier.prenom} ${courtier.nom}\n`;
@@ -2565,9 +2565,9 @@ export default function PriseDeMandat() {
                       }
                       
                       // Section Compagnies
-                      if ((formData.compagnies_ids || []).length > 0) {
+                      if ((nouveauDossierForm.compagnies_ids || []).length > 0) {
                         infoCommentaire += `**Compagnies:**\n`;
-                        formData.compagnies_ids.forEach(compagnieId => {
+                        nouveauDossierForm.compagnies_ids.forEach(compagnieId => {
                           const compagnie = getClientById(compagnieId);
                           if (compagnie) {
                             infoCommentaire += `  • ${compagnie.prenom} ${compagnie.nom}\n`;
