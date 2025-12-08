@@ -2066,44 +2066,44 @@ export default function PriseDeMandat() {
                             }))
                           });
                           // Créer un commentaire récapitulatif avec les infos MANUELLES du mandat
-                          let commentaireInfoMandat = "# 📋 Informations du mandat\n\n";
+                          let commentaireInfoMandat = "📋 Informations du mandat\n\n";
                           
                           // Client saisi manuellement
                           if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
-                            commentaireInfoMandat += `## 👤 Client\n`;
+                            commentaireInfoMandat += `Client\n`;
                             if (clientInfo.prenom || clientInfo.nom) {
-                              commentaireInfoMandat += `**${clientInfo.prenom || ''} ${clientInfo.nom || ''}**`.trim() + "\n";
+                              commentaireInfoMandat += `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() + "\n";
                             }
-                            if (clientInfo.telephone) commentaireInfoMandat += `• Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
-                            if (clientInfo.courriel) commentaireInfoMandat += `• Email: ${clientInfo.courriel}\n`;
+                            if (clientInfo.telephone) commentaireInfoMandat += `Tél (${clientInfo.type_telephone || 'Cellulaire'}): ${clientInfo.telephone}\n`;
+                            if (clientInfo.courriel) commentaireInfoMandat += `Email: ${clientInfo.courriel}\n`;
                             commentaireInfoMandat += "\n";
                           }
                           
                           // Notaire saisi manuellement
                           if (professionnelInfo.notaire) {
-                            commentaireInfoMandat += `## 📜 Notaire\n`;
-                            commentaireInfoMandat += `**${professionnelInfo.notaire}**\n\n`;
+                            commentaireInfoMandat += `Notaire\n`;
+                            commentaireInfoMandat += `${professionnelInfo.notaire}\n\n`;
                           }
                           
                           // Courtier saisi manuellement
                           if (professionnelInfo.courtier) {
-                            commentaireInfoMandat += `## 🏢 Courtier immobilier\n`;
-                            commentaireInfoMandat += `**${professionnelInfo.courtier}**\n\n`;
+                            commentaireInfoMandat += `Courtier immobilier\n`;
+                            commentaireInfoMandat += `${professionnelInfo.courtier}\n\n`;
                           }
                           
                           // Compagnie saisie manuellement
                           if (professionnelInfo.compagnie) {
-                            commentaireInfoMandat += `## 🏭 Compagnie\n`;
-                            commentaireInfoMandat += `**${professionnelInfo.compagnie}**\n\n`;
+                            commentaireInfoMandat += `Compagnie\n`;
+                            commentaireInfoMandat += `${professionnelInfo.compagnie}\n\n`;
                           }
                           
                           // Lots (saisis manuellement)
                           if (workAddress.numero_lot && workAddress.numero_lot.trim()) {
                             const lotsArray = workAddress.numero_lot.split('\n').filter(l => l.trim());
                             if (lotsArray.length > 0) {
-                              commentaireInfoMandat += `## 📐 Lots\n`;
+                              commentaireInfoMandat += `Lots\n`;
                               lotsArray.forEach(lot => {
-                                commentaireInfoMandat += `• ${lot.trim()}\n`;
+                                commentaireInfoMandat += `${lot.trim()}\n`;
                               });
                               commentaireInfoMandat += "\n";
                             }
