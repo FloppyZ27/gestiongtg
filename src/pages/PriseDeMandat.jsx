@@ -2069,19 +2069,20 @@ export default function PriseDeMandat() {
                           let commentaireInfoMandat = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                           
                           // Vérifier si un texte saisi correspond à un professionnel sélectionné
-                          const selectedClientsNames = selectedClientIds.map(id => {
+                          const selectedClientsNames = formData.clients_ids.map(id => {
                             const c = clients.find(cl => cl.id === id);
                             return c ? `${c.prenom} ${c.nom}`.trim() : '';
                           });
-                          const selectedNotairesNames = selectedNotaireIds.map(id => {
+                          const selectedNotairesNames = (formData.notaires_ids || []).map(id => {
                             const n = notaires.find(nt => nt.id === id);
                             return n ? `${n.prenom} ${n.nom}`.trim() : '';
                           });
-                          const selectedCourtiersNames = selectedCourtierIds.map(id => {
+                          const selectedCourtiersNames = (formData.courtiers_ids || []).map(id => {
                             const ct = courtiers.find(cr => cr.id === id);
                             return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
                           });
-                          const selectedCompagniesNames = selectedCompagnieIds.map(id => {
+                          const compagnies = clients.filter(c => c.type_client === 'Compagnie');
+                          const selectedCompagniesNames = (formData.compagnies_ids || []).map(id => {
                             const cp = compagnies.find(cmp => cmp.id === id);
                             return cp ? `${cp.prenom} ${cp.nom}`.trim() : '';
                           });
@@ -2601,19 +2602,20 @@ export default function PriseDeMandat() {
                       let hasAnyManualInfo = false;
                       
                       // Vérifier si un texte saisi correspond à un professionnel sélectionné
-                      const selectedClientsNames = selectedClientIds.map(id => {
+                      const selectedClientsNames = nouveauDossierForm.clients_ids.map(id => {
                         const c = clients.find(cl => cl.id === id);
                         return c ? `${c.prenom} ${c.nom}`.trim() : '';
                       });
-                      const selectedNotairesNames = selectedNotaireIds.map(id => {
+                      const selectedNotairesNames = nouveauDossierForm.notaires_ids.map(id => {
                         const n = notaires.find(nt => nt.id === id);
                         return n ? `${n.prenom} ${n.nom}`.trim() : '';
                       });
-                      const selectedCourtiersNames = selectedCourtierIds.map(id => {
+                      const selectedCourtiersNames = nouveauDossierForm.courtiers_ids.map(id => {
                         const ct = courtiers.find(cr => cr.id === id);
                         return ct ? `${ct.prenom} ${ct.nom}`.trim() : '';
                       });
-                      const selectedCompagniesNames = selectedCompagnieIds.map(id => {
+                      const compagnies = clients.filter(c => c.type_client === 'Compagnie');
+                      const selectedCompagniesNames = (nouveauDossierForm.compagnies_ids || []).map(id => {
                         const cp = compagnies.find(cmp => cmp.id === id);
                         return cp ? `${cp.prenom} ${cp.nom}`.trim() : '';
                       });
