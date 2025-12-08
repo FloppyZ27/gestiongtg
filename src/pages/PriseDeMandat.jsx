@@ -2066,7 +2066,7 @@ export default function PriseDeMandat() {
                             }))
                           });
                           // Créer un commentaire récapitulatif avec les infos MANUELLES du mandat
-                          let commentaireInfoMandat = "<h2 style='font-size: 1.75em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
+                          let commentaireInfoMandat = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                           
                           // Client saisi manuellement
                           if (clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel) {
@@ -2577,7 +2577,7 @@ export default function PriseDeMandat() {
 
                     try {
                       // Créer un commentaire récapitulatif avec les infos MANUELLES du dossier
-                      let infoCommentaire = "<h2 style='font-size: 1.75em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
+                      let infoCommentaire = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                       let hasAnyManualInfo = false;
                       
                       // Client saisi manuellement
