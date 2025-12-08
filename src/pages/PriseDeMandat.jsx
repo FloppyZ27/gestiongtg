@@ -262,6 +262,8 @@ export default function PriseDeMandat() {
   const [viewingPdfName, setViewingPdfName] = useState("");
   const [sidebarTab, setSidebarTab] = useState("commentaires");
   const [historique, setHistorique] = useState([]);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockedBy, setLockedBy] = useState("");
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -454,7 +456,25 @@ export default function PriseDeMandat() {
 
   const [editingPriseMandat, setEditingPriseMandat] = useState(null);
 
-  const handleEditPriseMandat = (pm) => {
+  const handleEditPriseMandat = async (pm) => {
+    // Vérifier si le mandat est verrouillé par quelqu'un d'autre
+    if (pm.locked_by && pm.locked_by !== user?.email) {
+      const lockedUser = users.find(u => u.email === pm.locked_by);
+      setIsLocked(true);
+      setLockedBy(lockedUser?.full_name || pm.locked_by);
+    } else {
+      setIsLocked(false);
+      setLockedBy("");
+      
+      // Verrouiller le mandat pour l'utilisateur actuel
+      await base44.entities.PriseMandat.update(pm.id, {
+        ...pm,
+        locked_by: user?.email,
+        locked_at: new Date().toISOString()
+      });
+      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+    }
+    
     setEditingPriseMandat(pm);
     
     // Charger l'historique si présent
@@ -573,7 +593,9 @@ export default function PriseDeMandat() {
         urgence_percue: data.urgence_percue,
         statut: data.statut,
         commentaires: commentsToSave,
-        historique: data.historique
+        historique: data.historique,
+        locked_by: null,
+        locked_at: null
       };
 
       return await base44.entities.PriseMandat.update(id, priseMandatData);
@@ -584,6 +606,8 @@ export default function PriseDeMandat() {
       resetFullForm();
       setCommentairesTemporaires([]);
       setEditingPriseMandat(null);
+      setIsLocked(false);
+      setLockedBy("");
     },
   });
 
@@ -1877,8 +1901,18 @@ export default function PriseDeMandat() {
             <p className="text-slate-400">Gestion des prise de mandat</p>
           </div>
 
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          <Dialog open={isDialogOpen} onOpenChange={async (open) => {
             if (!open) {
+              // Déverrouiller le mandat si on était en train de l'éditer
+              if (editingPriseMandat && !isLocked) {
+                await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                  ...editingPriseMandat,
+                  locked_by: null,
+                  locked_at: null
+                });
+                queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+              }
+              
               // Vérifier si des données ont été saisies
               const hasData = formData.arpenteur_geometre || 
                 formData.clients_ids.length > 0 ||
@@ -1896,14 +1930,18 @@ export default function PriseDeMandat() {
                 formData.statut !== editingPriseMandat.statut
               ) : hasData;
               
-              if (hasChanges) {
+              if (hasChanges && !isLocked) {
                 if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
                   setIsDialogOpen(false);
                   resetFullForm();
+                  setIsLocked(false);
+                  setLockedBy("");
                 }
               } else {
                 setIsDialogOpen(false);
                 resetFullForm();
+                setIsLocked(false);
+                setLockedBy("");
               }
             } else {
               setIsDialogOpen(open);
@@ -1926,6 +1964,21 @@ export default function PriseDeMandat() {
                 {/* Main form content - 70% */}
                 <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6">
+                  {/* Bandeau de verrouillage */}
+                  {isLocked && (
+                    <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-red-400 font-semibold">Mandat verrouillé</p>
+                        <p className="text-slate-300 text-sm">Ce mandat est en cours de modification par <span className="text-red-400 font-medium">{lockedBy}</span></p>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="mb-6 flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white">
@@ -2016,8 +2069,10 @@ export default function PriseDeMandat() {
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
                   <DossierInfoStepForm
+                    disabled={isLocked}
                     arpenteurGeometre={formData.arpenteur_geometre}
                     onArpenteurChange={(value) => {
+                      if (isLocked) return;
                       if (formData.statut === "Mandats à ouvrir" && !editingPriseMandat?.numero_dossier) {
                         const prochainNumero = calculerProchainNumeroDossier(value, editingPriseMandat?.id);
                         setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero});
@@ -2027,6 +2082,7 @@ export default function PriseDeMandat() {
                     }}
                     statut={formData.statut}
                     onStatutChange={(value) => {
+                      if (isLocked) return;
                       // Si un numéro de dossier est inscrit et qu'on change de statut, demander confirmation
                       if (formData.numero_dossier && value !== formData.statut) {
                         setPendingStatutChange(value);
