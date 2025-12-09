@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -9,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Check, Edit, X, Save, Package } from "lucide-react";
+import { Plus, Trash2, Check, Edit, X, Save, Package, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PROVINCES_CANADIENNES = [
   "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
@@ -45,6 +45,16 @@ export default function ClientFormDialog({
   const [editingCourrielIndex, setEditingCourrielIndex] = useState(null);
   const [editingTelephoneIndex, setEditingTelephoneIndex] = useState(null);
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  
+  // Sections collapse states
+  const [infoCollapsed, setInfoCollapsed] = useState(false);
+  const [adressesCollapsed, setAdressesCollapsed] = useState(false);
+  const [communicationCollapsed, setCommunicationCollapsed] = useState(false);
+  
+  // Address search
+  const [addressSearchTerm, setAddressSearchTerm] = useState("");
+  const [addressSearchResults, setAddressSearchResults] = useState([]);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -186,13 +196,70 @@ export default function ClientFormDialog({
     }));
   };
 
-  const updateTelephoneField = (index, value) => {
+  const updateTelephoneField = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
       telephones: prev.telephones.map((t, i) => 
-        i === index ? { ...t, telephone: value } : t
+        i === index ? { ...t, [field]: value } : t
       )
     }));
+  };
+  
+  // Address search with LLM
+  const handleAddressSearch = async (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setAddressSearchResults([]);
+      return;
+    }
+    
+    setIsSearchingAddress(true);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Trouve l'adresse complète pour: "${searchTerm}" au Québec, Canada. Retourne les informations d'adresse.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            addresses: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  civic_number: { type: "string" },
+                  street: { type: "string" },
+                  city: { type: "string" },
+                  province: { type: "string" },
+                  postal_code: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      setAddressSearchResults(response.addresses || []);
+    } catch (error) {
+      console.error("Error searching address:", error);
+      setAddressSearchResults([]);
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+  
+  const selectSearchedAddress = (address) => {
+    setFormData(prev => ({
+      ...prev,
+      adresses: [...prev.adresses, {
+        numeros_civiques: address.civic_number ? [address.civic_number] : [""],
+        rue: address.street || "",
+        ville: address.city || "",
+        province: address.province || "Québec",
+        code_postal: address.postal_code || "",
+        actuelle: false
+      }]
+    }));
+    setAddressSearchTerm("");
+    setAddressSearchResults([]);
   };
 
   const togglePreferenceLivraison = (mode) => {
@@ -257,128 +324,201 @@ export default function ClientFormDialog({
               </h2>
             </div>
 
-            <form id="client-form" onSubmit={handleSubmit} className="space-y-6">
-              {/* Prénom, Nom et Type sur la même ligne */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="prenom">Prénom <span className="text-red-400">*</span></Label>
-                  <Input
-                    id="prenom"
-                    value={formData.prenom}
-                    onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                    required
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="nom">Nom <span className="text-red-400">*</span></Label>
-                  <Input
-                    id="nom"
-                    value={formData.nom}
-                    onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                    required
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="type_client">Type de client</Label>
-                  <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner le type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Client" className="text-white">Client</SelectItem>
-                      <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                      <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                      <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Préférences de livraison - COMPACT */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm">
-                  <Package className="w-3 h-3" />
-                  Préférences de livraison
-                </Label>
-                <div className="flex gap-2">
-                  {MODES_LIVRAISON.map((mode) => (
-                    <div
-                      key={mode}
-                      onClick={() => togglePreferenceLivraison(mode)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border cursor-pointer transition-all text-sm ${
-                        formData.preferences_livraison.includes(mode)
-                          ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
-                          : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
-                      }`}
-                    >
-                      <span>{mode}</span>
-                      {formData.preferences_livraison.includes(mode) && (
-                        <Check className="w-3 h-3" />
-                      )}
+            <form id="client-form" onSubmit={handleSubmit} className="space-y-3">
+              {/* Section Informations Client */}
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
+                  onClick={() => setInfoCollapsed(!infoCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                        <User className="w-3.5 h-3.5 text-blue-400" />
+                      </div>
+                      <CardTitle className="text-blue-300 text-base">Informations client</CardTitle>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    {infoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
 
-              {/* Adresses */}
-              <div className="space-y-3">
-                <Label>Adresses</Label>
-                
-                {/* Formulaire pour nouvelle adresse */}
-                <div className="p-3 bg-slate-800/30 rounded-lg space-y-3">
-                  <div className="grid grid-cols-[200px_1fr] gap-3">
-                    <div className="space-y-2">
-                      <Label>Numéro(s) civique(s)</Label>
-                      <div className="flex gap-2 mb-2">
+                {!infoCollapsed && (
+                  <CardContent className="pt-3 pb-2 space-y-3">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="prenom" className="text-xs">Prénom <span className="text-red-400">*</span></Label>
                         <Input
-                          id="new-civic-0"
-                          placeholder="Ex: 123"
-                          className="bg-slate-800 border-slate-700"
+                          id="prenom"
+                          value={formData.prenom}
+                          onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                          required
+                          className="bg-slate-700 border-slate-600 h-8 text-sm"
                         />
                       </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="nom" className="text-xs">Nom <span className="text-red-400">*</span></Label>
+                        <Input
+                          id="nom"
+                          value={formData.nom}
+                          onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                          required
+                          className="bg-slate-700 border-slate-600 h-8 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="type_client" className="text-xs">Type de client</Label>
+                        <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Client" className="text-white">Client</SelectItem>
+                            <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
+                            <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
+                            <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    <div className="space-y-1">
+                      <Label className="flex items-center gap-2 text-xs">
+                        <Package className="w-3 h-3" />
+                        Préférences de livraison
+                      </Label>
+                      <div className="flex gap-2">
+                        {MODES_LIVRAISON.map((mode) => (
+                          <div
+                            key={mode}
+                            onClick={() => togglePreferenceLivraison(mode)}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border cursor-pointer transition-all text-xs ${
+                              formData.preferences_livraison.includes(mode)
+                                ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                                : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
+                            }`}
+                          >
+                            <span>{mode}</span>
+                            {formData.preferences_livraison.includes(mode) && (
+                              <Check className="w-3 h-3" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Section Adresses */}
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
+                  onClick={() => setAdressesCollapsed(!adressesCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                        <MapPin className="w-3.5 h-3.5 text-purple-400" />
+                      </div>
+                      <CardTitle className="text-purple-300 text-base">Adresses</CardTitle>
+                    </div>
+                    {adressesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
+
+                {!adressesCollapsed && (
+                  <CardContent className="pt-3 pb-2 space-y-3">
+                    {/* Barre de recherche d'adresse avec LLM */}
                     <div className="space-y-2">
-                      <Label>Rue</Label>
+                      <Label className="text-xs">Rechercher une adresse</Label>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                        <Input
+                          placeholder="Ex: 123 rue Principale, Alma..."
+                          value={addressSearchTerm}
+                          onChange={(e) => {
+                            setAddressSearchTerm(e.target.value);
+                            if (e.target.value.length > 3) {
+                              handleAddressSearch(e.target.value);
+                            } else {
+                              setAddressSearchResults([]);
+                            }
+                          }}
+                          className="pl-7 bg-slate-700 border-slate-600 h-8 text-sm"
+                        />
+                      </div>
+                      
+                      {/* Résultats de recherche */}
+                      {addressSearchResults.length > 0 && (
+                        <div className="bg-slate-800 border border-slate-700 rounded-lg p-2 space-y-1 max-h-40 overflow-y-auto">
+                          {addressSearchResults.map((addr, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => selectSearchedAddress(addr)}
+                              className="px-2 py-1.5 rounded text-xs bg-slate-700/50 hover:bg-slate-700 cursor-pointer text-slate-300"
+                            >
+                              {addr.civic_number} {addr.street}, {addr.city}, {addr.province} {addr.postal_code}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {isSearchingAddress && (
+                        <p className="text-xs text-slate-500">Recherche en cours...</p>
+                      )}
+                    </div>
+
+                    {/* Formulaire pour nouvelle adresse */}
+                    <div className="p-2 bg-slate-800/30 rounded-lg space-y-2">
+                  <div className="grid grid-cols-[150px_1fr] gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Numéro(s) civique(s)</Label>
+                      <Input
+                        id="new-civic-0"
+                        placeholder="Ex: 123"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Rue</Label>
                       <Input
                         id="new-rue"
                         placeholder="Nom de la rue"
-                        className="bg-slate-800 border-slate-700"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
                       />
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label>Ville</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Ville</Label>
                       <Input
                         id="new-ville"
                         placeholder="Ville"
-                        className="bg-slate-800 border-slate-700"
+                        className="bg-slate-700 border-slate-600 h-7 text-sm"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Province</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Province</Label>
                       <Select id="new-province" defaultValue="Québec">
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                           <SelectValue placeholder="Sélectionner une province" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {PROVINCES_CANADIENNES.map(prov => (
-                            <SelectItem key={prov} value={prov} className="text-white">{prov}</SelectItem>
+                            <SelectItem key={prov} value={prov} className="text-white text-sm">{prov}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label>Code Postal</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Code Postal</Label>
                     <Input
                       id="new-code-postal"
                       placeholder="Code postal"
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-slate-700 border-slate-600 h-7 text-sm"
                     />
                   </div>
                   
@@ -413,15 +553,15 @@ export default function ClientFormDialog({
                         document.getElementById('new-code-postal').value = "";
                       }
                     }}
-                    className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
+                    className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 text-xs"
+                    >
+                    <Plus className="w-3 h-3 mr-1" />
                     Ajouter cette adresse
-                  </Button>
-                </div>
+                    </Button>
+                    </div>
 
-                {/* Liste des adresses */}
-                {formData.adresses.length > 0 && (
+                    {/* Liste des adresses */}
+                    {formData.adresses.length > 0 && (
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
@@ -555,46 +695,66 @@ export default function ClientFormDialog({
                             )}
                           </React.Fragment>
                         ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableBody>
+                      </Table>
+                    </div>
+                    )}
+                  </CardContent>
                 )}
-              </div>
+              </Card>
 
-              {/* Courriels et Téléphones en deux colonnes */}
-              <div className="grid grid-cols-2 gap-6">
-                {/* Courriels */}
-                <div className="space-y-3">
-                  <Label>Courriels</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="email"
-                      id="new-courriel"
-                      placeholder="Courriel"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        const courriel = document.getElementById('new-courriel').value;
-                        if (courriel.trim()) {
-                          setFormData(prev => ({
-                            ...prev,
-                            courriels: [...prev.courriels, { courriel, actuel: false }]
-                          }));
-                          document.getElementById('new-courriel').value = "";
-                        }
-                      }}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+              {/* Section Communication */}
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
+                  onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                        <Mail className="w-3.5 h-3.5 text-orange-400" />
+                      </div>
+                      <CardTitle className="text-orange-300 text-base">Communication</CardTitle>
+                    </div>
+                    {communicationCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  
-                  {formData.courriels.length > 0 && (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                      <Table>
+                </CardHeader>
+
+                {!communicationCollapsed && (
+                  <CardContent className="pt-3 pb-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Courriels */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">Courriels</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="email"
+                            id="new-courriel"
+                            placeholder="Courriel"
+                            className="bg-slate-700 border-slate-600 h-7 text-sm"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              const courriel = document.getElementById('new-courriel').value;
+                              if (courriel.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  courriels: [...prev.courriels, { courriel, actuel: false }]
+                                }));
+                                document.getElementById('new-courriel').value = "";
+                              }
+                            }}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        
+                        {formData.courriels.length > 0 && (
+                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                            <Table>
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Courriel</TableHead>
@@ -675,62 +835,90 @@ export default function ClientFormDialog({
                               )}
                             </React.Fragment>
                           ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </div>
+                          </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                      </div>
 
-                {/* Téléphones */}
-                <div className="space-y-3">
-                  <Label>Téléphones</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="new-telephone"
-                      placeholder="Téléphone"
-                      className="bg-slate-800 border-slate-700"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        const telephone = document.getElementById('new-telephone').value;
-                        if (telephone.trim()) {
-                          setFormData(prev => ({
-                            ...prev,
-                            telephones: [...prev.telephones, { telephone, actuel: false }]
-                          }));
-                          document.getElementById('new-telephone').value = "";
-                        }
-                      }}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  {formData.telephones.length > 0 && (
-                    <div className="border border-slate-700 rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">Téléphone</TableHead>
-                            <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {formData.telephones.map((item, index) => (
-                            <React.Fragment key={index}>
-                              {editingTelephoneIndex === index ? (
-                                <TableRow className="bg-slate-700/50 border-slate-800">
-                                  <TableCell colSpan={2}>
-                                    <div className="space-y-2 py-2">
-                                      <Input
-                                        value={item.telephone}
-                                        onChange={(e) => updateTelephoneField(index, e.target.value)}
-                                        placeholder="Téléphone"
-                                        className="bg-slate-800 border-slate-600 text-sm"
-                                      />
+                      {/* Téléphones */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">Téléphones</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="new-telephone"
+                            placeholder="Téléphone"
+                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                          />
+                          <Select id="new-telephone-type" defaultValue="Cellulaire">
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
+                              <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
+                              <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              const telephone = document.getElementById('new-telephone').value;
+                              const typeSelect = document.querySelector('[id="new-telephone-type"]');
+                              const type = typeSelect?.textContent?.trim() || "Cellulaire";
+                              if (telephone.trim()) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  telephones: [...prev.telephones, { telephone, type, actuel: false }]
+                                }));
+                                document.getElementById('new-telephone').value = "";
+                              }
+                            }}
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        
+                        {formData.telephones.length > 0 && (
+                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                  <TableHead className="text-slate-300">Téléphone</TableHead>
+                                  <TableHead className="text-slate-300">Type</TableHead>
+                                  <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {formData.telephones.map((item, index) => (
+                                  <React.Fragment key={index}>
+                                    {editingTelephoneIndex === index ? (
+                                      <TableRow className="bg-slate-700/50 border-slate-800">
+                                        <TableCell colSpan={3}>
+                                          <div className="space-y-2 py-2">
+                                            <div className="flex gap-2">
+                                              <Input
+                                                value={item.telephone}
+                                                onChange={(e) => updateTelephoneField(index, 'telephone', e.target.value)}
+                                                placeholder="Téléphone"
+                                                className="bg-slate-800 border-slate-600 text-sm flex-1"
+                                              />
+                                              <Select 
+                                                value={item.type || "Cellulaire"} 
+                                                onValueChange={(value) => updateTelephoneField(index, 'type', value)}
+                                              >
+                                                <SelectTrigger className="bg-slate-800 border-slate-600 text-white text-xs w-24">
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-slate-800 border-slate-700">
+                                                  <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
+                                                  <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
+                                                  <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
                                       <div className="flex justify-end gap-2">
                                         <Button
                                           type="button"
@@ -751,14 +939,15 @@ export default function ClientFormDialog({
                                           <Save className="w-3 h-3 mr-1" />
                                           Enregistrer
                                         </Button>
-                                      </div>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                                  <TableCell className="text-right">
+                                            </div>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ) : (
+                                      <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                        <TableCell className="text-white text-sm">{item.telephone}</TableCell>
+                                        <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
+                                        <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
                                       <Button
                                         type="button"
@@ -785,18 +974,21 @@ export default function ClientFormDialog({
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </React.Fragment>
-                          ))}
-                        </TableBody>
-                      </Table>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  )}
+                                </React.Fragment>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
             </form>
 
             {/* Boutons Annuler/Créer tout en bas */}
