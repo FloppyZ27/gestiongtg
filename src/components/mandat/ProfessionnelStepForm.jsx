@@ -91,6 +91,17 @@ export default function ProfessionnelStepForm({
     const newInfo = { ...localInfo, [field]: value };
     setLocalInfo(newInfo);
     onProfessionnelInfoChange(newInfo);
+    
+    // Si le champ est vidé, désélectionner tous les professionnels de cette catégorie
+    if (!value || value.trim() === "") {
+      if (field === "notaire" && selectedNotaireIds.length > 0) {
+        selectedNotaireIds.forEach(id => onSelectNotaire(id));
+      } else if (field === "courtier" && selectedCourtierIds.length > 0) {
+        selectedCourtierIds.forEach(id => onSelectCourtier(id));
+      } else if (field === "compagnie" && selectedCompagnieIds.length > 0) {
+        selectedCompagnieIds.forEach(id => onSelectCompagnie(id));
+      }
+    }
   };
 
   const handleSelectProfessionnel = (item, type) => {
