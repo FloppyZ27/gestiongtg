@@ -344,58 +344,65 @@ export default function ClientFormDialog({
 
                 {!infoCollapsed && (
                   <CardContent className="pt-1 pb-2">
-                    <div className="grid grid-cols-[1fr_1fr_1fr_2fr] gap-2 items-end">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="prenom" className="text-slate-400 text-xs">Prénom <span className="text-red-400">*</span></Label>
-                        <Input
-                          id="prenom"
-                          value={formData.prenom}
-                          onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                          required
-                          className="bg-slate-700 border-slate-600 h-6 text-sm"
-                        />
+                    <div className="grid grid-cols-[70%_30%] gap-3">
+                      {/* 70% - Prénom et Nom */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="prenom" className="text-slate-400 text-xs">Prénom <span className="text-red-400">*</span></Label>
+                          <Input
+                            id="prenom"
+                            value={formData.prenom}
+                            onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                            required
+                            className="bg-slate-700 border-slate-600 h-6 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label htmlFor="nom" className="text-slate-400 text-xs">Nom <span className="text-red-400">*</span></Label>
+                          <Input
+                            id="nom"
+                            value={formData.nom}
+                            onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                            required
+                            className="bg-slate-700 border-slate-600 h-6 text-sm"
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        <Label htmlFor="nom" className="text-slate-400 text-xs">Nom <span className="text-red-400">*</span></Label>
-                        <Input
-                          id="nom"
-                          value={formData.nom}
-                          onChange={(e) => setFormData({...formData, nom: e.target.value})}
-                          required
-                          className="bg-slate-700 border-slate-600 h-6 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-0.5">
-                        <Label htmlFor="type_client" className="text-slate-400 text-xs">Type</Label>
-                        <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
-                            <SelectValue placeholder="Type" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="Client" className="text-white text-sm">Client</SelectItem>
-                            <SelectItem value="Notaire" className="text-white text-sm">Notaire</SelectItem>
-                            <SelectItem value="Courtier immobilier" className="text-white text-sm">Courtier</SelectItem>
-                            <SelectItem value="Compagnie" className="text-white text-sm">Compagnie</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-0.5">
-                        <Label className="text-slate-400 text-xs">Livraison</Label>
-                        <div className="flex gap-1">
-                          {MODES_LIVRAISON.map((mode) => (
-                            <button
-                              key={mode}
-                              type="button"
-                              onClick={() => togglePreferenceLivraison(mode)}
-                              className={`px-2 py-0.5 rounded text-xs border transition-all ${
-                                formData.preferences_livraison.includes(mode)
-                                  ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
-                                  : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
-                              }`}
-                            >
-                              {mode === "Main propre" ? "Main" : mode === "Poste" ? "Poste" : "Email"}
-                            </button>
-                          ))}
+
+                      {/* 30% - Type et Livraison */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="type_client" className="text-slate-400 text-xs">Type</Label>
+                          <Select value={formData.type_client} onValueChange={(value) => setFormData({...formData, type_client: value})}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
+                              <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Client" className="text-white text-sm">Client</SelectItem>
+                              <SelectItem value="Notaire" className="text-white text-sm">Notaire</SelectItem>
+                              <SelectItem value="Courtier immobilier" className="text-white text-sm">Courtier</SelectItem>
+                              <SelectItem value="Compagnie" className="text-white text-sm">Compagnie</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="text-slate-400 text-xs">Livraison</Label>
+                          <div className="flex gap-1">
+                            {MODES_LIVRAISON.map((mode) => (
+                              <button
+                                key={mode}
+                                type="button"
+                                onClick={() => togglePreferenceLivraison(mode)}
+                                className={`px-1.5 py-0.5 rounded text-xs border transition-all ${
+                                  formData.preferences_livraison.includes(mode)
+                                    ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                                    : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-700/50'
+                                }`}
+                              >
+                                {mode === "Main propre" ? "Main" : mode === "Poste" ? "Poste" : "Email"}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
