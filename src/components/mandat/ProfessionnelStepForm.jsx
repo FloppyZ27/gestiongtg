@@ -94,7 +94,13 @@ export default function ProfessionnelStepForm({
   };
 
   const handleSelectProfessionnel = (item, type) => {
-    // Sélectionner depuis la liste n'affecte PAS les infos manuelles
+    // Auto-remplir le champ de saisie avec le nom du professionnel
+    const fullName = `${item.prenom} ${item.nom}`;
+    const newInfo = { ...localInfo, [type]: fullName };
+    setLocalInfo(newInfo);
+    onProfessionnelInfoChange(newInfo);
+    
+    // Sélectionner le professionnel
     if (type === "notaire") {
       onSelectNotaire(item.id);
     } else if (type === "courtier") {
@@ -171,21 +177,6 @@ export default function ProfessionnelStepForm({
                   disabled={disabled}
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "notaire" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
-                {selectedNotaireIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-0.5">
-                    {selectedNotaireIds.map(id => {
-                      const notaire = getClientById(notaires, id);
-                      return notaire ? (
-                        <Badge key={id} className="bg-purple-500/20 text-purple-400 border-purple-500/30 pr-1 text-xs py-0">
-                          {notaire.prenom} {notaire.nom}
-                          <button type="button" onClick={() => onSelectNotaire(id)} className="ml-1 hover:text-red-400">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
               </div>
 
               {/* Courtier */}
@@ -199,21 +190,6 @@ export default function ProfessionnelStepForm({
                   disabled={disabled}
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "courtier" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
-                {selectedCourtierIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-0.5">
-                    {selectedCourtierIds.map(id => {
-                      const courtier = getClientById(courtiers, id);
-                      return courtier ? (
-                        <Badge key={id} className="bg-orange-500/20 text-orange-400 border-orange-500/30 pr-1 text-xs py-0">
-                          {courtier.prenom} {courtier.nom}
-                          <button type="button" onClick={() => onSelectCourtier(id)} className="ml-1 hover:text-red-400">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
               </div>
 
               {/* Compagnie */}
@@ -227,21 +203,6 @@ export default function ProfessionnelStepForm({
                   disabled={disabled}
                   className={`bg-slate-700 border-slate-600 text-white h-7 text-sm ${activeField === "compagnie" && !disabled ? "ring-2 ring-pink-500 border-pink-500" : ""}`}
                 />
-                {selectedCompagnieIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-0.5">
-                    {selectedCompagnieIds.map(id => {
-                      const compagnie = getClientById(compagnies, id);
-                      return compagnie ? (
-                        <Badge key={id} className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 pr-1 text-xs py-0">
-                          {compagnie.prenom} {compagnie.nom}
-                          <button type="button" onClick={() => onSelectCompagnie(id)} className="ml-1 hover:text-red-400">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
               </div>
             </div>
 
