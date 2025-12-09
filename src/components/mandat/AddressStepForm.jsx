@@ -326,12 +326,18 @@ export default function AddressStepForm({
                         <div
                           key={mandatKey}
                           onClick={() => {
-                            setSelectedMandatKey(mandatKey);
-                            onSelectExistingAddress && onSelectExistingAddress(addr, mandat.lots);
+                            if (isSelected) {
+                              // Déselectionner
+                              setSelectedMandatKey(null);
+                            } else {
+                              // Sélectionner
+                              setSelectedMandatKey(mandatKey);
+                              onSelectExistingAddress && onSelectExistingAddress(addr, mandat.lots);
+                            }
                           }}
                           className={`px-2 py-1 rounded cursor-pointer text-xs ${
                             isSelected 
-                              ? 'bg-emerald-500/20 text-emerald-400' 
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
                               : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
                           }`}
                         >
