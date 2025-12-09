@@ -116,21 +116,39 @@ export default function ProfessionnelStepForm({
       const newInfo = { ...localInfo, [type]: "" };
       setLocalInfo(newInfo);
       onProfessionnelInfoChange(newInfo);
+      
+      // Désélectionner le professionnel
+      if (type === "notaire") {
+        onSelectNotaire(item.id);
+      } else if (type === "courtier") {
+        onSelectCourtier(item.id);
+      } else if (type === "compagnie") {
+        onSelectCompagnie(item.id);
+      }
     } else {
+      // Désélectionner tous les autres professionnels de la même catégorie d'abord
+      if (type === "notaire" && selectedNotaireIds.length > 0) {
+        selectedNotaireIds.forEach(id => onSelectNotaire(id));
+      } else if (type === "courtier" && selectedCourtierIds.length > 0) {
+        selectedCourtierIds.forEach(id => onSelectCourtier(id));
+      } else if (type === "compagnie" && selectedCompagnieIds.length > 0) {
+        selectedCompagnieIds.forEach(id => onSelectCompagnie(id));
+      }
+      
       // Auto-remplir le champ de saisie avec le nom du professionnel
       const fullName = `${item.prenom} ${item.nom}`;
       const newInfo = { ...localInfo, [type]: fullName };
       setLocalInfo(newInfo);
       onProfessionnelInfoChange(newInfo);
-    }
-    
-    // Sélectionner/désélectionner le professionnel (un seul à la fois)
-    if (type === "notaire") {
-      onSelectNotaire(item.id);
-    } else if (type === "courtier") {
-      onSelectCourtier(item.id);
-    } else if (type === "compagnie") {
-      onSelectCompagnie(item.id);
+      
+      // Sélectionner le nouveau professionnel
+      if (type === "notaire") {
+        onSelectNotaire(item.id);
+      } else if (type === "courtier") {
+        onSelectCourtier(item.id);
+      } else if (type === "compagnie") {
+        onSelectCompagnie(item.id);
+      }
     }
   };
 
