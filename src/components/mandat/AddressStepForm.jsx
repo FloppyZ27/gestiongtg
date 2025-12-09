@@ -327,8 +327,25 @@ export default function AddressStepForm({
                           key={mandatKey}
                           onClick={() => {
                             if (isSelected) {
-                              // Déselectionner
+                              // Déselectionner et réinitialiser les champs
                               setSelectedMandatKey(null);
+                              const emptyForm = {
+                                numero_civique: "",
+                                rue: "",
+                                ville: "",
+                                province: "Québec",
+                                code_postal: "",
+                                numero_lot: ""
+                              };
+                              setAddressForm(emptyForm);
+                              onAddressChange({
+                                numeros_civiques: [""],
+                                rue: "",
+                                ville: "",
+                                province: "Québec",
+                                code_postal: "",
+                                numero_lot: ""
+                              });
                             } else {
                               // Sélectionner
                               setSelectedMandatKey(mandatKey);
