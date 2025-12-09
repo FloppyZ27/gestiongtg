@@ -94,13 +94,26 @@ export default function ProfessionnelStepForm({
   };
 
   const handleSelectProfessionnel = (item, type) => {
-    // Auto-remplir le champ de saisie avec le nom du professionnel
-    const fullName = `${item.prenom} ${item.nom}`;
-    const newInfo = { ...localInfo, [type]: fullName };
-    setLocalInfo(newInfo);
-    onProfessionnelInfoChange(newInfo);
+    // Vérifier si déjà sélectionné pour désélectionner
+    const isAlreadySelected = 
+      (type === "notaire" && selectedNotaireIds.includes(item.id)) ||
+      (type === "courtier" && selectedCourtierIds.includes(item.id)) ||
+      (type === "compagnie" && selectedCompagnieIds.includes(item.id));
     
-    // Sélectionner le professionnel
+    if (isAlreadySelected) {
+      // Désélectionner et vider le champ
+      const newInfo = { ...localInfo, [type]: "" };
+      setLocalInfo(newInfo);
+      onProfessionnelInfoChange(newInfo);
+    } else {
+      // Auto-remplir le champ de saisie avec le nom du professionnel
+      const fullName = `${item.prenom} ${item.nom}`;
+      const newInfo = { ...localInfo, [type]: fullName };
+      setLocalInfo(newInfo);
+      onProfessionnelInfoChange(newInfo);
+    }
+    
+    // Sélectionner/désélectionner le professionnel (un seul à la fois)
     if (type === "notaire") {
       onSelectNotaire(item.id);
     } else if (type === "courtier") {
