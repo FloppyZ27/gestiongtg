@@ -2060,6 +2060,10 @@ export default function Dossiers() {
                                       updateMandatAddress={updateMandatAddress}
                                       openLotSelector={openLotSelector}
                                       openAddMinuteDialog={openAddMinuteDialog}
+                                      openNewLotDialog={(mandatIndex) => {
+                                        setCurrentMandatIndex(mandatIndex);
+                                        setIsNewLotDialogOpen(true);
+                                      }}
                                       removeLotFromMandat={removeLotFromMandat}
                                       removeMinuteFromMandat={removeMinuteFromMandat}
                                       getLotById={getLotById}

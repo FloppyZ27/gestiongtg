@@ -23,6 +23,7 @@ export default function MandatTabs({
   updateMandatAddress,
   openLotSelector,
   openAddMinuteDialog,
+  openNewLotDialog,
   removeLotFromMandat,
   removeMinuteFromMandat,
   getLotById,
@@ -226,10 +227,16 @@ export default function MandatTabs({
           <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label>Lots sélectionnés</Label>
-            <Button type="button" size="sm" onClick={() => openLotSelector(mandatIndex)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-              <Plus className="w-4 h-4 mr-1" />
-              Sélectionner des lots
-            </Button>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" onClick={() => openLotSelector(mandatIndex)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                <Plus className="w-4 h-4 mr-1" />
+                Sélectionner des lots
+              </Button>
+              <Button type="button" size="sm" onClick={() => openNewLotDialog(mandatIndex)} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400">
+                <Plus className="w-4 h-4 mr-1" />
+                Nouveau
+              </Button>
+            </div>
           </div>
 
           {mandat.lots && mandat.lots.length > 0 ? (
