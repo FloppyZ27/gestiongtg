@@ -52,6 +52,9 @@ export default function ClientFormDialog({
   const [addressSearchTerm, setAddressSearchTerm] = useState("");
   const [addressSearchResults, setAddressSearchResults] = useState([]);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  
+  // Telephone type state
+  const [newTelephoneType, setNewTelephoneType] = useState("Cellulaire");
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -734,12 +737,8 @@ export default function ClientFormDialog({
                             className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
                           />
                           <Select 
-                            id="new-telephone-type" 
-                            defaultValue="Cellulaire"
-                            onValueChange={(value) => {
-                              const selectEl = document.querySelector('[id="new-telephone-type"]');
-                              if (selectEl) selectEl.setAttribute('data-value', value);
-                            }}
+                            value={newTelephoneType}
+                            onValueChange={setNewTelephoneType}
                           >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
                               <SelectValue />
@@ -755,17 +754,16 @@ export default function ClientFormDialog({
                             size="sm"
                             onClick={() => {
                               const telephone = document.getElementById('new-telephone').value;
-                              const typeSelect = document.querySelector('[id="new-telephone-type"]');
-                              const typeValue = typeSelect?.getAttribute('data-value') || "Cellulaire";
                               if (telephone.trim()) {
                                 setFormData(prev => ({
                                   ...prev,
                                   telephones: [
-                                    { telephone, type: typeValue, actuel: true },
+                                    { telephone, type: newTelephoneType, actuel: true },
                                     ...prev.telephones.map(t => ({ ...t, actuel: false }))
                                   ]
                                 }));
                                 document.getElementById('new-telephone').value = "";
+                                setNewTelephoneType("Cellulaire");
                               }
                             }}
                             className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
