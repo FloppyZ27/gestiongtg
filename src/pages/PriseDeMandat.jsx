@@ -4429,8 +4429,8 @@ export default function PriseDeMandat() {
             </DialogHeader>
             
             <div className="flex h-[90vh]">
-              {/* Colonne gauche - Formulaire - 40% */}
-              <div className="flex-[0_0_40%] flex flex-col border-r border-slate-800">
+              {/* Colonne gauche - Formulaire - 70% */}
+              <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                 <div className="flex-1 overflow-y-auto p-6">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
