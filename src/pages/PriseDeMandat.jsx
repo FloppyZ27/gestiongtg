@@ -2792,16 +2792,17 @@ export default function PriseDeMandat() {
                                           />
                                         </div>
                                         <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => {
-                                            setIsClientFormDialogOpen(true);
-                                            setClientTypeForForm("Client");
-                                          }}
-                                          className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                         type="button"
+                                         size="sm"
+                                         onClick={() => {
+                                           setEditingClientForForm(null);
+                                           setClientTypeForForm("Client");
+                                           setIsClientFormDialogOpen(true);
+                                         }}
+                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
                                         >
-                                          <Plus className="w-3 h-3 mr-1" />
-                                          Nouveau
+                                         <Plus className="w-3 h-3 mr-1" />
+                                         Nouveau
                                         </Button>
                                       </div>
                                       {filteredClientsForSelector.slice(0, 20).map((client) => (
@@ -2876,16 +2877,17 @@ export default function PriseDeMandat() {
                                           />
                                         </div>
                                         <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => {
-                                            setIsClientFormDialogOpen(true);
-                                            setClientTypeForForm("Notaire");
-                                          }}
-                                          className="bg-purple-500 hover:bg-purple-600 h-6 text-xs px-2"
+                                         type="button"
+                                         size="sm"
+                                         onClick={() => {
+                                           setEditingClientForForm(null);
+                                           setClientTypeForForm("Notaire");
+                                           setIsClientFormDialogOpen(true);
+                                         }}
+                                         className="bg-purple-500 hover:bg-purple-600 h-6 text-xs px-2"
                                         >
-                                          <Plus className="w-3 h-3 mr-1" />
-                                          Nouveau
+                                         <Plus className="w-3 h-3 mr-1" />
+                                         Nouveau
                                         </Button>
                                       </div>
                                       {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
@@ -2960,16 +2962,17 @@ export default function PriseDeMandat() {
                                           />
                                         </div>
                                         <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => {
-                                            setIsClientFormDialogOpen(true);
-                                            setClientTypeForForm("Courtier immobilier");
-                                          }}
-                                          className="bg-orange-500 hover:bg-orange-600 h-6 text-xs px-2"
+                                         type="button"
+                                         size="sm"
+                                         onClick={() => {
+                                           setEditingClientForForm(null);
+                                           setClientTypeForForm("Courtier immobilier");
+                                           setIsClientFormDialogOpen(true);
+                                         }}
+                                         className="bg-orange-500 hover:bg-orange-600 h-6 text-xs px-2"
                                         >
-                                          <Plus className="w-3 h-3 mr-1" />
-                                          Nouveau
+                                         <Plus className="w-3 h-3 mr-1" />
+                                         Nouveau
                                         </Button>
                                       </div>
                                       {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
@@ -4287,6 +4290,21 @@ export default function PriseDeMandat() {
           }}
           editingClient={editingClientForForm}
           defaultType={clientTypeForForm}
+          initialData={
+            clientTypeForForm === "Client" ? clientInfo :
+            clientTypeForForm === "Notaire" ? {
+              prenom: professionnelInfo.notaire_prenom || "",
+              nom: professionnelInfo.notaire_nom || "",
+              telephone: professionnelInfo.notaire_telephone || "",
+              courriel: professionnelInfo.notaire_courriel || ""
+            } :
+            clientTypeForForm === "Courtier immobilier" ? {
+              prenom: professionnelInfo.courtier_prenom || "",
+              nom: professionnelInfo.courtier_nom || "",
+              telephone: professionnelInfo.courtier_telephone || "",
+              courriel: professionnelInfo.courtier_courriel || ""
+            } : null
+          }
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
             // Optionally re-open the selector if creating from there

@@ -26,7 +26,8 @@ export default function ClientFormDialog({
   onOpenChange, 
   editingClient = null, 
   defaultType = "Client",
-  onSuccess 
+  onSuccess,
+  initialData = null
 }) {
   const queryClient = useQueryClient();
 
@@ -294,19 +295,29 @@ export default function ClientFormDialog({
       });
       setCommentairesTemporaires([]);
     } else if (open && !editingClient) {
+      // Pré-remplir avec initialData si fourni
+      const initial = initialData || {};
       setFormData({
-        prenom: "",
-        nom: "",
+        prenom: initial.prenom || "",
+        nom: initial.nom || "",
         type_client: defaultType,
         preferences_livraison: [],
         adresses: [],
-        courriels: [],
-        telephones: [],
+        courriels: initial.courriel ? [{ courriel: initial.courriel, actuel: true }] : [],
+        telephones: initial.telephone ? [{ telephone: initial.telephone, type: initial.type_telephone || "Cellulaire", actuel: true }] : [],
         notes: ""
       });
       setCommentairesTemporaires([]);
+      
+      // Pré-remplir les champs du formulaire en bas pour l'adresse si besoin
+      if (initial.courriel && !initial.courriel.trim()) {
+        setTimeout(() => {
+          const courrielInput = document.getElementById('new-courriel');
+          if (courrielInput) courrielInput.value = "";
+        }, 100);
+      }
     }
-  }, [open, editingClient, defaultType]);
+  }, [open, editingClient, defaultType, initialData]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
