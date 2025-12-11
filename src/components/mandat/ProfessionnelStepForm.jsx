@@ -193,21 +193,57 @@ export default function ProfessionnelStepForm({
             <CardTitle className="text-pink-300 text-base">Professionnel</CardTitle>
             {hasSelections && (
               <div className="flex gap-1">
-                {selectedNotaireIds.length > 0 && (
-                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                    {selectedNotaireIds.length} notaire{selectedNotaireIds.length > 1 ? 's' : ''}
-                  </Badge>
-                )}
-                {selectedCourtierIds.length > 0 && (
-                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                    {selectedCourtierIds.length} courtier{selectedCourtierIds.length > 1 ? 's' : ''}
-                  </Badge>
-                )}
-                {selectedCompagnieIds.length > 0 && (
-                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
-                    {selectedCompagnieIds.length} compagnie{selectedCompagnieIds.length > 1 ? 's' : ''}
-                  </Badge>
-                )}
+                {selectedNotaireIds.map(notaireId => {
+                  const notaire = notaires.find(n => n.id === notaireId);
+                  return notaire ? (
+                    <Badge 
+                      key={notaireId}
+                      className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs cursor-pointer hover:bg-purple-500/30 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.openClientForEdit) {
+                          window.openClientForEdit(notaire);
+                        }
+                      }}
+                    >
+                      {notaire.prenom} {notaire.nom}
+                    </Badge>
+                  ) : null;
+                })}
+                {selectedCourtierIds.map(courtierId => {
+                  const courtier = courtiers.find(c => c.id === courtierId);
+                  return courtier ? (
+                    <Badge 
+                      key={courtierId}
+                      className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs cursor-pointer hover:bg-orange-500/30 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.openClientForEdit) {
+                          window.openClientForEdit(courtier);
+                        }
+                      }}
+                    >
+                      {courtier.prenom} {courtier.nom}
+                    </Badge>
+                  ) : null;
+                })}
+                {selectedCompagnieIds.map(compagnieId => {
+                  const compagnie = compagnies.find(c => c.id === compagnieId);
+                  return compagnie ? (
+                    <Badge 
+                      key={compagnieId}
+                      className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs cursor-pointer hover:bg-cyan-500/30 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.openClientForEdit) {
+                          window.openClientForEdit(compagnie);
+                        }
+                      }}
+                    >
+                      {compagnie.prenom} {compagnie.nom}
+                    </Badge>
+                  ) : null;
+                })}
               </div>
             )}
           </div>

@@ -155,6 +155,18 @@ export default function PriseDeMandat() {
   const [isNotaireSelectorOpen, setIsNotaireSelectorOpen] = useState(false);
   const [isCourtierSelectorOpen, setIsCourtierSelectorOpen] = useState(false);
 
+  // Expose function to child components via window object
+  React.useEffect(() => {
+    window.openClientForEdit = (client) => {
+      setEditingClientForForm(client);
+      setClientTypeForForm(client.type_client);
+      setIsClientFormDialogOpen(true);
+    };
+    return () => {
+      delete window.openClientForEdit;
+    };
+  }, []);
+
   // Replaced individual new client dialog states with a single one controlling the ClientFormDialog
   const [isClientFormDialogOpen, setIsClientFormDialogOpen] = useState(false);
   const [clientTypeForForm, setClientTypeForForm] = useState('Client'); // 'Client', 'Notaire', 'Courtier immobilier'
