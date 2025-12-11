@@ -222,11 +222,16 @@ export default function Dossiers() {
       }
       return newDossier;
     },
-    onSuccess: () => {
+    onSuccess: (newDossier) => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setIsDialogOpen(false);
       resetForm();
+      
+      // Ouvrir automatiquement le dossier créé en mode visualisation
+      setTimeout(() => {
+        handleView(newDossier);
+      }, 100);
     }
   });
 
@@ -275,7 +280,7 @@ export default function Dossiers() {
       
       return updatedDossier;
     },
-    onSuccess: () => {
+    onSuccess: (updatedDossier) => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
@@ -289,6 +294,11 @@ export default function Dossiers() {
       setFacturationDossierId(null);
       setSelectedMandatsForFacturation([]);
       setSelectedMandatsForLocalFacturation([]);
+      
+      // Ouvrir automatiquement le dossier modifié en mode visualisation
+      setTimeout(() => {
+        handleView(updatedDossier);
+      }, 100);
     }
   });
 
@@ -3457,6 +3467,16 @@ export default function Dossiers() {
             <form onSubmit={handleNewLotSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
+                  <Input value={newLotForm.numero_lot} onChange={(e) => setNewLotForm({ ...newLotForm, numero_lot: e.target.value })} required placeholder="Ex: 1234567" className="bg-slate-800 border-slate-700" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rang</Label>
+                  <Input value={newLotForm.rang} onChange={(e) => setNewLotForm({ ...newLotForm, rang: e.target.value })} placeholder="Ex: Rang 1" className="bg-slate-800 border-slate-700" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
                   <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange} required>
                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
@@ -3481,16 +3501,6 @@ export default function Dossiers() {
                       )}
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
-                  <Input value={newLotForm.numero_lot} onChange={(e) => setNewLotForm({ ...newLotForm, numero_lot: e.target.value })} required placeholder="Ex: 1234567" className="bg-slate-800 border-slate-700" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Rang</Label>
-                  <Input value={newLotForm.rang} onChange={(e) => setNewLotForm({ ...newLotForm, rang: e.target.value })} placeholder="Ex: Rang 1" className="bg-slate-800 border-slate-700" />
                 </div>
               </div>
               <div className="space-y-2">
