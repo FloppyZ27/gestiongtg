@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search } from "lucide-react";
+import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -48,6 +48,11 @@ export default function ClientFormDialog({
   const [infoCollapsed, setInfoCollapsed] = useState(false);
   const [adressesCollapsed, setAdressesCollapsed] = useState(false);
   const [communicationCollapsed, setCommunicationCollapsed] = useState(false);
+  
+  // Duplicate check dialog
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+  const [duplicateClients, setDuplicateClients] = useState([]);
+  const [pendingClientData, setPendingClientData] = useState(null);
   
   // Address search
   const [addressSearchTerm, setAddressSearchTerm] = useState("");
@@ -107,6 +112,25 @@ export default function ClientFormDialog({
     return parts.filter(p => p).join(', ');
   };
 
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const checkForDuplicates = (clientData) => {
+    if (!clientData.nom || !clientData.prenom) return [];
+    
+    const nomLower = clientData.nom.toLowerCase().trim();
+    const prenomLower = clientData.prenom.toLowerCase().trim();
+    
+    return allClients.filter(client => 
+      client.nom.toLowerCase().trim() === nomLower &&
+      client.prenom.toLowerCase().trim() === prenomLower &&
+      client.type_client === clientData.type_client
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const cleanedData = {
@@ -125,8 +149,31 @@ export default function ClientFormDialog({
     if (editingClient) {
       updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
     } else {
-      createClientMutation.mutate(cleanedData);
+      // Check for duplicates before creating
+      const duplicates = checkForDuplicates(cleanedData);
+      if (duplicates.length > 0) {
+        setDuplicateClients(duplicates);
+        setPendingClientData(cleanedData);
+        setShowDuplicateDialog(true);
+      } else {
+        createClientMutation.mutate(cleanedData);
+      }
     }
+  };
+
+  const handleConfirmCreate = () => {
+    if (pendingClientData) {
+      createClientMutation.mutate(pendingClientData);
+      setShowDuplicateDialog(false);
+      setPendingClientData(null);
+      setDuplicateClients([]);
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setShowDuplicateDialog(false);
+    setPendingClientData(null);
+    setDuplicateClients([]);
   };
 
   const resetForm = () => {
@@ -320,8 +367,80 @@ export default function ClientFormDialog({
   }, [open, editingClient, defaultType, initialData]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+    <>
+      {/* Duplicate Check Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <AlertTriangle className="w-5 h-5 text-yellow-400" />
+              Fiche similaire détectée
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-slate-300">
+              Une ou plusieurs fiches avec le même nom existent déjà. Voulez-vous vraiment créer une nouvelle fiche ?
+            </p>
+            
+            <div className="bg-slate-800/50 rounded-lg p-4 max-h-64 overflow-y-auto">
+              <Label className="text-slate-400 text-sm mb-2 block">Fiches existantes :</Label>
+              <div className="space-y-2">
+                {duplicateClients.map((client) => (
+                  <div key={client.id} className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-white">
+                          {client.prenom} {client.nom}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">Type: {client.type_client}</p>
+                      </div>
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        Existant
+                      </Badge>
+                    </div>
+                    {(client.courriels?.length > 0 || client.telephones?.length > 0) && (
+                      <div className="mt-2 pt-2 border-t border-slate-700 text-xs space-y-1">
+                        {client.courriels?.find(c => c.actuel)?.courriel && (
+                          <p className="text-slate-400">
+                            ✉️ {client.courriels.find(c => c.actuel).courriel}
+                          </p>
+                        )}
+                        {client.telephones?.find(t => t.actuel)?.telephone && (
+                          <p className="text-slate-400">
+                            📞 {client.telephones.find(t => t.actuel).telephone}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancelCreate}
+              >
+                Annuler
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleConfirmCreate}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              >
+                Créer quand même
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Main Client Form Dialog */}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">
             {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
