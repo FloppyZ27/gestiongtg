@@ -25,6 +25,19 @@ const PROVINCES_CANADIENNES = [
 
 const MODES_LIVRAISON = ["Main propre", "Poste", "Courriel"];
 
+const formatAdresse = (addr) => {
+  if (!addr) return "";
+  const parts = [];
+  if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+    parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+  }
+  if (addr.rue) parts.push(addr.rue);
+  if (addr.ville) parts.push(addr.ville);
+  if (addr.province) parts.push(addr.province);
+  if (addr.code_postal) parts.push(addr.code_postal);
+  return parts.filter(p => p).join(', ');
+};
+
 export default function ClientFormDialog({ 
   open, 
   onOpenChange, 
@@ -362,7 +375,7 @@ export default function ClientFormDialog({
     setCommentairesTemporaires([]);
   };
 
-  const removeClientField = (fieldName, index) => {
+  const removeClientField = async (fieldName, index) => {
     const fieldLabels = {
       adresses: "cette adresse",
       courriels: "ce courriel",
@@ -373,11 +386,42 @@ export default function ClientFormDialog({
       return;
     }
     
+    // Récupérer l'élément qui sera supprimé pour l'historique
+    const itemToRemove = formData[fieldName][index];
+    
     if (formData[fieldName].length > 0) {
       setFormData(prev => ({
         ...prev,
         [fieldName]: prev[fieldName].filter((_, i) => i !== index)
       }));
+
+      // Créer une entrée d'historique immédiate si on modifie un client existant
+      if (editingClient?.id) {
+        let details = "";
+        let action = "";
+        
+        if (fieldName === "adresses") {
+          action = "Suppression d'une adresse";
+          details = formatAdresse(itemToRemove);
+        } else if (fieldName === "courriels") {
+          action = "Suppression d'un courriel";
+          details = itemToRemove.courriel;
+        } else if (fieldName === "telephones") {
+          action = "Suppression d'un téléphone";
+          details = `${itemToRemove.telephone} (${itemToRemove.type || 'Cellulaire'})`;
+        }
+
+        await base44.entities.ActionLog.create({
+          utilisateur_email: user?.email || "",
+          utilisateur_nom: user?.full_name || "Système",
+          action: action,
+          entite: "Client",
+          entite_id: editingClient.id,
+          details: details,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+      }
     }
   };
 
