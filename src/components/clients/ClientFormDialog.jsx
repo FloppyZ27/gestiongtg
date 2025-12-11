@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Check, Edit, X, Save, Package, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search } from "lucide-react";
+import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -41,9 +41,6 @@ export default function ClientFormDialog({
     notes: ""
   });
 
-  const [editingAdresseIndex, setEditingAdresseIndex] = useState(null);
-  const [editingCourrielIndex, setEditingCourrielIndex] = useState(null);
-  const [editingTelephoneIndex, setEditingTelephoneIndex] = useState(null);
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   
   // Sections collapse states
@@ -139,9 +136,6 @@ export default function ClientFormDialog({
       telephones: [],
       notes: ""
     });
-    setEditingAdresseIndex(null);
-    setEditingCourrielIndex(null);
-    setEditingTelephoneIndex(null);
     setCommentairesTemporaires([]);
   };
 
@@ -540,7 +534,7 @@ export default function ClientFormDialog({
                             ville,
                             province,
                             code_postal: codePostal,
-                            actuelle: false
+                            actuelle: true
                           }]
                         }));
                         
@@ -572,92 +566,7 @@ export default function ClientFormDialog({
                       <TableBody>
                         {formData.adresses.map((addr, index) => (
                           <React.Fragment key={index}>
-                            {editingAdresseIndex === index ? (
-                              <TableRow className="bg-slate-700/50 border-slate-800">
-                                <TableCell colSpan={3}>
-                                  <div className="space-y-3 py-2">
-                                    <div className="grid grid-cols-[150px_1fr] gap-3">
-                                      <div className="space-y-2">
-                                        <Label className="text-xs">Numéro(s) civique(s)</Label>
-                                        <Input
-                                          value={addr.numeros_civiques?.[0] || ""}
-                                          onChange={(e) => updateAdresseCivicNumber(index, 0, e.target.value)}
-                                          placeholder="Ex: 123"
-                                          className="bg-slate-800 border-slate-600 text-sm"
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label className="text-xs">Rue</Label>
-                                        <Input
-                                          value={addr.rue || ""}
-                                          onChange={(e) => updateAdresseField(index, 'rue', e.target.value)}
-                                          placeholder="Nom de la rue"
-                                          className="bg-slate-800 border-slate-600 text-sm"
-                                        />
-                                      </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                      <div className="space-y-2">
-                                        <Label className="text-xs">Ville</Label>
-                                        <Input
-                                          value={addr.ville || ""}
-                                          onChange={(e) => updateAdresseField(index, 'ville', e.target.value)}
-                                          placeholder="Ville"
-                                          className="bg-slate-800 border-slate-600 text-sm"
-                                        />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label className="text-xs">Province</Label>
-                                        <Select 
-                                          value={addr.province || "Québec"} 
-                                          onValueChange={(value) => updateAdresseField(index, 'province', value)}
-                                        >
-                                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white text-sm">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700">
-                                            {PROVINCES_CANADIENNES.map(prov => (
-                                              <SelectItem key={prov} value={prov} className="text-white">{prov}</SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label className="text-xs">Code Postal</Label>
-                                      <Input
-                                        value={addr.code_postal || ""}
-                                        onChange={(e) => updateAdresseField(index, 'code_postal', e.target.value)}
-                                        placeholder="Code postal"
-                                        className="bg-slate-800 border-slate-600 text-sm"
-                                      />
-                                    </div>
-                                    <div className="flex justify-end gap-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setEditingAdresseIndex(null)}
-                                        className="text-slate-400 hover:text-white"
-                                      >
-                                        <X className="w-3 h-3 mr-1" />
-                                        Annuler
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => setEditingAdresseIndex(null)}
-                                        className="bg-emerald-500 hover:bg-emerald-600"
-                                      >
-                                        <Save className="w-3 h-3 mr-1" />
-                                        Enregistrer
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                            <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                 <TableCell className="text-white">
                                   {formatAdresse(addr) || "-"}
                                 </TableCell>
@@ -696,10 +605,9 @@ export default function ClientFormDialog({
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
                                   </div>
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </React.Fragment>
+                                  </TableCell>
+                                  </TableRow>
+                                  </React.Fragment>
                         ))}
                         </TableBody>
                       </Table>
@@ -747,7 +655,7 @@ export default function ClientFormDialog({
                               if (courriel.trim()) {
                                 setFormData(prev => ({
                                   ...prev,
-                                  courriels: [...prev.courriels, { courriel, actuel: false }]
+                                  courriels: [...prev.courriels, { courriel, actuel: true }]
                                 }));
                                 document.getElementById('new-courriel').value = "";
                               }
@@ -771,43 +679,7 @@ export default function ClientFormDialog({
                         <TableBody>
                           {formData.courriels.map((item, index) => (
                             <React.Fragment key={index}>
-                              {editingCourrielIndex === index ? (
-                                <TableRow className="bg-slate-700/50 border-slate-800">
-                                  <TableCell colSpan={3}>
-                                    <div className="space-y-2 py-2">
-                                      <Input
-                                        type="email"
-                                        value={item.courriel}
-                                        onChange={(e) => updateCourrielField(index, e.target.value)}
-                                        placeholder="Courriel"
-                                        className="bg-slate-800 border-slate-600 text-sm"
-                                      />
-                                      <div className="flex justify-end gap-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setEditingCourrielIndex(null)}
-                                          className="text-slate-400 hover:text-white h-7 text-xs"
-                                        >
-                                          <X className="w-3 h-3 mr-1" />
-                                          Annuler
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => setEditingCourrielIndex(null)}
-                                          className="bg-emerald-500 hover:bg-emerald-600 h-7 text-xs"
-                                        >
-                                          <Save className="w-3 h-3 mr-1" />
-                                          Enregistrer
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                              <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                   <TableCell className="text-white text-sm">{item.courriel}</TableCell>
                                   <TableCell>
                                     <Select 
@@ -846,7 +718,6 @@ export default function ClientFormDialog({
                                     </div>
                                   </TableCell>
                                 </TableRow>
-                              )}
                             </React.Fragment>
                           ))}
                           </TableBody>
@@ -884,7 +755,7 @@ export default function ClientFormDialog({
                               if (telephone.trim()) {
                                 setFormData(prev => ({
                                   ...prev,
-                                  telephones: [...prev.telephones, { telephone, type, actuel: false }]
+                                  telephones: [...prev.telephones, { telephone, type, actuel: true }]
                                 }));
                                 document.getElementById('new-telephone').value = "";
                               }
@@ -909,57 +780,7 @@ export default function ClientFormDialog({
                               <TableBody>
                                 {formData.telephones.map((item, index) => (
                                   <React.Fragment key={index}>
-                                    {editingTelephoneIndex === index ? (
-                                      <TableRow className="bg-slate-700/50 border-slate-800">
-                                        <TableCell colSpan={3}>
-                                          <div className="space-y-2 py-2">
-                                            <div className="flex gap-2">
-                                              <Input
-                                                value={item.telephone}
-                                                onChange={(e) => updateTelephoneField(index, 'telephone', e.target.value)}
-                                                placeholder="Téléphone"
-                                                className="bg-slate-800 border-slate-600 text-sm flex-1"
-                                              />
-                                              <Select 
-                                                value={item.type || "Cellulaire"} 
-                                                onValueChange={(value) => updateTelephoneField(index, 'type', value)}
-                                              >
-                                                <SelectTrigger className="bg-slate-800 border-slate-600 text-white text-xs w-24">
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="bg-slate-800 border-slate-700">
-                                                  <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
-                                                  <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
-                                                  <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                      <div className="flex justify-end gap-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setEditingTelephoneIndex(null)}
-                                          className="text-slate-400 hover:text-white h-7 text-xs"
-                                        >
-                                          <X className="w-3 h-3 mr-1" />
-                                          Annuler
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          onClick={() => setEditingTelephoneIndex(null)}
-                                          className="bg-emerald-500 hover:bg-emerald-600 h-7 text-xs"
-                                        >
-                                          <Save className="w-3 h-3 mr-1" />
-                                          Enregistrer
-                                        </Button>
-                                            </div>
-                                          </div>
-                                        </TableCell>
-                                      </TableRow>
-                                    ) : (
-                                      <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                                    <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                         <TableCell className="text-white text-sm">{item.telephone}</TableCell>
                                         <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
                                         <TableCell>
@@ -997,10 +818,9 @@ export default function ClientFormDialog({
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
                                         </div>
-                                      </TableCell>
-                                    </TableRow>
-                                  )}
-                                </React.Fragment>
+                                        </TableCell>
+                                        </TableRow>
+                                        </React.Fragment>
                               ))}
                             </TableBody>
                           </Table>
