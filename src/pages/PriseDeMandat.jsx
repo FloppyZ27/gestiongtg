@@ -1419,9 +1419,29 @@ export default function PriseDeMandat() {
   // handleNewClientSubmit removed, logic moved to ClientFormDialog
 
   // NEW FUNCTION
-  const handleNewLotSubmit = (e) => {
+  const handleNewLotSubmit = async (e) => {
     e.preventDefault();
-    createLotMutation.mutate(newLotForm);
+    const newLot = await createLotMutation.mutateAsync(newLotForm);
+    
+    // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
+    if (currentMandatIndexDossier !== null) {
+      setNouveauDossierForm(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) => i === currentMandatIndexDossier ? {
+          ...m,
+          lots: [...(m.lots || []), newLot.id]
+        } : m)
+      }));
+    } else if (currentMandatIndex !== null) {
+      // Si on est dans le formulaire principal (prise de mandat)
+      setFormData(prev => ({
+        ...prev,
+        mandats: prev.mandats.map((m, i) => i === currentMandatIndex ? {
+          ...m,
+          lots: [...(m.lots || []), newLot.id]
+        } : m)
+      }));
+    }
   };
   // END NEW FUNCTION
 
@@ -3472,29 +3492,43 @@ export default function PriseDeMandat() {
                                         </Button>
                                       </div>
                                       {lotTabExpanded && currentMandatIndexDossier === index && (
-                                        <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                          <div className="relative mb-2">
-                                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                            <Input
-                                              placeholder="Rechercher lot..."
-                                              value={lotSearchTerm}
-                                              onChange={(e) => setLotSearchTerm(e.target.value)}
-                                              className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                            />
-                                          </div>
-                                          <div className="flex gap-1 mb-2">
-                                            <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                                <SelectValue placeholder="Circonscription" />
-                                              </SelectTrigger>
-                                              <SelectContent className="bg-slate-800 border-slate-700">
-                                                <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
-                                                {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                                  <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
+                                       <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                         <div className="flex gap-1 mb-2">
+                                           <div className="relative flex-1">
+                                             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                             <Input
+                                               placeholder="Rechercher lot..."
+                                               value={lotSearchTerm}
+                                               onChange={(e) => setLotSearchTerm(e.target.value)}
+                                               className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                             />
+                                           </div>
+                                           <Button
+                                             type="button"
+                                             size="sm"
+                                             onClick={() => {
+                                               setCurrentMandatIndexDossier(index);
+                                               setIsNewLotDialogOpen(true);
+                                             }}
+                                             className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                           >
+                                             <Plus className="w-3 h-3 mr-1" />
+                                             Nouveau
+                                           </Button>
+                                         </div>
+                                         <div className="flex gap-1 mb-2">
+                                           <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                               <SelectValue placeholder="Circonscription" />
+                                             </SelectTrigger>
+                                             <SelectContent className="bg-slate-800 border-slate-700">
+                                               <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
+                                               {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                                 <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
+                                               ))}
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
                                           {filteredLotsForSelector.slice(0, 20).map((lot) => {
                                             const isSelected = mandat.lots?.includes(lot.id);
                                             return (
