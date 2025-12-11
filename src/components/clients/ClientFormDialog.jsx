@@ -539,7 +539,6 @@ export default function ClientFormDialog({
                         setFormData(prev => ({
                           ...prev,
                           adresses: [
-                            ...prev.adresses.map(a => ({ ...a, actuelle: false })),
                             {
                               numeros_civiques: civic ? [civic] : [""],
                               rue,
@@ -547,7 +546,8 @@ export default function ClientFormDialog({
                               province,
                               code_postal: codePostal,
                               actuelle: true
-                            }
+                            },
+                            ...prev.adresses.map(a => ({ ...a, actuelle: false }))
                           ]
                         }));
                         
@@ -660,8 +660,8 @@ export default function ClientFormDialog({
                                 setFormData(prev => ({
                                   ...prev,
                                   courriels: [
-                                    ...prev.courriels.map(c => ({ ...c, actuel: false })),
-                                    { courriel, actuel: true }
+                                    { courriel, actuel: true },
+                                    ...prev.courriels.map(c => ({ ...c, actuel: false }))
                                   ]
                                 }));
                                 document.getElementById('new-courriel').value = "";
@@ -761,8 +761,8 @@ export default function ClientFormDialog({
                                 setFormData(prev => ({
                                   ...prev,
                                   telephones: [
-                                    ...prev.telephones.map(t => ({ ...t, actuel: false })),
-                                    { telephone, type: typeValue, actuel: true }
+                                    { telephone, type: typeValue, actuel: true },
+                                    ...prev.telephones.map(t => ({ ...t, actuel: false }))
                                   ]
                                 }));
                                 document.getElementById('new-telephone').value = "";

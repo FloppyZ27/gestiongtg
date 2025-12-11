@@ -135,11 +135,23 @@ export default function ProfessionnelStepForm({
         selectedCompagnieIds.forEach(id => onSelectCompagnie(id));
       }
       
-      // Auto-remplir le champ de saisie avec le nom du professionnel
+      // Auto-remplir tous les champs avec les informations du professionnel
       const fullName = `${item.prenom} ${item.nom}`;
-      const newInfo = { ...localInfo, [type]: fullName };
-      setLocalInfo(newInfo);
-      onProfessionnelInfoChange(newInfo);
+      const currentPhone = getCurrentValue(item.telephones, 'telephone');
+      const currentEmail = getCurrentValue(item.courriels, 'courriel');
+      
+      // Créer un objet d'info enrichi
+      const enrichedInfo = {
+        ...localInfo,
+        [type]: fullName,
+        [`${type}_prenom`]: item.prenom || "",
+        [`${type}_nom`]: item.nom || "",
+        [`${type}_telephone`]: currentPhone || "",
+        [`${type}_courriel`]: currentEmail || ""
+      };
+      
+      setLocalInfo(enrichedInfo);
+      onProfessionnelInfoChange(enrichedInfo);
       
       // Sélectionner le nouveau professionnel
       if (type === "notaire") {
