@@ -20,6 +20,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
+import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
 import ClientStepForm from "../components/mandat/ClientStepForm";
@@ -197,6 +198,9 @@ export default function PriseDeMandat() {
   });
   const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
   const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
+  const [commentairesTemporairesLot, setCommentairesTemporairesLot] = useState([]);
+  const [sidebarTabLot, setSidebarTabLot] = useState("commentaires");
+  const [editingLot, setEditingLot] = useState(null);
   const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
   const [newMinuteForm, setNewMinuteForm] = useState({
@@ -802,11 +806,40 @@ export default function PriseDeMandat() {
   // const updateClientMutation = useMutation(...)
 
   const createLotMutation = useMutation({
-    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    mutationFn: async (lotData) => {
+      const newLot = await base44.entities.Lot.create(lotData);
+      
+      // Créer les commentaires temporaires si présents
+      if (commentairesTemporairesLot.length > 0) {
+        const commentairePromises = commentairesTemporairesLot.map(comment =>
+          base44.entities.CommentaireLot.create({
+            lot_id: newLot.id,
+            contenu: comment.contenu,
+            utilisateur_email: comment.utilisateur_email,
+            utilisateur_nom: comment.utilisateur_nom
+          })
+        );
+        await Promise.all(commentairePromises);
+      }
+      
+      // Créer une entrée d'historique pour la création
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email || "",
+        utilisateur_nom: user?.full_name || "Système",
+        action: "Création du lot",
+        entite: "Lot",
+        entite_id: newLot.id,
+        details: `Lot ${lotData.numero_lot} créé dans ${lotData.circonscription_fonciere}`,
+      });
+      
+      return newLot;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setIsNewLotDialogOpen(false);
       resetLotForm();
+      setCommentairesTemporairesLot([]);
     },
   });
 
@@ -1557,6 +1590,8 @@ export default function PriseDeMandat() {
       document_url: "",
     });
     setAvailableCadastresForNewLot([]);
+    setCommentairesTemporairesLot([]);
+    setEditingLot(null);
   };
   // END NEW FUNCTION
 
@@ -4338,101 +4373,151 @@ export default function PriseDeMandat() {
           setIsNewLotDialogOpen(open);
           if (!open) resetLotForm();
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl">
-            <DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleNewLotSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
-                  <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                        <SelectItem key={circ} value={circ} className="text-white">
-                          {circ}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Cadastre</Label>
-                  <Select
-                    value={newLotForm.cadastre}
-                    onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
-                    disabled={!newLotForm.circonscription_fonciere}
-                  >
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                      {availableCadastresForNewLot.map((cadastre) => (
-                        <SelectItem key={cadastre} value={cadastre} className="text-white">
-                          {cadastre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+            
+            <div className="flex h-[90vh]">
+              {/* Colonne gauche - Formulaire - 70% */}
+              <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
+                <div className="flex-1 overflow-y-auto p-6">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
+                  </div>
+                  
+                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Numéro de lot <span className="text-red-400">*</span></Label>
+                        <Input
+                          value={newLotForm.numero_lot}
+                          onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
+                          required
+                          placeholder="Ex: 1234-5678"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Rang</Label>
+                        <Input
+                          value={newLotForm.rang}
+                          onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
+                          placeholder="Ex: Rang 4"
+                          className="bg-slate-800 border-slate-700"
+                        />
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Numéro de lot <span className="text-red-400">*</span></Label>
-                  <Input
-                    value={newLotForm.numero_lot}
-                    onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
-                    required
-                    placeholder="Ex: 1234-5678"
-                    className="bg-slate-800 border-slate-700"
-                  />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Circonscription foncière <span className="text-red-400">*</span></Label>
+                        <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                              <SelectItem key={circ} value={circ} className="text-white">
+                                {circ}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Cadastre</Label>
+                        <Select
+                          value={newLotForm.cadastre}
+                          onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                          disabled={!newLotForm.circonscription_fonciere}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord une circonscription"} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                            {availableCadastresForNewLot.map((cadastre) => (
+                              <SelectItem key={cadastre} value={cadastre} className="text-white">
+                                {cadastre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Concordance antérieur</Label>
+                      <Input
+                        value={newLotForm.concordance_anterieur}
+                        onChange={(e) => setNewLotForm({...newLotForm, concordance_anterieur: e.target.value})}
+                        placeholder="Concordance avec l'ancien cadastre"
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Document PDF</Label>
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleLotFileUpload}
+                        disabled={uploadingLotPdf}
+                        className="bg-slate-800 border-slate-700"
+                      />
+                      {uploadingLotPdf && <p className="text-sm text-slate-400">Upload en cours...</p>}
+                    </div>
+                  </form>
                 </div>
-                <div className="space-y-2">
-                  <Label>Rang</Label>
-                  <Input
-                    value={newLotForm.rang}
-                    onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
-                    placeholder="Ex: Rang 4"
-                    className="bg-slate-800 border-slate-700"
-                  />
+                
+                {/* Boutons en bas */}
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+                  <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                    Créer
+                  </Button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label>Concordance antérieur</Label>
-                <Input
-                  value={newLotForm.concordance_anterieur}
-                  onChange={(e) => setNewLotForm({...newLotForm, concordance_anterieur: e.target.value})}
-                  placeholder="Concordance avec l'ancien cadastre"
-                  className="bg-slate-800 border-slate-700"
-                />
+              
+              {/* Colonne droite - Commentaires et Historique - 30% */}
+              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 w-full">
+                      <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Commentaires
+                      </TabsTrigger>
+                      <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                        <Clock className="w-3 h-3 mr-1" />
+                        Historique
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                    <CommentairesSectionLot
+                      lotId={editingLot?.id}
+                      lotTemporaire={!editingLot}
+                      commentairesTemp={commentairesTemporairesLot}
+                      onCommentairesTempChange={setCommentairesTemporairesLot}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                    <div className="flex items-center justify-center h-full text-center">
+                      <div>
+                        <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                        <p className="text-slate-500">Aucune action enregistrée</p>
+                        <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
-
-              <div className="space-y-2">
-                <Label>Document PDF</Label>
-                <Input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleLotFileUpload}
-                  disabled={uploadingLotPdf}
-                  className="bg-slate-800 border-slate-700"
-                />
-                {uploadingLotPdf && <p className="text-sm text-slate-400">Upload en cours...</p>}
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  Créer
-                </Button>
-              </div>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
 
