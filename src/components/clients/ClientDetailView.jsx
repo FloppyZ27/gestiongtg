@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Search, ArrowUpDown, ArrowUp, ArrowDown, Package, Edit } from "lucide-react";
+import { Mail, Phone, MapPin, FileText, FolderOpen, ExternalLink, Search, ArrowUpDown, ArrowUp, ArrowDown, Package, Edit, MessageSquare, Clock } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -72,6 +72,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const [filterVille, setFilterVille] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [sidebarTab, setSidebarTab] = useState("commentaires");
   const queryClient = useQueryClient();
 
   const { data: dossiers = [] } = useQuery({
@@ -83,6 +84,15 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: actionLogs = [] } = useQuery({
+    queryKey: ['actionLogs', client.id],
+    queryFn: async () => {
+      const logs = await base44.entities.ActionLog.filter({ entite: "Client", entite_id: client.id });
+      return logs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    },
     initialData: [],
   });
 
@@ -529,13 +539,57 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
           </div>
         </div>
 
-        {/* Colonne droite - Commentaires */}
+        {/* Colonne droite - Commentaires et Historique */}
         <div className="flex flex-col h-full border-l border-slate-700 pl-6 pr-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-white">Commentaires</h3>
-          </div>
-          
-          <CommentairesSectionClient clientId={client.id} /> {/* Extracted component */}
+          <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 mb-3">
+              <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
+                <MessageSquare className="w-3 h-3 mr-1" />
+                Commentaires
+              </TabsTrigger>
+              <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                <Clock className="w-3 h-3 mr-1" />
+                Historique
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="commentaires" className="flex-1 overflow-hidden mt-0">
+              <CommentairesSectionClient clientId={client.id} />
+            </TabsContent>
+            
+            <TabsContent value="historique" className="flex-1 overflow-y-auto mt-0">
+              {actionLogs.length > 0 ? (
+                <div className="space-y-2">
+                  {actionLogs.map((entry, idx) => (
+                    <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium">{entry.action}</p>
+                          {entry.details && (
+                            <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                            <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                            <span>•</span>
+                            <span>{format(new Date(entry.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-center">
+                  <div>
+                    <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <p className="text-slate-500">Aucune action enregistrée</p>
+                    <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

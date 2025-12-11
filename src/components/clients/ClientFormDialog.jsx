@@ -8,10 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const PROVINCES_CANADIENNES = [
   "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
@@ -44,6 +47,7 @@ export default function ClientFormDialog({
   });
 
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  const [sidebarTab, setSidebarTab] = useState("commentaires");
   
   // Sections collapse states
   const [infoCollapsed, setInfoCollapsed] = useState(false);
@@ -79,11 +83,22 @@ export default function ClientFormDialog({
         );
         await Promise.all(commentairePromises);
       }
+
+      // Créer une entrée d'historique pour la création
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email || "",
+        utilisateur_nom: user?.full_name || "Système",
+        action: "Création de la fiche",
+        entite: "Client",
+        entite_id: newClient.id,
+        details: `Fiche créée pour ${clientData.prenom} ${clientData.nom}`,
+      });
       
       return newClient;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
@@ -91,9 +106,64 @@ export default function ClientFormDialog({
   });
 
   const updateClientMutation = useMutation({
-    mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
+    mutationFn: async ({ id, clientData, oldData }) => {
+      const updatedClient = await base44.entities.Client.update(id, clientData);
+
+      // Détecter les changements et créer des entrées d'historique
+      const changes = [];
+      
+      if (oldData.prenom !== clientData.prenom || oldData.nom !== clientData.nom) {
+        changes.push({
+          action: "Modification du nom",
+          details: `${oldData.prenom} ${oldData.nom} → ${clientData.prenom} ${clientData.nom}`
+        });
+      }
+      
+      if (oldData.type_client !== clientData.type_client) {
+        changes.push({
+          action: "Modification du type",
+          details: `${oldData.type_client || 'Non défini'} → ${clientData.type_client}`
+        });
+      }
+
+      if (JSON.stringify(oldData.adresses) !== JSON.stringify(clientData.adresses)) {
+        changes.push({
+          action: "Modification des adresses",
+          details: "Les adresses ont été mises à jour"
+        });
+      }
+
+      if (JSON.stringify(oldData.courriels) !== JSON.stringify(clientData.courriels)) {
+        changes.push({
+          action: "Modification des courriels",
+          details: "Les courriels ont été mis à jour"
+        });
+      }
+
+      if (JSON.stringify(oldData.telephones) !== JSON.stringify(clientData.telephones)) {
+        changes.push({
+          action: "Modification des téléphones",
+          details: "Les téléphones ont été mis à jour"
+        });
+      }
+
+      // Créer les entrées d'historique
+      for (const change of changes) {
+        await base44.entities.ActionLog.create({
+          utilisateur_email: user?.email || "",
+          utilisateur_nom: user?.full_name || "Système",
+          action: change.action,
+          entite: "Client",
+          entite_id: id,
+          details: change.details,
+        });
+      }
+
+      return updatedClient;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
@@ -116,6 +186,22 @@ export default function ClientFormDialog({
   const { data: allClients = [] } = useQuery({
     queryKey: ['clients'],
     queryFn: () => base44.entities.Client.list(),
+    initialData: [],
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: actionLogs = [] } = useQuery({
+    queryKey: ['actionLogs', editingClient?.id],
+    queryFn: async () => {
+      if (!editingClient?.id) return [];
+      const logs = await base44.entities.ActionLog.filter({ entite: "Client", entite_id: editingClient.id });
+      return logs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    },
+    enabled: !!editingClient?.id,
     initialData: [],
   });
 
@@ -148,7 +234,7 @@ export default function ClientFormDialog({
     };
 
     if (editingClient) {
-      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
+      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData, oldData: editingClient });
     } else {
       // Check for duplicates before creating
       const duplicates = checkForDuplicates(cleanedData);
@@ -973,19 +1059,64 @@ export default function ClientFormDialog({
             </div>
           </div>
 
-          {/* Right side - Commentaires Sidebar - 30% */}
+          {/* Right side - Commentaires et Historique Sidebar - 30% */}
           <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-slate-800 flex-shrink-0">
-              <h3 className="text-lg font-bold text-white">Commentaires</h3>
-            </div>
-            <div className="flex-1 overflow-hidden p-4">
-              <CommentairesSectionClient
-                clientId={editingClient?.id}
-                clientTemporaire={!editingClient}
-                commentairesTemp={commentairesTemporaires}
-                onCommentairesTempChange={setCommentairesTemporaires}
-              />
-            </div>
+            <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 w-full">
+                  <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
+                    <MessageSquare className="w-3 h-3 mr-1" />
+                    Commentaires
+                  </TabsTrigger>
+                  <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Historique
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                <CommentairesSectionClient
+                  clientId={editingClient?.id}
+                  clientTemporaire={!editingClient}
+                  commentairesTemp={commentairesTemporaires}
+                  onCommentairesTempChange={setCommentairesTemporaires}
+                />
+              </TabsContent>
+
+              <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                {editingClient && actionLogs.length > 0 ? (
+                  <div className="space-y-2">
+                    {actionLogs.map((entry, idx) => (
+                      <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-medium">{entry.action}</p>
+                            {entry.details && (
+                              <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                            )}
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                              <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                              <span>•</span>
+                              <span>{format(new Date(entry.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-center">
+                    <div>
+                      <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                      <p className="text-slate-500">Aucune action enregistrée</p>
+                      <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>
