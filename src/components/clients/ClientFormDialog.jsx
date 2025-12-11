@@ -247,17 +247,12 @@ export default function ClientFormDialog({
   };
   
   const selectSearchedAddress = (address) => {
-    setFormData(prev => ({
-      ...prev,
-      adresses: [...prev.adresses, {
-        numeros_civiques: address.civic_number ? [address.civic_number] : [""],
-        rue: address.street || "",
-        ville: address.city || "",
-        province: address.province || "Québec",
-        code_postal: address.postal_code || "",
-        actuelle: false
-      }]
-    }));
+    // Remplir les champs du formulaire au lieu d'ajouter automatiquement
+    document.getElementById('new-civic-0').value = address.civic_number || "";
+    document.getElementById('new-rue').value = address.street || "";
+    document.getElementById('new-ville').value = address.city || "";
+    document.getElementById('new-code-postal').value = address.postal_code || "";
+
     setAddressSearchTerm("");
     setAddressSearchResults([]);
   };
@@ -407,25 +402,28 @@ export default function ClientFormDialog({
                       </div>
                     </div>
                   </CardContent>
-                )}
-              </Card>
-
-              {/* Section Adresses */}
-              <Card className="border-slate-700 bg-slate-800/30">
-                <CardHeader 
-                  className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
-                  onClick={() => setAdressesCollapsed(!adressesCollapsed)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-                        <MapPin className="w-3.5 h-3.5 text-purple-400" />
-                      </div>
-                      <CardTitle className="text-purple-300 text-base">Adresses</CardTitle>
-                    </div>
-                    {adressesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  )}
+                  </Card>
                   </div>
-                </CardHeader>
+
+              {/* Sections Adresses et Communication côte-à-côte */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Section Adresses */}
+                <Card className="border-slate-700 bg-slate-800/30">
+                  <CardHeader 
+                    className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
+                    onClick={() => setAdressesCollapsed(!adressesCollapsed)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                          <MapPin className="w-3.5 h-3.5 text-purple-400" />
+                        </div>
+                        <CardTitle className="text-purple-300 text-base">Adresses</CardTitle>
+                      </div>
+                      {adressesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                    </div>
+                  </CardHeader>
 
                 {!adressesCollapsed && (
                   <CardContent className="pt-3 pb-2 space-y-3">
@@ -701,11 +699,11 @@ export default function ClientFormDialog({
                     </div>
                     )}
                   </CardContent>
-                )}
-              </Card>
+                  )}
+                  </Card>
 
-              {/* Section Communication */}
-              <Card className="border-slate-700 bg-slate-800/30">
+                  {/* Section Communication */}
+                  <Card className="border-slate-700 bg-slate-800/30">
                 <CardHeader 
                   className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
                   onClick={() => setCommunicationCollapsed(!communicationCollapsed)}
