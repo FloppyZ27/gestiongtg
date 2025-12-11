@@ -316,10 +316,20 @@ export default function Dossiers() {
   });
 
   const createLotMutation = useMutation({
-    mutationFn: (lotData) => base44.entities.Lot.create(lotData),
+    mutationFn: async (lotData) => {
+      const newLot = await base44.entities.Lot.create(lotData);
+      
+      // Ajouter automatiquement le nouveau lot au mandat en cours
+      if (currentMandatIndex !== null) {
+        addLotToCurrentMandat(newLot.id);
+      }
+      
+      return newLot;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       setIsNewLotDialogOpen(false);
+      setIsLotSelectorOpen(true);
       resetNewLotForm();
     }
   });
@@ -359,9 +369,8 @@ export default function Dossiers() {
   const filteredLotsForSelector = sortLotsWithSelected(
     lots.filter((lot) => {
       const matchesSearch = lot.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || lot.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || lot.circonscription_fonciere?.toLowerCase().includes(lotSearchTerm.toLowerCase());
-      const matchesCirconscription = lotCirconscriptionFilter === "all" || lot.circonscription_fonciere === lotCirconscriptionFilter;
       const matchesCadastre = lotCadastreFilter === "all" || lot.cadastre === lotCadastreFilter;
-      return matchesSearch && matchesCirconscription && matchesCadastre;
+      return matchesSearch && matchesCadastre;
     }),
     currentMandatIndex !== null ? formData.mandats[currentMandatIndex]?.lots : []
   );
@@ -3329,7 +3338,7 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {setIsLotSelectorOpen(open);if (!open) {setLotCirconscriptionFilter("all");setLotSearchTerm("");setLotCadastreFilter("Québec");}}}>
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {setIsLotSelectorOpen(open);if (!open) {setLotSearchTerm("");setLotCadastreFilter("Québec");}}}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
@@ -3345,32 +3354,21 @@ export default function Dossiers() {
                     className="pl-10 bg-slate-800 border-slate-700" />
 
                 </div>
-                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Circonscription" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
-                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) =>
-                    <SelectItem key={circ} value={circ} className="text-white">
-                        {circ}
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
                 <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
                   <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Cadastre" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
                     <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
-                    {/* The outline explicitly showed only 'Québec' as a direct item. If dynamic filtering by selected circonscription is desired, this section should be adapted to use `availableLotCadastres`. Following the outline directly: */}
                     <SelectItem value="Québec" className="text-white">Québec</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button
                   type="button"
-                  onClick={() => setIsNewLotDialogOpen(true)}
+                  onClick={() => {
+                    setIsLotSelectorOpen(false);
+                    setIsNewLotDialogOpen(true);
+                  }}
                   className="bg-emerald-500 hover:bg-emerald-600">
 
                   <Plus className="w-4 h-4 mr-2" />
