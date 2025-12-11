@@ -661,25 +661,25 @@ export default function ClientFormDialog({
                                       {formData.telephones.map((item, index) => (
                                       <React.Fragment key={index}>
                                       <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                        <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                                        <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
-                                        <TableCell>
-                                          <Select 
-                                            value={item.actuel ? "Actuel" : "Ancien"} 
-                                            onValueChange={(value) => toggleActuel('telephones', index)}
-                                          >
-                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-slate-800 border-slate-700">
-                                              <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
-                                              <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                      <div className="flex justify-end gap-2">
-                                      <Button
+                                      <TableCell className="text-white text-sm">{item.telephone}</TableCell>
+                                      <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
+                                      <TableCell>
+                                        <Select 
+                                          value={item.actuel ? "Actuel" : "Ancien"} 
+                                          onValueChange={(value) => toggleActuel('telephones', index)}
+                                        >
+                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-slate-800 border-slate-700">
+                                            <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                            <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                          <Button
                                       type="button"
                                       size="sm"
                                       variant="ghost"
@@ -892,10 +892,10 @@ export default function ClientFormDialog({
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
-                                        </div>
-                                        </TableCell>
-                                        </TableRow>
-                                        </React.Fragment>
+                                      </div>
+                                      </TableCell>
+                                      </TableRow>
+                                      </React.Fragment>
                               ))}
                             </TableBody>
                           </Table>
