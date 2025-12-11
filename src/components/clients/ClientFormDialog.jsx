@@ -565,6 +565,7 @@ export default function ClientFormDialog({
                       <TableHeader>
                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                           <TableHead className="text-slate-300">Adresse complète</TableHead>
+                          <TableHead className="text-slate-300">Statut</TableHead>
                           <TableHead className="text-slate-300 text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -573,7 +574,7 @@ export default function ClientFormDialog({
                           <React.Fragment key={index}>
                             {editingAdresseIndex === index ? (
                               <TableRow className="bg-slate-700/50 border-slate-800">
-                                <TableCell colSpan={2}>
+                                <TableCell colSpan={3}>
                                   <div className="space-y-3 py-2">
                                     <div className="grid grid-cols-[150px_1fr] gap-3">
                                       <div className="space-y-2">
@@ -660,6 +661,20 @@ export default function ClientFormDialog({
                                 <TableCell className="text-white">
                                   {formatAdresse(addr) || "-"}
                                 </TableCell>
+                                <TableCell>
+                                  <Select 
+                                    value={addr.actuelle ? "Actuel" : "Ancien"} 
+                                    onValueChange={(value) => toggleActuel('adresses', index)}
+                                  >
+                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                      <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
                                     <Button
@@ -670,14 +685,7 @@ export default function ClientFormDialog({
                                     >
                                       <Edit className="w-3 h-3" />
                                     </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => toggleActuel('adresses', index)}
-                                      className={`${addr.actuelle ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                    >
-                                      <Check className="w-4 h-4" />
-                                    </Button>
+
                                     <Button
                                       type="button"
                                       size="sm"
@@ -720,7 +728,7 @@ export default function ClientFormDialog({
 
                 {!communicationCollapsed && (
                   <CardContent className="pt-3 pb-2">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       {/* Courriels */}
                       <div className="space-y-2">
                         <Label className="text-xs">Courriels</Label>
@@ -756,6 +764,7 @@ export default function ClientFormDialog({
                         <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Courriel</TableHead>
+                            <TableHead className="text-slate-300">Statut</TableHead>
                             <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -764,7 +773,7 @@ export default function ClientFormDialog({
                             <React.Fragment key={index}>
                               {editingCourrielIndex === index ? (
                                 <TableRow className="bg-slate-700/50 border-slate-800">
-                                  <TableCell colSpan={2}>
+                                  <TableCell colSpan={3}>
                                     <div className="space-y-2 py-2">
                                       <Input
                                         type="email"
@@ -800,6 +809,20 @@ export default function ClientFormDialog({
                               ) : (
                                 <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                   <TableCell className="text-white text-sm">{item.courriel}</TableCell>
+                                  <TableCell>
+                                    <Select 
+                                      value={item.actuel ? "Actuel" : "Ancien"} 
+                                      onValueChange={(value) => toggleActuel('courriels', index)}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                        <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
                                       <Button
@@ -810,14 +833,7 @@ export default function ClientFormDialog({
                                       >
                                         <Edit className="w-3 h-3" />
                                       </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('courriels', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
+
                                       <Button
                                         type="button"
                                         size="sm"
@@ -886,6 +902,7 @@ export default function ClientFormDialog({
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                   <TableHead className="text-slate-300">Téléphone</TableHead>
                                   <TableHead className="text-slate-300">Type</TableHead>
+                                  <TableHead className="text-slate-300">Statut</TableHead>
                                   <TableHead className="text-slate-300 text-right">Actions</TableHead>
                                 </TableRow>
                               </TableHeader>
@@ -945,6 +962,20 @@ export default function ClientFormDialog({
                                       <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                         <TableCell className="text-white text-sm">{item.telephone}</TableCell>
                                         <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
+                                        <TableCell>
+                                          <Select 
+                                            value={item.actuel ? "Actuel" : "Ancien"} 
+                                            onValueChange={(value) => toggleActuel('telephones', index)}
+                                          >
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                              <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                              <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </TableCell>
                                         <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
                                       <Button
@@ -955,14 +986,7 @@ export default function ClientFormDialog({
                                       >
                                         <Edit className="w-3 h-3" />
                                       </Button>
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => toggleActuel('telephones', index)}
-                                        className={`${item.actuel ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'} hover:bg-green-500/30 h-7 w-7 p-0`}
-                                      >
-                                        <Check className="w-4 h-4" />
-                                      </Button>
+
                                       <Button
                                         type="button"
                                         size="sm"
