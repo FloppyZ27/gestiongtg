@@ -402,9 +402,8 @@ export default function ClientFormDialog({
                       </div>
                     </div>
                   </CardContent>
-                  )}
-                  </Card>
-                  </div>
+                )}
+              </Card>
 
               {/* Sections Adresses et Communication côte-à-côte */}
               <div className="grid grid-cols-2 gap-3">
@@ -987,7 +986,8 @@ export default function ClientFormDialog({
                   </div>
                 </CardContent>
               )}
-            </Card>
+              </Card>
+              </div>
             </form>
 
             {/* Boutons Annuler/Créer tout en bas */}
