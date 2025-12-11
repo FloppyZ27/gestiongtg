@@ -2855,9 +2855,21 @@ export default function PriseDeMandat() {
                                       {nouveauDossierForm.clients_ids.map((clientId) => {
                                         const client = getClientById(clientId);
                                         return client ? (
-                                          <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs">
+                                          <Badge 
+                                            key={clientId} 
+                                            variant="outline" 
+                                            className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                            onClick={() => {
+                                              if (window.openClientForEdit) {
+                                                window.openClientForEdit(client);
+                                              }
+                                            }}
+                                          >
                                             <span className="flex-1 truncate">{client.prenom} {client.nom}</span>
-                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                            <button type="button" onClick={(e) => {
+                                              e.stopPropagation();
+                                              setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                               <X className="w-2.5 h-2.5" />
                                             </button>
                                           </Badge>
@@ -2940,9 +2952,21 @@ export default function PriseDeMandat() {
                                       {nouveauDossierForm.notaires_ids.map((notaireId) => {
                                         const notaire = getClientById(notaireId);
                                         return notaire ? (
-                                          <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 relative pr-6 w-full justify-start text-xs">
+                                          <Badge 
+                                            key={notaireId} 
+                                            variant="outline" 
+                                            className="bg-purple-500/20 text-purple-400 border-purple-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                            onClick={() => {
+                                              if (window.openClientForEdit) {
+                                                window.openClientForEdit(notaire);
+                                              }
+                                            }}
+                                          >
                                             <span className="flex-1 truncate">{notaire.prenom} {notaire.nom}</span>
-                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                            <button type="button" onClick={(e) => {
+                                              e.stopPropagation();
+                                              setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
+                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                               <X className="w-2.5 h-2.5" />
                                             </button>
                                           </Badge>
@@ -3025,9 +3049,21 @@ export default function PriseDeMandat() {
                                       {nouveauDossierForm.courtiers_ids.map((courtierId) => {
                                         const courtier = getClientById(courtierId);
                                         return courtier ? (
-                                          <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 relative pr-6 w-full justify-start text-xs">
+                                          <Badge 
+                                            key={courtierId} 
+                                            variant="outline" 
+                                            className="bg-orange-500/20 text-orange-400 border-orange-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                            onClick={() => {
+                                              if (window.openClientForEdit) {
+                                                window.openClientForEdit(courtier);
+                                              }
+                                            }}
+                                          >
                                             <span className="flex-1 truncate">{courtier.prenom} {courtier.nom}</span>
-                                            <button type="button" onClick={() => setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}))} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
+                                            <button type="button" onClick={(e) => {
+                                              e.stopPropagation();
+                                              setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
                                               <X className="w-2.5 h-2.5" />
                                             </button>
                                           </Badge>
