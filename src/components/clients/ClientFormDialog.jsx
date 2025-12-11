@@ -126,26 +126,111 @@ export default function ClientFormDialog({
         });
       }
 
-      if (JSON.stringify(oldData.adresses) !== JSON.stringify(clientData.adresses)) {
+      if (JSON.stringify(oldData.preferences_livraison) !== JSON.stringify(clientData.preferences_livraison)) {
         changes.push({
-          action: "Modification des adresses",
-          details: "Les adresses ont été mises à jour"
+          action: "Modification des préférences de livraison",
+          details: `${oldData.preferences_livraison?.join(', ') || 'Aucune'} → ${clientData.preferences_livraison?.join(', ') || 'Aucune'}`
         });
       }
 
-      if (JSON.stringify(oldData.courriels) !== JSON.stringify(clientData.courriels)) {
+      if (oldData.notes !== clientData.notes) {
         changes.push({
-          action: "Modification des courriels",
-          details: "Les courriels ont été mis à jour"
+          action: "Modification des notes",
+          details: "Les notes ont été modifiées"
         });
       }
 
-      if (JSON.stringify(oldData.telephones) !== JSON.stringify(clientData.telephones)) {
-        changes.push({
-          action: "Modification des téléphones",
-          details: "Les téléphones ont été mis à jour"
-        });
-      }
+      // Détecter les changements d'adresses
+      const oldAdresses = oldData.adresses || [];
+      const newAdresses = clientData.adresses || [];
+      
+      // Adresses ajoutées
+      newAdresses.forEach(newAddr => {
+        const existsInOld = oldAdresses.some(oldAddr => 
+          JSON.stringify(oldAddr) === JSON.stringify(newAddr)
+        );
+        if (!existsInOld) {
+          const formattedAddr = formatAdresse(newAddr);
+          changes.push({
+            action: "Ajout d'une adresse",
+            details: formattedAddr
+          });
+        }
+      });
+
+      // Adresses supprimées
+      oldAdresses.forEach(oldAddr => {
+        const existsInNew = newAdresses.some(newAddr => 
+          JSON.stringify(newAddr) === JSON.stringify(oldAddr)
+        );
+        if (!existsInNew) {
+          const formattedAddr = formatAdresse(oldAddr);
+          changes.push({
+            action: "Suppression d'une adresse",
+            details: formattedAddr
+          });
+        }
+      });
+
+      // Détecter les changements de courriels
+      const oldCourriels = oldData.courriels || [];
+      const newCourriels = clientData.courriels || [];
+      
+      // Courriels ajoutés
+      newCourriels.forEach(newCourriel => {
+        const existsInOld = oldCourriels.some(oldCourriel => 
+          oldCourriel.courriel === newCourriel.courriel
+        );
+        if (!existsInOld) {
+          changes.push({
+            action: "Ajout d'un courriel",
+            details: newCourriel.courriel
+          });
+        }
+      });
+
+      // Courriels supprimés
+      oldCourriels.forEach(oldCourriel => {
+        const existsInNew = newCourriels.some(newCourriel => 
+          newCourriel.courriel === oldCourriel.courriel
+        );
+        if (!existsInNew) {
+          changes.push({
+            action: "Suppression d'un courriel",
+            details: oldCourriel.courriel
+          });
+        }
+      });
+
+      // Détecter les changements de téléphones
+      const oldTelephones = oldData.telephones || [];
+      const newTelephones = clientData.telephones || [];
+      
+      // Téléphones ajoutés
+      newTelephones.forEach(newTel => {
+        const existsInOld = oldTelephones.some(oldTel => 
+          oldTel.telephone === newTel.telephone
+        );
+        if (!existsInOld) {
+          changes.push({
+            action: "Ajout d'un téléphone",
+            details: `${newTel.telephone} (${newTel.type || 'Cellulaire'})`
+          });
+        }
+      });
+
+      // Téléphones supprimés
+      oldTelephones.forEach(oldTel => {
+        const existsInNew = newTelephones.some(newTel => 
+          newTel.telephone === oldTel.telephone
+        );
+        if (!existsInNew) {
+          changes.push({
+            action: "Suppression d'un téléphone",
+            details: `${oldTel.telephone} (${oldTel.type || 'Cellulaire'})`
+          });
+        }
+      });
 
       // Créer les entrées d'historique
       for (const change of changes) {
