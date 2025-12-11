@@ -590,7 +590,7 @@ export default function ClientFormDialog({
                                       type="button"
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => removeClientField('courriels', index)}
+                                      onClick={() => removeClientField('adresses', index)}
                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                       >
                                       <Trash2 className="w-4 h-4" />
