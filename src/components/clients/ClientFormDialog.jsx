@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle } from "lucide-react";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const PROVINCES_CANADIENNES = [
   "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
