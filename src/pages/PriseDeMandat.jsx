@@ -4293,14 +4293,14 @@ export default function PriseDeMandat() {
           initialData={
             clientTypeForForm === "Client" ? clientInfo :
             clientTypeForForm === "Notaire" ? {
-              prenom: professionnelInfo.notaire_prenom || "",
-              nom: professionnelInfo.notaire_nom || "",
+              prenom: professionnelInfo.notaire || "",
+              nom: "",
               telephone: professionnelInfo.notaire_telephone || "",
               courriel: professionnelInfo.notaire_courriel || ""
             } :
             clientTypeForForm === "Courtier immobilier" ? {
-              prenom: professionnelInfo.courtier_prenom || "",
-              nom: professionnelInfo.courtier_nom || "",
+              prenom: professionnelInfo.courtier || "",
+              nom: "",
               telephone: professionnelInfo.courtier_telephone || "",
               courriel: professionnelInfo.courtier_courriel || ""
             } : null
