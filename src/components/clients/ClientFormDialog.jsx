@@ -604,102 +604,9 @@ export default function ClientFormDialog({
                                       </Table>
                                       </div>
                                       )}
-                                      </div>
-
-                                      {/* Téléphones */}
-                                      <div className="space-y-2">
-                                      <Label className="text-xs">Téléphones</Label>
-                                      <div className="flex gap-2">
-                                      <Input
-                                      id="new-telephone"
-                                      placeholder="Téléphone"
-                                      className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
-                                      />
-                                      <Select id="new-telephone-type" defaultValue="Cellulaire">
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
-                                      <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                      <SelectItem value="Cellulaire" className="text-white text-xs">Cell.</SelectItem>
-                                      <SelectItem value="Maison" className="text-white text-xs">Maison</SelectItem>
-                                      <SelectItem value="Travail" className="text-white text-xs">Travail</SelectItem>
-                                      </SelectContent>
-                                      </Select>
-                                      <Button
-                                      type="button"
-                                      size="sm"
-                                      onClick={() => {
-                                      const telephone = document.getElementById('new-telephone').value;
-                                      const typeSelect = document.querySelector('[id="new-telephone-type"]');
-                                      const type = typeSelect?.textContent?.trim() || "Cellulaire";
-                                      if (telephone.trim()) {
-                                      setFormData(prev => ({
-                                      ...prev,
-                                      telephones: [...prev.telephones, { telephone, type, actuel: true }]
-                                      }));
-                                      document.getElementById('new-telephone').value = "";
-                                      }
-                                      }}
-                                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
-                                      >
-                                      <Plus className="w-3 h-3" />
-                                      </Button>
-                                      </div>
-
-                                      {formData.telephones.length > 0 && (
-                                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                      <Table>
-                                      <TableHeader>
-                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                      <TableHead className="text-slate-300">Téléphone</TableHead>
-                                      <TableHead className="text-slate-300">Type</TableHead>
-                                      <TableHead className="text-slate-300">Statut</TableHead>
-                                      <TableHead className="text-slate-300 text-right">Actions</TableHead>
-                                      </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                      {formData.telephones.map((item, index) => (
-                                      <React.Fragment key={index}>
-                                      <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                      <TableCell className="text-white text-sm">{item.telephone}</TableCell>
-                                      <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
-                                      <TableCell>
-                                        <Select 
-                                          value={item.actuel ? "Actuel" : "Ancien"} 
-                                          onValueChange={(value) => toggleActuel('telephones', index)}
-                                        >
-                                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-slate-800 border-slate-700">
-                                            <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
-                                            <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                          <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClientField('adresses', index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                  </TableCell>
-                                  </TableRow>
-                                  </React.Fragment>
-                        ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    )}
-                  </CardContent>
-                  )}
-                  </Card>
+                                      </CardContent>
+                                      )}
+                                      </Card>
 
                   {/* Section Communication */}
                   <Card className="border-slate-700 bg-slate-800/30">
@@ -781,15 +688,6 @@ export default function ClientFormDialog({
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        onClick={() => setEditingCourrielIndex(index)}
-                                        className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 h-7 w-7 p-0"
-                                      >
-                                        <Edit className="w-3 h-3" />
-                                      </Button>
-
                                       <Button
                                         type="button"
                                         size="sm"
