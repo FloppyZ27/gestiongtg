@@ -140,6 +140,16 @@ export default function ClientFormDialog({
   };
 
   const removeClientField = (fieldName, index) => {
+    const fieldLabels = {
+      adresses: "cette adresse",
+      courriels: "ce courriel",
+      telephones: "ce téléphone"
+    };
+    
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer ${fieldLabels[fieldName]} ?`)) {
+      return;
+    }
+    
     if (formData[fieldName].length > 0) {
       setFormData(prev => ({
         ...prev,
@@ -528,14 +538,17 @@ export default function ClientFormDialog({
                       if (civic || rue || ville) {
                         setFormData(prev => ({
                           ...prev,
-                          adresses: [...prev.adresses, {
-                            numeros_civiques: civic ? [civic] : [""],
-                            rue,
-                            ville,
-                            province,
-                            code_postal: codePostal,
-                            actuelle: true
-                          }]
+                          adresses: [
+                            ...prev.adresses.map(a => ({ ...a, actuelle: false })),
+                            {
+                              numeros_civiques: civic ? [civic] : [""],
+                              rue,
+                              ville,
+                              province,
+                              code_postal: codePostal,
+                              actuelle: true
+                            }
+                          ]
                         }));
                         
                         // Clear inputs
@@ -646,7 +659,10 @@ export default function ClientFormDialog({
                               if (courriel.trim()) {
                                 setFormData(prev => ({
                                   ...prev,
-                                  courriels: [...prev.courriels, { courriel, actuel: true }]
+                                  courriels: [
+                                    ...prev.courriels.map(c => ({ ...c, actuel: false })),
+                                    { courriel, actuel: true }
+                                  ]
                                 }));
                                 document.getElementById('new-courriel').value = "";
                               }
@@ -717,7 +733,14 @@ export default function ClientFormDialog({
                             placeholder="Téléphone"
                             className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
                           />
-                          <Select id="new-telephone-type" defaultValue="Cellulaire">
+                          <Select 
+                            id="new-telephone-type" 
+                            defaultValue="Cellulaire"
+                            onValueChange={(value) => {
+                              const selectEl = document.querySelector('[id="new-telephone-type"]');
+                              if (selectEl) selectEl.setAttribute('data-value', value);
+                            }}
+                          >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
                               <SelectValue />
                             </SelectTrigger>
@@ -733,11 +756,14 @@ export default function ClientFormDialog({
                             onClick={() => {
                               const telephone = document.getElementById('new-telephone').value;
                               const typeSelect = document.querySelector('[id="new-telephone-type"]');
-                              const type = typeSelect?.textContent?.trim() || "Cellulaire";
+                              const typeValue = typeSelect?.getAttribute('data-value') || "Cellulaire";
                               if (telephone.trim()) {
                                 setFormData(prev => ({
                                   ...prev,
-                                  telephones: [...prev.telephones, { telephone, type, actuel: true }]
+                                  telephones: [
+                                    ...prev.telephones.map(t => ({ ...t, actuel: false })),
+                                    { telephone, type: typeValue, actuel: true }
+                                  ]
                                 }));
                                 document.getElementById('new-telephone').value = "";
                               }
