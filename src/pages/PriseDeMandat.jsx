@@ -4423,7 +4423,7 @@ export default function PriseDeMandat() {
           setIsNewLotDialogOpen(open);
           if (!open) resetLotForm();
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
