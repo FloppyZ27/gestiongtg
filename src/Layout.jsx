@@ -288,7 +288,9 @@ function LayoutContent({ children, currentPageName }) {
     <TooltipProvider>
   
         <style>{`
-        :root {
+          @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
+
+          :root {
           --background: 222.2 84% 4.9%;
           --foreground: 210 40% 98%;
           --card: 222.2 84% 4.9%;
@@ -340,6 +342,15 @@ function LayoutContent({ children, currentPageName }) {
           top: 50% !important;
           transform: translate(-50%, -50%) !important;
           animation: dialogSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        }
+
+        /* Titres des fenêtres dialog en Caveat et majuscules */
+        [role="dialog"] h2,
+        [role="dialog"] [class*="DialogTitle"],
+        .DialogTitle {
+          font-family: 'Caveat', cursive !important;
+          text-transform: uppercase !important;
+          font-weight: 600 !important;
         }
 
         @keyframes dialogSlideIn {
