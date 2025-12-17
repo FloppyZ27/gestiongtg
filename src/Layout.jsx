@@ -335,12 +335,12 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-          animation: slideIn 0.3s ease-out !important;
+          animation: slideInFromBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
-        @keyframes slideIn {
+        @keyframes slideInFromBottom {
           from {
-            transform: translateY(-20px);
+            transform: translateY(100%);
             opacity: 0;
           }
           to {
@@ -350,16 +350,16 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         [data-state="closed"][role="dialog"] {
-          animation: slideOut 0.2s ease-in !important;
+          animation: slideOutToBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
-        @keyframes slideOut {
+        @keyframes slideOutToBottom {
           from {
             transform: translateY(0);
             opacity: 1;
           }
           to {
-            transform: translateY(-20px);
+            transform: translateY(100%);
             opacity: 0;
           }
         }
