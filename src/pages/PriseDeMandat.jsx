@@ -3874,7 +3874,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-md shadow-2xl">
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
             </DialogHeader>
@@ -3954,7 +3954,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-md shadow-2xl">
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
@@ -4017,7 +4017,7 @@ export default function PriseDeMandat() {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -4100,7 +4100,7 @@ export default function PriseDeMandat() {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -4183,7 +4183,7 @@ export default function PriseDeMandat() {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
@@ -4336,7 +4336,7 @@ export default function PriseDeMandat() {
             setLotCadastreFilter("Québec");
           }
         }}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
