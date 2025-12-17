@@ -3859,9 +3859,13 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-transparent border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
             </DialogHeader>
             <motion.div 
               className="space-y-4"
@@ -3883,13 +3887,13 @@ export default function PriseDeMandat() {
                     setShowStatutChangeConfirm(false);
                     setPendingStatutChange(null);
                   }}
-                  className="border-slate-500"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
                 >
                   Annuler
                 </Button>
                 <Button
                   type="button"
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                   onClick={async () => {
                     const value = pendingStatutChange;
                     
@@ -3940,9 +3944,13 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation d'annulation - Nouveau mandat */}
         <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-transparent border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
             </DialogHeader>
             <motion.div 
               className="space-y-4"
@@ -3958,13 +3966,13 @@ export default function PriseDeMandat() {
                   type="button" 
                   variant="outline" 
                   onClick={() => setShowCancelConfirm(false)}
-                  className="border-slate-500"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
                 >
                   Annuler
                 </Button>
                 <Button
                   type="button"
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                   onClick={async () => {
                     // Déverrouiller le mandat si on annule
                     if (editingPriseMandat && !isLocked) {
@@ -3991,9 +3999,13 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation d'annulation - Ouvrir dossier */}
         <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-transparent border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
-              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
             </DialogHeader>
             <motion.div 
               className="space-y-4"
@@ -4009,13 +4021,13 @@ export default function PriseDeMandat() {
                   type="button" 
                   variant="outline" 
                   onClick={() => setShowCancelConfirmDossier(false)}
-                  className="border-slate-500"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
                 >
                   Annuler
                 </Button>
                 <Button
                   type="button"
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                   onClick={() => {
                     setShowCancelConfirmDossier(false);
                     setIsOuvrirDossierDialogOpen(false);
