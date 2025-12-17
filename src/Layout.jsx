@@ -345,7 +345,9 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800),
-        [role="button"]:not([variant="ghost"]) {
+        [role="button"]:not([variant="ghost"]),
+        .bg-gradient-to-r,
+        [class*="bg-gradient"] {
           background: transparent !important;
           border: 2px solid currentColor !important;
           box-shadow: none !important;
@@ -353,12 +355,16 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         button:hover:not([variant="ghost"]),
-        [role="button"]:hover:not([variant="ghost"]) {
+        [role="button"]:hover:not([variant="ghost"]),
+        .bg-gradient-to-r:hover,
+        [class*="bg-gradient"]:hover {
           background: rgba(255, 255, 255, 0.05) !important;
         }
 
         button:active:not([variant="ghost"]),
-        [role="button"]:active:not([variant="ghost"]) {
+        [role="button"]:active:not([variant="ghost"]),
+        .bg-gradient-to-r:active,
+        [class*="bg-gradient"]:active {
           background: rgba(0, 0, 0, 0.1) !important;
         }
 
