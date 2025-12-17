@@ -335,6 +335,33 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+          animation: slideIn 0.3s ease-out !important;
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        [data-state="closed"][role="dialog"] {
+          animation: slideOut 0.2s ease-in !important;
+        }
+
+        @keyframes slideOut {
+          from {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
         }
 
         /* Effet Neumorphism global */
