@@ -422,9 +422,15 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         /* Contours par défaut pour les autres boutons */
-        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
-        [role="button"]:not([class*="size-icon"]):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
+        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]):not([class*="border-red"]),
+        [role="button"]:not([class*="size-icon"]):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]):not([class*="border-red"]) {
           border: 2px solid rgba(148, 163, 184, 0.5) !important;
+        }
+
+        /* Contours rouges pour les boutons Annuler */
+        button[class*="border-red"],
+        [role="button"][class*="border-red"] {
+          border: 2px solid rgb(239, 68, 68) !important;
         }
 
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
