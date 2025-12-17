@@ -791,7 +791,7 @@ function LayoutContent({ children, currentPageName }) {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button type="button" variant="ghost" onClick={() => setIsEntreeTempsOpen(false)} className="text-red-400 hover:bg-red-500/10">
+            <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
               Annuler
             </Button>
             <Button type="submit" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
