@@ -863,13 +863,6 @@ function LayoutContent({ children, currentPageName }) {
               Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
             </p>
             <div className="flex justify-center gap-3 pt-4">
-              <Button 
-                type="button" 
-                onClick={() => setShowUnsavedWarning(false)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Continuer l'édition
-              </Button>
               <Button
                 type="button"
                 onClick={() => {
@@ -881,6 +874,13 @@ function LayoutContent({ children, currentPageName }) {
                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
               >
                 Abandonner
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => setShowUnsavedWarning(false)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Continuer l'édition
               </Button>
             </div>
           </div>
