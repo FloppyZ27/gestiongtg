@@ -344,7 +344,7 @@ function LayoutContent({ children, currentPageName }) {
             -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
         }
 
-        /* Boutons icon (avec logo seulement) - pas de contour */
+        /* Boutons icon, ghost et dans tableaux - pas de contour */
         button[class*="size-icon"],
         button.h-10.w-10,
         button.h-9.w-9,
@@ -352,8 +352,8 @@ function LayoutContent({ children, currentPageName }) {
         table button,
         [role="row"] button,
         [role="cell"] button,
-        button[class*="destructive"],
-        button[class*="variant-destructive"] {
+        button[data-variant="ghost"],
+        button[class*="ghost"] {
           background-color: transparent !important;
           background-image: none !important;
           border: none !important;
