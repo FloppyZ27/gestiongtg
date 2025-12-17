@@ -587,7 +587,7 @@ export default function ClientFormDialog({
     <>
       {/* Duplicate Check Dialog */}
       <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
-        <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-2xl shadow-2xl shadow-black/50">
+        <DialogContent className="bg-slate-900/20 border-2 border-white/30 text-white max-w-2xl shadow-2xl shadow-black/50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <AlertTriangle className="w-5 h-5 text-yellow-400" />
@@ -662,7 +662,7 @@ export default function ClientFormDialog({
 
       {/* Main Client Form Dialog */}
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+        <DialogContent className="bg-slate-900/20 border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">
             {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
