@@ -16,6 +16,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
   const [editingContent, setEditingContent] = useState("");
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const [mentionSearch, setMentionSearch] = useState("");
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
@@ -495,7 +496,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
           />
         )}
         {imageFileUrl && (
-          <img src={imageFileUrl} alt="Image du commentaire" className="max-w-full h-auto rounded-lg" />
+          <img 
+            src={imageFileUrl} 
+            alt="Image du commentaire" 
+            className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => setFullscreenImage(imageFileUrl)}
+          />
         )}
         {audioFileUrl && (
           <audio controls className="w-full h-8" style={{ maxHeight: '32px' }}>
@@ -524,6 +530,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
           allCommentaires.map((commentaire) => {
             const isOwnComment = commentaire.utilisateur_email === user?.email;
             const isEditing = editingCommentId === commentaire.id;
+            const hasMedia = commentaire.contenu.includes('[AUDIO:') || commentaire.contenu.includes('[IMAGE:');
 
             return (
               <div key={commentaire.id} className="space-y-2">
@@ -578,14 +585,16 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
                       </div>
                       {isOwnComment && (
                         <div className="flex gap-1 justify-end mt-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditCommentaire(commentaire)}
-                            className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
+                          {!hasMedia && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditCommentaire(commentaire)}
+                              className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -798,6 +807,17 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
             </Button>
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Dialog pour l'image en plein écran */}
+    <Dialog open={!!fullscreenImage} onOpenChange={(open) => !open && setFullscreenImage(null)}>
+      <DialogContent className="border-none max-w-[90vw] max-h-[90vh] p-2" style={{ background: 'none' }}>
+        <img 
+          src={fullscreenImage} 
+          alt="Image en plein écran" 
+          className="w-full h-full object-contain rounded-lg"
+        />
       </DialogContent>
     </Dialog>
     </>
