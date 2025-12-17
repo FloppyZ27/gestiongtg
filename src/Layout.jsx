@@ -344,38 +344,38 @@ function LayoutContent({ children, currentPageName }) {
             -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
         }
 
-        /* Style minimaliste pour tous les boutons */
-        button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
-        button[class*="bg-gradient"],
-        button[class*="bg-emerald"],
-        button[class*="bg-blue"],
-        button[class*="bg-red"],
-        [role="button"]:not([variant="ghost"]) {
+        /* Style minimaliste pour tous les boutons - contour seulement */
+        button:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
+        [role="button"] {
           background: transparent !important;
+          background-color: transparent !important;
           background-image: none !important;
           border: 2px solid currentColor !important;
           box-shadow: none !important;
           transition: all 0.3s ease !important;
         }
 
-        button:hover:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
-        button[class*="bg-gradient"]:hover,
-        button[class*="bg-emerald"]:hover,
-        button[class*="bg-blue"]:hover,
-        button[class*="bg-red"]:hover,
-        [role="button"]:hover:not([variant="ghost"]) {
-          background: rgba(255, 255, 255, 0.05) !important;
+        button:hover:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
+        [role="button"]:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          background-color: rgba(255, 255, 255, 0.08) !important;
           background-image: none !important;
+          transform: translateY(-1px);
         }
 
-        button:active:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
-        button[class*="bg-gradient"]:active,
-        button[class*="bg-emerald"]:active,
-        button[class*="bg-blue"]:active,
-        button[class*="bg-red"]:active,
-        [role="button"]:active:not([variant="ghost"]) {
-          background: rgba(0, 0, 0, 0.1) !important;
+        button:active:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
+        [role="button"]:active {
+          background: rgba(0, 0, 0, 0.15) !important;
+          background-color: rgba(0, 0, 0, 0.15) !important;
           background-image: none !important;
+          transform: translateY(0px);
+        }
+
+        /* Exception pour les boutons ghost */
+        button[class*="ghost"],
+        [variant="ghost"] {
+          background: transparent !important;
+          border: none !important;
         }
 
         .border-slate-700, .border-slate-800 {
