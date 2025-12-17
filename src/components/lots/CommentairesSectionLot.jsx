@@ -175,7 +175,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                     </span>
                   </div>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-3 ml-11">
+                <div className="bg-slate-700/50 rounded-lg p-3">
                   {isEditing ? (
                     <div className="space-y-2">
                       <Textarea
