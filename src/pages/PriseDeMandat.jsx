@@ -3849,12 +3849,12 @@ export default function PriseDeMandat() {
                           </div>
                         )}
                       </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
+                      </Tabs>
+                      )}
+                      </div>
+                      </div>
+                      </DialogContent>
+                      </Dialog>
 
           {/* Dialogs de sélection pour le formulaire de dossier */}
 
@@ -3933,7 +3933,7 @@ export default function PriseDeMandat() {
                   Confirmer
                 </Button>
               </div>
-            </motion.div>
+            </div>
           </DialogContent>
         </Dialog>
 
@@ -4001,12 +4001,7 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className="space-y-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4084,12 +4079,7 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className="space-y-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4167,12 +4157,7 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
-            <motion.div 
-              className="space-y-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className="space-y-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4903,10 +4888,10 @@ export default function PriseDeMandat() {
                     </div>
                   </TabsContent>
                 </Tabs>
-                </div>
-                </div>
-                </DialogContent>
-                </Dialog>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
