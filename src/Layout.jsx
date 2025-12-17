@@ -317,8 +317,8 @@ function LayoutContent({ children, currentPageName }) {
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
           background-color: transparent !important;
-          backdrop-filter: blur(2px) !important;
-          -webkit-backdrop-filter: blur(2px) !important;
+          backdrop-filter: blur(2.1px) !important;
+          -webkit-backdrop-filter: blur(2.1px) !important;
           opacity: 1 !important;
         }
 
@@ -326,15 +326,15 @@ function LayoutContent({ children, currentPageName }) {
         .fixed.inset-0.z-50.bg-black\\/80,
         .fixed.inset-0.z-50 {
           background-color: transparent !important;
-          backdrop-filter: blur(2px) !important;
-          -webkit-backdrop-filter: blur(2px) !important;
+          backdrop-filter: blur(2.1px) !important;
+          -webkit-backdrop-filter: blur(2.1px) !important;
         }
 
         /* Effet glassmorphism sur les fenêtres dialog */
         [role="dialog"] {
           background: transparent !important;
-          backdrop-filter: blur(20px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+          backdrop-filter: blur(21px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(21px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
           position: fixed !important;
@@ -476,11 +476,22 @@ function LayoutContent({ children, currentPageName }) {
             0 0 0 3px rgba(16, 185, 129, 0.5) !important;
         }
 
-        /* Fond gris pour les menus déroulants */
+        /* Fond gris pour les menus déroulants et leurs déclencheurs */
         [role="listbox"],
         [role="menu"],
         [data-radix-select-content],
-        [data-radix-popper-content-wrapper] > div {
+        [data-radix-popper-content-wrapper] > div,
+        button[role="combobox"],
+        [data-radix-select-trigger],
+        button[data-state] {
+          background-color: rgb(30, 41, 59) !important;
+        }
+
+        /* Champs select natifs et styled */
+        select,
+        [role="combobox"],
+        button[aria-haspopup="listbox"],
+        button[aria-expanded] {
           background-color: rgb(30, 41, 59) !important;
         }
 
