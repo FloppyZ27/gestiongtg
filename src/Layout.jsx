@@ -286,7 +286,8 @@ function LayoutContent({ children, currentPageName }) {
 
   return (
     <TooltipProvider>
-      <style>{`
+        <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <style>{`
         :root {
           --background: 222.2 84% 4.9%;
           --foreground: 210 40% 98%;
@@ -371,6 +372,17 @@ function LayoutContent({ children, currentPageName }) {
             inset 3px 3px 6px rgba(0, 0, 0, 0.3),
             inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
           border: none !important;
+        }
+
+        /* Police handwriting pour les titres */
+        h1, h2, h3, h4, h5, h6,
+        [role="heading"],
+        [class*="DialogTitle"],
+        [class*="CardTitle"],
+        .text-2xl, .text-3xl, .text-xl {
+          font-family: 'Caveat', cursive !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.5px !important;
         }
 
         /* Scrollbar personnalisée globale */
