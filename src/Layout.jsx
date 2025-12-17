@@ -422,17 +422,34 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         /* Contours par défaut pour les autres boutons */
-        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
-        [role="button"]:not([class*="size-icon"]):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(.border-b button) {
+        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
+        [role="button"]:not([class*="size-icon"]):not([class*="from-"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
           border: 2px solid rgba(148, 163, 184, 0.5) !important;
         }
 
-        button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
-        [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button) {
+        button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
+        [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
           background: rgba(255, 255, 255, 0.08) !important;
           background-color: rgba(255, 255, 255, 0.08) !important;
           background-image: none !important;
           transform: translateY(-1px);
+        }
+
+        /* Retirer complètement l'encadré des TabsTrigger */
+        button[role="tab"],
+        [role="tab"] {
+          background: transparent !important;
+          background-color: transparent !important;
+          background-image: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        button[role="tab"]:hover,
+        [role="tab"]:hover {
+          background: transparent !important;
+          background-color: transparent !important;
+          background-image: none !important;
         }
 
         button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
