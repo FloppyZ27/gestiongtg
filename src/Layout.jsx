@@ -506,15 +506,6 @@ function LayoutContent({ children, currentPageName }) {
             0 0 0 2px rgba(16, 185, 129, 0.3) !important;
         }
 
-        /* Forcer le fond gris sur tous les SelectTrigger */
-        button[class*="bg-slate"][role="combobox"],
-        button[class*="bg-slate"][aria-haspopup="listbox"],
-        [class*="bg-slate-7"],
-        [class*="bg-slate-8"] {
-          background-color: rgb(30, 41, 59) !important;
-          background-image: none !important;
-        }
-
 
 
         /* Scrollbar personnalisée globale */
