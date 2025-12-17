@@ -4695,28 +4695,22 @@ export default function PriseDeMandat() {
                             {/* Colonne droite - Liste des lots existants */}
                             <div className="border-l border-slate-700 pl-4">
                               <div className="mb-3">
-                                <Label className="text-purple-300 text-sm mb-2 block">Lots existants</Label>
-                                <div className="relative">
-                                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input
-                                    placeholder="Rechercher..."
-                                    value={lotListSearchTerm}
-                                    onChange={(e) => setLotListSearchTerm(e.target.value)}
-                                    className="pl-8 bg-slate-700 border-slate-600 text-white h-7 text-xs"
-                                  />
-                                </div>
+                                <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
                               
                               <div className="space-y-2 max-h-96 overflow-y-auto">
                                 {lots
                                   .filter(lot => {
-                                    const searchLower = lotListSearchTerm.toLowerCase();
-                                    return (
-                                      lot.numero_lot?.toLowerCase().includes(searchLower) ||
-                                      lot.rang?.toLowerCase().includes(searchLower) ||
-                                      lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
-                                      lot.cadastre?.toLowerCase().includes(searchLower)
-                                    );
+                                    const matchesNumero = !currentConcordanceForm.numero_lot || 
+                                      lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
+                                    const matchesRang = !currentConcordanceForm.rang || 
+                                      lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
+                                    const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
+                                      lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
+                                    const matchesCadastre = !currentConcordanceForm.cadastre || 
+                                      lot.cadastre === currentConcordanceForm.cadastre;
+                                    
+                                    return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                   })
                                   .map((lot) => (
                                     <div key={lot.id} className="p-2 bg-slate-700/30 border border-slate-600 rounded-lg hover:bg-slate-700/50 transition-colors">
@@ -4737,13 +4731,16 @@ export default function PriseDeMandat() {
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
-                                  const searchLower = lotListSearchTerm.toLowerCase();
-                                  return (
-                                    lot.numero_lot?.toLowerCase().includes(searchLower) ||
-                                    lot.rang?.toLowerCase().includes(searchLower) ||
-                                    lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
-                                    lot.cadastre?.toLowerCase().includes(searchLower)
-                                  );
+                                  const matchesNumero = !currentConcordanceForm.numero_lot || 
+                                    lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
+                                  const matchesRang = !currentConcordanceForm.rang || 
+                                    lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
+                                  const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
+                                    lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
+                                  const matchesCadastre = !currentConcordanceForm.cadastre || 
+                                    lot.cadastre === currentConcordanceForm.cadastre;
+                                  
+                                  return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                 }).length === 0 && (
                                   <div className="text-center py-6 text-slate-500">
                                     <Grid3x3 className="w-6 h-6 mx-auto mb-2 opacity-50" />
