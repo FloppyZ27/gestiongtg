@@ -296,6 +296,9 @@ export default function PriseDeMandat() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCancelConfirmDossier, setShowCancelConfirmDossier] = useState(false);
   const [showArpenteurRequiredDialog, setShowArpenteurRequiredDialog] = useState(false);
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
