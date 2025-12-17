@@ -4455,7 +4455,7 @@ export default function PriseDeMandat() {
                         </CardHeader>
 
                         {!lotInfoCollapsed && (
-                          <CardContent className="pt-3 pb-3 space-y-3">
+                          <CardContent className="pt-2 pb-3 space-y-3">
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-1">
                                 <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
@@ -4464,7 +4464,7 @@ export default function PriseDeMandat() {
                                   onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
                                   required
                                   placeholder="Ex: 1234-5678"
-                                  className="bg-slate-700 border-slate-600 h-8 text-sm"
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -4473,7 +4473,7 @@ export default function PriseDeMandat() {
                                   value={newLotForm.rang}
                                   onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
                                   placeholder="Ex: Rang 4"
-                                  className="bg-slate-700 border-slate-600 h-8 text-sm"
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
                                 />
                               </div>
                             </div>
@@ -4482,7 +4482,7 @@ export default function PriseDeMandat() {
                               <div className="space-y-1">
                                 <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
                                 <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -4501,7 +4501,7 @@ export default function PriseDeMandat() {
                                   onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
                                   disabled={!newLotForm.circonscription_fonciere}
                                 >
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
@@ -4522,7 +4522,7 @@ export default function PriseDeMandat() {
                                   type="date"
                                   value={newLotForm.date_bpd}
                                   onChange={(e) => setNewLotForm({...newLotForm, date_bpd: e.target.value})}
-                                  className="bg-slate-700 border-slate-600 h-8 text-sm"
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
                                 />
                               </div>
                               <div className="space-y-1">
@@ -4531,7 +4531,7 @@ export default function PriseDeMandat() {
                                   value={newLotForm.type_operation}
                                   onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
                                 >
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -4571,7 +4571,7 @@ export default function PriseDeMandat() {
                       </CardHeader>
 
                       {!lotConcordanceCollapsed && (
-                        <CardContent className="pt-3 pb-3">
+                        <CardContent className="pt-2 pb-3">
                           <div className="grid grid-cols-[60%_40%] gap-4">
                             {/* Colonne gauche - Formulaire et tableau */}
                             <div className="space-y-3">
@@ -4781,9 +4781,9 @@ export default function PriseDeMandat() {
                       </CardHeader>
 
                       {!lotDocumentsCollapsed && (
-                        <CardContent className="pt-3 pb-3">
+                        <CardContent className="pt-2 pb-3">
                           <div className="space-y-2">
-                            <Label>Document PDF du lot</Label>
+                            <Label className="text-slate-400 text-xs">Document PDF du lot</Label>
                             <Input
                               type="file"
                               accept=".pdf"
