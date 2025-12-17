@@ -613,31 +613,22 @@ function LayoutContent({ children, currentPageName }) {
         <Sidebar collapsible="icon" className="border-r border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
           <SidebarHeader className="border-b border-slate-800/50 p-3 bg-gradient-to-br from-slate-900/80 to-slate-950/80 backdrop-blur-xl">
             {!isCollapsed ? (
-              <motion.div 
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.img 
+              <div className="flex items-center gap-3">
+                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-16 h-auto"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
                 />
                 <div>
                   <h2 className="font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent text-2xl">GestionGTG</h2>
                 </div>
-              </motion.div>
+              </div>
             ) : (
               <div className="flex justify-center py-1">
-                <motion.img 
+                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-8 h-auto"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400 }}
                 />
               </div>
             )}
@@ -653,12 +644,7 @@ function LayoutContent({ children, currentPageName }) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item, index) => (
-                    <motion.div
-                      key={item.title}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                    >
+                    <div key={item.title}>
                       <SidebarMenuItem>
                         {isCollapsed ? (
                           <Tooltip>
@@ -672,9 +658,9 @@ function LayoutContent({ children, currentPageName }) {
                                 }`}
                               >
                                 <Link to={item.url} className="flex items-center justify-center p-2.5 relative z-10">
-                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                                  <div>
                                     <item.icon className="w-5 h-5" />
-                                  </motion.div>
+                                  </div>
                                 </Link>
                               </SidebarMenuButton>
                             </TooltipTrigger>
@@ -692,31 +678,20 @@ function LayoutContent({ children, currentPageName }) {
                             }`}
                           >
                             <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5 relative z-10">
-                              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}>
+                              <div>
                                 <item.icon className="w-5 h-5" />
-                              </motion.div>
+                              </div>
                               <span className="font-medium">{item.title}</span>
-                              {location.pathname === item.url && (
-                                <motion.div
-                                  className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl"
-                                  layoutId="activeNav"
-                                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                />
-                              )}
                             </Link>
                           </SidebarMenuButton>
                         )}
                       </SidebarMenuItem>
-                    </motion.div>
-                  ))}
+                      </div>
+                      ))}
 
                   {/* Admin menu item */}
                   {user?.role === 'admin' && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: navigationItems.length * 0.05, duration: 0.3 }}
-                    >
+                    <div>
                       <SidebarMenuItem>
                         {isCollapsed ? (
                           <Tooltip>
@@ -730,9 +705,9 @@ function LayoutContent({ children, currentPageName }) {
                                 }`}
                               >
                                 <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5 relative z-10">
-                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                                  <div>
                                     <Shield className="w-5 h-5" />
-                                  </motion.div>
+                                  </div>
                                 </Link>
                               </SidebarMenuButton>
                             </TooltipTrigger>
@@ -750,98 +725,70 @@ function LayoutContent({ children, currentPageName }) {
                             }`}
                           >
                             <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5 relative z-10">
-                              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}>
+                              <div>
                                 <Shield className="w-5 h-5" />
-                              </motion.div>
+                              </div>
                               <span className="font-medium">Administration</span>
                             </Link>
                           </SidebarMenuButton>
                         )}
                       </SidebarMenuItem>
-                    </motion.div>
-                  )}
+                      </div>
+                      )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-800/50 p-2.5 bg-gradient-to-t from-slate-950/90 to-slate-950/60 backdrop-blur-sm space-y-2.5">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <div>
               <Button
                 onClick={() => setOpen(!open)}
                 variant="ghost"
                 size="icon"
                 className="w-full bg-slate-800/60 hover:bg-emerald-500/10 hover:border hover:border-emerald-500/30 text-slate-300 hover:text-emerald-400 transition-all duration-300 rounded-xl"
               >
-                <motion.div
-                  animate={{ rotate: isCollapsed ? 0 : 180 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </motion.div>
+                <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
               </Button>
-            </motion.div>
+            </div>
           </SidebarFooter>
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
           <header className="sticky top-0 z-50 bg-slate-900/40 backdrop-blur-2xl border-b border-slate-800/50 px-6 py-3 flex items-center justify-between gap-4 shadow-lg shadow-black/5">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
-            <motion.div 
-              className="flex items-center gap-4 md:hidden relative z-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="flex items-center gap-4 md:hidden relative z-10">
               <SidebarTrigger className="hover:bg-emerald-500/10 p-2 rounded-xl transition-all duration-300 text-white hover:text-emerald-400 hover:border hover:border-emerald-500/30" />
               <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">GestionGTG</h1>
-            </motion.div>
+            </div>
 
             {/* Barre de recherche de dossiers au centre */}
-            <motion.div 
-              className="hidden md:flex flex-1 justify-center max-w-2xl mx-auto relative z-10"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-            >
+            <div className="hidden md:flex flex-1 justify-center max-w-2xl mx-auto relative z-10">
               <DossierSearchBar dossiers={dossiers} clients={clients} />
-            </motion.div>
+            </div>
 
             {/* Boutons à droite - Entrée de temps et Notification */}
-            <motion.div 
-              className="flex items-center gap-2 relative z-10"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div className="flex items-center gap-2 relative z-10">
+              <div>
                 <Button
                   onClick={() => setIsEntreeTempsOpen(true)}
                   size="icon"
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-emerald-500/50 relative transition-all duration-300 rounded-xl"
                 >
                   <Clock className="w-5 h-5" />
-                  <motion.div
-                    className="w-3 h-3 absolute -top-1 -right-1 bg-white text-emerald-600 rounded-full flex items-center justify-center"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                  >
+                  <div className="w-3 h-3 absolute -top-1 -right-1 bg-white text-emerald-600 rounded-full flex items-center justify-center">
                     <Plus className="w-2.5 h-2.5" />
-                  </motion.div>
+                  </div>
                 </Button>
-              </motion.div>
+              </div>
               <NotificationButton user={user} />
-            </motion.div>
+            </div>
           </header>
 
           <div className="flex-1 overflow-auto relative">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
+            <div>
               {children}
-            </motion.div>
+            </div>
           </div>
         </main>
       </div>
