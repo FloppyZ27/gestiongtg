@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Edit, Trash2, X, Check } from "lucide-react";
+import { Send, Edit, Trash2, X, Check, Mic, Square, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,8 +18,13 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   const [mentionSearch, setMentionSearch] = useState("");
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState("");
   const textareaRef = useRef(null);
   const mentionMenuRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -45,6 +50,48 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
     queryFn: () => base44.entities.Client.list(),
     initialData: [],
   });
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setIsUploadingAudio(true);
+        
+        try {
+          const { file_url } = await base44.integrations.Core.UploadFile({ file: audioBlob });
+          setAudioUrl(file_url);
+          setNouveauCommentaire(prev => prev ? `${prev}\n[Audio]` : "[Audio]");
+        } catch (error) {
+          console.error("Erreur lors de l'upload de l'audio:", error);
+        } finally {
+          setIsUploadingAudio(false);
+        }
+
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Erreur lors de l'accès au microphone:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
 
   const createCommentaireMutation = useMutation({
     mutationFn: async (commentaireData) => {
@@ -234,27 +281,31 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
 
   const handleSubmitCommentaire = (e) => {
     e.preventDefault();
-    if (!nouveauCommentaire.trim() || !user) return;
+    if ((!nouveauCommentaire.trim() && !audioUrl) || !user) return;
+
+    const commentData = {
+      contenu: audioUrl ? `${nouveauCommentaire}\n[AUDIO:${audioUrl}]` : nouveauCommentaire,
+      utilisateur_email: user.email,
+      utilisateur_nom: user.full_name
+    };
 
     if (clientTemporaire) {
       const tempComment = {
         id: `temp-${Date.now()}`,
-        contenu: nouveauCommentaire,
-        utilisateur_email: user.email,
-        utilisateur_nom: user.full_name,
+        ...commentData,
         created_date: new Date().toISOString()
       };
       if (onCommentairesTempChange) {
         onCommentairesTempChange([tempComment, ...commentairesTemp]);
       }
       setNouveauCommentaire("");
+      setAudioUrl("");
     } else if (clientId) {
       createCommentaireMutation.mutate({
         client_id: clientId,
-        contenu: nouveauCommentaire,
-        utilisateur_email: user.email,
-        utilisateur_nom: user.full_name
+        ...commentData
       });
+      setAudioUrl("");
     }
   };
 
@@ -314,20 +365,39 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   };
 
   const renderCommentaireContent = (contenu) => {
+    // Extraire l'URL audio si présente
+    const audioMatch = contenu.match(/\[AUDIO:([^\]]+)\]/);
+    const audioFileUrl = audioMatch ? audioMatch[1] : null;
+    let textContent = contenu.replace(/\[AUDIO:[^\]]+\]/g, '').trim();
+
     const emailRegex = /@([^\s]+)/g;
-    const parts = contenu.split(emailRegex);
+    const parts = textContent.split(emailRegex);
     
-    return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        const taggedUser = users.find(u => u.email === part);
-        return (
-          <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
-            @{taggedUser?.full_name || part}
-          </span>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
+    return (
+      <div className="space-y-2">
+        {textContent && (
+          <div>
+            {parts.map((part, index) => {
+              if (index % 2 === 1) {
+                const taggedUser = users.find(u => u.email === part);
+                return (
+                  <span key={index} className="bg-blue-500/20 text-blue-400 px-1 rounded">
+                    @{taggedUser?.full_name || part}
+                  </span>
+                );
+              }
+              return <span key={index}>{part}</span>;
+            })}
+          </div>
+        )}
+        {audioFileUrl && (
+          <audio controls className="w-full h-8" style={{ maxHeight: '32px' }}>
+            <source src={audioFileUrl} type="audio/webm" />
+            Votre navigateur ne supporte pas l'audio.
+          </audio>
+        )}
+      </div>
+    );
   };
 
   const allCommentaires = clientTemporaire ? commentairesTemp : commentaires;
@@ -486,13 +556,61 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
             }}
             placeholder="Ajouter un commentaire... (tapez @ pour mentionner)"
             className="bg-slate-700 border-slate-600 text-white resize-none h-20"
-            disabled={createCommentaireMutation.isPending}
+            disabled={createCommentaireMutation.isPending || isRecording}
           />
-          <div className="flex justify-end">
+          {audioUrl && (
+            <div className="flex items-center gap-2 p-2 bg-slate-700/50 rounded">
+              <audio controls className="flex-1 h-8" style={{ maxHeight: '32px' }}>
+                <source src={audioUrl} type="audio/webm" />
+              </audio>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setAudioUrl("")}
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {!isRecording ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={startRecording}
+                  disabled={isUploadingAudio || audioUrl}
+                  className="bg-slate-700 border-slate-600"
+                >
+                  <Mic className="w-4 h-4 mr-2" />
+                  Audio
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={stopRecording}
+                  className="bg-red-500/20 border-red-500 text-red-400"
+                >
+                  <Square className="w-4 h-4 mr-2" />
+                  Arrêter
+                </Button>
+              )}
+              {isUploadingAudio && (
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Upload...
+                </div>
+              )}
+            </div>
             <Button
               type="submit"
               size="sm"
-              disabled={!nouveauCommentaire.trim() || createCommentaireMutation.isPending}
+              disabled={(!nouveauCommentaire.trim() && !audioUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
             >
               <Send className="w-4 h-4 mr-2" />
