@@ -3998,11 +3998,11 @@ export default function PriseDeMandat() {
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-            <DialogHeader>
-              <DialogTitle>Sélectionner des clients</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex gap-2">
+          <DialogHeader>
+            <DialogTitle>Sélectionner des clients</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -4076,11 +4076,11 @@ export default function PriseDeMandat() {
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-            <DialogHeader>
-              <DialogTitle>Sélectionner des notaires</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex gap-2">
+          <DialogHeader>
+            <DialogTitle>Sélectionner des notaires</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -4154,11 +4154,11 @@ export default function PriseDeMandat() {
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-            <DialogHeader>
-              <DialogTitle>Sélectionner des courtiers</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex gap-2">
+          <DialogHeader>
+            <DialogTitle>Sélectionner des courtiers</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
