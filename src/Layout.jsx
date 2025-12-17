@@ -462,6 +462,55 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
+        /* Tabs avec couleur cyan */
+        button[role="tab"][class*="cyan"]:hover,
+        [role="tab"][class*="cyan"]:hover {
+          background: rgba(34, 211, 238, 0.15) !important;
+          background-color: rgba(34, 211, 238, 0.15) !important;
+          background-image: none !important;
+          color: rgb(34, 211, 238) !important;
+        }
+
+        button[role="tab"][class*="cyan"][class*="border-cyan"],
+        [role="tab"][class*="cyan"][class*="border-cyan"] {
+          background: rgba(34, 211, 238, 0.1) !important;
+          color: rgb(34, 211, 238) !important;
+          border-bottom-color: rgb(34, 211, 238) !important;
+        }
+
+        /* Tabs avec couleur purple */
+        button[role="tab"][class*="purple"]:hover,
+        [role="tab"][class*="purple"]:hover {
+          background: rgba(168, 85, 247, 0.15) !important;
+          background-color: rgba(168, 85, 247, 0.15) !important;
+          background-image: none !important;
+          color: rgb(168, 85, 247) !important;
+        }
+
+        button[role="tab"][class*="purple"][class*="border-purple"],
+        [role="tab"][class*="purple"][class*="border-purple"] {
+          background: rgba(168, 85, 247, 0.1) !important;
+          color: rgb(168, 85, 247) !important;
+          border-bottom-color: rgb(168, 85, 247) !important;
+        }
+
+        /* Tabs avec couleur red */
+        button[role="tab"][class*="red"]:hover,
+        [role="tab"][class*="red"]:hover {
+          background: rgba(239, 68, 68, 0.15) !important;
+          background-color: rgba(239, 68, 68, 0.15) !important;
+          background-image: none !important;
+          color: rgb(239, 68, 68) !important;
+        }
+
+        button[role="tab"][class*="red"][class*="border-red"],
+        [role="tab"][class*="red"][class*="border-red"] {
+          background: rgba(239, 68, 68, 0.1) !important;
+          color: rgb(239, 68, 68) !important;
+          border-bottom-color: rgb(239, 68, 68) !important;
+        }
+
+        /* Tabs par défaut (emerald/green) */
         button[role="tab"]:hover,
         [role="tab"]:hover {
           background: rgba(16, 185, 129, 0.15) !important;
