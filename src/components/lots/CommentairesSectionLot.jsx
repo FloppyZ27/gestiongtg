@@ -142,6 +142,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
   const allCommentaires = lotTemporaire ? commentairesTemp : commentaires;
 
   return (
+    <>
     <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-3">
         {allCommentaires.length === 0 ? (
@@ -157,22 +158,24 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             const isEditing = editingCommentId === commentaire.id;
 
             return (
-              <div key={commentaire.id} className="flex gap-3 pr-2">
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  {getUserPhoto(commentaire.utilisateur_email) ? (
-                    <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
-                  ) : null}
-                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
-                    {getInitials(commentaire.utilisateur_nom)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-1">
+              <div key={commentaire.id} className="space-y-2 pr-2">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    {getUserPhoto(commentaire.utilisateur_email) ? (
+                      <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
+                    ) : null}
+                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                      {getInitials(commentaire.utilisateur_nom)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex justify-between items-center">
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
                     <span className="text-xs text-slate-400">
                       {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
                     </span>
                   </div>
+                </div>
+                <div className="bg-slate-700/50 rounded-lg p-3 ml-11">
                   {isEditing ? (
                     <div className="space-y-2">
                       <Textarea
@@ -263,5 +266,40 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
         </form>
       </div>
     </div>
+
+    {/* Dialog de confirmation de suppression */}
+    <Dialog open={!!commentToDelete} onOpenChange={(open) => !open && setCommentToDelete(null)}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Attention
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            Êtes-vous sûr de vouloir supprimer ce commentaire ?
+          </p>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button 
+              type="button" 
+              onClick={() => setCommentToDelete(null)}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmDelete}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Confirmer
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
