@@ -209,6 +209,8 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       setNouveauCommentaire("");
+      setAudioUrl("");
+      setImageUrl("");
       setShowMentionMenu(false);
       setMentionSearch("");
     },
