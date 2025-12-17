@@ -295,6 +295,7 @@ export default function PriseDeMandat() {
   const [lockedBy, setLockedBy] = useState("");
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCancelConfirmDossier, setShowCancelConfirmDossier] = useState(false);
+  const [showArpenteurRequiredDialog, setShowArpenteurRequiredDialog] = useState(false);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -1198,7 +1199,7 @@ export default function PriseDeMandat() {
 
     // Validation: arpenteur requis
     if (!formData.arpenteur_geometre) {
-      alert("Veuillez sélectionner un arpenteur-géomètre.");
+      setShowArpenteurRequiredDialog(true);
       return;
     }
 
@@ -4045,6 +4046,38 @@ export default function PriseDeMandat() {
                   }}
                 >
                   Confirmer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour validation arpenteur requis */}
+        <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez sélectionner un arpenteur-géomètre.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowArpenteurRequiredDialog(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  OK
                 </Button>
               </div>
             </motion.div>
