@@ -383,6 +383,7 @@ function LayoutContent({ children, currentPageName }) {
           font-family: 'Caveat', cursive !important;
           font-weight: 600 !important;
           letter-spacing: 0.5px !important;
+          text-transform: uppercase !important;
         }
 
         /* Scrollbar personnalisée globale */
