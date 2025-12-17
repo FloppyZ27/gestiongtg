@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
@@ -2025,9 +2025,9 @@ export default function PriseDeMandat() {
   const sortedNouveauMandat = sortDossiers(filteredNouveauMandat);
 
   return (
-    <div className="min-h-screen p-4 md:p-8 relative">
-      <div className="w-full relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+      <div className="w-full">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
@@ -2035,9 +2035,7 @@ export default function PriseDeMandat() {
               </h1>
               <FilePlus className="w-6 h-6 text-emerald-400" />
             </div>
-            <p className="text-slate-400 text-sm">
-              Gestion des prise de mandat
-            </p>
+            <p className="text-slate-400">Gestion des prise de mandat</p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
@@ -2087,7 +2085,7 @@ export default function PriseDeMandat() {
             }
           }}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-emerald-500/70 transition-all duration-300 rounded-xl">
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
                 <Plus className="w-5 h-5 mr-2" />
                 Nouveau mandat
               </Button>
@@ -2099,7 +2097,13 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
                 {/* Main form content - 70% */}
                 <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6">
@@ -2624,13 +2628,13 @@ export default function PriseDeMandat() {
                       )}
                     </TabsContent>
                     </Tabs>
-                    )}
-                    </div>
-                    </div>
-                    </DialogContent>
-                    </Dialog>
+                  )}
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
 
-                    {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
+          {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
             if (!open) {
               // Vérifier si des modifications ont été faites par rapport à l'état initial
@@ -2685,7 +2689,13 @@ export default function PriseDeMandat() {
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
@@ -3849,12 +3859,12 @@ export default function PriseDeMandat() {
                           </div>
                         )}
                       </TabsContent>
-                      </Tabs>
-                      )}
-                      </div>
-                      </div>
-                      </DialogContent>
-                      </Dialog>
+                    </Tabs>
+                  )}
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
 
           {/* Dialogs de sélection pour le formulaire de dossier */}
 
@@ -3868,7 +3878,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
               <p className="text-slate-300">
                 Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
               </p>
@@ -3933,7 +3948,7 @@ export default function PriseDeMandat() {
                   Confirmer
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -3943,7 +3958,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+            >
               <div className="space-y-2">
                 <Label>Minute <span className="text-red-400">*</span></Label>
                 <Input
@@ -3991,18 +4011,23 @@ export default function PriseDeMandat() {
                   Ajouter
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-          <DialogHeader>
-            <DialogTitle>Sélectionner des clients</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des clients</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -4069,18 +4094,23 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-          <DialogHeader>
-            <DialogTitle>Sélectionner des notaires</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -4147,18 +4177,23 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
-          <DialogHeader>
-            <DialogTitle>Sélectionner des courtiers</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
+            <DialogHeader>
+              <DialogTitle>Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -4225,7 +4260,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4305,7 +4340,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+            <motion.div 
+              className="space-y-4 flex-1 overflow-hidden flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4417,7 +4457,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider la sélection
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4431,7 +4471,13 @@ export default function PriseDeMandat() {
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
             
-            <div className="flex h-[90vh]">
+            <motion.div 
+              className="flex h-[90vh]"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
               {/* Colonne gauche - Formulaire - 70% */}
               <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                 <div className="flex-1 overflow-y-auto p-6">
@@ -4889,7 +4935,7 @@ export default function PriseDeMandat() {
                   </TabsContent>
                 </Tabs>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4901,7 +4947,12 @@ export default function PriseDeMandat() {
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden p-6">
+            <motion.div 
+              className="flex-1 overflow-hidden p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
               {viewingClientDetails && (
                 <ClientDetailView
                   client={viewingClientDetails}
@@ -4913,7 +4964,7 @@ export default function PriseDeMandat() {
                   }}
                 />
               )}
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4924,7 +4975,13 @@ export default function PriseDeMandat() {
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
             {viewingDossier && (
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
                 {/* Main content - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6 flex items-center gap-3">
@@ -5215,34 +5272,25 @@ export default function PriseDeMandat() {
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
           </DialogContent>
         </Dialog>
 
 
         {/* Table des prises de mandat */}
-        <div>
-          <Card className="border-slate-800/50 bg-slate-900/40 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
-            <CardHeader className="border-b border-slate-800/50 relative z-10">
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardHeader className="border-b border-slate-800">
             <div className="flex flex-col gap-4">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
-              <div className="flex w-full border-b border-slate-700/50 relative">
-                <div
-                  className="absolute bottom-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
-                  style={{
-                    left: activeListTab === "nouveau" ? "0%" : activeListTab === "ouvrir" ? "33.33%" : "66.66%",
-                    width: "33.33%"
-                  }}
-                />
+              <div className="flex w-full border-b border-slate-700">
                 <button
                   onClick={() => setActiveListTab("nouveau")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "nouveau"
-                      ? "text-cyan-400"
-                      : "text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
+                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
+                      : "border-transparent text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
                   }`}
                 >
                   <FileQuestion className="w-4 h-4" />
@@ -5253,10 +5301,10 @@ export default function PriseDeMandat() {
                 </button>
                 <button
                   onClick={() => setActiveListTab("ouvrir")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "ouvrir"
-                      ? "text-purple-400"
-                      : "text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
+                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
+                      : "border-transparent text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
                   }`}
                 >
                   <FolderOpen className="w-4 h-4" />
@@ -5267,10 +5315,10 @@ export default function PriseDeMandat() {
                 </button>
                 <button
                   onClick={() => setActiveListTab("non-octroye")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "non-octroye"
-                      ? "text-red-400"
-                      : "text-slate-400 hover:text-red-400 hover:bg-red-500/5"
+                      ? "border-red-500 text-red-400 bg-red-500/10"
+                      : "border-transparent text-slate-400 hover:text-red-400 hover:bg-red-500/5"
                   }`}
                 >
                   <XCircle className="w-4 h-4" />
@@ -5489,7 +5537,7 @@ export default function PriseDeMandat() {
                       }
                       return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                     })
-                    .map((pm, index) => {
+                    .map((pm) => {
                       const getUrgenceColor = (urgence) => {
                         switch (urgence) {
                           case "Pas pressé": return "bg-green-500/20 text-green-400 border-green-500/30";
@@ -5500,10 +5548,10 @@ export default function PriseDeMandat() {
                       };
 
                       return (
-                        <TableRow
-                        key={pm.id}
-                        className="hover:bg-emerald-500/5 border-slate-800/50 cursor-pointer group transition-all duration-200"
-                        onClick={() => handleEditPriseMandat(pm)}
+                        <TableRow 
+                          key={pm.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleEditPriseMandat(pm)}
                         >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
@@ -5567,12 +5615,12 @@ export default function PriseDeMandat() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
-                              </div>
-                              </TableCell>
-                              </TableRow>
-                              );
-                              })}
-                              {priseMandats.filter(pm => {
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  {priseMandats.filter(pm => {
                     const tabStatut = activeListTab === "nouveau" 
                       ? "Nouveau mandat/Demande d'information"
                       : activeListTab === "ouvrir"
@@ -5590,8 +5638,7 @@ export default function PriseDeMandat() {
               </Table>
             </div>
           </CardContent>
-          </Card>
-        </div>
+        </Card>
       </div>
     </div>
   );
