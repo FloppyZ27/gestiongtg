@@ -3859,7 +3859,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="bg-transparent border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-transparent border-none text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
                 <span className="text-2xl">⚠️</span>
@@ -3873,27 +3873,26 @@ export default function PriseDeMandat() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <p className="text-slate-300">
+              <p className="text-slate-300 text-center">
                 Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
               </p>
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-400 text-sm text-center">
                 Êtes-vous sûr de vouloir continuer ?
               </p>
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-center gap-3 pt-4">
                 <Button 
                   type="button" 
-                  variant="outline" 
                   onClick={() => {
                     setShowStatutChangeConfirm(false);
                     setPendingStatutChange(null);
                   }}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                 >
                   Annuler
                 </Button>
                 <Button
                   type="button"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                   onClick={async () => {
                     const value = pendingStatutChange;
                     
