@@ -172,7 +172,7 @@ export default function MandatStepForm({
                       <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" side="bottom" align="center" sideOffset={4}>
+                  <PopoverContent className="w-full p-0 bg-slate-800 border-slate-700" side="bottom" align="start" sideOffset={4}>
                     <div className="max-h-64 overflow-y-auto p-2 space-y-1">
                       {TYPES_MANDATS.map((type) => {
                         const isSelected = selectedTypes.includes(type);
