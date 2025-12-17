@@ -327,6 +327,15 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(2px) !important;
         }
 
+        /* Effet glassmorphism sur les fenêtres dialog */
+        [role="dialog"] {
+          background: rgba(15, 23, 42, 0.7) !important;
+          backdrop-filter: blur(20px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+        }
+
         /* Scrollbar personnalisée globale */
         *::-webkit-scrollbar {
           width: 10px;
