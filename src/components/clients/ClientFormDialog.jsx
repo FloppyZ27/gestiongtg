@@ -268,9 +268,7 @@ export default function ClientFormDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      setHasChanges(false);
       resetForm();
-      onOpenChange(false);
       if (onSuccess) onSuccess();
     },
   });
