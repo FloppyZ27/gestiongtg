@@ -341,7 +341,7 @@ function LayoutContent({ children, currentPageName }) {
 
         @keyframes slideInFromBottom {
           0% {
-            transform: translateY(100%) scale(0.95);
+            transform: translateY(40px) scale(0.96);
             opacity: 0;
           }
           100% {
@@ -360,7 +360,7 @@ function LayoutContent({ children, currentPageName }) {
             opacity: 1;
           }
           100% {
-            transform: translateY(100%) scale(0.95);
+            transform: translateY(40px) scale(0.96);
             opacity: 0;
           }
         }
