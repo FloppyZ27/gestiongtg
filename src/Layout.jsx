@@ -288,25 +288,40 @@ function LayoutContent({ children, currentPageName }) {
     <TooltipProvider>
       <style>{`
         :root {
-          --background: 222.2 84% 4.9%;
+          --background: 220 25% 8%;
           --foreground: 210 40% 98%;
-          --card: 222.2 84% 4.9%;
+          --card: 220 20% 12%;
           --card-foreground: 210 40% 98%;
-          --popover: 222.2 84% 4.9%;
+          --popover: 220 20% 10%;
           --popover-foreground: 210 40% 98%;
-          --primary: 217.2 91.2% 59.8%;
-          --primary-foreground: 222.2 47.4% 11.2%;
-          --secondary: 217.2 32.6% 17.5%;
+          --primary: 160 84% 39%;
+          --primary-foreground: 220 25% 8%;
+          --secondary: 160 20% 20%;
           --secondary-foreground: 210 40% 98%;
-          --muted: 217.2 32.6% 17.5%;
+          --muted: 220 15% 18%;
           --muted-foreground: 215 20.2% 65.1%;
-          --accent: 217.2 32.6% 17.5%;
+          --accent: 160 50% 30%;
           --accent-foreground: 210 40% 98%;
-          --destructive: 0 62.8% 30.6%;
+          --destructive: 0 70% 50%;
           --destructive-foreground: 210 40% 98%;
-          --border: 217.2 32.6% 17.5%;
-          --input: 217.2 32.6% 17.5%;
-          --ring: 224.3 76.3% 48%;
+          --border: 220 15% 22%;
+          --input: 220 15% 18%;
+          --ring: 160 84% 39%;
+        }
+
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        @keyframes glow-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        @keyframes slide-in {
+          from { transform: translateY(-10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
 
         /* Scrollbar personnalisée globale */
@@ -585,169 +600,248 @@ function LayoutContent({ children, currentPageName }) {
         </DialogContent>
       </Dialog>
       
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
-          <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
+      <div className="min-h-screen flex w-full relative overflow-hidden">
+        {/* Background gradient animé */}
+        <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/20 -z-10" 
+          style={{ 
+            backgroundSize: '200% 200%',
+            animation: 'gradient-shift 15s ease infinite'
+          }}
+        />
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-900/10 via-transparent to-transparent -z-10" />
+
+        <Sidebar collapsible="icon" className="border-r border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
+          <SidebarHeader className="border-b border-slate-800/50 p-3 bg-gradient-to-br from-slate-900/80 to-slate-950/80 backdrop-blur-xl">
             {!isCollapsed ? (
-              <div className="flex items-center gap-3">
-                <img 
+              <motion.div 
+                className="flex items-center gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-16 h-auto"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 />
                 <div>
-                  <h2 className="font-bold text-white text-2xl">GestionGTG</h2>
+                  <h2 className="font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent text-2xl">GestionGTG</h2>
                 </div>
-              </div>
+              </motion.div>
             ) : (
               <div className="flex justify-center py-1">
-                <img 
+                <motion.img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
                   className="w-8 h-auto"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400 }}
                 />
               </div>
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-1.5 bg-slate-950">
+          <SidebarContent className="p-1.5 bg-gradient-to-b from-slate-950/60 to-slate-950/80 backdrop-blur-sm">
             <SidebarGroup>
               {!isCollapsed && (
-                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
+                <SidebarGroupLabel className="text-xs font-semibold text-emerald-400/70 uppercase tracking-wider px-3 py-2">
                   Navigation
                 </SidebarGroupLabel>
               )}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      {isCollapsed ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton 
-                              asChild 
-                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                location.pathname === item.url 
-                                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                              }`}
-                            >
-                              <Link to={item.url} className="flex items-center justify-center p-2.5">
+                  {navigationItems.map((item, index) => (
+                    <motion.div
+                      key={item.title}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                    >
+                      <SidebarMenuItem>
+                        {isCollapsed ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarMenuButton 
+                                asChild 
+                                className={`transition-all duration-300 rounded-xl mb-1 justify-center group relative overflow-hidden ${
+                                  location.pathname === item.url 
+                                    ? 'bg-gradient-to-r from-emerald-500/25 to-teal-500/25 text-emerald-400 border border-emerald-500/40 shadow-lg shadow-emerald-500/30' 
+                                    : 'text-slate-400 hover:text-emerald-300 hover:bg-slate-800/60 hover:border hover:border-emerald-500/20'
+                                }`}
+                              >
+                                <Link to={item.url} className="flex items-center justify-center p-2.5 relative z-10">
+                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                                    <item.icon className="w-5 h-5" />
+                                  </motion.div>
+                                </Link>
+                              </SidebarMenuButton>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white shadow-xl">
+                              <p>{item.title}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <SidebarMenuButton 
+                            asChild 
+                            className={`transition-all duration-300 rounded-xl mb-1 group relative overflow-hidden ${
+                              location.pathname === item.url 
+                                ? 'bg-gradient-to-r from-emerald-500/25 to-teal-500/25 text-emerald-400 border border-emerald-500/40 shadow-lg shadow-emerald-500/30' 
+                                : 'text-slate-400 hover:text-emerald-300 hover:bg-slate-800/60 hover:border hover:border-emerald-500/20'
+                            }`}
+                          >
+                            <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5 relative z-10">
+                              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}>
                                 <item.icon className="w-5 h-5" />
-                              </Link>
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                            <p>{item.title}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <SidebarMenuButton 
-                          asChild 
-                          className={`transition-all duration-200 rounded-lg mb-0.5 ${
-                            location.pathname === item.url 
-                              ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                          }`}
-                        >
-                          <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-medium">{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      )}
-                    </SidebarMenuItem>
+                              </motion.div>
+                              <span className="font-medium">{item.title}</span>
+                              {location.pathname === item.url && (
+                                <motion.div
+                                  className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl"
+                                  layoutId="activeNav"
+                                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                />
+                              )}
+                            </Link>
+                          </SidebarMenuButton>
+                        )}
+                      </SidebarMenuItem>
+                    </motion.div>
                   ))}
 
                   {/* Admin menu item */}
                   {user?.role === 'admin' && (
-                    <SidebarMenuItem>
-                      {isCollapsed ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton 
-                              asChild 
-                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                location.pathname === createPageUrl("Administration")
-                                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
-                                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                              }`}
-                            >
-                              <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5">
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: navigationItems.length * 0.05, duration: 0.3 }}
+                    >
+                      <SidebarMenuItem>
+                        {isCollapsed ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarMenuButton 
+                                asChild 
+                                className={`transition-all duration-300 rounded-xl mb-1 justify-center group relative ${
+                                  location.pathname === createPageUrl("Administration")
+                                    ? 'bg-gradient-to-r from-red-500/25 to-orange-500/25 text-red-400 border border-red-500/40 shadow-lg shadow-red-500/30' 
+                                    : 'text-slate-400 hover:text-red-300 hover:bg-slate-800/60 hover:border hover:border-red-500/20'
+                                }`}
+                              >
+                                <Link to={createPageUrl("Administration")} className="flex items-center justify-center p-2.5 relative z-10">
+                                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                                    <Shield className="w-5 h-5" />
+                                  </motion.div>
+                                </Link>
+                              </SidebarMenuButton>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white shadow-xl">
+                              <p>Administration</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <SidebarMenuButton 
+                            asChild 
+                            className={`transition-all duration-300 rounded-xl mb-1 group relative ${
+                              location.pathname === createPageUrl("Administration")
+                                ? 'bg-gradient-to-r from-red-500/25 to-orange-500/25 text-red-400 border border-red-500/40 shadow-lg shadow-red-500/30' 
+                                : 'text-slate-400 hover:text-red-300 hover:bg-slate-800/60 hover:border hover:border-red-500/20'
+                            }`}
+                          >
+                            <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5 relative z-10">
+                              <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}>
                                 <Shield className="w-5 h-5" />
-                              </Link>
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                            <p>Administration</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <SidebarMenuButton 
-                          asChild 
-                          className={`transition-all duration-200 rounded-lg mb-0.5 ${
-                            location.pathname === createPageUrl("Administration")
-                              ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/20' 
-                              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                          }`}
-                        >
-                          <Link to={createPageUrl("Administration")} className="flex items-center gap-3 px-3 py-2.5">
-                            <Shield className="w-5 h-5" />
-                            <span className="font-medium">Administration</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      )}
-                    </SidebarMenuItem>
+                              </motion.div>
+                              <span className="font-medium">Administration</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        )}
+                      </SidebarMenuItem>
+                    </motion.div>
                   )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
-            <Button
-              onClick={() => setOpen(!open)}
-              variant="ghost"
-              size="icon"
-              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300"
-            >
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <ChevronLeft className="w-4 h-4" />
-              )}
-            </Button>
+          <SidebarFooter className="border-t border-slate-800/50 p-2.5 bg-gradient-to-t from-slate-950/90 to-slate-950/60 backdrop-blur-sm space-y-2.5">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => setOpen(!open)}
+                variant="ghost"
+                size="icon"
+                className="w-full bg-slate-800/60 hover:bg-emerald-500/10 hover:border hover:border-emerald-500/30 text-slate-300 hover:text-emerald-400 transition-all duration-300 rounded-xl"
+              >
+                <motion.div
+                  animate={{ rotate: isCollapsed ? 0 : 180 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </motion.div>
+              </Button>
+            </motion.div>
           </SidebarFooter>
         </Sidebar>
 
         <main className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-50 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 md:hidden">
-              <SidebarTrigger className="hover:bg-slate-800 p-2 rounded-lg transition-colors duration-200 text-white" />
-              <h1 className="text-xl font-bold text-white">GestionGTG</h1>
-            </div>
+          <header className="sticky top-0 z-50 bg-slate-900/40 backdrop-blur-2xl border-b border-slate-800/50 px-6 py-3 flex items-center justify-between gap-4 shadow-lg shadow-black/5">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+            <motion.div 
+              className="flex items-center gap-4 md:hidden relative z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <SidebarTrigger className="hover:bg-emerald-500/10 p-2 rounded-xl transition-all duration-300 text-white hover:text-emerald-400 hover:border hover:border-emerald-500/30" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">GestionGTG</h1>
+            </motion.div>
 
             {/* Barre de recherche de dossiers au centre */}
-            <div className="hidden md:flex flex-1 justify-center max-w-2xl mx-auto">
+            <motion.div 
+              className="hidden md:flex flex-1 justify-center max-w-2xl mx-auto relative z-10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+            >
               <DossierSearchBar dossiers={dossiers} clients={clients} />
-            </div>
+            </motion.div>
 
             {/* Boutons à droite - Entrée de temps et Notification */}
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setIsEntreeTempsOpen(true)}
-                size="icon"
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg relative"
-              >
-                <Clock className="w-5 h-5" />
-                <Plus className="w-3 h-3 absolute -top-1 -right-1 bg-white text-emerald-600 rounded-full" />
-              </Button>
+            <motion.div 
+              className="flex items-center gap-2 relative z-10"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={() => setIsEntreeTempsOpen(true)}
+                  size="icon"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-emerald-500/50 relative transition-all duration-300 rounded-xl"
+                >
+                  <Clock className="w-5 h-5" />
+                  <motion.div
+                    className="w-3 h-3 absolute -top-1 -right-1 bg-white text-emerald-600 rounded-full flex items-center justify-center"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <Plus className="w-2.5 h-2.5" />
+                  </motion.div>
+                </Button>
+              </motion.div>
               <NotificationButton user={user} />
-            </div>
+            </motion.div>
           </header>
 
-          <div className="flex-1 overflow-auto">
-            {children}
+          <div className="flex-1 overflow-auto relative">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {children}
+            </motion.div>
           </div>
         </main>
       </div>

@@ -2025,17 +2025,40 @@ export default function PriseDeMandat() {
   const sortedNouveauMandat = sortDossiers(filteredNouveauMandat);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
-      <div className="w-full">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className="min-h-screen p-4 md:p-8 relative">
+      <div className="w-full relative z-10">
+        <motion.div 
+          className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              <motion.h1 
+                className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+              >
                 Prise de mandat
-              </h1>
-              <FilePlus className="w-6 h-6 text-emerald-400" />
+              </motion.h1>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
+                <FilePlus className="w-6 h-6 text-emerald-400" />
+              </motion.div>
             </div>
-            <p className="text-slate-400">Gestion des prise de mandat</p>
+            <motion.p 
+              className="text-slate-400 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+            >
+              Gestion des prise de mandat
+            </motion.p>
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
@@ -2085,10 +2108,16 @@ export default function PriseDeMandat() {
             }
           }}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
-                <Plus className="w-5 h-5 mr-2" />
-                Nouveau mandat
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-emerald-500/70 transition-all duration-300 rounded-xl">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Nouveau mandat
+                </Button>
+              </motion.div>
             </DialogTrigger>
             <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden" hideClose>
               <DialogHeader className="sr-only">
@@ -5279,54 +5308,75 @@ export default function PriseDeMandat() {
 
 
         {/* Table des prises de mandat */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          <Card className="border-slate-800/50 bg-slate-900/40 backdrop-blur-2xl shadow-2xl shadow-black/20 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+            <CardHeader className="border-b border-slate-800/50 relative z-10">
             <div className="flex flex-col gap-4">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
-              <div className="flex w-full border-b border-slate-700">
-                <button
+              <div className="flex w-full border-b border-slate-700/50 relative">
+                <motion.div
+                  className="absolute bottom-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500"
+                  layoutId="activeTab"
+                  style={{
+                    left: activeListTab === "nouveau" ? "0%" : activeListTab === "ouvrir" ? "33.33%" : "66.66%",
+                    width: "33.33%"
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+                <motion.button
                   onClick={() => setActiveListTab("nouveau")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
                     activeListTab === "nouveau"
-                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
-                      : "border-transparent text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
+                      ? "text-cyan-400"
+                      : "text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
                   }`}
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <FileQuestion className="w-4 h-4" />
                   Nouveau mandat / Demande d'informations
                   <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 ml-1">
                     {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
                   </Badge>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={() => setActiveListTab("ouvrir")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
                     activeListTab === "ouvrir"
-                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
-                      : "border-transparent text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
+                      ? "text-purple-400"
+                      : "text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
                   }`}
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <FolderOpen className="w-4 h-4" />
                   Mandat à ouvrir
                   <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 ml-1">
                     {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
                   </Badge>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={() => setActiveListTab("non-octroye")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
                     activeListTab === "non-octroye"
-                      ? "border-red-500 text-red-400 bg-red-500/10"
-                      : "border-transparent text-slate-400 hover:text-red-400 hover:bg-red-500/5"
+                      ? "text-red-400"
+                      : "text-slate-400 hover:text-red-400 hover:bg-red-500/5"
                   }`}
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <XCircle className="w-4 h-4" />
                   Mandat non-octroyé
                   <Badge className="bg-red-500/20 text-red-400 border-red-500/30 ml-1">
                     {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
                   </Badge>
-                </button>
+                </motion.button>
               </div>
 
               <div className="flex flex-wrap gap-3">
@@ -5537,7 +5587,7 @@ export default function PriseDeMandat() {
                       }
                       return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
                     })
-                    .map((pm) => {
+                    .map((pm, index) => {
                       const getUrgenceColor = (urgence) => {
                         switch (urgence) {
                           case "Pas pressé": return "bg-green-500/20 text-green-400 border-green-500/30";
@@ -5548,10 +5598,14 @@ export default function PriseDeMandat() {
                       };
 
                       return (
-                        <TableRow 
-                          key={pm.id} 
-                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                        <motion.tr
+                          key={pm.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.03, duration: 0.3 }}
+                          className="hover:bg-emerald-500/5 border-slate-800/50 cursor-pointer group transition-all duration-200"
                           onClick={() => handleEditPriseMandat(pm)}
+                          whileHover={{ scale: 1.01, backgroundColor: "rgba(16, 185, 129, 0.08)" }}
                         >
                           <TableCell className="font-medium">
                             <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
@@ -5617,9 +5671,9 @@ export default function PriseDeMandat() {
                               </Button>
                             </div>
                           </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                          </motion.tr>
+                          );
+                          })}
                   {priseMandats.filter(pm => {
                     const tabStatut = activeListTab === "nouveau" 
                       ? "Nouveau mandat/Demande d'information"
@@ -5638,7 +5692,8 @@ export default function PriseDeMandat() {
               </Table>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
