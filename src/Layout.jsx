@@ -459,13 +459,24 @@ function LayoutContent({ children, currentPageName }) {
           background-image: none !important;
           border: none !important;
           box-shadow: none !important;
+          transition: all 0.3s ease !important;
         }
 
         button[role="tab"]:hover,
         [role="tab"]:hover {
-          background: transparent !important;
-          background-color: transparent !important;
+          background: rgba(16, 185, 129, 0.15) !important;
+          background-color: rgba(16, 185, 129, 0.15) !important;
           background-image: none !important;
+          color: rgb(16, 185, 129) !important;
+        }
+
+        button[role="tab"][data-state="active"],
+        [role="tab"][data-state="active"] {
+          background: rgba(16, 185, 129, 0.25) !important;
+          background-color: rgba(16, 185, 129, 0.25) !important;
+          background-image: none !important;
+          color: rgb(16, 185, 129) !important;
+          border-bottom: 2px solid rgb(16, 185, 129) !important;
         }
 
         button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
