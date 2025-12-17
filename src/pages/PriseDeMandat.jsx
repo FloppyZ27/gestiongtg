@@ -3701,6 +3701,10 @@ export default function PriseDeMandat() {
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
                     <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                      if (hasFormChanges) {
+                        setShowUnsavedWarning(true);
+                        return;
+                      }
                       const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
                         type_mandat: m.type_mandat,
                         date_livraison: m.date_livraison || ""

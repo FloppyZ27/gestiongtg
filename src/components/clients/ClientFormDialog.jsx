@@ -1192,7 +1192,7 @@ export default function ClientFormDialog({
 
             {/* Boutons Annuler/Créer tout en bas */}
             <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+              <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
                 Annuler
               </Button>
               <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
@@ -1263,6 +1263,40 @@ export default function ClientFormDialog({
         </motion.div>
       </DialogContent>
     </Dialog>
-  </>
-  );
-}
+
+    {/* Avertissement modifications non sauvegardées */}
+    <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Attention
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+          </p>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button 
+              type="button" 
+              onClick={() => setShowUnsavedWarning(false)}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Continuer l'édition
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmClose}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Abandonner
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
+    );
+    }
