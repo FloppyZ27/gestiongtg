@@ -433,6 +433,11 @@ function LayoutContent({ children, currentPageName }) {
           border: 2px solid rgb(239, 68, 68) !important;
         }
 
+        button[class*="border-red"]:hover,
+        [role="button"][class*="border-red"]:hover {
+          color: rgb(248, 113, 113) !important;
+        }
+
         button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([role="tab"]),
         [role="button"]:hover:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([role="tab"]) {
           background: rgba(255, 255, 255, 0.08) !important;
