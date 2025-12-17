@@ -664,6 +664,56 @@ export default function PriseDeMandat() {
     },
   });
 
+  // Détecter les changements dans le formulaire
+  useEffect(() => {
+    if (initialPriseMandatData && editingPriseMandat) {
+      const currentData = {
+        arpenteur_geometre: formData.arpenteur_geometre,
+        clients_ids: formData.clients_ids,
+        notaires_ids: formData.notaires_ids,
+        courtiers_ids: formData.courtiers_ids,
+        compagnies_ids: formData.compagnies_ids,
+        client_info: clientInfo,
+        professionnel_info: professionnelInfo,
+        adresse_travaux: workAddress,
+        mandats: mandatsInfo,
+        statut: formData.statut,
+        numero_dossier: formData.numero_dossier,
+        date_ouverture: formData.date_ouverture
+      };
+      
+      const initialData = {
+        arpenteur_geometre: initialPriseMandatData.arpenteur_geometre,
+        clients_ids: initialPriseMandatData.clients_ids || [],
+        notaires_ids: initialPriseMandatData.notaires_ids || [],
+        courtiers_ids: initialPriseMandatData.courtiers_ids || [],
+        compagnies_ids: initialPriseMandatData.compagnies_ids || [],
+        client_info: initialPriseMandatData.client_info || {},
+        professionnel_info: initialPriseMandatData.professionnel_info || {},
+        adresse_travaux: initialPriseMandatData.adresse_travaux || {},
+        mandats: (initialPriseMandatData.mandats || []).map(m => ({
+          type_mandat: m.type_mandat || "",
+          echeance_souhaitee: initialPriseMandatData.echeance_souhaitee || "",
+          date_signature: initialPriseMandatData.date_signature || "",
+          date_debut_travaux: initialPriseMandatData.date_debut_travaux || "",
+          date_livraison: initialPriseMandatData.date_livraison || "",
+          urgence_percue: initialPriseMandatData.urgence_percue || "",
+          prix_estime: m.prix_estime || 0,
+          prix_premier_lot: m.prix_premier_lot || 0,
+          prix_autres_lots: m.prix_autres_lots || 0,
+          rabais: m.rabais || 0,
+          taxes_incluses: m.taxes_incluses || false
+        })),
+        statut: initialPriseMandatData.statut,
+        numero_dossier: initialPriseMandatData.numero_dossier || "",
+        date_ouverture: initialPriseMandatData.date_ouverture || ""
+      };
+      
+      const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData);
+      setHasFormChanges(hasChanges);
+    }
+  }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat]);
+
   const createDossierMutation = useMutation({
     mutationFn: async ({ dossierData, commentairesToCreate = null }) => {
       const newDossier = await base44.entities.Dossier.create(dossierData);
