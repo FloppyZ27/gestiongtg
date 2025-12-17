@@ -357,7 +357,8 @@ function LayoutContent({ children, currentPageName }) {
         .text-right button,
         button[data-variant="ghost"],
         button[class*="ghost"],
-        button[class*="variant-ghost"] {
+        button[class*="variant-ghost"],
+        button[class*="border-b-"] {
           background-color: transparent !important;
           background-image: none !important;
           border: none !important;
