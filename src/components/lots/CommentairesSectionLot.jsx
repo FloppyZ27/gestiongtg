@@ -162,31 +162,9 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                 <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">
-                        {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
-                      </span>
-                      {isOwnComment && !isEditing && (
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditCommentaire(commentaire)}
-                            className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteCommentaire(commentaire)}
-                            className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    <span className="text-xs text-slate-400">
+                      {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
+                    </span>
                   </div>
                   {isEditing ? (
                     <div className="space-y-2">
@@ -216,11 +194,33 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                       </div>
                     </div>
                   ) : (
-                    <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                      {commentaire.contenu}
-                    </p>
+                    <>
+                      <p className="text-slate-300 text-sm whitespace-pre-wrap">
+                        {commentaire.contenu}
+                      </p>
+                      {isOwnComment && (
+                        <div className="flex gap-1 justify-end mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditCommentaire(commentaire)}
+                            className="h-6 w-6 p-0 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteCommentaire(commentaire)}
+                            className="h-6 w-6 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
-                </div>
+                  </div>
               </div>
             );
           })
