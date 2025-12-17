@@ -335,6 +335,34 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+          animation: slideInFromBottom 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+          will-change: transform, opacity;
+        }
+
+        @keyframes slideInFromBottom {
+          0% {
+            transform: translateY(40px) scale(0.96);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+        }
+
+        [data-state="closed"][role="dialog"] {
+          animation: slideOutToBottom 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+        }
+
+        @keyframes slideOutToBottom {
+          0% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(40px) scale(0.96);
+            opacity: 0;
+          }
         }
 
         /* Effet Neumorphism global */
