@@ -309,6 +309,17 @@ function LayoutContent({ children, currentPageName }) {
           --ring: 224.3 76.3% 48%;
         }
 
+        /* Enlever l'overlay et le flou des dialogs */
+        [data-radix-scroll-area-viewport] {
+          backdrop-filter: none !important;
+        }
+
+        [role="dialog"] ~ div[data-radix-dialog-overlay],
+        div[data-radix-dialog-overlay] {
+          background-color: transparent !important;
+          backdrop-filter: none !important;
+        }
+
         /* Scrollbar personnalisée globale */
         *::-webkit-scrollbar {
           width: 10px;
