@@ -53,6 +53,9 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     type_minute: "Initiale"
   });
   const [viewingClientDetails, setViewingClientDetails] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [initialFormData, setInitialFormData] = useState(null);
 
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
@@ -85,7 +88,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   useEffect(() => {
     if (dossier) {
-      setFormData({
+      const data = {
         numero_dossier: dossier.numero_dossier || "",
         arpenteur_geometre: dossier.arpenteur_geometre || "",
         date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
@@ -130,10 +133,21 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           notes: m.notes || ""
         })) || [],
         description: dossier.description || ""
-      });
+      };
+      setFormData(data);
+      setInitialFormData(JSON.parse(JSON.stringify(data)));
       setActiveTabMandat("0");
+      setHasChanges(false);
     }
   }, [dossier]);
+
+  // Détecter les changements
+  useEffect(() => {
+    if (initialFormData) {
+      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      setHasChanges(hasFormChanges);
+    }
+  }, [formData, initialFormData]);
 
   const updateDossierMutation = useMutation({
     mutationFn: async ({ id, dossierData }) => {
@@ -187,10 +201,25 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setHasChanges(false);
       if (onSuccess) onSuccess();
       onClose();
     }
   });
+
+  const handleCloseAttempt = () => {
+    if (hasChanges) {
+      setShowUnsavedWarning(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowUnsavedWarning(false);
+    setHasChanges(false);
+    onClose();
+  };
 
   const getClientById = (id) => clients?.find((c) => c.id === id);
   const getLotById = (numeroLot) => lots.find((l) => l.id === numeroLot);
@@ -495,7 +524,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
           <DialogHeader className="sr-only">
             <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
@@ -772,7 +801,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
               </form>
 
               <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+                <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
                 <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Modifier</Button>
               </div>
             </div>
@@ -1204,6 +1233,40 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
         }}
       />
+
+      {/* Dialog d'avertissement modifications non sauvegardées */}
+      <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setShowUnsavedWarning(false)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Continuer l'édition
+              </Button>
+              <Button
+                type="button"
+                onClick={handleConfirmClose}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Abandonner
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
