@@ -344,27 +344,61 @@ function LayoutContent({ children, currentPageName }) {
             -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
         }
 
-        /* Style minimaliste pour tous les boutons - contour seulement */
-        button:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
-        [role="button"] {
+        /* Boutons icon (avec logo seulement) - pas de contour */
+        button[class*="size-icon"],
+        button.h-10.w-10,
+        button.h-9.w-9,
+        button.h-8.w-8 {
+          background-color: transparent !important;
+          background-image: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        /* Style minimaliste pour les autres boutons - contour coloré */
+        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8),
+        [role="button"]:not([class*="size-icon"]) {
           background: transparent !important;
           background-color: transparent !important;
           background-image: none !important;
-          border: 2px solid currentColor !important;
           box-shadow: none !important;
           transition: all 0.3s ease !important;
         }
 
-        button:hover:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
-        [role="button"]:hover {
+        /* Contours colorés pour les boutons avec gradient emerald/teal */
+        button[class*="from-emerald"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
+          border: 2px solid rgb(16, 185, 129) !important;
+          color: rgb(16, 185, 129) !important;
+        }
+
+        /* Contours colorés pour les boutons avec gradient blue/indigo */
+        button[class*="from-blue"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
+          border: 2px solid rgb(59, 130, 246) !important;
+          color: rgb(59, 130, 246) !important;
+        }
+
+        /* Contours colorés pour les boutons avec gradient red */
+        button[class*="from-red"]:not([class*="size-icon"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8) {
+          border: 2px solid rgb(239, 68, 68) !important;
+          color: rgb(239, 68, 68) !important;
+        }
+
+        /* Contours par défaut pour les autres boutons */
+        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not([class*="from-"]),
+        [role="button"]:not([class*="size-icon"]):not([class*="from-"]) {
+          border: 2px solid rgba(148, 163, 184, 0.5) !important;
+        }
+
+        button:hover:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8),
+        [role="button"]:hover:not([class*="size-icon"]) {
           background: rgba(255, 255, 255, 0.08) !important;
           background-color: rgba(255, 255, 255, 0.08) !important;
           background-image: none !important;
           transform: translateY(-1px);
         }
 
-        button:active:not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]),
-        [role="button"]:active {
+        button:active:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8),
+        [role="button"]:active:not([class*="size-icon"]) {
           background: rgba(0, 0, 0, 0.15) !important;
           background-color: rgba(0, 0, 0, 0.15) !important;
           background-image: none !important;
