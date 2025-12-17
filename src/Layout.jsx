@@ -335,31 +335,32 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-          animation: slideInFromBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          animation: slideInFromBottom 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+          will-change: transform, opacity;
         }
 
         @keyframes slideInFromBottom {
-          from {
-            transform: translateY(100%);
+          0% {
+            transform: translateY(100%) scale(0.95);
             opacity: 0;
           }
-          to {
-            transform: translateY(0);
+          100% {
+            transform: translateY(0) scale(1);
             opacity: 1;
           }
         }
 
         [data-state="closed"][role="dialog"] {
-          animation: slideOutToBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          animation: slideOutToBottom 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
         }
 
         @keyframes slideOutToBottom {
-          from {
-            transform: translateY(0);
+          0% {
+            transform: translateY(0) scale(1);
             opacity: 1;
           }
-          to {
-            transform: translateY(100%);
+          100% {
+            transform: translateY(100%) scale(0.95);
             opacity: 0;
           }
         }
