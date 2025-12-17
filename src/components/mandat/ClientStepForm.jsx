@@ -134,7 +134,7 @@ export default function ClientStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="grid grid-cols-[70%_30%] gap-4">
-            <div className="space-y-2 border-r border-slate-700 pr-4">
+            <div className="space-y-2 border-r-2 border-emerald-500/30 pr-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Prénom</Label>

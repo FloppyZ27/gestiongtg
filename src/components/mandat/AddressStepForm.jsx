@@ -290,7 +290,7 @@ export default function AddressStepForm({
               </div>
 
               {/* Colonne centrale - N° de lot */}
-              <div className="border-l border-r border-slate-700 pl-3 pr-3 flex flex-col h-full">
+              <div className="border-l-2 border-r-2 border-emerald-500/30 pl-3 pr-3 flex flex-col h-full">
                 <p className="text-slate-400 text-xs mb-1.5">N° de lot</p>
                 <textarea
                   value={addressForm.numero_lot}
