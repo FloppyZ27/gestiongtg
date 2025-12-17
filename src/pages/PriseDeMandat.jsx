@@ -2658,7 +2658,7 @@ export default function PriseDeMandat() {
                     </TabsContent>
                     </Tabs>
                   )}
-                </div>
+                </motion.div>
               </motion.div>
             </DialogContent>
           </Dialog>
