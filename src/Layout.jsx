@@ -309,15 +309,22 @@ function LayoutContent({ children, currentPageName }) {
           --ring: 224.3 76.3% 48%;
         }
 
-        /* Enlever l'overlay et le flou des dialogs */
-        [data-radix-scroll-area-viewport] {
-          backdrop-filter: none !important;
-        }
-
-        [role="dialog"] ~ div[data-radix-dialog-overlay],
-        div[data-radix-dialog-overlay] {
+        /* Enlever complètement l'overlay et le flou des dialogs */
+        [data-state="open"] > div[data-radix-dialog-overlay],
+        div[data-radix-dialog-overlay],
+        [data-radix-dialog-overlay] {
           background-color: transparent !important;
           backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          opacity: 1 !important;
+        }
+
+        /* Forcer la transparence de tous les overlays */
+        .fixed.inset-0.z-50.bg-black\\/80,
+        .fixed.inset-0.z-50 {
+          background-color: transparent !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         /* Scrollbar personnalisée globale */
