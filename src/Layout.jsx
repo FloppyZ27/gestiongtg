@@ -339,7 +339,7 @@ function LayoutContent({ children, currentPageName }) {
           left: 50% !important;
           top: 50% !important;
           transform: translate(-50%, -50%) !important;
-          animation: dialogSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+          animation: dialogSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
         }
 
         @keyframes dialogSlideIn {
