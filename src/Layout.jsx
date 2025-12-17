@@ -330,7 +330,7 @@ function LayoutContent({ children, currentPageName }) {
 
         /* Effet glassmorphism sur les fenêtres dialog */
         [role="dialog"] {
-          background: rgba(15, 23, 42, 0.4) !important;
+          background: transparent !important;
           backdrop-filter: blur(20px) saturate(180%) !important;
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
