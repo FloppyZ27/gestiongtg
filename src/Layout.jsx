@@ -410,12 +410,7 @@ function LayoutContent({ children, currentPageName }) {
           transform: translateY(0px);
         }
 
-        /* Exception pour les boutons ghost */
-        button[class*="ghost"],
-        [variant="ghost"] {
-          background: transparent !important;
-          border: none !important;
-        }
+
 
         .border-slate-700, .border-slate-800 {
           border: none !important;
