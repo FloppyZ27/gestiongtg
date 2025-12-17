@@ -3859,7 +3859,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="bg-transparent border-none text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
                 <span className="text-2xl">⚠️</span>
@@ -3943,7 +3943,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation d'annulation - Nouveau mandat */}
         <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
-          <DialogContent className="bg-transparent border-none text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
                 <span className="text-2xl">⚠️</span>
@@ -3997,7 +3997,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation d'annulation - Ouvrir dossier */}
         <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
-          <DialogContent className="bg-transparent border-none text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
                 <span className="text-2xl">⚠️</span>
