@@ -632,37 +632,34 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
               />
               <Button
                 type="button"
-                size="sm"
-                variant="outline"
+                size="icon"
+                variant="ghost"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={isUploadingImage || imageUrl}
-                className="bg-slate-700 border-slate-600"
+                className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400"
               >
-                <Image className="w-4 h-4 mr-2" />
-                Image
+                <Image className="w-5 h-5" />
               </Button>
               {!isRecording ? (
                 <Button
                   type="button"
-                  size="sm"
-                  variant="outline"
+                  size="icon"
+                  variant="ghost"
                   onClick={startRecording}
                   disabled={isUploadingAudio || audioUrl}
-                  className="bg-slate-700 border-slate-600"
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-emerald-400"
                 >
-                  <Mic className="w-4 h-4 mr-2" />
-                  Audio
+                  <Mic className="w-5 h-5" />
                 </Button>
               ) : (
                 <Button
                   type="button"
-                  size="sm"
-                  variant="outline"
+                  size="icon"
+                  variant="ghost"
                   onClick={stopRecording}
-                  className="bg-red-500/20 border-red-500 text-red-400"
+                  className="h-8 w-8 p-0 text-red-400 hover:text-red-500"
                 >
-                  <Square className="w-4 h-4 mr-2" />
-                  Arrêter
+                  <Square className="w-5 h-5" />
                 </Button>
               )}
               {(isUploadingAudio || isUploadingImage) && (
