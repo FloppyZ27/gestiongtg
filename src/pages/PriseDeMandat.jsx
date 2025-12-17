@@ -2090,7 +2090,7 @@ export default function PriseDeMandat() {
                 Nouveau mandat
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+            <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2685,7 +2685,7 @@ export default function PriseDeMandat() {
               setIsOuvrirDossierDialogOpen(open);
             }
           }}>
-            <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+            <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
@@ -3874,7 +3874,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
             </DialogHeader>
@@ -3954,7 +3954,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-md shadow-2xl shadow-black/50">
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
             <DialogHeader>
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
@@ -4017,7 +4017,7 @@ export default function PriseDeMandat() {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -4100,7 +4100,7 @@ export default function PriseDeMandat() {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -4183,7 +4183,7 @@ export default function PriseDeMandat() {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
@@ -4466,7 +4466,7 @@ export default function PriseDeMandat() {
           setIsNewLotDialogOpen(open);
           if (!open) resetLotForm();
         }}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
@@ -4941,7 +4941,7 @@ export default function PriseDeMandat() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50">
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50">
             <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
@@ -4970,7 +4970,7 @@ export default function PriseDeMandat() {
 
         {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+          <DialogContent className="bg-slate-900/20 backdrop-blur-3xl backdrop-saturate-150 border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
