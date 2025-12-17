@@ -3954,7 +3954,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-md shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
@@ -4017,7 +4017,7 @@ export default function PriseDeMandat() {
 
         {/* Client Selector Dialog */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
@@ -4100,7 +4100,7 @@ export default function PriseDeMandat() {
 
         {/* Notaire Selector Dialog */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
@@ -4183,7 +4183,7 @@ export default function PriseDeMandat() {
 
         {/* Courtier Selector Dialog */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-4xl shadow-2xl" hideClose>
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
