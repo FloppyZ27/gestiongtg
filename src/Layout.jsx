@@ -346,18 +346,20 @@ function LayoutContent({ children, currentPageName }) {
 
         button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800),
         [role="button"]:not([variant="ghost"]) {
-          box-shadow: 
-            8px 8px 16px rgba(0, 0, 0, 0.4),
-            -8px -8px 16px rgba(71, 85, 105, 0.1) !important;
-          border: none !important;
+          background: transparent !important;
+          border: 2px solid currentColor !important;
+          box-shadow: none !important;
           transition: all 0.3s ease !important;
+        }
+
+        button:hover:not([variant="ghost"]),
+        [role="button"]:hover:not([variant="ghost"]) {
+          background: rgba(255, 255, 255, 0.05) !important;
         }
 
         button:active:not([variant="ghost"]),
         [role="button"]:active:not([variant="ghost"]) {
-          box-shadow: 
-            inset 4px 4px 8px rgba(0, 0, 0, 0.4),
-            inset -4px -4px 8px rgba(71, 85, 105, 0.1) !important;
+          background: rgba(0, 0, 0, 0.1) !important;
         }
 
         .border-slate-700, .border-slate-800 {
