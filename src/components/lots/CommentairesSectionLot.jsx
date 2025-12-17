@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -248,9 +247,10 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
               type="submit"
               size="sm"
               disabled={!nouveauCommentaire.trim() || createCommentaireMutation.isPending}
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 mr-2" />
+              Distribuer
             </Button>
           </div>
         </form>

@@ -565,9 +565,10 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
               type="submit"
               size="sm"
               disabled={!nouveauCommentaire.trim() || createCommentaireMutation.isPending}
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 mr-2" />
+              Distribuer
             </Button>
           </div>
         </form>
