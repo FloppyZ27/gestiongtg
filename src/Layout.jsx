@@ -335,17 +335,21 @@ function LayoutContent({ children, currentPageName }) {
           -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-          animation: dialogSlideIn 0.3s ease-out !important;
+          position: fixed !important;
+          left: 50% !important;
+          top: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          animation: dialogSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
         }
 
         @keyframes dialogSlideIn {
           from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translate(-50%, calc(-50% + 30px));
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translate(-50%, -50%);
           }
         }
 
