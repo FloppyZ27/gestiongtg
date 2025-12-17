@@ -76,7 +76,6 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
         try {
           const { file_url } = await base44.integrations.Core.UploadFile({ file: audioBlob });
           setAudioUrl(file_url);
-          setNouveauCommentaire(prev => prev ? `${prev}\n[Audio]` : "[Audio]");
         } catch (error) {
           console.error("Erreur lors de l'upload de l'audio:", error);
         } finally {
@@ -633,16 +632,19 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
             disabled={createCommentaireMutation.isPending || isRecording}
           />
           {audioUrl && (
-            <div className="flex items-center gap-2 p-2 bg-slate-700/50 rounded">
-              <audio controls className="flex-1 h-8" style={{ maxHeight: '32px' }}>
-                <source src={audioUrl} type="audio/webm" />
-              </audio>
+            <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+              <div className="flex-1">
+                <p className="text-xs text-emerald-400 mb-1">Enregistrement audio prêt</p>
+                <audio controls className="w-full h-8" style={{ maxHeight: '32px' }}>
+                  <source src={audioUrl} type="audio/webm" />
+                </audio>
+              </div>
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
                 onClick={() => setAudioUrl("")}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
               >
                 <X className="w-4 h-4" />
               </Button>
