@@ -2573,13 +2573,13 @@ export default function PriseDeMandat() {
 
                   {!sidebarCollapsed && (
                     <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
-                      <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mr-6 mt-2 flex-shrink-0">
-                        <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
-                          <MessageSquare className="w-3 h-3 mr-1" />
+                      <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
                         </TabsTrigger>
-                        <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
-                          <Clock className="w-3 h-3 mr-1" />
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-blue-400 data-[state=inactive]:text-slate-400 hover:text-blue-300">
+                          <Clock className="w-4 h-4 mr-1" />
                           Historique
                         </TabsTrigger>
                       </TabsList>
@@ -3798,13 +3798,13 @@ export default function PriseDeMandat() {
 
                   {!sidebarCollapsedDossier && (
                     <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
-                      <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 mx-4 mr-6 mt-2 flex-shrink-0">
-                        <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
-                          <MessageSquare className="w-3 h-3 mr-1" />
+                      <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
                         </TabsTrigger>
-                        <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
-                          <Clock className="w-3 h-3 mr-1" />
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-blue-400 data-[state=inactive]:text-slate-400 hover:text-blue-300">
+                          <Clock className="w-4 h-4 mr-1" />
                           Historique
                         </TabsTrigger>
                       </TabsList>
@@ -5035,13 +5035,13 @@ export default function PriseDeMandat() {
               <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                 <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                    <TabsList className="grid grid-cols-2 bg-slate-800/50 h-9 w-full">
-                      <TabsTrigger value="commentaires" className="text-xs data-[state=active]:bg-emerald-500/30 data-[state=active]:text-emerald-400">
-                        <MessageSquare className="w-3 h-3 mr-1" />
+                    <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                        <MessageSquare className="w-4 h-4 mr-1" />
                         Commentaires
                       </TabsTrigger>
-                      <TabsTrigger value="historique" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400">
-                        <Clock className="w-3 h-3 mr-1" />
+                      <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-blue-400 data-[state=inactive]:text-slate-400 hover:text-blue-300">
+                        <Clock className="w-4 h-4 mr-1" />
                         Historique
                       </TabsTrigger>
                     </TabsList>
