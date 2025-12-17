@@ -4713,19 +4713,26 @@ export default function PriseDeMandat() {
                                     return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                   })
                                   .map((lot) => (
-                                    <div key={lot.id} className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 transition-colors">
-                                      <div className="flex items-center justify-between gap-2">
-                                        <p className="text-white font-semibold text-xs">{lot.numero_lot}</p>
+                                    <div 
+                                      key={lot.id} 
+                                      onClick={() => {
+                                        setCurrentConcordanceForm({
+                                          circonscription_fonciere: lot.circonscription_fonciere || "",
+                                          cadastre: lot.cadastre || "",
+                                          numero_lot: lot.numero_lot || "",
+                                          rang: lot.rang || ""
+                                        });
+                                        setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
+                                      }}
+                                      className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
+                                    >
+                                      <div className="flex items-center justify-between gap-1">
+                                        <p className="text-white font-semibold text-xs truncate flex-1">{lot.numero_lot}</p>
                                         {lot.rang && (
-                                          <Badge variant="outline" className="bg-slate-700 text-slate-300 border-slate-600 text-[10px] py-0">
-                                            {lot.rang}
-                                          </Badge>
+                                          <span className="text-slate-300 text-[10px]">{lot.rang}</span>
                                         )}
                                       </div>
-                                      <p className="text-purple-400 text-[10px] mt-0.5">{lot.circonscription_fonciere}</p>
-                                      {lot.cadastre && (
-                                        <p className="text-slate-400 text-[10px]">{lot.cadastre}</p>
-                                      )}
+                                      <p className="text-purple-400 text-[10px] truncate">{lot.circonscription_fonciere}{lot.cadastre ? ` • ${lot.cadastre}` : ''}</p>
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
