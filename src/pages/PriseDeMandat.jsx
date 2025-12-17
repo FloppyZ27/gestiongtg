@@ -5510,6 +5510,7 @@ export default function PriseDeMandat() {
               {/* Tabs pour les statuts - style tabs pleine largeur */}
               <div className="flex w-full border-b border-slate-700">
                 <button
+                  role="tab"
                   onClick={() => setActiveListTab("nouveau")}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "nouveau"
@@ -5524,6 +5525,7 @@ export default function PriseDeMandat() {
                   </Badge>
                 </button>
                 <button
+                  role="tab"
                   onClick={() => setActiveListTab("ouvrir")}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "ouvrir"
@@ -5538,6 +5540,7 @@ export default function PriseDeMandat() {
                   </Badge>
                 </button>
                 <button
+                  role="tab"
                   onClick={() => setActiveListTab("non-octroye")}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "non-octroye"
