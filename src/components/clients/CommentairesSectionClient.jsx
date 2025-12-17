@@ -7,12 +7,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function CommentairesSectionClient({ clientId, clientTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const [mentionSearch, setMentionSearch] = useState("");
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
@@ -286,15 +288,20 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   };
 
   const handleDeleteCommentaire = (commentaire) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) return;
+    setCommentToDelete(commentaire);
+  };
+
+  const confirmDelete = () => {
+    if (!commentToDelete) return;
 
     if (clientTemporaire) {
       if (onCommentairesTempChange) {
-        onCommentairesTempChange(commentairesTemp.filter(c => c.id !== commentaire.id));
+        onCommentairesTempChange(commentairesTemp.filter(c => c.id !== commentToDelete.id));
       }
     } else {
-      deleteCommentaireMutation.mutate(commentaire.id);
+      deleteCommentaireMutation.mutate(commentToDelete.id);
     }
+    setCommentToDelete(null);
   };
 
   const getUserPhoto = (email) => {
@@ -326,6 +333,7 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   const allCommentaires = clientTemporaire ? commentairesTemp : commentaires;
 
   return (
+    <>
     <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-3">
         {allCommentaires.length === 0 ? (

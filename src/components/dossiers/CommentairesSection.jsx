@@ -8,12 +8,14 @@ import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function CommentairesSection({ dossierId, dossierTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const [showMentionMenu, setShowMentionMenu] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const [mentionSearch, setMentionSearch] = useState("");
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
@@ -405,6 +407,7 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
   const allCommentaires = dossierTemporaire ? commentairesTemp : commentaires;
 
   return (
+    <>
     <div className="h-full bg-slate-800/30 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {allCommentaires.length === 0 ? (
@@ -420,22 +423,24 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
             const isEditing = editingCommentId === commentaire.id;
 
             return (
-              <div key={commentaire.id} className="flex gap-3">
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  {getUserPhoto(commentaire.utilisateur_email) ? (
-                    <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
-                  ) : null}
-                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
-                    {getInitials(commentaire.utilisateur_nom)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 bg-slate-700/50 rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-1">
+              <div key={commentaire.id} className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    {getUserPhoto(commentaire.utilisateur_email) ? (
+                      <AvatarImage src={getUserPhoto(commentaire.utilisateur_email)} />
+                    ) : null}
+                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500">
+                      {getInitials(commentaire.utilisateur_nom)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex justify-between items-center">
                     <span className="font-semibold text-white text-sm">{commentaire.utilisateur_nom}</span>
                     <span className="text-xs text-slate-400">
                       {format(new Date(commentaire.created_date), "dd MMM à HH:mm", { locale: fr })}
                     </span>
                   </div>
+                </div>
+                <div className="bg-slate-700/50 rounded-lg p-3 ml-11">
                   {isEditing ? (
                     <div className="space-y-2">
                       <Textarea

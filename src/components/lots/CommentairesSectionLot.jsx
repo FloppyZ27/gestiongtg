@@ -7,11 +7,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Edit, Trash2, X, Check } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function CommentairesSectionLot({ lotId, lotTemporaire, commentairesTemp = [], onCommentairesTempChange }) {
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -112,15 +114,20 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
   };
 
   const handleDeleteCommentaire = (commentaire) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) return;
+    setCommentToDelete(commentaire);
+  };
+
+  const confirmDelete = () => {
+    if (!commentToDelete) return;
 
     if (lotTemporaire) {
       if (onCommentairesTempChange) {
-        onCommentairesTempChange(commentairesTemp.filter(c => c.id !== commentaire.id));
+        onCommentairesTempChange(commentairesTemp.filter(c => c.id !== commentToDelete.id));
       }
     } else {
-      deleteCommentaireMutation.mutate(commentaire.id);
+      deleteCommentaireMutation.mutate(commentToDelete.id);
     }
+    setCommentToDelete(null);
   };
 
   const getUserPhoto = (email) => {
