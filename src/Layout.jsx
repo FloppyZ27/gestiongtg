@@ -453,6 +453,7 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         input, textarea, select {
+          background-color: rgb(30, 41, 59) !important;
           box-shadow: 
             inset 3px 3px 6px rgba(0, 0, 0, 0.3),
             inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
