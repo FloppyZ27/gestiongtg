@@ -127,6 +127,8 @@ function LayoutContent({ children, currentPageName }) {
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
   const [dossierSearchTerm, setDossierSearchTerm] = useState("");
   const [selectedDossierId, setSelectedDossierId] = useState(null);
+  const [hasEntreeChanges, setHasEntreeChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -169,6 +171,7 @@ function LayoutContent({ children, currentPageName }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
       setIsEntreeTempsOpen(false);
+      setHasEntreeChanges(false);
       resetForm();
     },
   });
@@ -186,6 +189,7 @@ function LayoutContent({ children, currentPageName }) {
     });
     setDossierSearchTerm("");
     setSelectedDossierId(null);
+    setHasEntreeChanges(false);
   };
 
   const handleSubmit = async (e) => {
@@ -280,6 +284,7 @@ function LayoutContent({ children, currentPageName }) {
       utilisateur_assigne: premierMandat?.utilisateur_assigne || ""
     });
     setDossierSearchTerm("");
+    setHasEntreeChanges(true);
   };
 
   const isCollapsed = state === "collapsed";
@@ -571,7 +576,13 @@ function LayoutContent({ children, currentPageName }) {
       <NotificationBanner user={user} />
       
       {/* Dialog pour l'entrée de temps */}
-      <Dialog open={isEntreeTempsOpen} onOpenChange={setIsEntreeTempsOpen}>
+      <Dialog open={isEntreeTempsOpen} onOpenChange={(open) => {
+        if (!open && hasEntreeChanges) {
+          setShowUnsavedWarning(true);
+        } else {
+          setIsEntreeTempsOpen(open);
+        }
+      }}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Nouvelle entrée de temps</DialogTitle>
@@ -693,6 +704,7 @@ function LayoutContent({ children, currentPageName }) {
                           tache_suivante: mandat?.tache_actuelle || "",
                           utilisateur_assigne: mandat?.utilisateur_assigne || ""
                         });
+                        setHasEntreeChanges(true);
                       }}>
                         <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                           <SelectValue placeholder="Sélectionner un mandat" />
@@ -712,7 +724,10 @@ function LayoutContent({ children, currentPageName }) {
                     <Label>Description</Label>
                     <Textarea
                       value={entreeForm.description}
-                      onChange={(e) => setEntreeForm({...entreeForm, description: e.target.value})}
+                      onChange={(e) => {
+                        setEntreeForm({...entreeForm, description: e.target.value});
+                        setHasEntreeChanges(true);
+                      }}
                       placeholder="Détails supplémentaires..."
                       className="bg-slate-800 border-slate-700 h-32"
                     />
@@ -730,7 +745,10 @@ function LayoutContent({ children, currentPageName }) {
                 <Input
                   type="date"
                   value={entreeForm.date}
-                  onChange={(e) => setEntreeForm({...entreeForm, date: e.target.value})}
+                  onChange={(e) => {
+                    setEntreeForm({...entreeForm, date: e.target.value});
+                    setHasEntreeChanges(true);
+                  }}
                   required
                   className="bg-slate-800 border-slate-700"
                 />
@@ -743,7 +761,10 @@ function LayoutContent({ children, currentPageName }) {
                   step="0.25"
                   min="0"
                   value={entreeForm.heures}
-                  onChange={(e) => setEntreeForm({...entreeForm, heures: e.target.value})}
+                  onChange={(e) => {
+                    setEntreeForm({...entreeForm, heures: e.target.value});
+                    setHasEntreeChanges(true);
+                  }}
                   required
                   placeholder="Ex: 2.5"
                   className="bg-slate-800 border-slate-700"
@@ -752,7 +773,10 @@ function LayoutContent({ children, currentPageName }) {
 
               <div className="space-y-2">
                 <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
-                <Select value={entreeForm.tache} onValueChange={(value) => setEntreeForm({...entreeForm, tache: value})}>
+                <Select value={entreeForm.tache} onValueChange={(value) => {
+                  setEntreeForm({...entreeForm, tache: value});
+                  setHasEntreeChanges(true);
+                }}>
                   <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Sélectionner une tâche" />
                   </SelectTrigger>
@@ -768,7 +792,10 @@ function LayoutContent({ children, currentPageName }) {
 
               <div className="space-y-2">
                 <Label>Tâche suivante</Label>
-                <Select value={entreeForm.tache_suivante} onValueChange={(value) => setEntreeForm({...entreeForm, tache_suivante: value})}>
+                <Select value={entreeForm.tache_suivante} onValueChange={(value) => {
+                  setEntreeForm({...entreeForm, tache_suivante: value});
+                  setHasEntreeChanges(true);
+                }}>
                   <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Sélectionner une tâche" />
                   </SelectTrigger>
@@ -784,7 +811,10 @@ function LayoutContent({ children, currentPageName }) {
 
               <div className="space-y-2">
                 <Label>Utilisateur assigné</Label>
-                <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => setEntreeForm({...entreeForm, utilisateur_assigne: value})}>
+                <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => {
+                  setEntreeForm({...entreeForm, utilisateur_assigne: value});
+                  setHasEntreeChanges(true);
+                }}>
                   <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Sélectionner un utilisateur" />
                   </SelectTrigger>
@@ -802,12 +832,57 @@ function LayoutContent({ children, currentPageName }) {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={() => setIsEntreeTempsOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+            <Button type="button" variant="outline" onClick={() => {
+              if (hasEntreeChanges) {
+                setShowUnsavedWarning(true);
+              } else {
+                setIsEntreeTempsOpen(false);
+              }
+            }} className="border-red-500 text-red-400 hover:bg-red-500/10">
               Annuler
             </Button>
             <Button type="submit" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
               Enregistrer
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog d'avertissement modifications non sauvegardées */}
+      <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setShowUnsavedWarning(false)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Continuer l'édition
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedWarning(false);
+                  setIsEntreeTempsOpen(false);
+                  setHasEntreeChanges(false);
+                  resetForm();
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Abandonner
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
