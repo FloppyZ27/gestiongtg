@@ -2477,7 +2477,7 @@ export default function PriseDeMandat() {
                 
                   {/* Boutons Annuler/Créer en bas de la colonne gauche */}
                   <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                    <Button type="button" variant="outline" onClick={async () => {
+                    <Button type="button" variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/10" onClick={async () => {
                       const hasData = formData.arpenteur_geometre || 
                         formData.clients_ids.length > 0 ||
                         clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
@@ -3700,7 +3700,7 @@ export default function PriseDeMandat() {
                   </form>
 
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                    <Button type="button" variant="outline" onClick={() => {
+                    <Button type="button" variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/10" onClick={() => {
                       const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
                         type_mandat: m.type_mandat,
                         date_livraison: m.date_livraison || ""
@@ -4131,7 +4131,7 @@ export default function PriseDeMandat() {
                 </Select>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500/50 text-red-400 hover:bg-red-500/10">
                   Annuler
                 </Button>
                 <Button
@@ -5021,9 +5021,9 @@ export default function PriseDeMandat() {
                 
                 {/* Boutons en bas */}
                 <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                  <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)}>
-                    Annuler
-                  </Button>
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
                   <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
                     Créer
                   </Button>
@@ -5382,7 +5382,7 @@ export default function PriseDeMandat() {
 
                   {/* Boutons Fermer/Modifier tout en bas */}
                   <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500/50 text-red-400 hover:bg-red-500/10">
                       Fermer
                     </Button>
                     <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
