@@ -3874,7 +3874,7 @@ export default function PriseDeMandat() {
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-md shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
             </DialogHeader>
@@ -4466,7 +4466,7 @@ export default function PriseDeMandat() {
           setIsNewLotDialogOpen(open);
           if (!open) resetLotForm();
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
@@ -4970,7 +4970,7 @@ export default function PriseDeMandat() {
 
         {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
+          <DialogContent className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
