@@ -352,8 +352,12 @@ function LayoutContent({ children, currentPageName }) {
         table button,
         [role="row"] button,
         [role="cell"] button,
+        td button,
+        th button,
+        .text-right button,
         button[data-variant="ghost"],
-        button[class*="ghost"] {
+        button[class*="ghost"],
+        button[class*="variant-ghost"] {
           background-color: transparent !important;
           background-image: none !important;
           border: none !important;
