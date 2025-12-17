@@ -4698,7 +4698,7 @@ export default function PriseDeMandat() {
                                 <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
                               
-                              <div className="space-y-2 max-h-96 overflow-y-auto">
+                              <div className="space-y-1 max-h-48 overflow-y-auto">
                                 {lots
                                   .filter(lot => {
                                     const matchesNumero = !currentConcordanceForm.numero_lot || 
@@ -4713,21 +4713,19 @@ export default function PriseDeMandat() {
                                     return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                   })
                                   .map((lot) => (
-                                    <div key={lot.id} className="p-2 bg-slate-700/30 border border-slate-600 rounded-lg hover:bg-slate-700/50 transition-colors">
-                                      <div className="flex items-start justify-between mb-1">
-                                        <p className="text-white font-semibold text-sm">{lot.numero_lot}</p>
+                                    <div key={lot.id} className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 transition-colors">
+                                      <div className="flex items-center justify-between gap-2">
+                                        <p className="text-white font-semibold text-xs">{lot.numero_lot}</p>
                                         {lot.rang && (
-                                          <Badge variant="outline" className="bg-slate-700 text-slate-300 border-slate-600 text-xs">
+                                          <Badge variant="outline" className="bg-slate-700 text-slate-300 border-slate-600 text-[10px] py-0">
                                             {lot.rang}
                                           </Badge>
                                         )}
                                       </div>
-                                      <div className="space-y-0.5">
-                                        <p className="text-purple-400 text-xs">{lot.circonscription_fonciere}</p>
-                                        {lot.cadastre && (
-                                          <p className="text-slate-400 text-xs">{lot.cadastre}</p>
-                                        )}
-                                      </div>
+                                      <p className="text-purple-400 text-[10px] mt-0.5">{lot.circonscription_fonciere}</p>
+                                      {lot.cadastre && (
+                                        <p className="text-slate-400 text-[10px]">{lot.cadastre}</p>
+                                      )}
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
