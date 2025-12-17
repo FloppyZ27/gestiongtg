@@ -345,7 +345,7 @@ function LayoutContent({ children, currentPageName }) {
         @keyframes dialogSlideIn {
           from {
             opacity: 0;
-            transform: translate(-50%, calc(-50% + 30px));
+            transform: translate(-50%, calc(-50% + 120px));
           }
           to {
             opacity: 1;
