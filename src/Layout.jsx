@@ -336,6 +336,43 @@ function LayoutContent({ children, currentPageName }) {
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
         }
 
+        /* Effet Neumorphism global */
+        .bg-slate-900, .bg-slate-800, .bg-slate-950 {
+          box-shadow: 
+            12px 12px 24px rgba(0, 0, 0, 0.5),
+            -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
+        }
+
+        button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800),
+        [role="button"]:not([variant="ghost"]) {
+          box-shadow: 
+            8px 8px 16px rgba(0, 0, 0, 0.4),
+            -8px -8px 16px rgba(71, 85, 105, 0.1) !important;
+          border: none !important;
+          transition: all 0.3s ease !important;
+        }
+
+        button:active:not([variant="ghost"]),
+        [role="button"]:active:not([variant="ghost"]) {
+          box-shadow: 
+            inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+            inset -4px -4px 8px rgba(71, 85, 105, 0.1) !important;
+        }
+
+        .border-slate-700, .border-slate-800 {
+          border: none !important;
+          box-shadow: 
+            6px 6px 12px rgba(0, 0, 0, 0.4),
+            -6px -6px 12px rgba(71, 85, 105, 0.05) !important;
+        }
+
+        input, textarea, select {
+          box-shadow: 
+            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
+          border: none !important;
+        }
+
         /* Scrollbar personnalisée globale */
         *::-webkit-scrollbar {
           width: 10px;
