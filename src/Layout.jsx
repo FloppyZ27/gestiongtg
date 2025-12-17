@@ -480,19 +480,30 @@ function LayoutContent({ children, currentPageName }) {
         [role="listbox"],
         [role="menu"],
         [data-radix-select-content],
-        [data-radix-popper-content-wrapper] > div,
-        button[role="combobox"],
-        [data-radix-select-trigger],
-        button[data-state] {
+        [data-radix-popper-content-wrapper] > div {
           background-color: rgb(30, 41, 59) !important;
         }
 
-        /* Champs select natifs et styled */
-        select,
-        [role="combobox"],
+        /* Boutons de sélection (Select triggers) */
+        button[role="combobox"],
         button[aria-haspopup="listbox"],
-        button[aria-expanded] {
+        button[data-radix-select-trigger],
+        [data-radix-select-trigger] {
           background-color: rgb(30, 41, 59) !important;
+          background-image: none !important;
+          box-shadow: 
+            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
+        }
+
+        button[role="combobox"]:hover,
+        button[aria-haspopup="listbox"]:hover,
+        button[data-radix-select-trigger]:hover {
+          background-color: rgb(30, 41, 59) !important;
+          box-shadow: 
+            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
+            0 0 0 2px rgba(16, 185, 129, 0.3) !important;
         }
 
 
