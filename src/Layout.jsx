@@ -351,7 +351,9 @@ function LayoutContent({ children, currentPageName }) {
         button.h-8.w-8,
         table button,
         [role="row"] button,
-        [role="cell"] button {
+        [role="cell"] button,
+        button[class*="destructive"],
+        button[class*="variant-destructive"] {
           background-color: transparent !important;
           background-image: none !important;
           border: none !important;
