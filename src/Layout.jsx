@@ -344,28 +344,38 @@ function LayoutContent({ children, currentPageName }) {
             -12px -12px 24px rgba(71, 85, 105, 0.1) !important;
         }
 
-        button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800),
-        [role="button"]:not([variant="ghost"]),
-        .bg-gradient-to-r,
-        [class*="bg-gradient"] {
+        /* Style minimaliste pour tous les boutons */
+        button:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
+        button[class*="bg-gradient"],
+        button[class*="bg-emerald"],
+        button[class*="bg-blue"],
+        button[class*="bg-red"],
+        [role="button"]:not([variant="ghost"]) {
           background: transparent !important;
+          background-image: none !important;
           border: 2px solid currentColor !important;
           box-shadow: none !important;
           transition: all 0.3s ease !important;
         }
 
-        button:hover:not([variant="ghost"]),
-        [role="button"]:hover:not([variant="ghost"]),
-        .bg-gradient-to-r:hover,
-        [class*="bg-gradient"]:hover {
+        button:hover:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
+        button[class*="bg-gradient"]:hover,
+        button[class*="bg-emerald"]:hover,
+        button[class*="bg-blue"]:hover,
+        button[class*="bg-red"]:hover,
+        [role="button"]:hover:not([variant="ghost"]) {
           background: rgba(255, 255, 255, 0.05) !important;
+          background-image: none !important;
         }
 
-        button:active:not([variant="ghost"]),
-        [role="button"]:active:not([variant="ghost"]),
-        .bg-gradient-to-r:active,
-        [class*="bg-gradient"]:active {
+        button:active:not([variant="ghost"]):not(.hover\:bg-slate-700):not(.hover\:bg-slate-800):not(.bg-slate-800),
+        button[class*="bg-gradient"]:active,
+        button[class*="bg-emerald"]:active,
+        button[class*="bg-blue"]:active,
+        button[class*="bg-red"]:active,
+        [role="button"]:active:not([variant="ghost"]) {
           background: rgba(0, 0, 0, 0.1) !important;
+          background-image: none !important;
         }
 
         .border-slate-700, .border-slate-800 {
