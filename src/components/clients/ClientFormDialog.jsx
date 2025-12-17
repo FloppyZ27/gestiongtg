@@ -643,9 +643,9 @@ export default function ClientFormDialog({
             <div className="flex justify-end gap-3 pt-4">
               <Button 
                 type="button" 
-                variant="outline" 
+                variant="ghost" 
                 onClick={handleCancelCreate}
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                className="text-red-400 hover:bg-red-500/10"
               >
                 Annuler
               </Button>
@@ -1192,7 +1192,7 @@ export default function ClientFormDialog({
 
             {/* Boutons Annuler/Créer tout en bas */}
             <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-red-500/50 text-red-400 hover:bg-red-500/10">
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="text-red-400 hover:bg-red-500/10">
                 Annuler
               </Button>
               <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
