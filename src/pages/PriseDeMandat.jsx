@@ -293,6 +293,8 @@ export default function PriseDeMandat() {
   const [historique, setHistorique] = useState([]);
   const [isLocked, setIsLocked] = useState(false);
   const [lockedBy, setLockedBy] = useState("");
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showCancelConfirmDossier, setShowCancelConfirmDossier] = useState(false);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
     rue: "",
@@ -2475,15 +2477,6 @@ export default function PriseDeMandat() {
                   {/* Boutons Annuler/Créer en bas de la colonne gauche */}
                   <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
                     <Button type="button" variant="outline" onClick={async () => {
-                      // Déverrouiller le mandat si on annule
-                      if (editingPriseMandat && !isLocked) {
-                        await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                          ...editingPriseMandat,
-                          locked_by: null,
-                          locked_at: null
-                        });
-                        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                      }
                       const hasData = formData.arpenteur_geometre || 
                         formData.clients_ids.length > 0 ||
                         clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
@@ -2498,34 +2491,17 @@ export default function PriseDeMandat() {
                       ) : hasData;
                       
                       if (hasChanges && !isLocked) {
-                        // Afficher le dialog de confirmation personnalisé
-                        const confirmDialog = document.createElement('div');
-                        confirmDialog.innerHTML = `
-                          <div style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
-                            <div style="background: rgba(15, 23, 42, 0.95); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 24px; max-width: 400px; box-shadow: 0 0 32px rgba(0,0,0,0.5);">
-                              <h3 style="color: rgb(251, 191, 36); font-size: 20px; font-weight: 600; margin-bottom: 16px;">⚠️ Attention</h3>
-                              <p style="color: rgb(203, 213, 225); margin-bottom: 8px;">Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.</p>
-                              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgb(51, 65, 85);">
-                                <button id="cancel-confirm" style="padding: 8px 16px; background: transparent; color: white; border: 2px solid rgba(148, 163, 184, 0.5); border-radius: 6px; cursor: pointer; transition: all 0.3s;">Annuler</button>
-                                <button id="confirm-confirm" style="padding: 8px 16px; background: rgb(239, 68, 68); color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">Confirmer</button>
-                              </div>
-                            </div>
-                          </div>
-                        `;
-                        document.body.appendChild(confirmDialog);
-                        
-                        document.getElementById('cancel-confirm').onclick = () => {
-                          document.body.removeChild(confirmDialog);
-                        };
-                        
-                        document.getElementById('confirm-confirm').onclick = () => {
-                          document.body.removeChild(confirmDialog);
-                          setIsDialogOpen(false);
-                          resetFullForm();
-                          setIsLocked(false);
-                          setLockedBy("");
-                        };
+                        setShowCancelConfirm(true);
                       } else {
+                        // Déverrouiller le mandat si on annule
+                        if (editingPriseMandat && !isLocked) {
+                          await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                            ...editingPriseMandat,
+                            locked_by: null,
+                            locked_at: null
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                        }
                         setIsDialogOpen(false);
                         resetFullForm();
                         setIsLocked(false);
@@ -2677,7 +2653,9 @@ export default function PriseDeMandat() {
                 commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                 dossierDocuments.length > 0;
               
-              const closeAndReset = () => {
+              if (hasChanges) {
+                setShowCancelConfirmDossier(true);
+              } else {
                 setIsOuvrirDossierDialogOpen(false);
                 setNouveauDossierForm({
                   numero_dossier: "",
@@ -2693,14 +2671,6 @@ export default function PriseDeMandat() {
                 setCommentairesTemporairesDossier([]);
                 setDossierDocuments([]);
                 setActiveTabMandatDossier("0");
-              };
-              
-              if (hasChanges) {
-                if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
-                  closeAndReset();
-                }
-              } else {
-                closeAndReset();
               }
             } else {
               setIsOuvrirDossierDialogOpen(open);
@@ -3748,7 +3718,9 @@ export default function PriseDeMandat() {
                         commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
                         dossierDocuments.length > 0;
                       
-                      const closeAndReset = () => {
+                      if (hasChanges) {
+                        setShowCancelConfirmDossier(true);
+                      } else {
                         setIsOuvrirDossierDialogOpen(false);
                         setNouveauDossierForm({
                           numero_dossier: "",
@@ -3764,14 +3736,6 @@ export default function PriseDeMandat() {
                         setCommentairesTemporairesDossier([]);
                         setDossierDocuments([]);
                         setActiveTabMandatDossier("0");
-                      };
-                      
-                      if (hasChanges) {
-                        if (confirm("Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.")) {
-                          closeAndReset();
-                        }
-                      } else {
-                        closeAndReset();
                       }
                     }}>Annuler</Button>
                     <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
@@ -3919,12 +3883,13 @@ export default function PriseDeMandat() {
                     setShowStatutChangeConfirm(false);
                     setPendingStatutChange(null);
                   }}
+                  className="border-slate-500"
                 >
                   Annuler
                 </Button>
                 <Button
                   type="button"
-                  className="bg-red-500 hover:bg-red-600"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
                   onClick={async () => {
                     const value = pendingStatutChange;
                     
@@ -3964,6 +3929,110 @@ export default function PriseDeMandat() {
                     setShowStatutChangeConfirm(false);
                     setPendingStatutChange(null);
                     setHasDocuments(false);
+                  }}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation - Nouveau mandat */}
+        <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="border-slate-500"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  onClick={async () => {
+                    // Déverrouiller le mandat si on annule
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setShowCancelConfirm(false);
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation - Ouvrir dossier */}
+        <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300">
+                Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowCancelConfirmDossier(false)}
+                  className="border-slate-500"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  onClick={() => {
+                    setShowCancelConfirmDossier(false);
+                    setIsOuvrirDossierDialogOpen(false);
+                    setNouveauDossierForm({
+                      numero_dossier: "",
+                      arpenteur_geometre: "",
+                      date_ouverture: new Date().toISOString().split('T')[0],
+                      statut: "Ouvert",
+                      ttl: "Non",
+                      clients_ids: [],
+                      notaires_ids: [],
+                      courtiers_ids: [],
+                      mandats: []
+                    });
+                    setCommentairesTemporairesDossier([]);
+                    setDossierDocuments([]);
+                    setActiveTabMandatDossier("0");
                   }}
                 >
                   Confirmer
