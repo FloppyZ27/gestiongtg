@@ -4941,7 +4941,7 @@ export default function PriseDeMandat() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl">
+          <DialogContent className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl">
             <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
