@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { motion, AnimatePresence } from "framer-motion";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
@@ -2096,7 +2097,13 @@ export default function PriseDeMandat() {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
                 {/* Main form content - 70% */}
                 <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6">
@@ -2623,7 +2630,7 @@ export default function PriseDeMandat() {
                     </Tabs>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </DialogContent>
           </Dialog>
 
@@ -2682,7 +2689,13 @@ export default function PriseDeMandat() {
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
@@ -3849,7 +3862,7 @@ export default function PriseDeMandat() {
                     </Tabs>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </DialogContent>
           </Dialog>
 
@@ -3865,7 +3878,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400">⚠️ Attention</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
               <p className="text-slate-300">
                 Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
               </p>
@@ -3930,7 +3948,7 @@ export default function PriseDeMandat() {
                   Confirmer
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -3940,7 +3958,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+            >
               <div className="space-y-2">
                 <Label>Minute <span className="text-red-400">*</span></Label>
                 <Input
@@ -3988,7 +4011,7 @@ export default function PriseDeMandat() {
                   Ajouter
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -3998,7 +4021,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des clients</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4066,7 +4094,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4076,7 +4104,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des notaires</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4144,7 +4177,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4154,7 +4187,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle>Sélectionner des courtiers</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4222,7 +4260,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
                 Valider
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4302,7 +4340,12 @@ export default function PriseDeMandat() {
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+            <motion.div 
+              className="space-y-4 flex-1 overflow-hidden flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -4414,7 +4457,7 @@ export default function PriseDeMandat() {
               <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
                 Valider la sélection
               </Button>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4428,7 +4471,13 @@ export default function PriseDeMandat() {
               <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
             </DialogHeader>
             
-            <div className="flex h-[90vh]">
+            <motion.div 
+              className="flex h-[90vh]"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
               {/* Colonne gauche - Formulaire - 70% */}
               <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
                 <div className="flex-1 overflow-y-auto p-6">
@@ -4886,7 +4935,7 @@ export default function PriseDeMandat() {
                   </TabsContent>
                 </Tabs>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4898,7 +4947,12 @@ export default function PriseDeMandat() {
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
               </DialogTitle>
             </DialogHeader>
-            <div className="flex-1 overflow-hidden p-6">
+            <motion.div 
+              className="flex-1 overflow-hidden p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
               {viewingClientDetails && (
                 <ClientDetailView
                   client={viewingClientDetails}
@@ -4910,7 +4964,7 @@ export default function PriseDeMandat() {
                   }}
                 />
               )}
-            </div>
+            </motion.div>
           </DialogContent>
         </Dialog>
 
@@ -4921,7 +4975,13 @@ export default function PriseDeMandat() {
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
             {viewingDossier && (
-              <div className="flex h-[90vh]">
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
                 {/* Main content - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6 flex items-center gap-3">
@@ -5212,7 +5272,7 @@ export default function PriseDeMandat() {
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
           </DialogContent>
         </Dialog>
