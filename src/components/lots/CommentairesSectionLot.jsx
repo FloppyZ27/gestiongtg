@@ -52,17 +52,15 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], `audio-${Date.now()}.webm`, { type: 'audio/webm' });
         setIsUploadingAudio(true);
         
         try {
-          console.log("Uploading audio blob...", audioBlob);
-          const response = await base44.integrations.Core.UploadFile({ file: audioBlob });
-          console.log("Upload response:", response);
+          const response = await base44.integrations.Core.UploadFile({ file: audioFile });
           setAudioUrl(response.file_url);
-          console.log("Audio URL set to:", response.file_url);
         } catch (error) {
           console.error("Erreur lors de l'upload de l'audio:", error);
-          alert("Erreur lors de l'upload de l'audio");
+          alert("Erreur lors de l'upload de l'audio: " + error.message);
         } finally {
           setIsUploadingAudio(false);
         }
