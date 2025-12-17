@@ -2498,12 +2498,33 @@ export default function PriseDeMandat() {
                       ) : hasData;
                       
                       if (hasChanges && !isLocked) {
-                        if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
+                        // Afficher le dialog de confirmation personnalisé
+                        const confirmDialog = document.createElement('div');
+                        confirmDialog.innerHTML = `
+                          <div style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+                            <div style="background: rgba(15, 23, 42, 0.95); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 24px; max-width: 400px; box-shadow: 0 0 32px rgba(0,0,0,0.5);">
+                              <h3 style="color: rgb(251, 191, 36); font-size: 20px; font-weight: 600; margin-bottom: 16px;">⚠️ Attention</h3>
+                              <p style="color: rgb(203, 213, 225); margin-bottom: 8px;">Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.</p>
+                              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgb(51, 65, 85);">
+                                <button id="cancel-confirm" style="padding: 8px 16px; background: transparent; color: white; border: 2px solid rgba(148, 163, 184, 0.5); border-radius: 6px; cursor: pointer; transition: all 0.3s;">Annuler</button>
+                                <button id="confirm-confirm" style="padding: 8px 16px; background: rgb(239, 68, 68); color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">Confirmer</button>
+                              </div>
+                            </div>
+                          </div>
+                        `;
+                        document.body.appendChild(confirmDialog);
+                        
+                        document.getElementById('cancel-confirm').onclick = () => {
+                          document.body.removeChild(confirmDialog);
+                        };
+                        
+                        document.getElementById('confirm-confirm').onclick = () => {
+                          document.body.removeChild(confirmDialog);
                           setIsDialogOpen(false);
                           resetFullForm();
                           setIsLocked(false);
                           setLockedBy("");
-                        }
+                        };
                       } else {
                         setIsDialogOpen(false);
                         resetFullForm();
