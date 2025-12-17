@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
