@@ -348,7 +348,10 @@ function LayoutContent({ children, currentPageName }) {
         button[class*="size-icon"],
         button.h-10.w-10,
         button.h-9.w-9,
-        button.h-8.w-8 {
+        button.h-8.w-8,
+        table button,
+        [role="row"] button,
+        [role="cell"] button {
           background-color: transparent !important;
           background-image: none !important;
           border: none !important;
