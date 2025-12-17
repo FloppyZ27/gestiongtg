@@ -2663,7 +2663,7 @@ export default function PriseDeMandat() {
                     </DialogContent>
                     </Dialog>
 
-          {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
+                    {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
             if (!open) {
               // Vérifier si des modifications ont été faites par rapport à l'état initial
