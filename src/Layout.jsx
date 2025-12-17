@@ -379,7 +379,9 @@ function LayoutContent({ children, currentPageName }) {
         [role="heading"],
         [class*="DialogTitle"],
         [class*="CardTitle"],
-        .text-2xl, .text-3xl, .text-xl {
+        [class*="CardHeader"],
+        [class*="SidebarGroupLabel"],
+        .text-2xl, .text-3xl, .text-xl, .text-lg, .text-base {
           font-family: 'Caveat', cursive !important;
           font-weight: 600 !important;
           letter-spacing: 0.5px !important;
