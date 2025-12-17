@@ -4535,7 +4535,7 @@ export default function PriseDeMandat() {
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
-                                    {["Vente", "Cession", "Donation", "Déclaration de Transmission", "Jugement", "Rectification", "Retrocession", "Subdivision", "Morcellement", "Autre"].map(type => (
+                                    {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
                                       <SelectItem key={type} value={type} className="text-white text-sm">
                                         {type}
                                       </SelectItem>
