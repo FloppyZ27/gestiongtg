@@ -446,6 +446,22 @@ function LayoutContent({ children, currentPageName }) {
             inset 3px 3px 6px rgba(0, 0, 0, 0.3),
             inset -3px -3px 6px rgba(71, 85, 105, 0.05) !important;
           border: none !important;
+          transition: all 0.3s ease !important;
+        }
+
+        input:hover, textarea:hover, select:hover {
+          box-shadow: 
+            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
+            0 0 0 2px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        input:focus, textarea:focus, select:focus {
+          outline: none !important;
+          box-shadow: 
+            inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 6px rgba(71, 85, 105, 0.05),
+            0 0 0 3px rgba(16, 185, 129, 0.5) !important;
         }
 
 
