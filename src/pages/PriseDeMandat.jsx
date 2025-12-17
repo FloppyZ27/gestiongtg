@@ -4437,10 +4437,8 @@ export default function PriseDeMandat() {
                   </div>
                   
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
-                    {/* Sections côte à côte - Informations du lot et Concordances */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Section 1: Informations du lot */}
-                      <Card className="border-slate-700 bg-slate-800/30">
+                    {/* Section 1: Informations du lot */}
+                    <Card className="border-slate-700 bg-slate-800/30">
                         <CardHeader 
                           className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
                           onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
@@ -4758,7 +4756,6 @@ export default function PriseDeMandat() {
                         </CardContent>
                       )}
                     </Card>
-                    </div>
 
                     {/* Section 3: Documents */}
                     <Card className="border-slate-700 bg-slate-800/30">

@@ -1,4 +1,3 @@
-import Home from './pages/Home';
 import Administration from './pages/Administration';
 import AjouterActe from './pages/AjouterActe';
 import Calendrier from './pages/Calendrier';
@@ -11,6 +10,7 @@ import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
 import GestionDeMandat from './pages/GestionDeMandat';
 import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
+import Home from './pages/Home';
 import Lots from './pages/Lots';
 import Notaires from './pages/Notaires';
 import PriseDeMandat from './pages/PriseDeMandat';
@@ -23,7 +23,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
     "Administration": Administration,
     "AjouterActe": AjouterActe,
     "Calendrier": Calendrier,
@@ -36,6 +35,7 @@ export const PAGES = {
     "EditerActe": EditerActe,
     "GestionDeMandat": GestionDeMandat,
     "GestionEquipeTerrain": GestionEquipeTerrain,
+    "Home": Home,
     "Lots": Lots,
     "Notaires": Notaires,
     "PriseDeMandat": PriseDeMandat,
