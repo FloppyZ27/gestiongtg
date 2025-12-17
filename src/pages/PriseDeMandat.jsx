@@ -4486,6 +4486,7 @@ export default function PriseDeMandat() {
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                       <SelectItem key={circ} value={circ} className="text-white text-sm">
                                         {circ}
@@ -4505,6 +4506,7 @@ export default function PriseDeMandat() {
                                     <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {availableCadastresForNewLot.map((cadastre) => (
                                       <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
                                         {cadastre}
@@ -4535,6 +4537,7 @@ export default function PriseDeMandat() {
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
                                       <SelectItem key={type} value={type} className="text-white text-sm">
                                         {type}
@@ -4611,6 +4614,7 @@ export default function PriseDeMandat() {
                                         <SelectValue placeholder="Sélectionner" />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                         {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                           <SelectItem key={circ} value={circ} className="text-white text-sm">
                                             {circ}
@@ -4630,6 +4634,7 @@ export default function PriseDeMandat() {
                                         <SelectValue placeholder={currentConcordanceForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                         {availableCadastresForConcordance.map((cadastre) => (
                                           <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
                                             {cadastre}
@@ -4726,13 +4731,12 @@ export default function PriseDeMandat() {
                                       }}
                                       className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
                                     >
-                                      <div className="flex items-center justify-between gap-1">
-                                        <p className="text-white font-semibold text-xs truncate flex-1">{lot.numero_lot}</p>
-                                        {lot.rang && (
-                                          <span className="text-slate-300 text-[10px]">{lot.rang}</span>
-                                        )}
-                                      </div>
-                                      <p className="text-purple-400 text-[10px] truncate">{lot.circonscription_fonciere}{lot.cadastre ? ` • ${lot.cadastre}` : ''}</p>
+                                      <p className="text-white font-semibold text-xs truncate">
+                                        {lot.numero_lot}
+                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
+                                        <span className="text-purple-400 font-normal"> • {lot.circonscription_fonciere}</span>
+                                        {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
+                                      </p>
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
