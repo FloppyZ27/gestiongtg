@@ -476,6 +476,14 @@ function LayoutContent({ children, currentPageName }) {
             0 0 0 3px rgba(16, 185, 129, 0.5) !important;
         }
 
+        /* Fond gris pour les menus déroulants */
+        [role="listbox"],
+        [role="menu"],
+        [data-radix-select-content],
+        [data-radix-popper-content-wrapper] > div {
+          background-color: rgb(30, 41, 59) !important;
+        }
+
 
 
         /* Scrollbar personnalisée globale */
