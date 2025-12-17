@@ -73,6 +73,11 @@ export default function ClientFormDialog({
   const [duplicateClients, setDuplicateClients] = useState([]);
   const [pendingClientData, setPendingClientData] = useState(null);
   
+  // Unsaved changes detection
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [initialFormData, setInitialFormData] = useState(null);
+  
   // Address search
   const [addressSearchTerm, setAddressSearchTerm] = useState("");
   const [addressSearchResults, setAddressSearchResults] = useState([]);
@@ -263,11 +268,20 @@ export default function ClientFormDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+      setHasChanges(false);
       resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
     },
   });
+
+  // Détecter les changements
+  React.useEffect(() => {
+    if (initialFormData) {
+      const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      setHasChanges(hasFormChanges);
+    }
+  }, [formData, initialFormData]);
 
   const formatAdresse = (addr) => {
     if (!addr) return "";
@@ -374,6 +388,23 @@ export default function ClientFormDialog({
       notes: ""
     });
     setCommentairesTemporaires([]);
+    setHasChanges(false);
+    setInitialFormData(null);
+  };
+
+  const handleCloseAttempt = () => {
+    if (hasChanges) {
+      setShowUnsavedWarning(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowUnsavedWarning(false);
+    setHasChanges(false);
+    resetForm();
+    onOpenChange(false);
   };
 
   const removeClientField = async (fieldName, index) => {
@@ -541,7 +572,7 @@ export default function ClientFormDialog({
   // Update form when editingClient changes or when dialog opens
   React.useEffect(() => {
     if (open && editingClient) {
-      setFormData({
+      const data = {
         prenom: editingClient.prenom || "",
         nom: editingClient.nom || "",
         type_client: editingClient.type_client || "Client",
@@ -556,12 +587,15 @@ export default function ClientFormDialog({
           ? editingClient.telephones.map(tel => ({ ...tel })) 
           : [],
         notes: editingClient.notes || ""
-      });
+      };
+      setFormData(data);
+      setInitialFormData(JSON.parse(JSON.stringify(data)));
       setCommentairesTemporaires([]);
+      setHasChanges(false);
     } else if (open && !editingClient) {
       // Pré-remplir avec initialData si fourni
       const initial = initialData || {};
-      setFormData({
+      const data = {
         prenom: initial.prenom || "",
         nom: initial.nom || "",
         type_client: defaultType,
@@ -570,8 +604,11 @@ export default function ClientFormDialog({
         courriels: initial.courriel ? [{ courriel: initial.courriel, actuel: true }] : [],
         telephones: initial.telephone ? [{ telephone: initial.telephone, type: initial.type_telephone || "Cellulaire", actuel: true }] : [],
         notes: ""
-      });
+      };
+      setFormData(data);
+      setInitialFormData(JSON.parse(JSON.stringify(data)));
       setCommentairesTemporaires([]);
+      setHasChanges(false);
       
       // Pré-remplir les champs du formulaire en bas pour l'adresse si besoin
       if (initial.courriel && !initial.courriel.trim()) {
@@ -662,7 +699,7 @@ export default function ClientFormDialog({
       </Dialog>
 
       {/* Main Client Form Dialog */}
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleCloseAttempt}>
         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">

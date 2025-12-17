@@ -508,6 +508,8 @@ export default function PriseDeMandat() {
     }
     
     setEditingPriseMandat(pm);
+    setInitialPriseMandatData(JSON.parse(JSON.stringify(pm)));
+    setHasFormChanges(false);
     
     // Charger l'historique si présent
     setHistorique(pm.historique || []);
@@ -654,6 +656,8 @@ export default function PriseDeMandat() {
       setEditingPriseMandat(null);
       setIsLocked(false);
       setLockedBy("");
+      setHasFormChanges(false);
+      setInitialPriseMandatData(null);
     },
   });
 
@@ -1592,6 +1596,8 @@ export default function PriseDeMandat() {
     setDossierSearchForReference("");
     setCommentairesTemporaires([]);
     setEditingPriseMandat(null);
+    setHasFormChanges(false);
+    setInitialPriseMandatData(null);
   };
 
   // NEW FUNCTION
@@ -2042,6 +2048,11 @@ export default function PriseDeMandat() {
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
+            if (!open && hasFormChanges && !isLocked) {
+              setShowUnsavedWarning(true);
+              return;
+            }
+            
             if (!open) {
               // Déverrouiller le mandat si on était en train de l'éditer
               if (editingPriseMandat && !isLocked) {
@@ -2053,36 +2064,10 @@ export default function PriseDeMandat() {
                 queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
               }
               
-              // Vérifier si des données ont été saisies
-              const hasData = formData.arpenteur_geometre || 
-                formData.clients_ids.length > 0 ||
-                clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
-                workAddress.rue || workAddress.ville || workAddress.numeros_civiques?.[0] ||
-                mandatsInfo.some(m => m.type_mandat || m.prix_estime > 0) ||
-                commentairesTemporaires.length > 0;
-              
-              // En mode édition, vérifier si des modifications ont été faites
-              const hasChanges = editingPriseMandat ? (
-                formData.arpenteur_geometre !== editingPriseMandat.arpenteur_geometre ||
-                JSON.stringify(formData.clients_ids) !== JSON.stringify(editingPriseMandat.clients_ids || []) ||
-                JSON.stringify(clientInfo) !== JSON.stringify(editingPriseMandat.client_info || {}) ||
-                JSON.stringify(workAddress) !== JSON.stringify(editingPriseMandat.adresse_travaux || {}) ||
-                formData.statut !== editingPriseMandat.statut
-              ) : hasData;
-              
-              if (hasChanges && !isLocked) {
-                if (confirm("Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.")) {
-                  setIsDialogOpen(false);
-                  resetFullForm();
-                  setIsLocked(false);
-                  setLockedBy("");
-                }
-              } else {
-                setIsDialogOpen(false);
-                resetFullForm();
-                setIsLocked(false);
-                setLockedBy("");
-              }
+              setIsDialogOpen(false);
+              resetFullForm();
+              setIsLocked(false);
+              setLockedBy("");
             } else {
               setIsDialogOpen(open);
             }
@@ -2307,6 +2292,7 @@ export default function PriseDeMandat() {
                       } else {
                         setFormData({...formData, arpenteur_geometre: value});
                       }
+                      setHasFormChanges(true);
                     }}
                     statut={formData.statut}
                     onStatutChange={(value) => {
@@ -2348,11 +2334,15 @@ export default function PriseDeMandat() {
                           ? prev.clients_ids.filter(id => id !== clientId)
                           : [...prev.clients_ids, clientId]
                       }));
+                      setHasFormChanges(true);
                     }}
                     isCollapsed={clientStepCollapsed}
                     onToggleCollapse={() => setClientStepCollapsed(!clientStepCollapsed)}
                     clientInfo={clientInfo}
-                    onClientInfoChange={setClientInfo}
+                    onClientInfoChange={(info) => {
+                      setClientInfo(info);
+                      setHasFormChanges(true);
+                    }}
                   />
 
                   {/* Étape 2: Professionnel */}
@@ -2404,6 +2394,7 @@ export default function PriseDeMandat() {
                     onAddressChange={(addr) => {
                       if (isLocked) return;
                       setWorkAddress(addr);
+                      setHasFormChanges(true);
                     }}
                     isCollapsed={addressStepCollapsed}
                     onToggleCollapse={() => setAddressStepCollapsed(!addressStepCollapsed)}
@@ -2443,6 +2434,7 @@ export default function PriseDeMandat() {
                     onMandatsChange={(newMandats) => {
                       if (isLocked) return;
                       setMandatsInfo(newMandats);
+                      setHasFormChanges(true);
                     }}
                     isCollapsed={mandatStepCollapsed}
                     onToggleCollapse={() => setMandatStepCollapsed(!mandatStepCollapsed)}
@@ -2456,6 +2448,7 @@ export default function PriseDeMandat() {
                     onTarificationChange={(newMandats) => {
                       if (isLocked) return;
                       setMandatsInfo(newMandats);
+                      setHasFormChanges(true);
                     }}
                     isCollapsed={tarificationStepCollapsed}
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
@@ -2478,36 +2471,24 @@ export default function PriseDeMandat() {
                   {/* Boutons Annuler/Créer en bas de la colonne gauche */}
                   <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
                     <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async () => {
-                      const hasData = formData.arpenteur_geometre || 
-                        formData.clients_ids.length > 0 ||
-                        clientInfo.prenom || clientInfo.nom || clientInfo.telephone || clientInfo.courriel ||
-                        workAddress.rue || workAddress.ville || workAddress.numeros_civiques?.[0] ||
-                        mandatsInfo.some(m => m.type_mandat || m.prix_estime > 0) ||
-                        commentairesTemporaires.length > 0;
-                      
-                      const hasChanges = editingPriseMandat ? (
-                        formData.arpenteur_geometre !== editingPriseMandat.arpenteur_geometre ||
-                        JSON.stringify(formData.clients_ids) !== JSON.stringify(editingPriseMandat.clients_ids || []) ||
-                        formData.statut !== editingPriseMandat.statut
-                      ) : hasData;
-                      
-                      if (hasChanges && !isLocked) {
-                        setShowCancelConfirm(true);
-                      } else {
-                        // Déverrouiller le mandat si on annule
-                        if (editingPriseMandat && !isLocked) {
-                          await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                            ...editingPriseMandat,
-                            locked_by: null,
-                            locked_at: null
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                        }
-                        setIsDialogOpen(false);
-                        resetFullForm();
-                        setIsLocked(false);
-                        setLockedBy("");
+                      if (hasFormChanges && !isLocked) {
+                        setShowUnsavedWarning(true);
+                        return;
                       }
+                      
+                      // Déverrouiller le mandat si on annule
+                      if (editingPriseMandat && !isLocked) {
+                        await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                          ...editingPriseMandat,
+                          locked_by: null,
+                          locked_at: null
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                      }
+                      setIsDialogOpen(false);
+                      resetFullForm();
+                      setIsLocked(false);
+                      setLockedBy("");
                     }}>
                       Annuler
                     </Button>
@@ -3969,13 +3950,13 @@ export default function PriseDeMandat() {
                 <Button 
                   type="button" 
                   onClick={() => setShowCancelConfirm(false)}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
-                  Annuler
+                  Continuer l'édition
                 </Button>
                 <Button
                   type="button"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                   onClick={async () => {
                     // Déverrouiller le mandat si on annule
                     if (editingPriseMandat && !isLocked) {
@@ -3993,7 +3974,61 @@ export default function PriseDeMandat() {
                     setLockedBy("");
                   }}
                 >
-                  Confirmer
+                  Abandonner
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour avertissement modifications non sauvegardées */}
+        <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowUnsavedWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={async () => {
+                    // Déverrouiller le mandat si on annule
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setShowUnsavedWarning(false);
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}
+                >
+                  Abandonner
                 </Button>
               </div>
             </motion.div>
