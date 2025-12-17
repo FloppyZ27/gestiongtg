@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -586,7 +587,7 @@ export default function ClientFormDialog({
     <>
       {/* Duplicate Check Dialog */}
       <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+        <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <AlertTriangle className="w-5 h-5 text-yellow-400" />
@@ -594,7 +595,12 @@ export default function ClientFormDialog({
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <motion.div 
+            className="space-y-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+          >
             <p className="text-slate-300">
               Une ou plusieurs fiches avec le même nom existent déjà. Voulez-vous vraiment créer une nouvelle fiche ?
             </p>
@@ -650,20 +656,26 @@ export default function ClientFormDialog({
                 Créer quand même
               </Button>
             </div>
-          </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
 
       {/* Main Client Form Dialog */}
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">
             {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-[90vh]">
+        <motion.div 
+          className="flex h-[90vh]"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+        >
           {/* Main form content - 70% */}
           <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
             <div className="mb-6">
@@ -1247,7 +1259,7 @@ export default function ClientFormDialog({
               </TabsContent>
             </Tabs>
           </div>
-        </div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   </>
