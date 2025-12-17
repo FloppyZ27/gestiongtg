@@ -55,10 +55,14 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
         setIsUploadingAudio(true);
         
         try {
-          const { file_url } = await base44.integrations.Core.UploadFile({ file: audioBlob });
-          setAudioUrl(file_url);
+          console.log("Uploading audio blob...", audioBlob);
+          const response = await base44.integrations.Core.UploadFile({ file: audioBlob });
+          console.log("Upload response:", response);
+          setAudioUrl(response.file_url);
+          console.log("Audio URL set to:", response.file_url);
         } catch (error) {
           console.error("Erreur lors de l'upload de l'audio:", error);
+          alert("Erreur lors de l'upload de l'audio");
         } finally {
           setIsUploadingAudio(false);
         }
