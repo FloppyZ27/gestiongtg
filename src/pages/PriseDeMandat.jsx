@@ -2090,7 +2090,7 @@ export default function PriseDeMandat() {
                 Nouveau mandat
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden" hideClose>
+            <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2685,7 +2685,7 @@ export default function PriseDeMandat() {
               setIsOuvrirDossierDialogOpen(open);
             }
           }}>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
@@ -4336,7 +4336,7 @@ export default function PriseDeMandat() {
             setLotCadastreFilter("Québec");
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
@@ -4941,7 +4941,7 @@ export default function PriseDeMandat() {
 
         {/* Client Details Dialog */}
         <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl">
             <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
               <DialogTitle className="text-2xl">
                 Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
@@ -4970,7 +4970,7 @@ export default function PriseDeMandat() {
 
         {/* View Dossier Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
             </DialogHeader>
