@@ -158,14 +158,19 @@ export default function MandatStepForm({
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Types de mandats</Label>
                 <Popover>
-                  <PopoverTrigger asChild disabled={disabled}>
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={disabled}
+                      className="w-full justify-between bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-7 text-sm px-3"
+                    >
                       {selectedTypes.length > 0 ? (
                         <span className="text-white truncate">{selectedTypes.length} type{selectedTypes.length > 1 ? 's' : ''} sélectionné{selectedTypes.length > 1 ? 's' : ''}</span>
                       ) : (
-                        <SelectValue placeholder="Sélectionner..." />
+                        <span className="text-slate-400">Sélectionner...</span>
                       )}
-                    </SelectTrigger>
+                      <ChevronDown className="w-4 h-4 ml-2 opacity-50 flex-shrink-0" />
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-0 bg-slate-800 border-slate-700" align="start">
                     <div className="max-h-64 overflow-y-auto p-2 space-y-1">
