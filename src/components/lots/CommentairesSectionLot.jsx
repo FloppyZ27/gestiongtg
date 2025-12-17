@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Edit, Trash2, X, Check, Mic, Square, Loader2 } from "lucide-react";
+import { Send, Edit, Trash2, X, Check, Mic, Square, Loader2, Image } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,8 +17,11 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
   const [isRecording, setIsRecording] = useState(false);
   const [isUploadingAudio, setIsUploadingAudio] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const imageInputRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery({
@@ -82,6 +85,22 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const response = await base44.integrations.Core.UploadFile({ file });
+      setImageUrl(response.file_url);
+    } catch (error) {
+      console.error("Erreur lors de l'upload de l'image:", error);
+      alert("Erreur lors de l'upload de l'image: " + error.message);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const createCommentaireMutation = useMutation({
     mutationFn: (commentaireData) => base44.entities.CommentaireLot.create(commentaireData),
     onSuccess: () => {
@@ -109,10 +128,14 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
 
   const handleSubmitCommentaire = (e) => {
     e.preventDefault();
-    if ((!nouveauCommentaire.trim() && !audioUrl) || !user) return;
+    if ((!nouveauCommentaire.trim() && !audioUrl && !imageUrl) || !user) return;
+
+    let contenu = nouveauCommentaire;
+    if (audioUrl) contenu += `\n[AUDIO:${audioUrl}]`;
+    if (imageUrl) contenu += `\n[IMAGE:${imageUrl}]`;
 
     const commentData = {
-      contenu: audioUrl ? `${nouveauCommentaire}\n[AUDIO:${audioUrl}]` : nouveauCommentaire,
+      contenu,
       utilisateur_email: user.email,
       utilisateur_nom: user.full_name
     };
@@ -128,12 +151,14 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
       }
       setNouveauCommentaire("");
       setAudioUrl("");
+      setImageUrl("");
     } else if (lotId) {
       createCommentaireMutation.mutate({
         lot_id: lotId,
         ...commentData
       });
       setAudioUrl("");
+      setImageUrl("");
     }
   };
 
@@ -261,7 +286,9 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                       {(() => {
                         const audioMatch = commentaire.contenu.match(/\[AUDIO:([^\]]+)\]/);
                         const audioFileUrl = audioMatch ? audioMatch[1] : null;
-                        const textContent = commentaire.contenu.replace(/\[AUDIO:[^\]]+\]/g, '').trim();
+                        const imageMatch = commentaire.contenu.match(/\[IMAGE:([^\]]+)\]/);
+                        const imageFileUrl = imageMatch ? imageMatch[1] : null;
+                        const textContent = commentaire.contenu.replace(/\[AUDIO:[^\]]+\]/g, '').replace(/\[IMAGE:[^\]]+\]/g, '').trim();
 
                         return (
                           <div className="space-y-2">
@@ -269,6 +296,9 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                               <p className="text-slate-300 text-sm whitespace-pre-wrap">
                                 {textContent}
                               </p>
+                            )}
+                            {imageFileUrl && (
+                              <img src={imageFileUrl} alt="Image du commentaire" className="max-w-full h-auto rounded-lg" />
                             )}
                             {audioFileUrl && (
                               <audio controls className="w-full h-8" style={{ maxHeight: '32px' }}>
@@ -321,8 +351,25 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             }}
             placeholder="Ajouter un commentaire..."
             className="bg-slate-700 border-slate-600 text-white resize-none h-20"
-            disabled={createCommentaireMutation.isPending || isRecording}
+            disabled={createCommentaireMutation.isPending || isRecording || isUploadingImage}
           />
+          {imageUrl && (
+            <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex-1">
+                <p className="text-xs text-blue-400 mb-1">Image prête</p>
+                <img src={imageUrl} alt="Preview" className="max-w-full h-auto rounded max-h-32" />
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setImageUrl("")}
+                className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
           {audioUrl && (
             <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
               <div className="flex-1">
@@ -344,6 +391,24 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
           )}
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={isUploadingImage || imageUrl}
+                className="bg-slate-700 border-slate-600"
+              >
+                <Image className="w-4 h-4 mr-2" />
+                Image
+              </Button>
               {!isRecording ? (
                 <Button
                   type="button"
@@ -368,7 +433,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                   Arrêter
                 </Button>
               )}
-              {isUploadingAudio && (
+              {(isUploadingAudio || isUploadingImage) && (
                 <div className="flex items-center gap-2 text-sm text-slate-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Upload...
@@ -378,7 +443,7 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
             <Button
               type="submit"
               size="sm"
-              disabled={(!nouveauCommentaire.trim() && !audioUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio}
+              disabled={(!nouveauCommentaire.trim() && !audioUrl && !imageUrl) || createCommentaireMutation.isPending || isRecording || isUploadingAudio || isUploadingImage}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/50"
             >
               <Send className="w-4 h-4 mr-2" />
