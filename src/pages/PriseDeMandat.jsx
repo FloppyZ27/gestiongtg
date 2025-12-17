@@ -4481,12 +4481,18 @@ export default function PriseDeMandat() {
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-1">
                                 <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
-                                <Select value={newLotForm.circonscription_fonciere} onValueChange={handleLotCirconscriptionChange}>
+                                <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
+                                  if (value === newLotForm.circonscription_fonciere) {
+                                    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
+                                    setAvailableCadastresForNewLot([]);
+                                  } else {
+                                    handleLotCirconscriptionChange(value);
+                                  }
+                                }}>
                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                       <SelectItem key={circ} value={circ} className="text-white text-sm">
                                         {circ}
@@ -4499,14 +4505,19 @@ export default function PriseDeMandat() {
                                 <Label className="text-slate-400 text-xs">Cadastre</Label>
                                 <Select
                                   value={newLotForm.cadastre}
-                                  onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                                  onValueChange={(value) => {
+                                    if (value === newLotForm.cadastre) {
+                                      setNewLotForm({...newLotForm, cadastre: ""});
+                                    } else {
+                                      setNewLotForm({...newLotForm, cadastre: value});
+                                    }
+                                  }}
                                   disabled={!newLotForm.circonscription_fonciere}
                                 >
                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {availableCadastresForNewLot.map((cadastre) => (
                                       <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
                                         {cadastre}
@@ -4531,13 +4542,18 @@ export default function PriseDeMandat() {
                                 <Label className="text-slate-400 text-xs">Type d'opération</Label>
                                 <Select
                                   value={newLotForm.type_operation}
-                                  onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
+                                  onValueChange={(value) => {
+                                    if (value === newLotForm.type_operation) {
+                                      setNewLotForm({...newLotForm, type_operation: ""});
+                                    } else {
+                                      setNewLotForm({...newLotForm, type_operation: value});
+                                    }
+                                  }}
                                 >
                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                     <SelectValue placeholder="Sélectionner" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                     {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
                                       <SelectItem key={type} value={type} className="text-white text-sm">
                                         {type}
@@ -4608,13 +4624,19 @@ export default function PriseDeMandat() {
                                     <Label className="text-slate-400 text-xs">Circonscription foncière</Label>
                                     <Select 
                                       value={currentConcordanceForm.circonscription_fonciere} 
-                                      onValueChange={handleConcordanceCirconscriptionChange}
+                                      onValueChange={(value) => {
+                                        if (value === currentConcordanceForm.circonscription_fonciere) {
+                                          setCurrentConcordanceForm({...currentConcordanceForm, circonscription_fonciere: "", cadastre: ""});
+                                          setAvailableCadastresForConcordance([]);
+                                        } else {
+                                          handleConcordanceCirconscriptionChange(value);
+                                        }
+                                      }}
                                     >
                                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                                         <SelectValue placeholder="Sélectionner" />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700">
-                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                         {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                           <SelectItem key={circ} value={circ} className="text-white text-sm">
                                             {circ}
@@ -4627,14 +4649,19 @@ export default function PriseDeMandat() {
                                     <Label className="text-slate-400 text-xs">Cadastre</Label>
                                     <Select
                                       value={currentConcordanceForm.cadastre}
-                                      onValueChange={(value) => setCurrentConcordanceForm({...currentConcordanceForm, cadastre: value})}
+                                      onValueChange={(value) => {
+                                        if (value === currentConcordanceForm.cadastre) {
+                                          setCurrentConcordanceForm({...currentConcordanceForm, cadastre: ""});
+                                        } else {
+                                          setCurrentConcordanceForm({...currentConcordanceForm, cadastre: value});
+                                        }
+                                      }}
                                       disabled={!currentConcordanceForm.circonscription_fonciere}
                                     >
                                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                                         <SelectValue placeholder={currentConcordanceForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
                                         {availableCadastresForConcordance.map((cadastre) => (
                                           <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
                                             {cadastre}
