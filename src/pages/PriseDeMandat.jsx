@@ -2657,11 +2657,11 @@ export default function PriseDeMandat() {
                       )}
                     </TabsContent>
                     </Tabs>
-                  )}
-                </motion.div>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
+                    )}
+                    </div>
+                    </motion.div>
+                    </DialogContent>
+                    </Dialog>
 
           {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
