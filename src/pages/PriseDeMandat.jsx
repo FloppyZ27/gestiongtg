@@ -3899,7 +3899,7 @@ export default function PriseDeMandat() {
 
 
 
-        </div>
+        </motion.div>
 
         {/* Dialog de confirmation de changement de statut */}
         <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
