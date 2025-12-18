@@ -3024,28 +3024,27 @@ export default function PriseDeMandat() {
                                     </div>
                                   )}
                                   {nouveauDossierForm.clients_ids.length > 0 ? (
-                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                       {nouveauDossierForm.clients_ids.map((clientId) => {
                                         const client = getClientById(clientId);
                                         return client ? (
-                                          <Badge 
+                                          <div 
                                             key={clientId} 
-                                            variant="outline" 
-                                            className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
                                             onClick={() => {
                                               if (window.openClientForEdit) {
                                                 window.openClientForEdit(client);
                                               }
                                             }}
                                           >
-                                            <span className="flex-1 truncate">{client.prenom} {client.nom}</span>
                                             <button type="button" onClick={(e) => {
                                               e.stopPropagation();
                                               setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
-                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                              <X className="w-2.5 h-2.5" />
+                                            }} className="absolute right-1 top-1 hover:text-red-400">
+                                              <X className="w-3 h-3" />
                                             </button>
-                                          </Badge>
+                                            <p className="text-xs font-medium pr-4">{client.prenom} {client.nom}</p>
+                                          </div>
                                         ) : null;
                                       })}
                                     </div>
@@ -3134,28 +3133,27 @@ export default function PriseDeMandat() {
                                     </div>
                                   )}
                                   {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                       {nouveauDossierForm.notaires_ids.map((notaireId) => {
                                         const notaire = getClientById(notaireId);
                                         return notaire ? (
-                                          <Badge 
+                                          <div 
                                            key={notaireId} 
-                                           variant="outline" 
-                                           className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
                                             onClick={() => {
                                               if (window.openClientForEdit) {
                                                 window.openClientForEdit(notaire);
                                               }
                                             }}
                                           >
-                                            <span className="flex-1 truncate">{notaire.prenom} {notaire.nom}</span>
                                             <button type="button" onClick={(e) => {
                                               e.stopPropagation();
                                               setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
-                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                              <X className="w-2.5 h-2.5" />
+                                            }} className="absolute right-1 top-1 hover:text-red-400">
+                                              <X className="w-3 h-3" />
                                             </button>
-                                          </Badge>
+                                            <p className="text-xs font-medium pr-4">{notaire.prenom} {notaire.nom}</p>
+                                          </div>
                                         ) : null;
                                       })}
                                     </div>
@@ -3244,28 +3242,27 @@ export default function PriseDeMandat() {
                                     </div>
                                   )}
                                   {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                    <div className="flex flex-col gap-1 p-2 bg-slate-800/30 rounded-lg max-h-[80px] overflow-y-auto">
+                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                       {nouveauDossierForm.courtiers_ids.map((courtierId) => {
                                         const courtier = getClientById(courtierId);
                                         return courtier ? (
-                                          <Badge 
+                                          <div 
                                            key={courtierId} 
-                                           variant="outline" 
-                                           className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
                                             onClick={() => {
                                               if (window.openClientForEdit) {
                                                 window.openClientForEdit(courtier);
                                               }
                                             }}
                                           >
-                                            <span className="flex-1 truncate">{courtier.prenom} {courtier.nom}</span>
                                             <button type="button" onClick={(e) => {
                                               e.stopPropagation();
                                               setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
-                                            }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                              <X className="w-2.5 h-2.5" />
+                                            }} className="absolute right-1 top-1 hover:text-red-400">
+                                              <X className="w-3 h-3" />
                                             </button>
-                                          </Badge>
+                                            <p className="text-xs font-medium pr-4">{courtier.prenom} {courtier.nom}</p>
+                                          </div>
                                         ) : null;
                                       })}
                                     </div>
@@ -3674,50 +3671,158 @@ export default function PriseDeMandat() {
                                     
                                     {/* Ligne délimitative */}
                                     <div className="border-t border-slate-600 my-2"></div>
-                                    
-                                    <div className="grid grid-cols-3 gap-2">
+
+                                    <div className="grid grid-cols-[60%_40%] gap-3">
+                                      {/* Adresse - 60% */}
                                       <div className="space-y-1">
-                                        <Label className="text-slate-400 text-xs">Date de signature</Label>
-                                        <Input 
-                                          type="date" 
-                                          value={mandat.date_signature || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
+                                        <div className="grid grid-cols-[100px_1fr] gap-1">
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">N° civique</Label>
+                                            <Input 
+                                              placeholder="123" 
+                                              value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Rue</Label>
+                                            <Input 
+                                              placeholder="Rue principale" 
+                                              value={mandat.adresse_travaux?.rue || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-1">
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Ville</Label>
+                                            <Input 
+                                              placeholder="Ville" 
+                                              value={mandat.adresse_travaux?.ville || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                            <Input 
+                                              placeholder="G0A 1A0" 
+                                              value={mandat.adresse_travaux?.code_postal || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Province</Label>
+                                            <Select 
+                                              value={mandat.adresse_travaux?.province || "QC"} 
+                                              onValueChange={(value) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, province: value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                            >
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700">
+                                                {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                                  <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div className="space-y-1">
-                                        <Label className="text-slate-400 text-xs">Début des travaux</Label>
-                                        <Input 
-                                          type="date" 
-                                          value={mandat.date_debut_travaux || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
-                                            }));
-                                          }}
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
-                                      </div>
-                                      <div className="space-y-1">
-                                        <Label className="text-slate-400 text-xs">Date de livraison <span className="text-red-400">*</span></Label>
-                                        <Input 
-                                          type="date" 
-                                          value={mandat.date_livraison || mandatsInfo[0]?.date_livraison || ""} 
-                                          onChange={(e) => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
-                                            }));
-                                          }}
-                                          required
-                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                        />
+
+                                      {/* Dates - 40% vertical */}
+                                      <div className="space-y-2">
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Date de signature</Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_signature || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_debut_travaux || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Date de livraison <span className="text-red-400">*</span></Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_livraison || mandatsInfo[0]?.date_livraison || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
+                                              }));
+                                            }}
+                                            required
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
                                       </div>
                                     </div>
                                     
