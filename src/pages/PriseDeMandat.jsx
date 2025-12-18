@@ -309,6 +309,8 @@ export default function PriseDeMandat() {
   const [showArpenteurRequiredDialog, setShowArpenteurRequiredDialog] = useState(false);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
+  const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -3300,14 +3302,9 @@ export default function PriseDeMandat() {
                                   size="sm" 
                                   variant="ghost"
                                   onClick={() => {
-                                    const indexToRemove = parseInt(activeTabMandatDossier);
-                                    if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
-                                      setNouveauDossierForm(prev => ({
-                                        ...prev,
-                                        mandats: prev.mandats.filter((_, i) => i !== indexToRemove)
-                                      }));
-                                      setActiveTabMandatDossier(Math.max(0, indexToRemove - 1).toString());
-                                    }
+                                   const indexToRemove = parseInt(activeTabMandatDossier);
+                                   setMandatIndexToDelete(indexToRemove);
+                                   setShowDeleteMandatConfirm(true);
                                   }}
                                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
                                 >
@@ -4183,6 +4180,58 @@ export default function PriseDeMandat() {
                   }}
                 >
                   Abandonner
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression de mandat */}
+        <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (mandatIndexToDelete !== null) {
+                      setNouveauDossierForm(prev => ({
+                        ...prev,
+                        mandats: prev.mandats.filter((_, i) => i !== mandatIndexToDelete)
+                      }));
+                      setActiveTabMandatDossier(Math.max(0, mandatIndexToDelete - 1).toString());
+                    }
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                >
+                  Supprimer
                 </Button>
               </div>
             </motion.div>
