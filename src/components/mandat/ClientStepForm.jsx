@@ -214,7 +214,20 @@ export default function ClientStepForm({
                           {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
-                          {getCurrentPhone(client) && <p>📞 {getCurrentPhone(client)}</p>}
+                          {getCurrentPhone(client) && (
+                            <p>
+                              📞 <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.location.href = `3cx://call/${getCurrentPhone(client)}`;
+                                }}
+                                className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                              >
+                                {getCurrentPhone(client)}
+                              </button>
+                            </p>
+                          )}
                           {getCurrentEmail(client) && <p className="truncate">✉️ {getCurrentEmail(client)}</p>}
                         </div>
                       </div>
