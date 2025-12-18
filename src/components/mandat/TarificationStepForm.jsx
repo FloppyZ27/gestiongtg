@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, DollarSign, Receipt, ToggleLeft, ToggleRight } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+
 
 const getAbbreviatedMandatType = (type) => {
   const abbreviations = {
