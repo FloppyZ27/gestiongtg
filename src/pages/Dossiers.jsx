@@ -2746,11 +2746,9 @@ export default function Dossiers() {
                     <p>
                       📞 <span 
                         onClick={() => {
-                          const iframe = document.createElement('iframe');
-                          iframe.style.display = 'none';
-                          iframe.src = `3cx://call/${client.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
-                          document.body.appendChild(iframe);
-                          setTimeout(() => document.body.removeChild(iframe), 100);
+                          const link = document.createElement('a');
+                          link.href = `3cx://call/${client.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
+                          link.click();
                         }}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
@@ -2833,11 +2831,9 @@ export default function Dossiers() {
                     <p>
                       📞 <span 
                         onClick={() => {
-                          const iframe = document.createElement('iframe');
-                          iframe.style.display = 'none';
-                          iframe.src = `3cx://call/${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
-                          document.body.appendChild(iframe);
-                          setTimeout(() => document.body.removeChild(iframe), 100);
+                          const link = document.createElement('a');
+                          link.href = `3cx://call/${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
+                          link.click();
                         }}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
@@ -2920,11 +2916,9 @@ export default function Dossiers() {
                     <p>
                       📞 <span 
                         onClick={() => {
-                          const iframe = document.createElement('iframe');
-                          iframe.style.display = 'none';
-                          iframe.src = `3cx://call/${courtier.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
-                          document.body.appendChild(iframe);
-                          setTimeout(() => document.body.removeChild(iframe), 100);
+                          const link = document.createElement('a');
+                          link.href = `3cx://call/${courtier.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`;
+                          link.click();
                         }}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
