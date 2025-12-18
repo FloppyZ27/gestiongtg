@@ -3004,7 +3004,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des clients existants */}
-                                  <div className="border-l border-slate-700 pl-3">
+                                  <div className="border-l border-slate-700 pl-3 pr-2">
                                     <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredClientsForSelector.length > 0 ? (
@@ -3113,7 +3113,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des notaires existants */}
-                                  <div className="border-l border-slate-700 pl-3">
+                                  <div className="border-l border-slate-700 pl-3 pr-2">
                                     <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredNotairesForSelector.length > 0 ? (
@@ -3222,7 +3222,7 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des courtiers existants */}
-                                  <div className="border-l border-slate-700 pl-3">
+                                  <div className="border-l border-slate-700 pl-3 pr-2">
                                     <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredCourtiersForSelector.length > 0 ? (
