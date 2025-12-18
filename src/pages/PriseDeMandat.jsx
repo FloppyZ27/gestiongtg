@@ -2978,7 +2978,7 @@ export default function PriseDeMandat() {
                                            setClientTypeForForm("Client");
                                            setIsClientFormDialogOpen(true);
                                          }}
-                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
                                         >
                                          <Plus className="w-3 h-3 mr-1" />
                                          Nouveau
@@ -3081,7 +3081,7 @@ export default function PriseDeMandat() {
                                            setClientTypeForForm("Notaire");
                                            setIsClientFormDialogOpen(true);
                                          }}
-                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
                                         >
                                          <Plus className="w-3 h-3 mr-1" />
                                          Nouveau
@@ -3184,7 +3184,7 @@ export default function PriseDeMandat() {
                                            setClientTypeForForm("Courtier immobilier");
                                            setIsClientFormDialogOpen(true);
                                          }}
-                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
+                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
                                         >
                                          <Plus className="w-3 h-3 mr-1" />
                                          Nouveau
