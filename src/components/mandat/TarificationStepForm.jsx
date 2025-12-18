@@ -247,23 +247,6 @@ export default function TarificationStepForm({
                   </tfoot>
                 </table>
               </div>
-              
-              {/* Option globale taxes incluses */}
-              <div className="flex items-center gap-2 p-3 bg-slate-800/50 border-t border-slate-700">
-                <Checkbox
-                  checked={mandatsWithType.length > 0 && mandatsWithType.every(m => m.taxes_incluses)}
-                  onCheckedChange={(checked) => {
-                    const updatedMandats = mandats.map(m => ({
-                      ...m,
-                      taxes_incluses: checked
-                    }));
-                    onTarificationChange(updatedMandats);
-                  }}
-                  disabled={disabled || mandatsWithType.length === 0}
-                  className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                />
-                <Label className="text-slate-400 text-sm cursor-pointer">Taxes incluses pour tous les mandats</Label>
-              </div>
             </div>
           ) : (
             <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">
