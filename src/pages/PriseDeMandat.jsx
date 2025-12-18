@@ -2946,335 +2946,329 @@ export default function PriseDeMandat() {
                               </TabsList>
 
                               <TabsContent value="clients" className="mt-2">
-                                <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => {
-                                    setClientsTabExpanded(!clientsTabExpanded);
-                                    if (!clientsTabExpanded) {
-                                      setNotairesTabExpanded(false);
-                                      setCourtiersTabExpanded(false);
-                                    }
-                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
-                                    {clientsTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
-                                    {clientsTabExpanded ? 'Masquer' : 'Ajouter'}
-                                  </Button>
-                                  {clientsTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="flex gap-2 mb-2">
-                                        <div className="relative flex-1">
-                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                          <Input
-                                            placeholder="Rechercher..."
-                                            value={clientSearchTerm}
-                                            onChange={(e) => setClientSearchTerm(e.target.value)}
-                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                          />
-                                        </div>
-                                        <Button
-                                         type="button"
-                                         size="sm"
-                                         onClick={() => {
-                                           setEditingClientForForm(null);
-                                           setClientTypeForForm("Client");
-                                           setIsClientFormDialogOpen(true);
-                                         }}
-                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                        >
-                                         <Plus className="w-3 h-3 mr-1" />
-                                         Nouveau
-                                        </Button>
+                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                  {/* Colonne gauche - Clients sélectionnés */}
+                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={clientSearchTerm}
+                                          onChange={(e) => setClientSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
                                       </div>
-                                      <div className="grid grid-cols-3 gap-2">
-                                        {filteredClientsForSelector.slice(0, 20).map((client) => (
-                                          <div
-                                            key={client.id}
-                                            className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                              nouveauDossierForm.clients_ids.includes(client.id)
-                                                ? 'bg-blue-500/20 border border-blue-500/30'
-                                                : 'bg-slate-700/50 hover:bg-slate-700'
-                                            }`}
-                                            onClick={() => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                clients_ids: prev.clients_ids.includes(client.id)
-                                                  ? prev.clients_ids.filter(id => id !== client.id)
-                                                  : [...prev.clients_ids, client.id]
-                                              }));
-                                            }}
-                                          >
-                                            <p className="font-medium text-white">{client.prenom} {client.nom}</p>
-                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                              {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
-                                                <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
-                                              )}
-                                              {client.courriels?.find(c => c.actuel)?.courriel && (
-                                                <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                                              )}
-                                              {client.telephones?.find(t => t.actuel)?.telephone && (
-                                                <p>
-                                                  📞 <a 
-                                                    href={`tel:${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                  >
-                                                    {client.telephones.find(t => t.actuel).telephone}
-                                                  </a>
-                                                </p>
-                                              )}
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Client");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
+                                    {nouveauDossierForm.clients_ids.length > 0 ? (
+                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
+                                        {nouveauDossierForm.clients_ids.map((clientId) => {
+                                          const client = getClientById(clientId);
+                                          return client ? (
+                                            <div 
+                                              key={clientId} 
+                                              className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                              onClick={() => {
+                                                if (window.openClientForEdit) {
+                                                  window.openClientForEdit(client);
+                                                }
+                                              }}
+                                            >
+                                              <button type="button" onClick={(e) => {
+                                                e.stopPropagation();
+                                                setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                              }} className="absolute right-1 top-1 hover:text-red-400">
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                              <p className="text-xs font-medium pr-4">{client.prenom} {client.nom}</p>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ) : null;
+                                        })}
                                       </div>
+                                    ) : (
+                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun client sélectionné</p>
+                                    )}
+                                  </div>
+
+                                  {/* Colonne droite - Liste des clients existants */}
+                                  <div className="border-l border-slate-700 pl-3">
+                                    <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                      {filteredClientsForSelector.length > 0 ? (
+                                        filteredClientsForSelector.slice(0, 15).map((client) => {
+                                          const isSelected = nouveauDossierForm.clients_ids.includes(client.id);
+                                          return (
+                                            <div
+                                              key={client.id}
+                                              onClick={() => {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  clients_ids: prev.clients_ids.includes(client.id)
+                                                    ? prev.clients_ids.filter(id => id !== client.id)
+                                                    : [...prev.clients_ids, client.id]
+                                                }));
+                                              }}
+                                              className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
+                                                isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                              }`}
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <span className="font-medium truncate">{client.prenom} {client.nom}</span>
+                                                {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                              </div>
+                                              <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                {client.telephones?.find(t => t.actuel)?.telephone && (
+                                                  <p>
+                                                    📞 <a 
+                                                      href={`tel:${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                    >
+                                                      {client.telephones.find(t => t.actuel).telephone}
+                                                    </a>
+                                                  </p>
+                                                )}
+                                                {client.courriels?.find(c => c.actuel)?.courriel && <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      ) : (
+                                        <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
+                                      )}
                                     </div>
-                                  )}
-                                  {nouveauDossierForm.clients_ids.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                      {nouveauDossierForm.clients_ids.map((clientId) => {
-                                        const client = getClientById(clientId);
-                                        return client ? (
-                                          <div 
-                                            key={clientId} 
-                                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                            onClick={() => {
-                                              if (window.openClientForEdit) {
-                                                window.openClientForEdit(client);
-                                              }
-                                            }}
-                                          >
-                                            <button type="button" onClick={(e) => {
-                                              e.stopPropagation();
-                                              setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
-                                            }} className="absolute right-1 top-1 hover:text-red-400">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <p className="text-xs font-medium pr-4">{client.prenom} {client.nom}</p>
-                                          </div>
-                                        ) : null;
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun client</p>
-                                  )}
+                                  </div>
                                 </div>
                               </TabsContent>
 
                               <TabsContent value="notaires" className="mt-2">
-                                <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => {
-                                    setNotairesTabExpanded(!notairesTabExpanded);
-                                    if (!notairesTabExpanded) {
-                                      setClientsTabExpanded(false);
-                                      setCourtiersTabExpanded(false);
-                                    }
-                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
-                                    {notairesTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
-                                    {notairesTabExpanded ? 'Masquer' : 'Ajouter'}
-                                  </Button>
-                                  {notairesTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="flex gap-2 mb-2">
-                                        <div className="relative flex-1">
-                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                          <Input
-                                            placeholder="Rechercher..."
-                                            value={notaireSearchTerm}
-                                            onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                          />
-                                        </div>
-                                        <Button
-                                         type="button"
-                                         size="sm"
-                                         onClick={() => {
-                                           setEditingClientForForm(null);
-                                           setClientTypeForForm("Notaire");
-                                           setIsClientFormDialogOpen(true);
-                                         }}
-                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                        >
-                                         <Plus className="w-3 h-3 mr-1" />
-                                         Nouveau
-                                        </Button>
+                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                  {/* Colonne gauche - Notaires sélectionnés */}
+                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={notaireSearchTerm}
+                                          onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
                                       </div>
-                                      <div className="grid grid-cols-3 gap-2">
-                                        {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
-                                          <div
-                                           key={notaire.id}
-                                           className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                             nouveauDossierForm.notaires_ids.includes(notaire.id)
-                                               ? 'bg-blue-500/20 border border-blue-500/30'
-                                               : 'bg-slate-700/50 hover:bg-slate-700'
-                                           }`}
-                                            onClick={() => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                notaires_ids: prev.notaires_ids.includes(notaire.id)
-                                                  ? prev.notaires_ids.filter(id => id !== notaire.id)
-                                                  : [...prev.notaires_ids, notaire.id]
-                                              }));
-                                            }}
-                                          >
-                                            <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
-                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                              {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
-                                                <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
-                                              )}
-                                              {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                                                <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
-                                              )}
-                                              {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                                                <p>
-                                                  📞 <a 
-                                                    href={`tel:${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                  >
-                                                    {notaire.telephones.find(t => t.actuel).telephone}
-                                                  </a>
-                                                </p>
-                                              )}
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Notaire");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
+                                    {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
+                                        {nouveauDossierForm.notaires_ids.map((notaireId) => {
+                                          const notaire = getClientById(notaireId);
+                                          return notaire ? (
+                                            <div 
+                                             key={notaireId} 
+                                             className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                              onClick={() => {
+                                                if (window.openClientForEdit) {
+                                                  window.openClientForEdit(notaire);
+                                                }
+                                              }}
+                                            >
+                                              <button type="button" onClick={(e) => {
+                                                e.stopPropagation();
+                                                setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
+                                              }} className="absolute right-1 top-1 hover:text-red-400">
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                              <p className="text-xs font-medium pr-4">{notaire.prenom} {notaire.nom}</p>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ) : null;
+                                        })}
                                       </div>
+                                    ) : (
+                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun notaire sélectionné</p>
+                                    )}
+                                  </div>
+
+                                  {/* Colonne droite - Liste des notaires existants */}
+                                  <div className="border-l border-slate-700 pl-3">
+                                    <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                      {filteredNotairesForSelector.length > 0 ? (
+                                        filteredNotairesForSelector.slice(0, 15).map((notaire) => {
+                                          const isSelected = nouveauDossierForm.notaires_ids.includes(notaire.id);
+                                          return (
+                                            <div
+                                              key={notaire.id}
+                                              onClick={() => {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  notaires_ids: prev.notaires_ids.includes(notaire.id)
+                                                    ? prev.notaires_ids.filter(id => id !== notaire.id)
+                                                    : [...prev.notaires_ids, notaire.id]
+                                                }));
+                                              }}
+                                              className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
+                                                isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                              }`}
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <span className="font-medium truncate">{notaire.prenom} {notaire.nom}</span>
+                                                {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                              </div>
+                                              <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                                                  <p>
+                                                    📞 <a 
+                                                      href={`tel:${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                    >
+                                                      {notaire.telephones.find(t => t.actuel).telephone}
+                                                    </a>
+                                                  </p>
+                                                )}
+                                                {notaire.courriels?.find(c => c.actuel)?.courriel && <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      ) : (
+                                        <p className="text-slate-500 text-xs text-center py-2">Aucun notaire</p>
+                                      )}
                                     </div>
-                                  )}
-                                  {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                      {nouveauDossierForm.notaires_ids.map((notaireId) => {
-                                        const notaire = getClientById(notaireId);
-                                        return notaire ? (
-                                          <div 
-                                           key={notaireId} 
-                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                            onClick={() => {
-                                              if (window.openClientForEdit) {
-                                                window.openClientForEdit(notaire);
-                                              }
-                                            }}
-                                          >
-                                            <button type="button" onClick={(e) => {
-                                              e.stopPropagation();
-                                              setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
-                                            }} className="absolute right-1 top-1 hover:text-red-400">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <p className="text-xs font-medium pr-4">{notaire.prenom} {notaire.nom}</p>
-                                          </div>
-                                        ) : null;
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun notaire</p>
-                                  )}
+                                  </div>
                                 </div>
                               </TabsContent>
 
                               <TabsContent value="courtiers" className="mt-2">
-                                <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => {
-                                    setCourtiersTabExpanded(!courtiersTabExpanded);
-                                    if (!courtiersTabExpanded) {
-                                      setClientsTabExpanded(false);
-                                      setNotairesTabExpanded(false);
-                                    }
-                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
-                                    {courtiersTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
-                                    {courtiersTabExpanded ? 'Masquer' : 'Ajouter'}
-                                  </Button>
-                                  {courtiersTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                      <div className="flex gap-2 mb-2">
-                                        <div className="relative flex-1">
-                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                          <Input
-                                            placeholder="Rechercher..."
-                                            value={courtierSearchTerm}
-                                            onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                                            className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                          />
-                                        </div>
-                                        <Button
-                                         type="button"
-                                         size="sm"
-                                         onClick={() => {
-                                           setEditingClientForForm(null);
-                                           setClientTypeForForm("Courtier immobilier");
-                                           setIsClientFormDialogOpen(true);
-                                         }}
-                                         className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                        >
-                                         <Plus className="w-3 h-3 mr-1" />
-                                         Nouveau
-                                        </Button>
+                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                  {/* Colonne gauche - Courtiers sélectionnés */}
+                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={courtierSearchTerm}
+                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
                                       </div>
-                                      <div className="grid grid-cols-3 gap-2">
-                                        {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
-                                          <div
-                                           key={courtier.id}
-                                           className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                             nouveauDossierForm.courtiers_ids.includes(courtier.id)
-                                               ? 'bg-blue-500/20 border border-blue-500/30'
-                                               : 'bg-slate-700/50 hover:bg-slate-700'
-                                           }`}
-                                            onClick={() => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                courtiers_ids: prev.courtiers_ids.includes(courtier.id)
-                                                  ? prev.courtiers_ids.filter(id => id !== courtier.id)
-                                                  : [...prev.courtiers_ids, courtier.id]
-                                              }));
-                                            }}
-                                          >
-                                            <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
-                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                              {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
-                                                <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
-                                              )}
-                                              {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                                                <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
-                                              )}
-                                              {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                                                <p>
-                                                  📞 <a 
-                                                    href={`tel:${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                  >
-                                                    {courtier.telephones.find(t => t.actuel).telephone}
-                                                  </a>
-                                                </p>
-                                              )}
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Courtier immobilier");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
+                                    {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
+                                        {nouveauDossierForm.courtiers_ids.map((courtierId) => {
+                                          const courtier = getClientById(courtierId);
+                                          return courtier ? (
+                                            <div 
+                                             key={courtierId} 
+                                             className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                              onClick={() => {
+                                                if (window.openClientForEdit) {
+                                                  window.openClientForEdit(courtier);
+                                                }
+                                              }}
+                                            >
+                                              <button type="button" onClick={(e) => {
+                                                e.stopPropagation();
+                                                setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                              }} className="absolute right-1 top-1 hover:text-red-400">
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                              <p className="text-xs font-medium pr-4">{courtier.prenom} {courtier.nom}</p>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ) : null;
+                                        })}
                                       </div>
+                                    ) : (
+                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun courtier sélectionné</p>
+                                    )}
+                                  </div>
+
+                                  {/* Colonne droite - Liste des courtiers existants */}
+                                  <div className="border-l border-slate-700 pl-3">
+                                    <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                      {filteredCourtiersForSelector.length > 0 ? (
+                                        filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
+                                          const isSelected = nouveauDossierForm.courtiers_ids.includes(courtier.id);
+                                          return (
+                                            <div
+                                              key={courtier.id}
+                                              onClick={() => {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  courtiers_ids: prev.courtiers_ids.includes(courtier.id)
+                                                    ? prev.courtiers_ids.filter(id => id !== courtier.id)
+                                                    : [...prev.courtiers_ids, courtier.id]
+                                                }));
+                                              }}
+                                              className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
+                                                isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                              }`}
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <span className="font-medium truncate">{courtier.prenom} {courtier.nom}</span>
+                                                {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                              </div>
+                                              <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                                                  <p>
+                                                    📞 <a 
+                                                      href={`tel:${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                    >
+                                                      {courtier.telephones.find(t => t.actuel).telephone}
+                                                    </a>
+                                                  </p>
+                                                )}
+                                                {courtier.courriels?.find(c => c.actuel)?.courriel && <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      ) : (
+                                        <p className="text-slate-500 text-xs text-center py-2">Aucun courtier</p>
+                                      )}
                                     </div>
-                                  )}
-                                  {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                    <div className="grid grid-cols-3 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                      {nouveauDossierForm.courtiers_ids.map((courtierId) => {
-                                        const courtier = getClientById(courtierId);
-                                        return courtier ? (
-                                          <div 
-                                           key={courtierId} 
-                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                            onClick={() => {
-                                              if (window.openClientForEdit) {
-                                                window.openClientForEdit(courtier);
-                                              }
-                                            }}
-                                          >
-                                            <button type="button" onClick={(e) => {
-                                              e.stopPropagation();
-                                              setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
-                                            }} className="absolute right-1 top-1 hover:text-red-400">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <p className="text-xs font-medium pr-4">{courtier.prenom} {courtier.nom}</p>
-                                          </div>
-                                        ) : null;
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun courtier</p>
-                                  )}
+                                  </div>
                                 </div>
                               </TabsContent>
                             </Tabs>
