@@ -368,25 +368,20 @@ export default function DocumentsStepForm({
                     {files.map((file) => (
                       <div
                         key={file.id}
-                        className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
-                        onClick={() => handlePreview(file)}
+                        className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group border border-slate-600"
                       >
-                        <div className="aspect-square flex items-center justify-center bg-slate-800/50">
+                        <div 
+                          className="aspect-square flex items-center justify-center bg-slate-800/50 cursor-pointer"
+                          onClick={() => handlePreview(file)}
+                        >
                           {isImageFile(file.name) ? (
-                            <div className="w-full h-full p-2">
-                              <img
-                                src={file.webUrl}
-                                alt={file.name}
-                                className="w-full h-full object-cover rounded"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<div class="flex items-center justify-center h-full">' + getFileIcon(file.name) + '</div>';
-                                }}
-                              />
+                            <div className="w-full h-full p-1 flex items-center justify-center bg-slate-900/50">
+                              <FileText className="w-12 h-12 text-purple-400 opacity-50" />
                             </div>
                           ) : (
-                            <div className="flex items-center justify-center">
-                              {getFileIcon(file.name)}
+                            <div className="flex flex-col items-center justify-center gap-2">
+                              <div className="scale-150">{getFileIcon(file.name)}</div>
+                              <Eye className="w-4 h-4 text-slate-500" />
                             </div>
                           )}
                         </div>
@@ -394,13 +389,23 @@ export default function DocumentsStepForm({
                           <p className="text-slate-300 text-xs truncate" title={file.name}>{file.name}</p>
                           <p className="text-slate-500 text-[10px]">{formatFileSize(file.size)}</p>
                         </div>
-                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-1 right-1 flex gap-1 bg-slate-900/95 rounded p-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
+                            className="h-5 w-5 p-0 text-slate-400 hover:text-white"
+                            title="Visualiser"
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
-                            className="h-6 w-6 p-0 bg-slate-900/90 text-slate-400 hover:text-white"
+                            className="h-5 w-5 p-0 text-slate-400 hover:text-white"
                             title="Télécharger"
                           >
                             <Download className="w-3 h-3" />
@@ -410,7 +415,7 @@ export default function DocumentsStepForm({
                             variant="ghost"
                             size="sm"
                             onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
-                            className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             title="Supprimer"
                           >
                             <Trash2 className="w-3 h-3" />
