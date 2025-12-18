@@ -2927,15 +2927,15 @@ export default function PriseDeMandat() {
                             {/* Tabs Clients/Notaires/Courtiers */}
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
                               <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
-                                <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 flex items-center gap-1">
+                                <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
                                   Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400 flex items-center gap-1">
+                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400 data-[state=active]:border-b-2 data-[state=active]:border-purple-400 flex items-center gap-1">
                                   <FileText className="w-3 h-3" />
                                   Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400 flex items-center gap-1">
+                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400 data-[state=active]:border-b-2 data-[state=active]:border-orange-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
                                   Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
                                 </TabsTrigger>
@@ -3352,7 +3352,7 @@ export default function PriseDeMandat() {
                                     <TabsTrigger
                                       key={index}
                                       value={index.toString()}
-                                      className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
+                                      className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:border-b-2 data-[state=active]:border-blue-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
                                     >
                                       {mandat.type_mandat || `Mandat ${index + 1}`}
                                     </TabsTrigger>
