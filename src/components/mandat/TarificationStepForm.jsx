@@ -229,7 +229,7 @@ export default function TarificationStepForm({
                               checked={mandat.taxes_incluses || false}
                               onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
                               disabled={disabled}
-                              className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                              className="border-2 border-slate-400 bg-slate-700 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-400"
                             />
                           </td>
                         </tr>
