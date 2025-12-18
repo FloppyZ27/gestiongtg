@@ -3014,11 +3014,11 @@ export default function PriseDeMandat() {
                                               <p>
                                                 📞 <span 
                                                   onClick={() => {
-                                                    const link = document.createElement('a');
-                                                    link.href = `3cx://call/${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
+                                                    const iframe = document.createElement('iframe');
+                                                    iframe.style.display = 'none';
+                                                    iframe.src = `3cx://call/${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
+                                                    document.body.appendChild(iframe);
+                                                    setTimeout(() => document.body.removeChild(iframe), 100);
                                                   }}
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
@@ -3130,11 +3130,11 @@ export default function PriseDeMandat() {
                                               <p>
                                                 📞 <span 
                                                   onClick={() => {
-                                                    const link = document.createElement('a');
-                                                    link.href = `3cx://call/${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
+                                                    const iframe = document.createElement('iframe');
+                                                    iframe.style.display = 'none';
+                                                    iframe.src = `3cx://call/${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
+                                                    document.body.appendChild(iframe);
+                                                    setTimeout(() => document.body.removeChild(iframe), 100);
                                                   }}
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
@@ -3246,11 +3246,11 @@ export default function PriseDeMandat() {
                                               <p>
                                                 📞 <span 
                                                   onClick={() => {
-                                                    const link = document.createElement('a');
-                                                    link.href = `3cx://call/${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
+                                                    const iframe = document.createElement('iframe');
+                                                    iframe.style.display = 'none';
+                                                    iframe.src = `3cx://call/${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`;
+                                                    document.body.appendChild(iframe);
+                                                    setTimeout(() => document.body.removeChild(iframe), 100);
                                                   }}
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
@@ -4545,11 +4545,11 @@ export default function PriseDeMandat() {
                           <p>
                             📞 <span 
                               onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = `3cx://call/${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
+                                const iframe = document.createElement('iframe');
+                                iframe.style.display = 'none';
+                                iframe.src = `3cx://call/${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`;
+                                document.body.appendChild(iframe);
+                                setTimeout(() => document.body.removeChild(iframe), 100);
                               }}
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
@@ -4641,11 +4641,11 @@ export default function PriseDeMandat() {
                           <p>
                             📞 <span 
                               onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = `3cx://call/${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
+                                const iframe = document.createElement('iframe');
+                                iframe.style.display = 'none';
+                                iframe.src = `3cx://call/${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`;
+                                document.body.appendChild(iframe);
+                                setTimeout(() => document.body.removeChild(iframe), 100);
                               }}
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
@@ -4737,11 +4737,11 @@ export default function PriseDeMandat() {
                           <p>
                             📞 <span 
                               onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = `3cx://call/${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
+                                const iframe = document.createElement('iframe');
+                                iframe.style.display = 'none';
+                                iframe.src = `3cx://call/${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`;
+                                document.body.appendChild(iframe);
+                                setTimeout(() => document.body.removeChild(iframe), 100);
                               }}
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
