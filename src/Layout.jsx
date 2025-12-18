@@ -518,7 +518,7 @@ function LayoutContent({ children, currentPageName }) {
           border-bottom-color: rgb(168, 85, 247) !important;
         }
 
-        /* Tabs avec couleur orange - en vert */
+        /* Tabs avec couleur orange - en orange */
         button[role="tab"][class*="orange"]:not([data-state="active"]),
         [role="tab"][class*="orange"]:not([data-state="active"]) {
           color: rgb(148, 163, 184) !important;
@@ -526,19 +526,19 @@ function LayoutContent({ children, currentPageName }) {
 
         button[role="tab"][class*="orange"]:not([data-state="active"]):hover,
         [role="tab"][class*="orange"]:not([data-state="active"]):hover {
-          background: rgba(16, 185, 129, 0.15) !important;
-          background-color: rgba(16, 185, 129, 0.15) !important;
+          background: rgba(249, 115, 22, 0.15) !important;
+          background-color: rgba(249, 115, 22, 0.15) !important;
           background-image: none !important;
-          color: rgb(16, 185, 129) !important;
+          color: rgb(251, 146, 60) !important;
         }
 
         button[role="tab"][class*="orange"][data-state="active"],
         [role="tab"][class*="orange"][data-state="active"] {
-          background: rgba(16, 185, 129, 0.25) !important;
-          background-color: rgba(16, 185, 129, 0.25) !important;
+          background: rgba(249, 115, 22, 0.25) !important;
+          background-color: rgba(249, 115, 22, 0.25) !important;
           background-image: none !important;
-          color: rgb(16, 185, 129) !important;
-          border-bottom: 2px solid rgb(16, 185, 129) !important;
+          color: rgb(251, 146, 60) !important;
+          border-bottom: 2px solid rgb(251, 146, 60) !important;
         }
 
         /* Badges et éléments orange dans les sections mandats - en orange */
