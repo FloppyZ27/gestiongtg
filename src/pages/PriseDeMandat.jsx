@@ -3793,6 +3793,16 @@ export default function PriseDeMandat() {
 
                  {/* Boutons tout en bas */}
                  <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                   <Button type="button" variant="outline" onClick={() => {
+                     if (showCancelConfirmDossier) return;
+                     setShowCancelConfirmDossier(true);
+                   }} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                     Annuler
+                   </Button>
+                   <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                     Créer le dossier
+                   </Button>
+                 </div>
                     <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
                       Fermer
                     </Button>
