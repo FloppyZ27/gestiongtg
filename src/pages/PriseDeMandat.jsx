@@ -3066,12 +3066,26 @@ export default function PriseDeMandat() {
                                           );
                                         })
                                       ) : (
-                                        <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
+                                       <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
                                       )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </TabsContent>
+                                      </div>
+                                      </div>
+                                      )}
+                                      {contactsListCollapsed && (
+                                      <div className="absolute top-2 right-2">
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(false)}
+                                       className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                      </Button>
+                                      </div>
+                                      )}
+                                      </div>
+                                      </TabsContent>
 
                               <TabsContent value="notaires" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
