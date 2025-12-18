@@ -2743,7 +2743,11 @@ export default function Dossiers() {
                     <p className="truncate">✉️ {client.courriels.find((c) => c.actuel).courriel}</p>
                     }
                         {client.telephones?.find((t) => t.actuel)?.telephone &&
-                    <p>📞 {client.telephones.find((t) => t.actuel).telephone}</p>
+                    <p>
+                      📞 <a href={`tel:${client.telephones.find((t) => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                        {client.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
                     }
                       </div>
                       <Button
@@ -2817,7 +2821,11 @@ export default function Dossiers() {
                     <p className="truncate">✉️ {notaire.courriels.find((c) => c.actuel).courriel}</p>
                     }
                         {notaire.telephones?.find((t) => t.actuel)?.telephone &&
-                    <p>📞 {notaire.telephones.find((t) => t.actuel).telephone}</p>
+                    <p>
+                      📞 <a href={`tel:${notaire.telephones.find((t) => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                        {notaire.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
                     }
                       </div>
                       <Button
@@ -2891,7 +2899,11 @@ export default function Dossiers() {
                     <p className="truncate">✉️ {courtier.courriels.find((c) => c.actuel).courriel}</p>
                     }
                         {courtier.telephones?.find((t) => t.actuel)?.telephone &&
-                    <p>📞 {courtier.telephones.find((t) => t.actuel).telephone}</p>
+                    <p>
+                      📞 <a href={`tel:${courtier.telephones.find((t) => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                        {courtier.telephones.find((t) => t.actuel).telephone}
+                      </a>
+                    </p>
                     }
                       </div>
                       <Button

@@ -3011,7 +3011,11 @@ export default function PriseDeMandat() {
                                               <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
                                             )}
                                             {client.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>📞 {client.telephones.find(t => t.actuel).telephone}</p>
+                                              <p>
+                                                📞 <a href={`tel:${client.telephones.find(t => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                  {client.telephones.find(t => t.actuel).telephone}
+                                                </a>
+                                              </p>
                                             )}
                                           </div>
                                         </div>
@@ -3114,7 +3118,11 @@ export default function PriseDeMandat() {
                                               <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
                                             )}
                                             {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>📞 {notaire.telephones.find(t => t.actuel).telephone}</p>
+                                              <p>
+                                                📞 <a href={`tel:${notaire.telephones.find(t => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                  {notaire.telephones.find(t => t.actuel).telephone}
+                                                </a>
+                                              </p>
                                             )}
                                           </div>
                                         </div>
@@ -3217,7 +3225,11 @@ export default function PriseDeMandat() {
                                               <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
                                             )}
                                             {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>📞 {courtier.telephones.find(t => t.actuel).telephone}</p>
+                                              <p>
+                                                📞 <a href={`tel:${courtier.telephones.find(t => t.actuel).telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                  {courtier.telephones.find(t => t.actuel).telephone}
+                                                </a>
+                                              </p>
                                             )}
                                           </div>
                                         </div>
@@ -4503,7 +4515,11 @@ export default function PriseDeMandat() {
                           <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
                         )}
                         {getCurrentValue(client.telephones, 'telephone') && (
-                          <p>📞 {getCurrentValue(client.telephones, 'telephone')}</p>
+                          <p>
+                            📞 <a href={`tel:${getCurrentValue(client.telephones, 'telephone')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                              {getCurrentValue(client.telephones, 'telephone')}
+                            </a>
+                          </p>
                         )}
                       </div>
                       <Button
@@ -4586,7 +4602,11 @@ export default function PriseDeMandat() {
                           <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
                         )}
                         {getCurrentValue(notaire.telephones, 'telephone') && (
-                          <p>📞 {getCurrentValue(notaire.telephones, 'telephone')}</p>
+                          <p>
+                            📞 <a href={`tel:${getCurrentValue(notaire.telephones, 'telephone')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                              {getCurrentValue(notaire.telephones, 'telephone')}
+                            </a>
+                          </p>
                         )}
                       </div>
                       <Button
@@ -4669,7 +4689,11 @@ export default function PriseDeMandat() {
                           <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
                         )}
                         {getCurrentValue(courtier.telephones, 'telephone') && (
-                          <p>📞 {getCurrentValue(courtier.telephones, 'telephone')}</p>
+                          <p>
+                            📞 <a href={`tel:${getCurrentValue(courtier.telephones, 'telephone')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                              {getCurrentValue(courtier.telephones, 'telephone')}
+                            </a>
+                          </p>
                         )}
                       </div>
                       <Button

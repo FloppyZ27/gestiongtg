@@ -1210,7 +1210,11 @@ export default function ClientFormDialog({
                                 {formData.telephones.map((item, index) => (
                                   <React.Fragment key={index}>
                                     <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                        <TableCell className="text-white text-sm">{item.telephone}</TableCell>
+                                        <TableCell className="text-white text-sm">
+                                          <a href={`tel:${item.telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                            {item.telephone}
+                                          </a>
+                                        </TableCell>
                                         <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
                                         <TableCell>
                                           <Select 
