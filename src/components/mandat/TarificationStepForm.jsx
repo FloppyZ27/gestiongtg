@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, DollarSign, Receipt } from "lucide-react";
+import { ChevronDown, ChevronUp, DollarSign, Receipt, ToggleLeft, ToggleRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const getAbbreviatedMandatType = (type) => {
@@ -225,12 +225,18 @@ export default function TarificationStepForm({
                             />
                           </td>
                           <td className="p-2 text-center">
-                            <Checkbox
-                              checked={mandat.taxes_incluses || false}
-                              onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
+                            <button
+                              type="button"
+                              onClick={() => !disabled && handleCheckboxChange(index, 'taxes_incluses', !mandat.taxes_incluses)}
                               disabled={disabled}
-                              className="!border-2 !border-white !bg-white data-[state=checked]:!bg-white data-[state=checked]:!border-white data-[state=checked]:!text-purple-500"
-                            />
+                              className="transition-colors"
+                            >
+                              {mandat.taxes_incluses ? (
+                                <ToggleRight className="w-8 h-8 text-emerald-400" />
+                              ) : (
+                                <ToggleLeft className="w-8 h-8 text-slate-500" />
+                              )}
+                            </button>
                           </td>
                         </tr>
                       );
