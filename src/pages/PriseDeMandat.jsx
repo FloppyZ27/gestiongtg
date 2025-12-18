@@ -3012,9 +3012,12 @@ export default function PriseDeMandat() {
                                             )}
                                             {client.telephones?.find(t => t.actuel)?.telephone && (
                                               <p>
-                                                📞 <a href={`3cx://call/${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                📞 <span 
+                                                  onClick={() => window.location.href = `3cx://call/${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                >
                                                   {client.telephones.find(t => t.actuel).telephone}
-                                                </a>
+                                                </span>
                                               </p>
                                             )}
                                           </div>
@@ -3119,9 +3122,12 @@ export default function PriseDeMandat() {
                                             )}
                                             {notaire.telephones?.find(t => t.actuel)?.telephone && (
                                               <p>
-                                                📞 <a href={`3cx://call/${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                📞 <span 
+                                                  onClick={() => window.location.href = `3cx://call/${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                >
                                                   {notaire.telephones.find(t => t.actuel).telephone}
-                                                </a>
+                                                </span>
                                               </p>
                                             )}
                                           </div>
@@ -3226,9 +3232,12 @@ export default function PriseDeMandat() {
                                             )}
                                             {courtier.telephones?.find(t => t.actuel)?.telephone && (
                                               <p>
-                                                📞 <a href={`3cx://call/${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                                📞 <span 
+                                                  onClick={() => window.location.href = `3cx://call/${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                >
                                                   {courtier.telephones.find(t => t.actuel).telephone}
-                                                </a>
+                                                </span>
                                               </p>
                                             )}
                                           </div>
@@ -4516,9 +4525,12 @@ export default function PriseDeMandat() {
                         )}
                         {getCurrentValue(client.telephones, 'telephone') && (
                           <p>
-                            📞 <a href={`3cx://call/${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                            📞 <span 
+                              onClick={() => window.location.href = `3cx://call/${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
                               {getCurrentValue(client.telephones, 'telephone')}
-                            </a>
+                            </span>
                           </p>
                         )}
                       </div>
@@ -4603,9 +4615,12 @@ export default function PriseDeMandat() {
                         )}
                         {getCurrentValue(notaire.telephones, 'telephone') && (
                           <p>
-                            📞 <a href={`3cx://call/${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                            📞 <span 
+                              onClick={() => window.location.href = `3cx://call/${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
                               {getCurrentValue(notaire.telephones, 'telephone')}
-                            </a>
+                            </span>
                           </p>
                         )}
                       </div>
@@ -4690,9 +4705,12 @@ export default function PriseDeMandat() {
                         )}
                         {getCurrentValue(courtier.telephones, 'telephone') && (
                           <p>
-                            📞 <a href={`3cx://call/${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                            📞 <span 
+                              onClick={() => window.location.href = `3cx://call/${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
                               {getCurrentValue(courtier.telephones, 'telephone')}
-                            </a>
+                            </span>
                           </p>
                         )}
                       </div>

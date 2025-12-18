@@ -369,9 +369,12 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                 <div className="space-y-2">
                   {telephoneActuel && (
                     <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
-                      <a href={`3cx://call/${telephoneActuel.telephone.replace(/\D/g, '')}`} className="text-blue-400 hover:text-blue-300 transition-colors flex-1">
+                      <span 
+                        onClick={() => window.location.href = `3cx://call/${telephoneActuel.telephone.replace(/\D/g, '')}`}
+                        className="text-blue-400 hover:text-blue-300 transition-colors flex-1 cursor-pointer"
+                      >
                         {telephoneActuel.telephone}
-                      </a>
+                      </span>
                       <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
                         Actuel
                       </Badge>
@@ -379,9 +382,12 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   )}
                   {telephonesAnciens.map((tel, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
-                      <a href={`3cx://call/${tel.telephone.replace(/\D/g, '')}`} className="text-slate-400 hover:text-blue-400 transition-colors flex-1 text-sm">
+                      <span 
+                        onClick={() => window.location.href = `3cx://call/${tel.telephone.replace(/\D/g, '')}`}
+                        className="text-slate-400 hover:text-blue-400 transition-colors flex-1 text-sm cursor-pointer"
+                      >
                         {tel.telephone}
-                      </a>
+                      </span>
                       <Badge variant="outline" className="bg-slate-700 text-slate-400 border-slate-600 ml-2 flex-shrink-0">
                         Ancien
                       </Badge>
