@@ -166,13 +166,13 @@ export default function ProfessionnelStepForm({
 
   const getActiveList = () => {
     if (activeField === "notaire") {
-      return { list: filteredNotaires, type: "notaire", color: "purple", selectedIds: selectedNotaireIds, onSelect: handleSelectProfessionnel };
+      return { list: filteredNotaires, type: "notaire", color: "blue", selectedIds: selectedNotaireIds, onSelect: handleSelectProfessionnel };
     }
     if (activeField === "courtier") {
-      return { list: filteredCourtiers, type: "courtier", color: "orange", selectedIds: selectedCourtierIds, onSelect: handleSelectProfessionnel };
+      return { list: filteredCourtiers, type: "courtier", color: "blue", selectedIds: selectedCourtierIds, onSelect: handleSelectProfessionnel };
     }
     if (activeField === "compagnie") {
-      return { list: filteredCompagnies, type: "compagnie", color: "cyan", selectedIds: selectedCompagnieIds, onSelect: handleSelectProfessionnel };
+      return { list: filteredCompagnies, type: "compagnie", color: "blue", selectedIds: selectedCompagnieIds, onSelect: handleSelectProfessionnel };
     }
     return null;
   };
@@ -198,7 +198,7 @@ export default function ProfessionnelStepForm({
                   return notaire ? (
                     <Badge 
                       key={notaireId}
-                      className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs cursor-pointer hover:bg-purple-500/30 transition-colors"
+                      className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (window.openClientForEdit) {
@@ -215,7 +215,7 @@ export default function ProfessionnelStepForm({
                   return courtier ? (
                     <Badge 
                       key={courtierId}
-                      className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs cursor-pointer hover:bg-orange-500/30 transition-colors"
+                      className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (window.openClientForEdit) {
@@ -232,7 +232,7 @@ export default function ProfessionnelStepForm({
                   return compagnie ? (
                     <Badge 
                       key={compagnieId}
-                      className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs cursor-pointer hover:bg-cyan-500/30 transition-colors"
+                      className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (window.openClientForEdit) {
