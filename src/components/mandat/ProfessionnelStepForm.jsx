@@ -322,16 +322,9 @@ export default function ProfessionnelStepForm({
                             <p className="font-medium">{item.prenom} {item.nom}</p>
                             {getCurrentValue(item.telephones, 'telephone') && (
                               <p className="mt-0.5">
-                                📞 <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.location.href = `3cx://call/${getCurrentValue(item.telephones, 'telephone')}`;
-                                  }}
-                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                >
+                                📞 <a href={`3cx://call/${getCurrentValue(item.telephones, 'telephone')}`} className="text-blue-400 hover:text-blue-300 transition-colors" onClick={(e) => e.stopPropagation()}>
                                   {getCurrentValue(item.telephones, 'telephone')}
-                                </button>
+                                </a>
                               </p>
                             )}
                           </div>
