@@ -2193,7 +2193,7 @@ export default function PriseDeMandat() {
                     {formData.statut === "Mandats à ouvrir" && (
                       <Button
                         type="button"
-                        className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-purple-400 border-2 border-purple-500"
+                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 border-2 border-purple-500"
                         onClick={() => {
                           // Utiliser le numéro de dossier déjà attribué
                           const prochainNumero = formData.numero_dossier;
