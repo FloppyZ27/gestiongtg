@@ -1211,9 +1211,13 @@ export default function ClientFormDialog({
                                   <React.Fragment key={index}>
                                     <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                         <TableCell className="text-white text-sm">
-                                          <a href={`3cx://call/${item.telephone}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                          <button
+                                            type="button"
+                                            onClick={() => window.location.href = `3cx://call/${item.telephone}`}
+                                            className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                          >
                                             {item.telephone}
-                                          </a>
+                                          </button>
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
                                         <TableCell>
