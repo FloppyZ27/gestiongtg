@@ -35,6 +35,80 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
+function FileGridItem({ file, onPreview, onDownload, onDelete, getFileIcon, formatFileSize, isImageFile }) {
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
+
+  React.useEffect(() => {
+    const loadThumbnail = async () => {
+      if (file.thumbnails && file.thumbnails.length > 0 && file.thumbnails[0].medium) {
+        setThumbnailUrl(file.thumbnails[0].medium.url);
+        setThumbnailLoading(false);
+      } else {
+        setThumbnailLoading(false);
+      }
+    };
+    loadThumbnail();
+  }, [file]);
+
+  return (
+    <div
+      className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
+      onClick={() => onPreview(file)}
+    >
+      <div className="aspect-square flex items-center justify-center bg-slate-800/50 relative">
+        {thumbnailLoading ? (
+          <Loader2 className="w-6 h-6 text-slate-500 animate-spin" />
+        ) : thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={file.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              const iconContainer = document.createElement('div');
+              iconContainer.className = 'flex items-center justify-center';
+              iconContainer.innerHTML = '<div class="scale-150">' + getFileIcon(file.name).props.children + '</div>';
+              e.target.parentElement.appendChild(iconContainer);
+            }}
+          />
+        ) : (
+          <div className="scale-150">
+            {getFileIcon(file.name)}
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+      <div className="p-2 bg-slate-800/80">
+        <p className="text-slate-300 text-xs truncate" title={file.name}>{file.name}</p>
+        <p className="text-slate-500 text-[10px]">{formatFileSize(file.size)}</p>
+      </div>
+      <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={(e) => { e.stopPropagation(); onDownload(file); }}
+          className="h-6 w-6 p-0 bg-slate-900/90 text-slate-400 hover:text-white"
+          title="Télécharger"
+        >
+          <Download className="w-3 h-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={(e) => { e.stopPropagation(); onDelete(file); }}
+          className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          title="Supprimer"
+        >
+          <Trash2 className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function DocumentsStepForm({
   arpenteurGeometre,
   numeroDossier,
@@ -218,6 +292,20 @@ export default function DocumentsStepForm({
     }
   };
 
+  const getThumbnailUrl = async (file) => {
+    try {
+      const response = await base44.functions.invoke('sharepoint', {
+        action: 'getThumbnail',
+        fileId: file.id,
+        size: 'medium'
+      });
+      return response.data?.thumbnailUrl;
+    } catch (error) {
+      console.error("Erreur thumbnail:", error);
+      return null;
+    }
+  };
+
 
 
   return (
@@ -366,57 +454,16 @@ export default function DocumentsStepForm({
                 ) : (
                   <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
                     {files.map((file) => (
-                      <div
+                      <FileGridItem 
                         key={file.id}
-                        className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
-                        onClick={() => handlePreview(file)}
-                      >
-                        <div className="aspect-square flex items-center justify-center bg-slate-800/50">
-                          {isImageFile(file.name) ? (
-                            <div className="w-full h-full p-2">
-                              <img
-                                src={file.webUrl}
-                                alt={file.name}
-                                className="w-full h-full object-cover rounded"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<div class="flex items-center justify-center h-full">' + getFileIcon(file.name) + '</div>';
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-center">
-                              {getFileIcon(file.name)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-2 bg-slate-800/80">
-                          <p className="text-slate-300 text-xs truncate" title={file.name}>{file.name}</p>
-                          <p className="text-slate-500 text-[10px]">{formatFileSize(file.size)}</p>
-                        </div>
-                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
-                            className="h-6 w-6 p-0 bg-slate-900/90 text-slate-400 hover:text-white"
-                            title="Télécharger"
-                          >
-                            <Download className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
-                            className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
+                        file={file}
+                        onPreview={handlePreview}
+                        onDownload={handleDownload}
+                        onDelete={setFileToDelete}
+                        getFileIcon={getFileIcon}
+                        formatFileSize={formatFileSize}
+                        isImageFile={isImageFile}
+                      />
                     ))}
                   </div>
                 )
