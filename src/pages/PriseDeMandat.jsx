@@ -36,6 +36,17 @@ const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjami
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 const getMandatColor = (typeMandat) => {
   const colors = {
     "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
@@ -5822,7 +5833,7 @@ export default function PriseDeMandat() {
                               <div className="flex flex-wrap gap-1">
                                 {pm.mandats.slice(0, 2).map((m, idx) => (
                                   <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                                    {m.type_mandat}
+                                    {getAbbreviatedMandatType(m.type_mandat)}
                                   </Badge>
                                 ))}
                                 {pm.mandats.length > 2 && (

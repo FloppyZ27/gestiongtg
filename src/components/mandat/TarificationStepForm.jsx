@@ -6,6 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, DollarSign, Receipt } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 export default function TarificationStepForm({ 
   mandats = [],
   onTarificationChange,
@@ -161,7 +172,7 @@ export default function TarificationStepForm({
                         <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/30">
                           <td className="p-2">
                             <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                              {mandat.type_mandat}
+                              {getAbbreviatedMandatType(mandat.type_mandat)}
                             </Badge>
                           </td>
                           <td className="p-2">
