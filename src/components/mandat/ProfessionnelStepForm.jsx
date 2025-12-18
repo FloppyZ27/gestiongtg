@@ -325,7 +325,11 @@ export default function ProfessionnelStepForm({
                                 📞 <span 
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    window.location.href = `3cx://call/${getCurrentValue(item.telephones, 'telephone').replace(/\D/g, '')}`;
+                                    const link = document.createElement('a');
+                                    link.href = `3cx://call/${getCurrentValue(item.telephones, 'telephone').replace(/\D/g, '')}`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
                                   }}
                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                 >

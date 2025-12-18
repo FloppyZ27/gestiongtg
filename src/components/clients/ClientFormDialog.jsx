@@ -1212,7 +1212,13 @@ export default function ClientFormDialog({
                                     <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                         <TableCell className="text-white text-sm">
                                           <span 
-                                            onClick={() => window.location.href = `3cx://call/${item.telephone.replace(/\D/g, '')}`}
+                                            onClick={() => {
+                                              const link = document.createElement('a');
+                                              link.href = `3cx://call/${item.telephone.replace(/\D/g, '')}`;
+                                              document.body.appendChild(link);
+                                              link.click();
+                                              document.body.removeChild(link);
+                                            }}
                                             className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                           >
                                             {item.telephone}
