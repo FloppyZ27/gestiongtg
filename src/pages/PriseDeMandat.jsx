@@ -319,7 +319,7 @@ export default function PriseDeMandat() {
     numeros_civiques: [""],
     rue: "",
     ville: "",
-    province: "Québec",
+    province: "QC",
     code_postal: ""
   });
   const [clientInfo, setClientInfo] = useState({
@@ -566,7 +566,7 @@ export default function PriseDeMandat() {
       numeros_civiques: [""],
       rue: "",
       ville: "",
-      province: "Québec",
+      province: "QC",
       code_postal: "",
       numero_lot: ""
     });
@@ -1624,7 +1624,7 @@ export default function PriseDeMandat() {
       numeros_civiques: [""],
       rue: "",
       ville: "",
-      province: "Québec",
+      province: "QC",
       code_postal: "",
       numero_lot: ""
     });
@@ -1805,7 +1805,7 @@ export default function PriseDeMandat() {
         numeros_civiques: [""],
         rue: "",
         code_postal: "",
-        province: ""
+        province: "QC"
       };
     const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
 
@@ -2488,7 +2488,7 @@ export default function PriseDeMandat() {
                           numeros_civiques: addr.numeros_civiques || [""],
                           rue: addr.rue || "",
                           ville: addr.ville || "",
-                          province: addr.province || "Québec",
+                          province: addr.province || "QC",
                           code_postal: addr.code_postal || "",
                           numero_lot: lotNumbers
                         });
@@ -3318,7 +3318,7 @@ export default function PriseDeMandat() {
                               <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
-                          const defaultAdresse = sameAddressForAllMandats && firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "Québec" };
+                          const defaultAdresse = sameAddressForAllMandats && firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "QC" };
                           const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
                           
                           setNouveauDossierForm(prev => ({
@@ -3489,7 +3489,7 @@ export default function PriseDeMandat() {
                                                          numero_civique,
                                                          rue,
                                                          ville,
-                                                         province: "Québec",
+                                                         province: "QC",
                                                          code_postal,
                                                          full_address: fullAddr
                                                        };
@@ -3528,7 +3528,7 @@ export default function PriseDeMandat() {
                                                    numeros_civiques: [suggestion.numero_civique || ""],
                                                    rue: suggestion.rue || "",
                                                    ville: suggestion.ville || "",
-                                                   province: suggestion.province || "Québec",
+                                                   province: suggestion.province || "QC",
                                                    code_postal: suggestion.code_postal || ""
                                                  };
 
@@ -3642,21 +3642,28 @@ export default function PriseDeMandat() {
                                         </div>
                                         <div className="space-y-0.5">
                                           <Label className="text-slate-500 text-[10px]">Province</Label>
-                                          <Input 
-                                            placeholder="Québec" 
-                                            value={mandat.adresse_travaux?.province || "Québec"} 
-                                            onChange={(e) => {
+                                          <Select 
+                                            value={mandat.adresse_travaux?.province || "QC"} 
+                                            onValueChange={(value) => {
                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
                                                 ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, province: e.target.value } 
+                                                adresse_travaux: { ...m.adresse_travaux, province: value } 
                                               } : m;
                                               setNouveauDossierForm(prev => ({
                                                 ...prev,
                                                 mandats: prev.mandats.map(updateAddress)
                                               }));
                                             }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                          />
+                                          >
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                              {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                                <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
                                         </div>
                                       </div>
                                     </div>

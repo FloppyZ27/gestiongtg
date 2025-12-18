@@ -626,7 +626,7 @@ export default function Dossiers() {
   const addMandat = () => {
     const newIndex = formData.mandats.length;
     const firstMandat = formData.mandats[0];
-    const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" };
+    const defaultAdresse = firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "QC" };
     const defaultLots = firstMandat?.lots ? [...firstMandat.lots] : [];
 
     setFormData((prev) => ({
