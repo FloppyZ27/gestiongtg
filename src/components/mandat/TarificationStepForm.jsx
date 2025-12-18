@@ -150,10 +150,10 @@ export default function TarificationStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-1 pb-2">
+        <CardContent className="p-0">
           {mandatsWithType.length > 0 ? (
-            <div className="space-y-2">
-              <div className="border border-slate-700 rounded-lg overflow-hidden">
+            <div className="space-y-0">
+              <div className="border-t border-slate-700 overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-slate-800/50 border-b border-slate-700">
@@ -246,6 +246,23 @@ export default function TarificationStepForm({
                     </tr>
                   </tfoot>
                 </table>
+              </div>
+              
+              {/* Option globale taxes incluses */}
+              <div className="flex items-center gap-2 p-3 bg-slate-800/50 border-t border-slate-700">
+                <Checkbox
+                  checked={mandatsWithType.length > 0 && mandatsWithType.every(m => m.taxes_incluses)}
+                  onCheckedChange={(checked) => {
+                    const updatedMandats = mandats.map(m => ({
+                      ...m,
+                      taxes_incluses: checked
+                    }));
+                    onTarificationChange(updatedMandats);
+                  }}
+                  disabled={disabled || mandatsWithType.length === 0}
+                  className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                />
+                <Label className="text-slate-400 text-sm cursor-pointer">Taxes incluses pour tous les mandats</Label>
               </div>
             </div>
           ) : (
