@@ -3670,7 +3670,6 @@ export default function PriseDeMandat() {
                                           </div>
                                           </div>
                                           </div>
-                                          </div>
 
                                           {/* Ligne délimitative */}
                                           <div className="border-t border-slate-600 my-2"></div>
@@ -3681,7 +3680,7 @@ export default function PriseDeMandat() {
 
                                           {/* Dates - 40% vertical */}
                                           <div className="space-y-2">
-                                        <div className="space-y-1">
+                                          <div className="space-y-1">
                                           <Label className="text-slate-400 text-xs">Date de signature</Label>
                                           <Input 
                                             type="date" 
