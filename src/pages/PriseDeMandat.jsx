@@ -4041,29 +4041,29 @@ export default function PriseDeMandat() {
 
                  {/* Dialog utilisateur manquant */}
                  <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Attention
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Tous les mandats doivent avoir un utilisateur assigné avant d'ouvrir le dossier.
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button 
-                 type="button" 
-                 onClick={() => setShowMissingUserWarning(false)}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Compris
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
+                   <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                     <DialogHeader>
+                       <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                         <span className="text-2xl">⚠️</span>
+                         Attention
+                         <span className="text-2xl">⚠️</span>
+                       </DialogTitle>
+                     </DialogHeader>
+                     <div className="space-y-4">
+                       <p className="text-slate-300 text-center">
+                         Tous les mandats doivent avoir un utilisateur assigné avant d'ouvrir le dossier.
+                       </p>
+                       <div className="flex justify-center gap-3 pt-4">
+                         <Button 
+                           type="button" 
+                           onClick={() => setShowMissingUserWarning(false)}
+                           className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                         >
+                           Compris
+                         </Button>
+                       </div>
+                     </div>
+                   </DialogContent>
                  </Dialog>
 
                  {/* Table des prises de mandat */}
