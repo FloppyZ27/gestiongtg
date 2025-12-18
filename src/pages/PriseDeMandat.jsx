@@ -3431,6 +3431,7 @@ export default function PriseDeMandat() {
                                     
                                     {/* Barre de recherche d'adresse */}
                                     <div className="relative mb-2">
+                                      <Label className="text-slate-400 text-xs mb-1 block">Rechercher une adresse</Label>
                                       <div className="flex gap-1 relative">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
                                         <Input
@@ -3563,13 +3564,9 @@ export default function PriseDeMandat() {
                                           ))}
                                         </div>
                                       )}
-                                    </div>
+                                      </div>
 
-                                    {/* Ligne délimitative */}
-                                    <div className="border-t border-slate-600 my-2"></div>
-
-                                    <div className="grid grid-cols-[60%_40%] gap-3">
-                                      {/* Adresse - 60% */}
+                                      {/* Adresse des travaux */}
                                       <div className="space-y-1">
                                         <div className="grid grid-cols-[100px_1fr] gap-1">
                                           <div className="space-y-0.5">
@@ -3671,19 +3668,19 @@ export default function PriseDeMandat() {
                                               </SelectContent>
                                             </Select>
                                           </div>
-                                        </div>
-                                        </div>
-                                        </div>
+                                          </div>
+                                          </div>
+                                          </div>
 
-                                        {/* Ligne délimitative */}
-                                        <div className="border-t border-slate-600 my-2"></div>
+                                          {/* Ligne délimitative */}
+                                          <div className="border-t border-slate-600 my-2"></div>
 
-                                        <div className="grid grid-cols-[60%_40%] gap-3">
-                                        {/* Espace vide - 60% */}
-                                        <div></div>
+                                          <div className="grid grid-cols-[60%_40%] gap-3">
+                                          {/* Espace vide - 60% */}
+                                          <div></div>
 
-                                        {/* Dates - 40% vertical */}
-                                        <div className="space-y-2">
+                                          {/* Dates - 40% vertical */}
+                                          <div className="space-y-2">
                                         <div className="space-y-1">
                                           <Label className="text-slate-400 text-xs">Date de signature</Label>
                                           <Input 
