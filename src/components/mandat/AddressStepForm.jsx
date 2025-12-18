@@ -305,7 +305,7 @@ export default function AddressStepForm({
                       <SelectContent className="bg-slate-800 border-slate-700">
                         {PROVINCES_CANADA.map((prov) => (
                           <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">
-                            {prov.value} - {prov.label}
+                            {prov.value}
                           </SelectItem>
                         ))}
                       </SelectContent>

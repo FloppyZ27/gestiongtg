@@ -930,7 +930,7 @@ export default function ClientFormDialog({
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {PROVINCES_CANADIENNES.map(prov => (
-                            <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">{prov.value} - {prov.label}</SelectItem>
+                            <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">{prov.value}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

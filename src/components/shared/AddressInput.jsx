@@ -234,7 +234,7 @@ export default function AddressInput({
                 <SelectContent className="bg-slate-800 border-slate-700">
                   {PROVINCES_CANADIENNES.map((prov) => (
                     <SelectItem key={prov.value} value={prov.value} className="text-white">
-                      {prov.value} - {prov.label}
+                      {prov.value}
                     </SelectItem>
                   ))}
                 </SelectContent>
