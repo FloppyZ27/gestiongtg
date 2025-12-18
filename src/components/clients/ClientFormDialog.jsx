@@ -78,6 +78,9 @@ export default function ClientFormDialog({
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
   
+  // Delete confirmation dialogs
+  const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, type: null, index: null, item: null });
+  
   // Address search
   const [addressSearchTerm, setAddressSearchTerm] = useState("");
   const [addressSearchResults, setAddressSearchResults] = useState([]);
@@ -408,19 +411,25 @@ export default function ClientFormDialog({
     onOpenChange(false);
   };
 
-  const removeClientField = async (fieldName, index) => {
+  const handleDeleteRequest = (fieldName, index) => {
     const fieldLabels = {
       adresses: "cette adresse",
       courriels: "ce courriel",
       telephones: "ce téléphone"
     };
     
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer ${fieldLabels[fieldName]} ?`)) {
-      return;
-    }
-    
-    // Récupérer l'élément qui sera supprimé pour l'historique
-    const itemToRemove = formData[fieldName][index];
+    const itemToDelete = formData[fieldName][index];
+    setDeleteConfirmation({
+      show: true,
+      type: fieldName,
+      index: index,
+      item: itemToDelete,
+      label: fieldLabels[fieldName]
+    });
+  };
+
+  const confirmDelete = async () => {
+    const { type: fieldName, index, item: itemToRemove } = deleteConfirmation;
     
     if (formData[fieldName].length > 0) {
       setFormData(prev => ({
@@ -456,6 +465,8 @@ export default function ClientFormDialog({
         queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
       }
     }
+    
+    setDeleteConfirmation({ show: false, type: null, index: null, item: null });
   };
 
   const toggleActuel = (fieldName, index) => {
@@ -1000,14 +1011,14 @@ export default function ClientFormDialog({
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
                                     <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => removeClientField('adresses', index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                      >
-                                      <Trash2 className="w-4 h-4" />
-                                      </Button>
+                                     type="button"
+                                     size="sm"
+                                     variant="ghost"
+                                     onClick={() => handleDeleteRequest('adresses', index)}
+                                     className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                     >
+                                     <Trash2 className="w-4 h-4" />
+                                     </Button>
                                       </div>
                                       </TableCell>
                                       </TableRow>
@@ -1105,13 +1116,13 @@ export default function ClientFormDialog({
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
                                       <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeClientField('courriels', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                       type="button"
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => handleDeleteRequest('courriels', index)}
+                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                       >
-                                        <Trash2 className="w-4 h-4" />
+                                       <Trash2 className="w-4 h-4" />
                                       </Button>
                                     </div>
                                   </TableCell>
@@ -1203,13 +1214,13 @@ export default function ClientFormDialog({
                                         <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
                                       <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeClientField('telephones', index)}
-                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                       type="button"
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => handleDeleteRequest('telephones', index)}
+                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                       >
-                                        <Trash2 className="w-4 h-4" />
+                                       <Trash2 className="w-4 h-4" />
                                       </Button>
                                       </div>
                                       </TableCell>
@@ -1330,6 +1341,49 @@ export default function ClientFormDialog({
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
             >
               Continuer l'édition
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Confirmation de suppression */}
+    <Dialog open={deleteConfirmation.show} onOpenChange={(open) => !open && setDeleteConfirmation({ show: false, type: null, index: null, item: null })}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Confirmation
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            Êtes-vous sûr de vouloir supprimer {deleteConfirmation.label} ?
+          </p>
+          {deleteConfirmation.item && (
+            <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 text-center">
+              <p className="text-white text-sm">
+                {deleteConfirmation.type === 'adresses' && formatAdresse(deleteConfirmation.item)}
+                {deleteConfirmation.type === 'courriels' && deleteConfirmation.item.courriel}
+                {deleteConfirmation.type === 'telephones' && `${deleteConfirmation.item.telephone} (${deleteConfirmation.item.type || 'Cellulaire'})`}
+              </p>
+            </div>
+          )}
+          <div className="flex justify-center gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={() => setDeleteConfirmation({ show: false, type: null, index: null, item: null })}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="button" 
+              onClick={confirmDelete}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Confirmer
             </Button>
           </div>
         </div>
