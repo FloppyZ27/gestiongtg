@@ -219,11 +219,11 @@ export default function ClientStepForm({
                               📞 <span 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const link = document.createElement('a');
-                                  link.href = `3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`;
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
+                                  const iframe = document.createElement('iframe');
+                                  iframe.style.display = 'none';
+                                  iframe.src = `3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`;
+                                  document.body.appendChild(iframe);
+                                  setTimeout(() => document.body.removeChild(iframe), 100);
                                 }}
                                 className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                               >

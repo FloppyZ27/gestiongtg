@@ -371,11 +371,11 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                     <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                       <span 
                         onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = `3cx://call/${telephoneActuel.telephone.replace(/\D/g, '')}`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          const iframe = document.createElement('iframe');
+                          iframe.style.display = 'none';
+                          iframe.src = `3cx://call/${telephoneActuel.telephone.replace(/\D/g, '')}`;
+                          document.body.appendChild(iframe);
+                          setTimeout(() => document.body.removeChild(iframe), 100);
                         }}
                         className="text-blue-400 hover:text-blue-300 transition-colors flex-1 cursor-pointer"
                       >
@@ -390,11 +390,11 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                     <div key={idx} className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                       <span 
                         onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = `3cx://call/${tel.telephone.replace(/\D/g, '')}`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          const iframe = document.createElement('iframe');
+                          iframe.style.display = 'none';
+                          iframe.src = `3cx://call/${tel.telephone.replace(/\D/g, '')}`;
+                          document.body.appendChild(iframe);
+                          setTimeout(() => document.body.removeChild(iframe), 100);
                         }}
                         className="text-slate-400 hover:text-blue-400 transition-colors flex-1 text-sm cursor-pointer"
                       >
