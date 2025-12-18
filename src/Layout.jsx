@@ -463,6 +463,22 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
+        /* Tabs avec couleur blue */
+        button[role="tab"][class*="blue"]:hover,
+        [role="tab"][class*="blue"]:hover {
+          background: rgba(59, 130, 246, 0.15) !important;
+          background-color: rgba(59, 130, 246, 0.15) !important;
+          background-image: none !important;
+          color: rgb(59, 130, 246) !important;
+        }
+
+        button[role="tab"][class*="blue"][class*="border-blue"],
+        [role="tab"][class*="blue"][class*="border-blue"] {
+          background: rgba(59, 130, 246, 0.1) !important;
+          color: rgb(59, 130, 246) !important;
+          border-bottom-color: rgb(59, 130, 246) !important;
+        }
+
         /* Tabs avec couleur cyan */
         button[role="tab"][class*="cyan"]:hover,
         [role="tab"][class*="cyan"]:hover {
