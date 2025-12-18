@@ -323,7 +323,7 @@ export default function ProfessionnelStepForm({
                             {getCurrentValue(item.telephones, 'telephone') && (
                               <p className="mt-0.5">
                                 📞 <a 
-                                  href={`3cx://call/${getCurrentValue(item.telephones, 'telephone').replace(/\D/g, '')}`}
+                                  href={`tel:${getCurrentValue(item.telephones, 'telephone').replace(/\D/g, '')}`}
                                   onClick={(e) => e.stopPropagation()}
                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                 >

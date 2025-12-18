@@ -370,7 +370,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   {telephoneActuel && (
                     <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                       <a 
-                        href={`3cx://call/${telephoneActuel.telephone.replace(/\D/g, '')}`}
+                        href={`tel:${telephoneActuel.telephone.replace(/\D/g, '')}`}
                         className="text-blue-400 hover:text-blue-300 transition-colors flex-1 cursor-pointer"
                       >
                         {telephoneActuel.telephone}
@@ -383,7 +383,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                   {telephonesAnciens.map((tel, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
                       <a 
-                        href={`3cx://call/${tel.telephone.replace(/\D/g, '')}`}
+                        href={`tel:${tel.telephone.replace(/\D/g, '')}`}
                         className="text-slate-400 hover:text-blue-400 transition-colors flex-1 text-sm cursor-pointer"
                       >
                         {tel.telephone}

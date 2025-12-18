@@ -2745,7 +2745,7 @@ export default function Dossiers() {
                         {client.telephones?.find((t) => t.actuel)?.telephone &&
                     <p>
                       📞 <a 
-                        href={`3cx://call/${client.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        href={`tel:${client.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {client.telephones.find((t) => t.actuel).telephone}
@@ -2826,7 +2826,7 @@ export default function Dossiers() {
                         {notaire.telephones?.find((t) => t.actuel)?.telephone &&
                     <p>
                       📞 <a 
-                        href={`3cx://call/${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        href={`tel:${notaire.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {notaire.telephones.find((t) => t.actuel).telephone}
@@ -2907,7 +2907,7 @@ export default function Dossiers() {
                         {courtier.telephones?.find((t) => t.actuel)?.telephone &&
                     <p>
                       📞 <a 
-                        href={`3cx://call/${courtier.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
+                        href={`tel:${courtier.telephones.find((t) => t.actuel).telephone.replace(/\D/g, '')}`}
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {courtier.telephones.find((t) => t.actuel).telephone}

@@ -217,7 +217,7 @@ export default function ClientStepForm({
                           {getCurrentPhone(client) && (
                             <p>
                               📞 <a 
-                                href={`3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`}
+                                href={`tel:${getCurrentPhone(client).replace(/\D/g, '')}`}
                                 onClick={(e) => e.stopPropagation()}
                                 className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                               >

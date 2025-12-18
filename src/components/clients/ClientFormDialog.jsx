@@ -1212,7 +1212,7 @@ export default function ClientFormDialog({
                                     <TableRow className="hover:bg-slate-800/30 border-slate-800">
                                         <TableCell className="text-white text-sm">
                                           <a 
-                                            href={`3cx://call/${item.telephone.replace(/\D/g, '')}`}
+                                            href={`tel:${item.telephone.replace(/\D/g, '')}`}
                                             onClick={(e) => e.stopPropagation()}
                                             className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                           >
