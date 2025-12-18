@@ -3680,7 +3680,7 @@ export default function PriseDeMandat() {
                                         <div className="bg-slate-600"></div>
 
                                         {/* Dates - 40% vertical */}
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 pr-2">
                                           <div className="space-y-1">
                                           <Label className="text-slate-400 text-xs">Date de signature</Label>
                                           <Input 
