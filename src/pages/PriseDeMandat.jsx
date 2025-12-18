@@ -2957,30 +2957,6 @@ export default function PriseDeMandat() {
                                 <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Clients sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
-                                    <div className="flex gap-2 mb-2">
-                                      <div className="relative flex-1">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={clientSearchTerm}
-                                          onChange={(e) => setClientSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
-                                      </div>
-                                      <Button
-                                       type="button"
-                                       size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Client");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                      >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
-                                      </Button>
-                                    </div>
                                     {nouveauDossierForm.clients_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.clients_ids.map((clientId) => {
@@ -3013,6 +2989,30 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des clients existants */}
                                   <div className="border-l border-slate-700 pl-3 pr-2">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={clientSearchTerm}
+                                          onChange={(e) => setClientSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Client");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
                                     <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredClientsForSelector.length > 0 ? (
@@ -3066,30 +3066,6 @@ export default function PriseDeMandat() {
                                 <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Notaires sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
-                                    <div className="flex gap-2 mb-2">
-                                      <div className="relative flex-1">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={notaireSearchTerm}
-                                          onChange={(e) => setNotaireSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
-                                      </div>
-                                      <Button
-                                       type="button"
-                                       size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Notaire");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                      >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
-                                      </Button>
-                                    </div>
                                     {nouveauDossierForm.notaires_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.notaires_ids.map((notaireId) => {
@@ -3122,6 +3098,30 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des notaires existants */}
                                   <div className="border-l border-slate-700 pl-3 pr-2">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={notaireSearchTerm}
+                                          onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Notaire");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
                                     <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredNotairesForSelector.length > 0 ? (
@@ -3175,30 +3175,6 @@ export default function PriseDeMandat() {
                                 <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Courtiers sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
-                                    <div className="flex gap-2 mb-2">
-                                      <div className="relative flex-1">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={courtierSearchTerm}
-                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
-                                      </div>
-                                      <Button
-                                       type="button"
-                                       size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Courtier immobilier");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                      >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
-                                      </Button>
-                                    </div>
                                     {nouveauDossierForm.courtiers_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.courtiers_ids.map((courtierId) => {
@@ -3231,6 +3207,30 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des courtiers existants */}
                                   <div className="border-l border-slate-700 pl-3 pr-2">
+                                    <div className="flex gap-2 mb-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={courtierSearchTerm}
+                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      <Button
+                                       type="button"
+                                       size="sm"
+                                       onClick={() => {
+                                         setEditingClientForForm(null);
+                                         setClientTypeForForm("Courtier immobilier");
+                                         setIsClientFormDialogOpen(true);
+                                       }}
+                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                      >
+                                       <Plus className="w-3 h-3 mr-1" />
+                                       Nouveau
+                                      </Button>
+                                    </div>
                                     <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredCourtiersForSelector.length > 0 ? (
