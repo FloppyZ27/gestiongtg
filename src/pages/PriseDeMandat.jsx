@@ -3886,7 +3886,7 @@ export default function PriseDeMandat() {
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Commentaires
                         </TabsTrigger>
-                        <TabsTrigger value="historique" className="orange text-xs bg-transparent border-none data-[state=active]:text-orange-400 data-[state=active]:bg-orange-500/20 data-[state=active]:border-b-2 data-[state=active]:border-orange-400 data-[state=inactive]:text-slate-400 hover:text-orange-300">
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
                           <Clock className="w-4 h-4 mr-1" />
                           Historique
                         </TabsTrigger>
