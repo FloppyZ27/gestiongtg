@@ -3721,6 +3721,20 @@ export default function PriseDeMandat() {
                       </Card>
                     </div>
 
+                    {/* Section Tarification */}
+                    <TarificationStepForm
+                      disabled={false}
+                      mandats={nouveauDossierForm.mandats}
+                      onTarificationChange={(updatedMandats) => {
+                        setNouveauDossierForm(prev => ({
+                          ...prev,
+                          mandats: updatedMandats
+                        }));
+                      }}
+                      isCollapsed={tarificationStepCollapsed}
+                      onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+                    />
+
                     {/* Section Documents - Utiliser DocumentsStepForm */}
                     {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
                       <DocumentsStepForm
