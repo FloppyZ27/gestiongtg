@@ -219,9 +219,7 @@ export default function ClientStepForm({
                               📞 <span 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const link = document.createElement('a');
-                                  link.href = `3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`;
-                                  link.click();
+                                  window.location.href = `3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`;
                                 }}
                                 className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                               >
