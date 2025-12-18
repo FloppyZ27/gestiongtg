@@ -1243,7 +1243,7 @@ export default function ClientFormDialog({
             </div>
 
             {/* Right side - Commentaires et Historique Sidebar - 30% */}
-            <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+            <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
             {/* Header Tabs Commentaires/Historique - Collapsible */}
             <div 
               className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
