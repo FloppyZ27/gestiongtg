@@ -313,6 +313,7 @@ export default function PriseDeMandat() {
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
+  const [showMissingUserWarning, setShowMissingUserWarning] = useState(false);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -2764,7 +2765,7 @@ export default function PriseDeMandat() {
                     // Validation : tous les mandats doivent avoir un utilisateur assigné
                     const mandatsSansUtilisateur = nouveauDossierForm.mandats.filter(m => !m.utilisateur_assigne);
                     if (mandatsSansUtilisateur.length > 0) {
-                      alert("Tous les mandats doivent avoir un utilisateur assigné.");
+                      setShowMissingUserWarning(true);
                       return;
                     }
 
@@ -4303,6 +4304,38 @@ export default function PriseDeMandat() {
                   }}
                 >
                   Supprimer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement utilisateur assigné manquant */}
+        <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Tous les mandats doivent avoir un utilisateur assigné avant de créer le dossier.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowMissingUserWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
                 </Button>
               </div>
             </motion.div>
