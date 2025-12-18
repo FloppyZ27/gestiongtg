@@ -3017,7 +3017,7 @@ export default function PriseDeMandat() {
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
                                                   {client.telephones.find(t => t.actuel).telephone}
-                                                </span>
+                                                </a>
                                               </p>
                                             )}
                                           </div>
@@ -3127,7 +3127,7 @@ export default function PriseDeMandat() {
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
                                                   {notaire.telephones.find(t => t.actuel).telephone}
-                                                </span>
+                                                </a>
                                               </p>
                                             )}
                                           </div>
@@ -3237,7 +3237,7 @@ export default function PriseDeMandat() {
                                                   className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                                 >
                                                   {courtier.telephones.find(t => t.actuel).telephone}
-                                                </span>
+                                                </a>
                                               </p>
                                             )}
                                           </div>
@@ -4530,7 +4530,7 @@ export default function PriseDeMandat() {
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
                               {getCurrentValue(client.telephones, 'telephone')}
-                            </span>
+                            </a>
                           </p>
                         )}
                       </div>
@@ -4620,7 +4620,7 @@ export default function PriseDeMandat() {
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
                               {getCurrentValue(notaire.telephones, 'telephone')}
-                            </span>
+                            </a>
                           </p>
                         )}
                       </div>
@@ -4710,7 +4710,7 @@ export default function PriseDeMandat() {
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
                               {getCurrentValue(courtier.telephones, 'telephone')}
-                            </span>
+                            </a>
                           </p>
                         )}
                       </div>

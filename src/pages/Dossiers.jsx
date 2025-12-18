@@ -2749,7 +2749,7 @@ export default function Dossiers() {
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {client.telephones.find((t) => t.actuel).telephone}
-                      </span>
+                      </a>
                     </p>
                     }
                       </div>
@@ -2830,7 +2830,7 @@ export default function Dossiers() {
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {notaire.telephones.find((t) => t.actuel).telephone}
-                      </span>
+                      </a>
                     </p>
                     }
                       </div>
@@ -2911,7 +2911,7 @@ export default function Dossiers() {
                         className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                       >
                         {courtier.telephones.find((t) => t.actuel).telephone}
-                      </span>
+                      </a>
                     </p>
                     }
                       </div>

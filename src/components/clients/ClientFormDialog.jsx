@@ -1217,7 +1217,7 @@ export default function ClientFormDialog({
                                             className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                                           >
                                             {item.telephone}
-                                          </span>
+                                          </a>
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
                                         <TableCell>

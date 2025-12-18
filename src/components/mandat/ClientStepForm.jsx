@@ -222,7 +222,7 @@ export default function ClientStepForm({
                                 className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                               >
                                 {getCurrentPhone(client)}
-                              </span>
+                              </a>
                             </p>
                           )}
                           {getCurrentEmail(client) && <p className="truncate">✉️ {getCurrentEmail(client)}</p>}

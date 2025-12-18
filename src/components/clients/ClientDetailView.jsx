@@ -374,7 +374,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                         className="text-blue-400 hover:text-blue-300 transition-colors flex-1 cursor-pointer"
                       >
                         {telephoneActuel.telephone}
-                      </span>
+                      </a>
                       <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
                         Actuel
                       </Badge>
@@ -387,7 +387,7 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                         className="text-slate-400 hover:text-blue-400 transition-colors flex-1 text-sm cursor-pointer"
                       >
                         {tel.telephone}
-                      </span>
+                      </a>
                       <Badge variant="outline" className="bg-slate-700 text-slate-400 border-slate-600 ml-2 flex-shrink-0">
                         Ancien
                       </Badge>
