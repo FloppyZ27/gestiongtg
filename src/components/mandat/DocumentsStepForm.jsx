@@ -38,39 +38,44 @@ const formatFileSize = (bytes) => {
 function FileGridItem({ file, onPreview, onDownload, onDelete, getFileIcon, formatFileSize, isImageFile }) {
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [thumbnailLoading, setThumbnailLoading] = useState(true);
+  const [thumbnailError, setThumbnailError] = useState(false);
 
   React.useEffect(() => {
     const loadThumbnail = async () => {
-      if (file.thumbnails && file.thumbnails.length > 0 && file.thumbnails[0].medium) {
-        setThumbnailUrl(file.thumbnails[0].medium.url);
-        setThumbnailLoading(false);
-      } else {
+      try {
+        const response = await base44.functions.invoke('sharepoint', {
+          action: 'getThumbnail',
+          fileId: file.id
+        });
+        if (response.data?.thumbnailUrl) {
+          setThumbnailUrl(response.data.thumbnailUrl);
+        } else {
+          setThumbnailError(true);
+        }
+      } catch (error) {
+        console.error("Erreur chargement thumbnail:", error);
+        setThumbnailError(true);
+      } finally {
         setThumbnailLoading(false);
       }
     };
     loadThumbnail();
-  }, [file]);
+  }, [file.id]);
 
   return (
     <div
       className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
       onClick={() => onPreview(file)}
     >
-      <div className="aspect-square flex items-center justify-center bg-slate-800/50 relative">
+      <div className="aspect-square flex items-center justify-center bg-slate-800/50 relative overflow-hidden">
         {thumbnailLoading ? (
           <Loader2 className="w-6 h-6 text-slate-500 animate-spin" />
-        ) : thumbnailUrl ? (
+        ) : thumbnailUrl && !thumbnailError ? (
           <img
             src={thumbnailUrl}
             alt={file.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              const iconContainer = document.createElement('div');
-              iconContainer.className = 'flex items-center justify-center';
-              iconContainer.innerHTML = '<div class="scale-150">' + getFileIcon(file.name).props.children + '</div>';
-              e.target.parentElement.appendChild(iconContainer);
-            }}
+            className="w-full h-full object-contain p-1"
+            onError={() => setThumbnailError(true)}
           />
         ) : (
           <div className="scale-150">
