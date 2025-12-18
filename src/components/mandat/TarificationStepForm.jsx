@@ -142,117 +142,99 @@ export default function TarificationStepForm({
         <CardContent className="pt-1 pb-2">
           {mandatsWithType.length > 0 ? (
             <div className="space-y-2">
-              {mandats.map((mandat, index) => {
-                if (!mandat.type_mandat) return null;
-                const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
-                return (
-                  <div key={index} className="grid grid-cols-[180px_1fr_1fr_1fr_140px] items-center gap-4 py-2">
-                    <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 justify-center">
-                      {mandat.type_mandat}
-                    </Badge>
-                    
-                    {isMultiLotType ? (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">1er lot ($)</Label>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            value={getLocalValue(index, 'prix_premier_lot')}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9.]/g, '');
-                              handleInputChange(index, 'prix_premier_lot', val);
-                            }}
-                            onBlur={() => handleInputBlur(index, 'prix_premier_lot')}
-                            placeholder="0.00"
-                            disabled={disabled}
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Autres ($)</Label>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            value={getLocalValue(index, 'prix_autres_lots')}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9.]/g, '');
-                              handleInputChange(index, 'prix_autres_lots', val);
-                            }}
-                            onBlur={() => handleInputBlur(index, 'prix_autres_lots')}
-                            placeholder="0.00"
-                            disabled={disabled}
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-slate-400 text-xs whitespace-nowrap w-16">Prix ($)</Label>
-                          <Input
-                            type="text"
-                            inputMode="decimal"
-                            value={getLocalValue(index, 'prix_estime')}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9.]/g, '');
-                              handleInputChange(index, 'prix_estime', val);
-                            }}
-                            onBlur={() => handleInputBlur(index, 'prix_estime')}
-                            placeholder="0.00"
-                            disabled={disabled}
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
-                          />
-                        </div>
-                        <div></div>
-                      </>
-                    )}
-                    
-                    <div className="flex items-center gap-2">
-                      <Label className="text-slate-400 text-xs whitespace-nowrap">Rabais ($)</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={getLocalValue(index, 'rabais')}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9.]/g, '');
-                          handleInputChange(index, 'rabais', val);
-                        }}
-                        onBlur={() => handleInputBlur(index, 'rabais')}
-                        placeholder="0.00"
-                        disabled={disabled}
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-24"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={mandat.taxes_incluses || false}
-                        onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
-                        disabled={disabled}
-                        className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
-                      />
-                      <Label className="text-slate-400 text-xs whitespace-nowrap">Taxes incluses</Label>
-                    </div>
-                  </div>
-                );
-              })}
-              
-              {/* Résumé */}
-              <div className="pt-2 border-t border-slate-700 flex justify-end gap-6">
-                <div className="text-sm">
-                  <span className="text-slate-400">Total estimé: </span>
-                  <span className="text-white font-semibold">{totalEstime.toFixed(2)} $</span>
-                </div>
-                {totalRabais > 0 && (
-                  <div className="text-sm">
-                    <span className="text-slate-400">Total rabais: </span>
-                    <span className="text-red-400 font-semibold">-{totalRabais.toFixed(2)} $</span>
-                  </div>
-                )}
-                <div className="text-sm">
-                  <span className="text-slate-400">Net: </span>
-                  <span className="text-purple-400 font-bold">{(totalEstime - totalRabais).toFixed(2)} $</span>
-                </div>
+              <div className="border border-slate-700 rounded-lg overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-slate-800/50 border-b border-slate-700">
+                      <th className="text-left text-slate-300 p-2 font-medium">Mandat</th>
+                      <th className="text-left text-slate-300 p-2 font-medium">Prix/1er lot</th>
+                      <th className="text-left text-slate-300 p-2 font-medium">Autres lots</th>
+                      <th className="text-left text-slate-300 p-2 font-medium">Rabais</th>
+                      <th className="text-center text-slate-300 p-2 font-medium">Taxes incl.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mandats.map((mandat, index) => {
+                      if (!mandat.type_mandat) return null;
+                      const isMultiLotType = mandat.type_mandat === "Description Technique" || mandat.type_mandat === "OCTR";
+                      return (
+                        <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/30">
+                          <td className="p-2">
+                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                              {mandat.type_mandat}
+                            </Badge>
+                          </td>
+                          <td className="p-2">
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              value={getLocalValue(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, '');
+                                handleInputChange(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime', val);
+                              }}
+                              onBlur={() => handleInputBlur(index, isMultiLotType ? 'prix_premier_lot' : 'prix_estime')}
+                              placeholder="0.00"
+                              disabled={disabled}
+                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20"
+                            />
+                          </td>
+                          <td className="p-2">
+                            {isMultiLotType ? (
+                              <Input
+                                type="text"
+                                inputMode="decimal"
+                                value={getLocalValue(index, 'prix_autres_lots')}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, '');
+                                  handleInputChange(index, 'prix_autres_lots', val);
+                                }}
+                                onBlur={() => handleInputBlur(index, 'prix_autres_lots')}
+                                placeholder="0.00"
+                                disabled={disabled}
+                                className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20"
+                              />
+                            ) : (
+                              <span className="text-slate-600">-</span>
+                            )}
+                          </td>
+                          <td className="p-2">
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              value={getLocalValue(index, 'rabais')}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, '');
+                                handleInputChange(index, 'rabais', val);
+                              }}
+                              onBlur={() => handleInputBlur(index, 'rabais')}
+                              placeholder="0.00"
+                              disabled={disabled}
+                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20"
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={mandat.taxes_incluses || false}
+                              onCheckedChange={(checked) => handleCheckboxChange(index, 'taxes_incluses', checked)}
+                              disabled={disabled}
+                              className="border-slate-500 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-slate-800/50 border-t-2 border-slate-600">
+                      <td className="p-2 text-slate-400 text-xs font-medium">Total</td>
+                      <td className="p-2 text-white text-xs font-semibold">{totalEstime.toFixed(2)} $</td>
+                      <td className="p-2"></td>
+                      <td className="p-2 text-red-400 text-xs font-semibold">{totalRabais > 0 ? `-${totalRabais.toFixed(2)} $` : '-'}</td>
+                      <td className="p-2 text-center text-purple-400 text-xs font-bold">{(totalEstime - totalRabais).toFixed(2)} $</td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
           ) : (
