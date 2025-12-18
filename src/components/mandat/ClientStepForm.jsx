@@ -95,15 +95,15 @@ export default function ClientStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-              <Users className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+              <Users className="w-3.5 h-3.5 text-blue-400" />
             </div>
-            <CardTitle className="text-emerald-300 text-base">Client</CardTitle>
+            <CardTitle className="text-blue-300 text-base">Client</CardTitle>
             {/* Afficher les clients sélectionnés */}
             {selectedClientIds.length > 0 && (
               <div className="flex gap-1">
@@ -112,7 +112,7 @@ export default function ClientStepForm({
                   return client ? (
                     <Badge 
                       key={clientId} 
-                      className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs cursor-pointer hover:bg-emerald-500/30 transition-colors"
+                      className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (window.openClientForEdit) {
@@ -134,7 +134,7 @@ export default function ClientStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="grid grid-cols-[70%_30%] gap-4">
-            <div className="space-y-2 border-r-2 border-emerald-500/30 pr-4">
+            <div className="space-y-2 border-r-2 border-blue-500/30 pr-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Prénom</Label>
@@ -206,7 +206,7 @@ export default function ClientStepForm({
                         onClick={() => !disabled && handleClientClick(client, isSelected)}
                         className={`px-2 py-1.5 rounded text-xs ${
                           disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${
-                          isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                          isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
                         }`}
                       >
                         <div className="flex items-center justify-between">

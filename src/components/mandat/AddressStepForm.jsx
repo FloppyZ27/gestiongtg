@@ -167,17 +167,17 @@ export default function AddressStepForm({
   return (
     <Card className="border-slate-700 bg-slate-800/30">
       <CardHeader 
-                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
         onClick={onToggleCollapse}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                <Home className="w-3.5 h-3.5 text-blue-400" />
+              <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                <Home className="w-3.5 h-3.5 text-emerald-400" />
               </div>
-              <CardTitle className="text-blue-300 text-base">Adresse des travaux</CardTitle>
+              <CardTitle className="text-emerald-300 text-base">Adresse des travaux</CardTitle>
             {hasAddress && (
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
                 {addressForm.numero_civique} {addressForm.rue}, {addressForm.ville}
               </Badge>
             )}
@@ -220,7 +220,7 @@ export default function AddressStepForm({
                         onClick={() => selectSuggestion(suggestion)}
                         className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
                       >
-                        <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                        <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                         <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
                       </div>
                     ))}
@@ -290,7 +290,7 @@ export default function AddressStepForm({
               </div>
 
               {/* Colonne centrale - N° de lot */}
-              <div className="border-l-2 border-r-2 border-emerald-500/30 pl-3 pr-3 flex flex-col h-full">
+              <div className="border-l-2 border-r-2 border-purple-500/30 pl-3 pr-3 flex flex-col h-full">
                 <p className="text-slate-400 text-xs mb-1.5">N° de lot</p>
                 <textarea
                   value={addressForm.numero_lot}
