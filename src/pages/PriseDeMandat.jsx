@@ -2901,8 +2901,8 @@ export default function PriseDeMandat() {
 
                         {!infoDossierCollapsed && (
                           <CardContent className="pt-2 pb-3">
-                           <div className="grid grid-cols-[25%_75%] gap-4">
-                             {/* Colonne gauche - Informations de base - 25% */}
+                           <div className="grid grid-cols-[33%_67%] gap-4">
+                             {/* Colonne gauche - Informations de base - 33% */}
                              <div className="space-y-2 border-r border-slate-700 pr-4">
                                <div className="space-y-1">
                                  <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
@@ -2927,7 +2927,7 @@ export default function PriseDeMandat() {
                                </div>
                              </div>
 
-                             {/* Colonne droite - Tabs Clients/Notaires/Courtiers - 75% */}
+                             {/* Colonne droite - Tabs Clients/Notaires/Courtiers - 67% */}
                              <div>
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
                               <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
@@ -2946,7 +2946,7 @@ export default function PriseDeMandat() {
                               </TabsList>
 
                               <TabsContent value="clients" className="mt-2">
-                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Clients sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
                                     <div className="flex gap-2 mb-2">
@@ -3055,7 +3055,7 @@ export default function PriseDeMandat() {
                               </TabsContent>
 
                               <TabsContent value="notaires" className="mt-2">
-                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Notaires sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
                                     <div className="flex gap-2 mb-2">
@@ -3164,7 +3164,7 @@ export default function PriseDeMandat() {
                               </TabsContent>
 
                               <TabsContent value="courtiers" className="mt-2">
-                                <div className="grid grid-cols-[70%_30%] gap-4">
+                                <div className="grid grid-cols-[50%_50%] gap-4">
                                   {/* Colonne gauche - Courtiers sélectionnés */}
                                   <div className="space-y-2 border-r border-slate-700 pr-4">
                                     <div className="flex gap-2 mb-2">
