@@ -336,20 +336,24 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                 </Label>
                 <div className="space-y-2">
                   {courrielActuel && (
-                    <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
-                      <p className="text-slate-300 flex-1">{courrielActuel.courriel}</p>
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
-                        Actuel
-                      </Badge>
-                    </div>
+                   <div className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
+                     <a href={`mailto:${courrielActuel.courriel}`} className="text-blue-400 hover:text-blue-300 flex-1 transition-colors">
+                       {courrielActuel.courriel}
+                     </a>
+                     <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border ml-2 flex-shrink-0">
+                       Actuel
+                     </Badge>
+                   </div>
                   )}
                   {courrielsAnciens.map((courriel, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
-                      <p className="text-slate-400 flex-1 text-sm">{courriel.courriel}</p>
-                      <Badge variant="outline" className="bg-slate-700 text-slate-400 border-slate-600 ml-2 flex-shrink-0">
-                        Ancien
-                      </Badge>
-                    </div>
+                   <div key={idx} className="flex items-center justify-between bg-slate-800/30 p-3 rounded-lg">
+                     <a href={`mailto:${courriel.courriel}`} className="text-slate-400 hover:text-blue-400 flex-1 text-sm transition-colors">
+                       {courriel.courriel}
+                     </a>
+                     <Badge variant="outline" className="bg-slate-700 text-slate-400 border-slate-600 ml-2 flex-shrink-0">
+                       Ancien
+                     </Badge>
+                   </div>
                   ))}
                 </div>
               </div>
