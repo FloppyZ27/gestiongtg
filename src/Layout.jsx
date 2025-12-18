@@ -541,6 +541,31 @@ function LayoutContent({ children, currentPageName }) {
           border-bottom: 2px solid rgb(16, 185, 129) !important;
         }
 
+        /* Badges et éléments orange dans les sections mandats - en vert */
+        .bg-orange-500\/20 {
+          background-color: rgba(16, 185, 129, 0.2) !important;
+        }
+
+        .text-orange-400 {
+          color: rgb(16, 185, 129) !important;
+        }
+
+        .border-orange-500\/30 {
+          border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .hover\:bg-orange-900\/40:hover {
+          background-color: rgba(5, 150, 105, 0.4) !important;
+        }
+
+        .bg-orange-900\/20 {
+          background-color: rgba(5, 150, 105, 0.2) !important;
+        }
+
+        .bg-orange-500\/30 {
+          background-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
         /* Tabs avec couleur red */
         button[role="tab"][class*="red"]:hover,
         [role="tab"][class*="red"]:hover {
