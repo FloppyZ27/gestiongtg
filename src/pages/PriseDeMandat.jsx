@@ -3807,8 +3807,266 @@ export default function PriseDeMandat() {
                  </DialogContent>
                  </Dialog>
 
+                 {/* Dialogs supplémentaires... */}
+                 <ClientFormDialog
+                 open={isClientFormDialogOpen}
+                 onOpenChange={setIsClientFormDialogOpen}
+                 editingClient={editingClientForForm}
+                 defaultType={clientTypeForForm}
+                 onSuccess={() => {
+                 queryClient.invalidateQueries({ queryKey: ['clients'] });
+                 setEditingClientForForm(null);
+                 }}
+                 />
 
-        {/* Table des prises de mandat */}
+                 {/* Dialog d'avertissement modifications non sauvegardées */}
+                 <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Attention
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button
+                 type="button"
+                 onClick={async () => {
+                   if (editingPriseMandat && !isLocked) {
+                     await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                       ...editingPriseMandat,
+                       locked_by: null,
+                       locked_at: null
+                     });
+                     queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                   }
+                   setShowUnsavedWarning(false);
+                   setIsDialogOpen(false);
+                   resetFullForm();
+                   setIsLocked(false);
+                   setLockedBy("");
+                   setHasFormChanges(false);
+                 }}
+                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                 >
+                 Abandonner
+                 </Button>
+                 <Button 
+                 type="button" 
+                 onClick={() => setShowUnsavedWarning(false)}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Continuer l'édition
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Dialog de confirmation annulation dossier */}
+                 <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Attention
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button
+                 type="button"
+                 onClick={() => {
+                   setShowCancelConfirmDossier(false);
+                   setIsOuvrirDossierDialogOpen(false);
+                   setNouveauDossierForm({
+                     numero_dossier: "",
+                     arpenteur_geometre: "",
+                     date_ouverture: new Date().toISOString().split('T')[0],
+                     statut: "Ouvert",
+                     ttl: "Non",
+                     clients_ids: [],
+                     notaires_ids: [],
+                     courtiers_ids: [],
+                     mandats: []
+                   });
+                   setCommentairesTemporairesDossier([]);
+                   setDossierDocuments([]);
+                 }}
+                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                 >
+                 Abandonner
+                 </Button>
+                 <Button 
+                 type="button" 
+                 onClick={() => setShowCancelConfirmDossier(false)}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Continuer l'édition
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Dialog arpenteur requis */}
+                 <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Attention
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Vous devez sélectionner un arpenteur-géomètre avant de créer une prise de mandat.
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button 
+                 type="button" 
+                 onClick={() => setShowArpenteurRequiredDialog(false)}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Compris
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Dialog confirmation changement de statut */}
+                 <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Attention
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Un numéro de dossier est déjà attribué. Voulez-vous vraiment changer le statut ?
+                 {pendingStatutChange !== "Mandats à ouvrir" && " Cela effacera le numéro de dossier et la date d'ouverture."}
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button
+                 type="button"
+                 onClick={() => {
+                   setShowStatutChangeConfirm(false);
+                   setPendingStatutChange(null);
+                 }}
+                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                 >
+                 Annuler
+                 </Button>
+                 <Button 
+                 type="button" 
+                 onClick={() => {
+                   if (pendingStatutChange !== "Mandats à ouvrir") {
+                     setFormData({...formData, statut: pendingStatutChange, numero_dossier: "", date_ouverture: ""});
+                   } else {
+                     setFormData({...formData, statut: pendingStatutChange});
+                   }
+                   setShowStatutChangeConfirm(false);
+                   setPendingStatutChange(null);
+                 }}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Confirmer
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Dialog suppression mandat */}
+                 <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Confirmation
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Êtes-vous sûr de vouloir supprimer ce mandat ?
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button
+                 type="button"
+                 onClick={() => {
+                   setShowDeleteMandatConfirm(false);
+                   setMandatIndexToDelete(null);
+                 }}
+                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                 >
+                 Annuler
+                 </Button>
+                 <Button 
+                 type="button" 
+                 onClick={() => {
+                   if (mandatIndexToDelete !== null) {
+                     setNouveauDossierForm(prev => ({
+                       ...prev,
+                       mandats: prev.mandats.filter((_, i) => i !== mandatIndexToDelete)
+                     }));
+                     const newActiveIndex = mandatIndexToDelete > 0 ? (mandatIndexToDelete - 1).toString() : "0";
+                     setActiveTabMandatDossier(newActiveIndex);
+                   }
+                   setShowDeleteMandatConfirm(false);
+                   setMandatIndexToDelete(null);
+                 }}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Confirmer
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Dialog utilisateur manquant */}
+                 <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
+                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+                 <DialogHeader>
+                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                 <span className="text-2xl">⚠️</span>
+                 Attention
+                 <span className="text-2xl">⚠️</span>
+                 </DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                 <p className="text-slate-300 text-center">
+                 Tous les mandats doivent avoir un utilisateur assigné avant d'ouvrir le dossier.
+                 </p>
+                 <div className="flex justify-center gap-3 pt-4">
+                 <Button 
+                 type="button" 
+                 onClick={() => setShowMissingUserWarning(false)}
+                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                 >
+                 Compris
+                 </Button>
+                 </div>
+                 </div>
+                 </DialogContent>
+                 </Dialog>
+
+                 {/* Table des prises de mandat */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader className="border-b border-slate-800">
             <div className="flex flex-col gap-4">
