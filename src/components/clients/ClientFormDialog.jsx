@@ -18,10 +18,19 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const PROVINCES_CANADIENNES = [
-  "Québec", "Alberta", "Colombie-Britannique", "Île-du-Prince-Édouard",
-  "Manitoba", "Nouveau-Brunswick", "Nouvelle-Écosse", "Nunavut",
-  "Ontario", "Saskatchewan", "Terre-Neuve-et-Labrador",
-  "Territoires du Nord-Ouest", "Yukon"
+  { label: "Québec", value: "QC" },
+  { label: "Alberta", value: "AB" },
+  { label: "Colombie-Britannique", value: "BC" },
+  { label: "Île-du-Prince-Édouard", value: "PE" },
+  { label: "Manitoba", value: "MB" },
+  { label: "Nouveau-Brunswick", value: "NB" },
+  { label: "Nouvelle-Écosse", value: "NS" },
+  { label: "Nunavut", value: "NU" },
+  { label: "Ontario", value: "ON" },
+  { label: "Saskatchewan", value: "SK" },
+  { label: "Terre-Neuve-et-Labrador", value: "NL" },
+  { label: "Territoires du Nord-Ouest", value: "NT" },
+  { label: "Yukon", value: "YT" }
 ];
 
 const MODES_LIVRAISON = ["Main propre", "Poste", "Courriel"];
@@ -915,13 +924,13 @@ export default function ClientFormDialog({
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Province</Label>
-                      <Select id="new-province" defaultValue="Québec">
+                      <Select id="new-province" defaultValue="QC">
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                           <SelectValue placeholder="Sélectionner une province" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {PROVINCES_CANADIENNES.map(prov => (
-                            <SelectItem key={prov} value={prov} className="text-white text-sm">{prov}</SelectItem>
+                            <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">{prov.value} - {prov.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -945,7 +954,7 @@ export default function ClientFormDialog({
                       const rue = document.getElementById('new-rue').value;
                       const ville = document.getElementById('new-ville').value;
                       const provinceSelect = document.querySelector('[id="new-province"]');
-                      const province = provinceSelect?.textContent || "Québec";
+                      const province = provinceSelect?.getAttribute('data-value') || provinceSelect?.textContent?.split(' - ')[0] || "QC";
                       const codePostal = document.getElementById('new-code-postal').value;
                       
                       if (civic || rue || ville) {
