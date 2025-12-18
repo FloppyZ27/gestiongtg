@@ -2958,7 +2958,7 @@ export default function PriseDeMandat() {
                                     {clientsTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
                                   {clientsTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
                                       <div className="flex gap-2 mb-2">
                                         <div className="relative flex-1">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -2983,44 +2983,46 @@ export default function PriseDeMandat() {
                                          Nouveau
                                         </Button>
                                       </div>
-                                      {filteredClientsForSelector.slice(0, 20).map((client) => (
-                                        <div
-                                          key={client.id}
-                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                            nouveauDossierForm.clients_ids.includes(client.id)
-                                              ? 'bg-blue-500/20 border border-blue-500/30'
-                                              : 'bg-slate-700/50 hover:bg-slate-700'
-                                          }`}
-                                          onClick={() => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              clients_ids: prev.clients_ids.includes(client.id)
-                                                ? prev.clients_ids.filter(id => id !== client.id)
-                                                : [...prev.clients_ids, client.id]
-                                            }));
-                                          }}
-                                        >
-                                          <p className="font-medium text-white">{client.prenom} {client.nom}</p>
-                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                            {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
-                                              <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
-                                            )}
-                                            {client.courriels?.find(c => c.actuel)?.courriel && (
-                                              <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
-                                            )}
-                                            {client.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>
-                                                📞 <a 
-                                                  href={`tel:${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                >
-                                                  {client.telephones.find(t => t.actuel).telephone}
-                                                </a>
-                                              </p>
-                                            )}
+                                      <div className="grid grid-cols-3 gap-2">
+                                        {filteredClientsForSelector.slice(0, 20).map((client) => (
+                                          <div
+                                            key={client.id}
+                                            className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                              nouveauDossierForm.clients_ids.includes(client.id)
+                                                ? 'bg-blue-500/20 border border-blue-500/30'
+                                                : 'bg-slate-700/50 hover:bg-slate-700'
+                                            }`}
+                                            onClick={() => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                clients_ids: prev.clients_ids.includes(client.id)
+                                                  ? prev.clients_ids.filter(id => id !== client.id)
+                                                  : [...prev.clients_ids, client.id]
+                                              }));
+                                            }}
+                                          >
+                                            <p className="font-medium text-white">{client.prenom} {client.nom}</p>
+                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                              {client.adresses?.find(a => a.actuelle) && formatAdresse(client.adresses.find(a => a.actuelle)) && (
+                                                <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle))}</p>
+                                              )}
+                                              {client.courriels?.find(c => c.actuel)?.courriel && (
+                                                <p className="truncate">✉️ {client.courriels.find(c => c.actuel).courriel}</p>
+                                              )}
+                                              {client.telephones?.find(t => t.actuel)?.telephone && (
+                                                <p>
+                                                  📞 <a 
+                                                    href={`tel:${client.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                  >
+                                                    {client.telephones.find(t => t.actuel).telephone}
+                                                  </a>
+                                                </p>
+                                              )}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
                                   {nouveauDossierForm.clients_ids.length > 0 ? (
@@ -3067,7 +3069,7 @@ export default function PriseDeMandat() {
                                     {notairesTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
                                   {notairesTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
                                       <div className="flex gap-2 mb-2">
                                         <div className="relative flex-1">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -3092,44 +3094,46 @@ export default function PriseDeMandat() {
                                          Nouveau
                                         </Button>
                                       </div>
-                                      {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
-                                        <div
-                                         key={notaire.id}
-                                         className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                           nouveauDossierForm.notaires_ids.includes(notaire.id)
-                                             ? 'bg-blue-500/20 border border-blue-500/30'
-                                             : 'bg-slate-700/50 hover:bg-slate-700'
-                                         }`}
-                                          onClick={() => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              notaires_ids: prev.notaires_ids.includes(notaire.id)
-                                                ? prev.notaires_ids.filter(id => id !== notaire.id)
-                                                : [...prev.notaires_ids, notaire.id]
-                                            }));
-                                          }}
-                                        >
-                                          <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
-                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                            {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
-                                              <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
-                                            )}
-                                            {notaire.courriels?.find(c => c.actuel)?.courriel && (
-                                              <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
-                                            )}
-                                            {notaire.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>
-                                                📞 <a 
-                                                  href={`tel:${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                >
-                                                  {notaire.telephones.find(t => t.actuel).telephone}
-                                                </a>
-                                              </p>
-                                            )}
+                                      <div className="grid grid-cols-3 gap-2">
+                                        {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
+                                          <div
+                                           key={notaire.id}
+                                           className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                             nouveauDossierForm.notaires_ids.includes(notaire.id)
+                                               ? 'bg-blue-500/20 border border-blue-500/30'
+                                               : 'bg-slate-700/50 hover:bg-slate-700'
+                                           }`}
+                                            onClick={() => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                notaires_ids: prev.notaires_ids.includes(notaire.id)
+                                                  ? prev.notaires_ids.filter(id => id !== notaire.id)
+                                                  : [...prev.notaires_ids, notaire.id]
+                                              }));
+                                            }}
+                                          >
+                                            <p className="font-medium text-white">{notaire.prenom} {notaire.nom}</p>
+                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                              {notaire.adresses?.find(a => a.actuelle) && formatAdresse(notaire.adresses.find(a => a.actuelle)) && (
+                                                <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle))}</p>
+                                              )}
+                                              {notaire.courriels?.find(c => c.actuel)?.courriel && (
+                                                <p className="truncate">✉️ {notaire.courriels.find(c => c.actuel).courriel}</p>
+                                              )}
+                                              {notaire.telephones?.find(t => t.actuel)?.telephone && (
+                                                <p>
+                                                  📞 <a 
+                                                    href={`tel:${notaire.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                  >
+                                                    {notaire.telephones.find(t => t.actuel).telephone}
+                                                  </a>
+                                                </p>
+                                              )}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
                                   {nouveauDossierForm.notaires_ids.length > 0 ? (
@@ -3176,7 +3180,7 @@ export default function PriseDeMandat() {
                                     {courtiersTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
                                   {courtiersTabExpanded && (
-                                    <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                    <div className="max-h-[200px] overflow-y-auto p-2 bg-slate-800/50 rounded-lg border border-slate-700">
                                       <div className="flex gap-2 mb-2">
                                         <div className="relative flex-1">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
@@ -3201,44 +3205,46 @@ export default function PriseDeMandat() {
                                          Nouveau
                                         </Button>
                                       </div>
-                                      {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
-                                        <div
-                                         key={courtier.id}
-                                         className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                           nouveauDossierForm.courtiers_ids.includes(courtier.id)
-                                             ? 'bg-blue-500/20 border border-blue-500/30'
-                                             : 'bg-slate-700/50 hover:bg-slate-700'
-                                         }`}
-                                          onClick={() => {
-                                            setNouveauDossierForm(prev => ({
-                                              ...prev,
-                                              courtiers_ids: prev.courtiers_ids.includes(courtier.id)
-                                                ? prev.courtiers_ids.filter(id => id !== courtier.id)
-                                                : [...prev.courtiers_ids, courtier.id]
-                                            }));
-                                          }}
-                                        >
-                                          <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
-                                          <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
-                                            {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
-                                              <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
-                                            )}
-                                            {courtier.courriels?.find(c => c.actuel)?.courriel && (
-                                              <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
-                                            )}
-                                            {courtier.telephones?.find(t => t.actuel)?.telephone && (
-                                              <p>
-                                                📞 <a 
-                                                  href={`tel:${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
-                                                  className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                                >
-                                                  {courtier.telephones.find(t => t.actuel).telephone}
-                                                </a>
-                                              </p>
-                                            )}
+                                      <div className="grid grid-cols-3 gap-2">
+                                        {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
+                                          <div
+                                           key={courtier.id}
+                                           className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                             nouveauDossierForm.courtiers_ids.includes(courtier.id)
+                                               ? 'bg-blue-500/20 border border-blue-500/30'
+                                               : 'bg-slate-700/50 hover:bg-slate-700'
+                                           }`}
+                                            onClick={() => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                courtiers_ids: prev.courtiers_ids.includes(courtier.id)
+                                                  ? prev.courtiers_ids.filter(id => id !== courtier.id)
+                                                  : [...prev.courtiers_ids, courtier.id]
+                                              }));
+                                            }}
+                                          >
+                                            <p className="font-medium text-white">{courtier.prenom} {courtier.nom}</p>
+                                            <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
+                                              {courtier.adresses?.find(a => a.actuelle) && formatAdresse(courtier.adresses.find(a => a.actuelle)) && (
+                                                <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle))}</p>
+                                              )}
+                                              {courtier.courriels?.find(c => c.actuel)?.courriel && (
+                                                <p className="truncate">✉️ {courtier.courriels.find(c => c.actuel).courriel}</p>
+                                              )}
+                                              {courtier.telephones?.find(t => t.actuel)?.telephone && (
+                                                <p>
+                                                  📞 <a 
+                                                    href={`tel:${courtier.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                  >
+                                                    {courtier.telephones.find(t => t.actuel).telephone}
+                                                  </a>
+                                                </p>
+                                              )}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
                                   {nouveauDossierForm.courtiers_ids.length > 0 ? (
