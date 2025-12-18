@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, MapPin, Search, Loader2, Home } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -22,11 +23,27 @@ export default function AddressStepForm({
   const [searchTimeout, setSearchTimeoutState] = useState(null);
   const [selectedMandatKey, setSelectedMandatKey] = useState(null);
 
+  const PROVINCES_CANADA = [
+    { label: "Québec", value: "QC" },
+    { label: "Alberta", value: "AB" },
+    { label: "Colombie-Britannique", value: "BC" },
+    { label: "Île-du-Prince-Édouard", value: "PE" },
+    { label: "Manitoba", value: "MB" },
+    { label: "Nouveau-Brunswick", value: "NB" },
+    { label: "Nouvelle-Écosse", value: "NS" },
+    { label: "Nunavut", value: "NU" },
+    { label: "Ontario", value: "ON" },
+    { label: "Saskatchewan", value: "SK" },
+    { label: "Terre-Neuve-et-Labrador", value: "NL" },
+    { label: "Territoires du Nord-Ouest", value: "NT" },
+    { label: "Yukon", value: "YT" }
+  ];
+
   const [addressForm, setAddressForm] = useState({
     numero_civique: address?.numeros_civiques?.[0] || "",
     rue: address?.rue || "",
     ville: address?.ville || "",
-    province: address?.province || "Québec",
+    province: address?.province || "QC",
     code_postal: address?.code_postal || "",
     numero_lot: address?.numero_lot || ""
   });
@@ -37,7 +54,7 @@ export default function AddressStepForm({
         numero_civique: address.numeros_civiques?.[0] || "",
         rue: address.rue || "",
         ville: address.ville || "",
-        province: address.province || "Québec",
+        province: address.province || "QC",
         code_postal: address.code_postal || "",
         numero_lot: address.numero_lot || ""
       });
@@ -116,7 +133,7 @@ export default function AddressStepForm({
             numero_civique,
             rue,
             ville,
-            province: "Québec",
+            province: "QC",
             code_postal,
             full_address: fullAddr
           };
@@ -145,7 +162,7 @@ export default function AddressStepForm({
       numero_civique: suggestion.numero_civique || "",
       rue: suggestion.rue || "",
       ville: suggestion.ville || "",
-      province: suggestion.province || "Québec",
+      province: suggestion.province || "QC",
       code_postal: suggestion.code_postal || "",
       numero_lot: addressForm.numero_lot || ""
     };
@@ -277,13 +294,22 @@ export default function AddressStepForm({
                   </div>
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Province</Label>
-                    <Input
-                      value={addressForm.province}
-                      onChange={(e) => handleFieldChange('province', e.target.value)}
-                      placeholder="Québec"
+                    <Select 
+                      value={addressForm.province || "QC"}
+                      onValueChange={(value) => handleFieldChange('province', value)}
                       disabled={disabled}
-                      className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                    />
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
+                        <SelectValue placeholder="Province" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {PROVINCES_CANADA.map((prov) => (
+                          <SelectItem key={prov.value} value={prov.value} className="text-white text-sm">
+                            {prov.value} - {prov.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -333,7 +359,7 @@ export default function AddressStepForm({
                                 numero_civique: "",
                                 rue: "",
                                 ville: "",
-                                province: "Québec",
+                                province: "QC",
                                 code_postal: "",
                                 numero_lot: ""
                               };
@@ -342,7 +368,7 @@ export default function AddressStepForm({
                                 numeros_civiques: [""],
                                 rue: "",
                                 ville: "",
-                                province: "Québec",
+                                province: "QC",
                                 code_postal: "",
                                 numero_lot: ""
                               });

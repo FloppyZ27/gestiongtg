@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,19 +7,19 @@ import { MapPin, Plus, X, Check } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const PROVINCES_CANADIENNES = [
-  "Québec",
-  "Alberta",
-  "Colombie-Britannique",
-  "Île-du-Prince-Édouard",
-  "Manitoba",
-  "Nouveau-Brunswick",
-  "Nouvelle-Écosse",
-  "Nunavut",
-  "Ontario",
-  "Saskatchewan",
-  "Terre-Neuve-et-Labrador",
-  "Territoires du Nord-Ouest",
-  "Yukon"
+  { label: "Québec", value: "QC" },
+  { label: "Alberta", value: "AB" },
+  { label: "Colombie-Britannique", value: "BC" },
+  { label: "Île-du-Prince-Édouard", value: "PE" },
+  { label: "Manitoba", value: "MB" },
+  { label: "Nouveau-Brunswick", value: "NB" },
+  { label: "Nouvelle-Écosse", value: "NS" },
+  { label: "Nunavut", value: "NU" },
+  { label: "Ontario", value: "ON" },
+  { label: "Saskatchewan", value: "SK" },
+  { label: "Terre-Neuve-et-Labrador", value: "NL" },
+  { label: "Territoires du Nord-Ouest", value: "NT" },
+  { label: "Yukon", value: "YT" }
 ];
 
 export default function AddressInput({ 
@@ -82,7 +81,7 @@ export default function AddressInput({
       numeros_civiques: [""],
       rue: "",
       code_postal: "",
-      province: "Québec",
+      province: "QC",
       latitude: null,
       longitude: null,
       actuelle: false
@@ -225,7 +224,7 @@ export default function AddressInput({
             <div className="space-y-2">
               <Label className="text-slate-300">Province</Label>
               <Select 
-                value={address.province || "Québec"} 
+                value={address.province || "QC"} 
                 onValueChange={(value) => handleAddressChange(addressIndex, 'province', value)}
                 disabled={disabled}
               >
@@ -233,9 +232,9 @@ export default function AddressInput({
                   <SelectValue placeholder="Sélectionner une province" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
-                  {PROVINCES_CANADIENNES.map((province) => (
-                    <SelectItem key={province} value={province} className="text-white">
-                      {province}
+                  {PROVINCES_CANADIENNES.map((prov) => (
+                    <SelectItem key={prov.value} value={prov.value} className="text-white">
+                      {prov.value} - {prov.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
