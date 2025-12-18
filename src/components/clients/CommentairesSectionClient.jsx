@@ -22,6 +22,9 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
   const [isRecording, setIsRecording] = useState(false);
   const [isUploadingAudio, setIsUploadingAudio] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
   const mentionMenuRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -92,6 +95,22 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const response = await base44.integrations.Core.UploadFile({ file });
+      setImageUrl(response.file_url);
+    } catch (error) {
+      console.error("Erreur lors de l'upload de l'image:", error);
+      alert("Erreur lors de l'upload de l'image: " + error.message);
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -392,7 +411,10 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
     // Extraire l'URL audio si présente
     const audioMatch = contenu.match(/\[AUDIO:([^\]]+)\]/);
     const audioFileUrl = audioMatch ? audioMatch[1] : null;
-    let textContent = contenu.replace(/\[AUDIO:[^\]]+\]/g, '').trim();
+    // Extraire l'URL image si présente
+    const imageMatch = contenu.match(/\[IMAGE:([^\]]+)\]/);
+    const imageFileUrl = imageMatch ? imageMatch[1] : null;
+    let textContent = contenu.replace(/\[AUDIO:[^\]]+\]/g, '').replace(/\[IMAGE:[^\]]+\]/g, '').trim();
 
     const emailRegex = /@([^\s]+)/g;
     const parts = textContent.split(emailRegex);
@@ -413,6 +435,14 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
               return <span key={index}>{part}</span>;
             })}
           </div>
+        )}
+        {imageFileUrl && (
+          <img 
+            src={imageFileUrl} 
+            alt="Image du commentaire" 
+            className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => setFullscreenImage(imageFileUrl)}
+          />
         )}
         {audioFileUrl && (
           <audio controls className="w-full h-8" style={{ maxHeight: '32px' }}>
