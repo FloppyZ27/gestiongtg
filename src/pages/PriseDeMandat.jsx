@@ -3423,8 +3423,12 @@ export default function PriseDeMandat() {
                                     {/* Ligne délimitative */}
                                     <div className="border-t border-slate-600 my-2"></div>
                                     
-                                    {/* Barre de recherche d'adresse */}
-                                    <div className="relative mb-2">
+                                    {/* Adresse des travaux avec recherche */}
+                                    <div className="space-y-1">
+                                     <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+
+                                     {/* Barre de recherche d'adresse */}
+                                     <div className="relative">
                                        <div className="flex gap-1 relative">
                                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
                                          <Input
@@ -3558,530 +3562,2661 @@ export default function PriseDeMandat() {
                                          </div>
                                        )}
                                      </div>
+                                      
+                                      {/* Champs d'adresse avec labels */}
+                                      {/* Ligne 1: N° civique et Rue */}
+                                      <div className="grid grid-cols-[100px_1fr] gap-1">
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">N° civique</Label>
+                                          <Input 
+                                            placeholder="123" 
+                                            value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Rue</Label>
+                                          <Input 
+                                            placeholder="Rue principale" 
+                                            value={mandat.adresse_travaux?.rue || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                      </div>
+                                      {/* Ligne 2: Ville, Code postal et Province */}
+                                      <div className="grid grid-cols-3 gap-1">
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Ville</Label>
+                                          <Input 
+                                            placeholder="Ville" 
+                                            value={mandat.adresse_travaux?.ville || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                          <Input 
+                                            placeholder="G0A 1A0" 
+                                            value={mandat.adresse_travaux?.code_postal || ""} 
+                                            onChange={(e) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <Label className="text-slate-500 text-[10px]">Province</Label>
+                                          <Select 
+                                            value={mandat.adresse_travaux?.province || "QC"} 
+                                            onValueChange={(value) => {
+                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                ...m, 
+                                                adresse_travaux: { ...m.adresse_travaux, province: value } 
+                                              } : m;
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map(updateAddress)
+                                              }));
+                                            }}
+                                          >
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-800 border-slate-700">
+                                              {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                                <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Ligne délimitative */}
+                                    <div className="border-t border-slate-600 my-2"></div>
 
-                    {/* Grille Adresse et Dates */}
-                                     <div className="grid grid-cols-2 gap-2">
-                                       {/* Colonne Adresse - 50% */}
-                                       <div className="space-y-1">
-                                         <Label className="text-slate-500 text-[10px]">Adresse des travaux</Label>
-                                         {/* N° civique et Rue */}
-                                         <div className="grid grid-cols-[100px_1fr] gap-1">
-                                           <Input 
-                                             placeholder="N° civique" 
-                                             value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
-                                             onChange={(e) => {
-                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                 ...m, 
-                                                 adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
-                                               } : m;
-                                               setNouveauDossierForm(prev => ({
-                                                 ...prev,
-                                                 mandats: prev.mandats.map(updateAddress)
-                                               }));
+                                    <div className="grid grid-cols-[60%_40%] gap-3">
+                                      {/* Adresse - 60% */}
+                                      <div className="space-y-1">
+                                        <div className="grid grid-cols-[100px_1fr] gap-1">
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">N° civique</Label>
+                                            <Input 
+                                              placeholder="123" 
+                                              value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Rue</Label>
+                                            <Input 
+                                              placeholder="Rue principale" 
+                                              value={mandat.adresse_travaux?.rue || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-1">
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Ville</Label>
+                                            <Input 
+                                              placeholder="Ville" 
+                                              value={mandat.adresse_travaux?.ville || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                            <Input 
+                                              placeholder="G0A 1A0" 
+                                              value={mandat.adresse_travaux?.code_postal || ""} 
+                                              onChange={(e) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                              className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                            />
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <Label className="text-slate-500 text-[10px]">Province</Label>
+                                            <Select 
+                                              value={mandat.adresse_travaux?.province || "QC"} 
+                                              onValueChange={(value) => {
+                                                const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                  ...m, 
+                                                  adresse_travaux: { ...m.adresse_travaux, province: value } 
+                                                } : m;
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(updateAddress)
+                                                }));
+                                              }}
+                                            >
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700">
+                                                {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                                  <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Dates - 40% vertical */}
+                                      <div className="space-y-2">
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Date de signature</Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_signature || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_debut_travaux || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
+                                              }));
+                                            }}
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                        <div className="space-y-1">
+                                          <Label className="text-slate-400 text-xs">Date de livraison <span className="text-red-400">*</span></Label>
+                                          <Input 
+                                            type="date" 
+                                            value={mandat.date_livraison || mandatsInfo[0]?.date_livraison || ""} 
+                                            onChange={(e) => {
+                                              setNouveauDossierForm(prev => ({
+                                                ...prev,
+                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
+                                              }));
+                                            }}
+                                            required
+                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Ligne délimitative */}
+                                    <div className="border-t border-slate-600 my-2"></div>
+                                    
+                                    {/* Section Lots */}
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between items-center">
+                                        <Label className="text-slate-400 text-xs">Lots</Label>
+                                        <Button 
+                                         type="button" 
+                                         size="sm" 
+                                         onClick={() => {
+                                           setCurrentMandatIndexDossier(index);
+                                           setLotTabExpanded(!lotTabExpanded);
+                                         }}
+                                         className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-5 text-xs px-2"
+                                        >
+                                         {lotTabExpanded && currentMandatIndexDossier === index ? <ChevronUp className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+                                         {lotTabExpanded && currentMandatIndexDossier === index ? 'Masquer' : 'Ajouter'}
+                                        </Button>
+                                      </div>
+                                      {lotTabExpanded && currentMandatIndexDossier === index && (
+                                       <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
+                                         <div className="flex gap-1 mb-2">
+                                           <div className="relative flex-1">
+                                             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                             <Input
+                                               placeholder="Rechercher lot..."
+                                               value={lotSearchTerm}
+                                               onChange={(e) => setLotSearchTerm(e.target.value)}
+                                               className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                             />
+                                           </div>
+                                           <Button
+                                             type="button"
+                                             size="sm"
+                                             onClick={() => {
+                                               setCurrentMandatIndexDossier(index);
+                                               setIsNewLotDialogOpen(true);
                                              }}
-                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                           />
-                                           <Input 
-                                             placeholder="Rue" 
-                                             value={mandat.adresse_travaux?.rue || ""} 
-                                             onChange={(e) => {
-                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                 ...m, 
-                                                 adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
-                                               } : m;
-                                               setNouveauDossierForm(prev => ({
-                                                 ...prev,
-                                                 mandats: prev.mandats.map(updateAddress)
-                                               }));
-                                             }}
-                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                           />
-                                         </div>
-                                         {/* Ville, Code postal et Province */}
-                                         <div className="grid grid-cols-3 gap-1">
-                                           <Input 
-                                             placeholder="Ville" 
-                                             value={mandat.adresse_travaux?.ville || ""} 
-                                             onChange={(e) => {
-                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                 ...m, 
-                                                 adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
-                                               } : m;
-                                               setNouveauDossierForm(prev => ({
-                                                 ...prev,
-                                                 mandats: prev.mandats.map(updateAddress)
-                                               }));
-                                             }}
-                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                           />
-                                           <Input 
-                                             placeholder="Code postal" 
-                                             value={mandat.adresse_travaux?.code_postal || ""} 
-                                             onChange={(e) => {
-                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                 ...m, 
-                                                 adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
-                                               } : m;
-                                               setNouveauDossierForm(prev => ({
-                                                 ...prev,
-                                                 mandats: prev.mandats.map(updateAddress)
-                                               }));
-                                             }}
-                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                           />
-                                           <Select 
-                                             value={mandat.adresse_travaux?.province || "QC"} 
-                                             onValueChange={(value) => {
-                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                 ...m, 
-                                                 adresse_travaux: { ...m.adresse_travaux, province: value } 
-                                               } : m;
-                                               setNouveauDossierForm(prev => ({
-                                                 ...prev,
-                                                 mandats: prev.mandats.map(updateAddress)
-                                               }));
-                                             }}
+                                             className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
                                            >
+                                             <Plus className="w-3 h-3 mr-1" />
+                                             Nouveau
+                                           </Button>
+                                         </div>
+                                         <div className="flex gap-1 mb-2">
+                                           <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                               <SelectValue />
+                                               <SelectValue placeholder="Circonscription" />
                                              </SelectTrigger>
                                              <SelectContent className="bg-slate-800 border-slate-700">
-                                               {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
-                                                 <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                               <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
+                                               {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                                 <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
                                                ))}
                                              </SelectContent>
                                            </Select>
                                          </div>
+                                          {filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                            const isSelected = mandat.lots?.includes(lot.id);
+                                            return (
+                                              <div
+                                                key={lot.id}
+                                                className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                                  isSelected
+                                                    ? 'bg-emerald-500/20 border border-emerald-500/30'
+                                                    : 'bg-slate-700/50 hover:bg-slate-700'
+                                                }`}
+                                                onClick={() => {
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map((m, i) => i === index ? {
+                                                      ...m,
+                                                      lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                    } : m)
+                                                  }));
+                                                }}
+                                              >
+                                                <p className="font-medium text-white">{lot.numero_lot}</p>
+                                                <p className="text-slate-400 text-[10px]">{lot.circonscription_fonciere}</p>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                      {mandat.lots && mandat.lots.length > 0 ? (
+                                       <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
+                                         {mandat.lots.map((lotId) => {
+                                           const lot = getLotById(lotId);
+                                           return (
+                                             <Badge key={lotId} variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs pr-1">
+                                               {lot?.numero_lot || lotId}
+                                               <button 
+                                                 type="button" 
+                                                 onClick={() => {
+                                                   setNouveauDossierForm(prev => ({
+                                                     ...prev,
+                                                     mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                       ...m, 
+                                                       lots: m.lots.filter(id => id !== lotId) 
+                                                     } : m)
+                                                   }));
+                                                 }}
+                                                 className="ml-1 hover:text-red-400"
+                                               >
+                                                 <X className="w-2.5 h-2.5" />
+                                               </button>
+                                             </Badge>
+                                           );
+                                         })}
                                        </div>
-                                       
-                                       {/* Colonne Dates - 50% */}
-                                       <div className="space-y-1">
-                                         <Label className="text-slate-500 text-[10px]">Dates</Label>
-                                         <div className="space-y-1">
-                                           <div className="flex items-center gap-1">
-                                             <Label className="text-slate-500 text-[10px] w-24">Signature:</Label>
-                                             <Input 
-                                               type="date" 
-                                               value={mandat.date_signature || ""} 
-                                               onChange={(e) => {
-                                                 setNouveauDossierForm(prev => ({
-                                                   ...prev,
-                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
-                                                 }));
-                                               }}
-                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
-                                             />
-                                           </div>
-                                           <div className="flex items-center gap-1">
-                                             <Label className="text-slate-500 text-[10px] w-24">Début travaux:</Label>
-                                             <Input 
-                                               type="date" 
-                                               value={mandat.date_debut_travaux || ""} 
-                                               onChange={(e) => {
-                                                 setNouveauDossierForm(prev => ({
-                                                   ...prev,
-                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
-                                                 }));
-                                               }}
-                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
-                                             />
-                                           </div>
-                                           <div className="flex items-center gap-1">
-                                             <Label className="text-slate-500 text-[10px] w-24">Livraison:</Label>
-                                             <Input 
-                                               type="date" 
-                                               value={mandat.date_livraison || ""} 
-                                               onChange={(e) => {
-                                                 setNouveauDossierForm(prev => ({
-                                                   ...prev,
-                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
-                                                 }));
-                                               }}
-                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
-                                             />
-                                           </div>
-                                         </div>
-                                       </div>
-                                     </div>
-                                   </TabsContent>
-                                 ))}
-                               </Tabs>
-                             ) : (
-                               <p className="text-slate-500 text-xs text-center py-4">Ajoutez des mandats pour continuer</p>
-                             )}
-                           </CardContent>
-                         )}
-                       </Card>
-                   </form>
-                   </div>
+                                      ) : (
+                                       <p className="text-slate-500 text-xs text-center py-2 bg-slate-800/30 rounded-lg">Aucun lot</p>
+                                      )}
+                                    </div>
+                                  </TabsContent>
+                                ))}
+                              </Tabs>
+                            ) : (
+                              <div className="text-center py-4 text-slate-400 bg-slate-800/30 rounded-lg text-xs">Aucun mandat</div>
+                            )}
+                          </CardContent>
+                        )}
+                      </Card>
 
-                   {/* Right side - Commentaires et Historique Sidebar - 30% */}
-                   <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
-                     <div 
-                       className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
-                       onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
-                     >
-                       <div className="flex items-center gap-2">
-                         {sidebarTabDossier === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
-                         <h3 className="text-slate-300 text-base font-semibold">
-                           {sidebarTabDossier === "commentaires" ? "Commentaires" : "Historique"}
-                         </h3>
-                       </div>
-                       {sidebarCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                     </div>
+                    {/* Section Tarification */}
+                    <TarificationStepForm
+                      disabled={false}
+                      mandats={nouveauDossierForm.mandats}
+                      onTarificationChange={(updatedMandats) => {
+                        setNouveauDossierForm(prev => ({
+                          ...prev,
+                          mandats: updatedMandats
+                        }));
+                      }}
+                      isCollapsed={tarificationStepCollapsed}
+                      onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+                    />
 
-                     {!sidebarCollapsedDossier && (
-                       <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
-                         <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                           <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
-                             <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                               <MessageSquare className="w-4 h-4 mr-1" />
-                               Commentaires
-                             </TabsTrigger>
-                             <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                               <Clock className="w-4 h-4 mr-1" />
-                               Historique
-                             </TabsTrigger>
-                           </TabsList>
-                         </div>
+                    {/* Section Documents - Utiliser DocumentsStepForm */}
+                    {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
+                      <DocumentsStepForm
+                        arpenteurGeometre={nouveauDossierForm.arpenteur_geometre}
+                        numeroDossier={nouveauDossierForm.numero_dossier}
+                        isCollapsed={documentsCollapsed}
+                        onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
+                        onDocumentsChange={(hasFiles) => {}}
+                      />
+                    )}
+                  </form>
+                  </div>
 
-                         <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
-                           <CommentairesSection
-                             dossierId={null}
-                             dossierTemporaire={true}
-                             commentairesTemp={commentairesTemporairesDossier}
-                             onCommentairesTempChange={setCommentairesTemporairesDossier}
-                           />
-                         </TabsContent>
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                  {/* Carte de l'adresse des travaux - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setMapCollapsedDossier(!mapCollapsedDossier)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-slate-400" />
+                      <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
+                    </div>
+                    {mapCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                  {!mapCollapsedDossier && nouveauDossierForm.mandats.length > 0 && nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux && (
+                    nouveauDossierForm.mandats[activeTabMandatDossier].adresse_travaux.rue || nouveauDossierForm.mandats[activeTabMandatDossier].adresse_travaux.ville
+                  ) && (
+                    <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
+                      <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
+                        <div className="aspect-square w-full max-h-[calc(100%-28px)]">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                              `${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.rue || ''}, ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.ville || ''}, ${nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.province || 'Québec'}, Canada`
+                            )}&zoom=15`}
+                          />
+                        </div>
+                        <div className="p-2 bg-slate-800/80">
+                          <p className="text-xs text-slate-300 truncate">
+                            📍 {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.numeros_civiques?.[0]} {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.rue}, {nouveauDossierForm.mandats[activeTabMandatDossier]?.adresse_travaux?.ville}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Header Tabs Commentaires/Historique - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {sidebarTabDossier === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                      <h3 className="text-slate-300 text-base font-semibold">
+                        {sidebarTabDossier === "commentaires" ? "Commentaires" : "Historique"}
+                      </h3>
+                    </div>
+                    {sidebarCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
 
-                         <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
-                           {historiqueDossier.length > 0 ? (
-                             <div className="space-y-2">
-                               {historiqueDossier.map((entry, idx) => (
-                                 <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
-                                   <div className="flex items-start gap-2">
-                                     <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
-                                     <div className="flex-1 min-w-0">
-                                       <p className="text-white text-sm font-medium">{entry.action}</p>
-                                       {entry.details && (
-                                         <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
-                                       )}
-                                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
-                                         <span className="text-emerald-400">{entry.utilisateur_nom}</span>
-                                         <span>•</span>
-                                         <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
-                                       </div>
-                                     </div>
-                                   </div>
-                                 </div>
-                               ))}
-                             </div>
-                           ) : (
-                             <div className="flex items-center justify-center h-full text-center">
-                               <div>
-                                 <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                                 <p className="text-slate-500">Aucune action enregistrée</p>
-                                 <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                               </div>
-                             </div>
-                           )}
-                         </TabsContent>
-                       </Tabs>
-                     )}
-                   </div>
-                 </div>
+                  {!sidebarCollapsedDossier && (
+                    <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
+                      <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Commentaires
+                        </TabsTrigger>
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Historique
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                        <CommentairesSection dossierId={null} dossierTemporaire={true} commentairesTemp={commentairesTemporairesDossier} onCommentairesTempChange={setCommentairesTemporairesDossier} />
+                      </TabsContent>
+                      
+                      <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+                        {historiqueDossier.length > 0 ? (
+                          <div className="space-y-2">
+                            {historiqueDossier.map((entry, idx) => (
+                              <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <div className="flex items-start gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm font-medium">{entry.action}</p>
+                                    {entry.details && (
+                                      <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                                    )}
+                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                                      <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                                      <span>•</span>
+                                      <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-center">
+                            <div>
+                              <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                              <p className="text-slate-500">Aucune action enregistrée</p>
+                              <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                            </div>
+                          </div>
+                        )}
+                      </TabsContent>
+                      </Tabs>
+                      )}
+                      </div>
+                      </div>
 
-                 {/* Boutons tout en bas */}
-                 <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                   <Button type="button" variant="outline" onClick={() => {
-                     if (showCancelConfirmDossier) return;
-                     setShowCancelConfirmDossier(true);
-                   }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                     Annuler
-                   </Button>
-                   <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                     Créer le dossier
-                   </Button>
-                 </div>
-                 </motion.div>
-                 </DialogContent>
-                 </Dialog>
+                      {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+                      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                      <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                      const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
+                      const currentMandats = nouveauDossierForm.mandats.map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
 
-                 {/* Dialogs supplémentaires... */}
-                 <ClientFormDialog
-                 open={isClientFormDialogOpen}
-                 onOpenChange={setIsClientFormDialogOpen}
-                 editingClient={editingClientForForm}
-                 defaultType={clientTypeForForm}
-                 onSuccess={() => {
-                 queryClient.invalidateQueries({ queryKey: ['clients'] });
-                 setEditingClientForForm(null);
-                 }}
-                 />
+                      const hasChanges = nouveauDossierForm.numero_dossier || 
+                      JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
+                      nouveauDossierForm.notaires_ids.length > 0 ||
+                      nouveauDossierForm.courtiers_ids.length > 0 ||
+                      nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
+                      JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
+                      commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
+                      dossierDocuments.length > 0;
 
-                 {/* Dialog d'avertissement modifications non sauvegardées */}
-                 <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Attention
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button
-                 type="button"
-                 onClick={async () => {
-                   if (editingPriseMandat && !isLocked) {
-                     await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                       ...editingPriseMandat,
-                       locked_by: null,
-                       locked_at: null
-                     });
-                     queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                   }
-                   setShowUnsavedWarning(false);
-                   setIsDialogOpen(false);
-                   resetFullForm();
-                   setIsLocked(false);
-                   setLockedBy("");
-                   setHasFormChanges(false);
-                 }}
-                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                 >
-                 Abandonner
-                 </Button>
-                 <Button 
-                 type="button" 
-                 onClick={() => setShowUnsavedWarning(false)}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Continuer l'édition
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
-                 </Dialog>
+                      if (hasChanges) {
+                      setShowCancelConfirmDossier(true);
+                      } else {
+                      setIsOuvrirDossierDialogOpen(false);
+                      setNouveauDossierForm({
+                        numero_dossier: "",
+                        arpenteur_geometre: "",
+                        date_ouverture: new Date().toISOString().split('T')[0],
+                        statut: "Ouvert",
+                        ttl: "Non",
+                        clients_ids: [],
+                        notaires_ids: [],
+                        courtiers_ids: [],
+                        mandats: []
+                      });
+                      setCommentairesTemporairesDossier([]);
+                      setDossierDocuments([]);
+                      setActiveTabMandatDossier("0");
+                      }
+                      }}>
+                      Annuler
+                      </Button>
+                      <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      Créer
+                      </Button>
+                      </div>
+                      </motion.div>
+                      </DialogContent>
+                      </Dialog>
 
-                 {/* Dialog de confirmation annulation dossier */}
-                 <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Attention
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button
-                 type="button"
-                 onClick={() => {
-                   setShowCancelConfirmDossier(false);
-                   setIsOuvrirDossierDialogOpen(false);
-                   setNouveauDossierForm({
-                     numero_dossier: "",
-                     arpenteur_geometre: "",
-                     date_ouverture: new Date().toISOString().split('T')[0],
-                     statut: "Ouvert",
-                     ttl: "Non",
-                     clients_ids: [],
-                     notaires_ids: [],
-                     courtiers_ids: [],
-                     mandats: []
-                   });
-                   setCommentairesTemporairesDossier([]);
-                   setDossierDocuments([]);
-                 }}
-                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                 >
-                 Abandonner
-                 </Button>
-                 <Button 
-                 type="button" 
-                 onClick={() => setShowCancelConfirmDossier(false)}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Continuer l'édition
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
-                 </Dialog>
+                      {/* Dialogs de sélection pour le formulaire de dossier */}
 
-                 {/* Dialog arpenteur requis */}
-                 <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Attention
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Vous devez sélectionner un arpenteur-géomètre avant de créer une prise de mandat.
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button 
-                 type="button" 
-                 onClick={() => setShowArpenteurRequiredDialog(false)}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Compris
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
-                 </Dialog>
 
-                 {/* Dialog confirmation changement de statut */}
-                 <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Attention
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Un numéro de dossier est déjà attribué. Voulez-vous vraiment changer le statut ?
-                 {pendingStatutChange !== "Mandats à ouvrir" && " Cela effacera le numéro de dossier et la date d'ouverture."}
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button
-                 type="button"
-                 onClick={() => {
-                   setShowStatutChangeConfirm(false);
-                   setPendingStatutChange(null);
-                 }}
-                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                 >
-                 Annuler
-                 </Button>
-                 <Button 
-                 type="button" 
-                 onClick={() => {
-                   if (pendingStatutChange !== "Mandats à ouvrir") {
-                     setFormData({...formData, statut: pendingStatutChange, numero_dossier: "", date_ouverture: ""});
-                   } else {
-                     setFormData({...formData, statut: pendingStatutChange});
-                   }
-                   setShowStatutChangeConfirm(false);
-                   setPendingStatutChange(null);
-                 }}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Confirmer
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
-                 </Dialog>
 
-                 {/* Dialog suppression mandat */}
-                 <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
-                 <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                 <DialogHeader>
-                 <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                 <span className="text-2xl">⚠️</span>
-                 Confirmation
-                 <span className="text-2xl">⚠️</span>
-                 </DialogTitle>
-                 </DialogHeader>
-                 <div className="space-y-4">
-                 <p className="text-slate-300 text-center">
-                 Êtes-vous sûr de vouloir supprimer ce mandat ?
-                 </p>
-                 <div className="flex justify-center gap-3 pt-4">
-                 <Button
-                 type="button"
-                 onClick={() => {
-                   setShowDeleteMandatConfirm(false);
-                   setMandatIndexToDelete(null);
-                 }}
-                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                 >
-                 Annuler
-                 </Button>
-                 <Button 
-                 type="button" 
-                 onClick={() => {
-                   if (mandatIndexToDelete !== null) {
-                     setNouveauDossierForm(prev => ({
-                       ...prev,
-                       mandats: prev.mandats.filter((_, i) => i !== mandatIndexToDelete)
-                     }));
-                     const newActiveIndex = mandatIndexToDelete > 0 ? (mandatIndexToDelete - 1).toString() : "0";
-                     setActiveTabMandatDossier(newActiveIndex);
-                   }
-                   setShowDeleteMandatConfirm(false);
-                   setMandatIndexToDelete(null);
-                 }}
-                 className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                 >
-                 Confirmer
-                 </Button>
-                 </div>
-                 </div>
-                 </DialogContent>
-                 </Dialog>
+        </div>
 
-                 {/* Dialog utilisateur manquant */}
-                 <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
-                   <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-                     <DialogHeader>
-                       <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-                         <span className="text-2xl">⚠️</span>
-                         Attention
-                         <span className="text-2xl">⚠️</span>
-                       </DialogTitle>
-                     </DialogHeader>
-                     <div className="space-y-4">
-                       <p className="text-slate-300 text-center">
-                         Tous les mandats doivent avoir un utilisateur assigné avant d'ouvrir le dossier.
-                       </p>
-                       <div className="flex justify-center gap-3 pt-4">
-                         <Button 
-                           type="button" 
-                           onClick={() => setShowMissingUserWarning(false)}
-                           className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                         >
-                           Compris
-                         </Button>
-                       </div>
-                     </div>
-                   </DialogContent>
-                 </Dialog>
+        {/* Dialog de confirmation de changement de statut */}
+        <Dialog open={showStatutChangeConfirm} onOpenChange={setShowStatutChangeConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Des documents sont liés à ce mandat. En changeant le statut, les documents associés au dossier SharePoint seront supprimés.
+              </p>
+              <p className="text-slate-400 text-sm text-center">
+                Êtes-vous sûr de vouloir continuer ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                  }}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                  onClick={async () => {
+                    const value = pendingStatutChange;
+                    
+                    // Supprimer les documents du dossier SharePoint
+                    if (formData.numero_dossier && formData.arpenteur_geometre) {
+                      try {
+                        const initials = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
+                        const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${formData.numero_dossier}/INTRANTS`;
+                        
+                        // Récupérer la liste des fichiers
+                        const response = await base44.functions.invoke('sharepoint', {
+                          action: 'list',
+                          folderPath: folderPath
+                        });
+                        const files = response.data?.files || [];
+                        
+                        // Supprimer chaque fichier
+                        for (const file of files) {
+                          await base44.functions.invoke('sharepoint', {
+                            action: 'delete',
+                            fileId: file.id
+                          });
+                        }
+                      } catch (error) {
+                        console.error("Erreur suppression documents SharePoint:", error);
+                      }
+                    }
+                    
+                    if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
+                      const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                      setFormData({...formData, statut: value, numero_dossier: prochainNumero});
+                    } else if (value !== "Mandats à ouvrir") {
+                      setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                    } else {
+                      setFormData({...formData, statut: value});
+                    }
+                    setShowStatutChangeConfirm(false);
+                    setPendingStatutChange(null);
+                    setHasDocuments(false);
+                  }}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
 
-                 {/* Table des prises de mandat */}
-                 <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-                   <CardHeader className="border-b border-slate-800">
-                     <div className="flex flex-col gap-4">
+        {/* Dialog de confirmation d'annulation - Nouveau mandat */}
+        <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={async () => {
+                    // Déverrouiller le mandat si on annule
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setShowCancelConfirm(false);
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
 
-                       {/* Tabs pour les statuts - style tabs pleine largeur */}
-                       <div className="flex w-full border-b border-slate-700">
-                 ...
-                       </div>
-                     </div>
-                   </CardHeader>
-                   <CardContent className="p-0">
-                     {/* ... rest of table content ... */}
-                   </CardContent>
-                 </Card>
-                 </div>
-                 </div>
-                 );
-                 }
+        {/* Dialog pour avertissement modifications non sauvegardées */}
+        <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={async () => {
+                    // Déverrouiller le mandat si on annule
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setShowUnsavedWarning(false);
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowUnsavedWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation - Ouvrir dossier */}
+        <Dialog open={showCancelConfirmDossier} onOpenChange={setShowCancelConfirmDossier}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    setShowCancelConfirmDossier(false);
+                    setIsOuvrirDossierDialogOpen(false);
+                    setNouveauDossierForm({
+                      numero_dossier: "",
+                      arpenteur_geometre: "",
+                      date_ouverture: new Date().toISOString().split('T')[0],
+                      statut: "Ouvert",
+                      ttl: "Non",
+                      clients_ids: [],
+                      notaires_ids: [],
+                      courtiers_ids: [],
+                      mandats: []
+                    });
+                    setCommentairesTemporairesDossier([]);
+                    setDossierDocuments([]);
+                    setActiveTabMandatDossier("0");
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelConfirmDossier(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression de mandat */}
+        <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (mandatIndexToDelete !== null) {
+                      setNouveauDossierForm(prev => ({
+                        ...prev,
+                        mandats: prev.mandats.filter((_, i) => i !== mandatIndexToDelete)
+                      }));
+                      setActiveTabMandatDossier(Math.max(0, mandatIndexToDelete - 1).toString());
+                    }
+                    setShowDeleteMandatConfirm(false);
+                    setMandatIndexToDelete(null);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement utilisateur assigné manquant */}
+        <Dialog open={showMissingUserWarning} onOpenChange={setShowMissingUserWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Tous les mandats doivent avoir un utilisateur assigné avant de créer le dossier.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowMissingUserWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour validation arpenteur requis */}
+        <Dialog open={showArpenteurRequiredDialog} onOpenChange={setShowArpenteurRequiredDialog}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez sélectionner un arpenteur-géomètre.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowArpenteurRequiredDialog(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  OK
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog pour ajouter une minute */}
+        <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="space-y-2">
+                <Label>Minute <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newMinuteForm.minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, minute: e.target.value })}
+                  placeholder="Ex: 12345"
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date de minute <span className="text-red-400">*</span></Label>
+                <Input
+                  type="date"
+                  value={newMinuteForm.date_minute}
+                  onChange={(e) => setNewMinuteForm({ ...newMinuteForm, date_minute: e.target.value })}
+                  className="bg-slate-800 border-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type de minute <span className="text-red-400">*</span></Label>
+                <Select
+                  value={newMinuteForm.type_minute}
+                  onValueChange={(value) => setNewMinuteForm({ ...newMinuteForm, type_minute: value })}
+                >
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
+                    <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
+                    <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleAddMinuteFromDialog}
+                  disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Ajouter
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Selector Dialog */}
+        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+            <DialogHeader>
+              <DialogTitle>Sélectionner des clients</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un client..."
+                    value={clientSearchTerm}
+                    onChange={(e) => setClientSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Client");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredClientsForSelector.map((client) => (
+                    <div
+                      key={client.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.clients_ids.includes(client.id)
+                          ? 'bg-blue-500/20 border border-blue-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(client.id, 'clients')}
+                    >
+                      <p className="text-white font-medium">{client.prenom} {client.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {client.adresses?.length > 0 && formatAdresse(client.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(client.adresses.find(a => a.actuelle || a.actuel))}</p>
+                        )}
+                        {getCurrentValue(client.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(client.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(client.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(client.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(client.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsClientSelectorOpen(false);
+                          handleEdit(client);
+                        }}
+                        className="text-emerald-400 hover:text-emerald-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsClientSelectorOpen(false)} className="w-full bg-emerald-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notaire Selector Dialog */}
+        <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+            <DialogHeader>
+              <DialogTitle>Sélectionner des notaires</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un notaire..."
+                    value={notaireSearchTerm}
+                    onChange={(e) => setNotaireSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Notaire");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-purple-500 hover:bg-purple-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredNotairesForSelector.map((notaire) => (
+                    <div
+                      key={notaire.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.notaires_ids.includes(notaire.id)
+                          ? 'bg-purple-500/20 border border-purple-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(notaire.id, 'notaires')}
+                    >
+                      <p className="text-white font-medium">{notaire.prenom} {notaire.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {notaire.adresses?.length > 0 && formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel)) && (
+                          <p className="truncate">📍 {formatAdresse(notaire.adresses.find(a => a.actuelle || a.actuel))}</p>
+                        )}
+                        {getCurrentValue(notaire.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(notaire.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(notaire.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(notaire.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(notaire.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsNotaireSelectorOpen(false);
+                          handleEdit(notaire);
+                        }}
+                        className="text-purple-400 hover:text-purple-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsNotaireSelectorOpen(false)} className="w-full bg-purple-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Courtier Selector Dialog */}
+        <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl shadow-2xl shadow-black/50" hideClose>
+            <DialogHeader>
+              <DialogTitle>Sélectionner des courtiers</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher un courtier..."
+                    value={courtierSearchTerm}
+                    onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setEditingClientForForm(null);
+                    setClientTypeForForm("Courtier immobilier");
+                    setIsClientFormDialogOpen(true);
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredCourtiersForSelector.map((courtier) => (
+                    <div
+                      key={courtier.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                        formData.courtiers_ids.includes(courtier.id)
+                          ? 'bg-orange-500/20 border border-orange-500/30'
+                          : 'bg-slate-800/50 hover:bg-slate-800 border border-slate-700'
+                      }`}
+                      onClick={() => toggleClient(courtier.id, 'courtiers')}
+                    >
+                      <p className="text-white font-medium">{courtier.prenom} {courtier.nom}</p>
+                      <div className="text-sm text-slate-400 space-y-1 mt-1">
+                        {courtier.adresses?.length > 0 && formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel)) && (
+                          <p className="truncate">📍 {formatAdresse(courtier.adresses.find(a => a.actuelle || a.actel))}</p>
+                        )}
+                        {getCurrentValue(courtier.courriels, 'courriel') && (
+                          <p className="truncate">✉️ {getCurrentValue(courtier.courriels, 'courriel')}</p>
+                        )}
+                        {getCurrentValue(courtier.telephones, 'telephone') && (
+                          <p>
+                            📞 <a 
+                              href={`tel:${getCurrentValue(courtier.telephones, 'telephone').replace(/\D/g, '')}`}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {getCurrentValue(courtier.telephones, 'telephone')}
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsCourtierSelectorOpen(false);
+                          handleEdit(courtier);
+                        }}
+                        className="text-orange-400 hover:text-orange-300 mt-2 w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Modifier
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button onClick={() => setIsCourtierSelectorOpen(false)} className="w-full bg-orange-500">
+                Valider
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* PDF Viewer Dialog */}
+        <Dialog open={!!viewingPdfUrl} onOpenChange={(open) => { if (!open) { setViewingPdfUrl(null); setViewingPdfName(""); } }}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[90vw] w-[90vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <div className="flex items-center px-3 py-1.5 border-b border-slate-800 flex-shrink-0 min-h-0">
+              <div className="flex items-center gap-2 text-sm">
+                <File className="w-4 h-4 text-amber-400" />
+                <span className="truncate max-w-[600px] text-white">{viewingPdfName}</span>
+              </div>
+            </div>
+            <DialogHeader className="sr-only">
+              <DialogTitle>{viewingPdfName}</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden bg-slate-950 min-h-0">
+              {viewingPdfUrl && (
+                <iframe
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingPdfUrl)}&embedded=true`}
+                  className="w-full h-full border-0"
+                  title={viewingPdfName}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ClientFormDialog (replaces previous New Client Dialogs) */}
+        <ClientFormDialog
+          open={isClientFormDialogOpen}
+          onOpenChange={(open) => {
+            setIsClientFormDialogOpen(open);
+            if (!open) setEditingClientForForm(null);
+          }}
+          editingClient={editingClientForForm}
+          defaultType={clientTypeForForm}
+          initialData={
+            clientTypeForForm === "Client" ? clientInfo :
+            clientTypeForForm === "Notaire" ? {
+              prenom: professionnelInfo.notaire || "",
+              nom: "",
+              telephone: professionnelInfo.notaire_telephone || "",
+              courriel: professionnelInfo.notaire_courriel || ""
+            } :
+            clientTypeForForm === "Courtier immobilier" ? {
+              prenom: professionnelInfo.courtier || "",
+              nom: "",
+              telephone: professionnelInfo.courtier_telephone || "",
+              courriel: professionnelInfo.courtier_courriel || ""
+            } : null
+          }
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['clients'] }); // Refresh clients list
+            // Optionally re-open the selector if creating from there
+            if (clientTypeForForm === "Client" && !isOuvrirDossierDialogOpen) {
+              setIsClientSelectorOpen(true);
+            }
+            if (clientTypeForForm === "Notaire" && !isOuvrirDossierDialogOpen) {
+              setIsNotaireSelectorOpen(true);
+            }
+            if (clientTypeForForm === "Courtier immobilier" && !isOuvrirDossierDialogOpen) {
+              setIsCourtierSelectorOpen(true);
+            }
+          }}
+        />
+
+        {/* Lot Selector Dialog */}
+        <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {
+          setIsLotSelectorOpen(open);
+          if (!open) {
+            setLotCirconscriptionFilter("all");
+            setLotSearchTerm("");
+            setLotCadastreFilter("Québec");
+          }
+        }}>
+          <DialogContent className="bg-white/5 backdrop-blur-2xl border-2 border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4 flex-1 overflow-hidden flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher par numéro, rang..."
+                    value={lotSearchTerm}
+                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Circonscription" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                      <SelectItem key={circ} value={circ} className="text-white">
+                        {circ}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={lotCadastreFilter} onValueChange={setLotCadastreFilter}>
+                  <SelectTrigger className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Cadastre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
+                    <SelectItem value="Québec" className="text-white">Québec</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={() => setIsNewLotDialogOpen(true)}
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau lot
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                      <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                      <TableHead className="text-slate-300">Circonscription</TableHead>
+                      <TableHead className="text-slate-300">Cadastre</TableHead>
+                      <TableHead className="text-slate-300">Rang</TableHead>
+                      <TableHead className="text-slate-300 text-right">Sélection</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLotsForSelector.length > 0 ? (
+                      filteredLotsForSelector.map((lot) => {
+                        const isSelected = currentMandatIndex !== null &&
+                          formData.mandats[currentMandatIndex]?.lots?.includes(lot.id);
+                        return (
+                          <TableRow
+                            key={lot.id}
+                            className={`cursor-pointer transition-colors border-slate-800 ${
+                              isSelected
+                                ? 'bg-emerald-500/20 hover:bg-emerald-500/30'
+                                : 'hover:bg-slate-800/30'
+                            }`}
+                            onClick={() => addLotToCurrentMandat(lot.id)}
+                          >
+                            <TableCell className="font-medium text-white">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                {lot.circonscription_fonciere}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {isSelected && (
+                                <Badge className="bg-emerald-500/30 text-emerald-400 border-emerald-500/50">
+                                  <Check className="w-3 h-3 mr-1" />
+                                  Sélectionné
+                                </Badge>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-12">
+                          <div className="text-slate-400">
+                            <Grid3x3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>Aucun lot trouvé</p>
+                            <p className="text-sm mt-2">Essayez de modifier vos filtres ou créez un nouveau lot</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <Button onClick={() => setIsLotSelectorOpen(false)} className="w-full bg-emerald-500">
+                Valider la sélection
+              </Button>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Lot Dialog */}
+        <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
+          setIsNewLotDialogOpen(open);
+          if (!open) resetLotForm();
+        }}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+            <DialogHeader className="sr-only">
+              <DialogTitle className="text-2xl">Nouveau lot</DialogTitle>
+            </DialogHeader>
+            
+            <motion.div 
+              className="flex flex-col h-[90vh]"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex-1 flex overflow-hidden">
+                {/* Colonne gauche - Formulaire - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
+                  </div>
+                  
+                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
+                    {/* Section 1: Informations du lot */}
+                    <Card className="border-slate-700 bg-slate-800/30">
+                        <CardHeader 
+                          className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
+                          onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                                <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
+                              </div>
+                              <CardTitle className="text-blue-300 text-base">Informations du lot</CardTitle>
+                            </div>
+                            {lotInfoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                          </div>
+                        </CardHeader>
+
+                        {!lotInfoCollapsed && (
+                          <CardContent className="pt-2 pb-3 space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
+                                <Input
+                                  value={newLotForm.numero_lot}
+                                  onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
+                                  required
+                                  placeholder="Ex: 1234-5678"
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Rang</Label>
+                                <Input
+                                  value={newLotForm.rang}
+                                  onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
+                                  placeholder="Ex: Rang 4"
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
+                                <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
+                                  if (value === "") {
+                                    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
+                                    setAvailableCadastresForNewLot([]);
+                                  } else {
+                                    handleLotCirconscriptionChange(value);
+                                  }
+                                }}>
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                      <SelectItem key={circ} value={circ} className="text-white text-sm">
+                                        {circ}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Cadastre</Label>
+                                <Select
+                                  value={newLotForm.cadastre}
+                                  onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                                  disabled={!newLotForm.circonscription_fonciere}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                    <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                    {availableCadastresForNewLot.map((cadastre) => (
+                                      <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
+                                        {cadastre}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Date BPD</Label>
+                                <Input
+                                  type="date"
+                                  value={newLotForm.date_bpd}
+                                  onChange={(e) => setNewLotForm({...newLotForm, date_bpd: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Type d'opération</Label>
+                                <Select
+                                  value={newLotForm.type_operation}
+                                  onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                    {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
+                                      <SelectItem key={type} value={type} className="text-white text-sm">
+                                        {type}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+
+                      {/* Section 2: Concordances */}
+                      <Card className="border-slate-700 bg-slate-800/30">
+                      <CardHeader 
+                        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
+                        onClick={() => setLotConcordanceCollapsed(!lotConcordanceCollapsed)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                              <FileText className="w-3.5 h-3.5 text-purple-400" />
+                            </div>
+                            <CardTitle className="text-purple-300 text-base">Concordances antérieures</CardTitle>
+                            {newLotForm.concordances_anterieures?.length > 0 && (
+                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                {newLotForm.concordances_anterieures.length}
+                              </Badge>
+                            )}
+                          </div>
+                          {lotConcordanceCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                        </div>
+                      </CardHeader>
+
+                      {!lotConcordanceCollapsed && (
+                        <CardContent className="pt-2 pb-3">
+                          <div className="grid grid-cols-[60%_40%] gap-4">
+                            {/* Colonne gauche - Formulaire et tableau */}
+                            <div className="space-y-3">
+                              {/* Formulaire d'ajout toujours visible */}
+                              <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
+                                <Label className="text-purple-300 text-sm">Ajouter une concordance</Label>
+                                
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-1">
+                                    <Label className="text-slate-400 text-xs">Numéro de lot</Label>
+                                    <Input
+                                      value={currentConcordanceForm.numero_lot}
+                                      onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, numero_lot: e.target.value})}
+                                      placeholder="Ex: 123"
+                                      className="bg-slate-700 border-slate-600 h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-slate-400 text-xs">Rang</Label>
+                                    <Input
+                                      value={currentConcordanceForm.rang}
+                                      onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, rang: e.target.value})}
+                                      placeholder="Ex: Rang 4"
+                                      className="bg-slate-700 border-slate-600 h-8 text-sm"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="space-y-1">
+                                    <Label className="text-slate-400 text-xs">Circonscription foncière</Label>
+                                    <Select 
+                                      value={currentConcordanceForm.circonscription_fonciere} 
+                                      onValueChange={(value) => {
+                                        if (value === "") {
+                                          setCurrentConcordanceForm({...currentConcordanceForm, circonscription_fonciere: "", cadastre: ""});
+                                          setAvailableCadastresForConcordance([]);
+                                        } else {
+                                          handleConcordanceCirconscriptionChange(value);
+                                        }
+                                      }}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                                        <SelectValue placeholder="Sélectionner" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                        {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                          <SelectItem key={circ} value={circ} className="text-white text-sm">
+                                            {circ}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-slate-400 text-xs">Cadastre</Label>
+                                    <Select
+                                      value={currentConcordanceForm.cadastre}
+                                      onValueChange={(value) => setCurrentConcordanceForm({...currentConcordanceForm, cadastre: value})}
+                                      disabled={!currentConcordanceForm.circonscription_fonciere}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                                        <SelectValue placeholder={currentConcordanceForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                        {availableCadastresForConcordance.map((cadastre) => (
+                                          <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
+                                            {cadastre}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={addConcordanceFromForm}
+                                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full"
+                                >
+                                  <Plus className="w-4 h-4 mr-2" />
+                                  Ajouter cette concordance
+                                </Button>
+                              </div>
+
+                              {/* Tableau des concordances */}
+                              {newLotForm.concordances_anterieures?.length > 0 && (
+                                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                        <TableHead className="text-slate-300 text-xs">N° Lot</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Rang</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Circonscription</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Cadastre</TableHead>
+                                        <TableHead className="text-slate-300 text-right text-xs">Actions</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {newLotForm.concordances_anterieures.map((concordance, index) => (
+                                        <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                          <TableCell className="text-white text-sm">{concordance.numero_lot}</TableCell>
+                                          <TableCell className="text-slate-300 text-sm">{concordance.rang || "-"}</TableCell>
+                                          <TableCell className="text-slate-300 text-sm">
+                                            {concordance.circonscription_fonciere}
+                                          </TableCell>
+                                          <TableCell className="text-slate-300 text-sm">{concordance.cadastre || "-"}</TableCell>
+                                          <TableCell className="text-right">
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => removeConcordance(index)}
+                                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                            >
+                                              <Trash2 className="w-3 h-3" />
+                                            </Button>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Colonne droite - Liste des lots existants */}
+                            <div className="border-l border-slate-700 pl-4">
+                              <div className="mb-3">
+                                <Label className="text-purple-300 text-sm">Lots existants</Label>
+                              </div>
+                              
+                              <div className="space-y-1 max-h-48 overflow-y-auto">
+                                {lots
+                                  .filter(lot => {
+                                    const matchesNumero = !currentConcordanceForm.numero_lot || 
+                                      lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
+                                    const matchesRang = !currentConcordanceForm.rang || 
+                                      lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
+                                    const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
+                                      lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
+                                    const matchesCadastre = !currentConcordanceForm.cadastre || 
+                                      lot.cadastre === currentConcordanceForm.cadastre;
+                                    
+                                    return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
+                                  })
+                                  .map((lot) => (
+                                    <div 
+                                      key={lot.id} 
+                                      onClick={() => {
+                                        setCurrentConcordanceForm({
+                                          circonscription_fonciere: lot.circonscription_fonciere || "",
+                                          cadastre: lot.cadastre || "",
+                                          numero_lot: lot.numero_lot || "",
+                                          rang: lot.rang || ""
+                                        });
+                                        setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
+                                      }}
+                                      className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
+                                    >
+                                      <p className="text-white font-semibold text-xs truncate">
+                                        {lot.numero_lot}
+                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
+                                        <span className="text-purple-400 font-normal"> • {lot.circonscription_fonciere}</span>
+                                        {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
+                                      </p>
+                                    </div>
+                                  ))}
+                                {lots.filter(lot => {
+                                  const matchesNumero = !currentConcordanceForm.numero_lot || 
+                                    lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
+                                  const matchesRang = !currentConcordanceForm.rang || 
+                                    lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
+                                  const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
+                                    lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
+                                  const matchesCadastre = !currentConcordanceForm.cadastre || 
+                                    lot.cadastre === currentConcordanceForm.cadastre;
+                                  
+                                  return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
+                                }).length === 0 && (
+                                  <div className="text-center py-6 text-slate-500">
+                                    <Grid3x3 className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                                    <p className="text-xs">Aucun lot trouvé</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+
+                    {/* Section 3: Documents */}
+                    <Card className="border-slate-700 bg-slate-800/30">
+                      <CardHeader 
+                        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
+                        onClick={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                              <Upload className="w-3.5 h-3.5 text-orange-400" />
+                            </div>
+                            <CardTitle className="text-orange-300 text-base">Documents</CardTitle>
+                            {newLotForm.document_pdf_url && (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                                <Check className="w-3 h-3 mr-1" />
+                                PDF ajouté
+                              </Badge>
+                            )}
+                          </div>
+                          {lotDocumentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                        </div>
+                      </CardHeader>
+
+                      {!lotDocumentsCollapsed && (
+                        <CardContent className="pt-2 pb-3">
+                          <div className="space-y-2">
+                            <Label className="text-slate-400 text-xs">Document PDF du lot</Label>
+                            <Input
+                              type="file"
+                              accept=".pdf"
+                              onChange={handleLotFileUpload}
+                              disabled={uploadingLotPdf}
+                              className="bg-slate-700 border-slate-600 file:text-orange-400 file:bg-orange-500/10 file:border-none file:hover:bg-orange-500/20"
+                            />
+                            {uploadingLotPdf && (
+                              <div className="flex items-center gap-2 text-sm text-slate-400">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Upload en cours...
+                              </div>
+                            )}
+                            {newLotForm.document_pdf_url && (
+                              <div className="flex items-center gap-2 p-2 bg-slate-700/50 rounded-lg border border-slate-600">
+                                <File className="w-4 h-4 text-orange-400" />
+                                <span className="text-sm text-slate-300 flex-1">Document PDF ajouté</span>
+                                <a
+                                  href={newLotForm.document_pdf_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-emerald-400 hover:text-emerald-300"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+                  </form>
+                </div>
+
+                {/* Colonne droite - Commentaires et Historique - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        Commentaires
+                      </TabsTrigger>
+                      <TabsTrigger value="historique" className="orange text-xs bg-transparent border-none data-[state=active]:text-orange-400 data-[state=inactive]:text-slate-400 hover:text-orange-300">
+                        <Clock className="w-4 h-4 mr-1" />
+                        Historique
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                    <CommentairesSectionLot
+                      lotId={editingLot?.id}
+                      lotTemporaire={!editingLot}
+                      commentairesTemp={commentairesTemporairesLot}
+                      onCommentairesTempChange={setCommentairesTemporairesLot}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                    <div className="flex items-center justify-center h-full text-center">
+                      <div>
+                        <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                        <p className="text-slate-500">Aucune action enregistrée</p>
+                        <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+                </div>
+              </div>
+
+              {/* Boutons tout en bas - pleine largeur */}
+              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Details Dialog */}
+        <Dialog open={!!viewingClientDetails} onOpenChange={(open) => !open && setViewingClientDetails(null)}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col shadow-2xl shadow-black/50">
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+              <DialogTitle className="text-2xl">
+                Fiche de {viewingClientDetails?.prenom} {viewingClientDetails?.nom}
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="flex-1 overflow-hidden p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {viewingClientDetails && (
+                <ClientDetailView
+                  client={viewingClientDetails}
+                  onClose={() => setViewingClientDetails(null)}
+                  onViewDossier={(dossier) => {
+                    setViewingClientDetails(null);
+                    setViewingDossier(dossier);
+                    setIsViewDialogOpen(true);
+                  }}
+                />
+              )}
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Dossier Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+            <DialogHeader className="sr-only">
+              <DialogTitle className="text-2xl">Détails du dossier</DialogTitle>
+            </DialogHeader>
+            {viewingDossier && (
+              <motion.div 
+                className="flex h-[90vh]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Main content - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="mb-6 flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-white">
+                      Détails du dossier {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
+                    </h2>
+                    {viewingDossier.ttl === "Oui" && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Informations principales */}
+                    <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                      <div>
+                        <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                        <p className="text-white font-medium mt-1">{viewingDossier.arpenteur_geometre}</p>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Statut</Label>
+                        <div className="mt-1">
+                          <Badge variant="outline" className={`${getStatutBadgeColor(viewingDossier.statut)} border`}>
+                            {viewingDossier.statut}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-slate-400 text-sm">Date de création</Label>
+                        <p className="text-white font-medium mt-1">
+                          {viewingDossier.created_date ? format(new Date(viewingDossier.created_date), "dd MMMM yyyy", { locale: fr }) : '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {viewingDossier.utilisateur_assigne && (
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                        <p className="text-white font-medium mt-1 text-sm">
+                          {users.find(u => u.email === viewingDossier.utilisateur_assigne)?.full_name || viewingDossier.utilisateur_assigne}
+                        </p>
+                      </div>
+                    )}
+
+                    {viewingDossier.description && (
+                      <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+                        <Label className="text-slate-400 text-sm">Description</Label>
+                        <p className="text-white mt-2 whitespace-pre-wrap">{viewingDossier.description}</p>
+                      </div>
+                    )}
+
+                    {/* Clients, Notaires, Courtiers */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {/* Clients */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.clients_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.clients_texte}</p>
+                          </div>
+                        )
+                      ) : (
+                        viewingDossier.clients_ids && viewingDossier.clients_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Clients</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.clients_ids.map(clientId => {
+                                const client = getClientById(clientId);
+                                return client ? (
+                                  <Badge 
+                                    key={clientId} 
+                                    className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(client);
+                                    }}
+                                  >
+                                    {client.prenom} {client.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                      {/* Notaires */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.notaires_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.notaires_texte}</p>
+                          </div>
+                        )
+                      ) : (
+                        viewingDossier.notaires_ids && viewingDossier.notaires_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Notaires</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.notaires_ids.map(notaireId => {
+                                const notaire = getClientById(notaireId);
+                                return notaire ? (
+                                  <Badge 
+                                    key={notaireId} 
+                                    className="bg-purple-500/20 text-purple-400 border-purple-500/30 border w-full justify-start cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(notaire);
+                                    }}
+                                  >
+                                    {notaire.prenom} {notaire.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                      {/* Courtiers */}
+                      {viewingDossier.ttl === "Oui" ? (
+                        viewingDossier.courtiers_texte && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                            <p className="text-white p-3 bg-slate-800/30 rounded-lg whitespace-pre-wrap">{viewingDossier.courtiers_texte}</p>
+                          </div>
+                        )
+                      ) : (
+                        viewingDossier.courtiers_ids && viewingDossier.courtiers_ids.length > 0 && (
+                          <div>
+                            <Label className="text-slate-400 text-sm mb-2 block">Courtiers immobiliers</Label>
+                            <div className="flex flex-col gap-2">
+                              {viewingDossier.courtiers_ids.map(courtierId => {
+                                const courtier = getClientById(courtierId);
+                                return courtier ? (
+                                  <Badge 
+                                    key={courtierId} 
+                                    className="bg-orange-500/20 text-orange-400 border-orange-500/30 border w-full justify-start cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                    onClick={() => {
+                                      setIsViewDialogOpen(false);
+                                      setViewingClientDetails(courtier);
+                                    }}
+                                  >
+                                    {courtier.prenom} {courtier.nom}
+                                  </Badge>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    {/* Mandats */}
+                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
+                      <div>
+                        <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
+                        <div className="space-y-3">
+                          {viewingDossier.mandats.map((mandat, index) => (
+                            <Card key={index} className="bg-slate-800/50 border-slate-700">
+                              <CardContent className="p-4 space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
+                                  {mandat.prix_estime > 0 && (
+                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
+                                      {mandat.prix_estime.toFixed(2)} $
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {mandat.lots && mandat.lots.length > 0 && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Lots</Label>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {mandat.lots.map((lotId) => {
+                                          const lot = getLotById(lotId);
+                                          return (
+                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                                              {lot?.numero_lot || lotId}
+                                            </Badge>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Utilisateur assigné pour mandat */}
+                                {mandat.utilisateur_assigne && (
+                                  <div>
+                                    <Label className="text-slate-400 text-xs">Utilisateur assigné pour le mandat</Label>
+                                    <p className="text-slate-300 text-sm mt-1">
+                                      {users.find(u => u.email === mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Dates */}
+                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
+                                  {mandat.date_ouverture && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Ouverture</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_signature && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Signature</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_debut_travaux && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Début travaux</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                  {mandat.date_livraison && (
+                                    <div>
+                                      <Label className="text-slate-400 text-xs">Livraison</Label>
+                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Tarification */}
+                                {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
+                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
+                                    {mandat.prix_estime > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Prix estimé</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.prix_estime.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    {mandat.rabais > 0 && (
+                                      <div>
+                                        <Label className="text-slate-400 text-xs">Rabais</Label>
+                                        <p className="text-slate-300 text-sm mt-1">{mandat.rabais.toFixed(2)} $</p>
+                                      </div>
+                                    )}
+                                    <div>
+                                        <Label className="text-slate-400 text-xs">Taxes</Label>
+                                        <p className="text-slate-300 text-sm mt-1">
+                                          {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
+                                        </p>
+                                      </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Boutons Fermer/Modifier tout en bas */}
+                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                      Fermer
+                    </Button>
+                    <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Right side - Commentaires Sidebar - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                  </div>
+                  <div className="flex-1 overflow-hidden p-4 pr-4">
+                    <CommentairesSection
+                      dossierId={viewingDossier?.id}
+                      dossierTemporaire={false}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+
+        {/* Table des prises de mandat */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardHeader className="border-b border-slate-800">
+            <div className="flex flex-col gap-4">
+              
+              {/* Tabs pour les statuts - style tabs pleine largeur */}
+              <div className="flex w-full border-b border-slate-700">
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("nouveau")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "nouveau"
+                      ? "border-cyan-500 text-cyan-400 bg-cyan-500/10"
+                      : "border-transparent text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/5"
+                  }`}
+                >
+                  <FileQuestion className="w-4 h-4" />
+                  Nouveau mandat / Demande d'informations
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Nouveau mandat/Demande d'information").length}
+                  </Badge>
+                </button>
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("ouvrir")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "ouvrir"
+                      ? "border-purple-500 text-purple-400 bg-purple-500/10"
+                      : "border-transparent text-slate-400 hover:text-purple-400 hover:bg-purple-500/5"
+                  }`}
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Mandat à ouvrir
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Mandats à ouvrir").length}
+                  </Badge>
+                </button>
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("non-octroye")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "non-octroye"
+                      ? "border-red-500 text-red-400 bg-red-500/10"
+                      : "border-transparent text-slate-400 hover:text-red-400 hover:bg-red-500/5"
+                  }`}
+                >
+                  <XCircle className="w-4 h-4" />
+                  Mandat non-octroyé
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 ml-1">
+                    {priseMandats.filter(pm => pm.statut === "Mandat non octroyé").length}
+                  </Badge>
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                  />
+                </div>
+
+                <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                  <SelectTrigger className="w-44 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Arpenteur" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                    {ARPENTEURS.map((arp) => (
+                      <SelectItem key={arp} value={arp} className="text-white">
+                        {arp}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterVille} onValueChange={setFilterVille}>
+                  <SelectTrigger className="w-40 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Ville" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                    {[...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort().map((ville) => (
+                      <SelectItem key={ville} value={ville} className="text-white">
+                        {ville}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
+                  <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Type de mandat" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                    {TYPES_MANDATS.map((type) => (
+                      <SelectItem key={type} value={type} className="text-white">
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterUrgence} onValueChange={setFilterUrgence}>
+                  <SelectTrigger className="w-36 bg-slate-800/50 border-slate-700 text-white">
+                    <SelectValue placeholder="Urgence" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="all" className="text-white">Toutes</SelectItem>
+                    <SelectItem value="Pas pressé" className="text-white">Pas pressé</SelectItem>
+                    <SelectItem value="Normal" className="text-white">Normal</SelectItem>
+                    <SelectItem value="Rapide" className="text-white">Rapide</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {(filterArpenteur !== "all" || filterVille !== "all" || filterTypeMandat !== "all" || filterUrgence !== "all") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFilterArpenteur("all");
+                      setFilterVille("all");
+                      setFilterTypeMandat("all");
+                      setFilterUrgence("all");
+                    }}
+                    className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  >
+                    Réinitialiser
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('arpenteur_geometre')}
+                    >
+                      Arpenteur-Géomètre {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('created_date')}
+                    >
+                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('clients')}
+                    >
+                      Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('adresse_travaux')}
+                    >
+                      Adresse des travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('ville')}
+                    >
+                      Ville {sortField === 'ville' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('types_mandats')}
+                    >
+                      Types de mandats {sortField === 'types_mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('urgence_percue')}
+                    >
+                      Urgence {sortField === 'urgence_percue' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {priseMandats
+                    .filter(pm => {
+                      // Filtre par tab actif
+                      const tabStatut = activeListTab === "nouveau" 
+                        ? "Nouveau mandat/Demande d'information"
+                        : activeListTab === "ouvrir"
+                        ? "Mandats à ouvrir"
+                        : "Mandat non octroyé";
+                      if (pm.statut !== tabStatut) return false;
+
+                      const searchLower = searchTerm.toLowerCase();
+                      const clientName = pm.client_info?.prenom || pm.client_info?.nom 
+                        ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
+                        : getClientsNames(pm.clients_ids).toLowerCase();
+                      const matchesSearch = (
+                        pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+                        clientName.includes(searchLower) ||
+                        formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
+                        pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+                      );
+                      const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
+                      const matchesVille = filterVille === "all" || pm.adresse_travaux?.ville === filterVille;
+                      const matchesTypeMandat = filterTypeMandat === "all" || pm.mandats?.some(m => m.type_mandat === filterTypeMandat);
+                      const matchesUrgence = filterUrgence === "all" || pm.urgence_percue === filterUrgence;
+                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence;
+                    })
+                    .sort((a, b) => {
+                      if (!sortField) return 0;
+                      let aValue, bValue;
+                      switch (sortField) {
+                        case 'arpenteur_geometre':
+                          aValue = (a.arpenteur_geometre || '').toLowerCase();
+                          bValue = (b.arpenteur_geometre || '').toLowerCase();
+                          break;
+                        case 'created_date':
+                          aValue = new Date(a.created_date || 0).getTime();
+                          bValue = new Date(b.created_date || 0).getTime();
+                          break;
+                        case 'clients':
+                          const aClientName = a.client_info?.prenom || a.client_info?.nom 
+                            ? `${a.client_info.prenom || ''} ${a.client_info.nom || ''}`.trim()
+                            : getClientsNames(a.clients_ids);
+                          const bClientName = b.client_info?.prenom || b.client_info?.nom 
+                            ? `${b.client_info.prenom || ''} ${b.client_info.nom || ''}`.trim()
+                            : getClientsNames(b.clients_ids);
+                          aValue = aClientName.toLowerCase();
+                          bValue = bClientName.toLowerCase();
+                          break;
+                        case 'adresse_travaux':
+                          aValue = `${a.adresse_travaux?.numeros_civiques?.[0] || ''} ${a.adresse_travaux?.rue || ''}`.toLowerCase();
+                          bValue = `${b.adresse_travaux?.numeros_civiques?.[0] || ''} ${b.adresse_travaux?.rue || ''}`.toLowerCase();
+                          break;
+                        case 'ville':
+                          aValue = (a.adresse_travaux?.ville || '').toLowerCase();
+                          bValue = (b.adresse_travaux?.ville || '').toLowerCase();
+                          break;
+                        case 'types_mandats':
+                          aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
+                          bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
+                          break;
+                        case 'urgence_percue':
+                          const urgenceOrder = { 'Rapide': 1, 'Normal': 2, 'Pas pressé': 3 };
+                          aValue = urgenceOrder[a.urgence_percue] || 4;
+                          bValue = urgenceOrder[b.urgence_percue] || 4;
+                          break;
+                        default:
+                          aValue = '';
+                          bValue = '';
+                      }
+                      if (typeof aValue === 'string' && typeof bValue === 'string') {
+                        return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                      }
+                      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                    })
+                    .map((pm) => {
+                      const getUrgenceColor = (urgence) => {
+                        switch (urgence) {
+                          case "Pas pressé": return "bg-green-500/20 text-green-400 border-green-500/30";
+                          case "Normal": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+                          case "Rapide": return "bg-red-500/20 text-red-400 border-red-500/30";
+                          default: return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+                        }
+                      };
+
+                      return (
+                        <TableRow 
+                          key={pm.id} 
+                          className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                          onClick={() => handleEditPriseMandat(pm)}
+                        >
+                          <TableCell className="font-medium">
+                            <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
+                              {pm.arpenteur_geometre}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {pm.client_info?.prenom || pm.client_info?.nom 
+                              ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
+                              : getClientsNames(pm.clients_ids)}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                            {pm.adresse_travaux?.numeros_civiques?.[0] || pm.adresse_travaux?.rue
+                              ? `${pm.adresse_travaux.numeros_civiques?.[0] || ''} ${pm.adresse_travaux.rue || ''}`.trim()
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {pm.adresse_travaux?.ville || '-'}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {pm.mandats && pm.mandats.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {pm.mandats.slice(0, 2).map((m, idx) => (
+                                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                    {getAbbreviatedMandatType(m.type_mandat)}
+                                  </Badge>
+                                ))}
+                                {pm.mandats.length > 2 && (
+                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                    +{pm.mandats.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-600 text-xs">Aucun</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {pm.urgence_percue ? (
+                              <Badge className={`${getUrgenceColor(pm.urgence_percue)} border text-xs`}>
+                                {pm.urgence_percue}
+                              </Badge>
+                            ) : (
+                              <span className="text-slate-600 text-xs">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm("Êtes-vous sûr de vouloir supprimer cette prise de mandat ?")) {
+                                    deletePriseMandatMutation.mutate(pm.id);
+                                  }
+                                }}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  {priseMandats.filter(pm => {
+                    const tabStatut = activeListTab === "nouveau" 
+                      ? "Nouveau mandat/Demande d'information"
+                      : activeListTab === "ouvrir"
+                      ? "Mandats à ouvrir"
+                      : "Mandat non octroyé";
+                    return pm.statut === tabStatut;
+                  }).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                        Aucune prise de mandat dans cette catégorie
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
