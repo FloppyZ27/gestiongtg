@@ -3431,7 +3431,82 @@ export default function PriseDeMandat() {
                                           placeholder="Rechercher une adresse..."
                                           value={addressSearchQuery}
                                           onChange={async (e) => {
-                                    ...
+                                            const query = e.target.value;
+                                            setAddressSearchQuery(query);
+                                            setCurrentMandatIndexForAddress(index);
+
+                                            if (addressSearchTimeout) clearTimeout(addressSearchTimeout);
+
+                                            if (query.length >= 3) {
+                                              const timeout = setTimeout(async () => {
+                                                setIsSearchingAddress(true);
+                                                try {
+                                                  const searchQuery = query.toLowerCase().includes('alma') ? query : `${query}, Alma, Québec`;
+                                                  const encodedQuery = encodeURIComponent(searchQuery);
+
+                                                  const response = await fetch(
+                                                    `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
+                                                  );
+                                                  const data = await response.json();
+
+                                                  if (data.candidates && data.candidates.length > 0) {
+                                                    const formattedAddresses = data.candidates.map(candidate => {
+                                                      const attrs = candidate.attributes || {};
+                                                      const fullAddr = candidate.address || attrs.Match_addr || "";
+
+                                                      let numero_civique = attrs.AddNum || "";
+                                                      let rue = attrs.StName || "";
+                                                      let ville = attrs.City || attrs.Municipalit || "";
+                                                      let code_postal = attrs.Postal || "";
+
+                                                      if (!numero_civique || !rue) {
+                                                        const parts = fullAddr.split(',');
+                                                        if (parts.length > 0) {
+                                                          const streetPart = parts[0].trim();
+                                                          const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
+                                                          if (numMatch) {
+                                                            numero_civique = numMatch[1];
+                                                            rue = numMatch[2];
+                                                          } else {
+                                                            rue = streetPart;
+                                                          }
+                                                        }
+                                                        if (parts.length > 1 && !ville) {
+                                                          ville = parts[1].trim();
+                                                        }
+                                                        if (!code_postal) {
+                                                          const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+                                                          if (postalMatch) {
+                                                            code_postal = postalMatch[1].toUpperCase();
+                                                          }
+                                                        }
+                                                      }
+
+                                                      return {
+                                                        numero_civique,
+                                                        rue,
+                                                        ville,
+                                                        province: "QC",
+                                                        code_postal,
+                                                        full_address: fullAddr
+                                                      };
+                                                    });
+                                                    setAddressSuggestions(formattedAddresses);
+                                                  } else {
+                                                    setAddressSuggestions([]);
+                                                  }
+                                                } catch (error) {
+                                                  console.error("Erreur recherche adresse:", error);
+                                                  setAddressSuggestions([]);
+                                                } finally {
+                                                  setIsSearchingAddress(false);
+                                                }
+                                              }, 500);
+                                              setAddressSearchTimeout(timeout);
+                                            } else {
+                                              setAddressSuggestions([]);
+                                            }
+                                          }}
                                           className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1 pl-7"
                                         />
                                         {isSearchingAddress && (
