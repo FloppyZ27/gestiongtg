@@ -2155,15 +2155,15 @@ export default function PriseDeMandat() {
               </DialogHeader>
 
               <motion.div 
-                className="flex h-[90vh]"
+                className="flex flex-col h-[90vh]"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* Main form content - 70% */}
-                <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
-                  <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 flex overflow-hidden">
+                  {/* Main form content - 70% */}
+                  <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   {/* Bandeau de verrouillage */}
                   {isLocked && (
                     <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
@@ -2536,41 +2536,9 @@ export default function PriseDeMandat() {
 
                 </form>
                   </div>
-                
-                  {/* Boutons Annuler/Créer en bas de la colonne gauche */}
-                  <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                    <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async () => {
-                      if (hasFormChanges && !isLocked) {
-                        setShowUnsavedWarning(true);
-                        return;
-                      }
-                      
-                      // Déverrouiller le mandat si on annule
-                      if (editingPriseMandat && !isLocked) {
-                        await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                          ...editingPriseMandat,
-                          locked_by: null,
-                          locked_at: null
-                        });
-                        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                      }
-                      setIsDialogOpen(false);
-                      resetFullForm();
-                      setIsLocked(false);
-                      setLockedBy("");
-                    }}>
-                      Annuler
-                    </Button>
-                    {!isLocked && (
-                      <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                        {editingPriseMandat ? "Modifier" : "Créer"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
 
-                {/* Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                  {/* Sidebar - 30% */}
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -2732,13 +2700,14 @@ export default function PriseDeMandat() {
                 <DialogTitle className="text-2xl">Nouveau dossier</DialogTitle>
               </DialogHeader>
               <motion.div 
-                className="flex h-[90vh]"
+                className="flex flex-col h-[90vh]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="flex-1 flex overflow-hidden">
+                  <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
                   </div>
@@ -3846,9 +3815,9 @@ export default function PriseDeMandat() {
                       />
                     )}
                   </form>
+                  </div>
 
-                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                    <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
                       if (hasFormChanges) {
                         setShowUnsavedWarning(true);
                         return;
@@ -3890,12 +3859,15 @@ export default function PriseDeMandat() {
                         setDossierDocuments([]);
                         setActiveTabMandatDossier("0");
                       }
-                    }}>Annuler</Button>
-                    <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Créer</Button>
+                    }}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      Créer
+                    </Button>
                   </div>
                 </div>
-
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+              </motion.div>
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -4894,15 +4866,15 @@ export default function PriseDeMandat() {
             </DialogHeader>
             
             <motion.div 
-              className="flex h-[90vh]"
+              className="flex flex-col h-[90vh]"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Colonne gauche - Formulaire - 70% */}
-              <div className="flex-[0_0_70%] flex flex-col border-r border-slate-800">
-                <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 flex overflow-hidden">
+                {/* Colonne gauche - Formulaire - 70% */}
+                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
                   </div>
@@ -5308,21 +5280,9 @@ export default function PriseDeMandat() {
                     </Card>
                   </form>
                 </div>
-                
-                {/* Boutons en bas */}
-                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                  Annuler
-                </Button>
-                  <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                    Créer
-                  </Button>
-                </div>
-              </div>
-              
 
-              {/* Colonne droite - Commentaires et Historique - 30% */}
-              <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                {/* Colonne droite - Commentaires et Historique - 30% */}
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                 <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
@@ -5356,6 +5316,17 @@ export default function PriseDeMandat() {
                     </div>
                   </TabsContent>
                 </Tabs>
+                </div>
+              </div>
+
+              {/* Boutons tout en bas - pleine largeur */}
+              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  Créer
+                </Button>
               </div>
             </motion.div>
           </DialogContent>

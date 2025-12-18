@@ -720,14 +720,15 @@ export default function ClientFormDialog({
         </DialogHeader>
 
         <motion.div 
-          className="flex h-[90vh]"
+          className="flex flex-col h-[90vh]"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Main form content - 70% */}
-          <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+          <div className="flex-1 flex overflow-hidden">
+            {/* Main form content - 70% */}
+            <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-white">
                 {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
@@ -1238,20 +1239,10 @@ export default function ClientFormDialog({
               </Card>
               </div>
             </form>
-
-            {/* Boutons Annuler/Créer tout en bas */}
-            <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-              <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                Annuler
-              </Button>
-              <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                {editingClient ? "Modifier" : "Créer"}
-              </Button>
             </div>
-          </div>
 
-          {/* Right side - Commentaires et Historique Sidebar - 30% */}
-          <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+            {/* Right side - Commentaires et Historique Sidebar - 30% */}
+            <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
             <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-slate-800 flex-shrink-0">
                 <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
@@ -1308,6 +1299,17 @@ export default function ClientFormDialog({
                 )}
               </TabsContent>
             </Tabs>
+            </div>
+          </div>
+
+          {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+            <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
+              Annuler
+            </Button>
+            <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+              {editingClient ? "Modifier" : "Créer"}
+            </Button>
           </div>
         </motion.div>
       </DialogContent>
