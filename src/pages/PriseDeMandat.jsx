@@ -3306,23 +3306,42 @@ export default function PriseDeMandat() {
 
                         {!mandatStepCollapsed && (
                           <CardContent className="pt-2 pb-3">
-                            <div className="flex justify-end mb-2 gap-1">
-                              {nouveauDossierForm.mandats.length > 1 && (
-                                <Button 
-                                  type="button" 
-                                  size="sm" 
-                                  variant="ghost"
-                                  onClick={() => {
-                                   const indexToRemove = parseInt(activeTabMandatDossier);
-                                   setMandatIndexToDelete(indexToRemove);
-                                   setShowDeleteMandatConfirm(true);
-                                  }}
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                            <div className="flex justify-between items-center mb-2 gap-3">
+                              {/* Tabs à gauche */}
+                              {nouveauDossierForm.mandats.length > 0 && (
+                                <div className="flex-1">
+                                  <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
+                                    {nouveauDossierForm.mandats.map((mandat, index) => (
+                                      <TabsTrigger
+                                        key={index}
+                                        value={index.toString()}
+                                        className="orange data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-b-2 data-[state=active]:border-orange-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
+                                      >
+                                        {mandat.type_mandat || `Mandat ${index + 1}`}
+                                      </TabsTrigger>
+                                    ))}
+                                  </TabsList>
+                                </div>
                               )}
-                              <Button type="button" size="sm" onClick={() => {
+                              
+                              {/* Boutons à droite */}
+                              <div className="flex gap-1">
+                                {nouveauDossierForm.mandats.length > 1 && (
+                                  <Button 
+                                    type="button" 
+                                    size="sm" 
+                                    variant="ghost"
+                                    onClick={() => {
+                                     const indexToRemove = parseInt(activeTabMandatDossier);
+                                     setMandatIndexToDelete(indexToRemove);
+                                     setShowDeleteMandatConfirm(true);
+                                    }}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
+                                <Button type="button" size="sm" onClick={() => {
                           const newIndex = nouveauDossierForm.mandats.length;
                           const firstMandat = nouveauDossierForm.mandats[0];
                           const defaultAdresse = sameAddressForAllMandats && firstMandat?.adresse_travaux ? JSON.parse(JSON.stringify(firstMandat.adresse_travaux)) : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "QC" };
@@ -3366,25 +3385,14 @@ export default function PriseDeMandat() {
                           }));
                           setActiveTabMandatDossier(newIndex.toString());
                               }} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-6 text-xs">
-                                <Plus className="w-3 h-3 mr-1" />
-                                Ajouter
-                              </Button>
+                                  <Plus className="w-3 h-3 mr-1" />
+                                  Ajouter
+                                </Button>
+                              </div>
                             </div>
 
                             {nouveauDossierForm.mandats.length > 0 ? (
                               <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
-                                <TabsList className="bg-slate-800/30 border border-slate-700 w-full h-auto justify-start p-1 rounded-lg">
-                                  {nouveauDossierForm.mandats.map((mandat, index) => (
-                                    <TabsTrigger
-                                      key={index}
-                                      value={index.toString()}
-                                      className="orange data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-b-2 data-[state=active]:border-orange-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
-                                    >
-                                      {mandat.type_mandat || `Mandat ${index + 1}`}
-                                    </TabsTrigger>
-                                  ))}
-                                </TabsList>
-
                                 {nouveauDossierForm.mandats.map((mandat, index) => (
                                   <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
                                     <div className="grid grid-cols-2 gap-2">
@@ -3430,7 +3438,7 @@ export default function PriseDeMandat() {
                                     <div className="border-t border-slate-600 my-2"></div>
                                     
                                     {/* Barre de recherche d'adresse */}
-                                    <div className="relative mb-2">
+                                    <div className="relative">
                                       <Label className="text-slate-400 text-xs mb-1 block">Rechercher une adresse</Label>
                                       <div className="flex gap-1 relative">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
@@ -3564,12 +3572,9 @@ export default function PriseDeMandat() {
                                           ))}
                                         </div>
                                       )}
-                                      </div>
+                                    </div>
 
-                                      {/* Grille avec Adresse et Dates côte à côte */}
-                                      <div className="grid grid-cols-[60%_1px_40%] gap-3">
-                                        {/* Adresse des travaux - 60% */}
-                                        <div className="space-y-1">
+                                    <div className="grid grid-cols-[100px_1fr] gap-1">
                                          <div className="grid grid-cols-[100px_1fr] gap-1">
                                            <div className="space-y-0.5">
                                              <Label className="text-slate-500 text-[10px]">N° civique</Label>
