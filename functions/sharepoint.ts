@@ -204,6 +204,39 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: 'Fichier supprimé' });
     }
 
+    if (action === 'getThumbnail') {
+      // Obtenir le thumbnail d'un fichier
+      if (!fileId) {
+        return Response.json({ error: 'fileId requis pour le thumbnail' }, { status: 400 });
+      }
+
+      try {
+        // Essayer d'obtenir le thumbnail via l'API Graph
+        const response = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${fileId}/thumbnails`,
+          { headers: { 'Authorization': `Bearer ${accessToken}` } }
+        );
+
+        const data = await response.json();
+        
+        if (response.ok && data.value && data.value.length > 0) {
+          const thumbnail = data.value[0];
+          // Utiliser le thumbnail large pour une meilleure qualité
+          const thumbnailUrl = thumbnail.large?.url || thumbnail.medium?.url || thumbnail.small?.url;
+          
+          if (thumbnailUrl) {
+            return Response.json({ thumbnailUrl });
+          }
+        }
+
+        // Fallback: retourner null si pas de thumbnail disponible
+        return Response.json({ thumbnailUrl: null });
+      } catch (error) {
+        console.error("Thumbnail error:", error);
+        return Response.json({ thumbnailUrl: null });
+      }
+    }
+
     return Response.json({ error: 'Action non reconnue' }, { status: 400 });
 
   } catch (error) {
