@@ -3272,17 +3272,17 @@ export default function PriseDeMandat() {
                       {/* Colonne droite - Section Mandats */}
                       <Card className="border-slate-700 bg-slate-800/30">
                         <CardHeader 
-                          className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-1.5 bg-emerald-900/20"
+                          className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
                           onClick={() => setMandatStepCollapsed(!mandatStepCollapsed)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                                <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                              <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
+                                <FileText className="w-3.5 h-3.5 text-orange-400" />
                               </div>
-                              <CardTitle className="text-emerald-300 text-base">Mandats</CardTitle>
+                              <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
                               {nouveauDossierForm.mandats.length > 0 && (
-                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
                                   {nouveauDossierForm.mandats.length} mandat{nouveauDossierForm.mandats.length > 1 ? 's' : ''}
                                 </Badge>
                               )}
@@ -3357,7 +3357,7 @@ export default function PriseDeMandat() {
                             }]
                           }));
                           setActiveTabMandatDossier(newIndex.toString());
-                              }} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-6 text-xs">
+                              }} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-6 text-xs">
                                 <Plus className="w-3 h-3 mr-1" />
                                 Ajouter
                               </Button>
@@ -3648,16 +3648,16 @@ export default function PriseDeMandat() {
                                       <div className="flex justify-between items-center">
                                         <Label className="text-slate-400 text-xs">Lots</Label>
                                         <Button 
-                                          type="button" 
-                                          size="sm" 
-                                          onClick={() => {
-                                            setCurrentMandatIndexDossier(index);
-                                            setLotTabExpanded(!lotTabExpanded);
-                                          }}
-                                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-5 text-xs px-2"
+                                         type="button" 
+                                         size="sm" 
+                                         onClick={() => {
+                                           setCurrentMandatIndexDossier(index);
+                                           setLotTabExpanded(!lotTabExpanded);
+                                         }}
+                                         className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-5 text-xs px-2"
                                         >
-                                          {lotTabExpanded && currentMandatIndexDossier === index ? <ChevronUp className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
-                                          {lotTabExpanded && currentMandatIndexDossier === index ? 'Masquer' : 'Ajouter'}
+                                         {lotTabExpanded && currentMandatIndexDossier === index ? <ChevronUp className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+                                         {lotTabExpanded && currentMandatIndexDossier === index ? 'Masquer' : 'Ajouter'}
                                         </Button>
                                       </div>
                                       {lotTabExpanded && currentMandatIndexDossier === index && (
@@ -3726,33 +3726,33 @@ export default function PriseDeMandat() {
                                         </div>
                                       )}
                                       {mandat.lots && mandat.lots.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
-                                          {mandat.lots.map((lotId) => {
-                                            const lot = getLotById(lotId);
-                                            return (
-                                              <Badge key={lotId} variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs pr-1">
-                                                {lot?.numero_lot || lotId}
-                                                <button 
-                                                  type="button" 
-                                                  onClick={() => {
-                                                    setNouveauDossierForm(prev => ({
-                                                      ...prev,
-                                                      mandats: prev.mandats.map((m, i) => i === index ? { 
-                                                        ...m, 
-                                                        lots: m.lots.filter(id => id !== lotId) 
-                                                      } : m)
-                                                    }));
-                                                  }}
-                                                  className="ml-1 hover:text-red-400"
-                                                >
-                                                  <X className="w-2.5 h-2.5" />
-                                                </button>
-                                              </Badge>
-                                            );
-                                          })}
-                                        </div>
+                                       <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
+                                         {mandat.lots.map((lotId) => {
+                                           const lot = getLotById(lotId);
+                                           return (
+                                             <Badge key={lotId} variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs pr-1">
+                                               {lot?.numero_lot || lotId}
+                                               <button 
+                                                 type="button" 
+                                                 onClick={() => {
+                                                   setNouveauDossierForm(prev => ({
+                                                     ...prev,
+                                                     mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                       ...m, 
+                                                       lots: m.lots.filter(id => id !== lotId) 
+                                                     } : m)
+                                                   }));
+                                                 }}
+                                                 className="ml-1 hover:text-red-400"
+                                               >
+                                                 <X className="w-2.5 h-2.5" />
+                                               </button>
+                                             </Badge>
+                                           );
+                                         })}
+                                       </div>
                                       ) : (
-                                        <p className="text-slate-500 text-xs text-center py-2 bg-slate-800/30 rounded-lg">Aucun lot</p>
+                                       <p className="text-slate-500 text-xs text-center py-2 bg-slate-800/30 rounded-lg">Aucun lot</p>
                                       )}
                                     </div>
                                   </TabsContent>
