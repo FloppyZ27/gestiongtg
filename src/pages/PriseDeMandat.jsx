@@ -4150,13 +4150,6 @@ export default function PriseDeMandat() {
                 Êtes-vous sûr de vouloir quitter ? Toutes les informations saisies seront perdues.
               </p>
               <div className="flex justify-center gap-3 pt-4">
-                <Button 
-                  type="button" 
-                  onClick={() => setShowCancelConfirmDossier(false)}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Continuer l'édition
-                </Button>
                 <Button
                   type="button"
                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
@@ -4180,6 +4173,13 @@ export default function PriseDeMandat() {
                   }}
                 >
                   Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelConfirmDossier(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
                 </Button>
               </div>
             </motion.div>
