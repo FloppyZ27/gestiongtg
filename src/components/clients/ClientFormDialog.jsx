@@ -62,6 +62,7 @@ export default function ClientFormDialog({
 
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   const [sidebarTab, setSidebarTab] = useState("commentaires");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   // Sections collapse states
   const [infoCollapsed, setInfoCollapsed] = useState(false);
@@ -1243,6 +1244,21 @@ export default function ClientFormDialog({
 
             {/* Right side - Commentaires et Historique Sidebar - 30% */}
             <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+            {/* Header Tabs Commentaires/Historique - Collapsible */}
+            <div 
+              className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              <div className="flex items-center gap-2">
+                {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                <h3 className="text-slate-300 text-base font-semibold">
+                  {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
+                </h3>
+              </div>
+              {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+            </div>
+
+            {!sidebarCollapsed && (
             <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-slate-800 flex-shrink-0">
                 <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
@@ -1298,8 +1314,9 @@ export default function ClientFormDialog({
                   </div>
                 )}
               </TabsContent>
-            </Tabs>
-            </div>
+              </Tabs>
+              )}
+              </div>
           </div>
 
           {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
