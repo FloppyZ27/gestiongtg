@@ -3559,119 +3559,240 @@ export default function PriseDeMandat() {
                                        )}
                                      </div>
 
-                    {/* Mandats */}
-                    {viewingDossier.mandats && viewingDossier.mandats.length > 0 && (
-                      <div>
-                        <Label className="text-slate-400 text-sm mb-3 block">Mandats ({viewingDossier.mandats.length})</Label>
-                        <div className="space-y-3">
-                          {viewingDossier.mandats.map((mandat, index) => (
-                            <Card key={index} className="bg-slate-800/50 border-slate-700">
-                              <CardContent className="p-4 space-y-3">
-                                <div className="flex items-start justify-between">
-                                  <h5 className="font-semibold text-emerald-400 text-lg">{mandat.type_mandat || `Mandat ${index + 1}`}</h5>
-                                  {mandat.prix_estime > 0 && (
-                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 border">
-                                      {mandat.prix_estime.toFixed(2)} $
-                                    </Badge>
-                                  )}
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                  {mandat.adresse_travaux && formatAdresse(mandat.adresse_travaux) !== "" && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
-                                      <p className="text-slate-300 text-sm mt-1">📍 {formatAdresse(mandat.adresse_travaux)}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {mandat.lots && mandat.lots.length > 0 && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Lots</Label>
-                                      <div className="flex flex-wrap gap-1 mt-1">
-                                        {mandat.lots.map((lotId) => {
-                                          const lot = getLotById(lotId);
-                                          return (
-                                            <Badge key={lotId} variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                                              {lot?.numero_lot || lotId}
-                                            </Badge>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
+                    {/* Grille Adresse et Dates */}
+                                     <div className="grid grid-cols-2 gap-2">
+                                       {/* Colonne Adresse - 50% */}
+                                       <div className="space-y-1">
+                                         <Label className="text-slate-500 text-[10px]">Adresse des travaux</Label>
+                                         {/* N° civique et Rue */}
+                                         <div className="grid grid-cols-[100px_1fr] gap-1">
+                                           <Input 
+                                             placeholder="N° civique" 
+                                             value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                             onChange={(e) => {
+                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                 ...m, 
+                                                 adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
+                                               } : m;
+                                               setNouveauDossierForm(prev => ({
+                                                 ...prev,
+                                                 mandats: prev.mandats.map(updateAddress)
+                                               }));
+                                             }}
+                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                           />
+                                           <Input 
+                                             placeholder="Rue" 
+                                             value={mandat.adresse_travaux?.rue || ""} 
+                                             onChange={(e) => {
+                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                 ...m, 
+                                                 adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
+                                               } : m;
+                                               setNouveauDossierForm(prev => ({
+                                                 ...prev,
+                                                 mandats: prev.mandats.map(updateAddress)
+                                               }));
+                                             }}
+                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                           />
+                                         </div>
+                                         {/* Ville, Code postal et Province */}
+                                         <div className="grid grid-cols-3 gap-1">
+                                           <Input 
+                                             placeholder="Ville" 
+                                             value={mandat.adresse_travaux?.ville || ""} 
+                                             onChange={(e) => {
+                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                 ...m, 
+                                                 adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
+                                               } : m;
+                                               setNouveauDossierForm(prev => ({
+                                                 ...prev,
+                                                 mandats: prev.mandats.map(updateAddress)
+                                               }));
+                                             }}
+                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                           />
+                                           <Input 
+                                             placeholder="Code postal" 
+                                             value={mandat.adresse_travaux?.code_postal || ""} 
+                                             onChange={(e) => {
+                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                 ...m, 
+                                                 adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
+                                               } : m;
+                                               setNouveauDossierForm(prev => ({
+                                                 ...prev,
+                                                 mandats: prev.mandats.map(updateAddress)
+                                               }));
+                                             }}
+                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                           />
+                                           <Select 
+                                             value={mandat.adresse_travaux?.province || "QC"} 
+                                             onValueChange={(value) => {
+                                               const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
+                                                 ...m, 
+                                                 adresse_travaux: { ...m.adresse_travaux, province: value } 
+                                               } : m;
+                                               setNouveauDossierForm(prev => ({
+                                                 ...prev,
+                                                 mandats: prev.mandats.map(updateAddress)
+                                               }));
+                                             }}
+                                           >
+                                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                               <SelectValue />
+                                             </SelectTrigger>
+                                             <SelectContent className="bg-slate-800 border-slate-700">
+                                               {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                                 <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                               ))}
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                       </div>
+                                       
+                                       {/* Colonne Dates - 50% */}
+                                       <div className="space-y-1">
+                                         <Label className="text-slate-500 text-[10px]">Dates</Label>
+                                         <div className="space-y-1">
+                                           <div className="flex items-center gap-1">
+                                             <Label className="text-slate-500 text-[10px] w-24">Signature:</Label>
+                                             <Input 
+                                               type="date" 
+                                               value={mandat.date_signature || ""} 
+                                               onChange={(e) => {
+                                                 setNouveauDossierForm(prev => ({
+                                                   ...prev,
+                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
+                                                 }));
+                                               }}
+                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
+                                             />
+                                           </div>
+                                           <div className="flex items-center gap-1">
+                                             <Label className="text-slate-500 text-[10px] w-24">Début travaux:</Label>
+                                             <Input 
+                                               type="date" 
+                                               value={mandat.date_debut_travaux || ""} 
+                                               onChange={(e) => {
+                                                 setNouveauDossierForm(prev => ({
+                                                   ...prev,
+                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
+                                                 }));
+                                               }}
+                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
+                                             />
+                                           </div>
+                                           <div className="flex items-center gap-1">
+                                             <Label className="text-slate-500 text-[10px] w-24">Livraison:</Label>
+                                             <Input 
+                                               type="date" 
+                                               value={mandat.date_livraison || ""} 
+                                               onChange={(e) => {
+                                                 setNouveauDossierForm(prev => ({
+                                                   ...prev,
+                                                   mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
+                                                 }));
+                                               }}
+                                               className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
+                                             />
+                                           </div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </TabsContent>
+                                 ))}
+                               </Tabs>
+                             ) : (
+                               <p className="text-slate-500 text-xs text-center py-4">Ajoutez des mandats pour continuer</p>
+                             )}
+                           </CardContent>
+                         )}
+                       </Card>
+                   </form>
+                   </div>
 
-                                {/* Utilisateur assigné pour mandat */}
-                                {mandat.utilisateur_assigne && (
-                                  <div>
-                                    <Label className="text-slate-400 text-xs">Utilisateur assigné pour le mandat</Label>
-                                    <p className="text-slate-300 text-sm mt-1">
-                                      {users.find(u => u.email === mandat.utilisateur_assigne)?.full_name || mandat.utilisateur_assigne}
-                                    </p>
-                                  </div>
-                                )}
+                   {/* Right side - Commentaires et Historique Sidebar - 30% */}
+                   <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                     <div 
+                       className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                       onClick={() => setSidebarCollapsedDossier(!sidebarCollapsedDossier)}
+                     >
+                       <div className="flex items-center gap-2">
+                         {sidebarTabDossier === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                         <h3 className="text-slate-300 text-base font-semibold">
+                           {sidebarTabDossier === "commentaires" ? "Commentaires" : "Historique"}
+                         </h3>
+                       </div>
+                       {sidebarCollapsedDossier ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                     </div>
 
-                                {/* Dates */}
-                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-slate-700">
-                                  {mandat.date_ouverture && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Ouverture</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_ouverture), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_signature && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Signature</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_signature), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_debut_travaux && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Début travaux</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_debut_travaux), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                  {mandat.date_livraison && (
-                                    <div>
-                                      <Label className="text-slate-400 text-xs">Livraison</Label>
-                                      <p className="text-slate-300 text-sm mt-1">{format(new Date(mandat.date_livraison), "dd MMM yyyy", { locale: fr })}</p>
-                                    </div>
-                                  )}
-                                </div>
+                     {!sidebarCollapsedDossier && (
+                       <Tabs value={sidebarTabDossier} onValueChange={setSidebarTabDossier} className="flex-1 flex flex-col overflow-hidden">
+                         <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                           <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                             <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                               <MessageSquare className="w-4 h-4 mr-1" />
+                               Commentaires
+                             </TabsTrigger>
+                             <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                               <Clock className="w-4 h-4 mr-1" />
+                               Historique
+                             </TabsTrigger>
+                           </TabsList>
+                         </div>
 
-                                {/* Tarification */}
-                                {(mandat.prix_estime > 0 || mandat.rabais > 0) && (
-                                  <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-700">
-                                    {mandat.prix_estime > 0 && (
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Prix estimé</Label>
-                                        <p className="text-slate-300 text-sm mt-1">{mandat.prix_estime.toFixed(2)} $</p>
-                                      </div>
-                                    )}
-                                    {mandat.rabais > 0 && (
-                                      <div>
-                                        <Label className="text-slate-400 text-xs">Rabais</Label>
-                                        <p className="text-slate-300 text-sm mt-1">{mandat.rabais.toFixed(2)} $</p>
-                                      </div>
-                                    )}
-                                    <div>
-                                        <Label className="text-slate-400 text-xs">Taxes</Label>
-                                        <p className="text-slate-300 text-sm mt-1">
-                                          {mandat.taxes_incluses ? "✓ Incluses" : "Non incluses"}
-                                        </p>
-                                      </div>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                         <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                           <CommentairesSection
+                             dossierId={null}
+                             dossierTemporaire={true}
+                             commentairesTemp={commentairesTemporairesDossier}
+                             onCommentairesTempChange={setCommentairesTemporairesDossier}
+                           />
+                         </TabsContent>
 
-                  {/* Boutons Fermer/Modifier tout en bas */}
-                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                         <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                           {historiqueDossier.length > 0 ? (
+                             <div className="space-y-2">
+                               {historiqueDossier.map((entry, idx) => (
+                                 <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                   <div className="flex items-start gap-2">
+                                     <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+                                     <div className="flex-1 min-w-0">
+                                       <p className="text-white text-sm font-medium">{entry.action}</p>
+                                       {entry.details && (
+                                         <p className="text-slate-400 text-xs mt-1 break-words">{entry.details}</p>
+                                       )}
+                                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-slate-500">
+                                         <span className="text-emerald-400">{entry.utilisateur_nom}</span>
+                                         <span>•</span>
+                                         <span>{format(new Date(entry.date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           ) : (
+                             <div className="flex items-center justify-center h-full text-center">
+                               <div>
+                                 <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                                 <p className="text-slate-500">Aucune action enregistrée</p>
+                                 <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                               </div>
+                             </div>
+                           )}
+                         </TabsContent>
+                       </Tabs>
+                     )}
+                   </div>
+                 </div>
+
+                 {/* Boutons tout en bas */}
+                 <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
                     <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
                       Fermer
                     </Button>
