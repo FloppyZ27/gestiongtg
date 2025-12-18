@@ -3574,8 +3574,11 @@ export default function PriseDeMandat() {
                                       )}
                                     </div>
 
-                                    <div className="grid grid-cols-[100px_1fr] gap-1">
-                                         <div className="grid grid-cols-[100px_1fr] gap-1">
+                                    {/* Grille avec Adresse et Dates côte à côte */}
+                                    <div className="grid grid-cols-[60%_1px_40%] gap-3">
+                                      {/* Adresse des travaux - 60% */}
+                                      <div className="space-y-1">
+                                       <div className="grid grid-cols-[100px_1fr] gap-1">
                                            <div className="space-y-0.5">
                                              <Label className="text-slate-500 text-[10px]">N° civique</Label>
                                              <Input 
