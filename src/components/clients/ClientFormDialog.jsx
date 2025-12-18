@@ -712,7 +712,7 @@ export default function ClientFormDialog({
 
       {/* Main Client Form Dialog */}
       <Dialog open={open} onOpenChange={handleCloseAttempt}>
-        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+        <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-7xl w-[90vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl">
             {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
