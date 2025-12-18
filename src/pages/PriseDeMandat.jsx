@@ -3728,12 +3728,9 @@ export default function PriseDeMandat() {
                                           />
                                         </div>
                                       </div>
-                                    </div>
-                                    
-                                    {/* Ligne délimitative */}
-                                    <div className="border-t border-slate-600 my-2"></div>
-                                    
-                                    {/* Section Lots */}
+                                      </div>
+
+                                      {/* Section Lots */}
                                     <div className="space-y-1">
                                       <div className="flex justify-between items-center">
                                         <Label className="text-slate-400 text-xs">Lots</Label>
