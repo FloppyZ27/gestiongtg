@@ -2900,35 +2900,35 @@ export default function PriseDeMandat() {
                         </CardHeader>
 
                         {!infoDossierCollapsed && (
-                          <CardContent className="pt-2 pb-3 space-y-3">
-                           {/* Informations de base */}
-                           <div className="grid grid-cols-3 gap-2">
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                               <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                   <SelectValue placeholder="Sélectionner" />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                   {ARPENTEURS.map((arpenteur) => (
-                                     <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
+                          <CardContent className="pt-2 pb-3">
+                           <div className="grid grid-cols-[25%_75%] gap-4">
+                             {/* Colonne gauche - Informations de base - 25% */}
+                             <div className="space-y-2 border-r border-slate-700 pr-4">
+                               <div className="space-y-1">
+                                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                                 <Select value={nouveauDossierForm.arpenteur_geometre} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, arpenteur_geometre: value})}>
+                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                     <SelectValue placeholder="Sélectionner" />
+                                   </SelectTrigger>
+                                   <SelectContent className="bg-slate-800 border-slate-700">
+                                     {ARPENTEURS.map((arpenteur) => (
+                                       <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
+                                 <Input value={nouveauDossierForm.numero_dossier} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
+                                 <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                               </div>
                              </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
-                               <Input value={nouveauDossierForm.numero_dossier} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                             </div>
-                             <div className="space-y-1">
-                               <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
-                               <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                             </div>
-                           </div>
 
-
-
-                            {/* Tabs Clients/Notaires/Courtiers */}
+                             {/* Colonne droite - Tabs Clients/Notaires/Courtiers - 75% */}
+                             <div>
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
                               <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
                                 <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
@@ -3278,6 +3278,8 @@ export default function PriseDeMandat() {
                                 </div>
                               </TabsContent>
                             </Tabs>
+                             </div>
+                           </div>
                           </CardContent>
                         )}
                       </Card>
