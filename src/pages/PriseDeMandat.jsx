@@ -2931,11 +2931,11 @@ export default function PriseDeMandat() {
                                   <User className="w-3 h-3" />
                                   Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-400 data-[state=active]:border-b-2 data-[state=active]:border-purple-400 flex items-center gap-1">
+                                <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <FileText className="w-3 h-3" />
                                   Notaires {nouveauDossierForm.notaires_ids.length > 0 && `(${nouveauDossierForm.notaires_ids.length})`}
                                 </TabsTrigger>
-                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-400 data-[state=active]:border-b-2 data-[state=active]:border-orange-400 flex items-center gap-1">
+                                <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
                                   Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
                                 </TabsTrigger>
@@ -2943,7 +2943,13 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="clients" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setClientsTabExpanded(!clientsTabExpanded)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full h-6 text-xs">
+                                  <Button type="button" size="sm" onClick={() => {
+                                    setClientsTabExpanded(!clientsTabExpanded);
+                                    if (!clientsTabExpanded) {
+                                      setNotairesTabExpanded(false);
+                                      setCourtiersTabExpanded(false);
+                                    }
+                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
                                     {clientsTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
                                     {clientsTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
@@ -3040,7 +3046,13 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="notaires" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setNotairesTabExpanded(!notairesTabExpanded)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full h-6 text-xs">
+                                  <Button type="button" size="sm" onClick={() => {
+                                    setNotairesTabExpanded(!notairesTabExpanded);
+                                    if (!notairesTabExpanded) {
+                                      setClientsTabExpanded(false);
+                                      setCourtiersTabExpanded(false);
+                                    }
+                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
                                     {notairesTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
                                     {notairesTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
@@ -3064,7 +3076,7 @@ export default function PriseDeMandat() {
                                            setClientTypeForForm("Notaire");
                                            setIsClientFormDialogOpen(true);
                                          }}
-                                         className="bg-purple-500 hover:bg-purple-600 h-6 text-xs px-2"
+                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
                                         >
                                          <Plus className="w-3 h-3 mr-1" />
                                          Nouveau
@@ -3072,12 +3084,12 @@ export default function PriseDeMandat() {
                                       </div>
                                       {filteredNotairesForSelector.slice(0, 20).map((notaire) => (
                                         <div
-                                          key={notaire.id}
-                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                            nouveauDossierForm.notaires_ids.includes(notaire.id)
-                                              ? 'bg-purple-500/20 border border-purple-500/30'
-                                              : 'bg-slate-700/50 hover:bg-slate-700'
-                                          }`}
+                                         key={notaire.id}
+                                         className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                           nouveauDossierForm.notaires_ids.includes(notaire.id)
+                                             ? 'bg-blue-500/20 border border-blue-500/30'
+                                             : 'bg-slate-700/50 hover:bg-slate-700'
+                                         }`}
                                           onClick={() => {
                                             setNouveauDossierForm(prev => ({
                                               ...prev,
@@ -3109,9 +3121,9 @@ export default function PriseDeMandat() {
                                         const notaire = getClientById(notaireId);
                                         return notaire ? (
                                           <Badge 
-                                            key={notaireId} 
-                                            variant="outline" 
-                                            className="bg-purple-500/20 text-purple-400 border-purple-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                           key={notaireId} 
+                                           variant="outline" 
+                                           className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                                             onClick={() => {
                                               if (window.openClientForEdit) {
                                                 window.openClientForEdit(notaire);
@@ -3137,7 +3149,13 @@ export default function PriseDeMandat() {
 
                               <TabsContent value="courtiers" className="mt-2">
                                 <div className="space-y-1">
-                                  <Button type="button" size="sm" onClick={() => setCourtiersTabExpanded(!courtiersTabExpanded)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 w-full h-6 text-xs">
+                                  <Button type="button" size="sm" onClick={() => {
+                                    setCourtiersTabExpanded(!courtiersTabExpanded);
+                                    if (!courtiersTabExpanded) {
+                                      setClientsTabExpanded(false);
+                                      setNotairesTabExpanded(false);
+                                    }
+                                  }} className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full h-6 text-xs">
                                     {courtiersTabExpanded ? <ChevronUp className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
                                     {courtiersTabExpanded ? 'Masquer' : 'Ajouter'}
                                   </Button>
@@ -3161,7 +3179,7 @@ export default function PriseDeMandat() {
                                            setClientTypeForForm("Courtier immobilier");
                                            setIsClientFormDialogOpen(true);
                                          }}
-                                         className="bg-orange-500 hover:bg-orange-600 h-6 text-xs px-2"
+                                         className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
                                         >
                                          <Plus className="w-3 h-3 mr-1" />
                                          Nouveau
@@ -3169,12 +3187,12 @@ export default function PriseDeMandat() {
                                       </div>
                                       {filteredCourtiersForSelector.slice(0, 20).map((courtier) => (
                                         <div
-                                          key={courtier.id}
-                                          className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                            nouveauDossierForm.courtiers_ids.includes(courtier.id)
-                                              ? 'bg-orange-500/20 border border-orange-500/30'
-                                              : 'bg-slate-700/50 hover:bg-slate-700'
-                                          }`}
+                                         key={courtier.id}
+                                         className={`p-2 rounded cursor-pointer transition-colors text-xs ${
+                                           nouveauDossierForm.courtiers_ids.includes(courtier.id)
+                                             ? 'bg-blue-500/20 border border-blue-500/30'
+                                             : 'bg-slate-700/50 hover:bg-slate-700'
+                                         }`}
                                           onClick={() => {
                                             setNouveauDossierForm(prev => ({
                                               ...prev,
@@ -3206,9 +3224,9 @@ export default function PriseDeMandat() {
                                         const courtier = getClientById(courtierId);
                                         return courtier ? (
                                           <Badge 
-                                            key={courtierId} 
-                                            variant="outline" 
-                                            className="bg-orange-500/20 text-orange-400 border-orange-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                           key={courtierId} 
+                                           variant="outline" 
+                                           className="bg-blue-500/20 text-blue-400 border-blue-500/30 relative pr-6 w-full justify-start text-xs cursor-pointer hover:bg-blue-500/30 transition-colors"
                                             onClick={() => {
                                               if (window.openClientForEdit) {
                                                 window.openClientForEdit(courtier);
