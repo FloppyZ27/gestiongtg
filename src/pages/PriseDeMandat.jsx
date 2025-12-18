@@ -3211,13 +3211,12 @@ export default function PriseDeMandat() {
                                           );
                                         })
                                       ) : (
-                                        <p className="text-slate-500 text-xs text-center py-2">Aucun notaire</p>
+                                       <p className="text-slate-500 text-xs text-center py-2">Aucun notaire</p>
                                       )}
-                                    </div>
-                                  </div>
-                                  </div>
-                                </div>
-                              </TabsContent>
+                                      </div>
+                                      </div>
+                                      </div>
+                                      </TabsContent>
 
                               <TabsContent value="courtiers" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
@@ -3344,13 +3343,12 @@ export default function PriseDeMandat() {
                                           );
                                         })
                                       ) : (
-                                        <p className="text-slate-500 text-xs text-center py-2">Aucun courtier</p>
+                                       <p className="text-slate-500 text-xs text-center py-2">Aucun courtier</p>
                                       )}
-                                    </div>
-                                  </div>
-                                  </div>
-                                </div>
-                              </TabsContent>
+                                      </div>
+                                      </div>
+                                      </div>
+                                      </TabsContent>
                             </Tabs>
                              </div>
                            </div>
