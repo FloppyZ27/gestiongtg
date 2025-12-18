@@ -3423,252 +3423,67 @@ export default function PriseDeMandat() {
                                     {/* Ligne délimitative */}
                                     <div className="border-t border-slate-600 my-2"></div>
                                     
-                                    {/* Adresse des travaux avec recherche */}
-                                    <div className="space-y-1">
-                                     <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
-
-                                     {/* Barre de recherche d'adresse */}
-                                     <div className="relative">
-                                       <div className="flex gap-1 relative">
-                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
-                                         <Input
-                                           placeholder="Rechercher une adresse..."
-                                           value={addressSearchQuery}
-                                           onChange={async (e) => {
-                                             const query = e.target.value;
-                                             setAddressSearchQuery(query);
-                                             setCurrentMandatIndexForAddress(index);
-
-                                             if (addressSearchTimeout) clearTimeout(addressSearchTimeout);
-
-                                             if (query.length >= 3) {
-                                               const timeout = setTimeout(async () => {
-                                                 setIsSearchingAddress(true);
-                                                 try {
-                                                   const searchQuery = query.toLowerCase().includes('alma') ? query : `${query}, Alma, Québec`;
-                                                   const encodedQuery = encodeURIComponent(searchQuery);
-
-                                                   const response = await fetch(
-                                                     `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
-                                                   );
-                                                   const data = await response.json();
-
-                                                   if (data.candidates && data.candidates.length > 0) {
-                                                     const formattedAddresses = data.candidates.map(candidate => {
-                                                       const attrs = candidate.attributes || {};
-                                                       const fullAddr = candidate.address || attrs.Match_addr || "";
-
-                                                       let numero_civique = attrs.AddNum || "";
-                                                       let rue = attrs.StName || "";
-                                                       let ville = attrs.City || attrs.Municipalit || "";
-                                                       let code_postal = attrs.Postal || "";
-
-                                                       if (!numero_civique || !rue) {
-                                                         const parts = fullAddr.split(',');
-                                                         if (parts.length > 0) {
-                                                           const streetPart = parts[0].trim();
-                                                           const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
-                                                           if (numMatch) {
-                                                             numero_civique = numMatch[1];
-                                                             rue = numMatch[2];
-                                                           } else {
-                                                             rue = streetPart;
-                                                           }
-                                                         }
-                                                         if (parts.length > 1 && !ville) {
-                                                           ville = parts[1].trim();
-                                                         }
-                                                         if (!code_postal) {
-                                                           const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
-                                                           if (postalMatch) {
-                                                             code_postal = postalMatch[1].toUpperCase();
-                                                           }
-                                                         }
-                                                       }
-
-                                                       return {
-                                                         numero_civique,
-                                                         rue,
-                                                         ville,
-                                                         province: "QC",
-                                                         code_postal,
-                                                         full_address: fullAddr
-                                                       };
-                                                     });
-                                                     setAddressSuggestions(formattedAddresses);
-                                                   } else {
-                                                     setAddressSuggestions([]);
-                                                   }
-                                                 } catch (error) {
-                                                   console.error("Erreur recherche adresse:", error);
-                                                   setAddressSuggestions([]);
-                                                 } finally {
-                                                   setIsSearchingAddress(false);
-                                                 }
-                                               }, 500);
-                                               setAddressSearchTimeout(timeout);
-                                             } else {
-                                               setAddressSuggestions([]);
-                                             }
-                                           }}
-                                           className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1 pl-7"
-                                         />
-                                         {isSearchingAddress && (
-                                           <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-2 top-1/2 -translate-y-1/2" />
-                                         )}
-                                       </div>
-
-                                       {/* Suggestions d'adresses */}
-                                       {addressSuggestions.length > 0 && (
-                                         <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                                           {addressSuggestions.map((suggestion, idx) => (
-                                             <div
-                                               key={idx}
-                                               onClick={() => {
-                                                 const newAddress = {
-                                                   numeros_civiques: [suggestion.numero_civique || ""],
-                                                   rue: suggestion.rue || "",
-                                                   ville: suggestion.ville || "",
-                                                   province: suggestion.province || "QC",
-                                                   code_postal: suggestion.code_postal || ""
-                                                 };
-
-                                                 if (sameAddressForAllMandats) {
-                                                   setNouveauDossierForm(prev => ({
-                                                     ...prev,
-                                                     mandats: prev.mandats.map(m => ({
-                                                       ...m,
-                                                       adresse_travaux: JSON.parse(JSON.stringify(newAddress))
-                                                     }))
-                                                   }));
-                                                 } else {
-                                                   setNouveauDossierForm(prev => ({
-                                                     ...prev,
-                                                     mandats: prev.mandats.map((m, i) => i === currentMandatIndexForAddress ? {
-                                                       ...m,
-                                                       adresse_travaux: newAddress
-                                                     } : m)
-                                                   }));
-                                                 }
-                                                 setAddressSearchQuery("");
-                                                 setAddressSuggestions([]);
-                                               }}
-                                               className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
-                                             >
-                                               <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                               <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
-                                             </div>
-                                           ))}
-                                         </div>
-                                       )}
-                                     </div>
-                                      
-                                      {/* Champs d'adresse avec labels */}
-                                      {/* Ligne 1: N° civique et Rue */}
-                                      <div className="grid grid-cols-[100px_1fr] gap-1">
-                                        <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">N° civique</Label>
-                                          <Input 
-                                            placeholder="123" 
-                                            value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
-                                            onChange={(e) => {
-                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, numeros_civiques: [e.target.value] } 
-                                              } : m;
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map(updateAddress)
-                                              }));
-                                            }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                          />
-                                        </div>
-                                        <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Rue</Label>
-                                          <Input 
-                                            placeholder="Rue principale" 
-                                            value={mandat.adresse_travaux?.rue || ""} 
-                                            onChange={(e) => {
-                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, rue: e.target.value } 
-                                              } : m;
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map(updateAddress)
-                                              }));
-                                            }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                          />
-                                        </div>
+                                    {/* Barre de recherche d'adresse */}
+                                    <div className="relative mb-2">
+                                      <div className="flex gap-1 relative">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
+                                        <Input
+                                          placeholder="Rechercher une adresse..."
+                                          value={addressSearchQuery}
+                                          onChange={async (e) => {
+                                    ...
+                                          className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1 pl-7"
+                                        />
+                                        {isSearchingAddress && (
+                                          <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-2 top-1/2 -translate-y-1/2" />
+                                        )}
                                       </div>
-                                      {/* Ligne 2: Ville, Code postal et Province */}
-                                      <div className="grid grid-cols-3 gap-1">
-                                        <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Ville</Label>
-                                          <Input 
-                                            placeholder="Ville" 
-                                            value={mandat.adresse_travaux?.ville || ""} 
-                                            onChange={(e) => {
-                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, ville: e.target.value } 
-                                              } : m;
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map(updateAddress)
-                                              }));
-                                            }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                          />
+
+                                      {/* Suggestions d'adresses */}
+                                      {addressSuggestions.length > 0 && (
+                                        <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                          {addressSuggestions.map((suggestion, idx) => (
+                                            <div
+                                              key={idx}
+                                              onClick={() => {
+                                                const newAddress = {
+                                                  numeros_civiques: [suggestion.numero_civique || ""],
+                                                  rue: suggestion.rue || "",
+                                                  ville: suggestion.ville || "",
+                                                  province: suggestion.province || "QC",
+                                                  code_postal: suggestion.code_postal || ""
+                                                };
+
+                                                if (sameAddressForAllMandats) {
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map(m => ({
+                                                      ...m,
+                                                      adresse_travaux: JSON.parse(JSON.stringify(newAddress))
+                                                    }))
+                                                  }));
+                                                } else {
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map((m, i) => i === currentMandatIndexForAddress ? {
+                                                      ...m,
+                                                      adresse_travaux: newAddress
+                                                    } : m)
+                                                  }));
+                                                }
+                                                setAddressSearchQuery("");
+                                                setAddressSuggestions([]);
+                                              }}
+                                              className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
+                                            >
+                                              <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                              <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
+                                            </div>
+                                          ))}
                                         </div>
-                                        <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Code postal</Label>
-                                          <Input 
-                                            placeholder="G0A 1A0" 
-                                            value={mandat.adresse_travaux?.code_postal || ""} 
-                                            onChange={(e) => {
-                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, code_postal: e.target.value } 
-                                              } : m;
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map(updateAddress)
-                                              }));
-                                            }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
-                                          />
-                                        </div>
-                                        <div className="space-y-0.5">
-                                          <Label className="text-slate-500 text-[10px]">Province</Label>
-                                          <Select 
-                                            value={mandat.adresse_travaux?.province || "QC"} 
-                                            onValueChange={(value) => {
-                                              const updateAddress = (m, i) => i === index || sameAddressForAllMandats ? { 
-                                                ...m, 
-                                                adresse_travaux: { ...m.adresse_travaux, province: value } 
-                                              } : m;
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map(updateAddress)
-                                              }));
-                                            }}
-                                          >
-                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-slate-800 border-slate-700">
-                                              {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
-                                                <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      </div>
+                                      )}
                                     </div>
-                                    
+
                                     {/* Ligne délimitative */}
                                     <div className="border-t border-slate-600 my-2"></div>
 
