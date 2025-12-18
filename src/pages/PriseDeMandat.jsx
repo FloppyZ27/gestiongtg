@@ -2101,7 +2101,7 @@ export default function PriseDeMandat() {
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
-            if (!open && hasFormChanges && !isLocked) {
+            if (!open && hasFormChanges && !isLocked && !isOuvrirDossierDialogOpen) {
               setShowUnsavedWarning(true);
               return;
             }
