@@ -925,8 +925,8 @@ export default function ClientFormDialog({
                     <div className="space-y-1">
                       <Label className="text-xs">Province</Label>
                       <Select id="new-province" defaultValue="QC">
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                          <SelectValue placeholder="Sélectionner une province" />
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm w-20">
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {PROVINCES_CANADIENNES.map(prov => (

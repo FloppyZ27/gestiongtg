@@ -299,8 +299,8 @@ export default function AddressStepForm({
                       onValueChange={(value) => handleFieldChange('province', value)}
                       disabled={disabled}
                     >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
-                        <SelectValue placeholder="Province" />
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm w-20">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
                         {PROVINCES_CANADA.map((prov) => (

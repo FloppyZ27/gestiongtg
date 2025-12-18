@@ -228,8 +228,8 @@ export default function AddressInput({
                 onValueChange={(value) => handleAddressChange(addressIndex, 'province', value)}
                 disabled={disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                  <SelectValue placeholder="Sélectionner une province" />
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white w-20">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   {PROVINCES_CANADIENNES.map((prov) => (
