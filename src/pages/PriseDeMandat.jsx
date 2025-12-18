@@ -2860,8 +2860,9 @@ export default function PriseDeMandat() {
                       alert("Erreur lors de la création du dossier.");
                     }
                   }} className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Colonne gauche - Section Informations du dossier */}
+                    <div className="grid grid-cols-2 gap-4 h-full">
+                      {/* Colonne gauche - Section Informations du dossier + Tarification */}
+                      <div className="space-y-3">
                       <Card className="border-slate-700 bg-slate-800/30">
                         <CardHeader 
                           className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
@@ -3223,6 +3224,21 @@ export default function PriseDeMandat() {
                           </CardContent>
                         )}
                       </Card>
+
+                      {/* Section Tarification */}
+                      <TarificationStepForm
+                        disabled={false}
+                        mandats={nouveauDossierForm.mandats}
+                        onTarificationChange={(updatedMandats) => {
+                          setNouveauDossierForm(prev => ({
+                            ...prev,
+                            mandats: updatedMandats
+                          }));
+                        }}
+                        isCollapsed={tarificationStepCollapsed}
+                        onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+                      />
+                      </div>
 
                       {/* Colonne droite - Section Mandats */}
                       <Card className="border-slate-700 bg-slate-800/30">
@@ -3720,20 +3736,6 @@ export default function PriseDeMandat() {
                         )}
                       </Card>
                     </div>
-
-                    {/* Section Tarification */}
-                    <TarificationStepForm
-                      disabled={false}
-                      mandats={nouveauDossierForm.mandats}
-                      onTarificationChange={(updatedMandats) => {
-                        setNouveauDossierForm(prev => ({
-                          ...prev,
-                          mandats: updatedMandats
-                        }));
-                      }}
-                      isCollapsed={tarificationStepCollapsed}
-                      onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
-                    />
 
                     {/* Section Documents - Utiliser DocumentsStepForm */}
                     {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
