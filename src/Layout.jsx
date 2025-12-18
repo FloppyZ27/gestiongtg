@@ -317,13 +317,13 @@ function LayoutContent({ children, currentPageName }) {
           --ring: 224.3 76.3% 48%;
         }
 
-        /* Overlay transparent avec flou léger */
+        /* Overlay transparent avec flou */
         [data-state="open"] > div[data-radix-dialog-overlay],
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
           background-color: transparent !important;
-          backdrop-filter: blur(2.1px) !important;
-          -webkit-backdrop-filter: blur(2.1px) !important;
+          backdrop-filter: blur(25px) !important;
+          -webkit-backdrop-filter: blur(25px) !important;
           opacity: 1 !important;
         }
 
@@ -331,8 +331,8 @@ function LayoutContent({ children, currentPageName }) {
         .fixed.inset-0.z-50.bg-black\\/80,
         .fixed.inset-0.z-50 {
           background-color: transparent !important;
-          backdrop-filter: blur(2.1px) !important;
-          -webkit-backdrop-filter: blur(2.1px) !important;
+          backdrop-filter: blur(25px) !important;
+          -webkit-backdrop-filter: blur(25px) !important;
         }
 
         /* Effet glassmorphism sur les fenêtres dialog */
