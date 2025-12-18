@@ -294,6 +294,7 @@ export default function PriseDeMandat() {
   const [addressSearchQuery, setAddressSearchQuery] = useState("");
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
@@ -3424,69 +3425,75 @@ export default function PriseDeMandat() {
                                       
                                       {/* Barre de recherche d'adresse */}
                                       <div className="relative">
-                                        <div className="flex gap-1">
-                                          <Input
-                                            placeholder="Rechercher une adresse..."
-                                            value={addressSearchQuery}
-                                            onChange={(e) => setAddressSearchQuery(e.target.value)}
-                                            onKeyDown={async (e) => {
-                                              if (e.key === 'Enter' && addressSearchQuery.trim()) {
-                                                e.preventDefault();
-                                                setIsSearchingAddress(true);
-                                                try {
-                                                  const result = await base44.integrations.Core.InvokeLLM({
-                                                    prompt: `Extrais les composantes de cette adresse québécoise: "${addressSearchQuery}". Retourne un JSON avec les champs: numero_civique, rue, ville, province, code_postal. Si un champ n'est pas présent, laisse-le vide.`,
-                                                    response_json_schema: {
-                                                      type: "object",
-                                                      properties: {
-                                                        numero_civique: { type: "string" },
-                                                        rue: { type: "string" },
-                                                        ville: { type: "string" },
-                                                        province: { type: "string" },
-                                                        code_postal: { type: "string" }
-                                                      }
-                                                    }
-                                                  });
-                                                  
-                                                  const newAddress = {
-                                                    numeros_civiques: [result.numero_civique || ""],
-                                                    rue: result.rue || "",
-                                                    ville: result.ville || "",
-                                                    province: result.province || "Québec",
-                                                    code_postal: result.code_postal || ""
-                                                  };
-                                                  
-                                                  if (sameAddressForAllMandats) {
-                                                    setNouveauDossierForm(prev => ({
-                                                      ...prev,
-                                                      mandats: prev.mandats.map(m => ({
-                                                        ...m,
-                                                        adresse_travaux: JSON.parse(JSON.stringify(newAddress))
-                                                      }))
-                                                    }));
-                                                  } else {
-                                                    setNouveauDossierForm(prev => ({
-                                                      ...prev,
-                                                      mandats: prev.mandats.map((m, i) => i === index ? {
-                                                        ...m,
-                                                        adresse_travaux: newAddress
-                                                      } : m)
-                                                    }));
-                                                  }
-                                                  setAddressSearchQuery("");
-                                                } catch (error) {
-                                                  console.error("Erreur lors de la recherche d'adresse:", error);
-                                                } finally {
-                                                  setIsSearchingAddress(false);
-                                                }
-                                              }
-                                            }}
-                                            className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
-                                          />
-                                          {isSearchingAddress && (
-                                            <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-2 top-1/2 -translate-y-1/2" />
-                                          )}
-                                        </div>
+                                       <div className="flex gap-1">
+                                         <Input
+                                           placeholder="Rechercher une adresse..."
+                                           value={addressSearchQuery}
+                                           onChange={(e) => {
+                                             const query = e.target.value;
+                                             setAddressSearchQuery(query);
+
+                                             if (addressSearchTimeout) clearTimeout(addressSearchTimeout);
+
+                                             if (query.length >= 5) {
+                                               const timeout = setTimeout(async () => {
+                                                 setIsSearchingAddress(true);
+                                                 try {
+                                                   const result = await base44.integrations.Core.InvokeLLM({
+                                                     prompt: `Extrais les composantes de cette adresse québécoise: "${query}". Retourne un JSON avec les champs: numero_civique, rue, ville, province, code_postal. Si un champ n'est pas présent, laisse-le vide.`,
+                                                     response_json_schema: {
+                                                       type: "object",
+                                                       properties: {
+                                                         numero_civique: { type: "string" },
+                                                         rue: { type: "string" },
+                                                         ville: { type: "string" },
+                                                         province: { type: "string" },
+                                                         code_postal: { type: "string" }
+                                                       }
+                                                     }
+                                                   });
+
+                                                   const newAddress = {
+                                                     numeros_civiques: [result.numero_civique || ""],
+                                                     rue: result.rue || "",
+                                                     ville: result.ville || "",
+                                                     province: result.province || "Québec",
+                                                     code_postal: result.code_postal || ""
+                                                   };
+
+                                                   if (sameAddressForAllMandats) {
+                                                     setNouveauDossierForm(prev => ({
+                                                       ...prev,
+                                                       mandats: prev.mandats.map(m => ({
+                                                         ...m,
+                                                         adresse_travaux: JSON.parse(JSON.stringify(newAddress))
+                                                       }))
+                                                     }));
+                                                   } else {
+                                                     setNouveauDossierForm(prev => ({
+                                                       ...prev,
+                                                       mandats: prev.mandats.map((m, i) => i === index ? {
+                                                         ...m,
+                                                         adresse_travaux: newAddress
+                                                       } : m)
+                                                     }));
+                                                   }
+                                                   setAddressSearchQuery("");
+                                                 } catch (error) {
+                                                   console.error("Erreur lors de la recherche d'adresse:", error);
+                                                 } finally {
+                                                   setIsSearchingAddress(false);
+                                                 }
+                                               }, 800);
+                                               setAddressSearchTimeout(timeout);
+                                             }
+                                           }}
+                                           className="bg-slate-700 border-slate-600 text-white h-6 text-xs flex-1"
+                                         />
+                                         {isSearchingAddress && (
+                                           <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-2 top-1/2 -translate-y-1/2" />
+                                         )}
+                                       </div>
                                       </div>
                                       
                                       {/* Champs d'adresse avec labels */}
