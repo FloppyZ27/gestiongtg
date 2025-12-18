@@ -292,11 +292,21 @@ export default function CommentairesSectionLot({ lotId, lotTemporaire, commentai
                         const imageFileUrl = imageMatch ? imageMatch[1] : null;
                         const textContent = commentaire.contenu.replace(/\[AUDIO:[^\]]+\]/g, '').replace(/\[IMAGE:[^\]]+\]/g, '').trim();
 
+                        // Rendre les courriels cliquables
+                        const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+                        const parts = textContent.split(emailPattern);
+
                         return (
                           <div className="space-y-2">
                             {textContent && (
                               <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                                {textContent}
+                                {parts.map((part, i) => 
+                                  emailPattern.test(part) ? (
+                                    <a key={i} href={`mailto:${part}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                      {part}
+                                    </a>
+                                  ) : part
+                                )}
                               </p>
                             )}
                             {imageFileUrl && (

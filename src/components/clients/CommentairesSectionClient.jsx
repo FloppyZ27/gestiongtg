@@ -418,7 +418,20 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
                   </span>
                 );
               }
-              return <span key={index}>{part}</span>;
+              // Détecter et rendre les courriels cliquables
+              const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+              const segments = part.split(emailPattern);
+              return (
+                <span key={index}>
+                  {segments.map((seg, i) => 
+                    emailPattern.test(seg) ? (
+                      <a key={i} href={`mailto:${seg}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                        {seg}
+                      </a>
+                    ) : seg
+                  )}
+                </span>
+              );
             })}
           </div>
         )}

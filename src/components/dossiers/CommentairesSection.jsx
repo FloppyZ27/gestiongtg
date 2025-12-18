@@ -487,6 +487,12 @@ export default function CommentairesSection({ dossierId, dossierTemporaire, comm
       return `${prefix}<span class="bg-blue-500/20 text-blue-400 px-1 rounded">@${taggedUser?.full_name || email}</span>`;
     });
 
+    // Rendre les courriels cliquables
+    const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    processedContent = processedContent.replace(emailPattern, (email) => {
+      return `<a href="mailto:${email}" class="text-blue-400 hover:text-blue-300 transition-colors">${email}</a>`;
+    });
+
     return (
       <div className="space-y-2">
         {processedContent && (
