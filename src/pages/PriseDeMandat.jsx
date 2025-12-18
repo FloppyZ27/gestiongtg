@@ -3951,14 +3951,63 @@ export default function PriseDeMandat() {
                           </div>
                         )}
                       </TabsContent>
-                    </Tabs>
-                  )}
-                </div>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
+                      </Tabs>
+                      )}
+                      </div>
+                      </div>
 
-          {/* Dialogs de sélection pour le formulaire de dossier */}
+                      {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+                      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                      <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                      const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
+                      const currentMandats = nouveauDossierForm.mandats.map(m => ({
+                      type_mandat: m.type_mandat,
+                      date_livraison: m.date_livraison || ""
+                      }));
+
+                      const hasChanges = nouveauDossierForm.numero_dossier || 
+                      JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
+                      nouveauDossierForm.notaires_ids.length > 0 ||
+                      nouveauDossierForm.courtiers_ids.length > 0 ||
+                      nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
+                      JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
+                      commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
+                      dossierDocuments.length > 0;
+
+                      if (hasChanges) {
+                      setShowCancelConfirmDossier(true);
+                      } else {
+                      setIsOuvrirDossierDialogOpen(false);
+                      setNouveauDossierForm({
+                        numero_dossier: "",
+                        arpenteur_geometre: "",
+                        date_ouverture: new Date().toISOString().split('T')[0],
+                        statut: "Ouvert",
+                        ttl: "Non",
+                        clients_ids: [],
+                        notaires_ids: [],
+                        courtiers_ids: [],
+                        mandats: []
+                      });
+                      setCommentairesTemporairesDossier([]);
+                      setDossierDocuments([]);
+                      setActiveTabMandatDossier("0");
+                      }
+                      }}>
+                      Annuler
+                      </Button>
+                      <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      Créer
+                      </Button>
+                      </div>
+                      </motion.div>
+                      </DialogContent>
+                      </Dialog>
+
+                      {/* Dialogs de sélection pour le formulaire de dossier */}
 
 
 
