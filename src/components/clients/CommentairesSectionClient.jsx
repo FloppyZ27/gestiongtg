@@ -114,22 +114,6 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingImage(true);
-    try {
-      const response = await base44.integrations.Core.UploadFile({ file });
-      setImageUrl(response.file_url);
-    } catch (error) {
-      console.error("Erreur lors de l'upload de l'image:", error);
-      alert("Erreur lors de l'upload de l'image: " + error.message);
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
-
   const createCommentaireMutation = useMutation({
     mutationFn: async (commentaireData) => {
       const newComment = await base44.entities.CommentaireClient.create(commentaireData);
@@ -173,6 +157,8 @@ export default function CommentairesSectionClient({ clientId, clientTemporaire, 
       queryClient.invalidateQueries({ queryKey: ['commentairesClient', clientId] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setNouveauCommentaire("");
+      setAudioUrl("");
+      setImageUrl("");
       setShowMentionMenu(false);
       setMentionSearch("");
     },
