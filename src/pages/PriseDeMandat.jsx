@@ -3818,7 +3818,6 @@ export default function PriseDeMandat() {
                   </div>
 
                   <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
-                      if (hasFormChanges) {
                         setShowUnsavedWarning(true);
                         return;
                       }
