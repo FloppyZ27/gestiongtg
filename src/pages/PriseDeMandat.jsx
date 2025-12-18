@@ -2742,6 +2742,14 @@ export default function PriseDeMandat() {
                   <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
+                    {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
+                      <p className="text-emerald-400 text-lg font-semibold mt-1">
+                        {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
+                        {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
+                          <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
+                        )}
+                      </p>
+                    )}
                   </div>
                   <form id="nouveau-dossier-form" onSubmit={async (e) => {
                     e.preventDefault();
