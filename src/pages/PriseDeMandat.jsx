@@ -3672,10 +3672,18 @@ export default function PriseDeMandat() {
                                             </Select>
                                           </div>
                                         </div>
-                                      </div>
+                                        </div>
+                                        </div>
 
-                                      {/* Dates - 40% vertical */}
-                                      <div className="space-y-2">
+                                        {/* Ligne délimitative */}
+                                        <div className="border-t border-slate-600 my-2"></div>
+
+                                        <div className="grid grid-cols-[60%_40%] gap-3">
+                                        {/* Espace vide - 60% */}
+                                        <div></div>
+
+                                        {/* Dates - 40% vertical */}
+                                        <div className="space-y-2">
                                         <div className="space-y-1">
                                           <Label className="text-slate-400 text-xs">Date de signature</Label>
                                           <Input 
