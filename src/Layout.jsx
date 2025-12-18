@@ -337,7 +337,7 @@ function LayoutContent({ children, currentPageName }) {
 
         /* Effet glassmorphism sur les fenêtres dialog avec trame de fond */
         [role="dialog"] {
-          background: rgba(15, 23, 42, 0.2) !important;
+          background: rgba(15, 23, 42, 0.7) !important;
           backdrop-filter: blur(21px) saturate(180%) !important;
           -webkit-backdrop-filter: blur(21px) saturate(180%) !important;
           border: 1px solid rgba(255, 255, 255, 0.1) !important;
