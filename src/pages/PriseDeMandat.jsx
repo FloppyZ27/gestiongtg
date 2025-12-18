@@ -2645,6 +2645,38 @@ export default function PriseDeMandat() {
                     </TabsContent>
                     </Tabs>
                   )}
+                  </div>
+                </div>
+
+                {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                  <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async () => {
+                    if (hasFormChanges && !isLocked) {
+                      setShowUnsavedWarning(true);
+                      return;
+                    }
+                    
+                    // Déverrouiller le mandat si on annule
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}>
+                    Annuler
+                  </Button>
+                  {!isLocked && (
+                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                      {editingPriseMandat ? "Modifier" : "Créer"}
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             </DialogContent>
@@ -3818,55 +3850,6 @@ export default function PriseDeMandat() {
                   </div>
 
                   <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
-                        setShowUnsavedWarning(true);
-                        return;
-                      }
-                      const initialMandats = mandatsInfo.filter(m => m.type_mandat).map(m => ({
-                        type_mandat: m.type_mandat,
-                        date_livraison: m.date_livraison || ""
-                      }));
-                      const currentMandats = nouveauDossierForm.mandats.map(m => ({
-                        type_mandat: m.type_mandat,
-                        date_livraison: m.date_livraison || ""
-                      }));
-                      
-                      const hasChanges = nouveauDossierForm.numero_dossier || 
-                        JSON.stringify(nouveauDossierForm.clients_ids) !== JSON.stringify(formData.clients_ids) ||
-                        nouveauDossierForm.notaires_ids.length > 0 ||
-                        nouveauDossierForm.courtiers_ids.length > 0 ||
-                        nouveauDossierForm.mandats.some(m => m.utilisateur_assigne) ||
-                        JSON.stringify(currentMandats) !== JSON.stringify(initialMandats) ||
-                        commentairesTemporairesDossier.length !== commentairesTemporaires.length ||
-                        dossierDocuments.length > 0;
-                      
-                      if (hasChanges) {
-                        setShowCancelConfirmDossier(true);
-                      } else {
-                        setIsOuvrirDossierDialogOpen(false);
-                        setNouveauDossierForm({
-                          numero_dossier: "",
-                          arpenteur_geometre: "",
-                          date_ouverture: new Date().toISOString().split('T')[0],
-                          statut: "Ouvert",
-                          ttl: "Non",
-                          clients_ids: [],
-                          notaires_ids: [],
-                          courtiers_ids: [],
-                          mandats: []
-                        });
-                        setCommentairesTemporairesDossier([]);
-                        setDossierDocuments([]);
-                        setActiveTabMandatDossier("0");
-                      }
-                    }}>
-                      Annuler
-                    </Button>
-                    <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      Créer
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
