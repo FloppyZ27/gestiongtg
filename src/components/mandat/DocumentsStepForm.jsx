@@ -254,21 +254,34 @@ export default function DocumentsStepForm({
     setIsLoadingPreview(true);
     
     try {
-      const response = await base44.functions.invoke('sharepoint', {
-        action: 'preview',
-        fileId: file.id
-      });
-      
-      if (response.data?.previewUrl) {
-        setPreviewUrl(response.data.previewUrl);
-      } else if (file.webUrl) {
-        setPreviewUrl(file.webUrl);
+      // Pour les images, utiliser directement le downloadUrl
+      if (isImageFile(file.name)) {
+        const response = await base44.functions.invoke('sharepoint', {
+          action: 'getDownloadUrl',
+          fileId: file.id
+        });
+        
+        if (response.data?.downloadUrl) {
+          setPreviewUrl(response.data.downloadUrl);
+        } else if (file.downloadUrl) {
+          setPreviewUrl(file.downloadUrl);
+        }
+      } else {
+        // Pour les autres fichiers, utiliser l'API preview
+        const response = await base44.functions.invoke('sharepoint', {
+          action: 'preview',
+          fileId: file.id
+        });
+        
+        if (response.data?.previewUrl) {
+          setPreviewUrl(response.data.previewUrl);
+        } else if (file.webUrl) {
+          setPreviewUrl(file.webUrl);
+        }
       }
     } catch (error) {
       console.error("Erreur preview:", error);
-      if (file.webUrl) {
-        setPreviewUrl(file.webUrl);
-      }
+      setPreviewUrl(file.downloadUrl || file.webUrl);
     } finally {
       setIsLoadingPreview(false);
     }
