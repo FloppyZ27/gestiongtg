@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -48,6 +48,8 @@ export default function DocumentsStepForm({
   const [previewFile, setPreviewFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [viewMode, setViewMode] = useState("list");
+  const [fileToDelete, setFileToDelete] = useState(null);
 
 
   const initials = getArpenteurInitials(arpenteurGeometre);
@@ -203,6 +205,19 @@ export default function DocumentsStepForm({
     return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
   };
 
+  const handleDelete = async (file) => {
+    try {
+      await base44.functions.invoke('sharepoint', {
+        action: 'delete',
+        fileId: file.id
+      });
+      refetch();
+    } catch (error) {
+      console.error("Erreur suppression:", error);
+      alert("Erreur lors de la suppression du fichier");
+    }
+  };
+
 
 
   return (
@@ -257,6 +272,16 @@ export default function DocumentsStepForm({
                 📁 {folderPath}
               </p>
               <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); setViewMode(viewMode === "list" ? "grid" : "list"); }}
+                  className="text-slate-400 hover:text-white h-6 px-2"
+                  title={viewMode === "list" ? "Vue grille" : "Vue liste"}
+                >
+                  {viewMode === "list" ? <Grid3x3 className="w-3 h-3" /> : <List className="w-3 h-3" />}
+                </Button>
                 <label onClick={(e) => e.stopPropagation()}>
                   <input
                     type="file"
@@ -290,43 +315,111 @@ export default function DocumentsStepForm({
                   <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
                 </div>
               ) : files.length > 0 ? (
-                <div className="max-h-40 overflow-y-auto space-y-1">
-                  {files.map((file) => (
-                    <div
-                      key={file.id}
-                      className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
-                      onClick={() => handlePreview(file)}
-                    >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        {getFileIcon(file.name)}
-                        <span className="text-slate-300 text-sm truncate">{file.name}</span>
-                        <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
+                viewMode === "list" ? (
+                  <div className="max-h-40 overflow-y-auto space-y-1">
+                    {files.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
+                        onClick={() => handlePreview(file)}
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {getFileIcon(file.name)}
+                          <span className="text-slate-300 text-sm truncate">{file.name}</span>
+                          <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
+                            className="h-6 px-2 text-slate-400 hover:text-white"
+                            title="Visualiser"
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
+                            className="h-6 px-2 text-slate-400 hover:text-white"
+                            title="Télécharger"
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
+                            className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
-                          className="h-6 px-2 text-slate-400 hover:text-white"
-                          title="Visualiser"
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
-                          className="h-6 px-2 text-slate-400 hover:text-white"
-                          title="Télécharger"
-                        >
-                          <Download className="w-3 h-3" />
-                        </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
+                    {files.map((file) => (
+                      <div
+                        key={file.id}
+                        className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
+                        onClick={() => handlePreview(file)}
+                      >
+                        <div className="aspect-square flex items-center justify-center bg-slate-800/50">
+                          {isImageFile(file.name) ? (
+                            <div className="w-full h-full p-2">
+                              <img
+                                src={file.webUrl}
+                                alt={file.name}
+                                className="w-full h-full object-cover rounded"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = '<div class="flex items-center justify-center h-full">' + getFileIcon(file.name) + '</div>';
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center">
+                              {getFileIcon(file.name)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-2 bg-slate-800/80">
+                          <p className="text-slate-300 text-xs truncate" title={file.name}>{file.name}</p>
+                          <p className="text-slate-500 text-[10px]">{formatFileSize(file.size)}</p>
+                        </div>
+                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
+                            className="h-6 w-6 p-0 bg-slate-900/90 text-slate-400 hover:text-white"
+                            title="Télécharger"
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
+                            className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )
               ) : (
                 <p className="text-slate-500 text-xs text-center py-3">
                   Aucun fichier • Glissez des fichiers ici ou cliquez sur Ajouter
@@ -380,6 +473,49 @@ export default function DocumentsStepForm({
                   </Button>
                 </div>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression */}
+        <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce document ?
+              </p>
+              {fileToDelete && (
+                <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 flex items-center gap-2">
+                  {getFileIcon(fileToDelete.name)}
+                  <span className="text-white text-sm truncate flex-1">{fileToDelete.name}</span>
+                </div>
+              )}
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => setFileToDelete(null)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleDelete(fileToDelete);
+                    setFileToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Confirmer
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
