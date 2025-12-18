@@ -322,8 +322,8 @@ function LayoutContent({ children, currentPageName }) {
         div[data-radix-dialog-overlay],
         [data-radix-dialog-overlay] {
           background-color: transparent !important;
-          backdrop-filter: blur(15px) !important;
-          -webkit-backdrop-filter: blur(15px) !important;
+          backdrop-filter: blur(10px) !important;
+          -webkit-backdrop-filter: blur(10px) !important;
           opacity: 1 !important;
         }
 
@@ -331,8 +331,8 @@ function LayoutContent({ children, currentPageName }) {
         .fixed.inset-0.z-50.bg-black\\/80,
         .fixed.inset-0.z-50 {
           background-color: transparent !important;
-          backdrop-filter: blur(15px) !important;
-          -webkit-backdrop-filter: blur(15px) !important;
+          backdrop-filter: blur(10px) !important;
+          -webkit-backdrop-filter: blur(10px) !important;
         }
 
         /* Effet glassmorphism sur les fenêtres dialog avec trame de fond */
