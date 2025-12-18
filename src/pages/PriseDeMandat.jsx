@@ -291,6 +291,7 @@ export default function PriseDeMandat() {
   const [historiqueDossier, setHistoriqueDossier] = useState([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarCollapsedDossier, setSidebarCollapsedDossier] = useState(false);
+  const [contactsListCollapsed, setContactsListCollapsed] = useState(false);
   const [addressSearchQuery, setAddressSearchQuery] = useState("");
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
@@ -2954,9 +2955,9 @@ export default function PriseDeMandat() {
                               </TabsList>
 
                               <TabsContent value="clients" className="mt-2">
-                                <div className="grid grid-cols-[50%_50%] gap-4">
+                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Clients sélectionnés */}
-                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                     {nouveauDossierForm.clients_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.clients_ids.map((clientId) => {
@@ -2988,8 +2989,18 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des clients existants */}
+                                  {!contactsListCollapsed && (
                                   <div className="border-l border-slate-700 pl-3 pr-2">
                                     <div className="flex gap-2 mb-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setContactsListCollapsed(true)}
+                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
                                       <div className="relative flex-1">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
@@ -3063,9 +3074,9 @@ export default function PriseDeMandat() {
                               </TabsContent>
 
                               <TabsContent value="notaires" className="mt-2">
-                                <div className="grid grid-cols-[50%_50%] gap-4">
+                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Notaires sélectionnés */}
-                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                     {nouveauDossierForm.notaires_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.notaires_ids.map((notaireId) => {
@@ -3097,8 +3108,18 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des notaires existants */}
+                                  {!contactsListCollapsed && (
                                   <div className="border-l border-slate-700 pl-3 pr-2">
                                     <div className="flex gap-2 mb-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setContactsListCollapsed(true)}
+                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
                                       <div className="relative flex-1">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
@@ -3168,13 +3189,27 @@ export default function PriseDeMandat() {
                                       )}
                                     </div>
                                   </div>
+                                  )}
+                                  {contactsListCollapsed && (
+                                    <div className="absolute top-2 right-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setContactsListCollapsed(false)}
+                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                        <ChevronDown className="w-4 h-4 -rotate-90" />
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </TabsContent>
 
                               <TabsContent value="courtiers" className="mt-2">
-                                <div className="grid grid-cols-[50%_50%] gap-4">
+                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Courtiers sélectionnés */}
-                                  <div className="space-y-2 border-r border-slate-700 pr-4">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                     {nouveauDossierForm.courtiers_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.courtiers_ids.map((courtierId) => {
@@ -3206,8 +3241,18 @@ export default function PriseDeMandat() {
                                   </div>
 
                                   {/* Colonne droite - Liste des courtiers existants */}
+                                  {!contactsListCollapsed && (
                                   <div className="border-l border-slate-700 pl-3 pr-2">
                                     <div className="flex gap-2 mb-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setContactsListCollapsed(true)}
+                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
                                       <div className="relative flex-1">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
@@ -3277,6 +3322,20 @@ export default function PriseDeMandat() {
                                       )}
                                     </div>
                                   </div>
+                                  )}
+                                  {contactsListCollapsed && (
+                                    <div className="absolute top-2 right-2">
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setContactsListCollapsed(false)}
+                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                      >
+                                        <ChevronDown className="w-4 h-4 -rotate-90" />
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </TabsContent>
                             </Tabs>
