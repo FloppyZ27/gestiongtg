@@ -463,18 +463,25 @@ function LayoutContent({ children, currentPageName }) {
           transition: all 0.3s ease !important;
         }
 
-        /* Tabs avec couleur blue */
-        button[role="tab"][class*="blue"]:hover,
-        [role="tab"][class*="blue"]:hover {
-          background: rgba(59, 130, 246, 0.15) !important;
-          background-color: rgba(59, 130, 246, 0.15) !important;
-          background-image: none !important;
-          color: rgb(59, 130, 246) !important;
+        /* Tabs avec couleur blue - inactifs en gris */
+        button[role="tab"][class*="blue"]:not([data-state="active"]),
+        [role="tab"][class*="blue"]:not([data-state="active"]) {
+          color: rgb(148, 163, 184) !important;
         }
 
-        button[role="tab"][class*="blue"][class*="border-blue"],
-        [role="tab"][class*="blue"][class*="border-blue"] {
-          background: rgba(59, 130, 246, 0.1) !important;
+        button[role="tab"][class*="blue"]:not([data-state="active"]):hover,
+        [role="tab"][class*="blue"]:not([data-state="active"]):hover {
+          background: rgba(148, 163, 184, 0.1) !important;
+          background-color: rgba(148, 163, 184, 0.1) !important;
+          background-image: none !important;
+          color: rgb(148, 163, 184) !important;
+        }
+
+        button[role="tab"][class*="blue"][data-state="active"],
+        [role="tab"][class*="blue"][data-state="active"] {
+          background: rgba(59, 130, 246, 0.2) !important;
+          background-color: rgba(59, 130, 246, 0.2) !important;
+          background-image: none !important;
           color: rgb(59, 130, 246) !important;
           border-bottom-color: rgb(59, 130, 246) !important;
         }
