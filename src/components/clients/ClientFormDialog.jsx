@@ -1100,35 +1100,39 @@ export default function ClientFormDialog({
                           {formData.courriels.map((item, index) => (
                             <React.Fragment key={index}>
                               <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-white text-sm">{item.courriel}</TableCell>
-                                  <TableCell>
-                                    <Select 
-                                      value={item.actuel ? "Actuel" : "Ancien"} 
-                                      onValueChange={(value) => toggleActuel('courriels', index)}
-                                    >
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                        <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
-                                        <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                      <Button
-                                       type="button"
-                                       size="sm"
-                                       variant="ghost"
-                                       onClick={() => handleDeleteRequest('courriels', index)}
-                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    <TableCell className="text-white text-sm">
+                                      <a href={`mailto:${item.courriel}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                        {item.courriel}
+                                      </a>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Select 
+                                        value={item.actuel ? "Actuel" : "Ancien"} 
+                                        onValueChange={(value) => toggleActuel('courriels', index)}
                                       >
-                                       <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
+                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          <SelectItem value="Actuel" className="text-white text-xs">Actuel</SelectItem>
+                                          <SelectItem value="Ancien" className="text-white text-xs">Ancien</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => handleDeleteRequest('courriels', index)}
+                                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                        >
+                                         <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
                             </React.Fragment>
                           ))}
                           </TableBody>
