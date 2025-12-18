@@ -216,11 +216,9 @@ export default function ClientStepForm({
                         <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
                           {getCurrentPhone(client) && (
                             <p>
-                              📞 <span 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.location.href = `3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`;
-                                }}
+                              📞 <a 
+                                href={`3cx://call/${getCurrentPhone(client).replace(/\D/g, '')}`}
+                                onClick={(e) => e.stopPropagation()}
                                 className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                               >
                                 {getCurrentPhone(client)}
