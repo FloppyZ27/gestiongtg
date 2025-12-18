@@ -3083,24 +3083,10 @@ export default function PriseDeMandat() {
                                       )}
                                       </div>
                                       </div>
-                                      )}
-                                      {contactsListCollapsed && (
-                                      <div className="absolute top-2 right-2">
-                                      <Button
-                                       type="button"
-                                       size="sm"
-                                       variant="ghost"
-                                       onClick={() => setContactsListCollapsed(false)}
-                                       className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                      >
-                                       <ChevronDown className="w-4 h-4 -rotate-90" />
-                                      </Button>
-                                      </div>
-                                      )}
                                       </div>
                                       </TabsContent>
 
-                              <TabsContent value="notaires" className="mt-2">
+                                      <TabsContent value="notaires" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Notaires sélectionnés */}
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
