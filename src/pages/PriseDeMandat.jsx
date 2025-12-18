@@ -3365,12 +3365,12 @@ export default function PriseDeMandat() {
 
                             {nouveauDossierForm.mandats.length > 0 ? (
                               <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
-                                <TabsList className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border border-blue-500/30 w-full h-auto justify-start p-1 rounded-lg">
+                                <TabsList className="bg-gradient-to-r from-orange-900/50 to-orange-900/50 border border-orange-500/30 w-full h-auto justify-start p-1 rounded-lg">
                                   {nouveauDossierForm.mandats.map((mandat, index) => (
                                     <TabsTrigger
                                       key={index}
                                       value={index.toString()}
-                                      className="data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-300 data-[state=active]:border-b-2 data-[state=active]:border-blue-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
+                                      className="orange data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-b-2 data-[state=active]:border-orange-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
                                     >
                                       {mandat.type_mandat || `Mandat ${index + 1}`}
                                     </TabsTrigger>
