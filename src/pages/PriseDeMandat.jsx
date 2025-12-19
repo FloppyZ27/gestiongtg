@@ -2958,18 +2958,37 @@ export default function PriseDeMandat() {
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Clients sélectionnés */}
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center justify-between gap-2 mb-2">
-                                     <div className="flex-1">
-                                       {nouveauDossierForm.clients_ids.length > 0 && (
-                                         <div className="flex flex-wrap gap-1">
+                                   <div className="flex items-center gap-2 mb-2">
+                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                       {nouveauDossierForm.clients_ids.length > 0 ? (
+                                         <div className="space-y-2">
                                            {nouveauDossierForm.clients_ids.map(clientId => {
                                              const client = clients.find(c => c.id === clientId);
-                                             return client ? (
-                                               <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                                 {client.prenom} {client.nom}
-                                               </Badge>
-                                             ) : null;
+                                             if (!client) return null;
+                                             const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
+                                             const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
+                                             const preferences = client.preferences_livraison || [];
+                                             return (
+                                               <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs">
+                                                 <div className="font-semibold mb-1">{client.prenom} {client.nom}</div>
+                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                 {preferences.length > 0 && (
+                                                   <div className="flex gap-1 mt-1">
+                                                     {preferences.map(pref => (
+                                                       <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
+                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                       </span>
+                                                     ))}
+                                                   </div>
+                                                 )}
+                                               </div>
+                                             );
                                            })}
+                                         </div>
+                                       ) : (
+                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                           Aucun client sélectionné
                                          </div>
                                        )}
                                      </div>
@@ -3105,18 +3124,37 @@ export default function PriseDeMandat() {
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Notaires sélectionnés */}
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center justify-between gap-2 mb-2">
-                                     <div className="flex-1">
-                                       {nouveauDossierForm.notaires_ids.length > 0 && (
-                                         <div className="flex flex-wrap gap-1">
+                                   <div className="flex items-center gap-2 mb-2">
+                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                       {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                         <div className="space-y-2">
                                            {nouveauDossierForm.notaires_ids.map(notaireId => {
                                              const notaire = clients.find(c => c.id === notaireId);
-                                             return notaire ? (
-                                               <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                                 {notaire.prenom} {notaire.nom}
-                                               </Badge>
-                                             ) : null;
+                                             if (!notaire) return null;
+                                             const currentPhone = notaire.telephones?.find(t => t.actuel)?.telephone || notaire.telephones?.[0]?.telephone || "";
+                                             const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
+                                             const preferences = notaire.preferences_livraison || [];
+                                             return (
+                                               <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs">
+                                                 <div className="font-semibold mb-1">{notaire.prenom} {notaire.nom}</div>
+                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                 {preferences.length > 0 && (
+                                                   <div className="flex gap-1 mt-1">
+                                                     {preferences.map(pref => (
+                                                       <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
+                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                       </span>
+                                                     ))}
+                                                   </div>
+                                                 )}
+                                               </div>
+                                             );
                                            })}
+                                         </div>
+                                       ) : (
+                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                           Aucun notaire sélectionné
                                          </div>
                                        )}
                                      </div>
@@ -3252,18 +3290,37 @@ export default function PriseDeMandat() {
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Courtiers sélectionnés */}
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center justify-between gap-2 mb-2">
-                                     <div className="flex-1">
-                                       {nouveauDossierForm.courtiers_ids.length > 0 && (
-                                         <div className="flex flex-wrap gap-1">
+                                   <div className="flex items-center gap-2 mb-2">
+                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                       {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                         <div className="space-y-2">
                                            {nouveauDossierForm.courtiers_ids.map(courtierId => {
                                              const courtier = clients.find(c => c.id === courtierId);
-                                             return courtier ? (
-                                               <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                                                 {courtier.prenom} {courtier.nom}
-                                               </Badge>
-                                             ) : null;
+                                             if (!courtier) return null;
+                                             const currentPhone = courtier.telephones?.find(t => t.actuel)?.telephone || courtier.telephones?.[0]?.telephone || "";
+                                             const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
+                                             const preferences = courtier.preferences_livraison || [];
+                                             return (
+                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs">
+                                                 <div className="font-semibold mb-1">{courtier.prenom} {courtier.nom}</div>
+                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                 {preferences.length > 0 && (
+                                                   <div className="flex gap-1 mt-1">
+                                                     {preferences.map(pref => (
+                                                       <span key={pref} className="text-[10px] bg-orange-600/30 px-1 py-0.5 rounded">
+                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                       </span>
+                                                     ))}
+                                                   </div>
+                                                 )}
+                                               </div>
+                                             );
                                            })}
+                                         </div>
+                                       ) : (
+                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                           Aucun courtier sélectionné
                                          </div>
                                        )}
                                      </div>
