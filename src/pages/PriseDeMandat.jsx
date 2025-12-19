@@ -5276,132 +5276,132 @@ export default function PriseDeMandat() {
             >
               <div className="flex-1 flex overflow-hidden">
                 {/* Colonne gauche - Formulaire - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">Nouveau lot</h2>
+                <div className="flex-[0_0_70%] overflow-y-auto p-4 border-r border-slate-800">
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold text-white">Nouveau lot</h2>
                   </div>
                   
-                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
+                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-2">
                     {/* Section 1: Informations du lot */}
                     <Card className="border-slate-700 bg-slate-800/30">
-                        <CardHeader 
-                          className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 bg-blue-900/20"
-                          onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                                <Grid3x3 className="w-3.5 h-3.5 text-blue-400" />
-                              </div>
-                              <CardTitle className="text-blue-300 text-base">Informations du lot</CardTitle>
-                            </div>
-                            {lotInfoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                          </div>
-                        </CardHeader>
+                       <CardHeader 
+                         className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1 bg-blue-900/20"
+                         onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
+                       >
+                         <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-2">
+                             <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                               <Grid3x3 className="w-3 h-3 text-blue-400" />
+                             </div>
+                             <CardTitle className="text-blue-300 text-sm">Informations du lot</CardTitle>
+                           </div>
+                           {lotInfoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                         </div>
+                       </CardHeader>
 
-                        {!lotInfoCollapsed && (
-                          <CardContent className="pt-2 pb-3 space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
-                                <Input
-                                  value={newLotForm.numero_lot}
-                                  onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
-                                  required
-                                  placeholder="Ex: 1234-5678"
-                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Rang</Label>
-                                <Input
-                                  value={newLotForm.rang}
-                                  onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
-                                  placeholder="Ex: Rang 4"
-                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
-                                />
-                              </div>
-                            </div>
+                       {!lotInfoCollapsed && (
+                         <CardContent className="pt-1 pb-1.5 space-y-1.5">
+                           <div className="grid grid-cols-2 gap-2">
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Numéro de lot <span className="text-red-400">*</span></Label>
+                               <Input
+                                 value={newLotForm.numero_lot}
+                                 onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
+                                 required
+                                 placeholder="Ex: 1234-5678"
+                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Rang</Label>
+                               <Input
+                                 value={newLotForm.rang}
+                                 onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
+                                 placeholder="Ex: Rang 4"
+                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
+                               />
+                             </div>
+                           </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
-                                <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
-                                  if (value === "") {
-                                    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
-                                    setAvailableCadastresForNewLot([]);
-                                  } else {
-                                    handleLotCirconscriptionChange(value);
-                                  }
-                                }}>
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                    <SelectValue placeholder="Sélectionner" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
-                                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                      <SelectItem key={circ} value={circ} className="text-white text-sm">
-                                        {circ}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Cadastre</Label>
-                                <Select
-                                  value={newLotForm.cadastre}
-                                  onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
-                                  disabled={!newLotForm.circonscription_fonciere}
-                                >
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                    <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
-                                    {availableCadastresForNewLot.map((cadastre) => (
-                                      <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
-                                        {cadastre}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                           <div className="grid grid-cols-2 gap-2">
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Circonscription foncière <span className="text-red-400">*</span></Label>
+                               <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
+                                 if (value === "") {
+                                   setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
+                                   setAvailableCadastresForNewLot([]);
+                                 } else {
+                                   handleLotCirconscriptionChange(value);
+                                 }
+                               }}>
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                     <SelectItem key={circ} value={circ} className="text-white text-xs">
+                                       {circ}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Cadastre</Label>
+                               <Select
+                                 value={newLotForm.cadastre}
+                                 onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
+                                 disabled={!newLotForm.circonscription_fonciere}
+                               >
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                   <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
+                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   {availableCadastresForNewLot.map((cadastre) => (
+                                     <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
+                                       {cadastre}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Date BPD</Label>
-                                <Input
-                                  type="date"
-                                  value={newLotForm.date_bpd}
-                                  onChange={(e) => setNewLotForm({...newLotForm, date_bpd: e.target.value})}
-                                  className="bg-slate-700 border-slate-600 h-7 text-sm"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Type d'opération</Label>
-                                <Select
-                                  value={newLotForm.type_operation}
-                                  onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
-                                >
-                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                                    <SelectValue placeholder="Sélectionner" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                    <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
-                                    {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
-                                      <SelectItem key={type} value={type} className="text-white text-sm">
-                                        {type}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          </CardContent>
-                        )}
-                      </Card>
+                           <div className="grid grid-cols-2 gap-2">
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Date BPD</Label>
+                               <Input
+                                 type="date"
+                                 value={newLotForm.date_bpd}
+                                 onChange={(e) => setNewLotForm({...newLotForm, date_bpd: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-0.5">
+                               <Label className="text-slate-400 text-[10px]">Type d'opération</Label>
+                               <Select
+                                 value={newLotForm.type_operation}
+                                 onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
+                               >
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
+                                     <SelectItem key={type} value={type} className="text-white text-xs">
+                                       {type}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           </div>
+                         </CardContent>
+                       )}
+                     </Card>
 
                       {/* Section 2: Concordances */}
                       <Card className="border-slate-700 bg-slate-800/30">
@@ -5625,15 +5625,15 @@ export default function PriseDeMandat() {
                     {/* Section 3: Documents */}
                     <Card className="border-slate-700 bg-slate-800/30">
                       <CardHeader 
-                        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 bg-orange-900/20"
+                        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1 bg-orange-900/20"
                         onClick={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
-                              <Upload className="w-3.5 h-3.5 text-orange-400" />
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
+                              <Upload className="w-3 h-3 text-orange-400" />
                             </div>
-                            <CardTitle className="text-orange-300 text-base">Documents</CardTitle>
+                            <CardTitle className="text-orange-300 text-sm">Documents</CardTitle>
                             {newLotForm.document_pdf_url && (
                               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                                 <Check className="w-3 h-3 mr-1" />
@@ -5646,33 +5646,33 @@ export default function PriseDeMandat() {
                       </CardHeader>
 
                       {!lotDocumentsCollapsed && (
-                        <CardContent className="pt-2 pb-3">
-                          <div className="space-y-2">
-                            <Label className="text-slate-400 text-xs">Document PDF du lot</Label>
+                        <CardContent className="pt-1 pb-1.5">
+                          <div className="space-y-1.5">
+                            <Label className="text-slate-400 text-[10px]">Document PDF du lot</Label>
                             <Input
                               type="file"
                               accept=".pdf"
                               onChange={handleLotFileUpload}
                               disabled={uploadingLotPdf}
-                              className="bg-slate-700 border-slate-600 file:text-orange-400 file:bg-orange-500/10 file:border-none file:hover:bg-orange-500/20"
+                              className="bg-slate-700 border-slate-600 file:text-orange-400 file:bg-orange-500/10 file:border-none file:hover:bg-orange-500/20 h-7 text-xs"
                             />
                             {uploadingLotPdf && (
-                              <div className="flex items-center gap-2 text-sm text-slate-400">
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                              <div className="flex items-center gap-2 text-xs text-slate-400">
+                                <Loader2 className="w-3 h-3 animate-spin" />
                                 Upload en cours...
                               </div>
                             )}
                             {newLotForm.document_pdf_url && (
-                              <div className="flex items-center gap-2 p-2 bg-slate-700/50 rounded-lg border border-slate-600">
-                                <File className="w-4 h-4 text-orange-400" />
-                                <span className="text-sm text-slate-300 flex-1">Document PDF ajouté</span>
+                              <div className="flex items-center gap-2 p-1.5 bg-slate-700/50 rounded-lg border border-slate-600">
+                                <File className="w-3 h-3 text-orange-400" />
+                                <span className="text-xs text-slate-300 flex-1">Document PDF ajouté</span>
                                 <a
                                   href={newLotForm.document_pdf_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-emerald-400 hover:text-emerald-300"
                                 >
-                                  <ExternalLink className="w-4 h-4" />
+                                  <ExternalLink className="w-3 h-3" />
                                 </a>
                               </div>
                             )}
@@ -5684,49 +5684,65 @@ export default function PriseDeMandat() {
                 </div>
 
                 {/* Colonne droite - Commentaires et Historique - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                    <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
-                      <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        Commentaires
-                      </TabsTrigger>
-                      <TabsTrigger value="historique" className="orange text-xs bg-transparent border-none data-[state=active]:text-orange-400 data-[state=inactive]:text-slate-400 hover:text-orange-300">
-                        <Clock className="w-4 h-4 mr-1" />
-                        Historique
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-                  
-                  <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
-                    <CommentairesSectionLot
-                      lotId={editingLot?.id}
-                      lotTemporaire={!editingLot}
-                      commentairesTemp={commentairesTemporairesLot}
-                      onCommentairesTempChange={setCommentairesTemporairesLot}
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
-                    <div className="flex items-center justify-center h-full text-center">
-                      <div>
-                        <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                        <p className="text-slate-500">Aucune action enregistrée</p>
-                        <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                 {/* Header Tabs Commentaires/Historique - Collapsible */}
+                 <div 
+                   className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                 >
+                   <div className="flex items-center gap-2">
+                     {sidebarTabLot === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                     <h3 className="text-slate-300 text-base font-semibold">
+                       {sidebarTabLot === "commentaires" ? "Commentaires" : "Historique"}
+                     </h3>
+                   </div>
+                   {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                 </div>
+
+                 {!sidebarCollapsed && (
+                   <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
+                     <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                       <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
+                         <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                           <MessageSquare className="w-4 h-4 mr-1" />
+                           Commentaires
+                         </TabsTrigger>
+                         <TabsTrigger value="historique" className="orange text-xs bg-transparent border-none data-[state=active]:text-orange-400 data-[state=inactive]:text-slate-400 hover:text-orange-300">
+                           <Clock className="w-4 h-4 mr-1" />
+                           Historique
+                         </TabsTrigger>
+                       </TabsList>
+                     </div>
+
+                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                       <CommentairesSectionLot
+                         lotId={editingLot?.id}
+                         lotTemporaire={!editingLot}
+                         commentairesTemp={commentairesTemporairesLot}
+                         onCommentairesTempChange={setCommentairesTemporairesLot}
+                       />
+                     </TabsContent>
+
+                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
+                       <div className="flex items-center justify-center h-full text-center">
+                         <div>
+                           <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                           <p className="text-slate-500">Aucune action enregistrée</p>
+                           <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                         </div>
+                       </div>
+                     </TabsContent>
+                   </Tabs>
+                 )}
                 </div>
               </div>
 
               {/* Boutons tout en bas - pleine largeur */}
-              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+              <div className="flex justify-end gap-3 p-3 bg-slate-900 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm">
                   Annuler
                 </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm">
                   Créer
                 </Button>
               </div>
