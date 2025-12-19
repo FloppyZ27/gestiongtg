@@ -285,7 +285,7 @@ export default function PriseDeMandat() {
   const [commentairesTemporairesDossier, setCommentairesTemporairesDossier] = useState([]);
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [activeContactTab, setActiveContactTab] = useState("clients");
-  const [mapCollapsedDossier, setMapCollapsedDossier] = useState(false);
+  const [mapCollapsedDossier, setMapCollapsedDossier] = useState(true);
   const [commentsCollapsedDossier, setCommentsCollapsedDossier] = useState(false);
   const [sidebarTabDossier, setSidebarTabDossier] = useState("commentaires");
   const [historiqueDossier, setHistoriqueDossier] = useState([]);
@@ -4020,7 +4020,7 @@ export default function PriseDeMandat() {
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
-                                                <div className="flex flex-wrap gap-1">
+                                                <div className="grid grid-cols-2 gap-1">
                                                   {mandat.lots.map((lotId) => {
                                                     const lot = getLotById(lotId);
                                                     return (
@@ -4105,7 +4105,7 @@ export default function PriseDeMandat() {
                                                 setCurrentMandatIndexDossier(index);
                                                 setIsNewLotDialogOpen(true);
                                               }}
-                                              className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                              className="text-orange-400 hover:text-orange-300 h-6 w-6 p-0"
                                             >
                                               <Plus className="w-3 h-3" />
                                             </Button>
@@ -4350,7 +4350,7 @@ export default function PriseDeMandat() {
                       Annuler
                       </Button>
                       <Button type="submit" form="nouveau-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      Créer
+                      Ouvrir
                       </Button>
                       </div>
                       </motion.div>
