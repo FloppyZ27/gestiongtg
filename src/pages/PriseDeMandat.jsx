@@ -4141,7 +4141,7 @@ export default function PriseDeMandat() {
                                                       }));
                                                     }}
                                                     className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
-                                                      isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                                      isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
                                                     }`}
                                                   >
                                                     <div className="flex items-center justify-between">
