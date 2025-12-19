@@ -2957,22 +2957,19 @@ export default function PriseDeMandat() {
                               <TabsContent value="clients" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Clients sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                    {contactsListCollapsed && (
-                                      <div className="flex justify-end mb-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setContactsListCollapsed(false)}
-                                          className="text-slate-400 hover:text-white h-6 px-2 text-xs"
-                                        >
-                                          <ChevronDown className="w-4 h-4 -rotate-90 mr-1" />
-                                          Afficher liste
-                                        </Button>
-                                      </div>
-                                    )}
-                                    {nouveauDossierForm.clients_ids.length > 0 ? (
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
+                                   {contactsListCollapsed && (
+                                     <Button
+                                       type="button"
+                                       size="icon"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(false)}
+                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
+                                     >
+                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                     </Button>
+                                   )}
+                                   {nouveauDossierForm.clients_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.clients_ids.map((clientId) => {
                                           const client = getClientById(clientId);
@@ -3089,22 +3086,19 @@ export default function PriseDeMandat() {
                                       <TabsContent value="notaires" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Notaires sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                    {contactsListCollapsed && (
-                                      <div className="flex justify-end mb-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setContactsListCollapsed(false)}
-                                          className="text-slate-400 hover:text-white h-6 px-2 text-xs"
-                                        >
-                                          <ChevronDown className="w-4 h-4 -rotate-90 mr-1" />
-                                          Afficher liste
-                                        </Button>
-                                      </div>
-                                    )}
-                                    {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
+                                   {contactsListCollapsed && (
+                                     <Button
+                                       type="button"
+                                       size="icon"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(false)}
+                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
+                                     >
+                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                     </Button>
+                                   )}
+                                   {nouveauDossierForm.notaires_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.notaires_ids.map((notaireId) => {
                                           const notaire = getClientById(notaireId);
@@ -3221,22 +3215,19 @@ export default function PriseDeMandat() {
                               <TabsContent value="courtiers" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Courtiers sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                    {contactsListCollapsed && (
-                                      <div className="flex justify-end mb-2">
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => setContactsListCollapsed(false)}
-                                          className="text-slate-400 hover:text-white h-6 px-2 text-xs"
-                                        >
-                                          <ChevronDown className="w-4 h-4 -rotate-90 mr-1" />
-                                          Afficher liste
-                                        </Button>
-                                      </div>
-                                    )}
-                                    {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
+                                   {contactsListCollapsed && (
+                                     <Button
+                                       type="button"
+                                       size="icon"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(false)}
+                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
+                                     >
+                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                     </Button>
+                                   )}
+                                   {nouveauDossierForm.courtiers_ids.length > 0 ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.courtiers_ids.map((courtierId) => {
                                           const courtier = getClientById(courtierId);
