@@ -480,13 +480,36 @@ export default function ClientFormDialog({
   };
 
   const toggleActuel = (fieldName, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].map((item, i) => ({
-        ...item,
-        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
-      }))
-    }));
+    if (fieldName === 'telephones') {
+      // Pour les téléphones, permettre plusieurs "actuel" si le type est différent
+      setFormData(prev => {
+        const currentItem = prev.telephones[index];
+        const newActuel = !currentItem.actuel;
+        
+        return {
+          ...prev,
+          telephones: prev.telephones.map((item, i) => {
+            if (i === index) {
+              return { ...item, actuel: newActuel };
+            }
+            // Si on active un téléphone, désactiver les autres du même type
+            if (newActuel && item.type === currentItem.type && item.actuel) {
+              return { ...item, actuel: false };
+            }
+            return item;
+          })
+        };
+      });
+    } else {
+      // Pour adresses et courriels, un seul actuel
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: prev[fieldName].map((item, i) => ({
+          ...item,
+          [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
+        }))
+      }));
+    }
   };
 
   const updateAdresseField = (index, field, value) => {
@@ -766,20 +789,22 @@ export default function ClientFormDialog({
                 {!infoCollapsed && (
                   <CardContent className="pt-1 pb-2">
                     <div className="grid grid-cols-[70%_30%] gap-3">
-                      {/* 70% - Prénom et Nom */}
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* 70% - Prénom et Nom (ou juste Nom pour Compagnie) */}
+                      <div className={formData.type_client === 'Compagnie' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-2 gap-2'}>
+                        {formData.type_client !== 'Compagnie' && (
+                          <div className="space-y-0.5">
+                            <Label htmlFor="prenom" className="text-slate-400 text-xs">Prénom <span className="text-red-400">*</span></Label>
+                            <Input
+                              id="prenom"
+                              value={formData.prenom}
+                              onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                              required
+                              className="bg-slate-700 border-slate-600 h-6 text-sm"
+                            />
+                          </div>
+                        )}
                         <div className="space-y-0.5">
-                          <Label htmlFor="prenom" className="text-slate-400 text-xs">Prénom <span className="text-red-400">*</span></Label>
-                          <Input
-                            id="prenom"
-                            value={formData.prenom}
-                            onChange={(e) => setFormData({...formData, prenom: e.target.value})}
-                            required
-                            className="bg-slate-700 border-slate-600 h-6 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-0.5">
-                          <Label htmlFor="nom" className="text-slate-400 text-xs">Nom <span className="text-red-400">*</span></Label>
+                          <Label htmlFor="nom" className="text-slate-400 text-xs">{formData.type_client === 'Compagnie' ? 'Nom de la compagnie' : 'Nom'} <span className="text-red-400">*</span></Label>
                           <Input
                             id="nom"
                             value={formData.nom}
@@ -988,8 +1013,7 @@ export default function ClientFormDialog({
                     </div>
 
                     {/* Liste des adresses */}
-                    {formData.adresses.length > 0 && (
-                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -1035,10 +1059,16 @@ export default function ClientFormDialog({
                                       </TableRow>
                                       </React.Fragment>
                                       ))}
+                                      {formData.adresses.length === 0 && (
+                                      <TableRow>
+                                      <TableCell colSpan={3} className="text-center py-4 text-slate-500 text-xs">
+                                      Aucune adresse ajoutée
+                                      </TableCell>
+                                      </TableRow>
+                                      )}
                                       </TableBody>
                                       </Table>
                                       </div>
-                                      )}
                                       </CardContent>
                                       )}
                                       </Card>
@@ -1094,8 +1124,7 @@ export default function ClientFormDialog({
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        
-                        {formData.courriels.length > 0 && (
+
                           <div className="border border-slate-700 rounded-lg overflow-hidden">
                             <Table>
                         <TableHeader>
@@ -1143,11 +1172,17 @@ export default function ClientFormDialog({
                                     </TableCell>
                                   </TableRow>
                             </React.Fragment>
-                          ))}
-                          </TableBody>
+                            ))}
+                            {formData.courriels.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={3} className="text-center py-4 text-slate-500 text-xs">
+                                Aucun courriel ajouté
+                              </TableCell>
+                            </TableRow>
+                            )}
+                            </TableBody>
                             </Table>
-                          </div>
-                        )}
+                            </div>
                       </div>
 
                       {/* Téléphones */}
@@ -1194,8 +1229,7 @@ export default function ClientFormDialog({
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
-                        
-                        {formData.telephones.length > 0 && (
+
                           <div className="border border-slate-700 rounded-lg overflow-hidden">
                             <Table>
                               <TableHeader>
@@ -1249,11 +1283,17 @@ export default function ClientFormDialog({
                                       </TableCell>
                                       </TableRow>
                                       </React.Fragment>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )}
+                                      ))}
+                                      {formData.telephones.length === 0 && (
+                                      <TableRow>
+                                      <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-xs">
+                                        Aucun téléphone ajouté
+                                      </TableCell>
+                                      </TableRow>
+                                      )}
+                                      </TableBody>
+                                      </Table>
+                                      </div>
                     </div>
                   </div>
                 </CardContent>
