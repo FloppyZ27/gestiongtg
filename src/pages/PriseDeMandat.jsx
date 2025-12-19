@@ -4024,8 +4024,7 @@ export default function PriseDeMandat() {
                                                   {mandat.lots.map((lotId) => {
                                                     const lot = getLotById(lotId);
                                                     return (
-                                                      <Badge key={lotId} variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs pr-1">
-                                                        {lot?.numero_lot || lotId}
+                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-1.5 text-xs relative">
                                                         <button 
                                                           type="button" 
                                                           onClick={() => {
@@ -4037,11 +4036,19 @@ export default function PriseDeMandat() {
                                                               } : m)
                                                             }));
                                                           }}
-                                                          className="ml-1 hover:text-red-400"
+                                                          className="absolute right-0.5 top-0.5 hover:text-red-400"
                                                         >
                                                           <X className="w-2.5 h-2.5" />
                                                         </button>
-                                                      </Badge>
+                                                        <div className="pr-5">
+                                                          <p className="font-semibold">{lot?.numero_lot || lotId}</p>
+                                                          <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                            <p>{lot?.circonscription_fonciere}</p>
+                                                            {lot?.cadastre && <p>Cadastre: {lot.cadastre}</p>}
+                                                            {lot?.rang && <p>Rang: {lot.rang}</p>}
+                                                          </div>
+                                                        </div>
+                                                      </div>
                                                     );
                                                   })}
                                                 </div>
@@ -6212,7 +6219,7 @@ export default function PriseDeMandat() {
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('arpenteur_geometre')}
                     >
-                      Arpenteur-Géomètre {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
+                      {activeListTab === "ouvrir" ? "Dossier" : "Arpenteur-Géomètre"} {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
@@ -6345,9 +6352,15 @@ export default function PriseDeMandat() {
                           onClick={() => handleEditPriseMandat(pm)}
                         >
                           <TableCell className="font-medium">
-                            <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
-                              {pm.arpenteur_geometre}
-                            </Badge>
+                            {activeListTab === "ouvrir" ? (
+                              <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
+                                {getArpenteurInitials(pm.arpenteur_geometre)}{pm.numero_dossier || "N/A"}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className={`${getArpenteurColor(pm.arpenteur_geometre)} border`}>
+                                {pm.arpenteur_geometre}
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
