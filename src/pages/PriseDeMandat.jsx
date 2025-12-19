@@ -4017,6 +4017,7 @@ export default function PriseDeMandat() {
                                       <div className={`grid ${lotTabExpanded && currentMandatIndexDossier === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
                                         {/* Colonne gauche - Lots sélectionnés */}
                                         <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
+                                          <Label className="text-slate-400 text-xs">Lot</Label>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
@@ -5303,7 +5304,7 @@ export default function PriseDeMandat() {
                          <CardContent className="pt-1 pb-1.5 space-y-1.5">
                            <div className="grid grid-cols-2 gap-2">
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Numéro de lot <span className="text-red-400">*</span></Label>
+                               <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
                                <Input
                                  value={newLotForm.numero_lot}
                                  onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
@@ -5313,7 +5314,7 @@ export default function PriseDeMandat() {
                                />
                              </div>
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Rang</Label>
+                               <Label className="text-slate-400 text-xs">Rang</Label>
                                <Input
                                  value={newLotForm.rang}
                                  onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
@@ -5325,7 +5326,7 @@ export default function PriseDeMandat() {
 
                            <div className="grid grid-cols-2 gap-2">
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Circonscription foncière <span className="text-red-400">*</span></Label>
+                               <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
                                <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
                                  if (value === "") {
                                    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
@@ -5348,7 +5349,7 @@ export default function PriseDeMandat() {
                                </Select>
                              </div>
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Cadastre</Label>
+                               <Label className="text-slate-400 text-xs">Cadastre</Label>
                                <Select
                                  value={newLotForm.cadastre}
                                  onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
@@ -5371,7 +5372,7 @@ export default function PriseDeMandat() {
 
                            <div className="grid grid-cols-2 gap-2">
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Date BPD</Label>
+                               <Label className="text-slate-400 text-xs">Date BPD</Label>
                                <Input
                                  type="date"
                                  value={newLotForm.date_bpd}
@@ -5380,7 +5381,7 @@ export default function PriseDeMandat() {
                                />
                              </div>
                              <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-[10px]">Type d'opération</Label>
+                               <Label className="text-slate-400 text-xs">Type d'opération</Label>
                                <Select
                                  value={newLotForm.type_operation}
                                  onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
@@ -5516,8 +5517,7 @@ export default function PriseDeMandat() {
                               </div>
 
                               {/* Tableau des concordances */}
-                              {newLotForm.concordances_anterieures?.length > 0 && (
-                                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                              <div className="border border-slate-700 rounded-lg overflow-hidden">
                                   <Table>
                                     <TableHeader>
                                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -5625,15 +5625,15 @@ export default function PriseDeMandat() {
                     {/* Section 3: Documents */}
                     <Card className="border-slate-700 bg-slate-800/30">
                       <CardHeader 
-                        className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1 bg-orange-900/20"
+                        className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1 bg-cyan-900/20"
                         onClick={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
-                              <Upload className="w-3 h-3 text-orange-400" />
+                            <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                              <Upload className="w-3 h-3 text-cyan-400" />
                             </div>
-                            <CardTitle className="text-orange-300 text-sm">Documents</CardTitle>
+                            <CardTitle className="text-cyan-300 text-sm">Documents</CardTitle>
                             {newLotForm.document_pdf_url && (
                               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                                 <Check className="w-3 h-3 mr-1" />
@@ -5648,7 +5648,7 @@ export default function PriseDeMandat() {
                       {!lotDocumentsCollapsed && (
                         <CardContent className="pt-1 pb-1.5">
                           <div className="space-y-1.5">
-                            <Label className="text-slate-400 text-[10px]">Document PDF du lot</Label>
+                            <Label className="text-slate-400 text-xs">Document PDF du lot</Label>
                             <Input
                               type="file"
                               accept=".pdf"
