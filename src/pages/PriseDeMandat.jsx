@@ -3124,22 +3124,12 @@ export default function PriseDeMandat() {
                                               const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
                                               const preferences = notaire.preferences_livraison || [];
                                               return (
-                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative">
-                                                  <button 
-                                                    type="button" 
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
-                                                    }} 
-                                                    className="absolute right-1 top-1 hover:text-red-400 text-purple-300"
-                                                  >
-                                                    <X className="w-3 h-3" />
-                                                  </button>
-                                                  <div className="font-semibold mb-1 pr-4">{notaire.prenom} {notaire.nom}</div>
+                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative flex items-center gap-2">
+                                                  <div className="font-semibold">{notaire.prenom} {notaire.nom}</div>
                                                   {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                   {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                   {preferences.length > 0 && (
-                                                    <div className="flex gap-1 mt-1">
+                                                    <div className="flex gap-1">
                                                       {preferences.map(pref => (
                                                         <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
                                                           {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
@@ -3147,6 +3137,16 @@ export default function PriseDeMandat() {
                                                       ))}
                                                     </div>
                                                   )}
+                                                  <button 
+                                                    type="button" 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
+                                                    }} 
+                                                    className="hover:text-red-400 text-purple-300 ml-auto"
+                                                  >
+                                                    <X className="w-3 h-3" />
+                                                  </button>
                                                 </div>
                                               );
                                             })}
@@ -3271,22 +3271,12 @@ export default function PriseDeMandat() {
                                              const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
                                              const preferences = courtier.preferences_livraison || [];
                                              return (
-                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
-                                                 <button 
-                                                   type="button" 
-                                                   onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
-                                                   }} 
-                                                   className="absolute right-1 top-1 hover:text-red-400 text-orange-300"
-                                                 >
-                                                   <X className="w-3 h-3" />
-                                                 </button>
-                                                 <div className="font-semibold mb-1 pr-4">{courtier.prenom} {courtier.nom}</div>
+                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative flex items-center gap-2">
+                                                 <div className="font-semibold">{courtier.prenom} {courtier.nom}</div>
                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                  {preferences.length > 0 && (
-                                                   <div className="flex gap-1 mt-1">
+                                                   <div className="flex gap-1">
                                                      {preferences.map(pref => (
                                                        <span key={pref} className="text-[10px] bg-orange-600/30 px-1 py-0.5 rounded">
                                                          {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
@@ -3294,6 +3284,16 @@ export default function PriseDeMandat() {
                                                      ))}
                                                    </div>
                                                  )}
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={(e) => {
+                                                     e.stopPropagation();
+                                                     setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                                   }} 
+                                                   className="hover:text-red-400 text-orange-300 ml-auto"
+                                                 >
+                                                   <X className="w-3 h-3" />
+                                                 </button>
                                                </div>
                                              );
                                            })}
