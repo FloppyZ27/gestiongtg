@@ -2969,7 +2969,7 @@ export default function PriseDeMandat() {
                                  <div className="flex items-center justify-between mb-2">
                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                     {nouveauDossierForm.clients_ids.length > 0 ? (
-                                      <div className="grid grid-cols-2 gap-2">
+                                      <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                                         {nouveauDossierForm.clients_ids.map(clientId => {
                                           const client = clients.find(c => c.id === clientId);
                                           if (!client) return null;
@@ -3118,7 +3118,7 @@ export default function PriseDeMandat() {
                                       <div className="flex items-center justify-between mb-2">
                                       <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                         {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                          <div className="grid grid-cols-2 gap-2">
+                                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                                             {nouveauDossierForm.notaires_ids.map(notaireId => {
                                               const notaire = clients.find(c => c.id === notaireId);
                                               if (!notaire) return null;
@@ -3267,7 +3267,7 @@ export default function PriseDeMandat() {
                                    <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                         {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                          <div className="grid grid-cols-2 gap-2">
+                                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                                             {nouveauDossierForm.courtiers_ids.map(courtierId => {
                                               const courtier = clients.find(c => c.id === courtierId);
                                               if (!courtier) return null;
@@ -3416,7 +3416,7 @@ export default function PriseDeMandat() {
                                    <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                         {(nouveauDossierForm.compagnies_ids || []).length > 0 ? (
-                                          <div className="grid grid-cols-2 gap-2">
+                                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                                             {nouveauDossierForm.compagnies_ids.map(compagnieId => {
                                               const compagnie = clients.find(c => c.id === compagnieId);
                                               if (!compagnie) return null;
