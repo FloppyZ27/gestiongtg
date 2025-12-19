@@ -3721,6 +3721,7 @@ export default function PriseDeMandat() {
                                     <div className="grid grid-cols-[60%_1px_40%] gap-3">
                                       {/* Adresse des travaux - 60% */}
                                       <div className="space-y-2">
+                                        <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
                                         {/* Barre de recherche d'adresse */}
                                         <div className="relative">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
@@ -4140,7 +4141,11 @@ export default function PriseDeMandat() {
                                                       <span className="font-medium truncate">{lot.numero_lot}</span>
                                                       {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
                                                     </div>
-                                                    <p className="text-slate-400 text-[10px]">{lot.circonscription_fonciere}</p>
+                                                    <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                      <p>{lot.circonscription_fonciere}</p>
+                                                      {lot.cadastre && <p>Cadastre: {lot.cadastre}</p>}
+                                                      {lot.rang && <p>Rang: {lot.rang}</p>}
+                                                    </div>
                                                   </div>
                                                 );
                                               })
