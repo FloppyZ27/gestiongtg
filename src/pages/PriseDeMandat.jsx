@@ -2968,47 +2968,49 @@ export default function PriseDeMandat() {
                                 <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                  <div className="flex items-center justify-between mb-2">
                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                     {nouveauDossierForm.clients_ids.length > 0 ? (
-                                       <div className="space-y-2">
-                                         {nouveauDossierForm.clients_ids.map(clientId => {
-                                           const client = clients.find(c => c.id === clientId);
-                                           if (!client) return null;
-                                           const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
-                                           const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
-                                           const preferences = client.preferences_livraison || [];
-                                           return (
-                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative flex items-center gap-2">
-                                               <div className="font-semibold">{client.prenom} {client.nom}</div>
-                                               {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                               {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                               {preferences.length > 0 && (
-                                                 <div className="flex gap-1">
-                                                   {preferences.map(pref => (
-                                                     <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
-                                                       {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                     </span>
-                                                   ))}
-                                                 </div>
-                                               )}
-                                               <button 
-                                                 type="button" 
-                                                 onClick={(e) => {
-                                                   e.stopPropagation();
-                                                   setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
-                                                 }} 
-                                                 className="hover:text-red-400 text-blue-300 ml-auto"
-                                               >
-                                                 <X className="w-3 h-3" />
-                                               </button>
-                                             </div>
-                                           );
-                                         })}
-                                       </div>
-                                     ) : (
-                                       <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                         Aucun client sélectionné
-                                       </div>
-                                     )}
+                                    {nouveauDossierForm.clients_ids.length > 0 ? (
+                                      <div className="grid grid-cols-2 gap-2">
+                                        {nouveauDossierForm.clients_ids.map(clientId => {
+                                          const client = clients.find(c => c.id === clientId);
+                                          if (!client) return null;
+                                          const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
+                                          const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
+                                          const preferences = client.preferences_livraison || [];
+                                          return (
+                                            <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative">
+                                              <button 
+                                                type="button" 
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                                }} 
+                                                className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
+                                              >
+                                                <X className="w-3 h-3" />
+                                              </button>
+                                              <div className="space-y-1 pr-4">
+                                                <div className="font-semibold">{client.prenom} {client.nom}</div>
+                                                {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                {preferences.length > 0 && (
+                                                  <div className="flex gap-1">
+                                                    {preferences.map(pref => (
+                                                      <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
+                                                        {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                      </span>
+                                                    ))}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                        Aucun client sélectionné
+                                      </div>
+                                    )}
                                    </div>
                                    {!contactsListCollapsed && (
                                      <Button
@@ -3116,7 +3118,7 @@ export default function PriseDeMandat() {
                                       <div className="flex items-center justify-between mb-2">
                                       <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                         {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                          <div className="space-y-2">
+                                          <div className="grid grid-cols-2 gap-2">
                                             {nouveauDossierForm.notaires_ids.map(notaireId => {
                                               const notaire = clients.find(c => c.id === notaireId);
                                               if (!notaire) return null;
@@ -3124,29 +3126,31 @@ export default function PriseDeMandat() {
                                               const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
                                               const preferences = notaire.preferences_livraison || [];
                                               return (
-                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative flex items-center gap-2">
-                                                  <div className="font-semibold">{notaire.prenom} {notaire.nom}</div>
-                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                                  {preferences.length > 0 && (
-                                                    <div className="flex gap-1">
-                                                      {preferences.map(pref => (
-                                                        <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
-                                                          {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                        </span>
-                                                      ))}
-                                                    </div>
-                                                  )}
+                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative">
                                                   <button 
                                                     type="button" 
                                                     onClick={(e) => {
                                                       e.stopPropagation();
                                                       setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
                                                     }} 
-                                                    className="hover:text-red-400 text-purple-300 ml-auto"
+                                                    className="absolute right-1 top-1 hover:text-red-400 text-purple-300"
                                                   >
                                                     <X className="w-3 h-3" />
                                                   </button>
+                                                  <div className="space-y-1 pr-4">
+                                                    <div className="font-semibold">{notaire.prenom} {notaire.nom}</div>
+                                                    {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                    {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                    {preferences.length > 0 && (
+                                                      <div className="flex gap-1">
+                                                        {preferences.map(pref => (
+                                                          <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
+                                                            {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                          </span>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
                                                 </div>
                                               );
                                             })}
@@ -3262,48 +3266,50 @@ export default function PriseDeMandat() {
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                    <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                       {nouveauDossierForm.courtiers_ids.length > 0 ? (
-                                         <div className="space-y-2">
-                                           {nouveauDossierForm.courtiers_ids.map(courtierId => {
-                                             const courtier = clients.find(c => c.id === courtierId);
-                                             if (!courtier) return null;
-                                             const currentPhone = courtier.telephones?.find(t => t.actuel)?.telephone || courtier.telephones?.[0]?.telephone || "";
-                                             const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
-                                             const preferences = courtier.preferences_livraison || [];
-                                             return (
-                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative flex items-center gap-2">
-                                                 <div className="font-semibold">{courtier.prenom} {courtier.nom}</div>
-                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                                 {preferences.length > 0 && (
-                                                   <div className="flex gap-1">
-                                                     {preferences.map(pref => (
-                                                       <span key={pref} className="text-[10px] bg-orange-600/30 px-1 py-0.5 rounded">
-                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                       </span>
-                                                     ))}
-                                                   </div>
-                                                 )}
-                                                 <button 
-                                                   type="button" 
-                                                   onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
-                                                   }} 
-                                                   className="hover:text-red-400 text-orange-300 ml-auto"
-                                                 >
-                                                   <X className="w-3 h-3" />
-                                                 </button>
-                                               </div>
-                                             );
-                                           })}
-                                         </div>
-                                       ) : (
-                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                           Aucun courtier sélectionné
-                                         </div>
-                                       )}
-                                     </div>
+                                        {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {nouveauDossierForm.courtiers_ids.map(courtierId => {
+                                              const courtier = clients.find(c => c.id === courtierId);
+                                              if (!courtier) return null;
+                                              const currentPhone = courtier.telephones?.find(t => t.actuel)?.telephone || courtier.telephones?.[0]?.telephone || "";
+                                              const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
+                                              const preferences = courtier.preferences_livraison || [];
+                                              return (
+                                                <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
+                                                  <button 
+                                                    type="button" 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                                    }} 
+                                                    className="absolute right-1 top-1 hover:text-red-400 text-orange-300"
+                                                  >
+                                                    <X className="w-3 h-3" />
+                                                  </button>
+                                                  <div className="space-y-1 pr-4">
+                                                    <div className="font-semibold">{courtier.prenom} {courtier.nom}</div>
+                                                    {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                    {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                    {preferences.length > 0 && (
+                                                      <div className="flex gap-1">
+                                                        {preferences.map(pref => (
+                                                          <span key={pref} className="text-[10px] bg-orange-600/30 px-1 py-0.5 rounded">
+                                                            {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                          </span>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        ) : (
+                                          <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                            Aucun courtier sélectionné
+                                          </div>
+                                        )}
+                                      </div>
                                      {!contactsListCollapsed && (
                                        <Button
                                          type="button"
@@ -3409,48 +3415,50 @@ export default function PriseDeMandat() {
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                    <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                       {(nouveauDossierForm.compagnies_ids || []).length > 0 ? (
-                                         <div className="space-y-2">
-                                           {nouveauDossierForm.compagnies_ids.map(compagnieId => {
-                                             const compagnie = clients.find(c => c.id === compagnieId);
-                                             if (!compagnie) return null;
-                                             const currentPhone = compagnie.telephones?.find(t => t.actuel)?.telephone || compagnie.telephones?.[0]?.telephone || "";
-                                             const currentEmail = compagnie.courriels?.find(c => c.actuel)?.courriel || compagnie.courriels?.[0]?.courriel || "";
-                                             const preferences = compagnie.preferences_livraison || [];
-                                             return (
-                                               <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative flex items-center gap-2">
-                                                 <div className="font-semibold">{compagnie.prenom} {compagnie.nom}</div>
-                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                                 {preferences.length > 0 && (
-                                                   <div className="flex gap-1">
-                                                     {preferences.map(pref => (
-                                                       <span key={pref} className="text-[10px] bg-green-600/30 px-1 py-0.5 rounded">
-                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                       </span>
-                                                     ))}
-                                                   </div>
-                                                 )}
-                                                 <button 
-                                                   type="button" 
-                                                   onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     setNouveauDossierForm(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)}));
-                                                   }} 
-                                                   className="hover:text-red-400 text-green-300 ml-auto"
-                                                 >
-                                                   <X className="w-3 h-3" />
-                                                 </button>
-                                               </div>
-                                             );
-                                           })}
-                                         </div>
-                                       ) : (
-                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                           Aucune compagnie sélectionnée
-                                         </div>
-                                       )}
-                                     </div>
+                                        {(nouveauDossierForm.compagnies_ids || []).length > 0 ? (
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {nouveauDossierForm.compagnies_ids.map(compagnieId => {
+                                              const compagnie = clients.find(c => c.id === compagnieId);
+                                              if (!compagnie) return null;
+                                              const currentPhone = compagnie.telephones?.find(t => t.actuel)?.telephone || compagnie.telephones?.[0]?.telephone || "";
+                                              const currentEmail = compagnie.courriels?.find(c => c.actuel)?.courriel || compagnie.courriels?.[0]?.courriel || "";
+                                              const preferences = compagnie.preferences_livraison || [];
+                                              return (
+                                                <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative">
+                                                  <button 
+                                                    type="button" 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setNouveauDossierForm(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)}));
+                                                    }} 
+                                                    className="absolute right-1 top-1 hover:text-red-400 text-green-300"
+                                                  >
+                                                    <X className="w-3 h-3" />
+                                                  </button>
+                                                  <div className="space-y-1 pr-4">
+                                                    <div className="font-semibold">{compagnie.prenom} {compagnie.nom}</div>
+                                                    {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                    {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                    {preferences.length > 0 && (
+                                                      <div className="flex gap-1">
+                                                        {preferences.map(pref => (
+                                                          <span key={pref} className="text-[10px] bg-green-600/30 px-1 py-0.5 rounded">
+                                                            {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                          </span>
+                                                        ))}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        ) : (
+                                          <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                            Aucune compagnie sélectionnée
+                                          </div>
+                                        )}
+                                      </div>
                                      {!contactsListCollapsed && (
                                        <Button
                                          type="button"
