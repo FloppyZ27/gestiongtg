@@ -6223,12 +6223,6 @@ export default function PriseDeMandat() {
                     </TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
-                      onClick={() => handleSort('created_date')}
-                    >
-                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('clients')}
                     >
                       Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -6250,6 +6244,12 @@ export default function PriseDeMandat() {
                       onClick={() => handleSort('types_mandats')}
                     >
                       Types de mandats {sortField === 'types_mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </TableHead>
+                    <TableHead
+                      className="text-slate-300 cursor-pointer hover:text-white"
+                      onClick={() => handleSort('created_date')}
+                    >
+                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
@@ -6362,9 +6362,6 @@ export default function PriseDeMandat() {
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300">
-                            {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
-                          </TableCell>
                           <TableCell className="text-slate-300 text-sm">
                             {pm.client_info?.prenom || pm.client_info?.nom 
                               ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
@@ -6395,6 +6392,9 @@ export default function PriseDeMandat() {
                             ) : (
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
+                          </TableCell>
+                          <TableCell className="text-slate-300">
+                            {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell>
                             {pm.urgence_percue ? (
