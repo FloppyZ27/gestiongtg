@@ -3418,22 +3418,12 @@ export default function PriseDeMandat() {
                                              const currentEmail = compagnie.courriels?.find(c => c.actuel)?.courriel || compagnie.courriels?.[0]?.courriel || "";
                                              const preferences = compagnie.preferences_livraison || [];
                                              return (
-                                               <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative">
-                                                 <button 
-                                                   type="button" 
-                                                   onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     setNouveauDossierForm(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)}));
-                                                   }} 
-                                                   className="absolute right-1 top-1 hover:text-red-400 text-green-300"
-                                                 >
-                                                   <X className="w-3 h-3" />
-                                                 </button>
-                                                 <div className="font-semibold mb-1 pr-4">{compagnie.prenom} {compagnie.nom}</div>
+                                               <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative flex items-center gap-2">
+                                                 <div className="font-semibold">{compagnie.prenom} {compagnie.nom}</div>
                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                  {preferences.length > 0 && (
-                                                   <div className="flex gap-1 mt-1">
+                                                   <div className="flex gap-1">
                                                      {preferences.map(pref => (
                                                        <span key={pref} className="text-[10px] bg-green-600/30 px-1 py-0.5 rounded">
                                                          {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
@@ -3441,6 +3431,16 @@ export default function PriseDeMandat() {
                                                      ))}
                                                    </div>
                                                  )}
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={(e) => {
+                                                     e.stopPropagation();
+                                                     setNouveauDossierForm(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)}));
+                                                   }} 
+                                                   className="hover:text-red-400 text-green-300 ml-auto"
+                                                 >
+                                                   <X className="w-3 h-3" />
+                                                 </button>
                                                </div>
                                              );
                                            })}
