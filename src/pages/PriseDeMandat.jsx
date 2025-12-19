@@ -2966,7 +2966,7 @@ export default function PriseDeMandat() {
                                        onClick={() => setContactsListCollapsed(false)}
                                        className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
                                      >
-                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                       <ChevronDown className="w-4 h-4 rotate-90" />
                                      </Button>
                                    )}
                                    {nouveauDossierForm.clients_ids.length > 0 ? (
@@ -3020,6 +3020,9 @@ export default function PriseDeMandat() {
                                           className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
                                         />
                                       </div>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-2">
+                                      <p className="text-slate-400 text-xs">Clients existants ({filteredClientsForSelector.length})</p>
                                       <Button
                                        type="button"
                                        size="sm"
@@ -3034,7 +3037,6 @@ export default function PriseDeMandat() {
                                        Nouveau
                                       </Button>
                                     </div>
-                                    <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredClientsForSelector.length > 0 ? (
                                         filteredClientsForSelector.slice(0, 15).map((client) => {
@@ -3095,7 +3097,7 @@ export default function PriseDeMandat() {
                                        onClick={() => setContactsListCollapsed(false)}
                                        className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
                                      >
-                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                       <ChevronDown className="w-4 h-4 rotate-90" />
                                      </Button>
                                    )}
                                    {nouveauDossierForm.notaires_ids.length > 0 ? (
@@ -3149,6 +3151,9 @@ export default function PriseDeMandat() {
                                           className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
                                         />
                                       </div>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-2">
+                                      <p className="text-slate-400 text-xs">Notaires existants ({filteredNotairesForSelector.length})</p>
                                       <Button
                                        type="button"
                                        size="sm"
@@ -3163,7 +3168,6 @@ export default function PriseDeMandat() {
                                        Nouveau
                                       </Button>
                                     </div>
-                                    <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredNotairesForSelector.length > 0 ? (
                                         filteredNotairesForSelector.slice(0, 15).map((notaire) => {
@@ -3224,7 +3228,7 @@ export default function PriseDeMandat() {
                                        onClick={() => setContactsListCollapsed(false)}
                                        className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
                                      >
-                                       <ChevronDown className="w-4 h-4 -rotate-90" />
+                                       <ChevronDown className="w-4 h-4 rotate-90" />
                                      </Button>
                                    )}
                                    {nouveauDossierForm.courtiers_ids.length > 0 ? (
@@ -3278,6 +3282,9 @@ export default function PriseDeMandat() {
                                           className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
                                         />
                                       </div>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-2">
+                                      <p className="text-slate-400 text-xs">Courtiers existants ({filteredCourtiersForSelector.length})</p>
                                       <Button
                                        type="button"
                                        size="sm"
@@ -3292,7 +3299,6 @@ export default function PriseDeMandat() {
                                        Nouveau
                                       </Button>
                                     </div>
-                                    <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredCourtiersForSelector.length > 0 ? (
                                         filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
