@@ -5654,7 +5654,7 @@ export default function PriseDeMandat() {
                               accept=".pdf"
                               onChange={handleLotFileUpload}
                               disabled={uploadingLotPdf}
-                              className="bg-slate-700 border-slate-600 file:text-orange-400 file:bg-orange-500/10 file:border-none file:hover:bg-orange-500/20 h-7 text-xs"
+                              className="bg-slate-700 border-slate-600 file:text-cyan-400 file:bg-cyan-500/10 file:border-none file:hover:bg-cyan-500/20 h-7 text-xs"
                             />
                             {uploadingLotPdf && (
                               <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -5664,7 +5664,7 @@ export default function PriseDeMandat() {
                             )}
                             {newLotForm.document_pdf_url && (
                               <div className="flex items-center gap-2 p-1.5 bg-slate-700/50 rounded-lg border border-slate-600">
-                                <File className="w-3 h-3 text-orange-400" />
+                                <File className="w-3 h-3 text-cyan-400" />
                                 <span className="text-xs text-slate-300 flex-1">Document PDF ajouté</span>
                                 <a
                                   href={newLotForm.document_pdf_url}
