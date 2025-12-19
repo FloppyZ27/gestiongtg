@@ -2957,19 +2957,22 @@ export default function PriseDeMandat() {
                               <TabsContent value="clients" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Clients sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
-                                   {contactsListCollapsed && (
-                                     <Button
-                                       type="button"
-                                       size="icon"
-                                       variant="ghost"
-                                       onClick={() => setContactsListCollapsed(false)}
-                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
-                                     >
-                                       <ChevronDown className="w-4 h-4 rotate-90" />
-                                     </Button>
-                                   )}
-                                   <div className="flex justify-end mb-2">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                   <div className="flex items-center justify-between gap-2 mb-2">
+                                     <div className="flex-1">
+                                       {nouveauDossierForm.clients_ids.length > 0 && (
+                                         <div className="flex flex-wrap gap-1">
+                                           {nouveauDossierForm.clients_ids.map(clientId => {
+                                             const client = clients.find(c => c.id === clientId);
+                                             return client ? (
+                                               <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                                 {client.prenom} {client.nom}
+                                               </Badge>
+                                             ) : null;
+                                           })}
+                                         </div>
+                                       )}
+                                     </div>
                                      <Button
                                        type="button"
                                        size="sm"
@@ -2983,8 +2986,30 @@ export default function PriseDeMandat() {
                                        <Plus className="w-3 h-3 mr-1" />
                                        Nouveau
                                      </Button>
+                                     {!contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(true)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronUp className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
+                                     {contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(false)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronDown className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
                                    </div>
-                                   {nouveauDossierForm.clients_ids.length > 0 ? (
+                                   {nouveauDossierForm.clients_ids.length > 0 && !nouveauDossierForm.clients_ids.some(id => clients.find(c => c.id === id)) ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.clients_ids.map((clientId) => {
                                           const client = getClientById(clientId);
@@ -3016,17 +3041,8 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des clients existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="flex gap-2 mb-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setContactsListCollapsed(true)}
-                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                      >
-                                        <ChevronUp className="w-4 h-4 rotate-90" />
-                                      </Button>
-                                      <div className="relative flex-1">
+                                    <div className="mb-2">
+                                      <div className="relative">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
                                           placeholder="Rechercher..."
@@ -3088,19 +3104,22 @@ export default function PriseDeMandat() {
                                       <TabsContent value="notaires" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Notaires sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
-                                   {contactsListCollapsed && (
-                                     <Button
-                                       type="button"
-                                       size="icon"
-                                       variant="ghost"
-                                       onClick={() => setContactsListCollapsed(false)}
-                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
-                                     >
-                                       <ChevronDown className="w-4 h-4 rotate-90" />
-                                     </Button>
-                                   )}
-                                   <div className="flex justify-end mb-2">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                   <div className="flex items-center justify-between gap-2 mb-2">
+                                     <div className="flex-1">
+                                       {nouveauDossierForm.notaires_ids.length > 0 && (
+                                         <div className="flex flex-wrap gap-1">
+                                           {nouveauDossierForm.notaires_ids.map(notaireId => {
+                                             const notaire = clients.find(c => c.id === notaireId);
+                                             return notaire ? (
+                                               <Badge key={notaireId} className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                                 {notaire.prenom} {notaire.nom}
+                                               </Badge>
+                                             ) : null;
+                                           })}
+                                         </div>
+                                       )}
+                                     </div>
                                      <Button
                                        type="button"
                                        size="sm"
@@ -3114,8 +3133,30 @@ export default function PriseDeMandat() {
                                        <Plus className="w-3 h-3 mr-1" />
                                        Nouveau
                                      </Button>
+                                     {!contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(true)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronUp className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
+                                     {contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(false)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronDown className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
                                    </div>
-                                   {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                   {nouveauDossierForm.notaires_ids.length > 0 && !nouveauDossierForm.notaires_ids.some(id => clients.find(c => c.id === id)) ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.notaires_ids.map((notaireId) => {
                                           const notaire = getClientById(notaireId);
@@ -3147,17 +3188,8 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des notaires existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="flex gap-2 mb-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setContactsListCollapsed(true)}
-                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                      >
-                                        <ChevronUp className="w-4 h-4 rotate-90" />
-                                      </Button>
-                                      <div className="relative flex-1">
+                                    <div className="mb-2">
+                                      <div className="relative">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
                                           placeholder="Rechercher..."
@@ -3219,19 +3251,22 @@ export default function PriseDeMandat() {
                               <TabsContent value="courtiers" className="mt-2">
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Courtiers sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'} relative`}>
-                                   {contactsListCollapsed && (
-                                     <Button
-                                       type="button"
-                                       size="icon"
-                                       variant="ghost"
-                                       onClick={() => setContactsListCollapsed(false)}
-                                       className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white h-8 w-8 p-0"
-                                     >
-                                       <ChevronDown className="w-4 h-4 rotate-90" />
-                                     </Button>
-                                   )}
-                                   <div className="flex justify-end mb-2">
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                   <div className="flex items-center justify-between gap-2 mb-2">
+                                     <div className="flex-1">
+                                       {nouveauDossierForm.courtiers_ids.length > 0 && (
+                                         <div className="flex flex-wrap gap-1">
+                                           {nouveauDossierForm.courtiers_ids.map(courtierId => {
+                                             const courtier = clients.find(c => c.id === courtierId);
+                                             return courtier ? (
+                                               <Badge key={courtierId} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                                                 {courtier.prenom} {courtier.nom}
+                                               </Badge>
+                                             ) : null;
+                                           })}
+                                         </div>
+                                       )}
+                                     </div>
                                      <Button
                                        type="button"
                                        size="sm"
@@ -3245,8 +3280,30 @@ export default function PriseDeMandat() {
                                        <Plus className="w-3 h-3 mr-1" />
                                        Nouveau
                                      </Button>
+                                     {!contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(true)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronUp className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
+                                     {contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(false)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronDown className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
                                    </div>
-                                   {nouveauDossierForm.courtiers_ids.length > 0 ? (
+                                   {nouveauDossierForm.courtiers_ids.length > 0 && !nouveauDossierForm.courtiers_ids.some(id => clients.find(c => c.id === id)) ? (
                                       <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
                                         {nouveauDossierForm.courtiers_ids.map((courtierId) => {
                                           const courtier = getClientById(courtierId);
@@ -3278,17 +3335,8 @@ export default function PriseDeMandat() {
 
                                   {/* Colonne droite - Liste des courtiers existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="flex gap-2 mb-2">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => setContactsListCollapsed(true)}
-                                        className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                      >
-                                        <ChevronUp className="w-4 h-4 rotate-90" />
-                                      </Button>
-                                      <div className="relative flex-1">
+                                    <div className="mb-2">
+                                      <div className="relative">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
                                           placeholder="Rechercher..."
