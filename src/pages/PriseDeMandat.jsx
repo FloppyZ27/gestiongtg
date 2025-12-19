@@ -2943,7 +2943,7 @@ export default function PriseDeMandat() {
                              {/* Colonne droite - Tabs Clients/Notaires/Courtiers - 67% */}
                              <div>
                             <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
-                              <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 h-7">
+                              <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
                                 <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
                                   Clients {nouveauDossierForm.clients_ids.length > 0 && `(${nouveauDossierForm.clients_ids.length})`}
@@ -2955,6 +2955,10 @@ export default function PriseDeMandat() {
                                 <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
                                   <User className="w-3 h-3" />
                                   Courtiers {nouveauDossierForm.courtiers_ids.length > 0 && `(${nouveauDossierForm.courtiers_ids.length})`}
+                                </TabsTrigger>
+                                <TabsTrigger value="compagnies" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
+                                  <Briefcase className="w-3 h-3" />
+                                  Compagnies {(nouveauDossierForm.compagnies_ids || []).length > 0 && `(${nouveauDossierForm.compagnies_ids.length})`}
                                 </TabsTrigger>
                               </TabsList>
 
@@ -3393,6 +3397,153 @@ export default function PriseDeMandat() {
                                         })
                                       ) : (
                                        <p className="text-slate-500 text-xs text-center py-2">Aucun courtier</p>
+                                      )}
+                                      </div>
+                                      </div>
+                                      </div>
+                                      </TabsContent>
+
+                              <TabsContent value="compagnies" className="mt-2">
+                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                  {/* Colonne gauche - Compagnies sélectionnées */}
+                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                   <div className="flex items-center justify-between mb-2">
+                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                       {(nouveauDossierForm.compagnies_ids || []).length > 0 ? (
+                                         <div className="space-y-2">
+                                           {nouveauDossierForm.compagnies_ids.map(compagnieId => {
+                                             const compagnie = clients.find(c => c.id === compagnieId);
+                                             if (!compagnie) return null;
+                                             const currentPhone = compagnie.telephones?.find(t => t.actuel)?.telephone || compagnie.telephones?.[0]?.telephone || "";
+                                             const currentEmail = compagnie.courriels?.find(c => c.actuel)?.courriel || compagnie.courriels?.[0]?.courriel || "";
+                                             const preferences = compagnie.preferences_livraison || [];
+                                             return (
+                                               <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative">
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={(e) => {
+                                                     e.stopPropagation();
+                                                     setNouveauDossierForm(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)}));
+                                                   }} 
+                                                   className="absolute right-1 top-1 hover:text-red-400 text-green-300"
+                                                 >
+                                                   <X className="w-3 h-3" />
+                                                 </button>
+                                                 <div className="font-semibold mb-1 pr-4">{compagnie.prenom} {compagnie.nom}</div>
+                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                 {preferences.length > 0 && (
+                                                   <div className="flex gap-1 mt-1">
+                                                     {preferences.map(pref => (
+                                                       <span key={pref} className="text-[10px] bg-green-600/30 px-1 py-0.5 rounded">
+                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                       </span>
+                                                     ))}
+                                                   </div>
+                                                 )}
+                                               </div>
+                                             );
+                                           })}
+                                         </div>
+                                       ) : (
+                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                           Aucune compagnie sélectionnée
+                                         </div>
+                                       )}
+                                     </div>
+                                     {!contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(true)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronUp className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
+                                     {contactsListCollapsed && (
+                                       <Button
+                                         type="button"
+                                         size="sm"
+                                         variant="ghost"
+                                         onClick={() => setContactsListCollapsed(false)}
+                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                       >
+                                         <ChevronDown className="w-4 h-4 rotate-90" />
+                                       </Button>
+                                     )}
+                                   </div>
+                                  </div>
+
+                                  {/* Colonne droite - Liste des compagnies existantes */}
+                                  <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                    <div className="mb-2 flex gap-2">
+                                      <div className="relative flex-1">
+                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={courtierSearchTerm}
+                                          onChange={(e) => setCourtierSearchTerm(e.target.value)}
+                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                        />
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                          setEditingClientForForm(null);
+                                          setClientTypeForForm("Compagnie");
+                                          setIsClientFormDialogOpen(true);
+                                        }}
+                                        className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <p className="text-slate-400 text-xs mb-2">Compagnies existantes ({clients.filter(c => c.type_client === 'Compagnie').length})</p>
+                                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                      {clients.filter(c => c.type_client === 'Compagnie').length > 0 ? (
+                                        clients.filter(c => c.type_client === 'Compagnie').slice(0, 15).map((compagnie) => {
+                                          const isSelected = (nouveauDossierForm.compagnies_ids || []).includes(compagnie.id);
+                                          return (
+                                            <div
+                                              key={compagnie.id}
+                                              onClick={() => {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  compagnies_ids: (prev.compagnies_ids || []).includes(compagnie.id)
+                                                    ? prev.compagnies_ids.filter(id => id !== compagnie.id)
+                                                    : [...(prev.compagnies_ids || []), compagnie.id]
+                                                }));
+                                              }}
+                                              className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
+                                                isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                              }`}
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <span className="font-medium truncate">{compagnie.prenom} {compagnie.nom}</span>
+                                                {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                              </div>
+                                              <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
+                                                {compagnie.telephones?.find(t => t.actuel)?.telephone && (
+                                                  <p>
+                                                    📞 <a 
+                                                      href={`tel:${compagnie.telephones.find(t => t.actuel).telephone.replace(/\D/g, '')}`}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                                    >
+                                                      {compagnie.telephones.find(t => t.actuel).telephone}
+                                                    </a>
+                                                  </p>
+                                                )}
+                                                {compagnie.courriels?.find(c => c.actuel)?.courriel && <p className="truncate">✉️ {compagnie.courriels.find(c => c.actuel).courriel}</p>}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      ) : (
+                                       <p className="text-slate-500 text-xs text-center py-2">Aucune compagnie</p>
                                       )}
                                       </div>
                                       </div>
