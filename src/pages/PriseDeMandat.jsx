@@ -2977,22 +2977,22 @@ export default function PriseDeMandat() {
                                            const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
                                            const preferences = client.preferences_livraison || [];
                                            return (
-                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative">
+                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative flex items-center gap-2">
                                                <button 
                                                  type="button" 
                                                  onClick={(e) => {
                                                    e.stopPropagation();
                                                    setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
                                                  }} 
-                                                 className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
+                                                 className="hover:text-red-400 text-blue-300"
                                                >
                                                  <X className="w-3 h-3" />
                                                </button>
-                                               <div className="font-semibold mb-1 pr-4">{client.prenom} {client.nom}</div>
+                                               <div className="font-semibold">{client.prenom} {client.nom}</div>
                                                {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                {preferences.length > 0 && (
-                                                 <div className="flex gap-1 mt-1">
+                                                 <div className="flex gap-1">
                                                    {preferences.map(pref => (
                                                      <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
                                                        {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
