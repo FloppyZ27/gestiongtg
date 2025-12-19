@@ -3028,35 +3028,7 @@ export default function PriseDeMandat() {
                                        </Button>
                                      )}
                                    </div>
-                                   {nouveauDossierForm.clients_ids.length > 0 && !nouveauDossierForm.clients_ids.some(id => clients.find(c => c.id === id)) ? (
-                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                        {nouveauDossierForm.clients_ids.map((clientId) => {
-                                          const client = getClientById(clientId);
-                                          return client ? (
-                                            <div 
-                                              key={clientId} 
-                                              className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                              onClick={() => {
-                                                if (window.openClientForEdit) {
-                                                  window.openClientForEdit(client);
-                                                }
-                                              }}
-                                            >
-                                              <button type="button" onClick={(e) => {
-                                                e.stopPropagation();
-                                                setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
-                                              }} className="absolute right-1 top-1 hover:text-red-400">
-                                                <X className="w-3 h-3" />
-                                              </button>
-                                              <p className="text-xs font-medium pr-4">{client.prenom} {client.nom}</p>
-                                            </div>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-
-                                    )}
-                                  </div>
+                                   </div>
 
                                   {/* Colonne droite - Liste des clients existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
@@ -3194,35 +3166,7 @@ export default function PriseDeMandat() {
                                        </Button>
                                      )}
                                    </div>
-                                   {nouveauDossierForm.notaires_ids.length > 0 && !nouveauDossierForm.notaires_ids.some(id => clients.find(c => c.id === id)) ? (
-                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                        {nouveauDossierForm.notaires_ids.map((notaireId) => {
-                                          const notaire = getClientById(notaireId);
-                                          return notaire ? (
-                                            <div 
-                                             key={notaireId} 
-                                             className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                              onClick={() => {
-                                                if (window.openClientForEdit) {
-                                                  window.openClientForEdit(notaire);
-                                                }
-                                              }}
-                                            >
-                                              <button type="button" onClick={(e) => {
-                                                e.stopPropagation();
-                                                setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
-                                              }} className="absolute right-1 top-1 hover:text-red-400">
-                                                <X className="w-3 h-3" />
-                                              </button>
-                                              <p className="text-xs font-medium pr-4">{notaire.prenom} {notaire.nom}</p>
-                                            </div>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun notaire sélectionné</p>
-                                    )}
-                                  </div>
+                                   </div>
 
                                   {/* Colonne droite - Liste des notaires existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
@@ -3360,35 +3304,7 @@ export default function PriseDeMandat() {
                                        </Button>
                                      )}
                                    </div>
-                                   {nouveauDossierForm.courtiers_ids.length > 0 && !nouveauDossierForm.courtiers_ids.some(id => clients.find(c => c.id === id)) ? (
-                                      <div className="grid grid-cols-2 gap-2 p-2 bg-slate-800/30 rounded-lg max-h-[200px] overflow-y-auto">
-                                        {nouveauDossierForm.courtiers_ids.map((courtierId) => {
-                                          const courtier = getClientById(courtierId);
-                                          return courtier ? (
-                                            <div 
-                                             key={courtierId} 
-                                             className="bg-blue-500/20 text-blue-400 border border-blue-500/30 relative p-2 rounded-lg cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                              onClick={() => {
-                                                if (window.openClientForEdit) {
-                                                  window.openClientForEdit(courtier);
-                                                }
-                                              }}
-                                            >
-                                              <button type="button" onClick={(e) => {
-                                                e.stopPropagation();
-                                                setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
-                                              }} className="absolute right-1 top-1 hover:text-red-400">
-                                                <X className="w-3 h-3" />
-                                              </button>
-                                              <p className="text-xs font-medium pr-4">{courtier.prenom} {courtier.nom}</p>
-                                            </div>
-                                          ) : null;
-                                        })}
-                                      </div>
-                                    ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun courtier sélectionné</p>
-                                    )}
-                                  </div>
+                                   </div>
 
                                   {/* Colonne droite - Liste des courtiers existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
