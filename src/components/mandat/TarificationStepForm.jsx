@@ -232,7 +232,7 @@ export default function TarificationStepForm({
                               className="transition-colors"
                             >
                               {mandat.taxes_incluses ? (
-                                <ToggleRight className="w-8 h-8 text-emerald-400" />
+                                <ToggleRight className="w-8 h-8 text-purple-400" />
                               ) : (
                                 <ToggleLeft className="w-8 h-8 text-slate-500" />
                               )}
