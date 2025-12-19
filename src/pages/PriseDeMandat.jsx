@@ -2969,8 +2969,18 @@ export default function PriseDeMandat() {
                                            const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
                                            const preferences = client.preferences_livraison || [];
                                            return (
-                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs">
-                                               <div className="font-semibold mb-1">{client.prenom} {client.nom}</div>
+                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative">
+                                               <button 
+                                                 type="button" 
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                                 }} 
+                                                 className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
+                                               >
+                                                 <X className="w-3 h-3" />
+                                               </button>
+                                               <div className="font-semibold mb-1 pr-4">{client.prenom} {client.nom}</div>
                                                {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                {preferences.length > 0 && (
@@ -3097,37 +3107,47 @@ export default function PriseDeMandat() {
                                       <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
                                       <div className="flex items-center justify-between mb-2">
                                       <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                       {nouveauDossierForm.notaires_ids.length > 0 ? (
-                                         <div className="space-y-2">
-                                           {nouveauDossierForm.notaires_ids.map(notaireId => {
-                                             const notaire = clients.find(c => c.id === notaireId);
-                                             if (!notaire) return null;
-                                             const currentPhone = notaire.telephones?.find(t => t.actuel)?.telephone || notaire.telephones?.[0]?.telephone || "";
-                                             const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
-                                             const preferences = notaire.preferences_livraison || [];
-                                             return (
-                                               <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs">
-                                                 <div className="font-semibold mb-1">{notaire.prenom} {notaire.nom}</div>
-                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                                 {preferences.length > 0 && (
-                                                   <div className="flex gap-1 mt-1">
-                                                     {preferences.map(pref => (
-                                                       <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
-                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                       </span>
-                                                     ))}
-                                                   </div>
-                                                 )}
-                                               </div>
-                                             );
-                                           })}
-                                         </div>
-                                       ) : (
-                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                           Aucun notaire sélectionné
-                                         </div>
-                                       )}
+                                        {nouveauDossierForm.notaires_ids.length > 0 ? (
+                                          <div className="space-y-2">
+                                            {nouveauDossierForm.notaires_ids.map(notaireId => {
+                                              const notaire = clients.find(c => c.id === notaireId);
+                                              if (!notaire) return null;
+                                              const currentPhone = notaire.telephones?.find(t => t.actuel)?.telephone || notaire.telephones?.[0]?.telephone || "";
+                                              const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
+                                              const preferences = notaire.preferences_livraison || [];
+                                              return (
+                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative">
+                                                  <button 
+                                                    type="button" 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setNouveauDossierForm(prev => ({...prev, notaires_ids: prev.notaires_ids.filter(id => id !== notaireId)}));
+                                                    }} 
+                                                    className="absolute right-1 top-1 hover:text-red-400 text-purple-300"
+                                                  >
+                                                    <X className="w-3 h-3" />
+                                                  </button>
+                                                  <div className="font-semibold mb-1 pr-4">{notaire.prenom} {notaire.nom}</div>
+                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                  {preferences.length > 0 && (
+                                                    <div className="flex gap-1 mt-1">
+                                                      {preferences.map(pref => (
+                                                        <span key={pref} className="text-[10px] bg-purple-600/30 px-1 py-0.5 rounded">
+                                                          {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                        </span>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        ) : (
+                                          <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                            Aucun notaire sélectionné
+                                          </div>
+                                        )}
                                       </div>
                                       {!contactsListCollapsed && (
                                        <Button
@@ -3243,8 +3263,18 @@ export default function PriseDeMandat() {
                                              const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
                                              const preferences = courtier.preferences_livraison || [];
                                              return (
-                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs">
-                                                 <div className="font-semibold mb-1">{courtier.prenom} {courtier.nom}</div>
+                                               <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
+                                                 <button 
+                                                   type="button" 
+                                                   onClick={(e) => {
+                                                     e.stopPropagation();
+                                                     setNouveauDossierForm(prev => ({...prev, courtiers_ids: prev.courtiers_ids.filter(id => id !== courtierId)}));
+                                                   }} 
+                                                   className="absolute right-1 top-1 hover:text-red-400 text-orange-300"
+                                                 >
+                                                   <X className="w-3 h-3" />
+                                                 </button>
+                                                 <div className="font-semibold mb-1 pr-4">{courtier.prenom} {courtier.nom}</div>
                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
                                                  {preferences.length > 0 && (
