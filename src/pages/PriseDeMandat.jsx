@@ -2978,16 +2978,6 @@ export default function PriseDeMandat() {
                                            const preferences = client.preferences_livraison || [];
                                            return (
                                              <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative flex items-center gap-2">
-                                               <button 
-                                                 type="button" 
-                                                 onClick={(e) => {
-                                                   e.stopPropagation();
-                                                   setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
-                                                 }} 
-                                                 className="hover:text-red-400 text-blue-300"
-                                               >
-                                                 <X className="w-3 h-3" />
-                                               </button>
                                                <div className="font-semibold">{client.prenom} {client.nom}</div>
                                                {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
                                                {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
@@ -3000,6 +2990,16 @@ export default function PriseDeMandat() {
                                                    ))}
                                                  </div>
                                                )}
+                                               <button 
+                                                 type="button" 
+                                                 onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   setNouveauDossierForm(prev => ({...prev, clients_ids: prev.clients_ids.filter(id => id !== clientId)}));
+                                                 }} 
+                                                 className="hover:text-red-400 text-blue-300 ml-auto"
+                                               >
+                                                 <X className="w-3 h-3" />
+                                               </button>
                                              </div>
                                            );
                                          })}
