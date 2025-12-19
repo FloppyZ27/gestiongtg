@@ -3054,7 +3054,7 @@ export default function PriseDeMandat() {
                                         })}
                                       </div>
                                     ) : (
-                                      <p className="text-slate-500 text-xs text-center py-4 bg-slate-800/30 rounded-lg">Aucun client sélectionné</p>
+
                                     )}
                                   </div>
 
