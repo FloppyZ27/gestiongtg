@@ -4009,118 +4009,147 @@ export default function PriseDeMandat() {
                                       </div>
                                       </div>
 
+                                      {/* Ligne séparatrice */}
+                                      <div className="border-t border-slate-600 my-2"></div>
+
                                       {/* Section Lots */}
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between items-center">
-                                        <Label className="text-slate-400 text-xs">Lots</Label>
-                                        <Button 
-                                         type="button" 
-                                         size="sm" 
-                                         onClick={() => {
-                                           setCurrentMandatIndexDossier(index);
-                                           setLotTabExpanded(!lotTabExpanded);
-                                         }}
-                                         className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-5 text-xs px-2"
-                                        >
-                                         {lotTabExpanded && currentMandatIndexDossier === index ? <ChevronUp className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
-                                         {lotTabExpanded && currentMandatIndexDossier === index ? 'Masquer' : 'Ajouter'}
-                                        </Button>
-                                      </div>
-                                      {lotTabExpanded && currentMandatIndexDossier === index && (
-                                       <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                                         <div className="flex gap-1 mb-2">
-                                           <div className="relative flex-1">
-                                             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                             <Input
-                                               placeholder="Rechercher lot..."
-                                               value={lotSearchTerm}
-                                               onChange={(e) => setLotSearchTerm(e.target.value)}
-                                               className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                             />
-                                           </div>
-                                           <Button
-                                             type="button"
-                                             size="sm"
-                                             onClick={() => {
-                                               setCurrentMandatIndexDossier(index);
-                                               setIsNewLotDialogOpen(true);
-                                             }}
-                                             className="bg-blue-500 hover:bg-blue-600 h-6 text-xs px-2"
-                                           >
-                                             <Plus className="w-3 h-3 mr-1" />
-                                             Nouveau
-                                           </Button>
-                                         </div>
-                                         <div className="flex gap-1 mb-2">
-                                           <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                               <SelectValue placeholder="Circonscription" />
-                                             </SelectTrigger>
-                                             <SelectContent className="bg-slate-800 border-slate-700">
-                                               <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
-                                               {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                                 <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
-                                               ))}
-                                             </SelectContent>
-                                           </Select>
-                                         </div>
-                                          {filteredLotsForSelector.slice(0, 20).map((lot) => {
-                                            const isSelected = mandat.lots?.includes(lot.id);
-                                            return (
-                                              <div
-                                                key={lot.id}
-                                                className={`p-2 rounded cursor-pointer transition-colors text-xs ${
-                                                  isSelected
-                                                    ? 'bg-emerald-500/20 border border-emerald-500/30'
-                                                    : 'bg-slate-700/50 hover:bg-slate-700'
-                                                }`}
+                                      <div className={`grid ${lotTabExpanded && currentMandatIndexDossier === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
+                                        {/* Colonne gauche - Lots sélectionnés */}
+                                        <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
+                                          <div className="flex items-center justify-between mb-2">
+                                            <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                              {mandat.lots && mandat.lots.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                  {mandat.lots.map((lotId) => {
+                                                    const lot = getLotById(lotId);
+                                                    return (
+                                                      <Badge key={lotId} variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs pr-1">
+                                                        {lot?.numero_lot || lotId}
+                                                        <button 
+                                                          type="button" 
+                                                          onClick={() => {
+                                                            setNouveauDossierForm(prev => ({
+                                                              ...prev,
+                                                              mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                                ...m, 
+                                                                lots: m.lots.filter(id => id !== lotId) 
+                                                              } : m)
+                                                            }));
+                                                          }}
+                                                          className="ml-1 hover:text-red-400"
+                                                        >
+                                                          <X className="w-2.5 h-2.5" />
+                                                        </button>
+                                                      </Badge>
+                                                    );
+                                                  })}
+                                                </div>
+                                              ) : (
+                                                <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                                  Aucun lot sélectionné
+                                                </div>
+                                              )}
+                                            </div>
+                                            {!(lotTabExpanded && currentMandatIndexDossier === index) && (
+                                              <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
                                                 onClick={() => {
-                                                  setNouveauDossierForm(prev => ({
-                                                    ...prev,
-                                                    mandats: prev.mandats.map((m, i) => i === index ? {
-                                                      ...m,
-                                                      lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
-                                                    } : m)
-                                                  }));
+                                                  setCurrentMandatIndexDossier(index);
+                                                  setLotTabExpanded(true);
                                                 }}
+                                                className="text-slate-400 hover:text-white h-6 w-6 p-0"
                                               >
-                                                <p className="font-medium text-white">{lot.numero_lot}</p>
-                                                <p className="text-slate-400 text-[10px]">{lot.circonscription_fonciere}</p>
-                                              </div>
-                                            );
-                                          })}
+                                                <ChevronDown className="w-4 h-4 rotate-90" />
+                                              </Button>
+                                            )}
+                                            {lotTabExpanded && currentMandatIndexDossier === index && (
+                                              <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setLotTabExpanded(false)}
+                                                className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                              >
+                                                <ChevronUp className="w-4 h-4 rotate-90" />
+                                              </Button>
+                                            )}
+                                          </div>
                                         </div>
-                                      )}
-                                      {mandat.lots && mandat.lots.length > 0 ? (
-                                       <div className="flex flex-wrap gap-1 p-2 bg-slate-800/30 rounded-lg">
-                                         {mandat.lots.map((lotId) => {
-                                           const lot = getLotById(lotId);
-                                           return (
-                                             <Badge key={lotId} variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs pr-1">
-                                               {lot?.numero_lot || lotId}
-                                               <button 
-                                                 type="button" 
-                                                 onClick={() => {
-                                                   setNouveauDossierForm(prev => ({
-                                                     ...prev,
-                                                     mandats: prev.mandats.map((m, i) => i === index ? { 
-                                                       ...m, 
-                                                       lots: m.lots.filter(id => id !== lotId) 
-                                                     } : m)
-                                                   }));
-                                                 }}
-                                                 className="ml-1 hover:text-red-400"
-                                               >
-                                                 <X className="w-2.5 h-2.5" />
-                                               </button>
-                                             </Badge>
-                                           );
-                                         })}
-                                       </div>
-                                      ) : (
-                                       <p className="text-slate-500 text-xs text-center py-2 bg-slate-800/30 rounded-lg">Aucun lot</p>
-                                      )}
-                                    </div>
+
+                                        {/* Colonne droite - Liste des lots existants */}
+                                        <div className={`border-l border-slate-700 pl-3 pr-2 ${!(lotTabExpanded && currentMandatIndexDossier === index) ? 'hidden' : ''}`}>
+                                          <div className="mb-2 flex gap-2">
+                                            <div className="relative flex-1">
+                                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                              <Input
+                                                placeholder="Rechercher lot..."
+                                                value={lotSearchTerm}
+                                                onChange={(e) => setLotSearchTerm(e.target.value)}
+                                                className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                              />
+                                            </div>
+                                            <Button
+                                              type="button"
+                                              size="sm"
+                                              onClick={() => {
+                                                setCurrentMandatIndexDossier(index);
+                                                setIsNewLotDialogOpen(true);
+                                              }}
+                                              className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                            >
+                                              <Plus className="w-3 h-3" />
+                                            </Button>
+                                          </div>
+                                          <div className="flex gap-1 mb-2">
+                                            <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
+                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
+                                                <SelectValue placeholder="Circonscription" />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-slate-800 border-slate-700">
+                                                <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
+                                                {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                                                  <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                          <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
+                                          <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                            {filteredLotsForSelector.length > 0 ? (
+                                              filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                                const isSelected = mandat.lots?.includes(lot.id);
+                                                return (
+                                                  <div
+                                                    key={lot.id}
+                                                    onClick={() => {
+                                                      setNouveauDossierForm(prev => ({
+                                                        ...prev,
+                                                        mandats: prev.mandats.map((m, i) => i === index ? {
+                                                          ...m,
+                                                          lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                        } : m)
+                                                      }));
+                                                    }}
+                                                    className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
+                                                      isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                                                    }`}
+                                                  >
+                                                    <div className="flex items-center justify-between">
+                                                      <span className="font-medium truncate">{lot.numero_lot}</span>
+                                                      {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                                    </div>
+                                                    <p className="text-slate-400 text-[10px]">{lot.circonscription_fonciere}</p>
+                                                  </div>
+                                                );
+                                              })
+                                            ) : (
+                                              <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
                                   </TabsContent>
                                   ))}
                                   </Tabs>
