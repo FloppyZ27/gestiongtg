@@ -2955,94 +2955,93 @@ export default function PriseDeMandat() {
                               </TabsList>
 
                               <TabsContent value="clients" className="mt-2">
-                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                                  {/* Colonne gauche - Clients sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center gap-2 mb-2">
-                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                       {nouveauDossierForm.clients_ids.length > 0 ? (
-                                         <div className="space-y-2">
-                                           {nouveauDossierForm.clients_ids.map(clientId => {
-                                             const client = clients.find(c => c.id === clientId);
-                                             if (!client) return null;
-                                             const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
-                                             const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
-                                             const preferences = client.preferences_livraison || [];
-                                             return (
-                                               <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs">
-                                                 <div className="font-semibold mb-1">{client.prenom} {client.nom}</div>
-                                                 {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                                 {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                                 {preferences.length > 0 && (
-                                                   <div className="flex gap-1 mt-1">
-                                                     {preferences.map(pref => (
-                                                       <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
-                                                         {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
-                                                       </span>
-                                                     ))}
-                                                   </div>
-                                                 )}
-                                               </div>
-                                             );
-                                           })}
-                                         </div>
-                                       ) : (
-                                         <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                           Aucun client sélectionné
-                                         </div>
-                                       )}
-                                     </div>
+                              <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                {/* Colonne gauche - Clients sélectionnés */}
+                                <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                 <div className="flex items-center justify-between mb-2">
+                                   <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                     {nouveauDossierForm.clients_ids.length > 0 ? (
+                                       <div className="space-y-2">
+                                         {nouveauDossierForm.clients_ids.map(clientId => {
+                                           const client = clients.find(c => c.id === clientId);
+                                           if (!client) return null;
+                                           const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
+                                           const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
+                                           const preferences = client.preferences_livraison || [];
+                                           return (
+                                             <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs">
+                                               <div className="font-semibold mb-1">{client.prenom} {client.nom}</div>
+                                               {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                               {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                               {preferences.length > 0 && (
+                                                 <div className="flex gap-1 mt-1">
+                                                   {preferences.map(pref => (
+                                                     <span key={pref} className="text-[10px] bg-blue-600/30 px-1 py-0.5 rounded">
+                                                       {pref === "Main propre" ? "✋" : pref === "Poste" ? "📮" : "📧"}
+                                                     </span>
+                                                   ))}
+                                                 </div>
+                                               )}
+                                             </div>
+                                           );
+                                         })}
+                                       </div>
+                                     ) : (
+                                       <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                         Aucun client sélectionné
+                                       </div>
+                                     )}
+                                   </div>
+                                   {!contactsListCollapsed && (
                                      <Button
                                        type="button"
                                        size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Client");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(true)}
+                                       className="text-slate-400 hover:text-white h-6 w-6 p-0"
                                      >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
+                                       <ChevronUp className="w-4 h-4 rotate-90" />
                                      </Button>
-                                     {!contactsListCollapsed && (
-                                       <Button
-                                         type="button"
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={() => setContactsListCollapsed(true)}
-                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                       >
-                                         <ChevronUp className="w-4 h-4 rotate-90" />
-                                       </Button>
-                                     )}
-                                     {contactsListCollapsed && (
-                                       <Button
-                                         type="button"
-                                         size="sm"
-                                         variant="ghost"
-                                         onClick={() => setContactsListCollapsed(false)}
-                                         className="text-slate-400 hover:text-white h-6 w-6 p-0"
-                                       >
-                                         <ChevronDown className="w-4 h-4 rotate-90" />
-                                       </Button>
-                                     )}
-                                   </div>
-                                   </div>
+                                   )}
+                                   {contactsListCollapsed && (
+                                     <Button
+                                       type="button"
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => setContactsListCollapsed(false)}
+                                       className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                     >
+                                       <ChevronDown className="w-4 h-4 rotate-90" />
+                                     </Button>
+                                   )}
+                                 </div>
+                                </div>
 
-                                  {/* Colonne droite - Liste des clients existants */}
-                                  <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="mb-2">
-                                      <div className="relative">
-                                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={clientSearchTerm}
-                                          onChange={(e) => setClientSearchTerm(e.target.value)}
-                                          className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                        />
-                                      </div>
+                                {/* Colonne droite - Liste des clients existants */}
+                                <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                  <div className="mb-2 flex gap-2">
+                                    <div className="relative flex-1">
+                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Input
+                                        placeholder="Rechercher..."
+                                        value={clientSearchTerm}
+                                        onChange={(e) => setClientSearchTerm(e.target.value)}
+                                        className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                      />
                                     </div>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingClientForForm(null);
+                                        setClientTypeForForm("Client");
+                                        setIsClientFormDialogOpen(true);
+                                      }}
+                                      className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                     <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredClientsForSelector.length > 0 ? (
@@ -3093,11 +3092,11 @@ export default function PriseDeMandat() {
                                       </TabsContent>
 
                                       <TabsContent value="notaires" className="mt-2">
-                                <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                                  {/* Colonne gauche - Notaires sélectionnés */}
-                                  <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center gap-2 mb-2">
-                                     <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                      <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                      {/* Colonne gauche - Notaires sélectionnés */}
+                                      <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                      <div className="flex items-center justify-between mb-2">
+                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                        {nouveauDossierForm.notaires_ids.length > 0 ? (
                                          <div className="space-y-2">
                                            {nouveauDossierForm.notaires_ids.map(notaireId => {
@@ -3129,21 +3128,8 @@ export default function PriseDeMandat() {
                                            Aucun notaire sélectionné
                                          </div>
                                        )}
-                                     </div>
-                                     <Button
-                                       type="button"
-                                       size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Notaire");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                     >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
-                                     </Button>
-                                     {!contactsListCollapsed && (
+                                      </div>
+                                      {!contactsListCollapsed && (
                                        <Button
                                          type="button"
                                          size="sm"
@@ -3153,8 +3139,8 @@ export default function PriseDeMandat() {
                                        >
                                          <ChevronUp className="w-4 h-4 rotate-90" />
                                        </Button>
-                                     )}
-                                     {contactsListCollapsed && (
+                                      )}
+                                      {contactsListCollapsed && (
                                        <Button
                                          type="button"
                                          size="sm"
@@ -3164,14 +3150,14 @@ export default function PriseDeMandat() {
                                        >
                                          <ChevronDown className="w-4 h-4 rotate-90" />
                                        </Button>
-                                     )}
-                                   </div>
-                                   </div>
+                                      )}
+                                      </div>
+                                      </div>
 
-                                  {/* Colonne droite - Liste des notaires existants */}
-                                  <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="mb-2">
-                                      <div className="relative">
+                                      {/* Colonne droite - Liste des notaires existants */}
+                                      <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                      <div className="mb-2 flex gap-2">
+                                      <div className="relative flex-1">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
                                           placeholder="Rechercher..."
@@ -3180,7 +3166,19 @@ export default function PriseDeMandat() {
                                           className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
                                         />
                                       </div>
-                                    </div>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                          setEditingClientForForm(null);
+                                          setClientTypeForForm("Notaire");
+                                          setIsClientFormDialogOpen(true);
+                                        }}
+                                        className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </Button>
+                                      </div>
                                     <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                                       {filteredNotairesForSelector.length > 0 ? (
@@ -3234,7 +3232,7 @@ export default function PriseDeMandat() {
                                 <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
                                   {/* Colonne gauche - Courtiers sélectionnés */}
                                   <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                                   <div className="flex items-center gap-2 mb-2">
+                                   <div className="flex items-center justify-between mb-2">
                                      <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                        {nouveauDossierForm.courtiers_ids.length > 0 ? (
                                          <div className="space-y-2">
@@ -3268,19 +3266,6 @@ export default function PriseDeMandat() {
                                          </div>
                                        )}
                                      </div>
-                                     <Button
-                                       type="button"
-                                       size="sm"
-                                       onClick={() => {
-                                         setEditingClientForForm(null);
-                                         setClientTypeForForm("Courtier immobilier");
-                                         setIsClientFormDialogOpen(true);
-                                       }}
-                                       className="text-blue-400 hover:text-blue-300 h-6 text-xs px-2"
-                                     >
-                                       <Plus className="w-3 h-3 mr-1" />
-                                       Nouveau
-                                     </Button>
                                      {!contactsListCollapsed && (
                                        <Button
                                          type="button"
@@ -3304,12 +3289,12 @@ export default function PriseDeMandat() {
                                        </Button>
                                      )}
                                    </div>
-                                   </div>
+                                  </div>
 
                                   {/* Colonne droite - Liste des courtiers existants */}
                                   <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                                    <div className="mb-2">
-                                      <div className="relative">
+                                    <div className="mb-2 flex gap-2">
+                                      <div className="relative flex-1">
                                         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
                                         <Input
                                           placeholder="Rechercher..."
@@ -3318,6 +3303,18 @@ export default function PriseDeMandat() {
                                           className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
                                         />
                                       </div>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        onClick={() => {
+                                          setEditingClientForForm(null);
+                                          setClientTypeForForm("Courtier immobilier");
+                                          setIsClientFormDialogOpen(true);
+                                        }}
+                                        className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0"
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </Button>
                                     </div>
                                     <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
                                     <div className="max-h-[200px] overflow-y-auto space-y-1">
