@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
@@ -98,6 +99,10 @@ export default function ClientFormDialog({
   
   // Telephone type state
   const [newTelephoneType, setNewTelephoneType] = useState("Cellulaire");
+  
+  // Disable courriels and telephones
+  const [courrielDisabled, setCourrielDisabled] = useState(false);
+  const [telephoneDisabled, setTelephoneDisabled] = useState(false);
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -1095,17 +1100,36 @@ export default function ClientFormDialog({
                     <div className="space-y-4">
                       {/* Courriels */}
                       <div className="space-y-2">
-                        <Label className="text-xs">Courriels</Label>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs">Courriels</Label>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="disable-courriel"
+                              checked={courrielDisabled}
+                              onCheckedChange={(checked) => {
+                                setCourrielDisabled(checked);
+                                if (checked) {
+                                  setFormData(prev => ({ ...prev, courriels: [] }));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="disable-courriel" className="text-xs text-slate-400 cursor-pointer">
+                              Désactiver
+                            </Label>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <Input
                             type="email"
                             id="new-courriel"
                             placeholder="Courriel"
-                            className="bg-slate-700 border-slate-600 h-7 text-sm"
+                            disabled={courrielDisabled}
+                            className="bg-slate-700 border-slate-600 h-7 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           <Button
                             type="button"
                             size="sm"
+                            disabled={courrielDisabled}
                             onClick={() => {
                               const courriel = document.getElementById('new-courriel').value;
                               if (courriel.trim()) {
@@ -1119,22 +1143,22 @@ export default function ClientFormDialog({
                                 document.getElementById('new-courriel').value = "";
                               }
                             }}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
 
-                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <div className={`border border-slate-700 rounded-lg overflow-hidden ${courrielDisabled ? 'opacity-50' : ''}`}>
                             <Table>
-                        <TableHeader>
+                          <TableHeader>
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300">Courriel</TableHead>
                             <TableHead className="text-slate-300">Statut</TableHead>
                             <TableHead className="text-slate-300 text-right">Actions</TableHead>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
+                          </TableHeader>
+                          <TableBody>
                           {formData.courriels.map((item, index) => (
                             <React.Fragment key={index}>
                               <TableRow className="hover:bg-slate-800/30 border-slate-800">
@@ -1147,8 +1171,9 @@ export default function ClientFormDialog({
                                       <Select 
                                         value={item.actuel ? "Actuel" : "Ancien"} 
                                         onValueChange={(value) => toggleActuel('courriels', index)}
+                                        disabled={courrielDisabled}
                                       >
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
@@ -1163,8 +1188,9 @@ export default function ClientFormDialog({
                                          type="button"
                                          size="sm"
                                          variant="ghost"
+                                         disabled={courrielDisabled}
                                          onClick={() => handleDeleteRequest('courriels', index)}
-                                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                          <Trash2 className="w-4 h-4" />
                                         </Button>
@@ -1176,7 +1202,7 @@ export default function ClientFormDialog({
                             {formData.courriels.length === 0 && (
                             <TableRow>
                               <TableCell colSpan={3} className="text-center py-4 text-slate-500 text-xs">
-                                Aucun courriel ajouté
+                                {courrielDisabled ? "Courriels désactivés" : "Aucun courriel ajouté"}
                               </TableCell>
                             </TableRow>
                             )}
@@ -1187,18 +1213,37 @@ export default function ClientFormDialog({
 
                       {/* Téléphones */}
                       <div className="space-y-2">
-                        <Label className="text-xs">Téléphones</Label>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs">Téléphones</Label>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="disable-telephone"
+                              checked={telephoneDisabled}
+                              onCheckedChange={(checked) => {
+                                setTelephoneDisabled(checked);
+                                if (checked) {
+                                  setFormData(prev => ({ ...prev, telephones: [] }));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="disable-telephone" className="text-xs text-slate-400 cursor-pointer">
+                              Désactiver
+                            </Label>
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <Input
                             id="new-telephone"
                             placeholder="Téléphone"
-                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1"
+                            disabled={telephoneDisabled}
+                            className="bg-slate-700 border-slate-600 h-7 text-sm flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                           <Select 
                             value={newTelephoneType}
                             onValueChange={setNewTelephoneType}
+                            disabled={telephoneDisabled}
                           >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -1210,6 +1255,7 @@ export default function ClientFormDialog({
                           <Button
                             type="button"
                             size="sm"
+                            disabled={telephoneDisabled}
                             onClick={() => {
                               const telephone = document.getElementById('new-telephone').value;
                               if (telephone.trim()) {
@@ -1224,13 +1270,13 @@ export default function ClientFormDialog({
                                 setNewTelephoneType("Cellulaire");
                               }
                             }}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
+                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
 
-                          <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <div className={`border border-slate-700 rounded-lg overflow-hidden ${telephoneDisabled ? 'opacity-50' : ''}`}>
                             <Table>
                               <TableHeader>
                                 <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -1258,8 +1304,9 @@ export default function ClientFormDialog({
                                           <Select 
                                             value={item.actuel ? "Actuel" : "Ancien"} 
                                             onValueChange={(value) => toggleActuel('telephones', index)}
+                                            disabled={telephoneDisabled}
                                           >
-                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24">
+                                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs w-24 disabled:opacity-50 disabled:cursor-not-allowed">
                                               <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -1274,8 +1321,9 @@ export default function ClientFormDialog({
                                        type="button"
                                        size="sm"
                                        variant="ghost"
+                                       disabled={telephoneDisabled}
                                        onClick={() => handleDeleteRequest('telephones', index)}
-                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                       className="text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
                                       >
                                        <Trash2 className="w-4 h-4" />
                                       </Button>
@@ -1287,7 +1335,7 @@ export default function ClientFormDialog({
                                       {formData.telephones.length === 0 && (
                                       <TableRow>
                                       <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-xs">
-                                        Aucun téléphone ajouté
+                                        {telephoneDisabled ? "Téléphones désactivés" : "Aucun téléphone ajouté"}
                                       </TableCell>
                                       </TableRow>
                                       )}
