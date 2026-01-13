@@ -2977,7 +2977,15 @@ export default function PriseDeMandat() {
                                           const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
                                           const preferences = client.preferences_livraison || [];
                                           return (
-                                            <div key={clientId} className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative">
+                                            <div 
+                                              key={clientId} 
+                                              className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                              onClick={() => {
+                                                setEditingClientForForm(client);
+                                                setClientTypeForForm(client.type_client);
+                                                setIsClientFormDialogOpen(true);
+                                              }}
+                                            >
                                               <button 
                                                 type="button" 
                                                 onClick={(e) => {
@@ -3126,7 +3134,15 @@ export default function PriseDeMandat() {
                                               const currentEmail = notaire.courriels?.find(c => c.actuel)?.courriel || notaire.courriels?.[0]?.courriel || "";
                                               const preferences = notaire.preferences_livraison || [];
                                               return (
-                                                <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative">
+                                                <div 
+                                                  key={notaireId} 
+                                                  className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-purple-500/30 transition-colors"
+                                                  onClick={() => {
+                                                    setEditingClientForForm(notaire);
+                                                    setClientTypeForForm(notaire.type_client);
+                                                    setIsClientFormDialogOpen(true);
+                                                  }}
+                                                >
                                                   <button 
                                                     type="button" 
                                                     onClick={(e) => {
@@ -3275,7 +3291,15 @@ export default function PriseDeMandat() {
                                               const currentEmail = courtier.courriels?.find(c => c.actuel)?.courriel || courtier.courriels?.[0]?.courriel || "";
                                               const preferences = courtier.preferences_livraison || [];
                                               return (
-                                                <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
+                                                <div 
+                                                  key={courtierId} 
+                                                  className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/30 transition-colors"
+                                                  onClick={() => {
+                                                    setEditingClientForForm(courtier);
+                                                    setClientTypeForForm(courtier.type_client);
+                                                    setIsClientFormDialogOpen(true);
+                                                  }}
+                                                >
                                                   <button 
                                                     type="button" 
                                                     onClick={(e) => {
@@ -3424,7 +3448,15 @@ export default function PriseDeMandat() {
                                               const currentEmail = compagnie.courriels?.find(c => c.actuel)?.courriel || compagnie.courriels?.[0]?.courriel || "";
                                               const preferences = compagnie.preferences_livraison || [];
                                               return (
-                                                <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative">
+                                                <div 
+                                                  key={compagnieId} 
+                                                  className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-green-500/30 transition-colors"
+                                                  onClick={() => {
+                                                    setEditingClientForForm(compagnie);
+                                                    setClientTypeForForm(compagnie.type_client);
+                                                    setIsClientFormDialogOpen(true);
+                                                  }}
+                                                >
                                                   <button 
                                                     type="button" 
                                                     onClick={(e) => {
