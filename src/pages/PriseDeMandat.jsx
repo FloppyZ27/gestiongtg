@@ -2748,10 +2748,26 @@ export default function PriseDeMandat() {
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
                     {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
-                      <p className="text-emerald-400 text-lg font-semibold mt-1">
-                        {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
-                        {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
-                          <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
+                      <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
+                        <span>
+                          {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
+                          {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
+                            <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
+                          )}
+                        </span>
+                        {nouveauDossierForm.mandats && nouveauDossierForm.mandats.length > 0 && (
+                          <span className="flex gap-1">
+                            {nouveauDossierForm.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
+                              <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                {getAbbreviatedMandatType(m.type_mandat)}
+                              </Badge>
+                            ))}
+                            {nouveauDossierForm.mandats.length > 3 && (
+                              <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                +{nouveauDossierForm.mandats.length - 3}
+                              </Badge>
+                            )}
+                          </span>
                         )}
                       </p>
                     )}
