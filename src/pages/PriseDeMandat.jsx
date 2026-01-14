@@ -3625,9 +3625,18 @@ export default function PriseDeMandat() {
                               </div>
                               <CardTitle className="text-orange-300 text-base">Mandats</CardTitle>
                               {nouveauDossierForm.mandats.length > 0 && (
-                                <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                                  {nouveauDossierForm.mandats.length} mandat{nouveauDossierForm.mandats.length > 1 ? 's' : ''}
-                                </Badge>
+                                <div className="flex gap-1 flex-wrap">
+                                  {nouveauDossierForm.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
+                                    <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                      {getAbbreviatedMandatType(m.type_mandat)}
+                                    </Badge>
+                                  ))}
+                                  {nouveauDossierForm.mandats.length > 3 && (
+                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                      +{nouveauDossierForm.mandats.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
                               )}
                             </div>
                             {mandatStepCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
