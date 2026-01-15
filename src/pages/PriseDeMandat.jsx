@@ -2042,8 +2042,17 @@ export default function PriseDeMandat() {
       // Parser le fichier .d01
       const lines = fileContent.split('\n');
       const lotLine = lines.find(line => line.startsWith('LO'));
-      const suLine = lines.find(line => line.startsWith('SU'));
-      const coLines = lines.filter(line => line.startsWith('CO'));
+      const suLines = lines.filter(line => line.startsWith('SU'));
+      
+      // Extraire uniquement les lignes CO entre deux lignes SU
+      let coLines = [];
+      if (suLines.length >= 2) {
+        const firstSuIndex = lines.indexOf(suLines[0]);
+        const secondSuIndex = lines.indexOf(suLines[1]);
+        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
+      }
+      
+      const suLine = suLines[0];
       
       let extractedData = {};
       
@@ -2064,11 +2073,12 @@ export default function PriseDeMandat() {
       // Le cadastre est toujours "Québec" pour les imports .d01
       extractedData.cadastre = 'Québec';
       
-      // Parser les concordances antérieures (lignes CO)
+      // Parser les concordances antérieures (lignes CO entre deux lignes SU)
       extractedData.concordances_anterieures = [];
       if (coLines.length > 0) {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
+          const cadastre = coParts[1] || 'Québec'; // Deuxième élément
           let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : ''; // Troisième élément
           // Supprimer le premier chiffre si c'est un "0" (ex: "Rang 01" devient "Rang 1", mais "Rang 10" reste "Rang 10")
           if (rang.match(/^Rang 0(\d+)$/)) {
@@ -2079,7 +2089,7 @@ export default function PriseDeMandat() {
           
           extractedData.concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
-            cadastre: 'Québec',
+            cadastre: cadastre,
             numero_lot: numeroLot,
             rang: rang,
             est_partie: estPartie
