@@ -291,7 +291,7 @@ export default function PriseDeMandat() {
   const [historiqueDossier, setHistoriqueDossier] = useState([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarCollapsedDossier, setSidebarCollapsedDossier] = useState(false);
-  const [contactsListCollapsed, setContactsListCollapsed] = useState(false);
+  const [contactsListCollapsed, setContactsListCollapsed] = useState(true);
   const [addressSearchQuery, setAddressSearchQuery] = useState("");
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
