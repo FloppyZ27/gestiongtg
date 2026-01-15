@@ -248,12 +248,12 @@ export default function PriseDeMandat() {
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   // END NEW STATE
 
-  const [filterArpenteur, setFilterArpenteur] = useState("all");
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
   const [filterStatut, setFilterStatut] = useState("all");
   const [activeListTab, setActiveListTab] = useState("nouveau");
-  const [filterVille, setFilterVille] = useState("all");
-  const [filterTypeMandat, setFilterTypeMandat] = useState("all");
-  const [filterUrgence, setFilterUrgence] = useState("all");
+  const [filterVille, setFilterVille] = useState([]);
+  const [filterTypeMandat, setFilterTypeMandat] = useState([]);
+  const [filterUrgence, setFilterUrgence] = useState([]);
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
