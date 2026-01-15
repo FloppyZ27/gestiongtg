@@ -1601,25 +1601,26 @@ export default function PriseDeMandat() {
     } else {
       // Mode création
       const newLot = await createLotMutation.mutateAsync(newLotForm);
-    
-    // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
-    if (currentMandatIndexDossier !== null) {
-      setNouveauDossierForm(prev => ({
-        ...prev,
-        mandats: prev.mandats.map((m, i) => i === currentMandatIndexDossier ? {
-          ...m,
-          lots: [...(m.lots || []), newLot.id]
-        } : m)
-      }));
-    } else if (currentMandatIndex !== null) {
-      // Si on est dans le formulaire principal (prise de mandat)
-      setFormData(prev => ({
-        ...prev,
-        mandats: prev.mandats.map((m, i) => i === currentMandatIndex ? {
-          ...m,
-          lots: [...(m.lots || []), newLot.id]
-        } : m)
-      }));
+      
+      // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
+      if (currentMandatIndexDossier !== null) {
+        setNouveauDossierForm(prev => ({
+          ...prev,
+          mandats: prev.mandats.map((m, i) => i === currentMandatIndexDossier ? {
+            ...m,
+            lots: [...(m.lots || []), newLot.id]
+          } : m)
+        }));
+      } else if (currentMandatIndex !== null) {
+        // Si on est dans le formulaire principal (prise de mandat)
+        setFormData(prev => ({
+          ...prev,
+          mandats: prev.mandats.map((m, i) => i === currentMandatIndex ? {
+            ...m,
+            lots: [...(m.lots || []), newLot.id]
+          } : m)
+        }));
+      }
     }
   };
   // END NEW FUNCTION
