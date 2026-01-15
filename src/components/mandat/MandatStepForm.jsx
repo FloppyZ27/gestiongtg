@@ -205,6 +205,7 @@ export default function MandatStepForm({
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                     {ECHEANCES.map((echeance) => (
                       <SelectItem key={echeance} value={echeance} className="text-white">{echeance}</SelectItem>
                     ))}
@@ -218,6 +219,7 @@ export default function MandatStepForm({
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                     {URGENCES.map((urgence) => (
                       <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
                     ))}
