@@ -4346,28 +4346,30 @@ export default function PriseDeMandat() {
                                                  const isSelected = mandat.lots?.includes(lot.id);
                                                  return (
                                                    <div
-                                                     key={lot.id}
-                                                     onClick={() => {
-                                                       setNouveauDossierForm(prev => ({
-                                                         ...prev,
-                                                         mandats: prev.mandats.map((m, i) => i === index ? {
-                                                           ...m,
-                                                           lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
-                                                         } : m)
-                                                       }));
-                                                     }}
-                                                     className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
-                                                       isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
-                                                     }`}
-                                                   >
-                                                     <p className="text-white font-semibold text-xs truncate">
-                                                       {lot.numero_lot}
-                                                       {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
-                                                       <span className="text-orange-400 font-normal"> • {lot.circonscription_fonciere}</span>
-                                                       {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
-                                                       {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
-                                                     </p>
-                                                   </div>
+                                                          key={lot.id}
+                                                          onClick={() => {
+                                                            setNouveauDossierForm(prev => ({
+                                                              ...prev,
+                                                              mandats: prev.mandats.map((m, i) => i === index ? {
+                                                                ...m,
+                                                                lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                              } : m)
+                                                            }));
+                                                          }}
+                                                          className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
+                                                            isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
+                                                          }`}
+                                                        >
+                                                          <div className="text-xs space-y-0.5">
+                                                            <p className="text-white font-semibold">
+                                                              {lot.numero_lot}
+                                                              {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
+                                                            </p>
+                                                            {lot.rang && <p className="text-slate-300">{lot.rang}</p>}
+                                                            {lot.cadastre && <p className="text-slate-300">{lot.cadastre}</p>}
+                                                            <p className="text-slate-400">{lot.circonscription_fonciere}</p>
+                                                          </div>
+                                                        </div>
                                                  );
                                                })
                                              ) : (
