@@ -129,6 +129,7 @@ export default function Dossiers() {
     date_fermeture: "",
     statut: "Ouvert",
     ttl: "Non",
+    place_affaire: "",
     clients_ids: [],
     clients_texte: "",
     notaires_ids: [],
