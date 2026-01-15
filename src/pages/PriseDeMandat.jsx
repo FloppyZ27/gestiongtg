@@ -4339,19 +4339,7 @@ export default function PriseDeMandat() {
                                               <Plus className="w-3 h-3" />
                                             </Button>
                                           </div>
-                                          <div className="flex gap-1 mb-2">
-                                            <Select value={lotCirconscriptionFilter} onValueChange={setLotCirconscriptionFilter}>
-                                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                                <SelectValue placeholder="Circonscription" />
-                                              </SelectTrigger>
-                                              <SelectContent className="bg-slate-800 border-slate-700">
-                                                <SelectItem value="all" className="text-white text-xs">Toutes</SelectItem>
-                                                {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                                  <SelectItem key={circ} value={circ} className="text-white text-xs">{circ}</SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
+
                                           <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
                                             {filteredLotsForSelector.length > 0 ? (
