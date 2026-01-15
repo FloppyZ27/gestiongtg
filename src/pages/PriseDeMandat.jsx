@@ -5751,7 +5751,7 @@ export default function PriseDeMandat() {
                 {/* Colonne gauche - Formulaire - 70% */}
                 <div className="flex-[0_0_70%] overflow-y-auto p-4 border-r border-slate-800">
                   <div className="mb-4">
-                    <h2 className="text-xl font-bold text-white">Nouveau lot</h2>
+                    <h2 className="text-xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
                   </div>
                   
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-2">
