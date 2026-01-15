@@ -5525,8 +5525,6 @@ export default function PriseDeMandat() {
                             <div className="space-y-3">
                               {/* Formulaire d'ajout toujours visible */}
                               <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
-                                <Label className="text-purple-300 text-sm">Ajouter une concordance</Label>
-                                
                                 <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
                                   <div className="space-y-1">
                                     <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
