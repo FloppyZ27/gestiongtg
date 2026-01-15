@@ -2036,37 +2036,34 @@ export default function PriseDeMandat() {
   const handleD01Import = async (file) => {
     setIsImportingD01(true);
     try {
-      // Upload le fichier
-      const uploadResponse = await base44.integrations.Core.UploadFile({ file });
-      const fileUrl = uploadResponse.file_url;
-
-      // Extraire les données du fichier .d01
-      const extractResponse = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url: fileUrl,
-        json_schema: {
-          type: "object",
-          properties: {
-            numero_lot: { type: "string" },
-            circonscription_fonciere: { type: "string" },
-            cadastre: { type: "string" },
-            rang: { type: "string" },
-            date_bpd: { type: "string" },
-            type_operation: { type: "string" },
-            concordances_anterieures: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  numero_lot: { type: "string" },
-                  circonscription_fonciere: { type: "string" },
-                  cadastre: { type: "string" },
-                  rang: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
+      // Lire le contenu du fichier
+      const fileContent = await file.text();
+      
+      // Parser le fichier .d01
+      const lines = fileContent.split('\n');
+      const lotLine = lines.find(line => line.startsWith('LO'));
+      const suLine = lines.find(line => line.startsWith('SU'));
+      
+      let extractedData = {};
+      
+      if (lotLine) {
+        const lotParts = lotLine.split(/\s+/);
+        // Le numéro de lot est le premier élément après "LO"
+        extractedData.numero_lot = lotParts[1] || '';
+      }
+      
+      if (suLine) {
+        const suParts = suLine.split(/\s+/);
+        // La circonscription est le deuxième élément
+        extractedData.circonscription_fonciere = suParts[2] || '';
+        // La date BPD est le troisième élément
+        extractedData.date_bpd = suParts[3] || '';
+      }
+      
+      // Le cadastre est toujours "Québec" pour les imports .d01
+      extractedData.cadastre = 'Québec';
+      
+      const extractResponse = { status: "success", output: extractedData };
 
       if (extractResponse.status === "success" && extractResponse.output) {
         const data = extractResponse.output;
