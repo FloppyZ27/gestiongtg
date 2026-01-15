@@ -4339,10 +4339,10 @@ export default function PriseDeMandat() {
                                             </Button>
                                           </div>
 
-                                          <p className="text-slate-400 text-xs mb-2">Lots existants ({lots.length})</p>
+                                          <p className="text-slate-400 text-xs mb-2">Lots existants ({lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                            {lots.length > 0 ? (
-                                               lots.slice(0, 20).map((lot) => {
+                                            {lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length > 0 ? (
+                                               lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).slice(0, 20).map((lot) => {
                                                  const isSelected = mandat.lots?.includes(lot.id);
                                                  return (
                                                    <div
