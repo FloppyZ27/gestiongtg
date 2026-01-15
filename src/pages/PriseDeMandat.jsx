@@ -5930,10 +5930,10 @@ export default function PriseDeMandat() {
                       </CardHeader>
 
                       {!lotConcordanceCollapsed && (
-                       <CardContent className="pt-2 pb-3">
-                         <div className="grid grid-cols-[60%_40%] gap-4">
-                            {/* Colonne gauche - Formulaire et tableau */}
-                            <div className="space-y-3">
+                      <CardContent className="pt-2 pb-3">
+                        <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-4">
+                           {/* Colonne gauche - Formulaire et tableau */}
+                           <div className="space-y-3">
                               {/* Formulaire d'ajout toujours visible */}
                               <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
                                 <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
@@ -6072,10 +6072,11 @@ export default function PriseDeMandat() {
                               <div className="border-t border-slate-600 my-3"></div>
                               </div>
 
+                            {/* Séparateur vertical */}
+                            <div className="bg-slate-600"></div>
+                            
                             {/* Colonne droite - Liste des lots existants */}
-                            <div className="border-l border-slate-700 pl-4">
-                              {/* Ligne séparatrice en haut */}
-                              <div className="border-t border-slate-600 mb-3 -mt-1"></div>
+                            <div className="pl-4">
                               
                               <div className="mb-2">
                                 <Label className="text-slate-400 text-xs">Lots existants</Label>
