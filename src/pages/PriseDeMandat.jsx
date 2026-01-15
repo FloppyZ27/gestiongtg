@@ -323,6 +323,7 @@ export default function PriseDeMandat() {
   const [showD01ImportSuccess, setShowD01ImportSuccess] = useState(false);
   const [showDeleteConcordanceConfirm, setShowDeleteConcordanceConfirm] = useState(false);
   const [concordanceIndexToDelete, setConcordanceIndexToDelete] = useState(null);
+  const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -5018,6 +5019,49 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
+        {/* Dialog de confirmation d'annulation de création de lot */}
+        <Dialog open={showCancelLotConfirm} onOpenChange={setShowCancelLotConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    setShowCancelLotConfirm(false);
+                    setIsNewLotDialogOpen(false);
+                    resetLotForm();
+                  }}
+                >
+                  Abandonner
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setShowCancelLotConfirm(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
         {/* Dialog d'avertissement concordance incomplète */}
         <Dialog open={showConcordanceWarning} onOpenChange={setShowConcordanceWarning}>
           <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
@@ -5582,8 +5626,24 @@ export default function PriseDeMandat() {
 
         {/* New Lot Dialog */}
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
-          setIsNewLotDialogOpen(open);
-          if (!open) resetLotForm();
+          if (!open) {
+            // Vérifier si le formulaire a été modifié
+            const hasChanges = newLotForm.numero_lot || 
+              newLotForm.circonscription_fonciere || 
+              newLotForm.rang || 
+              newLotForm.concordances_anterieures.length > 0 || 
+              newLotForm.document_pdf_url ||
+              commentairesTemporairesLot.length > 0;
+            
+            if (hasChanges) {
+              setShowCancelLotConfirm(true);
+            } else {
+              setIsNewLotDialogOpen(false);
+              resetLotForm();
+            }
+          } else {
+            setIsNewLotDialogOpen(open);
+          }
         }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
