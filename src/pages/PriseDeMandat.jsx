@@ -320,6 +320,7 @@ export default function PriseDeMandat() {
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [showMissingUserWarning, setShowMissingUserWarning] = useState(false);
   const [showConcordanceWarning, setShowConcordanceWarning] = useState(false);
+  const [showD01ImportSuccess, setShowD01ImportSuccess] = useState(false);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -2119,7 +2120,7 @@ export default function PriseDeMandat() {
           setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[data.circonscription_fonciere] || []);
         }
 
-        alert("Données importées avec succès depuis le fichier .d01");
+        setShowD01ImportSuccess(true);
       } else {
         alert("Erreur lors de l'extraction des données du fichier .d01");
       }
@@ -4925,6 +4926,38 @@ export default function PriseDeMandat() {
                 <Button 
                   type="button" 
                   onClick={() => setShowArpenteurRequiredDialog(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  OK
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de succès d'import .d01 */}
+        <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">✅</span>
+                Succès
+                <span className="text-2xl">✅</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Données importées avec succès depuis le fichier .d01
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowD01ImportSuccess(false)}
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
                   OK
