@@ -6029,14 +6029,48 @@ export default function PriseDeMandat() {
                               {/* Tableau des concordances */}
                               {newLotForm.concordances_anterieures.length > 0 && (
                               <div className="border border-slate-700 rounded-lg overflow-hidden">
-...
-                                    </Table>
-                                    </div>
-                                    )}
-                                    
-                                    {/* Ligne séparatrice */}
-                                    <div className="border-t border-slate-600 my-3"></div>
-                                    </div>
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                        <TableHead className="text-slate-300 text-xs">N° Lot</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Rang</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Circonscription</TableHead>
+                                        <TableHead className="text-slate-300 text-xs">Cadastre</TableHead>
+                                        <TableHead className="text-slate-300 text-right text-xs">Actions</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                     {newLotForm.concordances_anterieures.map((concordance, index) => (
+                                       <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                         <TableCell className="text-white text-sm">
+                                           {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""}
+                                         </TableCell>
+                                         <TableCell className="text-slate-300 text-sm">{concordance.rang || "-"}</TableCell>
+                                         <TableCell className="text-slate-300 text-sm">
+                                           {concordance.circonscription_fonciere}
+                                         </TableCell>
+                                         <TableCell className="text-slate-300 text-sm">{concordance.cadastre || "-"}</TableCell>
+                                         <TableCell className="text-right">
+                                           <Button
+                                             type="button"
+                                             size="sm"
+                                             variant="ghost"
+                                             onClick={() => removeConcordance(index)}
+                                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                           >
+                                             <Trash2 className="w-3 h-3" />
+                                           </Button>
+                                         </TableCell>
+                                       </TableRow>
+                                     ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+
+                              {/* Ligne séparatrice */}
+                              <div className="border-t border-slate-600 my-3"></div>
+                              </div>
 
                             {/* Colonne droite - Liste des lots existants */}
                             <div className="border-l border-slate-700 pl-4">
