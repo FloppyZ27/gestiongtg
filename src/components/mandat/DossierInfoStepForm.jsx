@@ -29,6 +29,8 @@ export default function DossierInfoStepForm({
   onNumeroDossierChange,
   dateOuverture,
   onDateOuvertureChange,
+  placeAffaire,
+  onPlaceAffaireChange,
   isCollapsed,
   onToggleCollapse,
   disabled = false
