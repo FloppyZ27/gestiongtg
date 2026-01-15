@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, Eye, Trash2, Grid3x3, List } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -107,7 +107,7 @@ export default function DocumentsStepFormLot({
   circonscription,
   isCollapsed,
   onToggleCollapse,
-  onDocumentsChange
+  disabled
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -118,9 +118,9 @@ export default function DocumentsStepFormLot({
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
 
-  const folderPath = `Lots/${circonscription}/${lotNumero}`;
+  const folderPath = `ARPENTEUR/TOUS/LOT/${circonscription}/${lotNumero}`;
 
-  // Fetch files from SharePoint
+  // Fetch files from SharePoint - lot spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
     queryKey: ['sharepoint-lot', circonscription, lotNumero],
     queryFn: async () => {
@@ -135,13 +135,6 @@ export default function DocumentsStepFormLot({
   });
 
   const files = filesData?.files || [];
-
-  // Notifier le parent quand le nombre de fichiers change
-  React.useEffect(() => {
-    if (onDocumentsChange) {
-      onDocumentsChange(files.length > 0);
-    }
-  }, [files.length, onDocumentsChange]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -295,28 +288,6 @@ export default function DocumentsStepFormLot({
       alert("Erreur lors de la suppression du fichier");
     }
   };
-
-  if (!lotNumero || !circonscription) {
-    return (
-      <Card className="border-slate-700 bg-slate-800/30">
-        <CardHeader className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
-                <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
-              </div>
-              <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-2 pb-3">
-          <p className="text-slate-400 text-sm text-center py-4">
-            Veuillez d'abord renseigner le numéro de lot et la circonscription
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card 
@@ -487,95 +458,95 @@ export default function DocumentsStepFormLot({
         </CardContent>
       )}
 
-      {/* Dialog de prévisualisation */}
-      <Dialog open={!!previewFile} onOpenChange={closePreview}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
-          <DialogHeader className="px-4 py-2 border-b border-slate-700 flex-shrink-0">
-            <DialogTitle className="flex items-center gap-2 text-sm">
-              {getFileIcon(previewFile?.name)}
-              <span className="truncate">{previewFile?.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden">
-            {isLoadingPreview ? (
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
-              </div>
-            ) : previewUrl ? (
-              isImageFile(previewFile?.name) ? (
-                <div className="flex items-center justify-center h-full bg-slate-800/50 p-4">
-                  <img
-                    src={previewUrl}
-                    alt={previewFile?.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
+        {/* Dialog de prévisualisation */}
+        <Dialog open={!!previewFile} onOpenChange={closePreview}>
+          <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-5xl h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
+            <DialogHeader className="px-4 py-2 border-b border-slate-700 flex-shrink-0">
+              <DialogTitle className="flex items-center gap-2 text-sm">
+                {getFileIcon(previewFile?.name)}
+                <span className="truncate">{previewFile?.name}</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden">
+              {isLoadingPreview ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
                 </div>
+              ) : previewUrl ? (
+                isImageFile(previewFile?.name) ? (
+                  <div className="flex items-center justify-center h-full bg-slate-800/50 p-4">
+                    <img
+                      src={previewUrl}
+                      alt={previewFile?.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                ) : (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full border-0"
+                    title={previewFile?.name}
+                  />
+                )
               ) : (
-                <iframe
-                  src={previewUrl}
-                  className="w-full h-full border-0"
-                  title={previewFile?.name}
-                />
-              )
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                <FileText className="w-16 h-16 mb-4 opacity-50" />
-                <p>Prévisualisation non disponible</p>
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <FileText className="w-16 h-16 mb-4 opacity-50" />
+                  <p>Prévisualisation non disponible</p>
+                  <Button
+                    type="button"
+                    className="mt-4"
+                    onClick={() => previewFile?.webUrl && window.open(previewFile.webUrl, '_blank')}
+                  >
+                    Ouvrir dans SharePoint
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression */}
+        <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce document ?
+              </p>
+              {fileToDelete && (
+                <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 flex items-center gap-2">
+                  {getFileIcon(fileToDelete.name)}
+                  <span className="text-white text-sm truncate flex-1">{fileToDelete.name}</span>
+                </div>
+              )}
+              <div className="flex justify-center gap-3 pt-4">
                 <Button
                   type="button"
-                  className="mt-4"
-                  onClick={() => previewFile?.webUrl && window.open(previewFile.webUrl, '_blank')}
+                  onClick={() => setFileToDelete(null)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
                 >
-                  Ouvrir dans SharePoint
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleDelete(fileToDelete);
+                    setFileToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Confirmer
                 </Button>
               </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de confirmation de suppression */}
-      <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
-        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              Attention
-              <span className="text-2xl">⚠️</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-slate-300 text-center">
-              Êtes-vous sûr de vouloir supprimer ce document ?
-            </p>
-            {fileToDelete && (
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 flex items-center gap-2">
-                {getFileIcon(fileToDelete.name)}
-                <span className="text-white text-sm truncate flex-1">{fileToDelete.name}</span>
-              </div>
-            )}
-            <div className="flex justify-center gap-3 pt-4">
-              <Button
-                type="button"
-                onClick={() => setFileToDelete(null)}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-              >
-                Annuler
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  handleDelete(fileToDelete);
-                  setFileToDelete(null);
-                }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-              >
-                Confirmer
-              </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </Card>
+          </DialogContent>
+        </Dialog>
+      </Card>
   );
 }
