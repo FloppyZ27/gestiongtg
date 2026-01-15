@@ -2043,6 +2043,7 @@ export default function PriseDeMandat() {
       const lines = fileContent.split('\n');
       const lotLine = lines.find(line => line.startsWith('LO'));
       const suLine = lines.find(line => line.startsWith('SU'));
+      const coLines = lines.filter(line => line.startsWith('CO'));
       
       let extractedData = {};
       
@@ -2062,6 +2063,25 @@ export default function PriseDeMandat() {
       
       // Le cadastre est toujours "Québec" pour les imports .d01
       extractedData.cadastre = 'Québec';
+      
+      // Parser les concordances antérieures (lignes CO)
+      extractedData.concordances_anterieures = [];
+      if (coLines.length > 0) {
+        coLines.forEach(coLine => {
+          const coParts = coLine.split(';');
+          const rang = coParts[1] ? coParts[1].replace('R', 'Rang ') : '';
+          const numeroLot = coParts[2] || '';
+          const estPartie = coParts[3] === 'O';
+          
+          extractedData.concordances_anterieures.push({
+            circonscription_fonciere: extractedData.circonscription_fonciere,
+            cadastre: 'Québec',
+            numero_lot: numeroLot,
+            rang: rang,
+            est_partie: estPartie
+          });
+        });
+      }
       
       const extractResponse = { status: "success", output: extractedData };
 
