@@ -55,8 +55,8 @@ export default function DossierInfoStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="space-y-[3px]">
-            {/* Ligne 1: Arpenteur-géomètre et Statut */}
-            <div className="grid grid-cols-2 gap-1">
+            {/* Ligne 1: Arpenteur-géomètre, Place d'affaire et Statut */}
+            <div className="grid grid-cols-3 gap-1">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                 <Select value={arpenteurGeometre} onValueChange={onArpenteurChange} disabled={disabled}>
@@ -73,8 +73,20 @@ export default function DossierInfoStepForm({
                 </Select>
               </div>
               <div className="space-y-0.5">
+                <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+                <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                    <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Statut du mandat</Label>
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-wrap">
                   {STATUTS.map((s) => (
                     <button
                       key={s.value}
@@ -93,22 +105,6 @@ export default function DossierInfoStepForm({
                     </button>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            {/* Ligne 2: Place d'affaire (50% de largeur) */}
-            <div className="grid grid-cols-2">
-              <div className="space-y-0.5">
-                <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-                <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
-                    <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
