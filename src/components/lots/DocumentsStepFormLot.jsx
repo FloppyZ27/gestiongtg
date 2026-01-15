@@ -118,7 +118,7 @@ export default function DocumentsStepFormLot({
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
 
-  const folderPath = `ARPENTEUR/TOUS/LOT/${circonscription}/${lotNumero}`;
+  const folderPath = circonscription && lotNumero ? `ARPENTEUR/TOUS/LOT/${circonscription}/${lotNumero}` : null;
 
   // Fetch files from SharePoint - lot spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
@@ -130,7 +130,7 @@ export default function DocumentsStepFormLot({
       });
       return response.data;
     },
-    enabled: !!circonscription && !!lotNumero,
+    enabled: !!circonscription && !!lotNumero && !!folderPath,
     staleTime: 30000
   });
 
@@ -318,24 +318,34 @@ export default function DocumentsStepFormLot({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          {/* Message si drag over */}
-          {isDragOver && (
-            <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Déposez les fichiers ici
+          {/* Message si champs requis manquants */}
+          {(!lotNumero || !circonscription) && (
+            <div className="flex items-center justify-center py-4 text-yellow-400 text-sm">
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Veuillez remplir le numéro de lot et la circonscription foncière pour gérer les documents
             </div>
           )}
 
-          {/* Message de progression */}
-          {isUploading && (
-            <div className="flex items-center gap-2 py-2 text-teal-400 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {uploadProgress}
-            </div>
-          )}
+          {lotNumero && circonscription && (
+            <>
+              {/* Message si drag over */}
+              {isDragOver && (
+                <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Déposez les fichiers ici
+                </div>
+              )}
 
-          {/* Chemin et refresh */}
-          {!isDragOver && !isUploading && (
+              {/* Message de progression */}
+              {isUploading && (
+                <div className="flex items-center gap-2 py-2 text-teal-400 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {uploadProgress}
+                </div>
+              )}
+
+              {/* Chemin et refresh */}
+              {!isDragOver && !isUploading && (
             <div className="flex items-center justify-between mb-2">
               <p className="text-slate-500 text-xs truncate flex-1">
                 📁 {folderPath}
@@ -453,6 +463,8 @@ export default function DocumentsStepFormLot({
                   Aucun fichier • Glissez des fichiers ici ou cliquez sur Ajouter
                 </p>
               )}
+            </>
+          )}
             </>
           )}
         </CardContent>

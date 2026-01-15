@@ -5738,15 +5738,13 @@ export default function PriseDeMandat() {
                     </Card>
 
                     {/* Section 3: Documents */}
-                    {newLotForm.numero_lot && newLotForm.circonscription_fonciere && (
-                      <DocumentsStepFormLot
-                        lotNumero={newLotForm.numero_lot}
-                        circonscription={newLotForm.circonscription_fonciere}
-                        isCollapsed={lotDocumentsCollapsed}
-                        onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
-                        disabled={false}
-                      />
-                    )}
+                    <DocumentsStepFormLot
+                      lotNumero={newLotForm.numero_lot || ""}
+                      circonscription={newLotForm.circonscription_fonciere || ""}
+                      isCollapsed={lotDocumentsCollapsed}
+                      onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
+                      disabled={false}
+                    />
                   </form>
                 </div>
 
