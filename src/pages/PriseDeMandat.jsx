@@ -6073,7 +6073,7 @@ export default function PriseDeMandat() {
                             <div className="bg-slate-600"></div>
                             
                             {/* Colonne droite - Liste des lots existants */}
-                            <div className="pl-4 pr-4">
+                            <div className="pl-2 pr-4">
                               
                               <div className="mb-2">
                                 <Label className="text-slate-400 text-xs">Lots existants</Label>
