@@ -199,7 +199,7 @@ export default function PriseDeMandat() {
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
-  const [lotCadastreFilter, setLotCadastreFilter] = useState("all");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
   const [newLotForm, setNewLotForm] = useState({
     numero_lot: "",
@@ -904,19 +904,6 @@ export default function PriseDeMandat() {
   // Client mutations removed as they will be handled within ClientFormDialog
   // const createClientMutation = useMutation(...)
   // const updateClientMutation = useMutation(...)
-
-
-  const updateLotMutation = useMutation({
-    mutationFn: async (lotData) => {
-      const updatedLot = await base44.entities.Lot.update(editingLot.id, lotData);
-      return updatedLot;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
-      setIsNewLotDialogOpen(false);
-      resetLotForm();
-    },
-  });
 
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
@@ -4266,31 +4253,10 @@ export default function PriseDeMandat() {
                                                   {mandat.lots.map((lotId) => {
                                                     const lot = getLotById(lotId);
                                                     return (
-                                                      <div 
-                                                        key={lotId} 
-                                                        className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
-                                                        onClick={() => {
-                                                          setEditingLot(lot);
-                                                          setNewLotForm({
-                                                            numero_lot: lot?.numero_lot || "",
-                                                            circonscription_fonciere: lot?.circonscription_fonciere || "",
-                                                            cadastre: lot?.cadastre || "Québec",
-                                                            rang: lot?.rang || "",
-                                                            concordances_anterieures: lot?.concordances_anterieures || [],
-                                                            document_pdf_url: lot?.document_pdf_url || "",
-                                                            date_bpd: lot?.date_bpd || "",
-                                                            type_operation: lot?.type_operation || "",
-                                                          });
-                                                          if (lot?.circonscription_fonciere) {
-                                                            setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
-                                                          }
-                                                          setIsNewLotDialogOpen(true);
-                                                        }}
-                                                      >
+                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
                                                         <button 
                                                           type="button" 
-                                                          onClick={(e) => {
-                                                            e.stopPropagation();
+                                                          onClick={() => {
                                                             setNouveauDossierForm(prev => ({
                                                               ...prev,
                                                               mandats: prev.mandats.map((m, i) => i === index ? { 
@@ -4376,7 +4342,7 @@ export default function PriseDeMandat() {
                                           <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
                                             {filteredLotsForSelector.length > 0 ? (
-                                               filteredLotsForSelector.map((lot) => {
+                                               filteredLotsForSelector.slice(0, 20).map((lot) => {
                                                  const isSelected = mandat.lots?.includes(lot.id);
                                                  return (
                                                    <div
@@ -4397,8 +4363,8 @@ export default function PriseDeMandat() {
                                                      <p className="text-white font-semibold text-xs truncate">
                                                        {lot.numero_lot}
                                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
-                                                       {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
-                                                       {lot.circonscription_fonciere && <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>}
+                                                       <span className="text-orange-400 font-normal"> • {lot.circonscription_fonciere}</span>
+                                                       {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
                                                        {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
                                                      </p>
                                                    </div>
@@ -6095,24 +6061,7 @@ export default function PriseDeMandat() {
                             <div className="pl-1 pr-4">
                               
                               <div className="mb-2">
-                                <Label className="text-slate-400 text-xs">Lots existants ({lots.filter(lot => {
-                                    const searchLower = lotListSearchTerm.toLowerCase();
-                                    const matchesSearch = !lotListSearchTerm || 
-                                      lot.numero_lot?.toLowerCase().includes(searchLower) ||
-                                      lot.rang?.toLowerCase().includes(searchLower) ||
-                                      lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
-                                      lot.cadastre?.toLowerCase().includes(searchLower);
-                                    const matchesNumero = !currentConcordanceForm.numero_lot || 
-                                      lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
-                                    const matchesRang = !currentConcordanceForm.rang || 
-                                      lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
-                                    const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
-                                      lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
-                                    const matchesCadastre = !currentConcordanceForm.cadastre || 
-                                      lot.cadastre === currentConcordanceForm.cadastre;
-                                    
-                                    return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
-                                  }).length})</Label>
+                                <Label className="text-slate-400 text-xs">Lots existants</Label>
                               </div>
 
                               <div className="space-y-1" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -6149,12 +6098,12 @@ export default function PriseDeMandat() {
                                       }}
                                       className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
                                     >
-                                      <p className="text-xs text-white font-semibold truncate">
-                                        {lot.numero_lot}
-                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
-                                        {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
-                                        {lot.circonscription_fonciere && <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>}
-                                      </p>
+                                      <div className="text-xs space-y-0.5">
+                                        <p className="text-white font-semibold">{lot.numero_lot}</p>
+                                        {lot.rang && <p className="text-slate-300">{lot.rang}</p>}
+                                        {lot.cadastre && <p className="text-slate-300">{lot.cadastre}</p>}
+                                        <p className="text-slate-400">{lot.circonscription_fonciere}</p>
+                                      </div>
                                     </div>
                                   ))}
                                 {lots.filter(lot => {

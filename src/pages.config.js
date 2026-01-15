@@ -19,7 +19,6 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import EditerLot from './pages/EditerLot';
 import __Layout from './Layout.jsx';
 
 
@@ -45,7 +44,6 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "EditerLot": EditerLot,
 }
 
 export const pagesConfig = {
