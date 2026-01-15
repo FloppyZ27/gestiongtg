@@ -54,7 +54,7 @@ export default function DossierInfoStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          <div className="space-y-2">
+          <div className="space-y-[3px]">
             {/* Ligne 1: Arpenteur-géomètre et Statut */}
             <div className="grid grid-cols-2 gap-1">
               <div className="space-y-0.5">
