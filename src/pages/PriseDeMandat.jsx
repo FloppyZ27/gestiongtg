@@ -2070,9 +2070,9 @@ export default function PriseDeMandat() {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
           let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : ''; // Troisième élément
-          // Supprimer le premier chiffre si c'est un "0"
-          if (rang.startsWith('Rang 0')) {
-            rang = rang.replace('Rang 0', 'Rang ');
+          // Supprimer le premier chiffre si c'est un "0" (ex: "Rang 01" devient "Rang 1", mais "Rang 10" reste "Rang 10")
+          if (rang.match(/^Rang 0(\d+)$/)) {
+            rang = rang.replace(/^Rang 0/, 'Rang ');
           }
           const numeroLot = coParts[3] || ''; // Quatrième élément
           const estPartie = coParts[4] === 'O'; // Cinquième élément: 'O' = coché, 'N' = pas coché
