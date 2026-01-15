@@ -86,7 +86,7 @@ export default function DossierInfoStepForm({
               </div>
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Statut du mandat</Label>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-0.5 overflow-x-auto">
                   {STATUTS.map((s) => (
                     <button
                       key={s.value}
