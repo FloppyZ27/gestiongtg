@@ -79,7 +79,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     date_ouverture: new Date().toISOString().split('T')[0],
     date_fermeture: "",
     statut: "Ouvert",
-    place_affaire: "",
     clients_ids: [],
     notaires_ids: [],
     courtiers_ids: [],
@@ -95,7 +94,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
         date_fermeture: dossier.date_fermeture || "",
         statut: dossier.statut || "Ouvert",
-        place_affaire: dossier.place_affaire || "",
         clients_ids: dossier.clients_ids || [],
         notaires_ids: dossier.notaires_ids || [],
         courtiers_ids: dossier.courtiers_ids || [],
@@ -581,19 +579,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                       <Input type="date" value={formData.date_fermeture || ""} onChange={(e) => setFormData({ ...formData, date_fermeture: e.target.value })} className="bg-slate-800 border-slate-700" />
                     </div>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Place d'affaire</Label>
-                  <Select value={formData.place_affaire} onValueChange={(value) => setFormData({ ...formData, place_affaire: value })}>
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="Alma" className="text-white">Alma</SelectItem>
-                      <SelectItem value="Saguenay" className="text-white">Saguenay</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
