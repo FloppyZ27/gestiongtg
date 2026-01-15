@@ -564,6 +564,7 @@ export default function PriseDeMandat() {
     setFormData({
       ...formData,
       arpenteur_geometre: pm.arpenteur_geometre || "",
+      placeAffaire: pm.place_affaire || "",
       clients_ids: pm.clients_ids || [],
       notaires_ids: pm.notaires_ids || [],
       courtiers_ids: pm.courtiers_ids || [],
@@ -661,6 +662,7 @@ export default function PriseDeMandat() {
 
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
+        place_affaire: data.place_affaire,
         numero_dossier: data.numero_dossier,
         date_ouverture: data.date_ouverture,
         clients_ids: data.clients_ids,
@@ -703,6 +705,7 @@ export default function PriseDeMandat() {
     if (initialPriseMandatData && editingPriseMandat) {
       const currentData = {
         arpenteur_geometre: formData.arpenteur_geometre,
+        place_affaire: formData.placeAffaire,
         clients_ids: formData.clients_ids,
         notaires_ids: formData.notaires_ids,
         courtiers_ids: formData.courtiers_ids,
@@ -718,6 +721,7 @@ export default function PriseDeMandat() {
       
       const initialData = {
         arpenteur_geometre: initialPriseMandatData.arpenteur_geometre,
+        place_affaire: initialPriseMandatData.place_affaire || "",
         clients_ids: initialPriseMandatData.clients_ids || [],
         notaires_ids: initialPriseMandatData.notaires_ids || [],
         courtiers_ids: initialPriseMandatData.courtiers_ids || [],
@@ -1333,6 +1337,7 @@ export default function PriseDeMandat() {
 
     const dataToSubmit = {
       arpenteur_geometre: formData.arpenteur_geometre,
+      place_affaire: formData.placeAffaire,
       numero_dossier: formData.numero_dossier,
       date_ouverture: formData.date_ouverture,
       clients_ids: formData.clients_ids,
