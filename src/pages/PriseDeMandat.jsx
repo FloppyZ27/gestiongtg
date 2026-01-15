@@ -13,7 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -1201,7 +1203,7 @@ export default function PriseDeMandat() {
         )
       );
 
-      const matchesArpenteur = filterArpenteur === "all" || dossier.arpenteur_geometre === filterArpenteur;
+      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(dossier.arpenteur_geometre);
 
       let matchesUtilisateurAssigne;
       if (filterUtilisateurAssigne === "all") {
@@ -6739,69 +6741,127 @@ export default function PriseDeMandat() {
                   />
                 </div>
 
-                <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                  <SelectTrigger className="w-44 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Arpenteur" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                      <span>Arpenteurs ({filterArpenteur.length || 'Tous'})</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {ARPENTEURS.map((arp) => (
-                      <SelectItem key={arp} value={arp} className="text-white">
+                      <DropdownMenuCheckboxItem
+                        key={arp}
+                        checked={filterArpenteur.includes(arp)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFilterArpenteur([...filterArpenteur, arp]);
+                          } else {
+                            setFilterArpenteur(filterArpenteur.filter((a) => a !== arp));
+                          }
+                        }}
+                      >
                         {arp}
-                      </SelectItem>
+                      </DropdownMenuCheckboxItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                <Select value={filterVille} onValueChange={setFilterVille}>
-                  <SelectTrigger className="w-40 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Ville" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                    <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
+                      <span>Villes ({filterVille.length || 'Toutes'})</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {[...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort().map((ville) => (
-                      <SelectItem key={ville} value={ville} className="text-white">
+                      <DropdownMenuCheckboxItem
+                        key={ville}
+                        checked={filterVille.includes(ville)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFilterVille([...filterVille, ville]);
+                          } else {
+                            setFilterVille(filterVille.filter((v) => v !== ville));
+                          }
+                        }}
+                      >
                         {ville}
-                      </SelectItem>
+                      </DropdownMenuCheckboxItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
-                  <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Type de mandat" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                    <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
+                      <span>Types ({filterTypeMandat.length || 'Tous'})</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <DropdownMenuLabel>Filtrer par type de mandat</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {TYPES_MANDATS.map((type) => (
-                      <SelectItem key={type} value={type} className="text-white">
+                      <DropdownMenuCheckboxItem
+                        key={type}
+                        checked={filterTypeMandat.includes(type)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFilterTypeMandat([...filterTypeMandat, type]);
+                          } else {
+                            setFilterTypeMandat(filterTypeMandat.filter((t) => t !== type));
+                          }
+                        }}
+                      >
                         {type}
-                      </SelectItem>
+                      </DropdownMenuCheckboxItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                <Select value={filterUrgence} onValueChange={setFilterUrgence}>
-                  <SelectTrigger className="w-36 bg-slate-800/50 border-slate-700 text-white">
-                    <SelectValue placeholder="Urgence" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">Toutes</SelectItem>
-                    <SelectItem value="Pas pressé" className="text-white">Pas pressé</SelectItem>
-                    <SelectItem value="Normal" className="text-white">Normal</SelectItem>
-                    <SelectItem value="Rapide" className="text-white">Rapide</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-36 bg-slate-800/50 border-slate-700 text-white justify-between">
+                      <span>Urgence ({filterUrgence.length || 'Toutes'})</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                    <DropdownMenuLabel>Filtrer par urgence</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {["Pas pressé", "Normal", "Rapide"].map((urgence) => (
+                      <DropdownMenuCheckboxItem
+                        key={urgence}
+                        checked={filterUrgence.includes(urgence)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFilterUrgence([...filterUrgence, urgence]);
+                          } else {
+                            setFilterUrgence(filterUrgence.filter((u) => u !== urgence));
+                          }
+                        }}
+                      >
+                        {urgence}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                {(filterArpenteur !== "all" || filterVille !== "all" || filterTypeMandat !== "all" || filterUrgence !== "all") && (
+                {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0) && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setFilterArpenteur("all");
-                      setFilterVille("all");
-                      setFilterTypeMandat("all");
-                      setFilterUrgence("all");
+                      setFilterArpenteur([]);
+                      setFilterVille([]);
+                      setFilterTypeMandat([]);
+                      setFilterUrgence([]);
                     }}
                     className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                   >
@@ -6883,9 +6943,9 @@ export default function PriseDeMandat() {
                         pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
                       );
                       const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
-                      const matchesVille = filterVille === "all" || pm.adresse_travaux?.ville === filterVille;
-                      const matchesTypeMandat = filterTypeMandat === "all" || pm.mandats?.some(m => m.type_mandat === filterTypeMandat);
-                      const matchesUrgence = filterUrgence === "all" || pm.urgence_percue === filterUrgence;
+                      const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
+                      const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
+                      const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
                       return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence;
                     })
                     .sort((a, b) => {
