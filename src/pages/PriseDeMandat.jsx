@@ -1642,6 +1642,7 @@ export default function PriseDeMandat() {
     setFormData({
       numero_dossier: "",
       arpenteur_geometre: "",
+      placeAffaire: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
       statut: "Nouveau mandat/Demande d'information",
@@ -1668,6 +1669,7 @@ export default function PriseDeMandat() {
     setFormData({
       numero_dossier: "",
       arpenteur_geometre: "",
+      placeAffaire: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
       statut: "Nouveau mandat/Demande d'information",
