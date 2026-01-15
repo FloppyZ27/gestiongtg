@@ -6130,7 +6130,22 @@ export default function PriseDeMandat() {
 
               {/* Boutons tout en bas - pleine largeur */}
               <div className="flex justify-end gap-3 p-3 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setIsNewLotDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm">
+                <Button type="button" variant="outline" onClick={() => {
+                  // Vérifier si le formulaire a été modifié
+                  const hasChanges = newLotForm.numero_lot || 
+                    newLotForm.circonscription_fonciere || 
+                    newLotForm.rang || 
+                    newLotForm.concordances_anterieures.length > 0 || 
+                    newLotForm.document_pdf_url ||
+                    commentairesTemporairesLot.length > 0;
+                  
+                  if (hasChanges) {
+                    setShowCancelLotConfirm(true);
+                  } else {
+                    setIsNewLotDialogOpen(false);
+                    resetLotForm();
+                  }
+                }} className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm">
                   Annuler
                 </Button>
                 <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm">
