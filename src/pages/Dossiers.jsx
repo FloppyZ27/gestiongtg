@@ -547,6 +547,7 @@ export default function Dossiers() {
       date_ouverture: entity.date_ouverture || new Date().toISOString().split('T')[0],
       date_fermeture: entity.date_fermeture || "",
       statut: entity.statut || "Ouvert",
+      place_affaire: entity.place_affaire || "",
       ttl: entity.ttl || "Non",
       clients_ids: entity.clients_ids || [],
       clients_texte: entity.clients_texte || "",
@@ -1894,6 +1895,18 @@ export default function Dossiers() {
                         <div className="space-y-2">
                           <Label>Date d'ouverture <span className="text-red-400">*</span></Label>
                           <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({ ...formData, date_ouverture: e.target.value })} required className="bg-slate-800 border-slate-700" disabled={formData.ttl === "Oui"} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Place d'affaire</Label>
+                          <Select value={formData.place_affaire} onValueChange={(value) => setFormData({ ...formData, place_affaire: value })} disabled={formData.ttl === "Oui"}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Alma" className="text-white">Alma</SelectItem>
+                              <SelectItem value="Saguenay" className="text-white">Saguenay</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         {formData.statut === "Fermé" && (
                           <div className="space-y-2">
