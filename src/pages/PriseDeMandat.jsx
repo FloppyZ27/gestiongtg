@@ -6061,7 +6061,24 @@ export default function PriseDeMandat() {
                             <div className="pl-1 pr-4">
                               
                               <div className="mb-2">
-                                <Label className="text-slate-400 text-xs">Lots existants</Label>
+                                <Label className="text-slate-400 text-xs">Lots existants ({lots.filter(lot => {
+                                    const searchLower = lotListSearchTerm.toLowerCase();
+                                    const matchesSearch = !lotListSearchTerm || 
+                                      lot.numero_lot?.toLowerCase().includes(searchLower) ||
+                                      lot.rang?.toLowerCase().includes(searchLower) ||
+                                      lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
+                                      lot.cadastre?.toLowerCase().includes(searchLower);
+                                    const matchesNumero = !currentConcordanceForm.numero_lot || 
+                                      lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
+                                    const matchesRang = !currentConcordanceForm.rang || 
+                                      lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
+                                    const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
+                                      lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
+                                    const matchesCadastre = !currentConcordanceForm.cadastre || 
+                                      lot.cadastre === currentConcordanceForm.cadastre;
+                                    
+                                    return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
+                                  }).length})</Label>
                               </div>
 
                               <div className="space-y-1" style={{ maxHeight: '400px', overflowY: 'auto' }}>
