@@ -6,7 +6,6 @@ import ChaineDeTitre from './pages/ChaineDeTitre';
 import Clavardage from './pages/Clavardage';
 import Clients from './pages/Clients';
 import Dashboard from './pages/Dashboard';
-import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
 import GestionDeMandat from './pages/GestionDeMandat';
 import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
@@ -19,6 +18,7 @@ import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
 import PriseDeMandat from './pages/PriseDeMandat';
+import Dossiers from './pages/Dossiers';
 import __Layout from './Layout.jsx';
 
 
@@ -31,7 +31,6 @@ export const PAGES = {
     "Clavardage": Clavardage,
     "Clients": Clients,
     "Dashboard": Dashboard,
-    "Dossiers": Dossiers,
     "EditerActe": EditerActe,
     "GestionDeMandat": GestionDeMandat,
     "GestionEquipeTerrain": GestionEquipeTerrain,
@@ -44,6 +43,7 @@ export const PAGES = {
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
     "PriseDeMandat": PriseDeMandat,
+    "Dossiers": Dossiers,
 }
 
 export const pagesConfig = {

@@ -360,6 +360,7 @@ export default function PriseDeMandat() {
   const [formData, setFormData] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
+    place_affaire: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     date_fermeture: "",
     statut: "Nouveau mandat/Demande d'information",
@@ -491,6 +492,7 @@ export default function PriseDeMandat() {
 
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
+        place_affaire: data.place_affaire,
         clients_ids: data.clients_ids,
         client_info: data.client_info,
         adresse_travaux: data.adresse_travaux,
@@ -562,6 +564,7 @@ export default function PriseDeMandat() {
     setFormData({
       ...formData,
       arpenteur_geometre: pm.arpenteur_geometre || "",
+      place_affaire: pm.place_affaire || "",
       clients_ids: pm.clients_ids || [],
       notaires_ids: pm.notaires_ids || [],
       courtiers_ids: pm.courtiers_ids || [],
@@ -659,6 +662,7 @@ export default function PriseDeMandat() {
 
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
+        place_affaire: data.place_affaire,
         numero_dossier: data.numero_dossier,
         date_ouverture: data.date_ouverture,
         clients_ids: data.clients_ids,
@@ -701,6 +705,7 @@ export default function PriseDeMandat() {
     if (initialPriseMandatData && editingPriseMandat) {
       const currentData = {
         arpenteur_geometre: formData.arpenteur_geometre,
+        place_affaire: formData.place_affaire,
         clients_ids: formData.clients_ids,
         notaires_ids: formData.notaires_ids,
         courtiers_ids: formData.courtiers_ids,
@@ -716,6 +721,7 @@ export default function PriseDeMandat() {
       
       const initialData = {
         arpenteur_geometre: initialPriseMandatData.arpenteur_geometre,
+        place_affaire: initialPriseMandatData.place_affaire || "",
         clients_ids: initialPriseMandatData.clients_ids || [],
         notaires_ids: initialPriseMandatData.notaires_ids || [],
         courtiers_ids: initialPriseMandatData.courtiers_ids || [],
@@ -1331,6 +1337,7 @@ export default function PriseDeMandat() {
 
     const dataToSubmit = {
       arpenteur_geometre: formData.arpenteur_geometre,
+      place_affaire: formData.place_affaire,
       numero_dossier: formData.numero_dossier,
       date_ouverture: formData.date_ouverture,
       clients_ids: formData.clients_ids,
@@ -1635,6 +1642,7 @@ export default function PriseDeMandat() {
     setFormData({
       numero_dossier: "",
       arpenteur_geometre: "",
+      place_affaire: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
       statut: "Nouveau mandat/Demande d'information",
@@ -1661,6 +1669,7 @@ export default function PriseDeMandat() {
     setFormData({
       numero_dossier: "",
       arpenteur_geometre: "",
+      place_affaire: "",
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
       statut: "Nouveau mandat/Demande d'information",
@@ -2583,6 +2592,8 @@ export default function PriseDeMandat() {
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
                     dateOuverture={formData.date_ouverture}
                     onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
+                    placeAffaire={formData.place_affaire}
+                    onPlaceAffaireChange={(value) => setFormData({...formData, place_affaire: value})}
                     isCollapsed={dossierInfoStepCollapsed}
                     onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
                   />
