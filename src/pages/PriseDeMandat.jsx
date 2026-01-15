@@ -4342,7 +4342,7 @@ export default function PriseDeMandat() {
                                           <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
                                             {filteredLotsForSelector.length > 0 ? (
-                                               filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                               filteredLotsForSelector.map((lot) => {
                                                  const isSelected = mandat.lots?.includes(lot.id);
                                                  return (
                                                    <div
