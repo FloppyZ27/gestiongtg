@@ -2071,12 +2071,14 @@ export default function PriseDeMandat() {
           const coParts = coLine.split(';');
           const rang = coParts[1] ? coParts[1].replace('R', 'Rang ') : '';
           const numeroLot = coParts[3] || ''; // Quatrième élément
+          const estPartie = coParts[4] === 'O'; // Cinquième élément: 'O' = coché, 'N' = pas coché
           
           extractedData.concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
             cadastre: 'Québec',
             numero_lot: numeroLot,
-            rang: rang
+            rang: rang,
+            est_partie: estPartie
           });
         });
       }
