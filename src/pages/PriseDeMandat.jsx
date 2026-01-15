@@ -2584,6 +2584,8 @@ export default function PriseDeMandat() {
                     onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
                     dateOuverture={formData.date_ouverture}
                     onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
+                    placeAffaire={formData.placeAffaire}
+                    onPlaceAffaireChange={(value) => setFormData({...formData, placeAffaire: value})}
                     isCollapsed={dossierInfoStepCollapsed}
                     onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
                   />
