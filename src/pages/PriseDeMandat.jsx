@@ -315,6 +315,7 @@ export default function PriseDeMandat() {
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [showMissingUserWarning, setShowMissingUserWarning] = useState(false);
+  const [showConcordanceWarning, setShowConcordanceWarning] = useState(false);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -1980,7 +1981,7 @@ export default function PriseDeMandat() {
   
   const addConcordanceFromForm = () => {
     if (!currentConcordanceForm.numero_lot || !currentConcordanceForm.circonscription_fonciere) {
-      alert("Veuillez remplir au minimum le numéro de lot et la circonscription foncière.");
+      setShowConcordanceWarning(true);
       return;
     }
     
@@ -4785,6 +4786,38 @@ export default function PriseDeMandat() {
           </DialogContent>
         </Dialog>
 
+        {/* Dialog d'avertissement concordance incomplète */}
+        <Dialog open={showConcordanceWarning} onOpenChange={setShowConcordanceWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez remplir au minimum le numéro de lot et la circonscription foncière.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowConcordanceWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-md shadow-2xl shadow-black/50">
@@ -5447,7 +5480,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder="Sélectionner" />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
                                      <SelectItem key={type} value={type} className="text-white text-xs">
                                        {type}
