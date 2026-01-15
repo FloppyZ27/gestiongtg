@@ -305,7 +305,6 @@ export default function PriseDeMandat() {
   const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
-  const [applyLotsToAllMandats, setApplyLotsToAllMandats] = useState(false);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [dossierDocuments, setDossierDocuments] = useState([]);
@@ -4264,36 +4263,9 @@ export default function PriseDeMandat() {
 
                                       {/* Section Lots */}
                                       <div className={`grid ${lotTabExpanded && currentMandatIndexDossier === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
-                                       {/* Colonne gauche - Lots sélectionnés */}
-                                       <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
-                                          <div className="flex items-center justify-between mb-1">
-                                            <Label className="text-slate-400 text-xs">Lot</Label>
-                                            {nouveauDossierForm.mandats.length > 1 && (
-                                                <div className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={`apply-lots-to-all-${index}`}
-                                                        checked={applyLotsToAllMandats}
-                                                        onCheckedChange={(checked) => {
-                                                            setApplyLotsToAllMandats(checked);
-                                                            if (checked) {
-                                                                const activeMandatIndex = parseInt(activeTabMandatDossier, 10);
-                                                                const lotsToApply = nouveauDossierForm.mandats[activeMandatIndex]?.lots || [];
-                                                                setNouveauDossierForm(prev => ({
-                                                                    ...prev,
-                                                                    mandats: prev.mandats.map(m => ({ ...m, lots: [...new Set(lotsToApply)] }))
-                                                                }));
-                                                            }
-                                                        }}
-                                                    />
-                                                    <label
-                                                        htmlFor={`apply-lots-to-all-${index}`}
-                                                        className="text-xs font-medium leading-none text-slate-400 cursor-pointer"
-                                                    >
-                                                        Appliquer à tous les mandats
-                                                    </label>
-                                                </div>
-                                            )}
-                                          </div>
+                                        {/* Colonne gauche - Lots sélectionnés */}
+                                        <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
+                                          <Label className="text-slate-400 text-xs">Lot</Label>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
@@ -4329,25 +4301,15 @@ export default function PriseDeMandat() {
                                                        <button 
                                                          type="button" 
                                                          onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const currentLots = nouveauDossierForm.mandats[index]?.lots || [];
-                                                            const lotsToApply = currentLots.filter(id => id !== lotId);
-
-                                                            if (applyLotsToAllMandats) {
-                                                                setNouveauDossierForm(prev => ({
-                                                                    ...prev,
-                                                                    mandats: prev.mandats.map(m => ({ ...m, lots: [...lotsToApply] }))
-                                                                }));
-                                                            } else {
-                                                                setNouveauDossierForm(prev => ({
-                                                                    ...prev,
-                                                                    mandats: prev.mandats.map((m, i) => i === index ? {
-                                                                        ...m,
-                                                                        lots: lotsToApply
-                                                                    } : m)
-                                                                }));
-                                                            }
-                                                          }}
+                                                           e.stopPropagation();
+                                                           setNouveauDossierForm(prev => ({
+                                                             ...prev,
+                                                             mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                               ...m, 
+                                                               lots: m.lots.filter(id => id !== lotId) 
+                                                             } : m)
+                                                           }));
+                                                         }}
                                                          className="absolute right-1 top-1 hover:text-red-400"
                                                        >
                                                          <X className="w-3 h-3" />
@@ -4431,23 +4393,14 @@ export default function PriseDeMandat() {
                                                    <div
                                                           key={lot.id}
                                                           onClick={() => {
-                                                             const currentLots = nouveauDossierForm.mandats[index]?.lots || [];
-                                                             const isAdding = !currentLots.includes(lot.id);
-
-                                                             setNouveauDossierForm(prev => {
-                                                               const updatedMandats = prev.mandats.map((mandat, i) => {
-                                                                 if (applyLotsToAllMandats || i === index) {
-                                                                   const lots = mandat.lots || [];
-                                                                   const newLots = isAdding
-                                                                     ? [...new Set([...lots, lot.id])]
-                                                                     : lots.filter(id => id !== lot.id);
-                                                                   return { ...mandat, lots: newLots };
-                                                                 }
-                                                                 return mandat;
-                                                               });
-                                                               return { ...prev, mandats: updatedMandats };
-                                                             });
-                                                           }}
+                                                            setNouveauDossierForm(prev => ({
+                                                              ...prev,
+                                                              mandats: prev.mandats.map((m, i) => i === index ? {
+                                                                ...m,
+                                                                lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                              } : m)
+                                                            }));
+                                                          }}
                                                           className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
                                                             isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
                                                           }`}

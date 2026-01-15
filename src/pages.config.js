@@ -13,12 +13,12 @@ import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import Home from './pages/Home';
 import Lots from './pages/Lots';
 import Notaires from './pages/Notaires';
+import PriseDeMandat from './pages/PriseDeMandat';
 import Profil from './pages/Profil';
 import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import PriseDeMandat from './pages/PriseDeMandat';
 import __Layout from './Layout.jsx';
 
 
@@ -38,12 +38,12 @@ export const PAGES = {
     "Home": Home,
     "Lots": Lots,
     "Notaires": Notaires,
+    "PriseDeMandat": PriseDeMandat,
     "Profil": Profil,
     "Recherches": Recherches,
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "PriseDeMandat": PriseDeMandat,
 }
 
 export const pagesConfig = {
