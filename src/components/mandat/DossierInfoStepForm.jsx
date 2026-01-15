@@ -96,7 +96,21 @@ export default function DossierInfoStepForm({
               </div>
             </div>
 
-            {/* Ligne 2: N° Dossier et Date d'ouverture - Visible uniquement si statut "Mandats à ouvrir" */}
+            {/* Ligne 2: Place d'affaire */}
+            <div className="space-y-0.5">
+              <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+              <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
+                  <SelectValue placeholder="Sélectionner" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                  <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Ligne 3: N° Dossier et Date d'ouverture - Visible uniquement si statut "Mandats à ouvrir" */}
             {statut === "Mandats à ouvrir" && (
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-0.5">
