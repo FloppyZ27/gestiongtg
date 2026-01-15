@@ -4274,7 +4274,7 @@ export default function PriseDeMandat() {
                                                 checked={sameLotsForAllMandats}
                                                 onCheckedChange={setSameLotsForAllMandats}
                                               />
-                                              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
+                                              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
                                             </div>
                                           </div>
                                           <div className="flex items-center justify-between mb-2">
