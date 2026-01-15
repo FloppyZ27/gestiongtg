@@ -4272,7 +4272,16 @@ export default function PriseDeMandat() {
                                               <Checkbox
                                                 id={`sameLotsForAllMandats-${index}`}
                                                 checked={sameLotsForAllMandats}
-                                                onCheckedChange={setSameLotsForAllMandats}
+                                                onCheckedChange={(checked) => {
+                                                  setSameLotsForAllMandats(checked);
+                                                  if (checked) {
+                                                    const currentLots = mandat.lots || [];
+                                                    setNouveauDossierForm(prev => ({
+                                                      ...prev,
+                                                      mandats: prev.mandats.map(m => ({ ...m, lots: currentLots }))
+                                                    }));
+                                                  }
+                                                }}
                                               />
                                               <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous les mandats</Label>
                                             </div>
