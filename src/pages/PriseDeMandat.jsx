@@ -324,6 +324,8 @@ export default function PriseDeMandat() {
   const [showDeleteConcordanceConfirm, setShowDeleteConcordanceConfirm] = useState(false);
   const [concordanceIndexToDelete, setConcordanceIndexToDelete] = useState(null);
   const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
+  const [showLotExistsWarning, setShowLotExistsWarning] = useState(false);
+  const [showLotMissingFieldsWarning, setShowLotMissingFieldsWarning] = useState(false);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -1569,6 +1571,24 @@ export default function PriseDeMandat() {
   // NEW FUNCTION
   const handleNewLotSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation: vérifier que les champs obligatoires sont remplis
+    if (!newLotForm.numero_lot || !newLotForm.circonscription_fonciere) {
+      setShowLotMissingFieldsWarning(true);
+      return;
+    }
+    
+    // Vérifier si le lot existe déjà (même numéro de lot et même circonscription)
+    const lotExistant = lots.find(l => 
+      l.numero_lot === newLotForm.numero_lot && 
+      l.circonscription_fonciere === newLotForm.circonscription_fonciere
+    );
+    
+    if (lotExistant) {
+      setShowLotExistsWarning(true);
+      return;
+    }
+    
     const newLot = await createLotMutation.mutateAsync(newLotForm);
     
     // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
@@ -5056,6 +5076,70 @@ export default function PriseDeMandat() {
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
                   Continuer l'édition
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement lot existant */}
+        <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Le lot <span className="text-emerald-400 font-semibold">{newLotForm.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{newLotForm.circonscription_fonciere}</span>.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotExistsWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement champs obligatoires manquants */}
+        <Dialog open={showLotMissingFieldsWarning} onOpenChange={setShowLotMissingFieldsWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotMissingFieldsWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
                 </Button>
               </div>
             </motion.div>
