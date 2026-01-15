@@ -764,6 +764,16 @@ export default function Lots() {
                       </div>
                     </div>
 
+                    {/* Section Documents */}
+                    <Card className="border-slate-700 bg-slate-800/30">
+                      <CardHeader className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20">
+                        <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-2 pb-3">
+                        <p className="text-slate-400 text-sm">Section documents à venir</p>
+                      </CardContent>
+                    </Card>
+
                     {/* Section Concordances antérieures */}
                     <div className="space-y-3">
                       <Label className="text-lg font-semibold">Concordances antérieures</Label>
