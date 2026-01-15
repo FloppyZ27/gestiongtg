@@ -4363,8 +4363,8 @@ export default function PriseDeMandat() {
                                                      <p className="text-white font-semibold text-xs truncate">
                                                        {lot.numero_lot}
                                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
-                                                       <span className="text-orange-400 font-normal"> • {lot.circonscription_fonciere}</span>
-                                                       {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
+                                                       {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
+                                                       {lot.circonscription_fonciere && <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>}
                                                        {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
                                                      </p>
                                                    </div>
