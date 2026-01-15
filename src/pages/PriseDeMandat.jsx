@@ -4343,39 +4343,37 @@ export default function PriseDeMandat() {
                                           <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
                                             {filteredLotsForSelector.length > 0 ? (
-                                              filteredLotsForSelector.slice(0, 20).map((lot) => {
-                                                const isSelected = mandat.lots?.includes(lot.id);
-                                                return (
-                                                  <div
-                                                    key={lot.id}
-                                                    onClick={() => {
-                                                      setNouveauDossierForm(prev => ({
-                                                        ...prev,
-                                                        mandats: prev.mandats.map((m, i) => i === index ? {
-                                                          ...m,
-                                                          lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
-                                                        } : m)
-                                                      }));
-                                                    }}
-                                                    className={`px-2 py-1.5 rounded text-xs cursor-pointer ${
-                                                      isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-                                                    }`}
-                                                  >
-                                                    <div className="flex items-center justify-between">
-                                                      <span className="font-medium truncate">{lot.numero_lot}</span>
-                                                      {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                                                    </div>
-                                                    <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
-                                                      <p>{lot.circonscription_fonciere}</p>
-                                                      {lot.cadastre && <p>Cadastre: {lot.cadastre}</p>}
-                                                      {lot.rang && <p>Rang: {lot.rang}</p>}
-                                                    </div>
-                                                  </div>
-                                                );
-                                              })
-                                            ) : (
-                                              <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
-                                            )}
+                                               filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                                 const isSelected = mandat.lots?.includes(lot.id);
+                                                 return (
+                                                   <div
+                                                     key={lot.id}
+                                                     onClick={() => {
+                                                       setNouveauDossierForm(prev => ({
+                                                         ...prev,
+                                                         mandats: prev.mandats.map((m, i) => i === index ? {
+                                                           ...m,
+                                                           lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
+                                                         } : m)
+                                                       }));
+                                                     }}
+                                                     className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
+                                                       isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
+                                                     }`}
+                                                   >
+                                                     <p className="text-white font-semibold text-xs truncate">
+                                                       {lot.numero_lot}
+                                                       {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
+                                                       <span className="text-orange-400 font-normal"> • {lot.circonscription_fonciere}</span>
+                                                       {lot.cadastre && <span className="text-slate-400 font-normal"> • {lot.cadastre}</span>}
+                                                       {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
+                                                     </p>
+                                                   </div>
+                                                 );
+                                               })
+                                             ) : (
+                                               <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
+                                             )}
                                           </div>
                                         </div>
                                       </div>
