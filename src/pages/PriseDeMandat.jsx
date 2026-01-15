@@ -4249,41 +4249,62 @@ export default function PriseDeMandat() {
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
-                                                <div className="space-y-1">
-                                                  {mandat.lots.map((lotId) => {
-                                                    const lot = getLotById(lotId);
-                                                    return (
-                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
-                                                        <button 
-                                                          type="button" 
-                                                          onClick={() => {
-                                                            setNouveauDossierForm(prev => ({
-                                                              ...prev,
-                                                              mandats: prev.mandats.map((m, i) => i === index ? { 
-                                                                ...m, 
-                                                                lots: m.lots.filter(id => id !== lotId) 
-                                                              } : m)
-                                                            }));
-                                                          }}
-                                                          className="absolute right-1 top-1 hover:text-red-400"
-                                                        >
-                                                          <X className="w-3 h-3" />
-                                                        </button>
-                                                        <div className="pr-5 space-y-0.5">
-                                                          <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
-                                                          <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
-                                                          <p className="text-slate-500">
-                                                            {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
-                                                          </p>
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  })}
-                                                </div>
+                                               <div className="space-y-1">
+                                                 {mandat.lots.map((lotId) => {
+                                                   const lot = getLotById(lotId);
+                                                   return (
+                                                     <div 
+                                                       key={lotId} 
+                                                       className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                                       onClick={() => {
+                                                         setEditingLot(lot);
+                                                         setNewLotForm({
+                                                           numero_lot: lot?.numero_lot || "",
+                                                           circonscription_fonciere: lot?.circonscription_fonciere || "",
+                                                           cadastre: lot?.cadastre || "Québec",
+                                                           rang: lot?.rang || "",
+                                                           concordances_anterieures: lot?.concordances_anterieures || [],
+                                                           document_pdf_url: lot?.document_pdf_url || ""
+                                                         });
+                                                         setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot?.circonscription_fonciere] || []);
+                                                         setCommentairesTemporairesLot([]);
+                                                         setLotInfoCollapsed(false);
+                                                         setLotConcordanceCollapsed(false);
+                                                         setLotDocumentsCollapsed(false);
+                                                         setIsNewLotDialogOpen(true);
+                                                       }}
+                                                     >
+                                                       <button 
+                                                         type="button" 
+                                                         onClick={(e) => {
+                                                           e.stopPropagation();
+                                                           setNouveauDossierForm(prev => ({
+                                                             ...prev,
+                                                             mandats: prev.mandats.map((m, i) => i === index ? { 
+                                                               ...m, 
+                                                               lots: m.lots.filter(id => id !== lotId) 
+                                                             } : m)
+                                                           }));
+                                                         }}
+                                                         className="absolute right-1 top-1 hover:text-red-400"
+                                                       >
+                                                         <X className="w-3 h-3" />
+                                                       </button>
+                                                       <div className="pr-5 space-y-0.5">
+                                                         <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
+                                                         <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
+                                                         <p className="text-slate-500">
+                                                           {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
+                                                         </p>
+                                                       </div>
+                                                     </div>
+                                                   );
+                                                 })}
+                                               </div>
                                               ) : (
-                                                <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                                  Aucun lot sélectionné
-                                                </div>
+                                               <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                                 Aucun lot sélectionné
+                                               </div>
                                               )}
                                             </div>
                                             {!(lotTabExpanded && currentMandatIndexDossier === index) && (
