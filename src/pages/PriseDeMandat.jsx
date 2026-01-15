@@ -217,6 +217,8 @@ export default function PriseDeMandat() {
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [lotConcordanceCollapsed, setLotConcordanceCollapsed] = useState(false);
   const [lotDocumentsCollapsed, setLotDocumentsCollapsed] = useState(false);
+  const [isImportingD01, setIsImportingD01] = useState(false);
+  const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [currentConcordanceForm, setCurrentConcordanceForm] = useState({
     circonscription_fonciere: "",
     cadastre: "",
@@ -2029,6 +2031,105 @@ export default function PriseDeMandat() {
   const handleConcordanceCirconscriptionChange = (value) => {
     setCurrentConcordanceForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
     setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const handleD01Import = async (file) => {
+    setIsImportingD01(true);
+    try {
+      // Upload le fichier
+      const uploadResponse = await base44.integrations.Core.UploadFile({ file });
+      const fileUrl = uploadResponse.file_url;
+
+      // Extraire les données du fichier .d01
+      const extractResponse = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url: fileUrl,
+        json_schema: {
+          type: "object",
+          properties: {
+            numero_lot: { type: "string" },
+            circonscription_fonciere: { type: "string" },
+            cadastre: { type: "string" },
+            rang: { type: "string" },
+            date_bpd: { type: "string" },
+            type_operation: { type: "string" },
+            concordances_anterieures: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  numero_lot: { type: "string" },
+                  circonscription_fonciere: { type: "string" },
+                  cadastre: { type: "string" },
+                  rang: { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (extractResponse.status === "success" && extractResponse.output) {
+        const data = extractResponse.output;
+        
+        // Remplir le formulaire avec les données extraites
+        setNewLotForm(prev => ({
+          ...prev,
+          numero_lot: data.numero_lot || prev.numero_lot,
+          circonscription_fonciere: data.circonscription_fonciere || prev.circonscription_fonciere,
+          cadastre: data.cadastre || prev.cadastre,
+          rang: data.rang || prev.rang,
+          date_bpd: data.date_bpd || prev.date_bpd,
+          type_operation: data.type_operation || prev.type_operation,
+          concordances_anterieures: data.concordances_anterieures || prev.concordances_anterieures
+        }));
+
+        // Mettre à jour les cadastres disponibles si une circonscription a été détectée
+        if (data.circonscription_fonciere) {
+          setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[data.circonscription_fonciere] || []);
+        }
+
+        alert("Données importées avec succès depuis le fichier .d01");
+      } else {
+        alert("Erreur lors de l'extraction des données du fichier .d01");
+      }
+    } catch (error) {
+      console.error("Erreur import .d01:", error);
+      alert("Erreur lors de l'importation du fichier .d01");
+    } finally {
+      setIsImportingD01(false);
+    }
+  };
+
+  const handleD01FileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleD01Import(file);
+    }
+  };
+
+  const handleD01DragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(true);
+  };
+
+  const handleD01DragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+  };
+
+  const handleD01Drop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.d01')) {
+      handleD01Import(file);
+    } else {
+      alert("Veuillez déposer un fichier .d01");
+    }
   };
   // END NEW FUNCTIONS
 
@@ -5389,6 +5490,46 @@ export default function PriseDeMandat() {
                   </div>
                   
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-2">
+                    {/* Section Import .d01 */}
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
+                        isDragOverD01 
+                          ? 'border-emerald-500 bg-emerald-500/10' 
+                          : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
+                      }`}
+                      onDragOver={handleD01DragOver}
+                      onDragLeave={handleD01DragLeave}
+                      onDrop={handleD01Drop}
+                    >
+                      {isImportingD01 ? (
+                        <div className="flex items-center justify-center gap-2 text-teal-400">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span className="text-sm">Importation en cours...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                          <p className="text-slate-300 text-sm mb-1">
+                            Glissez un fichier .d01 ici ou
+                          </p>
+                          <label className="inline-block">
+                            <input
+                              type="file"
+                              accept=".d01"
+                              onChange={handleD01FileSelect}
+                              className="hidden"
+                            />
+                            <span className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm rounded cursor-pointer transition-all inline-block">
+                              Sélectionner un fichier .d01
+                            </span>
+                          </label>
+                          <p className="text-slate-500 text-xs mt-2">
+                            Les informations du lot seront extraites automatiquement
+                          </p>
+                        </>
+                      )}
+                    </div>
+
                     {/* Section 1: Informations du lot */}
                     <Card className="border-slate-700 bg-slate-800/30">
                        <CardHeader 
