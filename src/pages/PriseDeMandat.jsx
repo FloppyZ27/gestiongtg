@@ -4278,7 +4278,7 @@ export default function PriseDeMandat() {
                                                   }))
                                                 }));
                                               }}
-                                              className="w-5 h-5 border-white/50 data-[state=checked]:!bg-white data-[state=checked]:border-white"
+                                              className="w-5 h-5"
                                             />
                                             <span className="text-slate-400 text-xs">Appliquer à tous les mandats du dossier</span>
                                           </div>
