@@ -6026,15 +6026,10 @@ export default function PriseDeMandat() {
                                     </TableHeader>
                                     <TableBody>
                                      {newLotForm.concordances_anterieures.map((concordance, index) => (
-                                       <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                         <TableCell className="text-white text-sm">
-                                           {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""}
-                                         </TableCell>
-                                         <TableCell className="text-slate-300 text-sm">{concordance.rang || "-"}</TableCell>
-                                         <TableCell className="text-slate-300 text-sm">
-                                           {concordance.circonscription_fonciere}
-                                         </TableCell>
-                                         <TableCell className="text-slate-300 text-sm">{concordance.cadastre || "-"}</TableCell>
+                                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                                <TableCell className="text-white text-sm" colSpan={4}>
+                                                  {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""} • {concordance.rang || "-"} • {concordance.cadastre || "-"} • {concordance.circonscription_fonciere}
+                                                </TableCell>
                                          <TableCell className="text-right">
                                            <Button
                                              type="button"
