@@ -4339,10 +4339,10 @@ export default function PriseDeMandat() {
                                             </Button>
                                           </div>
 
-                                          <p className="text-slate-400 text-xs mb-2">Lots existants ({filteredLotsForSelector.length})</p>
+                                          <p className="text-slate-400 text-xs mb-2">Lots existants ({lots.length})</p>
                                           <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                            {filteredLotsForSelector.length > 0 ? (
-                                               filteredLotsForSelector.slice(0, 20).map((lot) => {
+                                            {lots.length > 0 ? (
+                                               lots.slice(0, 20).map((lot) => {
                                                  const isSelected = mandat.lots?.includes(lot.id);
                                                  return (
                                                    <div
