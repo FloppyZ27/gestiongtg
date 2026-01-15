@@ -2412,6 +2412,7 @@ export default function PriseDeMandat() {
                           setNouveauDossierForm({
                             numero_dossier: prochainNumero,
                             arpenteur_geometre: formData.arpenteur_geometre,
+                            place_affaire: formData.placeAffaire,
                             date_ouverture: new Date().toISOString().split('T')[0],
                             statut: "Ouvert",
                             ttl: "Non",
