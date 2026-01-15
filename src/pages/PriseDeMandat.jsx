@@ -6236,8 +6236,8 @@ export default function PriseDeMandat() {
                   Annuler
                 </Button>
                 <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm">
-                  Créer
-                </Button>
+                   {editingLot ? "Modifier" : "Créer"}
+                 </Button>
               </div>
             </motion.div>
           </DialogContent>
