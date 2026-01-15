@@ -2070,15 +2070,13 @@ export default function PriseDeMandat() {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
           const rang = coParts[1] ? coParts[1].replace('R', 'Rang ') : '';
-          const numeroLot = coParts[2] || '';
-          const estPartie = coParts[3] === 'O';
+          const numeroLot = coParts[2] || ''; // Troisième élément
           
           extractedData.concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
             cadastre: 'Québec',
             numero_lot: numeroLot,
-            rang: rang,
-            est_partie: estPartie
+            rang: rang
           });
         });
       }
