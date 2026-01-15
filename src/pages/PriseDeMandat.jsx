@@ -4265,7 +4265,22 @@ export default function PriseDeMandat() {
                                       <div className={`grid ${lotTabExpanded && currentMandatIndexDossier === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
                                         {/* Colonne gauche - Lots sélectionnés */}
                                         <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
-                                          <Label className="text-slate-400 text-xs">Lot</Label>
+                                          <div className="flex items-center gap-2">
+                                            <Label className="text-slate-400 text-xs">Lot</Label>
+                                            <Checkbox
+                                              checked={false}
+                                              onCheckedChange={() => {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(() => ({
+                                                    ...prev.mandats[index],
+                                                    lots: mandat.lots
+                                                  }))
+                                                }));
+                                              }}
+                                            />
+                                            <span className="text-slate-400 text-xs">Appliquer à tous les mandats du dossier</span>
+                                          </div>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
