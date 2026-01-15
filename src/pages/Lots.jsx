@@ -777,8 +777,6 @@ export default function Lots() {
 
                     {/* Section Concordances antérieures */}
                     <div className="space-y-3">
-                      <Label className="text-lg font-semibold">Concordances antérieures</Label>
-                      
                       {/* Formulaire d'ajout/édition */}
                       <div className="p-4 bg-slate-800/30 border border-slate-700 rounded-lg space-y-3">
                         {editingConcordanceIndex !== null && (
