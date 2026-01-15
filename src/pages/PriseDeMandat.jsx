@@ -6065,12 +6065,9 @@ export default function PriseDeMandat() {
                                      ))}
                                     </TableBody>
                                   </Table>
-                                </div>
-                              )}
-
-                              {/* Ligne séparatrice */}
-                              <div className="border-t border-slate-600 my-3"></div>
-                              </div>
+                                  </div>
+                                  )}
+                                  </div>
 
                             {/* Séparateur vertical */}
                             <div className="bg-slate-600"></div>
