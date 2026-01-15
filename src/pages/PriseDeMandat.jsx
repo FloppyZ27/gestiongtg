@@ -6941,7 +6941,7 @@ export default function PriseDeMandat() {
                         formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
                         pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
                       );
-                      const matchesArpenteur = filterArpenteur === "all" || pm.arpenteur_geometre === filterArpenteur;
+                      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre);
                       const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
                       const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
                       const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
