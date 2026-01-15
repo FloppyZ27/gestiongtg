@@ -28,7 +28,7 @@ export default function EditerLot() {
   const queryClient = useQueryClient();
 
   const [lotId, setLotId] = useState(null);
-const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
+  const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
   const [lotForm, setLotForm] = useState({
     numero_lot: "",
     circonscription_fonciere: "",
@@ -104,7 +104,7 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
     mutationFn: (data) => base44.entities.Lot.update(lotId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
-      navigate(-1); // Go back to the previous page
+      navigate(-1);
     },
   });
 
@@ -112,8 +112,160 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
     e.preventDefault();
     updateLotMutation.mutate(lotForm);
   };
+
+  const handleLotCirconscriptionChange = (value) => {
+    setLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
+    setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const addConcordanceFromForm = () => {
+    if (!currentConcordanceForm.numero_lot || !currentConcordanceForm.circonscription_fonciere || !currentConcordanceForm.cadastre) {
+      setShowConcordanceWarning(true);
+      return;
+    }
+    
+    setLotForm(prev => ({
+      ...prev,
+      concordances_anterieures: [
+        ...(prev.concordances_anterieures || []),
+        { ...currentConcordanceForm }
+      ]
+    }));
+    
+    setCurrentConcordanceForm({
+      circonscription_fonciere: "",
+      cadastre: "",
+      numero_lot: "",
+      rang: "",
+      est_partie: false
+    });
+    setAvailableCadastresForConcordance([]);
+  };
   
-  // ... (All handler functions from the dialog)
+  const removeConcordance = (index) => {
+    setConcordanceIndexToDelete(index);
+    setShowDeleteConcordanceConfirm(true);
+  };
+  
+  const handleConcordanceCirconscriptionChange = (value) => {
+    setCurrentConcordanceForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
+    setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const handleD01DragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(true);
+  };
+
+  const handleD01DragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+  };
+
+  const handleD01Drop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.d01')) {
+      handleD01Import(file);
+    } else {
+      alert("Veuillez déposer un fichier .d01");
+    }
+  };
+
+  const handleD01FileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleD01Import(file);
+    }
+  };
+
+  const handleD01Import = async (file) => {
+    setIsImportingD01(true);
+    try {
+      const fileContent = await file.text();
+      
+      const lines = fileContent.split('\n');
+      const lotLine = lines.find(line => line.startsWith('LO'));
+      const suLines = lines.filter(line => line.startsWith('SU'));
+      
+      let coLines = [];
+      if (suLines.length >= 2) {
+        const firstSuIndex = lines.indexOf(suLines[0]);
+        const secondSuIndex = lines.indexOf(suLines[1]);
+        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
+      }
+      
+      const suLine = suLines[0];
+      
+      let extractedData = {};
+      
+      if (lotLine) {
+        const lotParts = lotLine.split(';');
+        extractedData.numero_lot = lotParts[1] || '';
+      }
+      
+      if (suLine) {
+        const suParts = suLine.split(';');
+        extractedData.circonscription_fonciere = suParts[2] || '';
+        extractedData.date_bpd = suParts[3] || '';
+      }
+      
+      extractedData.cadastre = 'Québec';
+      
+      extractedData.concordances_anterieures = [];
+      if (coLines.length > 0) {
+        coLines.forEach(coLine => {
+          const coParts = coLine.split(';');
+          const cadastre = coParts[1] || 'Québec';
+          let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
+          if (rang.match(/^Rang 0(\d+)$/)) {
+            rang = rang.replace(/^Rang 0/, 'Rang ');
+          }
+          const numeroLot = coParts[3] || '';
+          const estPartie = coParts[4] === 'O';
+          
+          extractedData.concordances_anterieures.push({
+            circonscription_fonciere: extractedData.circonscription_fonciere,
+            cadastre: cadastre,
+            numero_lot: numeroLot,
+            rang: rang,
+            est_partie: estPartie
+          });
+        });
+      }
+      
+      if (extractedData.numero_lot || extractedData.circonscription_fonciere) {
+        setLotForm(prev => ({
+          ...prev,
+          numero_lot: extractedData.numero_lot || prev.numero_lot,
+          circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
+          cadastre: extractedData.cadastre || prev.cadastre,
+          rang: extractedData.rang || prev.rang,
+          date_bpd: extractedData.date_bpd || prev.date_bpd,
+          type_operation: extractedData.type_operation || prev.type_operation,
+          concordances_anterieures: extractedData.concordances_anterieures || prev.concordances_anterieures
+        }));
+
+        if (extractedData.circonscription_fonciere) {
+          setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
+        }
+
+        setShowD01ImportSuccess(true);
+      } else {
+        alert("Erreur lors de l'extraction des données du fichier .d01");
+      }
+    } catch (error) {
+      console.error("Erreur import .d01:", error);
+      alert("Erreur lors de l'importation du fichier .d01");
+    } finally {
+      setIsImportingD01(false);
+    }
+  };
 
   if (isLoadingLots) {
     return <div className="flex items-center justify-center h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>;
@@ -136,9 +288,45 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
                     </div>
                     
                     <form id="lot-form" onSubmit={handleLotSubmit} className="space-y-2">
-                        {/* The entire form from the dialog goes here */}
+                        {/* Section Import .d01 */}
+                        <div 
+                          className={`border border-dashed rounded-lg p-2 transition-all ${
+                            isDragOverD01 
+                              ? 'border-emerald-500 bg-emerald-500/10' 
+                              : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
+                          }`}
+                          onDragOver={handleD01DragOver}
+                          onDragLeave={handleD01DragLeave}
+                          onDrop={handleD01Drop}
+                        >
+                          {isImportingD01 ? (
+                            <div className="flex items-center justify-center gap-2 text-teal-400">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-xs">Importation...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <Upload className="w-4 h-4 text-slate-400" />
+                                <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
+                              </div>
+                              <label>
+                                <input
+                                  type="file"
+                                  accept=".d01"
+                                  onChange={handleD01FileSelect}
+                                  className="hidden"
+                                />
+                                <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
+                                  Parcourir
+                                </span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+
                         {/* Section 1: Informations du lot */}
-                         <Card className="border-slate-700 bg-slate-800/30">
+                        <Card className="border-slate-700 bg-slate-800/30">
                            <CardHeader 
                              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1 bg-blue-900/20"
                              onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
@@ -153,7 +341,7 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
                                {lotInfoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                              </div>
                            </CardHeader>
- 
+
                            {!lotInfoCollapsed && (
                              <CardContent className="pt-1 pb-1.5 space-y-1.5">
                                <div className="grid grid-cols-2 gap-2">
@@ -177,7 +365,7 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
                                    />
                                  </div>
                                </div>
- 
+
                                <div className="grid grid-cols-2 gap-2">
                                  <div className="space-y-0.5">
                                    <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
@@ -186,100 +374,11 @@ const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
                                        setLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
                                        setAvailableCadastresForNewLot([]);
                                      } else {
-                                       setLotForm(prev => ({...prev, circonscription_fonciere: value, cadastre: ""}));
-                                       setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+                                       handleLotCirconscriptionChange(value);
                                      }
                                    }}>
                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                                        <SelectValue placeholder="Sélectionner" />
                                      </SelectTrigger>
                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                       <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                       {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                         <SelectItem key={circ} value={circ} className="text-white text-xs">
-                                           {circ}
-                                         </SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
-                                 </div>
-                                 <div className="space-y-0.5">
-                                   <Label className="text-slate-400 text-xs">Cadastre</Label>
-                                   <Select
-                                     value={lotForm.cadastre}
-                                     onValueChange={(value) => setLotForm({...lotForm, cadastre: value})}
-                                     disabled={!lotForm.circonscription_fonciere}
-                                   >
-                                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                       <SelectValue placeholder={lotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
-                                     </SelectTrigger>
-                                     <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                       <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                       {availableCadastresForNewLot.map((cadastre) => (
-                                         <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
-                                           {cadastre}
-                                         </SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
-                                 </div>
-                               </div>
- 
-                               <div className="grid grid-cols-2 gap-2">
-                                 <div className="space-y-0.5">
-                                   <Label className="text-slate-400 text-xs">Date BPD</Label>
-                                   <Input
-                                     type="date"
-                                     value={lotForm.date_bpd}
-                                     onChange={(e) => setLotForm({...lotForm, date_bpd: e.target.value})}
-                                     className="bg-slate-700 border-slate-600 h-6 text-xs"
-                                   />
-                                 </div>
-                                 <div className="space-y-0.5">
-                                   <Label className="text-slate-400 text-xs">Type d'opération</Label>
-                                   <Select
-                                     value={lotForm.type_operation}
-                                     onValueChange={(value) => setLotForm({...lotForm, type_operation: value})}
-                                   >
-                                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                       <SelectValue placeholder="Sélectionner" />
-                                     </SelectTrigger>
-                                     <SelectContent className="bg-slate-800 border-slate-700">
-                                       <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                       {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
-                                         <SelectItem key={type} value={type} className="text-white text-xs">
-                                           {type}
-                                         </SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
-                                 </div>
-                               </div>
-                             </CardContent>
-                           )}
-                         </Card>
-
-                        {/* Concordances, Documents, etc. */}
-                        
-                    </form>
-                </div>
-
-                {/* Colonne droite - Commentaires et Historique - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
-                  {/* ... Sidebar from dialog ... */}
-                </div>
-            </div>
-
-            {/* Boutons tout en bas - pleine largeur */}
-            <div className="flex justify-end gap-3 p-3 bg-slate-900 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)} className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm">
-                    Annuler
-                </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm">
-                    Modifier
-                </Button>
-            </div>
-        </motion.div>
-    </div>
-  );
-}
+                                       <SelectItem value={null} className="text-slate-500
