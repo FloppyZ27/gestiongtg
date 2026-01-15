@@ -4265,7 +4265,24 @@ export default function PriseDeMandat() {
                                       <div className={`grid ${lotTabExpanded && currentMandatIndexDossier === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
                                         {/* Colonne gauche - Lots sélectionnés */}
                                         <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
-                                          <Label className="text-slate-400 text-xs">Lot</Label>
+                                          <div className="flex items-center justify-between">
+                                            <Label className="text-slate-400 text-xs">Lot</Label>
+                                            <button
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const currentLots = mandat.lots || [];
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map((m, i) => i !== index ? { ...m, lots: currentLots } : m)
+                                                }));
+                                              }}
+                                              title="Appliquer les lots sélectionnés aux autres mandats"
+                                              className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                                            >
+                                              <Check className="w-4 h-4" />
+                                            </button>
+                                          </div>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
