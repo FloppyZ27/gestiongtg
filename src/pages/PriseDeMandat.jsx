@@ -1579,9 +1579,11 @@ export default function PriseDeMandat() {
     }
     
     // Vérifier si le lot existe déjà (même numéro de lot et même circonscription)
+    // mais pas en édition (si on est en train de modifier le même lot, ce n'est pas un doublon)
     const lotExistant = lots.find(l => 
       l.numero_lot === newLotForm.numero_lot && 
-      l.circonscription_fonciere === newLotForm.circonscription_fonciere
+      l.circonscription_fonciere === newLotForm.circonscription_fonciere &&
+      l.id !== editingLot?.id
     );
     
     if (lotExistant) {
@@ -1589,7 +1591,16 @@ export default function PriseDeMandat() {
       return;
     }
     
-    const newLot = await createLotMutation.mutateAsync(newLotForm);
+    if (editingLot) {
+      // Mode modification
+      await base44.entities.Lot.update(editingLot.id, newLotForm);
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+      setCommentairesTemporairesLot([]);
+    } else {
+      // Mode création
+      const newLot = await createLotMutation.mutateAsync(newLotForm);
     
     // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
     if (currentMandatIndexDossier !== null) {
