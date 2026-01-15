@@ -5537,7 +5537,7 @@ export default function PriseDeMandat() {
                                       className="bg-slate-700 border-slate-600 h-8 text-sm"
                                     />
                                   </div>
-                                  <div className="space-y-1 flex flex-col items-center justify-start">
+                                  <div className="space-y-1 flex flex-col items-center justify-start" style={{ paddingTop: '5px' }}>
                                     <Label className="text-slate-400 text-xs">Partie</Label>
                                     <div className="h-8 flex items-center justify-center">
                                       <Checkbox
