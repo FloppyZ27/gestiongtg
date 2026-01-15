@@ -2309,6 +2309,8 @@ export default function PriseDeMandat() {
   const sortedSoumission = sortDossiers(filteredSoumission);
   const sortedNouveauMandat = sortDossiers(filteredNouveauMandat);
 
+  const allVilles = [...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="w-full">
@@ -6750,6 +6752,15 @@ export default function PriseDeMandat() {
                   <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                     <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={filterArpenteur.length === 0}
+                      onCheckedChange={(checked) => {
+                        if (checked) setFilterArpenteur([]);
+                      }}
+                    >
+                      Tous
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
                     {ARPENTEURS.map((arp) => (
                       <DropdownMenuCheckboxItem
                         key={arp}
@@ -6778,7 +6789,16 @@ export default function PriseDeMandat() {
                   <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                     <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {[...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort().map((ville) => (
+                    <DropdownMenuCheckboxItem
+                      checked={filterVille.length === 0}
+                      onCheckedChange={(checked) => {
+                        if (checked) setFilterVille([]);
+                      }}
+                    >
+                      Toutes
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    {allVilles.map((ville) => (
                       <DropdownMenuCheckboxItem
                         key={ville}
                         checked={filterVille.includes(ville)}
@@ -6805,6 +6825,15 @@ export default function PriseDeMandat() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                     <DropdownMenuLabel>Filtrer par type de mandat</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                     <DropdownMenuCheckboxItem
+                      checked={filterTypeMandat.length === 0}
+                      onCheckedChange={(checked) => {
+                        if (checked) setFilterTypeMandat([]);
+                      }}
+                    >
+                      Tous
+                    </DropdownMenuCheckboxItem>
                     <DropdownMenuSeparator />
                     {TYPES_MANDATS.map((type) => (
                       <DropdownMenuCheckboxItem
@@ -6833,6 +6862,15 @@ export default function PriseDeMandat() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
                     <DropdownMenuLabel>Filtrer par urgence</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={filterUrgence.length === 0}
+                      onCheckedChange={(checked) => {
+                        if (checked) setFilterUrgence([]);
+                      }}
+                    >
+                      Toutes
+                    </DropdownMenuCheckboxItem>
                     <DropdownMenuSeparator />
                     {["Pas pressé", "Normal", "Rapide"].map((urgence) => (
                       <DropdownMenuCheckboxItem
