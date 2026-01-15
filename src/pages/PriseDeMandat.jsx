@@ -969,6 +969,18 @@ export default function PriseDeMandat() {
     },
   });
 
+  const updateLotMutation = useMutation({
+    mutationFn: async (lotData) => {
+      const updatedLot = await base44.entities.Lot.update(editingLot.id, lotData);
+      return updatedLot;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+    },
+  });
+
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
   const courtiers = clients.filter(c => c.type_client === 'Courtier immobilier');
