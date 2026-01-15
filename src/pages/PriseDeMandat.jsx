@@ -3970,7 +3970,17 @@ export default function PriseDeMandat() {
                                     <div className="grid grid-cols-[60%_1px_40%] gap-3">
                                       {/* Adresse des travaux - 60% */}
                                       <div className="space-y-2">
-                                        <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                        <div className="flex items-center justify-between">
+                                          <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                          <div className="flex items-center gap-1.5">
+                                            <Checkbox
+                                              id={`sameAddressCheckbox-${index}`}
+                                              checked={sameAddressForAllMandats}
+                                              onCheckedChange={setSameAddressForAllMandats}
+                                            />
+                                            <Label htmlFor={`sameAddressCheckbox-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                          </div>
+                                        </div>
                                         {/* Barre de recherche d'adresse */}
                                         <div className="relative">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
