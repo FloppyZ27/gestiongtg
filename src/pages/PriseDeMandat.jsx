@@ -305,7 +305,7 @@ export default function PriseDeMandat() {
   const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
-  const [sameLotsForAllMandats, setSameLotsForAllMandats] = useState(true);
+  const [sameLotsForAllMandats, setSameLotsForAllMandats] = useState(false);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [dossierDocuments, setDossierDocuments] = useState([]);
