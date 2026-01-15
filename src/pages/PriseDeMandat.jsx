@@ -3143,7 +3143,6 @@ export default function PriseDeMandat() {
                                      <SelectValue placeholder="Sélectionner" />
                                    </SelectTrigger>
                                    <SelectContent className="bg-slate-800 border-slate-700">
-                                     <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                                      {ARPENTEURS.map((arpenteur) => (
                                        <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
                                      ))}
@@ -3949,7 +3948,6 @@ export default function PriseDeMandat() {
                                             <SelectValue placeholder="Sélectionner" />
                                           </SelectTrigger>
                                           <SelectContent className="bg-slate-800 border-slate-700">
-                                            <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                                             {TYPES_MANDATS.map((type) => (
                                               <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
                                             ))}
@@ -3968,7 +3966,6 @@ export default function PriseDeMandat() {
                                             <SelectValue placeholder="Sélectionner" />
                                           </SelectTrigger>
                                           <SelectContent className="bg-slate-800 border-slate-700">
-                                            <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                                             {users.map((u) => (
                                               <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
                                             ))}
@@ -5297,7 +5294,6 @@ export default function PriseDeMandat() {
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                     <SelectItem value="Initiale" className="text-white">Initiale</SelectItem>
                     <SelectItem value="Remplace" className="text-white">Remplace</SelectItem>
                     <SelectItem value="Corrige" className="text-white">Corrige</SelectItem>
@@ -5926,7 +5922,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder="Sélectionner" />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                      <SelectItem key={circ} value={circ} className="text-white text-xs">
                                        {circ}
@@ -5946,7 +5942,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                   <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {availableCadastresForNewLot.map((cadastre) => (
                                      <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
                                        {cadastre}
@@ -5977,7 +5973,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder="Sélectionner" />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
                                      <SelectItem key={type} value={type} className="text-white text-xs">
                                        {type}
