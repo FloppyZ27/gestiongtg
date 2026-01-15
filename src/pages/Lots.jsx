@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
+import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
@@ -126,6 +127,7 @@ export default function Lots() {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [newConcordance, setNewConcordance] = useState({
     circonscription_fonciere: "",
     cadastre: "",
@@ -765,14 +767,13 @@ export default function Lots() {
                     </div>
 
                     {/* Section Documents */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                      <CardHeader className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20">
-                        <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-2 pb-3">
-                        <p className="text-slate-400 text-sm">Section documents à venir</p>
-                      </CardContent>
-                    </Card>
+                    <DocumentsStepFormLot
+                      lotNumero={formData.numero_lot}
+                      circonscription={formData.circonscription_fonciere}
+                      isCollapsed={documentsCollapsed}
+                      onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
+                      disabled={false}
+                    />
 
                     {/* Section Concordances antérieures */}
                     <div className="space-y-3">
