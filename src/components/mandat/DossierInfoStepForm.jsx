@@ -74,7 +74,7 @@ export default function DossierInfoStepForm({
               </div>
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-                <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
+                <Select value={placeAffaire || ""} onValueChange={(value) => onPlaceAffaireChange(value)} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
