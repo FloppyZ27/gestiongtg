@@ -30,6 +30,7 @@ import MandatStepForm from "../components/mandat/MandatStepForm";
 import TarificationStepForm from "../components/mandat/TarificationStepForm";
 import ProfessionnelStepForm from "../components/mandat/ProfessionnelStepForm";
 import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
+import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -5737,63 +5738,15 @@ export default function PriseDeMandat() {
                     </Card>
 
                     {/* Section 3: Documents */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                      <CardHeader 
-                        className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20"
-                        onClick={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
-                              <Upload className="w-3.5 h-3.5 text-yellow-400" />
-                            </div>
-                            <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
-                            {newLotForm.document_pdf_url && (
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                                <Check className="w-3 h-3 mr-1" />
-                                PDF ajouté
-                              </Badge>
-                            )}
-                          </div>
-                          {lotDocumentsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                        </div>
-                      </CardHeader>
-
-                      {!lotDocumentsCollapsed && (
-                        <CardContent className="pt-1 pb-1.5">
-                          <div className="space-y-1.5">
-                            <Label className="text-slate-400 text-xs">Document PDF du lot</Label>
-                            <Input
-                              type="file"
-                              accept=".pdf"
-                              onChange={handleLotFileUpload}
-                              disabled={uploadingLotPdf}
-                              className="bg-slate-700 border-slate-600 file:text-cyan-400 file:bg-cyan-500/10 file:border-none file:hover:bg-cyan-500/20 h-7 text-xs"
-                            />
-                            {uploadingLotPdf && (
-                              <div className="flex items-center gap-2 text-xs text-slate-400">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                Upload en cours...
-                              </div>
-                            )}
-                            {newLotForm.document_pdf_url && (
-                              <div className="flex items-center gap-2 p-1.5 bg-slate-700/50 rounded-lg border border-slate-600">
-                                <File className="w-3 h-3 text-cyan-400" />
-                                <span className="text-xs text-slate-300 flex-1">Document PDF ajouté</span>
-                                <a
-                                  href={newLotForm.document_pdf_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-emerald-400 hover:text-emerald-300"
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      )}
-                    </Card>
+                    {newLotForm.numero_lot && newLotForm.circonscription_fonciere && (
+                      <DocumentsStepFormLot
+                        lotNumero={newLotForm.numero_lot}
+                        circonscription={newLotForm.circonscription_fonciere}
+                        isCollapsed={lotDocumentsCollapsed}
+                        onToggleCollapse={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
+                        disabled={false}
+                      />
+                    )}
                   </form>
                 </div>
 
