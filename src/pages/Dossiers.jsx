@@ -499,9 +499,14 @@ export default function Dossiers() {
       date_ouverture: new Date().toISOString().split('T')[0],
       date_fermeture: "",
       statut: "Ouvert",
+      ttl: "Non",
+      place_affaire: "",
       clients_ids: [],
+      clients_texte: "",
       notaires_ids: [],
+      notaires_texte: "",
       courtiers_ids: [],
+      courtiers_texte: "",
       mandats: [],
       description: ""
     });
