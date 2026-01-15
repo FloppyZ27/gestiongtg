@@ -905,6 +905,19 @@ export default function PriseDeMandat() {
   // const createClientMutation = useMutation(...)
   // const updateClientMutation = useMutation(...)
 
+
+  const updateLotMutation = useMutation({
+    mutationFn: async (lotData) => {
+      const updatedLot = await base44.entities.Lot.update(editingLot.id, lotData);
+      return updatedLot;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
+    },
+  });
+
   const createLotMutation = useMutation({
     mutationFn: async (lotData) => {
       const newLot = await base44.entities.Lot.create(lotData);
