@@ -5396,7 +5396,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder="Sélectionner" />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                      <SelectItem key={circ} value={circ} className="text-white text-xs">
                                        {circ}
@@ -5416,7 +5416,7 @@ export default function PriseDeMandat() {
                                    <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                  </SelectTrigger>
                                  <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                   <SelectItem value={null} className="text-slate-400 text-xs">Effacer</SelectItem>
+                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
                                    {availableCadastresForNewLot.map((cadastre) => (
                                      <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
                                        {cadastre}
@@ -5531,7 +5531,7 @@ export default function PriseDeMandat() {
                                         <SelectValue placeholder="Sélectionner" />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700">
-                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                        <SelectItem value={null} className="text-slate-500 text-sm opacity-50">Effacer</SelectItem>
                                         {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
                                           <SelectItem key={circ} value={circ} className="text-white text-sm">
                                             {circ}
@@ -5551,7 +5551,7 @@ export default function PriseDeMandat() {
                                         <SelectValue placeholder={currentConcordanceForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                        <SelectItem value={null} className="text-slate-400 text-sm">Effacer</SelectItem>
+                                        <SelectItem value={null} className="text-slate-500 text-sm opacity-50">Effacer</SelectItem>
                                         {availableCadastresForConcordance.map((cadastre) => (
                                           <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
                                             {cadastre}
@@ -5619,9 +5619,25 @@ export default function PriseDeMandat() {
                                 <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
                               
+                              <div className="relative mb-2">
+                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                <Input
+                                  placeholder="Rechercher..."
+                                  value={lotListSearchTerm}
+                                  onChange={(e) => setLotListSearchTerm(e.target.value)}
+                                  className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                />
+                              </div>
+                              
                               <div className="space-y-1 max-h-48 overflow-y-auto">
                                 {lots
                                   .filter(lot => {
+                                    const searchLower = lotListSearchTerm.toLowerCase();
+                                    const matchesSearch = !lotListSearchTerm || 
+                                      lot.numero_lot?.toLowerCase().includes(searchLower) ||
+                                      lot.rang?.toLowerCase().includes(searchLower) ||
+                                      lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
+                                      lot.cadastre?.toLowerCase().includes(searchLower);
                                     const matchesNumero = !currentConcordanceForm.numero_lot || 
                                       lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
                                     const matchesRang = !currentConcordanceForm.rang || 
@@ -5631,7 +5647,7 @@ export default function PriseDeMandat() {
                                     const matchesCadastre = !currentConcordanceForm.cadastre || 
                                       lot.cadastre === currentConcordanceForm.cadastre;
                                     
-                                    return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
+                                    return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                   })
                                   .map((lot) => (
                                     <div 
@@ -5656,6 +5672,12 @@ export default function PriseDeMandat() {
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
+                                  const searchLower = lotListSearchTerm.toLowerCase();
+                                  const matchesSearch = !lotListSearchTerm || 
+                                    lot.numero_lot?.toLowerCase().includes(searchLower) ||
+                                    lot.rang?.toLowerCase().includes(searchLower) ||
+                                    lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
+                                    lot.cadastre?.toLowerCase().includes(searchLower);
                                   const matchesNumero = !currentConcordanceForm.numero_lot || 
                                     lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
                                   const matchesRang = !currentConcordanceForm.rang || 
@@ -5665,7 +5687,7 @@ export default function PriseDeMandat() {
                                   const matchesCadastre = !currentConcordanceForm.cadastre || 
                                     lot.cadastre === currentConcordanceForm.cadastre;
                                   
-                                  return matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
+                                  return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
                                 }).length === 0 && (
                                   <div className="text-center py-6 text-slate-500">
                                     <Grid3x3 className="w-6 h-6 mx-auto mb-2 opacity-50" />
