@@ -4296,8 +4296,8 @@ export default function PriseDeMandat() {
                                           </div>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                             {mandat.lots && mandat.lots.length > 0 ? (
-                                              <div className="grid grid-cols-2 gap-2">
+                                              {mandat.lots && mandat.lots.length > 0 ? (
+                                               <div className="space-y-1">
                                                  {mandat.lots.map((lotId) => {
                                                    const lot = getLotById(lotId);
                                                    return (
