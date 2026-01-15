@@ -321,6 +321,8 @@ export default function PriseDeMandat() {
   const [showMissingUserWarning, setShowMissingUserWarning] = useState(false);
   const [showConcordanceWarning, setShowConcordanceWarning] = useState(false);
   const [showD01ImportSuccess, setShowD01ImportSuccess] = useState(false);
+  const [showDeleteConcordanceConfirm, setShowDeleteConcordanceConfirm] = useState(false);
+  const [concordanceIndexToDelete, setConcordanceIndexToDelete] = useState(null);
   const [initialPriseMandatData, setInitialPriseMandatData] = useState(null);
   const [workAddress, setWorkAddress] = useState({
     numeros_civiques: [""],
@@ -2023,10 +2025,8 @@ export default function PriseDeMandat() {
   };
   
   const removeConcordance = (index) => {
-    setNewLotForm(prev => ({
-      ...prev,
-      concordances_anterieures: prev.concordances_anterieures.filter((_, i) => i !== index)
-    }));
+    setConcordanceIndexToDelete(index);
+    setShowDeleteConcordanceConfirm(true);
   };
   
   const handleConcordanceCirconscriptionChange = (value) => {
@@ -4961,6 +4961,57 @@ export default function PriseDeMandat() {
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
                   OK
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression de concordance */}
+        <Dialog open={showDeleteConcordanceConfirm} onOpenChange={setShowDeleteConcordanceConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer cette concordance ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowDeleteConcordanceConfirm(false);
+                    setConcordanceIndexToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                  onClick={() => {
+                    if (concordanceIndexToDelete !== null) {
+                      setNewLotForm(prev => ({
+                        ...prev,
+                        concordances_anterieures: prev.concordances_anterieures.filter((_, i) => i !== concordanceIndexToDelete)
+                      }));
+                    }
+                    setShowDeleteConcordanceConfirm(false);
+                    setConcordanceIndexToDelete(null);
+                  }}
+                >
+                  Supprimer
                 </Button>
               </div>
             </motion.div>
