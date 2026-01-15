@@ -5520,9 +5520,9 @@ export default function PriseDeMandat() {
 
                       {!lotConcordanceCollapsed && (
                        <CardContent className="pt-2 pb-3">
-                         <div className="grid grid-cols-[60%_40%] gap-4 h-[500px]">
+                         <div className="grid grid-cols-[60%_40%] gap-4">
                             {/* Colonne gauche - Formulaire et tableau */}
-                            <div className="space-y-3 flex flex-col" style={{ height: '468px' }}>
+                            <div className="space-y-3">
                               {/* Formulaire d'ajout toujours visible */}
                               <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
                                 <Label className="text-purple-300 text-sm">Ajouter une concordance</Label>
@@ -5537,9 +5537,9 @@ export default function PriseDeMandat() {
                                       className="bg-slate-700 border-slate-600 h-8 text-sm"
                                     />
                                   </div>
-                                  <div className="space-y-1 flex flex-col items-center">
+                                  <div className="space-y-1 flex flex-col items-center justify-start">
                                     <Label className="text-slate-400 text-xs">Partie</Label>
-                                    <div className="h-8 flex items-center">
+                                    <div className="h-8 flex items-center justify-center">
                                       <Checkbox
                                         checked={currentConcordanceForm.est_partie}
                                         onCheckedChange={(checked) => setCurrentConcordanceForm({...currentConcordanceForm, est_partie: checked})}
@@ -5618,8 +5618,8 @@ export default function PriseDeMandat() {
                               </div>
 
                               {/* Tableau des concordances */}
-                              <div className="border border-slate-700 rounded-lg overflow-hidden flex-1">
-                                <div className="h-full overflow-y-auto">
+                              {newLotForm.concordances_anterieures.length > 0 && (
+                              <div className="border border-slate-700 rounded-lg overflow-hidden">
                                   <Table>
                                     <TableHeader>
                                       <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
@@ -5657,16 +5657,16 @@ export default function PriseDeMandat() {
                                     </TableBody>
                                     </Table>
                                     </div>
-                                    </div>
+                                    )}
                                     </div>
 
                             {/* Colonne droite - Liste des lots existants */}
-                            <div className="border-l border-slate-700 pl-4 flex flex-col" style={{ height: '468px' }}>
+                            <div className="border-l border-slate-700 pl-4">
                               <div className="mb-2">
                                 <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
 
-                              <div className="flex-1 overflow-y-auto space-y-1">
+                              <div className="space-y-1" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                 {lots
                                   .filter(lot => {
                                     const searchLower = lotListSearchTerm.toLowerCase();
