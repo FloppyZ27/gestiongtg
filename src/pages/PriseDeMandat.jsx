@@ -5492,7 +5492,7 @@ export default function PriseDeMandat() {
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-2">
                     {/* Section Import .d01 */}
                     <div 
-                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
+                      className={`border border-dashed rounded-lg p-2 transition-all ${
                         isDragOverD01 
                           ? 'border-emerald-500 bg-emerald-500/10' 
                           : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
@@ -5503,30 +5503,27 @@ export default function PriseDeMandat() {
                     >
                       {isImportingD01 ? (
                         <div className="flex items-center justify-center gap-2 text-teal-400">
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span className="text-sm">Importation en cours...</span>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-xs">Importation...</span>
                         </div>
                       ) : (
-                        <>
-                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                          <p className="text-slate-300 text-sm mb-1">
-                            Glissez un fichier .d01 ici ou
-                          </p>
-                          <label className="inline-block">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Upload className="w-4 h-4 text-slate-400" />
+                            <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
+                          </div>
+                          <label>
                             <input
                               type="file"
                               accept=".d01"
                               onChange={handleD01FileSelect}
                               className="hidden"
                             />
-                            <span className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm rounded cursor-pointer transition-all inline-block">
-                              Sélectionner un fichier .d01
+                            <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
+                              Parcourir
                             </span>
                           </label>
-                          <p className="text-slate-500 text-xs mt-2">
-                            Les informations du lot seront extraites automatiquement
-                          </p>
-                        </>
+                        </div>
                       )}
                     </div>
 
