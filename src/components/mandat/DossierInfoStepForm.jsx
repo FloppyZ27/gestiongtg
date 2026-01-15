@@ -55,7 +55,7 @@ export default function DossierInfoStepForm({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           <div className="space-y-2">
-            {/* Ligne 1: Arpenteur et Statut */}
+            {/* Ligne 1: Arpenteur et Place d'affaire */}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
@@ -73,41 +73,41 @@ export default function DossierInfoStepForm({
                 </Select>
               </div>
               <div className="space-y-0.5">
-                <Label className="text-slate-400 text-xs">Statut du mandat</Label>
-                <div className="flex gap-1">
-                  {STATUTS.map((s) => (
-                    <button
-                      key={s.value}
-                      type="button"
-                      onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
-                      disabled={!arpenteurGeometre || disabled}
-                      className={`px-2 py-0.5 rounded text-xs border transition-all ${
-                        !arpenteurGeometre || disabled
-                          ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
-                          : statut === s.value 
-                            ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
-                            : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
+                <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+                <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                    <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            {/* Ligne 2: Place d'affaire */}
+            {/* Ligne 2: Statut */}
             <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-              <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
-                  <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-slate-400 text-xs">Statut du mandat</Label>
+              <div className="flex gap-1">
+                {STATUTS.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => arpenteurGeometre && !disabled && onStatutChange(s.value)}
+                    disabled={!arpenteurGeometre || disabled}
+                    className={`px-2 py-0.5 rounded text-xs border transition-all ${
+                      !arpenteurGeometre || disabled
+                        ? "bg-slate-800/50 text-slate-600 border-slate-700 cursor-not-allowed"
+                        : statut === s.value 
+                          ? s.color + " ring-1 ring-offset-1 ring-offset-slate-800" 
+                          : "bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Ligne 3: N° Dossier et Date d'ouverture - Visible uniquement si statut "Mandats à ouvrir" */}
