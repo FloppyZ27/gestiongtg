@@ -220,7 +220,8 @@ export default function PriseDeMandat() {
     circonscription_fonciere: "",
     cadastre: "",
     numero_lot: "",
-    rang: ""
+    rang: "",
+    est_partie: false
   });
   const [availableCadastresForConcordance, setAvailableCadastresForConcordance] = useState([]);
   const [lotListSearchTerm, setLotListSearchTerm] = useState("");
@@ -1980,7 +1981,7 @@ export default function PriseDeMandat() {
   };
   
   const addConcordanceFromForm = () => {
-    if (!currentConcordanceForm.numero_lot || !currentConcordanceForm.circonscription_fonciere) {
+    if (!currentConcordanceForm.numero_lot || !currentConcordanceForm.circonscription_fonciere || !currentConcordanceForm.cadastre) {
       setShowConcordanceWarning(true);
       return;
     }
@@ -1998,7 +1999,8 @@ export default function PriseDeMandat() {
       circonscription_fonciere: "",
       cadastre: "",
       numero_lot: "",
-      rang: ""
+      rang: "",
+      est_partie: false
     });
     setAvailableCadastresForConcordance([]);
   };
@@ -4803,7 +4805,7 @@ export default function PriseDeMandat() {
               transition={{ duration: 0.15 }}
             >
               <p className="text-slate-300 text-center">
-                Veuillez remplir au minimum le numéro de lot et la circonscription foncière.
+                Veuillez remplir le numéro de lot, la circonscription foncière et le cadastre pour ajouter une concordance.
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button 
@@ -5525,9 +5527,9 @@ export default function PriseDeMandat() {
                               <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
                                 <Label className="text-purple-300 text-sm">Ajouter une concordance</Label>
                                 
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
                                   <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Numéro de lot</Label>
+                                    <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
                                     <Input
                                       value={currentConcordanceForm.numero_lot}
                                       onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, numero_lot: e.target.value})}
@@ -5544,11 +5546,18 @@ export default function PriseDeMandat() {
                                       className="bg-slate-700 border-slate-600 h-8 text-sm"
                                     />
                                   </div>
+                                  <div className="space-y-1 flex flex-col items-center justify-end pb-1">
+                                    <Label className="text-slate-400 text-xs">Partie</Label>
+                                    <Checkbox
+                                      checked={currentConcordanceForm.est_partie}
+                                      onCheckedChange={(checked) => setCurrentConcordanceForm({...currentConcordanceForm, est_partie: checked})}
+                                    />
+                                  </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                   <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Circonscription foncière</Label>
+                                    <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
                                     <Select 
                                       value={currentConcordanceForm.circonscription_fonciere} 
                                       onValueChange={(value) => {
@@ -5574,7 +5583,7 @@ export default function PriseDeMandat() {
                                     </Select>
                                   </div>
                                   <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Cadastre</Label>
+                                    <Label className="text-slate-400 text-xs">Cadastre <span className="text-red-400">*</span></Label>
                                     <Select
                                       value={currentConcordanceForm.cadastre}
                                       onValueChange={(value) => setCurrentConcordanceForm({...currentConcordanceForm, cadastre: value})}
@@ -5619,27 +5628,29 @@ export default function PriseDeMandat() {
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                      {newLotForm.concordances_anterieures.map((concordance, index) => (
-                                        <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                          <TableCell className="text-white text-sm">{concordance.numero_lot}</TableCell>
-                                          <TableCell className="text-slate-300 text-sm">{concordance.rang || "-"}</TableCell>
-                                          <TableCell className="text-slate-300 text-sm">
-                                            {concordance.circonscription_fonciere}
-                                          </TableCell>
-                                          <TableCell className="text-slate-300 text-sm">{concordance.cadastre || "-"}</TableCell>
-                                          <TableCell className="text-right">
-                                            <Button
-                                              type="button"
-                                              size="sm"
-                                              variant="ghost"
-                                              onClick={() => removeConcordance(index)}
-                                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
-                                            >
-                                              <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
+                                     {newLotForm.concordances_anterieures.map((concordance, index) => (
+                                       <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                         <TableCell className="text-white text-sm">
+                                           {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""}
+                                         </TableCell>
+                                         <TableCell className="text-slate-300 text-sm">{concordance.rang || "-"}</TableCell>
+                                         <TableCell className="text-slate-300 text-sm">
+                                           {concordance.circonscription_fonciere}
+                                         </TableCell>
+                                         <TableCell className="text-slate-300 text-sm">{concordance.cadastre || "-"}</TableCell>
+                                         <TableCell className="text-right">
+                                           <Button
+                                             type="button"
+                                             size="sm"
+                                             variant="ghost"
+                                             onClick={() => removeConcordance(index)}
+                                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                           >
+                                             <Trash2 className="w-3 h-3" />
+                                           </Button>
+                                         </TableCell>
+                                       </TableRow>
+                                     ))}
                                     </TableBody>
                                   </Table>
                                 </div>
