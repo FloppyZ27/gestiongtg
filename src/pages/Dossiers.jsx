@@ -1903,6 +1903,19 @@ export default function Dossiers() {
                         )}
                       </div>
 
+                      <div className="space-y-2">
+                        <Label>Place d'affaire</Label>
+                        <Select value={formData.place_affaire} onValueChange={(value) => setFormData({ ...formData, place_affaire: value })} disabled={formData.ttl === "Oui"}>
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Alma" className="text-white">Alma</SelectItem>
+                            <SelectItem value="Saguenay" className="text-white">Saguenay</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       <div className={`grid ${formData.ttl === "Oui" ? "grid-cols-1" : "grid-cols-3"} gap-4`}>
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-2">
