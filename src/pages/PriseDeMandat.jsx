@@ -4278,10 +4278,31 @@ export default function PriseDeMandat() {
                                                   {mandat.lots.map((lotId) => {
                                                     const lot = getLotById(lotId);
                                                     return (
-                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
+                                                      <div 
+                                                        key={lotId} 
+                                                        className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                                        onClick={() => {
+                                                          setEditingLot(lot);
+                                                          setNewLotForm({
+                                                            numero_lot: lot?.numero_lot || "",
+                                                            circonscription_fonciere: lot?.circonscription_fonciere || "",
+                                                            cadastre: lot?.cadastre || "Québec",
+                                                            rang: lot?.rang || "",
+                                                            concordances_anterieures: lot?.concordances_anterieures || [],
+                                                            document_pdf_url: lot?.document_pdf_url || "",
+                                                            date_bpd: lot?.date_bpd || "",
+                                                            type_operation: lot?.type_operation || "",
+                                                          });
+                                                          if (lot?.circonscription_fonciere) {
+                                                            setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
+                                                          }
+                                                          setIsNewLotDialogOpen(true);
+                                                        }}
+                                                      >
                                                         <button 
                                                           type="button" 
-                                                          onClick={() => {
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
                                                             setNouveauDossierForm(prev => ({
                                                               ...prev,
                                                               mandats: prev.mandats.map((m, i) => i === index ? { 
