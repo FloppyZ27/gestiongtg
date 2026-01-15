@@ -2047,13 +2047,13 @@ export default function PriseDeMandat() {
       let extractedData = {};
       
       if (lotLine) {
-        const lotParts = lotLine.split(/\s+/);
-        // Le numéro de lot est le premier élément après "LO"
+        const lotParts = lotLine.split(';');
+        // Le numéro de lot est entre les deux premiers ";"
         extractedData.numero_lot = lotParts[1] || '';
       }
       
       if (suLine) {
-        const suParts = suLine.split(/\s+/);
+        const suParts = suLine.split(';');
         // La circonscription est le deuxième élément
         extractedData.circonscription_fonciere = suParts[2] || '';
         // La date BPD est le troisième élément
