@@ -199,7 +199,7 @@ export default function PriseDeMandat() {
   const [currentMandatIndex, setCurrentMandatIndex] = useState(null);
   const [lotSearchTerm, setLotSearchTerm] = useState("");
   const [lotCirconscriptionFilter, setLotCirconscriptionFilter] = useState("all");
-  const [lotCadastreFilter, setLotCadastreFilter] = useState("Québec");
+  const [lotCadastreFilter, setLotCadastreFilter] = useState("all");
   const [isNewLotDialogOpen, setIsNewLotDialogOpen] = useState(false);
   const [newLotForm, setNewLotForm] = useState({
     numero_lot: "",
