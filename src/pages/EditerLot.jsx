@@ -28,6 +28,7 @@ export default function EditerLot() {
   const queryClient = useQueryClient();
 
   const [lotId, setLotId] = useState(null);
+const [showCancelLotConfirm, setShowCancelLotConfirm] = useState(false);
   const [lotForm, setLotForm] = useState({
     numero_lot: "",
     circonscription_fonciere: "",
