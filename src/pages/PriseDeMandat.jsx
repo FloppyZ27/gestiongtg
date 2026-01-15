@@ -2563,9 +2563,9 @@ export default function PriseDeMandat() {
                       if (isLocked) return;
                       if (formData.statut === "Mandats à ouvrir" && !editingPriseMandat?.numero_dossier) {
                         const prochainNumero = calculerProchainNumeroDossier(value, editingPriseMandat?.id);
-                        setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero});
+                        setFormData(prev => ({...prev, arpenteur_geometre: value, numero_dossier: prochainNumero}));
                       } else {
-                        setFormData({...formData, arpenteur_geometre: value});
+                        setFormData(prev => ({...prev, arpenteur_geometre: value}));
                       }
                       setHasFormChanges(true);
                     }}
@@ -2581,19 +2581,19 @@ export default function PriseDeMandat() {
                       
                       if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
                         const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                        setFormData({...formData, statut: value, numero_dossier: prochainNumero});
+                        setFormData(prev => ({...prev, statut: value, numero_dossier: prochainNumero}));
                       } else if (value !== "Mandats à ouvrir") {
-                        setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
+                        setFormData(prev => ({...prev, statut: value, numero_dossier: "", date_ouverture: ""}));
                       } else {
-                        setFormData({...formData, statut: value});
+                        setFormData(prev => ({...prev, statut: value}));
                       }
                     }}
                     numeroDossier={formData.numero_dossier}
-                    onNumeroDossierChange={(value) => setFormData({...formData, numero_dossier: value})}
+                    onNumeroDossierChange={(value) => setFormData(prev => ({...prev, numero_dossier: value}))}
                     dateOuverture={formData.date_ouverture}
-                    onDateOuvertureChange={(value) => setFormData({...formData, date_ouverture: value})}
+                    onDateOuvertureChange={(value) => setFormData(prev => ({...prev, date_ouverture: value}))}
                     placeAffaire={formData.place_affaire}
-                    onPlaceAffaireChange={(value) => setFormData({...formData, place_affaire: value})}
+                    onPlaceAffaireChange={(value) => setFormData(prev => ({...prev, place_affaire: value}))}
                     isCollapsed={dossierInfoStepCollapsed}
                     onToggleCollapse={() => setDossierInfoStepCollapsed(!dossierInfoStepCollapsed)}
                   />
