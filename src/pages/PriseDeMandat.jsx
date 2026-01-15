@@ -371,6 +371,7 @@ export default function PriseDeMandat() {
     notaires_texte: "",
     courtiers_ids: [],
     courtiers_texte: "",
+    placeAffaire: "",
     mandats: [],
     description: ""
   });
