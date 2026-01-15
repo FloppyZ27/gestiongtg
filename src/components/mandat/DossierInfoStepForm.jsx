@@ -64,6 +64,7 @@ export default function DossierInfoStepForm({
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                     {ARPENTEURS.map((arpenteur) => (
                       <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">
                         {arpenteur}
@@ -79,6 +80,7 @@ export default function DossierInfoStepForm({
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-slate-400 italic">Effacer</SelectItem>
                     <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
                     <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
                   </SelectContent>
