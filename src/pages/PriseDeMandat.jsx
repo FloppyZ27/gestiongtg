@@ -5499,7 +5499,7 @@ export default function PriseDeMandat() {
                       {/* Section 2: Concordances */}
                       <Card className="border-slate-700 bg-slate-800/30">
                       <CardHeader 
-                        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-2 bg-purple-900/20"
+                        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
                         onClick={() => setLotConcordanceCollapsed(!lotConcordanceCollapsed)}
                       >
                         <div className="flex items-center justify-between">
@@ -5658,22 +5658,12 @@ export default function PriseDeMandat() {
                             </div>
 
                             {/* Colonne droite - Liste des lots existants */}
-                            <div className="border-l border-slate-700 pl-4">
-                              <div className="mb-3">
+                            <div className="border-l border-slate-700 pl-4 flex flex-col h-full">
+                              <div className="mb-2">
                                 <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
-                              
-                              <div className="relative mb-2">
-                                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                <Input
-                                  placeholder="Rechercher..."
-                                  value={lotListSearchTerm}
-                                  onChange={(e) => setLotListSearchTerm(e.target.value)}
-                                  className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
-                                />
-                              </div>
-                              
-                              <div className="space-y-1 max-h-48 overflow-y-auto">
+
+                              <div className="flex-1 overflow-y-auto space-y-1">
                                 {lots
                                   .filter(lot => {
                                     const searchLower = lotListSearchTerm.toLowerCase();
@@ -5748,15 +5738,15 @@ export default function PriseDeMandat() {
                     {/* Section 3: Documents */}
                     <Card className="border-slate-700 bg-slate-800/30">
                       <CardHeader 
-                        className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1 bg-cyan-900/20"
+                        className="cursor-pointer hover:bg-yellow-900/40 transition-colors rounded-t-lg py-1.5 bg-yellow-900/20"
                         onClick={() => setLotDocumentsCollapsed(!lotDocumentsCollapsed)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
-                              <Upload className="w-3 h-3 text-cyan-400" />
+                            <div className="w-6 h-6 rounded-full bg-yellow-500/30 flex items-center justify-center">
+                              <Upload className="w-3.5 h-3.5 text-yellow-400" />
                             </div>
-                            <CardTitle className="text-cyan-300 text-sm">Documents</CardTitle>
+                            <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
                             {newLotForm.document_pdf_url && (
                               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                                 <Check className="w-3 h-3 mr-1" />
