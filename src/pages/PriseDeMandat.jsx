@@ -6098,12 +6098,12 @@ export default function PriseDeMandat() {
                                       }}
                                       className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
                                     >
-                                      <div className="text-xs space-y-0.5">
-                                        <p className="text-white font-semibold">{lot.numero_lot}</p>
-                                        {lot.rang && <p className="text-slate-300">{lot.rang}</p>}
-                                        {lot.cadastre && <p className="text-slate-300">{lot.cadastre}</p>}
-                                        <p className="text-slate-400">{lot.circonscription_fonciere}</p>
-                                      </div>
+                                      <p className="text-xs text-white font-semibold truncate">
+                                        {lot.numero_lot}
+                                        {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
+                                        {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
+                                        {lot.circonscription_fonciere && <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>}
+                                      </p>
                                     </div>
                                   ))}
                                 {lots.filter(lot => {
