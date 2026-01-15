@@ -206,6 +206,8 @@ export default function PriseDeMandat() {
     circonscription_fonciere: "",
     cadastre: "Québec",
     rang: "",
+    date_bpd: "",
+    type_operation: "",
     concordances_anterieures: [],
     document_pdf_url: "",
   });
@@ -214,6 +216,7 @@ export default function PriseDeMandat() {
   const [commentairesTemporairesLot, setCommentairesTemporairesLot] = useState([]);
   const [sidebarTabLot, setSidebarTabLot] = useState("commentaires");
   const [editingLot, setEditingLot] = useState(null);
+  const [initialLotForm, setInitialLotForm] = useState(null);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [lotConcordanceCollapsed, setLotConcordanceCollapsed] = useState(false);
   const [lotDocumentsCollapsed, setLotDocumentsCollapsed] = useState(false);
@@ -1737,12 +1740,15 @@ export default function PriseDeMandat() {
       circonscription_fonciere: "",
       cadastre: "Québec",
       rang: "",
+      date_bpd: "",
+      type_operation: "",
       concordances_anterieures: [],
       document_pdf_url: "",
     });
     setAvailableCadastresForNewLot([]);
     setCommentairesTemporairesLot([]);
     setEditingLot(null);
+    setInitialLotForm(null);
     setLotInfoCollapsed(false);
     setLotConcordanceCollapsed(false);
     setLotDocumentsCollapsed(false);
@@ -4271,22 +4277,26 @@ export default function PriseDeMandat() {
                                                        key={lotId} 
                                                        className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
                                                        onClick={() => {
-                                                         setEditingLot(lot);
-                                                         setNewLotForm({
-                                                           numero_lot: lot?.numero_lot || "",
-                                                           circonscription_fonciere: lot?.circonscription_fonciere || "",
-                                                           cadastre: lot?.cadastre || "Québec",
-                                                           rang: lot?.rang || "",
-                                                           concordances_anterieures: lot?.concordances_anterieures || [],
-                                                           document_pdf_url: lot?.document_pdf_url || ""
-                                                         });
-                                                         setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot?.circonscription_fonciere] || []);
-                                                         setCommentairesTemporairesLot([]);
-                                                         setLotInfoCollapsed(false);
-                                                         setLotConcordanceCollapsed(false);
-                                                         setLotDocumentsCollapsed(false);
-                                                         setIsNewLotDialogOpen(true);
-                                                       }}
+                                                          setEditingLot(lot);
+                                                          const formState = {
+                                                            numero_lot: lot?.numero_lot || "",
+                                                            circonscription_fonciere: lot?.circonscription_fonciere || "",
+                                                            cadastre: lot?.cadastre || "Québec",
+                                                            rang: lot?.rang || "",
+                                                            date_bpd: lot?.date_bpd || "",
+                                                            type_operation: lot?.type_operation || "",
+                                                            concordances_anterieures: lot?.concordances_anterieures || [],
+                                                            document_pdf_url: lot?.document_pdf_url || "",
+                                                          };
+                                                          setNewLotForm(formState);
+                                                          setInitialLotForm(formState);
+                                                          setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot?.circonscription_fonciere] || []);
+                                                          setCommentairesTemporairesLot([]);
+                                                          setLotInfoCollapsed(false);
+                                                          setLotConcordanceCollapsed(false);
+                                                          setLotDocumentsCollapsed(false);
+                                                          setIsNewLotDialogOpen(true);
+                                                        }}
                                                      >
                                                        <button 
                                                          type="button" 
@@ -5731,13 +5741,17 @@ export default function PriseDeMandat() {
         {/* New Lot Dialog */}
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
           if (!open) {
-            // Vérifier si le formulaire a été modifié
-            const hasChanges = newLotForm.numero_lot || 
-              newLotForm.circonscription_fonciere || 
-              newLotForm.rang || 
-              newLotForm.concordances_anterieures.length > 0 || 
-              newLotForm.document_pdf_url ||
-              commentairesTemporairesLot.length > 0;
+            let hasChanges = false;
+            if (editingLot) { // In edit mode
+                hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
+            } else { // In create mode
+                hasChanges = newLotForm.numero_lot || 
+                  newLotForm.circonscription_fonciere || 
+                  newLotForm.rang || 
+                  newLotForm.concordances_anterieures.length > 0 || 
+                  newLotForm.document_pdf_url ||
+                  commentairesTemporairesLot.length > 0;
+            }
             
             if (hasChanges) {
               setShowCancelLotConfirm(true);
@@ -6232,14 +6246,18 @@ export default function PriseDeMandat() {
               {/* Boutons tout en bas - pleine largeur */}
               <div className="flex justify-end gap-3 p-3 bg-slate-900 border-t border-slate-800">
                 <Button type="button" variant="outline" onClick={() => {
-                  // Vérifier si le formulaire a été modifié
-                  const hasChanges = newLotForm.numero_lot || 
-                    newLotForm.circonscription_fonciere || 
-                    newLotForm.rang || 
-                    newLotForm.concordances_anterieures.length > 0 || 
-                    newLotForm.document_pdf_url ||
-                    commentairesTemporairesLot.length > 0;
-                  
+                 let hasChanges = false;
+                 if (editingLot) { // In edit mode
+                     hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
+                 } else { // In create mode
+                     hasChanges = newLotForm.numero_lot || 
+                       newLotForm.circonscription_fonciere || 
+                       newLotForm.rang || 
+                       newLotForm.concordances_anterieures.length > 0 || 
+                       newLotForm.document_pdf_url ||
+                       commentairesTemporairesLot.length > 0;
+                 }
+
                   if (hasChanges) {
                     setShowCancelLotConfirm(true);
                   } else {
