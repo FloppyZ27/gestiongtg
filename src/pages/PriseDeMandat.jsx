@@ -6093,8 +6093,9 @@ export default function PriseDeMandat() {
                                       }}
                                       className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
                                     >
-                                      <div className="text-xs text-white font-semibold">
-                                         {lot.numero_lot}{lot.rang ? ` • ${lot.rang}` : ''}{lot.cadastre ? ` • ${lot.cadastre}` : ''} • {lot.circonscription_fonciere}
+                                      <div className="text-xs font-semibold">
+                                         <span className="text-white">{lot.numero_lot}</span>
+                                         <span className="text-slate-400">{lot.rang ? ` • ${lot.rang}` : ''}{lot.cadastre ? ` • ${lot.cadastre}` : ''} • {lot.circonscription_fonciere}</span>
                                        </div>
                                     </div>
                                   ))}
