@@ -6074,6 +6074,9 @@ export default function PriseDeMandat() {
 
                             {/* Colonne droite - Liste des lots existants */}
                             <div className="border-l border-slate-700 pl-4">
+                              {/* Ligne séparatrice en haut */}
+                              <div className="border-t border-slate-600 mb-3 -mt-1"></div>
+                              
                               <div className="mb-2">
                                 <Label className="text-slate-400 text-xs">Lots existants</Label>
                               </div>
