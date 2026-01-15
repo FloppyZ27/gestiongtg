@@ -204,7 +204,7 @@ export default function PriseDeMandat() {
   const [newLotForm, setNewLotForm] = useState({
     numero_lot: "",
     circonscription_fonciere: "",
-    cadastre: "",
+    cadastre: "Québec",
     rang: "",
     concordances_anterieures: [],
     document_pdf_url: "",
@@ -1697,7 +1697,7 @@ export default function PriseDeMandat() {
     setNewLotForm({
       numero_lot: "",
       circonscription_fonciere: "",
-      cadastre: "",
+      cadastre: "Québec",
       rang: "",
       concordances_anterieures: [],
       document_pdf_url: "",
