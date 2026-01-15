@@ -305,6 +305,7 @@ export default function PriseDeMandat() {
   const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
+  const [sameLotsForAllMandats, setSameLotsForAllMandats] = useState(true);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [dossierDocuments, setDossierDocuments] = useState([]);
@@ -4267,21 +4268,14 @@ export default function PriseDeMandat() {
                                         <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexDossier === index ? 'border-r border-slate-700 pr-4' : ''}`}>
                                           <div className="flex items-center justify-between">
                                             <Label className="text-slate-400 text-xs">Lot</Label>
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                const currentLots = mandat.lots || [];
-                                                setNouveauDossierForm(prev => ({
-                                                  ...prev,
-                                                  mandats: prev.mandats.map((m, i) => i !== index ? { ...m, lots: currentLots } : m)
-                                                }));
-                                              }}
-                                              title="Appliquer les lots sélectionnés aux autres mandats"
-                                              className="text-emerald-400 hover:text-emerald-300 transition-colors"
-                                            >
-                                              <Check className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex items-center gap-1.5">
+                                              <Checkbox
+                                                id={`sameLotsForAllMandats-${index}`}
+                                                checked={sameLotsForAllMandats}
+                                                onCheckedChange={setSameLotsForAllMandats}
+                                              />
+                                              <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                            </div>
                                           </div>
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
@@ -4319,13 +4313,18 @@ export default function PriseDeMandat() {
                                                          type="button" 
                                                          onClick={(e) => {
                                                            e.stopPropagation();
-                                                           setNouveauDossierForm(prev => ({
-                                                             ...prev,
-                                                             mandats: prev.mandats.map((m, i) => i === index ? { 
-                                                               ...m, 
-                                                               lots: m.lots.filter(id => id !== lotId) 
-                                                             } : m)
-                                                           }));
+                                                           const newLots = (mandat.lots || []).filter(id => id !== lotId);
+                                                           if (sameLotsForAllMandats) {
+                                                             setNouveauDossierForm(prev => ({
+                                                               ...prev,
+                                                               mandats: prev.mandats.map(m => ({ ...m, lots: newLots }))
+                                                             }));
+                                                           } else {
+                                                             setNouveauDossierForm(prev => ({
+                                                               ...prev,
+                                                               mandats: prev.mandats.map((m, i) => i === index ? { ...m, lots: newLots } : m)
+                                                             }));
+                                                           }
                                                          }}
                                                          className="absolute right-1 top-1 hover:text-red-400"
                                                        >
@@ -4410,13 +4409,23 @@ export default function PriseDeMandat() {
                                                    <div
                                                           key={lot.id}
                                                           onClick={() => {
-                                                            setNouveauDossierForm(prev => ({
-                                                              ...prev,
-                                                              mandats: prev.mandats.map((m, i) => i === index ? {
-                                                                ...m,
-                                                                lots: m.lots.includes(lot.id) ? m.lots.filter(id => id !== lot.id) : [...(m.lots || []), lot.id]
-                                                              } : m)
-                                                            }));
+                                                           const currentLots = nouveauDossierForm.mandats[index].lots || [];
+                                                           const lotIsSelected = currentLots.includes(lot.id);
+                                                           const newLots = lotIsSelected
+                                                             ? currentLots.filter(id => id !== lot.id)
+                                                             : [...currentLots, lot.id];
+
+                                                           if (sameLotsForAllMandats) {
+                                                             setNouveauDossierForm(prev => ({
+                                                               ...prev,
+                                                               mandats: prev.mandats.map(m => ({ ...m, lots: newLots }))
+                                                             }));
+                                                           } else {
+                                                             setNouveauDossierForm(prev => ({
+                                                               ...prev,
+                                                               mandats: prev.mandats.map((m, i) => i === index ? { ...m, lots: newLots } : m)
+                                                             }));
+                                                           }
                                                           }}
                                                           className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
                                                             isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
