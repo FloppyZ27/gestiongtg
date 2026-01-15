@@ -2069,7 +2069,7 @@ export default function PriseDeMandat() {
       if (coLines.length > 0) {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
-          const rang = coParts[1] ? coParts[1].replace('R', 'Rang ') : '';
+          const rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : ''; // Troisième élément
           const numeroLot = coParts[3] || ''; // Quatrième élément
           const estPartie = coParts[4] === 'O'; // Cinquième élément: 'O' = coché, 'N' = pas coché
           
