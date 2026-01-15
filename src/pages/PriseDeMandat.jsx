@@ -6072,7 +6072,7 @@ export default function PriseDeMandat() {
                             {/* Colonne droite - Liste des lots existants */}
                             <div className="border-l border-slate-700 pl-4">
                               <div className="mb-2">
-                                <Label className="text-purple-300 text-sm">Lots existants</Label>
+                                <Label className="text-slate-400 text-xs">Lots existants</Label>
                               </div>
 
                               <div className="space-y-1" style={{ maxHeight: '400px', overflowY: 'auto' }}>
