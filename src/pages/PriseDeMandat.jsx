@@ -1602,6 +1602,7 @@ export default function PriseDeMandat() {
       // Mode création
       const newLot = await createLotMutation.mutateAsync(newLotForm);
       
+      
       // Ajouter automatiquement le lot créé au mandat actuel si on est dans le dialog "Ouvrir dossier"
       if (currentMandatIndexDossier !== null) {
         setNouveauDossierForm(prev => ({
@@ -1623,6 +1624,7 @@ export default function PriseDeMandat() {
       }
     }
   };
+
   // END NEW FUNCTION
 
   const resetForm = () => {
