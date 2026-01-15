@@ -98,7 +98,7 @@ export default function DossierInfoStepForm({
 
             {/* Ligne 2: Place d'affaire (50% de largeur) */}
             <div className="grid grid-cols-2">
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 mt-[5px]">
                 <Label className="text-slate-400 text-xs">Place d'affaire</Label>
                 <Select value={placeAffaire || ""} onValueChange={onPlaceAffaireChange} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-sm">
