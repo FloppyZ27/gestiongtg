@@ -56,7 +56,7 @@ export default function DossierInfoStepForm({
         <CardContent className="pt-1 pb-2">
           <div className="space-y-2">
             {/* Ligne 1: Arpenteur-géomètre et Statut */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1">
               <div className="space-y-0.5">
                 <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                 <Select value={arpenteurGeometre} onValueChange={onArpenteurChange} disabled={disabled}>
