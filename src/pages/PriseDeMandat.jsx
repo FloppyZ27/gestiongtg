@@ -2070,7 +2070,7 @@ export default function PriseDeMandat() {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
           const rang = coParts[1] ? coParts[1].replace('R', 'Rang ') : '';
-          const numeroLot = coParts[2] || ''; // Troisième élément
+          const numeroLot = coParts[3] || ''; // Quatrième élément
           
           extractedData.concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
