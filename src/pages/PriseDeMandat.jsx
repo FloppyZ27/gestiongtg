@@ -274,6 +274,7 @@ export default function PriseDeMandat() {
   const [nouveauDossierForm, setNouveauDossierForm] = useState({
     numero_dossier: "",
     arpenteur_geometre: "",
+    place_affaire: "",
     date_ouverture: new Date().toISOString().split('T')[0],
     statut: "Ouvert",
     ttl: "Non",
@@ -2911,6 +2912,7 @@ export default function PriseDeMandat() {
                 setNouveauDossierForm({
                   numero_dossier: "",
                   arpenteur_geometre: "",
+                  place_affaire: "",
                   date_ouverture: new Date().toISOString().split('T')[0],
                   statut: "Ouvert",
                   ttl: "Non",
@@ -3148,6 +3150,18 @@ export default function PriseDeMandat() {
                                <div className="space-y-1">
                                  <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
                                  <Input type="date" value={nouveauDossierForm.date_ouverture} onChange={(e) => setNouveauDossierForm({...nouveauDossierForm, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                               </div>
+                               <div className="space-y-1">
+                                 <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+                                 <Select value={nouveauDossierForm.place_affaire || ""} onValueChange={(value) => setNouveauDossierForm({...nouveauDossierForm, place_affaire: value})}>
+                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                     <SelectValue placeholder="Sélectionner" />
+                                   </SelectTrigger>
+                                   <SelectContent className="bg-slate-800 border-slate-700">
+                                     <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                                     <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
+                                   </SelectContent>
+                                 </Select>
                                </div>
                              </div>
 
