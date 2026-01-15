@@ -118,11 +118,11 @@ export default function DocumentsStepFormLot({
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
 
-  const folderPath = circonscription && lotNumero ? `ARPENTEUR/TOUS/LOT/${circonscription}/${lotNumero}` : null;
+  const folderPath = lotNumero ? `CONSULTATION/RECHERCHES/LOTS/${lotNumero}` : null;
 
   // Fetch files from SharePoint - lot spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-lot', circonscription, lotNumero],
+    queryKey: ['sharepoint-lot', lotNumero],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -130,7 +130,7 @@ export default function DocumentsStepFormLot({
       });
       return response.data;
     },
-    enabled: !!circonscription && !!lotNumero && !!folderPath,
+    enabled: !!lotNumero && !!folderPath,
     staleTime: 30000
   });
 
@@ -319,14 +319,14 @@ export default function DocumentsStepFormLot({
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
           {/* Message si champs requis manquants */}
-          {(!lotNumero || !circonscription) && (
+          {!lotNumero && (
             <div className="flex items-center justify-center py-4 text-yellow-400 text-sm">
               <FolderOpen className="w-4 h-4 mr-2" />
-              Veuillez remplir le numéro de lot et la circonscription foncière pour gérer les documents
+              Veuillez remplir le numéro de lot pour gérer les documents
             </div>
           )}
 
-          {lotNumero && circonscription && (
+          {lotNumero && (
             <>
               {/* Message si drag over */}
               {isDragOver && (

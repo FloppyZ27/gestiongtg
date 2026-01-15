@@ -901,6 +901,19 @@ export default function PriseDeMandat() {
     mutationFn: async (lotData) => {
       const newLot = await base44.entities.Lot.create(lotData);
       
+      // Créer le dossier SharePoint pour le lot
+      if (lotData.numero_lot) {
+        try {
+          await base44.functions.invoke('sharepoint', {
+            action: 'createFolder',
+            folderPath: `CONSULTATION/RECHERCHES/LOTS/${lotData.numero_lot}`
+          });
+        } catch (error) {
+          console.error("Erreur création dossier SharePoint pour le lot:", error);
+          // Ne pas bloquer la création du lot si SharePoint échoue
+        }
+      }
+      
       // Créer les commentaires temporaires si présents
       if (commentairesTemporairesLot.length > 0) {
         const commentairePromises = commentairesTemporairesLot.map(comment =>
