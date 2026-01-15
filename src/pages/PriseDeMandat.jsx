@@ -5519,15 +5519,15 @@ export default function PriseDeMandat() {
                       </CardHeader>
 
                       {!lotConcordanceCollapsed && (
-                        <CardContent className="pt-2 pb-3">
-                          <div className="grid grid-cols-[60%_40%] gap-4">
+                       <CardContent className="pt-2 pb-3">
+                         <div className="grid grid-cols-[60%_40%] gap-4 h-[500px]">
                             {/* Colonne gauche - Formulaire et tableau */}
                             <div className="space-y-3">
                               {/* Formulaire d'ajout toujours visible */}
                               <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
                                 <Label className="text-purple-300 text-sm">Ajouter une concordance</Label>
                                 
-                                <div className="grid grid-cols-[1fr_1fr_auto] gap-3">
+                                <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
                                   <div className="space-y-1">
                                     <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
                                     <Input
@@ -5537,6 +5537,13 @@ export default function PriseDeMandat() {
                                       className="bg-slate-700 border-slate-600 h-8 text-sm"
                                     />
                                   </div>
+                                  <div className="space-y-1 flex flex-col items-center justify-end pb-1">
+                                    <Label className="text-slate-400 text-xs">Partie</Label>
+                                    <Checkbox
+                                      checked={currentConcordanceForm.est_partie}
+                                      onCheckedChange={(checked) => setCurrentConcordanceForm({...currentConcordanceForm, est_partie: checked})}
+                                    />
+                                  </div>
                                   <div className="space-y-1">
                                     <Label className="text-slate-400 text-xs">Rang</Label>
                                     <Input
@@ -5544,13 +5551,6 @@ export default function PriseDeMandat() {
                                       onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, rang: e.target.value})}
                                       placeholder="Ex: Rang 4"
                                       className="bg-slate-700 border-slate-600 h-8 text-sm"
-                                    />
-                                  </div>
-                                  <div className="space-y-1 flex flex-col items-center justify-end pb-1">
-                                    <Label className="text-slate-400 text-xs">Partie</Label>
-                                    <Checkbox
-                                      checked={currentConcordanceForm.est_partie}
-                                      onCheckedChange={(checked) => setCurrentConcordanceForm({...currentConcordanceForm, est_partie: checked})}
                                     />
                                   </div>
                                 </div>
@@ -5654,16 +5654,15 @@ export default function PriseDeMandat() {
                                     </TableBody>
                                   </Table>
                                 </div>
-                              )}
-                            </div>
+                              </div>
 
                             {/* Colonne droite - Liste des lots existants */}
-                            <div className="border-l border-slate-700 pl-4 flex flex-col h-full">
+                            <div className="border-l border-slate-700 pl-4 flex flex-col">
                               <div className="mb-2">
                                 <Label className="text-purple-300 text-sm">Lots existants</Label>
                               </div>
 
-                              <div className="flex-1 overflow-y-auto space-y-1">
+                              <div className="overflow-y-auto space-y-1" style={{ maxHeight: 'calc(500px - 32px)' }}>
                                 {lots
                                   .filter(lot => {
                                     const searchLower = lotListSearchTerm.toLowerCase();
