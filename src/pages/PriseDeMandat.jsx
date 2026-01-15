@@ -4249,11 +4249,11 @@ export default function PriseDeMandat() {
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
                                               {mandat.lots && mandat.lots.length > 0 ? (
-                                                <div className="grid grid-cols-2 gap-1">
+                                                <div className="space-y-1">
                                                   {mandat.lots.map((lotId) => {
                                                     const lot = getLotById(lotId);
                                                     return (
-                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-1.5 text-xs relative">
+                                                      <div key={lotId} className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative">
                                                         <button 
                                                           type="button" 
                                                           onClick={() => {
@@ -4265,17 +4265,16 @@ export default function PriseDeMandat() {
                                                               } : m)
                                                             }));
                                                           }}
-                                                          className="absolute right-0.5 top-0.5 hover:text-red-400"
+                                                          className="absolute right-1 top-1 hover:text-red-400"
                                                         >
-                                                          <X className="w-2.5 h-2.5" />
+                                                          <X className="w-3 h-3" />
                                                         </button>
-                                                        <div className="pr-5">
-                                                          <p className="font-semibold">{lot?.numero_lot || lotId}</p>
-                                                          <div className="text-[10px] text-slate-400 mt-0.5 space-y-0.5">
-                                                            <p>{lot?.circonscription_fonciere}</p>
-                                                            {lot?.cadastre && <p>Cadastre: {lot.cadastre}</p>}
-                                                            {lot?.rang && <p>Rang: {lot.rang}</p>}
-                                                          </div>
+                                                        <div className="pr-5 space-y-0.5">
+                                                          <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
+                                                          <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
+                                                          <p className="text-slate-500">
+                                                            {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
+                                                          </p>
                                                         </div>
                                                       </div>
                                                     );
