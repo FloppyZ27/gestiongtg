@@ -372,6 +372,35 @@ export default function ClientFormDialog({
     ? dossiers.filter(d => d.clients_ids?.includes(editingClient.id))
     : [];
 
+  const getMandatColor = (typeMandat) => {
+    const colors = {
+      "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+      "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+      "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+      "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+      "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+      "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+      "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+      "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+      "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+    };
+    return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  };
+
+  const getAbbreviatedMandatType = (type) => {
+    const abbreviations = {
+      "Certificat de localisation": "CL",
+      "Description Technique": "DT",
+      "Implantation": "Imp",
+      "Levé topographique": "Levé Topo",
+      "Piquetage": "Piq"
+    };
+    return abbreviations[type] || type;
+  };
+
   const checkForDuplicates = (clientData) => {
     if (!clientData.nom || !clientData.prenom) return [];
     
@@ -1416,6 +1445,7 @@ export default function ClientFormDialog({
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                 <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Adresse des travaux</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Statut</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Date</TableHead>
                               </TableRow>
@@ -1438,8 +1468,8 @@ export default function ClientFormDialog({
                                     {dossier.mandats && dossier.mandats.length > 0 ? (
                                       <div className="flex gap-1 flex-wrap">
                                         {dossier.mandats.slice(0, 2).map((m, idx) => (
-                                          <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                            {m.type_mandat}
+                                          <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                                            {getAbbreviatedMandatType(m.type_mandat)}
                                           </Badge>
                                         ))}
                                         {dossier.mandats.length > 2 && (
@@ -1451,6 +1481,9 @@ export default function ClientFormDialog({
                                     ) : (
                                       <span className="text-slate-600 text-xs">Aucun</span>
                                     )}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs max-w-xs truncate">
+                                    {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
                                   </TableCell>
                                   <TableCell>
                                     <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
