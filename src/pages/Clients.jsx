@@ -415,14 +415,6 @@ export default function Clients() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(client)}
-                              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
                               onClick={() => handleDelete(client.id)}
                               className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             >
