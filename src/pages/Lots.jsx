@@ -663,7 +663,7 @@ export default function Lots() {
                   Nouveau lot
                 </Button>
                 </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingLot ? "Modifier le lot" : "Nouveau lot"}
@@ -921,8 +921,8 @@ export default function Lots() {
                   </form>
 
                   {/* Boutons Annuler/Créer tout en bas */}
-                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)}>
+                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 mt-6">
+                    <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
                       Annuler
                     </Button>
                     <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
@@ -963,7 +963,7 @@ export default function Lots() {
             setViewSortDirection("asc");
           }
         }}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du lot</DialogTitle>
             </DialogHeader>
@@ -1196,7 +1196,7 @@ export default function Lots() {
 
                   {/* Boutons Fermer/Modifier tout en bas */}
                   <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
                       Fermer
                     </Button>
                     <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
