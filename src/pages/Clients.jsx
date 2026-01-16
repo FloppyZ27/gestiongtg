@@ -39,18 +39,6 @@ export default function Clients() {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [filterType, setFilterType] = useState("all");
-  const [newCivicNumbers, setNewCivicNumbers] = useState([""]);
-  const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
-  
-  const [formData, setFormData] = useState({
-    prenom: "",
-    nom: "",
-    type_client: "Client",
-    adresses: [],
-    courriels: [],
-    telephones: [],
-    notes: ""
-  });
 
   const queryClient = useQueryClient();
 
@@ -64,41 +52,6 @@ export default function Clients() {
     queryKey: ['dossiers'],
     queryFn: () => base44.entities.Dossier.list('-date_ouverture'),
     initialData: [],
-  });
-
-  const createClientMutation = useMutation({
-    mutationFn: async (clientData) => {
-      const newClient = await base44.entities.Client.create(clientData);
-      
-      // Créer les commentaires temporaires si présents
-      if (commentairesTemporaires.length > 0) {
-        const commentairePromises = commentairesTemporaires.map(comment =>
-          base44.entities.CommentaireClient.create({
-            client_id: newClient.id,
-            contenu: comment.contenu,
-            utilisateur_email: comment.utilisateur_email,
-            utilisateur_nom: comment.utilisateur_nom
-          })
-        );
-        await Promise.all(commentairePromises);
-      }
-      
-      return newClient;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      setIsDialogOpen(false);
-      resetForm();
-    },
-  });
-
-  const updateClientMutation = useMutation({
-    mutationFn: ({ id, clientData }) => base44.entities.Client.update(id, clientData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      setIsDialogOpen(false);
-      resetForm();
-    },
   });
 
   const deleteClientMutation = useMutation({
@@ -217,65 +170,8 @@ export default function Clients() {
 
   const sortedClients = sortClients(filteredClients);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Filter out empty entries
-    const cleanedData = {
-      ...formData,
-      adresses: formData.adresses.filter(a =>
-        (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
-        a.rue.trim() !== "" ||
-        a.ville.trim() !== "" ||
-        a.code_postal.trim() !== "" ||
-        a.province.trim() !== ""
-      ),
-      courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
-      telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
-    };
-
-    if (editingClient) {
-      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData });
-    } else {
-      createClientMutation.mutate(cleanedData);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      prenom: "",
-      nom: "",
-      type_client: "Client",
-      adresses: [],
-      courriels: [],
-      telephones: [],
-      notes: ""
-    });
-    setNewCivicNumbers([""]);
-    setEditingClient(null);
-    setCommentairesTemporaires([]);
-  };
-
   const handleEdit = (client) => {
     setEditingClient(client);
-    setFormData({
-      prenom: client.prenom || "",
-      nom: client.nom || "",
-      type_client: client.type_client || "Client",
-      adresses: client.adresses && client.adresses.length > 0 ?
-        client.adresses.map(addr => ({
-          ville: addr.ville || "",
-          numeros_civiques: addr.numeros_civiques && addr.numeros_civiques.length > 0 ? addr.numeros_civiques : [""],
-          rue: addr.rue || "",
-          code_postal: addr.code_postal || "",
-          province: addr.province || "",
-          actuelle: addr.actuelle
-        })) : [],
-      courriels: client.courriels && client.courriels.length > 0 ? client.courriels : [],
-      telephones: client.telephones && client.telephones.length > 0 ? client.telephones : [],
-      notes: client.notes || ""
-    });
-    setNewCivicNumbers([""]);
-    setCommentairesTemporaires([]); // Clear temporary comments when editing an existing client
     setIsDialogOpen(true);
   };
 
@@ -283,64 +179,6 @@ export default function Clients() {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
       deleteClientMutation.mutate(id);
     }
-  };
-
-  const addField = (fieldName) => {
-    if (fieldName === 'adresses') {
-      setFormData(prev => ({
-        ...prev,
-        adresses: [...prev.adresses, {
-          ville: "",
-          numeros_civiques: [""],
-          rue: "",
-          code_postal: "",
-          province: "",
-          actuelle: false
-        }]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [fieldName]: [...prev[fieldName], { [fieldName.slice(0, -1)]: "", actuel: false }]
-      }));
-    }
-  };
-
-  const removeField = (fieldName, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateField = (fieldName, index, key, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].map((item, i) =>
-        i === index ? { ...item, [key]: value } : item
-      )
-    }));
-  };
-
-  const updateAddress = (index, newAddresses) => {
-    if (newAddresses && newAddresses[0]) {
-      setFormData(prev => ({
-        ...prev,
-        adresses: prev.adresses.map((item, i) =>
-          i === index ? { ...newAddresses[0], actuelle: item.actuelle } : item
-        )
-      }));
-    }
-  };
-
-  const toggleActuel = (fieldName, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: prev[fieldName].map((item, i) => ({
-        ...item,
-        [fieldName === 'adresses' ? 'actuelle' : 'actuel']: i === index
-      }))
-    }));
   };
 
   const handleExportCSV = () => {
@@ -419,7 +257,7 @@ export default function Clients() {
             </Button>
             <Button 
               onClick={() => {
-                resetForm();
+                setEditingClient(null);
                 setIsDialogOpen(true);
               }}
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
@@ -429,14 +267,12 @@ export default function Clients() {
 
             <ClientFormDialog
               open={isDialogOpen}
-              onOpenChange={(open) => {
-                setIsDialogOpen(open);
-                if (!open) resetForm();
-              }}
+              onOpenChange={setIsDialogOpen}
               editingClient={editingClient}
               defaultType="Client"
               onSuccess={() => {
                 queryClient.invalidateQueries({ queryKey: ['clients'] });
+                setEditingClient(null);
               }}
             />
           </div>
