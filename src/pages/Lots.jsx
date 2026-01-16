@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -120,9 +121,9 @@ export default function Lots() {
   const [editingLot, setEditingLot] = useState(null);
   const [viewingLot, setViewingLot] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [filterCirconscription, setFilterCirconscription] = useState("all");
-  const [filterCadastre, setFilterCadastre] = useState("all");
-  const [filterTypeOperation, setFilterTypeOperation] = useState("all");
+  const [filterCirconscription, setFilterCirconscription] = useState([]);
+  const [filterCadastre, setFilterCadastre] = useState([]);
+  const [filterTypeOperation, setFilterTypeOperation] = useState([]);
   const [availableCadastres, setAvailableCadastres] = useState([]);
   const [concordancesAnterieure, setConcordancesAnterieure] = useState([]);
   const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
@@ -536,9 +537,9 @@ export default function Lots() {
       lot.circonscription_fonciere?.toLowerCase().includes(searchLower)
     );
 
-    const matchesCirconscription = filterCirconscription === "all" || lot.circonscription_fonciere === filterCirconscription;
-    const matchesCadastre = filterCadastre === "all" || lot.cadastre === filterCadastre;
-    const matchesTypeOperation = filterTypeOperation === "all" || lot.type_operation === filterTypeOperation;
+    const matchesCirconscription = filterCirconscription.length === 0 || filterCirconscription.includes(lot.circonscription_fonciere);
+    const matchesCadastre = filterCadastre.length === 0 || filterCadastre.includes(lot.cadastre);
+    const matchesTypeOperation = filterTypeOperation.length === 0 || filterTypeOperation.includes(lot.type_operation);
 
     return matchesSearch && matchesCirconscription && matchesCadastre && matchesTypeOperation;
   });
@@ -1219,45 +1220,131 @@ export default function Lots() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Select value={filterCirconscription} onValueChange={setFilterCirconscription}>
-                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                      <SelectValue placeholder="Circonscription" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Toutes les circonscriptions</SelectItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-56 bg-slate-800/50 border-slate-700 text-white justify-between">
+                        <span>Circonscription ({filterCirconscription.length || 'Toutes'})</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuLabel>Filtrer par circonscription</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={filterCirconscription.length === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setFilterCirconscription([]);
+                        }}
+                      >
+                        Toutes
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
                       {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                        <SelectItem key={circ} value={circ} className="text-white">
+                        <DropdownMenuCheckboxItem
+                          key={circ}
+                          checked={filterCirconscription.includes(circ)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterCirconscription([...filterCirconscription, circ]);
+                            } else {
+                              setFilterCirconscription(filterCirconscription.filter((c) => c !== circ));
+                            }
+                          }}
+                        >
                           {circ}
-                        </SelectItem>
+                        </DropdownMenuCheckboxItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterCadastre} onValueChange={setFilterCadastre}>
-                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                      <SelectValue placeholder="Cadastre" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les cadastres</SelectItem>
-                      {filterCirconscription !== "all" && CADASTRES_PAR_CIRCONSCRIPTION[filterCirconscription]?.map((cadastre) => (
-                        <SelectItem key={cadastre} value={cadastre} className="text-white">
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                        <span>Cadastre ({filterCadastre.length || 'Tous'})</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuLabel>Filtrer par cadastre</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={filterCadastre.length === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setFilterCadastre([]);
+                        }}
+                      >
+                        Tous
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
+                      {[...new Set(lots.map(l => l.cadastre).filter(c => c))].sort().map((cadastre) => (
+                        <DropdownMenuCheckboxItem
+                          key={cadastre}
+                          checked={filterCadastre.includes(cadastre)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterCadastre([...filterCadastre, cadastre]);
+                            } else {
+                              setFilterCadastre(filterCadastre.filter((c) => c !== cadastre));
+                            }
+                          }}
+                        >
                           {cadastre}
-                        </SelectItem>
+                        </DropdownMenuCheckboxItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={filterTypeOperation} onValueChange={setFilterTypeOperation}>
-                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                      <SelectValue placeholder="Type d'opération" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
+                        <span>Type ({filterTypeOperation.length || 'Tous'})</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={filterTypeOperation.length === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setFilterTypeOperation([]);
+                        }}
+                      >
+                        Tous
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
                       {TYPES_OPERATIONS.map((type) => (
-                        <SelectItem key={type} value={type} className="text-white">
+                        <DropdownMenuCheckboxItem
+                          key={type}
+                          checked={filterTypeOperation.includes(type)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterTypeOperation([...filterTypeOperation, type]);
+                            } else {
+                              setFilterTypeOperation(filterTypeOperation.filter((t) => t !== type));
+                            }
+                          }}
+                        >
                           {type}
-                        </SelectItem>
+                        </DropdownMenuCheckboxItem>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFilterCirconscription([]);
+                        setFilterCadastre([]);
+                        setFilterTypeOperation([]);
+                      }}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1269,37 +1356,37 @@ export default function Lots() {
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('numero_lot')}
                     >
-                      Numéro de lot {getSortIcon('numero_lot')}
+                      Numéro de lot {sortField === 'numero_lot' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('circonscription')}
                     >
-                      Circonscription {getSortIcon('circonscription')}
+                      Circonscription {sortField === 'circonscription' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('cadastre')}
                     >
-                      Cadastre {getSortIcon('cadastre')}
+                      Cadastre {sortField === 'cadastre' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('rang')}
                     >
-                      Rang {getSortIcon('rang')}
+                      Rang {sortField === 'rang' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('date_bpd')}
                     >
-                      Date BPD {getSortIcon('date_bpd')}
+                      Date BPD {sortField === 'date_bpd' && (sortDirection === 'asc' ? '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('type_operation')}
                     >
-                      Type d'opération {getSortIcon('type_operation')}
+                      Type d'opération {sortField === 'type_operation' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
