@@ -45,6 +45,30 @@ export default function LotInfoStepForm({
         <CardContent className="pt-1 pb-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-0.5">
+              <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
+              <Input
+                value={lotForm.numero_lot}
+                onChange={(e) => onLotFormChange({...lotForm, numero_lot: e.target.value})}
+                required
+                placeholder="Ex: 1234-5678"
+                className="bg-slate-700 border-slate-600 h-6 text-xs"
+                disabled={disabled}
+              />
+            </div>
+            <div className="space-y-0.5">
+              <Label className="text-slate-400 text-xs">Rang</Label>
+              <Input
+                value={lotForm.rang}
+                onChange={(e) => onLotFormChange({...lotForm, rang: e.target.value})}
+                placeholder="Ex: Rang 4"
+                className="bg-slate-700 border-slate-600 h-6 text-xs"
+                disabled={disabled}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
               <Select 
                 value={lotForm.circonscription_fonciere} 
@@ -81,30 +105,6 @@ export default function LotInfoStepForm({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
-              <Input
-                value={lotForm.numero_lot}
-                onChange={(e) => onLotFormChange({...lotForm, numero_lot: e.target.value})}
-                required
-                placeholder="Ex: 1234-5678"
-                className="bg-slate-700 border-slate-600 h-6 text-xs"
-                disabled={disabled}
-              />
-            </div>
-            <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Rang</Label>
-              <Input
-                value={lotForm.rang}
-                onChange={(e) => onLotFormChange({...lotForm, rang: e.target.value})}
-                placeholder="Ex: Rang 4"
-                className="bg-slate-700 border-slate-600 h-6 text-xs"
-                disabled={disabled}
-              />
             </div>
           </div>
 

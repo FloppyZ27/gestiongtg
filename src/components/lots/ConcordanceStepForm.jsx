@@ -237,6 +237,7 @@ export default function ConcordanceStepForm({
                     >
                       <div className="text-xs font-semibold">
                         <span className="text-white">{lot.numero_lot}</span>
+                        {lot.concordances_anterieures?.some(c => c.est_partie) && <span className="text-purple-400"> Ptie</span>}
                         <span className="text-slate-400">{lot.rang ? ` • ${lot.rang}` : ''}{lot.cadastre ? ` • ${lot.cadastre}` : ''} • {lot.circonscription_fonciere}</span>
                       </div>
                     </div>
