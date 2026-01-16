@@ -355,17 +355,6 @@ export default function Clients() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-
-                  {filterType.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFilterType([])}
-                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    >
-                      Réinitialiser
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>
