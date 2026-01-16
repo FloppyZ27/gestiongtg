@@ -713,6 +713,7 @@ export default function Lots() {
                       onToggleCollapse={() => setConcordanceCollapsed(!concordanceCollapsed)}
                       disabled={false}
                       CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                      allLots={lots}
                     />
 
                     {/* Section Documents */}
