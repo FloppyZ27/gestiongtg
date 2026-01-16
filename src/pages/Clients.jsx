@@ -380,7 +380,7 @@ export default function Clients() {
                       <TableRow 
                         key={client.id} 
                         className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                        onClick={() => setViewingClientDetails(client)}
+                        onClick={() => handleEdit(client)}
                       >
                         <TableCell className="font-medium text-white">
                           {client.prenom} {client.nom}
