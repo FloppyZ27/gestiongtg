@@ -124,6 +124,7 @@ export default function Lots() {
   const [filterCirconscription, setFilterCirconscription] = useState([]);
   const [filterCadastre, setFilterCadastre] = useState([]);
   const [filterTypeOperation, setFilterTypeOperation] = useState([]);
+  const [filterRang, setFilterRang] = useState([]);
   const [availableCadastres, setAvailableCadastres] = useState([]);
   const [concordancesAnterieure, setConcordancesAnterieure] = useState([]);
   const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
@@ -540,8 +541,9 @@ export default function Lots() {
     const matchesCirconscription = filterCirconscription.length === 0 || filterCirconscription.includes(lot.circonscription_fonciere);
     const matchesCadastre = filterCadastre.length === 0 || filterCadastre.includes(lot.cadastre);
     const matchesTypeOperation = filterTypeOperation.length === 0 || filterTypeOperation.includes(lot.type_operation);
+    const matchesRang = filterRang.length === 0 || filterRang.includes(lot.rang);
 
-    return matchesSearch && matchesCirconscription && matchesCadastre && matchesTypeOperation;
+    return matchesSearch && matchesCirconscription && matchesCadastre && matchesTypeOperation && matchesRang;
   });
 
   const sortedLots = [...filteredLots].sort((a, b) => {
@@ -1331,7 +1333,44 @@ export default function Lots() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
+                        <span>Rang ({filterRang.length || 'Tous'})</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuLabel>Filtrer par rang</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={filterRang.length === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setFilterRang([]);
+                        }}
+                      >
+                        Tous
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
+                      {[...new Set(lots.map(l => l.rang).filter(r => r))].sort().map((rang) => (
+                        <DropdownMenuCheckboxItem
+                          key={rang}
+                          checked={filterRang.includes(rang)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterRang([...filterRang, rang]);
+                            } else {
+                              setFilterRang(filterRang.filter((r) => r !== rang));
+                            }
+                          }}
+                        >
+                          {rang}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -1339,6 +1378,7 @@ export default function Lots() {
                         setFilterCirconscription([]);
                         setFilterCadastre([]);
                         setFilterTypeOperation([]);
+                        setFilterRang([]);
                       }}
                       className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                     >
@@ -1396,7 +1436,7 @@ export default function Lots() {
                     <TableRow 
                       key={lot.id} 
                       className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                      onClick={() => handleView(lot)}
+                      onClick={() => handleEdit(lot)}
                     >
                       <TableCell className="font-medium text-white">
                         {lot.numero_lot}
@@ -1426,14 +1466,6 @@ export default function Lots() {
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(lot)}
-                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
