@@ -401,6 +401,68 @@ export default function ClientFormDialog({
     return abbreviations[type] || type;
   };
 
+  const formatAdresseTravaux = (addr) => {
+    if (!addr) return "";
+    const parts = [];
+    if (addr.numeros_civiques && addr.numeros_civiques.length > 0 && addr.numeros_civiques[0] !== "") {
+      parts.push(addr.numeros_civiques.filter(n => n).join(', '));
+    }
+    if (addr.rue) parts.push(addr.rue);
+    if (addr.ville) parts.push(addr.ville);
+    return parts.filter(p => p).join(', ');
+  };
+
+  const [sortFieldDossiers, setSortFieldDossiers] = useState(null);
+  const [sortDirectionDossiers, setSortDirectionDossiers] = useState("asc");
+
+  const handleSortDossiers = (field) => {
+    if (sortFieldDossiers === field) {
+      setSortDirectionDossiers(sortDirectionDossiers === "asc" ? "desc" : "asc");
+    } else {
+      setSortFieldDossiers(field);
+      setSortDirectionDossiers("asc");
+    }
+  };
+
+  const sortedClientDossiers = [...clientDossiers].sort((a, b) => {
+    if (!sortFieldDossiers) return 0;
+
+    let aValue, bValue;
+
+    switch (sortFieldDossiers) {
+      case 'numero_dossier':
+        aValue = (getArpenteurInitials(a.arpenteur_geometre) + (a.numero_dossier || '')).toLowerCase();
+        bValue = (getArpenteurInitials(b.arpenteur_geometre) + (b.numero_dossier || '')).toLowerCase();
+        break;
+      case 'mandats':
+        aValue = (a.mandats?.[0]?.type_mandat || '').toLowerCase();
+        bValue = (b.mandats?.[0]?.type_mandat || '').toLowerCase();
+        break;
+      case 'adresse':
+        aValue = formatAdresseTravaux(a.mandats?.[0]?.adresse_travaux).toLowerCase();
+        bValue = formatAdresseTravaux(b.mandats?.[0]?.adresse_travaux).toLowerCase();
+        break;
+      case 'statut':
+        aValue = (a.statut || '').toLowerCase();
+        bValue = (b.statut || '').toLowerCase();
+        break;
+      case 'date':
+        aValue = new Date(a.date_ouverture || 0).getTime();
+        bValue = new Date(b.date_ouverture || 0).getTime();
+        break;
+      default:
+        return 0;
+    }
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirectionDossiers === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    } else {
+      if (aValue < bValue) return sortDirectionDossiers === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirectionDossiers === "asc" ? 1 : -1;
+      return 0;
+    }
+  });
+
   const checkForDuplicates = (clientData) => {
     if (!clientData.nom || !clientData.prenom) return [];
     
@@ -1443,15 +1505,40 @@ export default function ClientFormDialog({
                           <Table>
                             <TableHeader>
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
-                                <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
-                                <TableHead className="text-slate-300 text-xs">Adresse des travaux</TableHead>
-                                <TableHead className="text-slate-300 text-xs">Statut</TableHead>
-                                <TableHead className="text-slate-300 text-xs">Date</TableHead>
+                                <TableHead 
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
+                                  onClick={() => handleSortDossiers('numero_dossier')}
+                                >
+                                  N° Dossier {sortFieldDossiers === 'numero_dossier' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
+                                  onClick={() => handleSortDossiers('mandats')}
+                                >
+                                  Mandats {sortFieldDossiers === 'mandats' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
+                                  onClick={() => handleSortDossiers('adresse')}
+                                >
+                                  Adresse des travaux {sortFieldDossiers === 'adresse' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
+                                  onClick={() => handleSortDossiers('statut')}
+                                >
+                                  Statut {sortFieldDossiers === 'statut' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 text-xs cursor-pointer hover:text-white"
+                                  onClick={() => handleSortDossiers('date')}
+                                >
+                                  Date {sortFieldDossiers === 'date' && (sortDirectionDossiers === 'asc' ? '↑' : '↓')}
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {clientDossiers.map((dossier) => (
+                              {sortedClientDossiers.map((dossier) => (
                                 <TableRow 
                                   key={dossier.id} 
                                   className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
@@ -1483,7 +1570,7 @@ export default function ClientFormDialog({
                                     )}
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                                    {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
+                                    {dossier.mandats?.[0]?.adresse_travaux ? formatAdresseTravaux(dossier.mandats[0].adresse_travaux) : "-"}
                                   </TableCell>
                                   <TableCell>
                                     <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
