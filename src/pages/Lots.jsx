@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -134,6 +135,8 @@ export default function Lots() {
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [concordanceCollapsed, setConcordanceCollapsed] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState("commentaires");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [newConcordance, setNewConcordance] = useState({
@@ -895,17 +898,53 @@ export default function Lots() {
                 </div>
 
                 {/* Right side - Commentaires Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                  {/* Header Tabs Commentaires/Historique - Collapsible */}
+                  <div 
+                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {sidebarTab === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
+                      <h3 className="text-slate-300 text-base font-semibold">
+                        {sidebarTab === "commentaires" ? "Commentaires" : "Historique"}
+                      </h3>
+                    </div>
+                    {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
-                  <div className="flex-1 overflow-hidden p-4">
-                    <CommentairesSectionLot
-                      lotId={editingLot?.id}
-                      lotTemporaire={!editingLot}
-                      onCommentairesTempChange={setCommentairesTemporaires}
-                    />
-                  </div>
+
+                  {!sidebarCollapsed && (
+                    <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="flex-1 flex flex-col overflow-hidden">
+                      <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                        <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Commentaires
+                        </TabsTrigger>
+                        <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Historique
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
+                        <CommentairesSectionLot
+                          lotId={editingLot?.id}
+                          lotTemporaire={!editingLot}
+                          onCommentairesTempChange={setCommentairesTemporaires}
+                        />
+                      </TabsContent>
+
+                      <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+                        <div className="flex items-center justify-center h-full text-center">
+                          <div>
+                            <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                            <p className="text-slate-500">Aucune action enregistrée</p>
+                            <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  )}
                 </div>
               </div>
             </DialogContent>
