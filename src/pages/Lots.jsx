@@ -1497,9 +1497,7 @@ export default function Lots() {
                         {lot.numero_lot}
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                          {lot.circonscription_fonciere}
-                        </Badge>
+                        {lot.circonscription_fonciere}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         {lot.cadastre || "-"}
@@ -1510,14 +1508,8 @@ export default function Lots() {
                       <TableCell className="text-slate-300 text-sm">
                         {lot.date_bpd ? format(new Date(lot.date_bpd), "dd MMM yyyy", { locale: fr }) : "-"}
                       </TableCell>
-                      <TableCell>
-                        {lot.type_operation ? (
-                          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                            {lot.type_operation}
-                          </Badge>
-                        ) : (
-                          <span className="text-slate-600 text-sm">-</span>
-                        )}
+                      <TableCell className="text-slate-300">
+                        {lot.type_operation || "-"}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
