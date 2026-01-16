@@ -6143,23 +6143,32 @@ export default function PriseDeMandat() {
                                     </TableHeader>
                                     <TableBody>
                                      {newLotForm.concordances_anterieures.map((concordance, index) => (
-                                              <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                                <TableCell className="text-white text-sm" colSpan={4}>
-                                                  {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""} • {concordance.rang || "-"} • {concordance.cadastre || "-"} • {concordance.circonscription_fonciere}
-                                                </TableCell>
-                                         <TableCell className="text-right">
-                                           <Button
-                                             type="button"
-                                             size="sm"
-                                             variant="ghost"
-                                             onClick={() => removeConcordance(index)}
-                                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
-                                           >
-                                             <Trash2 className="w-3 h-3" />
-                                           </Button>
-                                         </TableCell>
-                                       </TableRow>
-                                     ))}
+                                             <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
+                                               <TableCell className="text-white text-sm">
+                                                 {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""}
+                                               </TableCell>
+                                               <TableCell className="text-slate-300 text-sm">
+                                                 {concordance.rang || "-"}
+                                               </TableCell>
+                                               <TableCell className="text-slate-300 text-sm">
+                                                 {concordance.circonscription_fonciere}
+                                               </TableCell>
+                                               <TableCell className="text-slate-300 text-sm">
+                                                 {concordance.cadastre || "-"}
+                                               </TableCell>
+                                        <TableCell className="text-right">
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => removeConcordance(index)}
+                                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
                                     </TableBody>
                                   </Table>
                                   </div>
