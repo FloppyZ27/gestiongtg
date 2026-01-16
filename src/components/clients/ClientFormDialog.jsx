@@ -10,13 +10,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock } from "lucide-react";
+import { Plus, Trash2, User, MapPin, Mail, Phone, ChevronDown, ChevronUp, Search, AlertTriangle, MessageSquare, Clock, FolderOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import CommentairesSectionClient from "./CommentairesSectionClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { createPageUrl } from "@/utils";
 
 const PROVINCES_CANADIENNES = [
   { label: "Québec", value: "QC" },
@@ -78,6 +79,7 @@ export default function ClientFormDialog({
   const [infoCollapsed, setInfoCollapsed] = useState(false);
   const [adressesCollapsed, setAdressesCollapsed] = useState(false);
   const [communicationCollapsed, setCommunicationCollapsed] = useState(false);
+  const [dossiersCollapsed, setDossiersCollapsed] = useState(true);
   
   // Duplicate check dialog
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
@@ -336,6 +338,39 @@ export default function ClientFormDialog({
     enabled: !!editingClient?.id,
     initialData: [],
   });
+
+  const { data: dossiers = [] } = useQuery({
+    queryKey: ['dossiers'],
+    queryFn: () => base44.entities.Dossier.list('-created_date'),
+    initialData: [],
+  });
+
+  const getArpenteurInitials = (arpenteur) => {
+    if (!arpenteur) return "";
+    const mapping = {
+      "Samuel Guay": "SG-",
+      "Dany Gaboury": "DG-",
+      "Pierre-Luc Pilote": "PLP-",
+      "Benjamin Larouche": "BL-",
+      "Frédéric Gilbert": "FG-"
+    };
+    return mapping[arpenteur] || "";
+  };
+
+  const getArpenteurColor = (arpenteur) => {
+    const colors = {
+      "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+      "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+      "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+      "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+      "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+    };
+    return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+  };
+
+  const clientDossiers = editingClient 
+    ? dossiers.filter(d => d.clients_ids?.includes(editingClient.id))
+    : [];
 
   const checkForDuplicates = (clientData) => {
     if (!clientData.nom || !clientData.prenom) return [];
@@ -1348,6 +1383,98 @@ export default function ClientFormDialog({
               )}
               </Card>
               </div>
+
+              {/* Section Dossiers associés - Uniquement en mode édition */}
+              {editingClient && (
+                <Card className="border-slate-700 bg-slate-800/30">
+                  <CardHeader 
+                    className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-2 bg-emerald-900/20"
+                    onClick={() => setDossiersCollapsed(!dossiersCollapsed)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                          <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
+                        </div>
+                        <CardTitle className="text-emerald-300 text-base">Dossiers associés</CardTitle>
+                        {clientDossiers.length > 0 && (
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {clientDossiers.length}
+                          </Badge>
+                        )}
+                      </div>
+                      {dossiersCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                    </div>
+                  </CardHeader>
+
+                  {!dossiersCollapsed && (
+                    <CardContent className="pt-3 pb-2">
+                      {clientDossiers.length > 0 ? (
+                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Date</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {clientDossiers.map((dossier) => (
+                                <TableRow 
+                                  key={dossier.id} 
+                                  className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                  onClick={() => {
+                                    window.open(createPageUrl('Dossiers') + `?dossier_id=${dossier.id}`, '_blank');
+                                  }}
+                                >
+                                  <TableCell>
+                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {dossier.mandats && dossier.mandats.length > 0 ? (
+                                      <div className="flex gap-1 flex-wrap">
+                                        {dossier.mandats.slice(0, 2).map((m, idx) => (
+                                          <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                            {m.type_mandat}
+                                          </Badge>
+                                        ))}
+                                        {dossier.mandats.length > 2 && (
+                                          <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                            +{dossier.mandats.length - 2}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="text-slate-600 text-xs">Aucun</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                      {dossier.statut}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    {dossier.date_ouverture ? format(new Date(dossier.date_ouverture), "dd MMM yyyy", { locale: fr }) : '-'}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-slate-500">
+                          <FolderOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-xs">Aucun dossier associé</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              )}
             </form>
             </div>
 
