@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,7 +39,7 @@ export default function Clients() {
   const [viewingDossier, setViewingDossier] = useState(null);
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
-  const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState([]);
 
   const queryClient = useQueryClient();
 
@@ -109,11 +110,6 @@ export default function Clients() {
     }
   };
 
-  const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
-    return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
-  };
-
   const sortClients = (clientsList) => {
     if (!sortField) return clientsList;
 
@@ -163,7 +159,9 @@ export default function Clients() {
       client.telephones?.some(t => t.telephone?.toLowerCase().includes(searchLower))
     );
 
-    const matchesType = filterType === "all" || client.type_client === filterType || (!client.type_client && filterType === "Client");
+    const matchesType = filterType.length === 0 || 
+      filterType.includes(client.type_client) || 
+      (!client.type_client && filterType.includes("Client"));
 
     return matchesSearch && matchesType;
   });
@@ -320,18 +318,54 @@ export default function Clients() {
                       className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                     />
                   </div>
-                  <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-48 bg-slate-800/50 border-slate-700 text-white">
-                      <SelectValue placeholder="Type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                      <SelectItem value="Client" className="text-white">Client</SelectItem>
-                      <SelectItem value="Notaire" className="text-white">Notaire</SelectItem>
-                      <SelectItem value="Courtier immobilier" className="text-white">Courtier immobilier</SelectItem>
-                      <SelectItem value="Compagnie" className="text-white">Compagnie</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
+                        <span>Types ({filterType.length || 'Tous'})</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={filterType.length === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) setFilterType([]);
+                        }}
+                      >
+                        Tous
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
+                      {["Client", "Notaire", "Courtier immobilier", "Compagnie"].map((type) => (
+                        <DropdownMenuCheckboxItem
+                          key={type}
+                          checked={filterType.includes(type)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterType([...filterType, type]);
+                            } else {
+                              setFilterType(filterType.filter((t) => t !== type));
+                            }
+                          }}
+                        >
+                          {type}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {filterType.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFilterType([])}
+                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    >
+                      Réinitialiser
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -343,31 +377,31 @@ export default function Clients() {
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('nom')}
                     >
-                      Nom complet {getSortIcon('nom')}
+                      Nom complet {sortField === 'nom' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('type')}
                     >
-                      Type {getSortIcon('type')}
+                      Type {sortField === 'type' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('adresse')}
                     >
-                      Adresse actuelle {getSortIcon('adresse')}
+                      Adresse actuelle {sortField === 'adresse' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('courriel')}
                     >
-                      Courriel actuel {getSortIcon('courriel')}
+                      Courriel actuel {sortField === 'courriel' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('telephone')}
                     >
-                      Téléphone actuel {getSortIcon('telephone')}
+                      Téléphone actuel {sortField === 'telephone' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
