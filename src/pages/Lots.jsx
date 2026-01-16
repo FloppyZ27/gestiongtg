@@ -1380,7 +1380,7 @@ export default function Lots() {
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('date_bpd')}
                     >
-                      Date BPD {sortField === 'date_bpd' && (sortDirection === 'asc' ? '↓')}
+                      Date BPD {sortField === 'date_bpd' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead 
                       className="text-slate-300 cursor-pointer hover:text-white"
