@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -137,6 +137,7 @@ export default function Lots() {
   const [concordanceCollapsed, setConcordanceCollapsed] = useState(false);
   const [sidebarTab, setSidebarTab] = useState("commentaires");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [dossiersAssociesCollapsed, setDossiersAssociesCollapsed] = useState(false);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [newConcordance, setNewConcordance] = useState({
@@ -1051,9 +1052,18 @@ export default function Lots() {
                       </div>
                     )}
 
-                    {/* Dossiers/Mandats associés avec filtres et tri */}
+                    {/* Dossiers/Mandats associés avec filtres et tri - Collapsible */}
                     <div>
-                      <Label className="text-slate-400 mb-3 block">Dossiers/Mandats associés</Label>
+                      <div 
+                        className="cursor-pointer hover:bg-slate-800/50 transition-colors py-2 px-3 rounded-lg mb-3 flex items-center justify-between"
+                        onClick={() => setDossiersAssociesCollapsed(!dossiersAssociesCollapsed)}
+                      >
+                        <Label className="text-slate-400 flex items-center gap-2 cursor-pointer">
+                          <FolderOpen className="w-4 h-4" />
+                          Dossiers associés
+                        </Label>
+                        {dossiersAssociesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                      </div>
                       {(() => {
                         const allAssociatedDossiers = getDossiersWithLot(viewingLot.numero_lot);
                         const uniqueVilles = [...new Set(
@@ -1066,6 +1076,8 @@ export default function Lots() {
 
                         return allAssociatedDossiers.length > 0 ? (
                           <>
+                            {!dossiersAssociesCollapsed && (
+                            <>
                             {/* Barre de recherche et filtres */}
                             <div className="space-y-3 mb-3">
                               <div className="relative">
@@ -1186,11 +1198,15 @@ export default function Lots() {
                                 </TableBody>
                               </Table>
                             </div>
+                            </>
+                            )}
                           </>
                         ) : (
-                          <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                            Aucun dossier associé à ce lot
-                          </p>
+                          !dossiersAssociesCollapsed && (
+                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                              Aucun dossier associé à ce lot
+                            </p>
+                          )
                         );
                       })()}
                     </div>
