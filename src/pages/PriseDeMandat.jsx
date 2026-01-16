@@ -3013,6 +3013,16 @@ export default function PriseDeMandat() {
                     }
 
                     try {
+                      // Mettre à jour chaque mandat avec tache_actuelle: "Cédule"
+                      const mandatsAvecCedule = nouveauDossierForm.mandats.map(m => ({
+                        ...m,
+                        tache_actuelle: "Cédule"
+                      }));
+                      
+                      const dossierDataAvecCedule = {
+                        ...nouveauDossierForm,
+                        mandats: mandatsAvecCedule
+                      };
                       // Créer un commentaire récapitulatif avec les infos MANUELLES du dossier
                       let infoCommentaire = "<h2 style='font-size: 1.31em;'><strong>📋 Informations du mandat</strong></h2>\n\n";
                       let hasAnyManualInfo = false;
@@ -3096,13 +3106,114 @@ export default function PriseDeMandat() {
                         commentairesFinaux = [commentaireInfos, ...commentairesTemporairesDossier];
                       }
                       
-                      console.log("Commentaire à créer:", infoCommentaire);
-                      console.log("Commentaires finaux:", commentairesFinaux);
-                      
-                      await createDossierMutation.mutateAsync({ 
-                        dossierData: nouveauDossierForm,
+                      const newDossier = await createDossierMutation.mutateAsync({ 
+                        dossierData: dossierDataAvecCedule,
                         commentairesToCreate: commentairesFinaux
                       });
+                      
+                      // Créer des notifications pour chaque utilisateur assigné à un mandat
+                      const notificationPromises = mandatsAvecCedule
+                        .filter(m => m.utilisateur_assigne)
+                        .map(m => {
+                          const clientsNames = getClientsNames(dossierDataAvecCedule.clients_ids);
+                          const numeroDossier = `${getArpenteurInitials(dossierDataAvecCedule.arpenteur_geometre)}${dossierDataAvecCedule.numero_dossier}`;
+                          
+                          return base44.entities.Notification.create({
+                            utilisateur_email: m.utilisateur_assigne,
+                            titre: "Nouvelle tâche assignée",
+                            message: `La tâche "Cédule" du mandat "${m.type_mandat}" du dossier ${numeroDossier}${clientsNames && clientsNames !== '-' ? ` - ${clientsNames}` : ''} vous a été assignée.`,
+                            type: "dossier",
+                            dossier_id: newDossier.id,
+                            lue: false
+                          });
+                        });
+                      
+                      await Promise.all(notificationPromises);
+                      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                      
+                      // Envoyer un email aux clients
+                      const clientsEmails = dossierDataAvecCedule.clients_ids
+                        .map(id => {
+                          const client = clients.find(c => c.id === id);
+                          return client?.courriels?.find(c => c.actuel)?.courriel || client?.courriels?.[0]?.courriel;
+                        })
+                        .filter(email => email);
+                      
+                      // Récupérer les emails des notaires et courtiers pour CC
+                      const notairesEmails = (dossierDataAvecCedule.notaires_ids || [])
+                        .map(id => {
+                          const notaire = clients.find(c => c.id === id);
+                          return notaire?.courriels?.find(c => c.actuel)?.courriel || notaire?.courriels?.[0]?.courriel;
+                        })
+                        .filter(email => email);
+                      
+                      const courtiersEmails = (dossierDataAvecCedule.courtiers_ids || [])
+                        .map(id => {
+                          const courtier = clients.find(c => c.id === id);
+                          return courtier?.courriels?.find(c => c.actuel)?.courriel || courtier?.courriels?.[0]?.courriel;
+                        })
+                        .filter(email => email);
+                      
+                      // Construire le contenu de l'email
+                      for (const clientEmail of clientsEmails) {
+                        const client = clients.find(c => c.courriels?.some(ce => ce.courriel === clientEmail));
+                        const nomClient = client ? `${client.prenom} ${client.nom}` : "Client";
+                        
+                        const mandatsDescription = mandatsAvecCedule.map(m => m.type_mandat).join(', ');
+                        const adresseComplete = mandatsAvecCedule[0]?.adresse_travaux 
+                          ? formatAdresse(mandatsAvecCedule[0].adresse_travaux)
+                          : "à déterminer";
+                        
+                        // Trouver la date de livraison la plus éloignée parmi tous les mandats
+                        const datesLivraison = mandatsAvecCedule
+                          .map(m => m.date_livraison)
+                          .filter(d => d)
+                          .sort((a, b) => new Date(b) - new Date(a));
+                        const dateLivraison = datesLivraison[0] 
+                          ? format(new Date(datesLivraison[0]), "dd MMMM yyyy", { locale: fr })
+                          : "à déterminer";
+                        
+                        const dateOuverture = format(new Date(dossierDataAvecCedule.date_ouverture), "dd MMMM yyyy", { locale: fr });
+                        
+                        const emailBody = `Bonjour ${nomClient},
+
+Nous vous confirmons par la présente l'ouverture de votre dossier d'arpentage en date du ${dateOuverture}, concernant le(s) mandat(s) suivant(s) : ${mandatsDescription}, à être réalisé(s) à l'adresse ${adresseComplete}.
+
+La date prévue de livraison des documents est fixée au ${dateLivraison}, sous réserve des délais liés aux autorisations, à l'accès au site et aux conditions terrain.
+
+Nous communiquerons avec vous si des informations supplémentaires sont requises ou si un ajustement au calendrier devait s'avérer nécessaire.
+
+N'hésitez pas à nous contacter pour toute question ou précision.
+
+Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
+                        
+                        // Envoyer l'email au client
+                        await base44.integrations.Core.SendEmail({
+                          to: clientEmail,
+                          subject: `Confirmation d'ouverture de dossier ${getArpenteurInitials(dossierDataAvecCedule.arpenteur_geometre)}${dossierDataAvecCedule.numero_dossier}`,
+                          body: emailBody,
+                          from_name: "GTG - Guay Turcotte Gilbert"
+                        });
+                        
+                        // Envoyer aussi aux notaires et courtiers en CC
+                        for (const notaireEmail of notairesEmails) {
+                          await base44.integrations.Core.SendEmail({
+                            to: notaireEmail,
+                            subject: `Confirmation d'ouverture de dossier ${getArpenteurInitials(dossierDataAvecCedule.arpenteur_geometre)}${dossierDataAvecCedule.numero_dossier}`,
+                            body: emailBody,
+                            from_name: "GTG - Guay Turcotte Gilbert"
+                          });
+                        }
+                        
+                        for (const courtierEmail of courtiersEmails) {
+                          await base44.integrations.Core.SendEmail({
+                            to: courtierEmail,
+                            subject: `Confirmation d'ouverture de dossier ${getArpenteurInitials(dossierDataAvecCedule.arpenteur_geometre)}${dossierDataAvecCedule.numero_dossier}`,
+                            body: emailBody,
+                            from_name: "GTG - Guay Turcotte Gilbert"
+                          });
+                        }
+                      }
                       
                       // Supprimer la prise de mandat si elle existe
                       if (editingPriseMandat?.id) {
