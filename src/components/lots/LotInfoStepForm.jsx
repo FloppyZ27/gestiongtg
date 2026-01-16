@@ -42,40 +42,40 @@ export default function LotInfoStepForm({
       </CardHeader>
 
       {!isCollapsed && (
-        <CardContent className="pt-2 pb-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
+        <CardContent className="pt-1 pb-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
               <Select 
                 value={lotForm.circonscription_fonciere} 
                 onValueChange={onCirconscriptionChange}
                 disabled={disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                    <SelectItem key={circ} value={circ} className="text-white text-sm">
+                    <SelectItem key={circ} value={circ} className="text-white text-xs">
                       {circ}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Cadastre</Label>
               <Select 
                 value={lotForm.cadastre} 
                 onValueChange={(value) => onLotFormChange({...lotForm, cadastre: value})}
                 disabled={!lotForm.circonscription_fonciere || disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                   <SelectValue placeholder={lotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
                   {availableCadastres.map((cadastre) => (
-                    <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
+                    <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
                       {cadastre}
                     </SelectItem>
                   ))}
@@ -84,54 +84,54 @@ export default function LotInfoStepForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
               <Input
                 value={lotForm.numero_lot}
                 onChange={(e) => onLotFormChange({...lotForm, numero_lot: e.target.value})}
                 required
                 placeholder="Ex: 1234-5678"
-                className="bg-slate-700 border-slate-600 h-7 text-sm"
+                className="bg-slate-700 border-slate-600 h-6 text-xs"
                 disabled={disabled}
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Rang</Label>
               <Input
                 value={lotForm.rang}
                 onChange={(e) => onLotFormChange({...lotForm, rang: e.target.value})}
                 placeholder="Ex: Rang 4"
-                className="bg-slate-700 border-slate-600 h-7 text-sm"
+                className="bg-slate-700 border-slate-600 h-6 text-xs"
                 disabled={disabled}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Date BPD</Label>
               <Input
                 type="date"
                 value={lotForm.date_bpd}
                 onChange={(e) => onLotFormChange({...lotForm, date_bpd: e.target.value})}
-                className="bg-slate-700 border-slate-600 h-7 text-sm"
+                className="bg-slate-700 border-slate-600 h-6 text-xs"
                 disabled={disabled}
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <Label className="text-slate-400 text-xs">Type d'opération</Label>
               <Select 
                 value={lotForm.type_operation} 
                 onValueChange={(value) => onLotFormChange({...lotForm, type_operation: value})}
                 disabled={disabled}
               >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   {TYPES_OPERATIONS.map((type) => (
-                    <SelectItem key={type} value={type} className="text-white text-sm">
+                    <SelectItem key={type} value={type} className="text-white text-xs">
                       {type}
                     </SelectItem>
                   ))}

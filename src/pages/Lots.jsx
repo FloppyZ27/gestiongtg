@@ -799,42 +799,44 @@ export default function Lots() {
                   </div>
 
                   <form id="lot-form" onSubmit={handleSubmit} className="space-y-3">
-                    {/* Section Import .d01 */}
-                    <div 
-                      className={`border border-dashed rounded-lg p-3 transition-all ${
-                        isDragOverD01 
-                          ? 'border-emerald-500 bg-emerald-500/10' 
-                          : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
-                      }`}
-                      onDragOver={handleD01DragOver}
-                      onDragLeave={handleD01DragLeave}
-                      onDrop={handleD01Drop}
-                    >
-                      {isImportingD01 ? (
-                        <div className="flex items-center justify-center gap-2 text-teal-400">
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span className="text-sm">Importation...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Upload className="w-5 h-5 text-slate-400" />
-                            <span className="text-slate-400 text-sm">Importer depuis un fichier .d01</span>
+                    {/* Section Import .d01 - Visible uniquement en mode création */}
+                    {!editingLot && (
+                      <div 
+                        className={`border border-dashed rounded-lg p-3 transition-all ${
+                          isDragOverD01 
+                            ? 'border-emerald-500 bg-emerald-500/10' 
+                            : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
+                        }`}
+                        onDragOver={handleD01DragOver}
+                        onDragLeave={handleD01DragLeave}
+                        onDrop={handleD01Drop}
+                      >
+                        {isImportingD01 ? (
+                          <div className="flex items-center justify-center gap-2 text-teal-400">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span className="text-sm">Importation...</span>
                           </div>
-                          <label>
-                            <input
-                              type="file"
-                              accept=".d01"
-                              onChange={handleD01FileSelect}
-                              className="hidden"
-                            />
-                            <span className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded cursor-pointer transition-colors inline-block">
-                              Parcourir
-                            </span>
-                          </label>
-                        </div>
-                      )}
-                    </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-5 h-5 text-slate-400" />
+                              <span className="text-slate-400 text-sm">Importer depuis un fichier .d01</span>
+                            </div>
+                            <label>
+                              <input
+                                type="file"
+                                accept=".d01"
+                                onChange={handleD01FileSelect}
+                                className="hidden"
+                              />
+                              <span className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded cursor-pointer transition-colors inline-block">
+                                Parcourir
+                              </span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Section Informations du lot */}
                     <LotInfoStepForm
