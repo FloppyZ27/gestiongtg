@@ -414,6 +414,11 @@ export default function ClientFormDialog({
 
   const [sortFieldDossiers, setSortFieldDossiers] = useState(null);
   const [sortDirectionDossiers, setSortDirectionDossiers] = useState("asc");
+  const [dossierSearchTerm, setDossierSearchTerm] = useState("");
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
+  const [filterMandat, setFilterMandat] = useState([]);
+  const [filterVille, setFilterVille] = useState([]);
+  const [filterStatut, setFilterStatut] = useState("all");
 
   const handleSortDossiers = (field) => {
     if (sortFieldDossiers === field) {
@@ -424,7 +429,31 @@ export default function ClientFormDialog({
     }
   };
 
-  const sortedClientDossiers = [...clientDossiers].sort((a, b) => {
+  const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
+  const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
+  const STATUTS = ["Ouvert", "Fermé", "Retour d'appel", "Message laissé/Sans réponse", "Demande d'information", "Nouveau mandat", "Soumission", "Mandat non octroyé", "Mandats à ouvrir", "Rejeté"];
+  
+  const allVilles = [...new Set(clientDossiers.map(d => d.mandats?.[0]?.adresse_travaux?.ville).filter(v => v))].sort();
+
+  const filteredClientDossiers = clientDossiers.filter(dossier => {
+    const searchLower = dossierSearchTerm.toLowerCase();
+    const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
+    const matchesSearch = (
+      fullNumber.toLowerCase().includes(searchLower) ||
+      dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
+      formatAdresseTravaux(dossier.mandats?.[0]?.adresse_travaux)?.toLowerCase().includes(searchLower) ||
+      dossier.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
+    );
+
+    const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(dossier.arpenteur_geometre);
+    const matchesVille = filterVille.length === 0 || filterVille.includes(dossier.mandats?.[0]?.adresse_travaux?.ville);
+    const matchesMandat = filterMandat.length === 0 || dossier.mandats?.some(m => filterMandat.includes(m.type_mandat));
+    const matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
+
+    return matchesSearch && matchesArpenteur && matchesVille && matchesMandat && matchesStatut;
+  });
+
+  const sortedClientDossiers = [...filteredClientDossiers].sort((a, b) => {
     if (!sortFieldDossiers) return 0;
 
     let aValue, bValue;
@@ -1500,9 +1529,149 @@ export default function ClientFormDialog({
 
                   {!dossiersCollapsed && (
                     <CardContent className="pt-3 pb-2">
-                      {clientDossiers.length > 0 ? (
+                      {/* Barre de recherche et filtres */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="relative flex-1 min-w-[150px]">
+                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                          <Input
+                            placeholder="Rechercher..."
+                            value={dossierSearchTerm}
+                            onChange={(e) => setDossierSearchTerm(e.target.value)}
+                            className="pl-7 bg-slate-700 border-slate-600 h-7 text-xs"
+                          />
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="h-7 text-xs bg-slate-700 border-slate-600 text-white px-2">
+                              Arpenteur ({filterArpenteur.length || 'Tous'})
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                            <DropdownMenuCheckboxItem
+                              checked={filterArpenteur.length === 0}
+                              onCheckedChange={(checked) => { if (checked) setFilterArpenteur([]); }}
+                            >
+                              Tous
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuSeparator />
+                            {ARPENTEURS.map((arp) => (
+                              <DropdownMenuCheckboxItem
+                                key={arp}
+                                checked={filterArpenteur.includes(arp)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setFilterArpenteur([...filterArpenteur, arp]);
+                                  } else {
+                                    setFilterArpenteur(filterArpenteur.filter((a) => a !== arp));
+                                  }
+                                }}
+                              >
+                                {arp}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="h-7 text-xs bg-slate-700 border-slate-600 text-white px-2">
+                              Mandat ({filterMandat.length || 'Tous'})
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                            <DropdownMenuCheckboxItem
+                              checked={filterMandat.length === 0}
+                              onCheckedChange={(checked) => { if (checked) setFilterMandat([]); }}
+                            >
+                              Tous
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuSeparator />
+                            {TYPES_MANDATS.map((type) => (
+                              <DropdownMenuCheckboxItem
+                                key={type}
+                                checked={filterMandat.includes(type)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setFilterMandat([...filterMandat, type]);
+                                  } else {
+                                    setFilterMandat(filterMandat.filter((t) => t !== type));
+                                  }
+                                }}
+                              >
+                                {type}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="h-7 text-xs bg-slate-700 border-slate-600 text-white px-2">
+                              Ville ({filterVille.length || 'Toutes'})
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                            <DropdownMenuCheckboxItem
+                              checked={filterVille.length === 0}
+                              onCheckedChange={(checked) => { if (checked) setFilterVille([]); }}
+                            >
+                              Toutes
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuSeparator />
+                            {allVilles.map((ville) => (
+                              <DropdownMenuCheckboxItem
+                                key={ville}
+                                checked={filterVille.includes(ville)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setFilterVille([...filterVille, ville]);
+                                  } else {
+                                    setFilterVille(filterVille.filter((v) => v !== ville));
+                                  }
+                                }}
+                              >
+                                {ville}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <Select value={filterStatut} onValueChange={setFilterStatut}>
+                          <SelectTrigger className="h-7 text-xs bg-slate-700 border-slate-600 text-white w-32">
+                            <SelectValue placeholder="Statut" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="all" className="text-white text-xs">Tous statuts</SelectItem>
+                            {STATUTS.map(statut => (
+                              <SelectItem key={statut} value={statut} className="text-white text-xs">{statut}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {(filterArpenteur.length > 0 || filterMandat.length > 0 || filterVille.length > 0 || filterStatut !== "all") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setFilterArpenteur([]);
+                              setFilterMandat([]);
+                              setFilterVille([]);
+                              setFilterStatut("all");
+                            }}
+                            className="h-7 text-xs bg-slate-700 border-slate-600 text-slate-400 hover:bg-slate-600 hover:text-white px-2"
+                          >
+                            Réinitialiser
+                          </Button>
+                        )}
+                      </div>
+
+                      {filteredClientDossiers.length > 0 ? (
                         <div className="border border-slate-700 rounded-lg overflow-hidden">
-                          <Table>
+                    <Table>
                             <TableHeader>
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                 <TableHead 
