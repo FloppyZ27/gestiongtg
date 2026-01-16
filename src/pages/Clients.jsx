@@ -267,12 +267,16 @@ export default function Clients() {
 
             <ClientFormDialog
               open={isDialogOpen}
-              onOpenChange={setIsDialogOpen}
+              onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) setEditingClient(null);
+              }}
               editingClient={editingClient}
               defaultType="Client"
               onSuccess={() => {
                 queryClient.invalidateQueries({ queryKey: ['clients'] });
                 setEditingClient(null);
+                setIsDialogOpen(false);
               }}
             />
           </div>
