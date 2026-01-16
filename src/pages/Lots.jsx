@@ -805,7 +805,7 @@ export default function Lots() {
                     {/* Section Import .d01 - Visible uniquement en mode création */}
                     {!editingLot && (
                       <div 
-                        className={`border border-dashed rounded-lg p-3 transition-all ${
+                        className={`border border-dashed rounded-lg p-2 transition-all ${
                           isDragOverD01 
                             ? 'border-emerald-500 bg-emerald-500/10' 
                             : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
@@ -816,14 +816,14 @@ export default function Lots() {
                       >
                         {isImportingD01 ? (
                           <div className="flex items-center justify-center gap-2 text-teal-400">
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span className="text-sm">Importation...</span>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-xs">Importation...</span>
                           </div>
                         ) : (
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
-                              <Upload className="w-5 h-5 text-slate-400" />
-                              <span className="text-slate-400 text-sm">Importer depuis un fichier .d01</span>
+                              <Upload className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
                             </div>
                             <label>
                               <input
@@ -832,7 +832,7 @@ export default function Lots() {
                                 onChange={handleD01FileSelect}
                                 className="hidden"
                               />
-                              <span className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded cursor-pointer transition-colors inline-block">
+                              <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
                                 Parcourir
                               </span>
                             </label>
