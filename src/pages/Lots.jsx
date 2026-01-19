@@ -1271,31 +1271,31 @@ export default function Lots() {
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('numero_dossier')}
                                           >
-                                            N° Dossier {getFormSortIcon('numero_dossier')}
+                                            N° Dossier
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
-                                            Mandats {getFormSortIcon('type_mandat')}
+                                            Mandats
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
-                                            Adresse des travaux {getFormSortIcon('adresse_travaux')}
+                                            Adresse des travaux
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('statut')}
                                           >
-                                            Statut {getFormSortIcon('statut')}
+                                            Statut
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('date_ouverture')}
                                           >
-                                            Date {getFormSortIcon('date_ouverture')}
+                                            Date
                                           </TableHead>
                                         </TableRow>
                                       </TableHeader>
@@ -1312,9 +1312,13 @@ export default function Lots() {
                                                 </Badge>
                                               </TableCell>
                                               <TableCell>
-                                                <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                                  {item.mandat?.type_mandat || "Aucun"}
-                                                </Badge>
+                                                {item.mandat?.type_mandat ? (
+                                                  <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs">
+                                                    {item.mandat.type_mandat}
+                                                  </Badge>
+                                                ) : (
+                                                  <span className="text-slate-600 text-xs">Aucun mandat</span>
+                                                )}
                                               </TableCell>
                                               <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                                 {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
