@@ -1301,31 +1301,31 @@ export default function Lots() {
                                       <TableHeader>
                                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('numero_dossier')}
                                           >
                                             N° Dossier {getFormSortIcon('numero_dossier')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
                                             Mandats {getFormSortIcon('type_mandat')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
                                             Adresse des travaux {getFormSortIcon('adresse_travaux')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('statut')}
                                           >
                                             Statut {getFormSortIcon('statut')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('date_ouverture')}
                                           >
                                             Date {getFormSortIcon('date_ouverture')}
@@ -1350,7 +1350,7 @@ export default function Lots() {
                                                     {getAbbreviatedMandatType(item.mandat.type_mandat)}
                                                   </Badge>
                                                 ) : (
-                                                  <span className="text-slate-600 text-xs">Aucun</span>
+                                                  <span className="text-slate-600 text-sm">Aucun mandat</span>
                                                 )}
                                               </TableCell>
                                               <TableCell className="text-slate-300 text-sm max-w-xs truncate">
@@ -1361,7 +1361,7 @@ export default function Lots() {
                                                   {item.dossier.statut}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300 text-sm">
+                                              <TableCell className="text-slate-300">
                                                 {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                               </TableCell>
                                             </TableRow>
