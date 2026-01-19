@@ -224,8 +224,6 @@ export default function Lots() {
     circonscription_fonciere: "",
     cadastre: "Québec",
     rang: "",
-    date_bpd: "",
-    type_operation: "",
     types_operation: []
   });
 
@@ -460,8 +458,6 @@ export default function Lots() {
       circonscription_fonciere: "",
       cadastre: "Québec",
       rang: "",
-      date_bpd: "",
-      type_operation: "",
       types_operation: []
     });
     setConcordancesAnterieure([]);
@@ -489,8 +485,6 @@ export default function Lots() {
       circonscription_fonciere: lot.circonscription_fonciere || "",
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
-      date_bpd: lot.date_bpd || "",
-      type_operation: lot.type_operation || "",
       types_operation: lot.types_operation || []
     };
     setFormData(lotData);
@@ -792,7 +786,6 @@ export default function Lots() {
         numero_lot: extractedData.numero_lot || prev.numero_lot,
         circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
         cadastre: 'Québec',
-        date_bpd: extractedData.date_bpd || prev.date_bpd,
       }));
       
       setConcordancesAnterieure(extractedData.concordances_anterieures || []);
