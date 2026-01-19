@@ -1452,7 +1452,7 @@ export default function Lots() {
                                         <Info className="w-3 h-3 text-slate-500" />
                                       </div>
                                     </TooltipTrigger>
-                                    <TooltipContent side="left" className="bg-slate-800 border-slate-700 max-w-sm">
+                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
                                       <div className="space-y-1">
                                         {lot.concordances.map((conc, idx) => (
                                           <div key={idx} className="text-xs">
@@ -1542,7 +1542,7 @@ export default function Lots() {
                                         <Info className="w-3 h-3 text-slate-500" />
                                       </div>
                                     </TooltipTrigger>
-                                    <TooltipContent side="left" className="bg-slate-800 border-slate-700 max-w-sm">
+                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
                                       <div className="space-y-1">
                                         {result.concordances.map((conc, idx) => (
                                           <div key={idx} className="text-xs">
