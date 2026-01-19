@@ -168,8 +168,6 @@ export default function Lots() {
   const [filterTypeOperation, setFilterTypeOperation] = useState([]);
   const [filterRang, setFilterRang] = useState([]);
   const [availableCadastres, setAvailableCadastres] = useState([]);
-  const [concordancesAnterieure, setConcordancesAnterieure] = useState([]);
-  const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
@@ -186,12 +184,6 @@ export default function Lots() {
   const [isBulkImportDialogOpen, setIsBulkImportDialogOpen] = useState(false);
   const [bulkImportPreview, setBulkImportPreview] = useState(null);
   const [isCreatingBulkLots, setIsCreatingBulkLots] = useState(false);
-  const [newConcordance, setNewConcordance] = useState({
-    circonscription_fonciere: "",
-    cadastre: "",
-    numero_lot: "",
-    rang: ""
-  });
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showLotMissingFieldsWarning, setShowLotMissingFieldsWarning] = useState(false);
   const [hasFormChanges, setHasFormChanges] = useState(false);
@@ -386,8 +378,7 @@ export default function Lots() {
     }
 
     const dataToSubmit = {
-      ...formData,
-      concordances_anterieures: concordancesAnterieure
+      ...formData
     };
     
     if (editingLot) {
@@ -401,53 +392,10 @@ export default function Lots() {
     setFormData(prev => ({ 
       ...prev, 
       circonscription_fonciere: value, 
-      cadastre: prev.cadastre || "Québec"  // Garder le cadastre existant ou mettre Québec par défaut
+      cadastre: prev.cadastre || "Québec"
     }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
     setHasFormChanges(true);
-  };
-
-  const addConcordance = () => {
-    if (newConcordance.numero_lot && newConcordance.circonscription_fonciere) {
-      if (editingConcordanceIndex !== null) {
-        const updated = [...concordancesAnterieure];
-        updated[editingConcordanceIndex] = { ...newConcordance };
-        setConcordancesAnterieure(updated);
-        setEditingConcordanceIndex(null);
-      } else {
-        setConcordancesAnterieure([...concordancesAnterieure, { ...newConcordance }]);
-      }
-      setNewConcordance({
-        circonscription_fonciere: "",
-        cadastre: "",
-        numero_lot: "",
-        rang: ""
-      });
-    }
-  };
-
-  const editConcordance = (index) => {
-    setNewConcordance({ ...concordancesAnterieure[index] });
-    setEditingConcordanceIndex(index);
-  };
-
-  const cancelEditConcordance = () => {
-    setNewConcordance({
-      circonscription_fonciere: "",
-      cadastre: "",
-      numero_lot: "",
-      rang: ""
-    });
-    setEditingConcordanceIndex(null);
-  };
-
-  const removeConcordance = (index) => {
-    setConcordancesAnterieure(concordancesAnterieure.filter((_, i) => i !== index));
-    if (editingConcordanceIndex === index) {
-      cancelEditConcordance();
-    } else if (editingConcordanceIndex !== null && index < editingConcordanceIndex) {
-      setEditingConcordanceIndex(editingConcordanceIndex - 1);
-    }
   };
 
   const resetForm = () => {
@@ -458,15 +406,8 @@ export default function Lots() {
       rang: "",
       types_operation: []
     });
-    setNewConcordance({
-      circonscription_fonciere: "",
-      cadastre: "",
-      numero_lot: "",
-      rang: ""
-    });
     setEditingLot(null);
     setAvailableCadastres([]);
-    setEditingConcordanceIndex(null);
     setCommentairesTemporaires([]);
     setHasFormChanges(false);
     setInitialFormData(null);
@@ -486,12 +427,10 @@ export default function Lots() {
     };
     setFormData(lotData);
     setInitialFormData(JSON.parse(JSON.stringify(lotData)));
-    setConcordancesAnterieure(lot.concordances_anterieures || []);
     if (lot.circonscription_fonciere) {
       setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
     }
-    setIsFormDialogOpen(true); // Renamed from setIsDialogOpen
-    setEditingConcordanceIndex(null);
+    setIsFormDialogOpen(true);
     setHasFormChanges(false);
   };
 
@@ -784,8 +723,6 @@ export default function Lots() {
         circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
         cadastre: 'Québec',
       }));
-      
-      setConcordancesAnterieure(extractedData.concordances_anterieures || []);
       
       setShowImportSuccess(true);
       setHasFormChanges(true);
