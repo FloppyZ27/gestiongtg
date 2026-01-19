@@ -190,7 +190,7 @@ export default function Lots() {
   const [formData, setFormData] = useState({
     numero_lot: "",
     circonscription_fonciere: "",
-    cadastre: "",
+    cadastre: "Québec",
     rang: "",
     date_bpd: "",
     type_operation: ""
@@ -427,7 +427,7 @@ export default function Lots() {
     setFormData({
       numero_lot: "",
       circonscription_fonciere: "",
-      cadastre: "",
+      cadastre: "Québec",
       rang: "",
       date_bpd: "",
       type_operation: ""
