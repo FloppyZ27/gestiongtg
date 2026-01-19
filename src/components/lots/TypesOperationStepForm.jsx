@@ -182,10 +182,9 @@ export default function TypesOperationStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-3 pb-2">
-          {/* Tabs des types d'opération ajoutés */}
+          {/* Types d'opération ajoutés */}
           {typesOperation.length > 0 && (
-            {typesOperation.length > 0 && (
-              <div className="mb-3 flex gap-1">
+            <div className="mb-3 flex gap-1">
                 {typesOperation.map((typeOp, index) => (
                   <div key={index} className="group relative">
                     <div className="flex items-center gap-1 px-2 py-1 bg-purple-500/15 border border-purple-500/30 rounded text-xs text-purple-300 hover:bg-purple-500/25 transition-colors cursor-pointer"
