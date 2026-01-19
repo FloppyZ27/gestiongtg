@@ -177,6 +177,14 @@ export default function Lots() {
   const [viewSortField, setViewSortField] = useState(null);
   const [viewSortDirection, setViewSortDirection] = useState("asc");
 
+  // New state for Form Dialog filters and sorting (dossiers section)
+  const [formDossierSearchTerm, setFormDossierSearchTerm] = useState("");
+  const [formFilterArpenteur, setFormFilterArpenteur] = useState("all");
+  const [formFilterTypeMandat, setFormFilterTypeMandat] = useState("all");
+  const [formFilterVille, setFormFilterVille] = useState("all");
+  const [formSortField, setFormSortField] = useState(null);
+  const [formSortDirection, setFormSortDirection] = useState("asc");
+
   const [formData, setFormData] = useState({
     numero_lot: "",
     circonscription_fonciere: "",
@@ -504,12 +512,32 @@ export default function Lots() {
     return viewSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
-  const getFilteredAndSortedDossiers = (lotNumero) => {
+  const handleFormSort = (field) => {
+    if (formSortField === field) {
+      setFormSortDirection(formSortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setFormSortField(field);
+      setFormSortDirection("asc");
+    }
+  };
+
+  const getFormSortIcon = (field) => {
+    if (formSortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    return formSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  const getFilteredAndSortedDossiers = (lotNumero, isFormDialog = false) => {
     const associatedDossiers = getDossiersWithLot(lotNumero);
+    const searchTerm = isFormDialog ? formDossierSearchTerm : viewDossierSearchTerm;
+    const filterArpenteur = isFormDialog ? formFilterArpenteur : viewFilterArpenteur;
+    const filterTypeMandat = isFormDialog ? formFilterTypeMandat : viewFilterTypeMandat;
+    const filterVille = isFormDialog ? formFilterVille : viewFilterVille;
+    const sortField = isFormDialog ? formSortField : viewSortField;
+    const sortDirection = isFormDialog ? formSortDirection : viewSortDirection;
     
     // Filter
     const filtered = associatedDossiers.filter(item => {
-      const searchLower = viewDossierSearchTerm.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
       const clientsNames = getClientsNames(item.dossier.clients_ids);
       const adresseTravaux = item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "";
       
@@ -521,20 +549,20 @@ export default function Lots() {
         adresseTravaux.toLowerCase().includes(searchLower)
       );
 
-      const matchesArpenteur = viewFilterArpenteur === "all" || item.dossier.arpenteur_geometre === viewFilterArpenteur;
-      const matchesTypeMandat = viewFilterTypeMandat === "all" || item.mandat?.type_mandat === viewFilterTypeMandat;
-      const matchesVille = viewFilterVille === "all" || item.mandat?.adresse_travaux?.ville === viewFilterVille;
+      const matchesArpenteur = filterArpenteur === "all" || item.dossier.arpenteur_geometre === filterArpenteur;
+      const matchesTypeMandat = filterTypeMandat === "all" || item.mandat?.type_mandat === filterTypeMandat;
+      const matchesVille = filterVille === "all" || item.mandat?.adresse_travaux?.ville === filterVille;
 
       return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille;
     });
 
     // Sort
-    if (!viewSortField) return filtered;
+    if (!sortField) return filtered;
 
     return [...filtered].sort((a, b) => {
       let aValue, bValue;
 
-      switch (viewSortField) {
+      switch (sortField) {
         case 'numero_dossier':
           aValue = (getArpenteurInitials(a.dossier.arpenteur_geometre) + a.dossier.numero_dossier).toLowerCase();
           bValue = (getArpenteurInitials(b.dossier.arpenteur_geometre) + b.dossier.numero_dossier).toLowerCase();
@@ -560,10 +588,10 @@ export default function Lots() {
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return viewSortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       } else {
-        if (aValue < bValue) return viewSortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return viewSortDirection === "asc" ? 1 : -1;
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
         return 0;
       }
     });
@@ -1115,49 +1143,120 @@ export default function Lots() {
 
                     {/* Section Dossiers associés - Visible uniquement en mode modification */}
                     {editingLot && (
-                      <Card className="border-slate-700 bg-slate-800/30">
-                        <CardHeader 
-                          className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 bg-blue-900/20"
+                      <div>
+                        <div 
+                          className="cursor-pointer hover:bg-slate-800/50 transition-colors py-2 px-3 rounded-lg mb-3 flex items-center justify-between"
                           onClick={() => setDossiersAssociesFormCollapsed(!dossiersAssociesFormCollapsed)}
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center">
-                                <FolderOpen className="w-4 h-4 text-blue-400" />
-                              </div>
-                              <CardTitle className="text-blue-300 text-lg">
-                                Dossiers associés
-                                {(() => {
-                                  const associatedDossiers = getDossiersWithLot(formData.numero_lot);
-                                  return associatedDossiers.length > 0 && (
-                                    <Badge className="ml-2 bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                      {associatedDossiers.length}
-                                    </Badge>
-                                  );
-                                })()}
-                              </CardTitle>
-                            </div>
-                            {dossiersAssociesFormCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
-                          </div>
-                        </CardHeader>
-
-                        {!dossiersAssociesFormCollapsed && (
-                          <CardContent className="pt-4 pb-4">
+                          <Label className="text-slate-400 flex items-center gap-2 cursor-pointer">
+                            <FolderOpen className="w-4 h-4" />
+                            Dossiers associés
                             {(() => {
                               const associatedDossiers = getDossiersWithLot(formData.numero_lot);
-                              return associatedDossiers.length > 0 ? (
-                                <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                  <Table>
-                                    <TableHeader>
-                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                        <TableHead className="text-slate-300">N° Dossier</TableHead>
-                                        <TableHead className="text-slate-300">Clients</TableHead>
-                                        <TableHead className="text-slate-300">Type de mandat</TableHead>
-                                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                      {associatedDossiers.map((item, idx) => (
+                              return associatedDossiers.length > 0 && (
+                                <Badge className="ml-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                  {associatedDossiers.length}
+                                </Badge>
+                              );
+                            })()}
+                          </Label>
+                          {dossiersAssociesFormCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                        </div>
+                        {(() => {
+                          const allAssociatedDossiers = getDossiersWithLot(formData.numero_lot);
+                          const uniqueVilles = [...new Set(
+                            allAssociatedDossiers
+                              .map(item => item.mandat?.adresse_travaux?.ville)
+                              .filter(ville => ville)
+                          )].sort();
+                          
+                          const filteredAndSorted = getFilteredAndSortedDossiers(formData.numero_lot, true);
+
+                          return allAssociatedDossiers.length > 0 ? (
+                            <>
+                              {!dossiersAssociesFormCollapsed && (
+                              <>
+                              {/* Barre de recherche et filtres */}
+                              <div className="space-y-3 mb-3">
+                                <div className="relative">
+                                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                  <Input
+                                    placeholder="Rechercher..."
+                                    value={formDossierSearchTerm}
+                                    onChange={(e) => setFormDossierSearchTerm(e.target.value)}
+                                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
+                                    <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                      <SelectValue placeholder="Arpenteur" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                                      {ARPENTEURS.map(arp => (
+                                        <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
+                                    <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                      <SelectValue placeholder="Type mandat" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                                      {TYPES_MANDATS.map(type => (
+                                        <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Select value={formFilterVille} onValueChange={setFormFilterVille}>
+                                    <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                      <SelectValue placeholder="Ville" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                                      {uniqueVilles.map(ville => (
+                                        <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                      <TableHead 
+                                        className="text-slate-300 cursor-pointer hover:text-white"
+                                        onClick={() => handleFormSort('numero_dossier')}
+                                      >
+                                        N° Dossier {getFormSortIcon('numero_dossier')}
+                                      </TableHead>
+                                      <TableHead 
+                                        className="text-slate-300 cursor-pointer hover:text-white"
+                                        onClick={() => handleFormSort('clients')}
+                                      >
+                                        Clients {getFormSortIcon('clients')}
+                                      </TableHead>
+                                      <TableHead 
+                                        className="text-slate-300 cursor-pointer hover:text-white"
+                                        onClick={() => handleFormSort('type_mandat')}
+                                      >
+                                        Type de mandat {getFormSortIcon('type_mandat')}
+                                      </TableHead>
+                                      <TableHead 
+                                        className="text-slate-300 cursor-pointer hover:text-white"
+                                        onClick={() => handleFormSort('adresse_travaux')}
+                                      >
+                                        Adresse travaux {getFormSortIcon('adresse_travaux')}
+                                      </TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {filteredAndSorted.length > 0 ? (
+                                      filteredAndSorted.map((item, idx) => (
                                         <TableRow 
                                           key={`${item.dossier.id}-${idx}`}
                                           className="border-slate-800 cursor-pointer hover:bg-slate-800/30"
@@ -1180,19 +1279,29 @@ export default function Lots() {
                                             {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
                                           </TableCell>
                                         </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </div>
-                              ) : (
-                                <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                                  Aucun dossier associé à ce lot
-                                </p>
-                              );
-                            })()}
-                          </CardContent>
-                        )}
-                      </Card>
+                                      ))
+                                    ) : (
+                                      <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                          Aucun dossier trouvé
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                              </>
+                              )}
+                            </>
+                          ) : (
+                            !dossiersAssociesFormCollapsed && (
+                              <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                                Aucun dossier associé à ce lot
+                              </p>
+                            )
+                          );
+                        })()}
+                      </div>
                     )}
                   </form>
 
