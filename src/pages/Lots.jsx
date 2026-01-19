@@ -317,8 +317,6 @@ export default function Lots() {
     }
     if (addr.rue) parts.push(addr.rue);
     if (addr.ville) parts.push(addr.ville);
-    if (addr.province) parts.push(addr.province);
-    if (addr.code_postal) parts.push(addr.code_postal);
     return parts.filter(p => p).join(', ');
   };
 
@@ -550,7 +548,13 @@ export default function Lots() {
 
   const handleFormSort = (field) => {
     if (formSortField === field) {
-      setFormSortDirection(formSortDirection === "asc" ? "desc" : "asc");
+      if (formSortDirection === "asc") {
+        setFormSortDirection("desc");
+      } else {
+        // Reset to neutral
+        setFormSortField(null);
+        setFormSortDirection("asc");
+      }
     } else {
       setFormSortField(field);
       setFormSortDirection("asc");
@@ -558,7 +562,7 @@ export default function Lots() {
   };
 
   const getFormSortIcon = (field) => {
-    if (formSortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    if (formSortField !== field) return null;
     return formSortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
@@ -1300,31 +1304,31 @@ export default function Lots() {
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('numero_dossier')}
                                           >
-                                            N° Dossier
+                                            N° Dossier {getFormSortIcon('numero_dossier')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
-                                            Mandats
+                                            Mandats {getFormSortIcon('type_mandat')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
-                                            Adresse des travaux
+                                            Adresse des travaux {getFormSortIcon('adresse_travaux')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('statut')}
                                           >
-                                            Statut
+                                            Statut {getFormSortIcon('statut')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('date_ouverture')}
                                           >
-                                            Date
+                                            Date {getFormSortIcon('date_ouverture')}
                                           </TableHead>
                                         </TableRow>
                                       </TableHeader>
