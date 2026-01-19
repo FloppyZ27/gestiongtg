@@ -153,7 +153,6 @@ export default function Lots() {
     rang: ""
   });
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showCreateConfirm, setShowCreateConfirm] = useState(false);
   const [showModifyConfirm, setShowModifyConfirm] = useState(false);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
@@ -321,7 +320,7 @@ export default function Lots() {
     if (editingLot) {
       setShowModifyConfirm(true);
     } else {
-      setShowCreateConfirm(true);
+      confirmSubmit();
     }
   };
 
@@ -336,7 +335,6 @@ export default function Lots() {
 
     if (lotExistant) {
       alert(`Un lot ${formData.numero_lot} existe déjà dans le cadastre ${formData.cadastre} de ${formData.circonscription_fonciere}.`);
-      setShowCreateConfirm(false);
       setShowModifyConfirm(false);
       return;
     }
@@ -352,7 +350,6 @@ export default function Lots() {
       createLotMutation.mutate(dataToSubmit);
     }
     
-    setShowCreateConfirm(false);
     setShowModifyConfirm(false);
   };
 
@@ -1704,40 +1701,6 @@ export default function Lots() {
                   Fermer
                 </Button>
               )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dialog de confirmation de création */}
-        <Dialog open={showCreateConfirm} onOpenChange={setShowCreateConfirm}>
-          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
-                <span className="text-2xl">✓</span>
-                Confirmer la création
-                <span className="text-2xl">✓</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir créer ce lot ?
-              </p>
-              <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => setShowCreateConfirm(false)}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="button"
-                  onClick={confirmSubmit}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
-                >
-                  Confirmer
-                </Button>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
