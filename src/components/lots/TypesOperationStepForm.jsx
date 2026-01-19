@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3, Link2 } from "lucide-react";
 
 const TYPES_OPERATIONS = [
@@ -181,41 +182,129 @@ export default function TypesOperationStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-3 pb-2">
+          {/* Tabs des types d'opération ajoutés */}
+          {typesOperation.length > 0 && (
+            <div className="mb-4">
+              <Tabs defaultValue="0" className="w-full">
+                <TabsList className="grid grid-cols-auto gap-1 bg-transparent border-b border-slate-700 pb-2 h-auto">
+                  {typesOperation.map((typeOp, index) => (
+                    <TabsTrigger 
+                      key={index} 
+                      value={String(index)}
+                      className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-400 text-xs px-3 py-2"
+                    >
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        {typeOp.type_operation}
+                      </Badge>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {typesOperation.map((typeOp, index) => (
+                  <TabsContent key={index} value={String(index)} className="mt-3 space-y-3">
+                    <div className="p-3 bg-slate-900/30 border border-slate-700 rounded-lg">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-slate-400 text-xs font-semibold">Date BPD:</span>
+                            <span className="text-white text-xs">{typeOp.date_bpd}</span>
+                          </div>
+                          {typeOp.concordances_anterieures?.length > 0 && (
+                            <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
+                              {typeOp.concordances_anterieures.length} concordance(s)
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditTypeOperation(index)}
+                            className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-7 w-7 p-0"
+                            disabled={disabled}
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveTypeOperation(index)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 w-7 p-0"
+                            disabled={disabled}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {typeOp.concordances_anterieures?.length > 0 && (
+                        <div className="mt-2 border-t border-slate-700 pt-2">
+                          <div className="grid grid-cols-4 gap-2">
+                            {typeOp.concordances_anterieures.map((conc, concIndex) => (
+                              <div key={concIndex} className="text-xs bg-slate-800/50 p-2 rounded">
+                                <div className="text-white font-medium">{conc.numero_lot}</div>
+                                <div className="text-slate-400">{conc.circonscription_fonciere}</div>
+                                {conc.cadastre && <div className="text-slate-500">{conc.cadastre}</div>}
+                                {conc.rang && <div className="text-slate-500">Rang: {conc.rang}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
+          )}
+
           <div className="space-y-4 w-full">
              {/* Formulaire d'ajout/édition de type d'opération */}
              <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3 w-full">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
-                  <Select
-                    value={newTypeOperation.type_operation}
-                    onValueChange={(value) => setNewTypeOperation({...newTypeOperation, type_operation: value})}
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs">
-                      <SelectValue placeholder="Sélectionner un type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {TYPES_OPERATIONS.map((type) => (
-                        <SelectItem key={type} value={type} className="text-white text-xs">
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+               <div className="grid grid-cols-[1fr_1fr_auto] gap-3 items-end">
+                 <div>
+                   <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
+                   <Select
+                     value={newTypeOperation.type_operation}
+                     onValueChange={(value) => setNewTypeOperation({...newTypeOperation, type_operation: value})}
+                     disabled={disabled}
+                   >
+                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white text-xs">
+                       <SelectValue placeholder="Sélectionner un type" />
+                     </SelectTrigger>
+                     <SelectContent className="bg-slate-800 border-slate-700">
+                       {TYPES_OPERATIONS.map((type) => (
+                         <SelectItem key={type} value={type} className="text-white text-xs">
+                           {type}
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
 
-                <div>
-                  <Label className="text-slate-300 mb-1 text-xs">Date BPD <span className="text-red-400">*</span></Label>
-                  <Input
-                    type="date"
-                    value={newTypeOperation.date_bpd}
-                    onChange={(e) => setNewTypeOperation({...newTypeOperation, date_bpd: e.target.value})}
-                    className="bg-slate-800 border-slate-700 text-white text-xs"
-                    disabled={disabled}
-                  />
-                </div>
-              </div>
+                 <div>
+                   <Label className="text-slate-300 mb-1 text-xs">Date BPD <span className="text-red-400">*</span></Label>
+                   <Input
+                     type="date"
+                     value={newTypeOperation.date_bpd}
+                     onChange={(e) => setNewTypeOperation({...newTypeOperation, date_bpd: e.target.value})}
+                     className="bg-slate-800 border-slate-700 text-white text-xs"
+                     disabled={disabled}
+                   />
+                 </div>
+
+                 <Button
+                   type="button"
+                   size="icon"
+                   onClick={handleAddTypeOperation}
+                   disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
+                   className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 h-8 w-8"
+                 >
+                   <Plus className="w-4 h-4" />
+                 </Button>
+               </div>
 
               {/* Section Concordances antérieures - Colapsable */}
               <div className="border-t border-slate-700 pt-2 mt-2">
@@ -457,21 +546,17 @@ export default function TypesOperationStepForm({
                     )}
                     </div>
 
-              <div className="flex gap-2 pt-2 border-t border-slate-700">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleAddTypeOperation}
-                  disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-xs"
-                >
-                  {editingTypeIndex !== null ? (
-                    <><Check className="w-3 h-3 mr-1" /> Modifier le type</>
-                  ) : (
-                    <><Plus className="w-3 h-3 mr-1" /> Ajouter le type</>
-                  )}
-                </Button>
-                {editingTypeIndex !== null && (
+              {editingTypeIndex !== null && (
+                <div className="flex gap-2 pt-2 border-t border-slate-700">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleAddTypeOperation}
+                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-xs"
+                  >
+                    <Check className="w-3 h-3 mr-1" /> Modifier le type
+                  </Button>
                   <Button
                     type="button"
                     size="sm"
@@ -481,75 +566,11 @@ export default function TypesOperationStepForm({
                   >
                     <X className="w-3 h-3 mr-1" /> Annuler
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Liste des types d'opération ajoutés */}
-            {typesOperation.length > 0 && (
-            <div className="space-y-2 w-full">
-                <Label className="text-slate-300 text-sm">Types d'opération ajoutés</Label>
-                {typesOperation.map((typeOp, index) => (
-                  <div key={index} className="p-3 bg-slate-900/30 border border-slate-700 rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                            {typeOp.type_operation}
-                          </Badge>
-                          <span className="text-slate-400 text-xs">
-                            {typeOp.date_bpd}
-                          </span>
-                          {typeOp.concordances_anterieures?.length > 0 && (
-                            <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
-                              {typeOp.concordances_anterieures.length} concordance(s)
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEditTypeOperation(index)}
-                          className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-7 w-7 p-0"
-                          disabled={disabled}
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleRemoveTypeOperation(index)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 w-7 p-0"
-                          disabled={disabled}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
 
-                    {/* Afficher les concordances de ce type */}
-                    {typeOp.concordances_anterieures?.length > 0 && (
-                      <div className="mt-2 border-t border-slate-700 pt-2">
-                        <div className="grid grid-cols-4 gap-2">
-                          {typeOp.concordances_anterieures.map((conc, concIndex) => (
-                            <div key={concIndex} className="text-xs bg-slate-800/50 p-2 rounded">
-                              <div className="text-white font-medium">{conc.numero_lot}</div>
-                              <div className="text-slate-400">{conc.circonscription_fonciere}</div>
-                              {conc.cadastre && <div className="text-slate-500">{conc.cadastre}</div>}
-                              {conc.rang && <div className="text-slate-500">Rang: {conc.rang}</div>}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </CardContent>
       )}
