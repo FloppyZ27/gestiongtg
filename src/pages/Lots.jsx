@@ -1144,24 +1144,14 @@ export default function Lots() {
                     {/* Section Dossiers associés - Visible uniquement en mode modification */}
                     {editingLot && (
                       <div>
-                        <div 
-                          className="cursor-pointer hover:bg-slate-800/50 transition-colors py-2 px-3 rounded-lg mb-3 flex items-center justify-between"
-                          onClick={() => setDossiersAssociesFormCollapsed(!dossiersAssociesFormCollapsed)}
-                        >
-                          <Label className="text-slate-400 flex items-center gap-2 cursor-pointer">
-                            <FolderOpen className="w-4 h-4" />
-                            Dossiers associés
-                            {(() => {
-                              const associatedDossiers = getDossiersWithLot(formData.numero_lot);
-                              return associatedDossiers.length > 0 && (
-                                <Badge className="ml-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                  {associatedDossiers.length}
-                                </Badge>
-                              );
-                            })()}
-                          </Label>
-                          {dossiersAssociesFormCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                        </div>
+                        <Label className="text-slate-400 mb-3 block flex items-center gap-2">
+                          <FolderOpen className="w-4 h-4" />
+                          Dossiers associés
+                          {(() => {
+                            const associatedDossiers = getDossiersWithLot(formData.numero_lot);
+                            return associatedDossiers.length > 0 && ` (${associatedDossiers.length} mandat${associatedDossiers.length > 1 ? 's' : ''})`;
+                          })()}
+                        </Label>
                         {(() => {
                           const allAssociatedDossiers = getDossiersWithLot(formData.numero_lot);
                           const uniqueVilles = [...new Set(
@@ -1174,8 +1164,6 @@ export default function Lots() {
 
                           return allAssociatedDossiers.length > 0 ? (
                             <>
-                              {!dossiersAssociesFormCollapsed && (
-                              <>
                               {/* Barre de recherche et filtres */}
                               <div className="space-y-3 mb-3">
                                 <div className="relative">
@@ -1250,7 +1238,7 @@ export default function Lots() {
                                         className="text-slate-300 cursor-pointer hover:text-white"
                                         onClick={() => handleFormSort('adresse_travaux')}
                                       >
-                                        Adresse travaux {getFormSortIcon('adresse_travaux')}
+                                        Adresse des travaux {getFormSortIcon('adresse_travaux')}
                                       </TableHead>
                                     </TableRow>
                                   </TableHeader>
@@ -1259,8 +1247,7 @@ export default function Lots() {
                                       filteredAndSorted.map((item, idx) => (
                                         <TableRow 
                                           key={`${item.dossier.id}-${idx}`}
-                                          className="border-slate-800 cursor-pointer hover:bg-slate-800/30"
-                                          onClick={() => handleDossierClick(item.dossier)}
+                                          className="border-slate-800"
                                         >
                                           <TableCell className="font-medium">
                                             <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border`}>
@@ -1290,15 +1277,11 @@ export default function Lots() {
                                   </TableBody>
                                 </Table>
                               </div>
-                              </>
-                              )}
                             </>
                           ) : (
-                            !dossiersAssociesFormCollapsed && (
-                              <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
-                                Aucun dossier associé à ce lot
-                              </p>
-                            )
+                            <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                              Aucun dossier associé à ce lot
+                            </p>
                           );
                         })()}
                       </div>
