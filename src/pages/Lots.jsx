@@ -703,7 +703,6 @@ export default function Lots() {
         }
       }
       
-      extractedData.cadastre = 'Québec';
       extractedData.concordances_anterieures = [];
       
       if (coLines.length > 0) {
