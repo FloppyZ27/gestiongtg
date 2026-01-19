@@ -940,7 +940,7 @@ export default function Lots() {
                 className="hidden"
                 disabled={isBulkImporting}
               />
-              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border-2 border-orange-500 text-orange-400 hover:bg-orange-500/10 bg-transparent">
                 {isBulkImporting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
