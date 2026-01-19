@@ -300,9 +300,10 @@ export default function TypesOperationStepForm({
                    size="icon"
                    onClick={handleAddTypeOperation}
                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                   className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 h-8 w-8"
+                   className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 h-9 w-9 flex-shrink-0"
+                   title="Ajouter le type d'opération"
                  >
-                   <Plus className="w-4 h-4" />
+                   <Plus className="w-5 h-5" />
                  </Button>
                </div>
 
