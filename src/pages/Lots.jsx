@@ -143,6 +143,8 @@ export default function Lots() {
   const [isBulkImporting, setIsBulkImporting] = useState(false);
   const [bulkImportResults, setBulkImportResults] = useState(null);
   const [isBulkImportDialogOpen, setIsBulkImportDialogOpen] = useState(false);
+  const [bulkImportPreview, setBulkImportPreview] = useState(null);
+  const [isCreatingBulkLots, setIsCreatingBulkLots] = useState(false);
   const [newConcordance, setNewConcordance] = useState({
     circonscription_fonciere: "",
     cadastre: "",
@@ -717,9 +719,9 @@ export default function Lots() {
       const loLines = lines.filter(line => line.startsWith('LO'));
       const suLines = lines.filter(line => line.startsWith('SU'));
       
-      const createdLots = [];
+      const previewLots = [];
       
-      // Créer un lot pour chaque ligne LO
+      // Préparer un aperçu pour chaque ligne LO
       for (let i = 0; i < loLines.length; i++) {
         const loLine = loLines[i];
         const loParts = loLine.split(';');
@@ -770,53 +772,19 @@ export default function Lots() {
           l.circonscription_fonciere === baseData.circonscription_fonciere
         );
         
-        if (lotExistant) {
-          createdLots.push({
-            success: false,
-            numero_lot: numeroLot,
-            cadastre: 'Québec',
-            circonscription_fonciere: baseData.circonscription_fonciere,
-            concordances_count: concordances.length,
-            error: "Lot déjà existant"
-          });
-          continue;
-        }
-        
-        // Créer le lot
-        try {
-          const newLot = await base44.entities.Lot.create({
-            numero_lot: numeroLot,
-            circonscription_fonciere: baseData.circonscription_fonciere,
-            cadastre: 'Québec',
-            rang: '',
-            date_bpd: baseData.date_bpd,
-            concordances_anterieures: concordances
-          });
-          
-          createdLots.push({
-            success: true,
-            numero_lot: numeroLot,
-            cadastre: 'Québec',
-            circonscription_fonciere: baseData.circonscription_fonciere,
-            date_bpd: baseData.date_bpd,
-            concordances_count: concordances.length,
-            id: newLot.id
-          });
-        } catch (error) {
-          createdLots.push({
-            success: false,
-            numero_lot: numeroLot,
-            cadastre: 'Québec',
-            circonscription_fonciere: baseData.circonscription_fonciere,
-            concordances_count: concordances.length,
-            error: error.message
-          });
-        }
+        previewLots.push({
+          numero_lot: numeroLot,
+          cadastre: 'Québec',
+          circonscription_fonciere: baseData.circonscription_fonciere,
+          date_bpd: baseData.date_bpd,
+          concordances: concordances,
+          concordances_count: concordances.length,
+          alreadyExists: !!lotExistant
+        });
       }
       
-      setBulkImportResults(createdLots);
+      setBulkImportPreview(previewLots);
       setIsBulkImportDialogOpen(true);
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
       
     } catch (error) {
       console.error("Erreur importation en masse .d01:", error);
@@ -824,6 +792,52 @@ export default function Lots() {
     } finally {
       setIsBulkImporting(false);
     }
+  };
+
+  const handleConfirmBulkImport = async () => {
+    if (!bulkImportPreview) return;
+    
+    setIsCreatingBulkLots(true);
+    const results = [];
+    
+    for (const lotData of bulkImportPreview) {
+      if (lotData.alreadyExists) {
+        results.push({
+          success: false,
+          ...lotData,
+          error: "Lot déjà existant"
+        });
+        continue;
+      }
+      
+      try {
+        const newLot = await base44.entities.Lot.create({
+          numero_lot: lotData.numero_lot,
+          circonscription_fonciere: lotData.circonscription_fonciere,
+          cadastre: lotData.cadastre,
+          rang: '',
+          date_bpd: lotData.date_bpd,
+          concordances_anterieures: lotData.concordances
+        });
+        
+        results.push({
+          success: true,
+          ...lotData,
+          id: newLot.id
+        });
+      } catch (error) {
+        results.push({
+          success: false,
+          ...lotData,
+          error: error.message
+        });
+      }
+    }
+    
+    setBulkImportResults(results);
+    setBulkImportPreview(null);
+    setIsCreatingBulkLots(false);
+    queryClient.invalidateQueries({ queryKey: ['lots'] });
   };
 
   const handleBulkD01FileSelect = (e) => {
@@ -1390,14 +1404,86 @@ export default function Lots() {
           </DialogContent>
         </Dialog>
 
-        {/* Bulk Import Results Dialog */}
-        <Dialog open={isBulkImportDialogOpen} onOpenChange={setIsBulkImportDialogOpen}>
+        {/* Bulk Import Preview/Results Dialog */}
+        <Dialog open={isBulkImportDialogOpen} onOpenChange={(open) => {
+          if (!open) {
+            setBulkImportPreview(null);
+            setBulkImportResults(null);
+          }
+          setIsBulkImportDialogOpen(open);
+        }}>
           <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Résultats de l'importation</DialogTitle>
+              <DialogTitle className="text-2xl">
+                {bulkImportPreview ? "Aperçu de l'importation" : "Résultats de l'importation"}
+              </DialogTitle>
             </DialogHeader>
             
             <div className="overflow-y-auto max-h-[70vh] p-4">
+              {/* Preview Mode */}
+              {bulkImportPreview && (
+                <>
+                  <div className="mb-4 flex gap-4">
+                    <div className="p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg flex-1">
+                      <p className="text-blue-400 font-semibold">
+                        {bulkImportPreview.filter(l => !l.alreadyExists).length} lots à créer
+                      </p>
+                    </div>
+                    {bulkImportPreview.filter(l => l.alreadyExists).length > 0 && (
+                      <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg flex-1">
+                        <p className="text-yellow-400 font-semibold">
+                          {bulkImportPreview.filter(l => l.alreadyExists).length} lots déjà existants (ignorés)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                          <TableHead className="text-slate-300">Statut</TableHead>
+                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                          <TableHead className="text-slate-300">Cadastre</TableHead>
+                          <TableHead className="text-slate-300">Circonscription</TableHead>
+                          <TableHead className="text-slate-300">Concordances</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bulkImportPreview.map((lot, index) => (
+                          <TableRow key={index} className="border-slate-800">
+                            <TableCell>
+                              {lot.alreadyExists ? (
+                                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                  Existe déjà
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                  À créer
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-white font-medium">
+                              {lot.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.circonscription_fonciere}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {lot.concordances_count || 0}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
+              )}
+
+              {/* Results Mode */}
               {bulkImportResults && (
                 <>
                   <div className="mb-4 flex gap-4">
@@ -1473,12 +1559,45 @@ export default function Lots() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-              <Button 
-                onClick={() => setIsBulkImportDialogOpen(false)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-600"
-              >
-                Fermer
-              </Button>
+              {bulkImportPreview ? (
+                <>
+                  <Button 
+                    onClick={() => {
+                      setIsBulkImportDialogOpen(false);
+                      setBulkImportPreview(null);
+                    }}
+                    variant="outline"
+                    className="border-red-500 text-red-400 hover:bg-red-500/10"
+                    disabled={isCreatingBulkLots}
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
+                    onClick={handleConfirmBulkImport}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                    disabled={isCreatingBulkLots || bulkImportPreview.filter(l => !l.alreadyExists).length === 0}
+                  >
+                    {isCreatingBulkLots ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Création...
+                      </>
+                    ) : (
+                      `Créer ${bulkImportPreview.filter(l => !l.alreadyExists).length} lot(s)`
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  onClick={() => {
+                    setIsBulkImportDialogOpen(false);
+                    setBulkImportResults(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Fermer
+                </Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>
