@@ -185,6 +185,7 @@ export default function Lots() {
   const [formSortField, setFormSortField] = useState(null);
   const [formSortDirection, setFormSortDirection] = useState("asc");
   const [showImportSuccess, setShowImportSuccess] = useState(false);
+  const [showLotExistsWarning, setShowLotExistsWarning] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_lot: "",
@@ -353,7 +354,7 @@ export default function Lots() {
     );
 
     if (lotExistant) {
-      alert(`Un lot ${formData.numero_lot} existe déjà dans le cadastre ${formData.cadastre} de ${formData.circonscription_fonciere}.`);
+      setShowLotExistsWarning(true);
       return;
     }
 
@@ -703,6 +704,7 @@ export default function Lots() {
         }
       }
       
+      extractedData.cadastre = 'Québec';
       extractedData.concordances_anterieures = [];
       
       if (coLines.length > 0) {
@@ -731,7 +733,7 @@ export default function Lots() {
         ...prev,
         numero_lot: extractedData.numero_lot || prev.numero_lot,
         circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
-        cadastre: 'Québec',
+        cadastre: extractedData.cadastre || 'Québec',
         date_bpd: extractedData.date_bpd || prev.date_bpd,
       }));
       
@@ -1908,6 +1910,33 @@ export default function Lots() {
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
                   OK
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog d'avertissement lot existant */}
+        <Dialog open={showLotExistsWarning} onOpenChange={setShowLotExistsWarning}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans le cadastre <span className="text-emerald-400 font-semibold">{formData.cadastre}</span> de <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotExistsWarning(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Compris
                 </Button>
               </div>
             </div>
