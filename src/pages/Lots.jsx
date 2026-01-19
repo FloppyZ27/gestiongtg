@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info } from "lucide-react";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -117,6 +118,17 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+};
+
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false); // Renamed from isDialogOpen
@@ -156,6 +168,7 @@ export default function Lots() {
   const [showLotMissingFieldsWarning, setShowLotMissingFieldsWarning] = useState(false);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
+  const [dossiersAssociesFormCollapsed, setDossiersAssociesFormCollapsed] = useState(false);
 
   // New state for View Dialog filters and sorting
   const [viewDossierSearchTerm, setViewDossierSearchTerm] = useState("");
@@ -1100,6 +1113,88 @@ export default function Lots() {
                       onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
                       disabled={false}
                     />
+
+                    {/* Section Dossiers associés - Visible uniquement en mode modification */}
+                    {editingLot && (
+                      <Card className="border-slate-700 bg-slate-800/30">
+                        <CardHeader 
+                          className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 bg-blue-900/20"
+                          onClick={() => setDossiersAssociesFormCollapsed(!dossiersAssociesFormCollapsed)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center">
+                                <FolderOpen className="w-4 h-4 text-blue-400" />
+                              </div>
+                              <CardTitle className="text-blue-300 text-lg">
+                                Dossiers associés
+                                {(() => {
+                                  const associatedDossiers = getDossiersWithLot(formData.numero_lot);
+                                  return associatedDossiers.length > 0 && (
+                                    <Badge className="ml-2 bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                      {associatedDossiers.length}
+                                    </Badge>
+                                  );
+                                })()}
+                              </CardTitle>
+                            </div>
+                            {dossiersAssociesFormCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+                          </div>
+                        </CardHeader>
+
+                        {!dossiersAssociesFormCollapsed && (
+                          <CardContent className="pt-4 pb-4">
+                            {(() => {
+                              const associatedDossiers = getDossiersWithLot(formData.numero_lot);
+                              return associatedDossiers.length > 0 ? (
+                                <div className="border border-slate-700 rounded-lg overflow-hidden">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                        <TableHead className="text-slate-300">N° Dossier</TableHead>
+                                        <TableHead className="text-slate-300">Clients</TableHead>
+                                        <TableHead className="text-slate-300">Type de mandat</TableHead>
+                                        <TableHead className="text-slate-300">Adresse travaux</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {associatedDossiers.map((item, idx) => (
+                                        <TableRow 
+                                          key={`${item.dossier.id}-${idx}`}
+                                          className="border-slate-800 cursor-pointer hover:bg-slate-800/30"
+                                          onClick={() => handleDossierClick(item.dossier)}
+                                        >
+                                          <TableCell className="font-medium">
+                                            <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border`}>
+                                              {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
+                                            </Badge>
+                                          </TableCell>
+                                          <TableCell className="text-slate-300 text-sm">
+                                            {getClientsNames(item.dossier.clients_ids)}
+                                          </TableCell>
+                                          <TableCell>
+                                            <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                              {item.mandat.type_mandat}
+                                            </Badge>
+                                          </TableCell>
+                                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                                            {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              ) : (
+                                <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
+                                  Aucun dossier associé à ce lot
+                                </p>
+                              );
+                            })()}
+                          </CardContent>
+                        )}
+                      </Card>
+                    )}
                   </form>
 
                   {/* Boutons Annuler/Créer tout en bas */}
