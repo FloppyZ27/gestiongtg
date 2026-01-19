@@ -1246,13 +1246,13 @@ export default function Lots() {
                                          placeholder="Rechercher..."
                                          value={formDossierSearchTerm}
                                          onChange={(e) => setFormDossierSearchTerm(e.target.value)}
-                                         className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                         className="pl-10 bg-slate-800/50 border-slate-700 text-white h-8"
                                        />
                                      </div>
                                       <div className="flex-1">
                                        <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full h-8 bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Arpenteur ({formFilterArpenteur.length || 'Tous'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
@@ -1290,7 +1290,7 @@ export default function Lots() {
                                       <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full h-8 bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Type ({formFilterTypeMandat.length || 'Tous'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
@@ -1328,7 +1328,7 @@ export default function Lots() {
                                       <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full h-8 bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Ville ({formFilterVille.length || 'Toutes'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
@@ -1366,7 +1366,7 @@ export default function Lots() {
                                       <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full h-8 bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Statut ({formFilterStatut.length || 'Tous'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
