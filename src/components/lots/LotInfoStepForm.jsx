@@ -5,15 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Grid3x3 } from "lucide-react";
 
-const TYPES_OPERATIONS = [
-  "Division du territoire",
-  "Subdivision",
-  "Remplacement",
-  "Rénovation cadastrale",
-  "Correction",
-  "Annulation"
-];
-
 export default function LotInfoStepForm({
   lotForm,
   onLotFormChange,
@@ -108,37 +99,7 @@ export default function LotInfoStepForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Date BPD</Label>
-              <Input
-                type="date"
-                value={lotForm.date_bpd}
-                onChange={(e) => onLotFormChange({...lotForm, date_bpd: e.target.value})}
-                className="bg-slate-700 border-slate-600 h-6 text-xs"
-                disabled={disabled}
-              />
-            </div>
-            <div className="space-y-0.5">
-              <Label className="text-slate-400 text-xs">Type d'opération</Label>
-              <Select 
-                value={lotForm.type_operation} 
-                onValueChange={(value) => onLotFormChange({...lotForm, type_operation: value})}
-                disabled={disabled}
-              >
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  {TYPES_OPERATIONS.map((type) => (
-                    <SelectItem key={type} value={type} className="text-white text-xs">
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+
         </CardContent>
       )}
     </Card>
