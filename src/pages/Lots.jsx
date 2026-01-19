@@ -1188,47 +1188,47 @@ export default function Lots() {
                               return allAssociatedDossiers.length > 0 ? (
                                 <>
                                   {/* Barre de recherche et filtres */}
-                                  <div className="space-y-2 mb-2">
+                                  <div className="space-y-3 mb-3">
                                     <div className="relative">
-                                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                                       <Input
                                         placeholder="Rechercher..."
                                         value={formDossierSearchTerm}
                                         onChange={(e) => setFormDossierSearchTerm(e.target.value)}
-                                        className="pl-9 bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                                        className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                                       />
                                     </div>
                                     <div className="grid grid-cols-3 gap-2">
                                       <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
                                           <SelectValue placeholder="Arpenteur" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white text-xs">Tous les arpenteurs</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
                                           {ARPENTEURS.map(arp => (
-                                            <SelectItem key={arp} value={arp} className="text-white text-xs">{arp}</SelectItem>
+                                            <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
                                           <SelectValue placeholder="Type mandat" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white text-xs">Tous les types</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous les types</SelectItem>
                                           {TYPES_MANDATS.map(type => (
-                                            <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
+                                            <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterVille} onValueChange={setFormFilterVille}>
-                                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
                                           <SelectValue placeholder="Ville" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white text-xs">Toutes les villes</SelectItem>
+                                          <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
                                           {uniqueVilles.map(ville => (
-                                            <SelectItem key={ville} value={ville} className="text-white text-xs">{ville}</SelectItem>
+                                            <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
@@ -1240,25 +1240,25 @@ export default function Lots() {
                                       <TableHeader>
                                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-xs h-8"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('numero_dossier')}
                                           >
                                             N° Dossier {getFormSortIcon('numero_dossier')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-xs h-8"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('clients')}
                                           >
                                             Clients {getFormSortIcon('clients')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-xs h-8"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
                                             Type de mandat {getFormSortIcon('type_mandat')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-xs h-8"
+                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
                                             Adresse des travaux {getFormSortIcon('adresse_travaux')}
@@ -1272,27 +1272,27 @@ export default function Lots() {
                                               key={`${item.dossier.id}-${idx}`}
                                               className="border-slate-800"
                                             >
-                                              <TableCell className="font-medium py-1.5">
-                                                <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border text-xs`}>
+                                              <TableCell className="font-medium">
+                                                <Badge variant="outline" className={`${getArpenteurColor(item.dossier.arpenteur_geometre)} border`}>
                                                   {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300 text-xs py-1.5">
+                                              <TableCell className="text-slate-300 text-sm">
                                                 {getClientsNames(item.dossier.clients_ids)}
                                               </TableCell>
-                                              <TableCell className="py-1.5">
+                                              <TableCell>
                                                 <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
                                                   {item.mandat.type_mandat}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300 text-xs max-w-xs truncate py-1.5">
+                                              <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                                 {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
                                               </TableCell>
                                             </TableRow>
                                           ))
                                         ) : (
                                           <TableRow>
-                                            <TableCell colSpan={4} className="text-center py-6 text-slate-500 text-xs">
+                                            <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                                               Aucun dossier trouvé
                                             </TableCell>
                                           </TableRow>
@@ -1302,7 +1302,7 @@ export default function Lots() {
                                   </div>
                                 </>
                               ) : (
-                                <p className="text-slate-500 text-xs text-center py-3 bg-slate-800/30 rounded-lg">
+                                <p className="text-slate-500 text-sm text-center py-4 bg-slate-800/30 rounded-lg">
                                   Aucun dossier associé à ce lot
                                 </p>
                               );
