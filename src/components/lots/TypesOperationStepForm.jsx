@@ -184,80 +184,47 @@ export default function TypesOperationStepForm({
         <CardContent className="pt-3 pb-2">
           {/* Tabs des types d'opération ajoutés */}
           {typesOperation.length > 0 && (
-            <div className="mb-4">
-              <Tabs defaultValue="0" className="w-full">
-                <TabsList className="grid grid-cols-auto gap-1 bg-transparent border-b border-slate-700 pb-2 h-auto">
-                  {typesOperation.map((typeOp, index) => (
-                    <TabsTrigger 
-                      key={index} 
-                      value={String(index)}
-                      className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-purple-400 text-xs px-3 py-2"
-                    >
-                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                        {typeOp.type_operation}
-                      </Badge>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
+            {typesOperation.length > 0 && (
+              <div className="mb-3 flex gap-1">
                 {typesOperation.map((typeOp, index) => (
-                  <TabsContent key={index} value={String(index)} className="mt-3 space-y-3">
-                    <div className="p-3 bg-slate-900/30 border border-slate-700 rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-slate-400 text-xs font-semibold">Date BPD:</span>
-                            <span className="text-white text-xs">{typeOp.date_bpd}</span>
-                          </div>
-                          {typeOp.concordances_anterieures?.length > 0 && (
-                            <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/30 text-xs">
-                              {typeOp.concordances_anterieures.length} concordance(s)
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditTypeOperation(index)}
-                            className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-7 w-7 p-0"
-                            disabled={disabled}
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveTypeOperation(index)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 w-7 p-0"
-                            disabled={disabled}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                  <div key={index} className="group relative">
+                    <div className="flex items-center gap-1 px-2 py-1 bg-purple-500/15 border border-purple-500/30 rounded text-xs text-purple-300 hover:bg-purple-500/25 transition-colors cursor-pointer"
+                      onClick={() => handleEditTypeOperation(index)}
+                    >
+                      {typeOp.type_operation}
+                      <div className="hidden group-hover:flex gap-0.5 ml-1 pl-1 border-l border-purple-500/30">
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditTypeOperation(index);
+                          }}
+                          className="text-blue-400 hover:text-blue-300 h-4 w-4 p-0"
+                          disabled={disabled}
+                        >
+                          <Edit2 className="w-2.5 h-2.5" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveTypeOperation(index);
+                          }}
+                          className="text-red-400 hover:text-red-300 h-4 w-4 p-0"
+                          disabled={disabled}
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                        </Button>
                       </div>
-
-                      {typeOp.concordances_anterieures?.length > 0 && (
-                        <div className="mt-2 border-t border-slate-700 pt-2">
-                          <div className="grid grid-cols-4 gap-2">
-                            {typeOp.concordances_anterieures.map((conc, concIndex) => (
-                              <div key={concIndex} className="text-xs bg-slate-800/50 p-2 rounded">
-                                <div className="text-white font-medium">{conc.numero_lot}</div>
-                                <div className="text-slate-400">{conc.circonscription_fonciere}</div>
-                                {conc.cadastre && <div className="text-slate-500">{conc.cadastre}</div>}
-                                {conc.rang && <div className="text-slate-500">Rang: {conc.rang}</div>}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  </TabsContent>
+                  </div>
                 ))}
-              </Tabs>
-            </div>
+              </div>
+            )}
           )}
 
           <div className="space-y-4 w-full">
