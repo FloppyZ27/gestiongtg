@@ -1484,7 +1484,7 @@ export default function Lots() {
                                         {lot.concordances.map((conc, idx) => (
                                           <div key={idx} className="text-xs">
                                             <span className="text-white font-medium">{conc.numero_lot}</span>
-                                            {conc.est_partie && <span className="text-purple-400"> Ptie</span>}
+                                            {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
                                             <span className="text-slate-400">
                                               {conc.rang ? ` • ${conc.rang}` : ''}
                                               {conc.cadastre ? ` • ${conc.cadastre}` : ''}
@@ -1574,7 +1574,7 @@ export default function Lots() {
                                         {result.concordances.map((conc, idx) => (
                                           <div key={idx} className="text-xs">
                                             <span className="text-white font-medium">{conc.numero_lot}</span>
-                                            {conc.est_partie && <span className="text-purple-400"> Ptie</span>}
+                                            {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
                                             <span className="text-slate-400">
                                               {conc.rang ? ` • ${conc.rang}` : ''}
                                               {conc.cadastre ? ` • ${conc.cadastre}` : ''}
