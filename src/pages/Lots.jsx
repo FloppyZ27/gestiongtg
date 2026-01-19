@@ -714,43 +714,59 @@ export default function Lots() {
     try {
       const fileContent = await file.text();
       const lines = fileContent.split('\n');
-      const lotLine = lines.find(line => line.startsWith('LO'));
+      const loLines = lines.filter(line => line.startsWith('LO'));
       const suLines = lines.filter(line => line.startsWith('SU'));
-      
-      let coLines = [];
-      if (suLines.length >= 2) {
-        const firstSuIndex = lines.indexOf(suLines[0]);
-        const secondSuIndex = lines.indexOf(suLines[1]);
-        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
-      }
-      
-      const suLine = suLines[0];
-      let baseData = {};
-      
-      if (suLine) {
-        const suParts = suLine.split(';');
-        baseData.circonscription_fonciere = suParts[2] || '';
-        baseData.date_bpd = suParts[3] || '';
-      }
       
       const createdLots = [];
       
-      // Créer un lot pour chaque ligne CO
-      for (const coLine of coLines) {
-        const coParts = coLine.split(';');
-        const cadastreCode = coParts[1] || '';
-        const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
-        let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
-        if (rang.match(/^Rang 0(\d+)$/)) {
-          rang = rang.replace(/^Rang 0/, 'Rang ');
+      // Créer un lot pour chaque ligne LO
+      for (let i = 0; i < loLines.length; i++) {
+        const loLine = loLines[i];
+        const loParts = loLine.split(';');
+        const numeroLot = loParts[1] || '';
+        
+        // Trouver la ligne SU correspondante (première SU après cette LO)
+        const loIndex = lines.indexOf(loLine);
+        const suLine = suLines.find((su, idx) => lines.indexOf(su) > loIndex && (i === loLines.length - 1 || lines.indexOf(su) < lines.indexOf(loLines[i + 1])));
+        
+        let baseData = {};
+        if (suLine) {
+          const suParts = suLine.split(';');
+          baseData.circonscription_fonciere = suParts[2] || '';
+          baseData.date_bpd = suParts[3] || '';
         }
-        const numeroLot = coParts[3] || '';
-        const estPartie = coParts[4] === 'O';
+        
+        // Trouver les lignes CO entre cette SU et la prochaine SU (ou fin du fichier)
+        const suIndex = lines.indexOf(suLine);
+        const nextSuIndex = suLines[suLines.indexOf(suLine) + 1] ? lines.indexOf(suLines[suLines.indexOf(suLine) + 1]) : lines.length;
+        const coLines = lines.slice(suIndex + 1, nextSuIndex).filter(line => line.startsWith('CO'));
+        
+        // Construire les concordances
+        const concordances = [];
+        coLines.forEach(coLine => {
+          const coParts = coLine.split(';');
+          const cadastreCode = coParts[1] || '';
+          const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
+          let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
+          if (rang.match(/^Rang 0(\d+)$/)) {
+            rang = rang.replace(/^Rang 0/, 'Rang ');
+          }
+          const numeroLotConcordance = coParts[3] || '';
+          const estPartie = coParts[4] === 'O';
+          
+          concordances.push({
+            circonscription_fonciere: baseData.circonscription_fonciere,
+            cadastre: cadastre,
+            numero_lot: numeroLotConcordance,
+            rang: rang,
+            est_partie: estPartie
+          });
+        });
         
         // Vérifier si le lot existe déjà
         const lotExistant = lots.find(l =>
           l.numero_lot === numeroLot &&
-          l.cadastre === cadastre &&
+          l.cadastre === 'Québec' &&
           l.circonscription_fonciere === baseData.circonscription_fonciere
         );
         
@@ -758,9 +774,9 @@ export default function Lots() {
           createdLots.push({
             success: false,
             numero_lot: numeroLot,
-            cadastre: cadastre,
-            rang: rang,
+            cadastre: 'Québec',
             circonscription_fonciere: baseData.circonscription_fonciere,
+            concordances_count: concordances.length,
             error: "Lot déjà existant"
           });
           continue;
@@ -771,28 +787,28 @@ export default function Lots() {
           const newLot = await base44.entities.Lot.create({
             numero_lot: numeroLot,
             circonscription_fonciere: baseData.circonscription_fonciere,
-            cadastre: cadastre,
-            rang: rang,
+            cadastre: 'Québec',
+            rang: '',
             date_bpd: baseData.date_bpd,
-            concordances_anterieures: []
+            concordances_anterieures: concordances
           });
           
           createdLots.push({
             success: true,
             numero_lot: numeroLot,
-            cadastre: cadastre,
-            rang: rang,
+            cadastre: 'Québec',
             circonscription_fonciere: baseData.circonscription_fonciere,
             date_bpd: baseData.date_bpd,
+            concordances_count: concordances.length,
             id: newLot.id
           });
         } catch (error) {
           createdLots.push({
             success: false,
             numero_lot: numeroLot,
-            cadastre: cadastre,
-            rang: rang,
+            cadastre: 'Québec',
             circonscription_fonciere: baseData.circonscription_fonciere,
+            concordances_count: concordances.length,
             error: error.message
           });
         }
@@ -890,17 +906,15 @@ export default function Lots() {
               <Download className="w-4 h-4 mr-2" />
               Extraction CSV
             </Button>
-            <label>
+            <label className="cursor-pointer">
               <input
                 type="file"
                 accept=".d01"
                 onChange={handleBulkD01FileSelect}
                 className="hidden"
-              />
-              <Button
-                as="span"
                 disabled={isBulkImporting}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg cursor-pointer">
+              />
+              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg">
                 {isBulkImporting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -912,7 +926,7 @@ export default function Lots() {
                     Importation
                   </>
                 )}
-              </Button>
+              </span>
             </label>
             <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
               setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
@@ -1408,8 +1422,8 @@ export default function Lots() {
                           <TableHead className="text-slate-300">Statut</TableHead>
                           <TableHead className="text-slate-300">Numéro de lot</TableHead>
                           <TableHead className="text-slate-300">Cadastre</TableHead>
-                          <TableHead className="text-slate-300">Rang</TableHead>
                           <TableHead className="text-slate-300">Circonscription</TableHead>
+                          <TableHead className="text-slate-300">Concordances</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1433,10 +1447,10 @@ export default function Lots() {
                               {result.cadastre || "-"}
                             </TableCell>
                             <TableCell className="text-slate-300">
-                              {result.rang || "-"}
+                              {result.circonscription_fonciere}
                             </TableCell>
                             <TableCell className="text-slate-300">
-                              {result.circonscription_fonciere}
+                              {result.concordances_count || 0}
                             </TableCell>
                           </TableRow>
                         ))}
