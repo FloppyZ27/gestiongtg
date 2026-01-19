@@ -633,10 +633,13 @@ export default function Lots() {
         if (dateBpd) {
           // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
           if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
-            const year = dateBpd.substring(0, 4);
-            const month = dateBpd.substring(4, 6);
-            const day = dateBpd.substring(6, 8);
-            extractedData.date_bpd = `${year}-${month}-${day}`;
+            const year = parseInt(dateBpd.substring(0, 4));
+            const month = parseInt(dateBpd.substring(4, 6));
+            const day = parseInt(dateBpd.substring(6, 8));
+            // Create date and add 1 day to compensate for timezone offset
+            const date = new Date(year, month - 1, day);
+            date.setDate(date.getDate() + 1);
+            extractedData.date_bpd = format(date, 'yyyy-MM-dd');
           } else {
             // Already in correct format or use as-is
             extractedData.date_bpd = dateBpd;
@@ -752,10 +755,13 @@ export default function Lots() {
           if (dateBpd) {
             // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
             if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
-              const year = dateBpd.substring(0, 4);
-              const month = dateBpd.substring(4, 6);
-              const day = dateBpd.substring(6, 8);
-              baseData.date_bpd = `${year}-${month}-${day}`;
+              const year = parseInt(dateBpd.substring(0, 4));
+              const month = parseInt(dateBpd.substring(4, 6));
+              const day = parseInt(dateBpd.substring(6, 8));
+              // Create date and add 1 day to compensate for timezone offset
+              const date = new Date(year, month - 1, day);
+              date.setDate(date.getDate() + 1);
+              baseData.date_bpd = format(date, 'yyyy-MM-dd');
             } else {
               // Already in correct format or use as-is
               baseData.date_bpd = dateBpd;
