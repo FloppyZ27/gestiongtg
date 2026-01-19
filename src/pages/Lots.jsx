@@ -208,10 +208,10 @@ export default function Lots() {
 
   // New state for Form Dialog filters and sorting (dossiers section)
   const [formDossierSearchTerm, setFormDossierSearchTerm] = useState("");
-  const [formFilterArpenteur, setFormFilterArpenteur] = useState("all");
-  const [formFilterTypeMandat, setFormFilterTypeMandat] = useState("all");
-  const [formFilterVille, setFormFilterVille] = useState("all");
-  const [formFilterStatut, setFormFilterStatut] = useState("all");
+  const [formFilterArpenteur, setFormFilterArpenteur] = useState([]);
+  const [formFilterTypeMandat, setFormFilterTypeMandat] = useState([]);
+  const [formFilterVille, setFormFilterVille] = useState([]);
+  const [formFilterStatut, setFormFilterStatut] = useState([]);
   const [formSortField, setFormSortField] = useState(null);
   const [formSortDirection, setFormSortDirection] = useState("asc");
   const [showImportSuccess, setShowImportSuccess] = useState(false);
@@ -572,7 +572,7 @@ export default function Lots() {
     const filterArpenteur = isFormDialog ? formFilterArpenteur : viewFilterArpenteur;
     const filterTypeMandat = isFormDialog ? formFilterTypeMandat : viewFilterTypeMandat;
     const filterVille = isFormDialog ? formFilterVille : viewFilterVille;
-    const filterStatut = isFormDialog ? formFilterStatut : "all";
+    const filterStatut = isFormDialog ? formFilterStatut : [];
     const sortField = isFormDialog ? formSortField : viewSortField;
     const sortDirection = isFormDialog ? formSortDirection : viewSortDirection;
     
@@ -590,10 +590,10 @@ export default function Lots() {
         adresseTravaux.toLowerCase().includes(searchLower)
       );
 
-      const matchesArpenteur = filterArpenteur === "all" || item.dossier.arpenteur_geometre === filterArpenteur;
-      const matchesTypeMandat = filterTypeMandat === "all" || item.mandat?.type_mandat === filterTypeMandat;
-      const matchesVille = filterVille === "all" || item.mandat?.adresse_travaux?.ville === filterVille;
-      const matchesStatut = filterStatut === "all" || item.dossier.statut === filterStatut;
+      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(item.dossier.arpenteur_geometre);
+      const matchesTypeMandat = filterTypeMandat.length === 0 || filterTypeMandat.includes(item.mandat?.type_mandat);
+      const matchesVille = filterVille.length === 0 || filterVille.includes(item.mandat?.adresse_travaux?.ville);
+      const matchesStatut = filterStatut.length === 0 || filterStatut.includes(item.dossier.statut);
 
       return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille && matchesStatut;
     });
@@ -1249,50 +1249,150 @@ export default function Lots() {
                                           className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                                         />
                                       </div>
-                                      <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Arpenteur" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
-                                          {ARPENTEURS.map(arp => (
-                                            <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Type mandat" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                                          {TYPES_MANDATS.map(type => (
-                                            <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <Select value={formFilterVille} onValueChange={setFormFilterVille}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Ville" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
-                                          {uniqueVilles.map(ville => (
-                                            <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                      <Select value={formFilterStatut} onValueChange={setFormFilterStatut}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Statut" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Tous statuts</SelectItem>
-                                          <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                                          <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                                          <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      <DropdownMenu>
+                                       <DropdownMenuTrigger asChild>
+                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
+                                           <span>Arpenteur ({formFilterArpenteur.length || 'Tous'})</span>
+                                           <ChevronDown className="w-4 h-4" />
+                                         </Button>
+                                       </DropdownMenuTrigger>
+                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                         <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
+                                         <DropdownMenuSeparator />
+                                         <DropdownMenuCheckboxItem
+                                           checked={formFilterArpenteur.length === 0}
+                                           onCheckedChange={(checked) => {
+                                             if (checked) setFormFilterArpenteur([]);
+                                           }}
+                                         >
+                                           Tous
+                                         </DropdownMenuCheckboxItem>
+                                         <DropdownMenuSeparator />
+                                         {ARPENTEURS.map(arp => (
+                                           <DropdownMenuCheckboxItem
+                                             key={arp}
+                                             checked={formFilterArpenteur.includes(arp)}
+                                             onCheckedChange={(checked) => {
+                                               if (checked) {
+                                                 setFormFilterArpenteur([...formFilterArpenteur, arp]);
+                                               } else {
+                                                 setFormFilterArpenteur(formFilterArpenteur.filter(a => a !== arp));
+                                               }
+                                             }}
+                                           >
+                                             {arp}
+                                           </DropdownMenuCheckboxItem>
+                                         ))}
+                                       </DropdownMenuContent>
+                                      </DropdownMenu>
+                                      <DropdownMenu>
+                                       <DropdownMenuTrigger asChild>
+                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
+                                           <span>Type ({formFilterTypeMandat.length || 'Tous'})</span>
+                                           <ChevronDown className="w-4 h-4" />
+                                         </Button>
+                                       </DropdownMenuTrigger>
+                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                         <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
+                                         <DropdownMenuSeparator />
+                                         <DropdownMenuCheckboxItem
+                                           checked={formFilterTypeMandat.length === 0}
+                                           onCheckedChange={(checked) => {
+                                             if (checked) setFormFilterTypeMandat([]);
+                                           }}
+                                         >
+                                           Tous
+                                         </DropdownMenuCheckboxItem>
+                                         <DropdownMenuSeparator />
+                                         {TYPES_MANDATS.map(type => (
+                                           <DropdownMenuCheckboxItem
+                                             key={type}
+                                             checked={formFilterTypeMandat.includes(type)}
+                                             onCheckedChange={(checked) => {
+                                               if (checked) {
+                                                 setFormFilterTypeMandat([...formFilterTypeMandat, type]);
+                                               } else {
+                                                 setFormFilterTypeMandat(formFilterTypeMandat.filter(t => t !== type));
+                                               }
+                                             }}
+                                           >
+                                             {type}
+                                           </DropdownMenuCheckboxItem>
+                                         ))}
+                                       </DropdownMenuContent>
+                                      </DropdownMenu>
+                                      <DropdownMenu>
+                                       <DropdownMenuTrigger asChild>
+                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
+                                           <span>Ville ({formFilterVille.length || 'Toutes'})</span>
+                                           <ChevronDown className="w-4 h-4" />
+                                         </Button>
+                                       </DropdownMenuTrigger>
+                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                         <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
+                                         <DropdownMenuSeparator />
+                                         <DropdownMenuCheckboxItem
+                                           checked={formFilterVille.length === 0}
+                                           onCheckedChange={(checked) => {
+                                             if (checked) setFormFilterVille([]);
+                                           }}
+                                         >
+                                           Toutes
+                                         </DropdownMenuCheckboxItem>
+                                         <DropdownMenuSeparator />
+                                         {uniqueVilles.map(ville => (
+                                           <DropdownMenuCheckboxItem
+                                             key={ville}
+                                             checked={formFilterVille.includes(ville)}
+                                             onCheckedChange={(checked) => {
+                                               if (checked) {
+                                                 setFormFilterVille([...formFilterVille, ville]);
+                                               } else {
+                                                 setFormFilterVille(formFilterVille.filter(v => v !== ville));
+                                               }
+                                             }}
+                                           >
+                                             {ville}
+                                           </DropdownMenuCheckboxItem>
+                                         ))}
+                                       </DropdownMenuContent>
+                                      </DropdownMenu>
+                                      <DropdownMenu>
+                                       <DropdownMenuTrigger asChild>
+                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
+                                           <span>Statut ({formFilterStatut.length || 'Tous'})</span>
+                                           <ChevronDown className="w-4 h-4" />
+                                         </Button>
+                                       </DropdownMenuTrigger>
+                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                         <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                                         <DropdownMenuSeparator />
+                                         <DropdownMenuCheckboxItem
+                                           checked={formFilterStatut.length === 0}
+                                           onCheckedChange={(checked) => {
+                                             if (checked) setFormFilterStatut([]);
+                                           }}
+                                         >
+                                           Tous
+                                         </DropdownMenuCheckboxItem>
+                                         <DropdownMenuSeparator />
+                                         {["Ouvert", "Fermé", "Mandats à ouvrir"].map(statut => (
+                                           <DropdownMenuCheckboxItem
+                                             key={statut}
+                                             checked={formFilterStatut.includes(statut)}
+                                             onCheckedChange={(checked) => {
+                                               if (checked) {
+                                                 setFormFilterStatut([...formFilterStatut, statut]);
+                                               } else {
+                                                 setFormFilterStatut(formFilterStatut.filter(s => s !== statut));
+                                               }
+                                             }}
+                                           >
+                                             {statut}
+                                           </DropdownMenuCheckboxItem>
+                                         ))}
+                                       </DropdownMenuContent>
+                                      </DropdownMenu>
                                     </div>
                                   </div>
 
