@@ -1092,6 +1092,7 @@ export default function Lots() {
                       onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
                       disabled={false}
                       CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                      allLots={lots}
                     />
 
                     {/* Section Documents */}
