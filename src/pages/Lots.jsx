@@ -371,7 +371,11 @@ export default function Lots() {
   };
 
   const handleCirconscriptionChange = (value) => {
-    setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
+    setFormData(prev => ({ 
+      ...prev, 
+      circonscription_fonciere: value, 
+      cadastre: prev.cadastre || "Québec"  // Garder le cadastre existant ou mettre Québec par défaut
+    }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
     setHasFormChanges(true);
   };
