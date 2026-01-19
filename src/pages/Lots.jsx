@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -1423,21 +1424,6 @@ export default function Lots() {
               {/* Preview Mode */}
               {bulkImportPreview && (
                 <>
-                  <div className="mb-4 flex gap-4">
-                    <div className="p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg flex-1">
-                      <p className="text-blue-400 font-semibold">
-                        {bulkImportPreview.filter(l => !l.alreadyExists).length} lots à créer
-                      </p>
-                    </div>
-                    {bulkImportPreview.filter(l => l.alreadyExists).length > 0 && (
-                      <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg flex-1">
-                        <p className="text-yellow-400 font-semibold">
-                          {bulkImportPreview.filter(l => l.alreadyExists).length} lots déjà existants (ignorés)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                     <Table>
                       <TableHeader>
@@ -1473,7 +1459,34 @@ export default function Lots() {
                               {lot.circonscription_fonciere}
                             </TableCell>
                             <TableCell className="text-slate-300">
-                              {lot.concordances_count || 0}
+                              {lot.concordances && lot.concordances.length > 0 ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1 cursor-help">
+                                        <span>{lot.concordances_count}</span>
+                                        <Info className="w-3 h-3 text-slate-500" />
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="bg-slate-800 border-slate-700 max-w-sm">
+                                      <div className="space-y-1">
+                                        {lot.concordances.map((conc, idx) => (
+                                          <div key={idx} className="text-xs">
+                                            <span className="text-white font-medium">{conc.numero_lot}</span>
+                                            {conc.est_partie && <span className="text-purple-400"> Ptie</span>}
+                                            <span className="text-slate-400">
+                                              {conc.rang ? ` • ${conc.rang}` : ''}
+                                              {conc.cadastre ? ` • ${conc.cadastre}` : ''}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                "0"
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1536,7 +1549,34 @@ export default function Lots() {
                               {result.circonscription_fonciere}
                             </TableCell>
                             <TableCell className="text-slate-300">
-                              {result.concordances_count || 0}
+                              {result.concordances && result.concordances.length > 0 ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1 cursor-help">
+                                        <span>{result.concordances_count}</span>
+                                        <Info className="w-3 h-3 text-slate-500" />
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="bg-slate-800 border-slate-700 max-w-sm">
+                                      <div className="space-y-1">
+                                        {result.concordances.map((conc, idx) => (
+                                          <div key={idx} className="text-xs">
+                                            <span className="text-white font-medium">{conc.numero_lot}</span>
+                                            {conc.est_partie && <span className="text-purple-400"> Ptie</span>}
+                                            <span className="text-slate-400">
+                                              {conc.rang ? ` • ${conc.rang}` : ''}
+                                              {conc.cadastre ? ` • ${conc.cadastre}` : ''}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                result.concordances_count || 0
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
