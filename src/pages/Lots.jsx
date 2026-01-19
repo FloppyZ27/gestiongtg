@@ -1205,17 +1205,17 @@ export default function Lots() {
                               return allAssociatedDossiers.length > 0 ? (
                                 <>
                                   {/* Barre de recherche et filtres */}
-                                  <div className="space-y-3 mb-3">
-                                    <div className="relative">
-                                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                                      <Input
-                                        placeholder="Rechercher..."
-                                        value={formDossierSearchTerm}
-                                        onChange={(e) => setFormDossierSearchTerm(e.target.value)}
-                                        className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                                      />
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-2">
+                                  <div className="mb-3">
+                                    <div className="grid grid-cols-5 gap-2">
+                                      <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                        <Input
+                                          placeholder="Rechercher..."
+                                          value={formDossierSearchTerm}
+                                          onChange={(e) => setFormDossierSearchTerm(e.target.value)}
+                                          className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                        />
+                                      </div>
                                       <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
                                         <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
                                           <SelectValue placeholder="Arpenteur" />
@@ -1275,21 +1275,27 @@ export default function Lots() {
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
-                                            onClick={() => handleFormSort('date_ouverture')}
-                                          >
-                                            Date d'ouverture {getFormSortIcon('date_ouverture')}
-                                          </TableHead>
-                                          <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
-                                            Type de mandat {getFormSortIcon('type_mandat')}
+                                            Mandats {getFormSortIcon('type_mandat')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
                                             Adresse des travaux {getFormSortIcon('adresse_travaux')}
+                                          </TableHead>
+                                          <TableHead 
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            onClick={() => handleFormSort('statut')}
+                                          >
+                                            Statut {getFormSortIcon('statut')}
+                                          </TableHead>
+                                          <TableHead 
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            onClick={() => handleFormSort('date_ouverture')}
+                                          >
+                                            Date {getFormSortIcon('date_ouverture')}
                                           </TableHead>
                                         </TableRow>
                                       </TableHeader>
@@ -1305,9 +1311,6 @@ export default function Lots() {
                                                   {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300 text-sm">
-                                                {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
-                                              </TableCell>
                                               <TableCell>
                                                 <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
                                                   {item.mandat?.type_mandat || "Aucun"}
@@ -1316,11 +1319,19 @@ export default function Lots() {
                                               <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                                 {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
                                               </TableCell>
+                                              <TableCell>
+                                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                                  {item.dossier.statut}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="text-slate-300 text-sm">
+                                                {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
+                                              </TableCell>
                                             </TableRow>
                                           ))
                                         ) : (
                                           <TableRow>
-                                            <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                            <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                                               Aucun dossier trouvé
                                             </TableCell>
                                           </TableRow>
