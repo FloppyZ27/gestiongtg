@@ -1217,7 +1217,7 @@ export default function Lots() {
                                         />
                                       </div>
                                       <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm w-[180px]">
+                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
                                           <SelectValue placeholder="Arpenteur (Tous)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
@@ -1228,7 +1228,7 @@ export default function Lots() {
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm w-[180px]">
+                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
                                           <SelectValue placeholder="Mandat (Tous)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
@@ -1239,7 +1239,7 @@ export default function Lots() {
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterVille} onValueChange={setFormFilterVille}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm w-[180px]">
+                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
                                           <SelectValue placeholder="Ville (Toutes)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
@@ -1250,7 +1250,7 @@ export default function Lots() {
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterStatut} onValueChange={setFormFilterStatut}>
-                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm w-[180px]">
+                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
                                           <SelectValue placeholder="Statut (Tous)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
