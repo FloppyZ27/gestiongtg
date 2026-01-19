@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3, Link2 } from "lucide-react";
 
 const TYPES_OPERATIONS = [
   "Vente",
@@ -218,12 +218,22 @@ export default function TypesOperationStepForm({
               </div>
 
               {/* Section Concordances antérieures - Colapsable */}
-              <div className="border-t border-slate-700 pt-2">
+              <div className="border-t border-slate-700 pt-2 mt-2">
                 <div 
-                  className="cursor-pointer hover:bg-slate-700/30 transition-colors p-2 rounded mb-2 flex items-center justify-between"
+                  className="cursor-pointer hover:bg-teal-900/40 transition-colors p-2 rounded-lg mb-2 flex items-center justify-between bg-teal-900/20"
                   onClick={() => setConcordancesCollapsed(!concordancesCollapsed)}
                 >
-                  <Label className="text-slate-300 text-xs font-semibold cursor-pointer">Concordances antérieures</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-teal-500/30 flex items-center justify-center flex-shrink-0">
+                      <Link2 className="w-3 h-3 text-teal-400" />
+                    </div>
+                    <Label className="text-teal-300 text-xs font-semibold cursor-pointer">Concordances antérieures</Label>
+                    {newTypeOperation.concordances_anterieures?.length > 0 && (
+                      <Badge className="bg-teal-500/20 text-teal-300 border-teal-500/30 px-1.5 py-0 text-xs">
+                        {newTypeOperation.concordances_anterieures.length}
+                      </Badge>
+                    )}
+                  </div>
                   {concordancesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
 
