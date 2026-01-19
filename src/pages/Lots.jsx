@@ -153,7 +153,7 @@ export default function Lots() {
     rang: ""
   });
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showModifyConfirm, setShowModifyConfirm] = useState(false);
+  const [showLotMissingFieldsWarning, setShowLotMissingFieldsWarning] = useState(false);
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
 
@@ -317,14 +317,12 @@ export default function Lots() {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (editingLot) {
-      setShowModifyConfirm(true);
-    } else {
-      confirmSubmit();
+    // Validation: vérifier que les champs obligatoires sont remplis
+    if (!formData.numero_lot || !formData.circonscription_fonciere) {
+      setShowLotMissingFieldsWarning(true);
+      return;
     }
-  };
-
-  const confirmSubmit = () => {
+    
     // Validation pour vérifier si le lot existe déjà
     const lotExistant = lots.find(l =>
       l.id !== editingLot?.id && // Exclure le lot actuel en modification
@@ -335,7 +333,6 @@ export default function Lots() {
 
     if (lotExistant) {
       alert(`Un lot ${formData.numero_lot} existe déjà dans le cadastre ${formData.cadastre} de ${formData.circonscription_fonciere}.`);
-      setShowModifyConfirm(false);
       return;
     }
 
@@ -349,8 +346,6 @@ export default function Lots() {
     } else {
       createLotMutation.mutate(dataToSubmit);
     }
-    
-    setShowModifyConfirm(false);
   };
 
   const handleCirconscriptionChange = (value) => {
@@ -1705,34 +1700,27 @@ export default function Lots() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de confirmation de modification */}
-        <Dialog open={showModifyConfirm} onOpenChange={setShowModifyConfirm}>
+        {/* Dialog d'avertissement champs obligatoires manquants */}
+        <Dialog open={showLotMissingFieldsWarning} onOpenChange={setShowLotMissingFieldsWarning}>
           <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
             <DialogHeader>
               <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
                 <span className="text-2xl">⚠️</span>
-                Confirmer la modification
+                Attention
                 <span className="text-2xl">⚠️</span>
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-slate-300 text-center">
-                Êtes-vous sûr de vouloir modifier ce lot ?
+                Veuillez remplir tous les champs obligatoires : <span className="text-red-400 font-semibold">Numéro de lot</span> et <span className="text-red-400 font-semibold">Circonscription foncière</span>.
               </p>
               <div className="flex justify-center gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={() => setShowModifyConfirm(false)}
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="button"
-                  onClick={confirmSubmit}
+                <Button 
+                  type="button" 
+                  onClick={() => setShowLotMissingFieldsWarning(false)}
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
-                  Confirmer
+                  Compris
                 </Button>
               </div>
             </div>
