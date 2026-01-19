@@ -1268,34 +1268,28 @@ export default function Lots() {
                                       <TableHeader>
                                         <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('numero_dossier')}
                                           >
                                             N° Dossier {getFormSortIcon('numero_dossier')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
-                                            onClick={() => handleFormSort('type_mandat')}
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            onClick={() => handleFormSort('date_ouverture')}
                                           >
-                                            Mandats {getFormSortIcon('type_mandat')}
+                                            Date d'ouverture {getFormSortIcon('date_ouverture')}
                                           </TableHead>
                                           <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
+                                            onClick={() => handleFormSort('type_mandat')}
+                                          >
+                                            Type de mandat {getFormSortIcon('type_mandat')}
+                                          </TableHead>
+                                          <TableHead 
+                                            className="text-slate-300 cursor-pointer hover:text-white text-sm"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
                                             Adresse des travaux {getFormSortIcon('adresse_travaux')}
-                                          </TableHead>
-                                          <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
-                                            onClick={() => handleFormSort('statut')}
-                                          >
-                                            Statut {getFormSortIcon('statut')}
-                                          </TableHead>
-                                          <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
-                                            onClick={() => handleFormSort('date_ouverture')}
-                                          >
-                                            Date {getFormSortIcon('date_ouverture')}
                                           </TableHead>
                                         </TableRow>
                                       </TableHeader>
