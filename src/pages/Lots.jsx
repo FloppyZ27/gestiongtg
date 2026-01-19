@@ -1320,7 +1320,7 @@ export default function Lots() {
                                           ))
                                         ) : (
                                           <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                                            <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                                               Aucun dossier trouvé
                                             </TableCell>
                                           </TableRow>
