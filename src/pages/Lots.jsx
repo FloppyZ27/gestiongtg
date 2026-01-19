@@ -20,6 +20,7 @@ import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import ConcordanceStepForm from "../components/lots/ConcordanceStepForm";
+import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
@@ -176,6 +177,7 @@ export default function Lots() {
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [concordanceCollapsed, setConcordanceCollapsed] = useState(false);
+  const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
   const [sidebarTab, setSidebarTab] = useState("commentaires");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dossiersAssociesCollapsed, setDossiersAssociesCollapsed] = useState(false);
@@ -223,7 +225,8 @@ export default function Lots() {
     cadastre: "Québec",
     rang: "",
     date_bpd: "",
-    type_operation: ""
+    type_operation: "",
+    types_operation: []
   });
 
   const queryClient = useQueryClient();
@@ -458,7 +461,8 @@ export default function Lots() {
       cadastre: "Québec",
       rang: "",
       date_bpd: "",
-      type_operation: ""
+      type_operation: "",
+      types_operation: []
     });
     setConcordancesAnterieure([]);
     setNewConcordance({
@@ -486,7 +490,8 @@ export default function Lots() {
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
       date_bpd: lot.date_bpd || "",
-      type_operation: lot.type_operation || ""
+      type_operation: lot.type_operation || "",
+      types_operation: lot.types_operation || []
     };
     setFormData(lotData);
     setInitialFormData(JSON.parse(JSON.stringify(lotData)));
@@ -1182,6 +1187,19 @@ export default function Lots() {
                       disabled={false}
                       CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
                       allLots={lots}
+                    />
+
+                    {/* Section Types d'opération */}
+                    <TypesOperationStepForm
+                      typesOperation={formData.types_operation || []}
+                      onTypesOperationChange={(data) => {
+                        setFormData({...formData, types_operation: data});
+                        setHasFormChanges(true);
+                      }}
+                      isCollapsed={typesOperationCollapsed}
+                      onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
+                      disabled={false}
+                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
                     />
 
                     {/* Section Documents */}
