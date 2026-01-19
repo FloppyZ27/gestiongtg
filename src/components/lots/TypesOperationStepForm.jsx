@@ -181,9 +181,9 @@ export default function TypesOperationStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-3 pb-2">
-          <div className="space-y-4">
-            {/* Formulaire d'ajout/édition de type d'opération */}
-            <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3">
+          <div className="space-y-4 w-full">
+             {/* Formulaire d'ajout/édition de type d'opération */}
+             <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3 w-full">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
@@ -238,7 +238,7 @@ export default function TypesOperationStepForm({
                 </div>
 
                 {!concordancesCollapsed && (
-                <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-2">
+                  <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-2 w-full">
                   {/* Colonne gauche - Formulaire et tableau */}
                   <div className="space-y-2">
                     {/* Formulaire d'ajout */}
@@ -487,7 +487,7 @@ export default function TypesOperationStepForm({
 
             {/* Liste des types d'opération ajoutés */}
             {typesOperation.length > 0 && (
-              <div className="space-y-2">
+            <div className="space-y-2 w-full">
                 <Label className="text-slate-300 text-sm">Types d'opération ajoutés</Label>
                 {typesOperation.map((typeOp, index) => (
                   <div key={index} className="p-3 bg-slate-900/30 border border-slate-700 rounded-lg">
