@@ -19,7 +19,6 @@ import { createPageUrl } from "@/utils";
 import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
-import ConcordanceStepForm from "../components/lots/ConcordanceStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
@@ -176,7 +175,6 @@ export default function Lots() {
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
-  const [concordanceCollapsed, setConcordanceCollapsed] = useState(false);
   const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
   const [sidebarTab, setSidebarTab] = useState("commentaires");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -460,7 +458,6 @@ export default function Lots() {
       rang: "",
       types_operation: []
     });
-    setConcordancesAnterieure([]);
     setNewConcordance({
       circonscription_fonciere: "",
       cadastre: "",
@@ -1145,41 +1142,6 @@ export default function Lots() {
                       onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
                       disabled={false}
                       CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
-                    />
-
-                    {/* Section Concordances antérieures */}
-                    <ConcordanceStepForm
-                      concordancesAnterieure={concordancesAnterieure}
-                      onConcordancesChange={(data) => {
-                        setConcordancesAnterieure(data);
-                        setHasFormChanges(true);
-                      }}
-                      newConcordance={newConcordance}
-                      onNewConcordanceChange={(data) => {
-                        setNewConcordance(data);
-                        setHasFormChanges(true);
-                      }}
-                      availableCadastres={newConcordance.circonscription_fonciere ? CADASTRES_PAR_CIRCONSCRIPTION[newConcordance.circonscription_fonciere] : []}
-                      onAddConcordance={() => {
-                        addConcordance();
-                        setHasFormChanges(true);
-                      }}
-                      onRemoveConcordance={(index) => {
-                        removeConcordance(index);
-                        setHasFormChanges(true);
-                      }}
-                      onCirconscriptionChange={(value) => {
-                        setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""});
-                        setHasFormChanges(true);
-                      }}
-                      editingIndex={editingConcordanceIndex}
-                      onEditConcordance={editConcordance}
-                      onCancelEdit={cancelEditConcordance}
-                      isCollapsed={concordanceCollapsed}
-                      onToggleCollapse={() => setConcordanceCollapsed(!concordanceCollapsed)}
-                      disabled={false}
-                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
-                      allLots={lots}
                     />
 
                     {/* Section Types d'opération */}
