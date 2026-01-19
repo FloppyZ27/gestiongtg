@@ -729,19 +729,20 @@ export default function Lots() {
         });
       }
       
+      // Mettre à jour les cadastres disponibles AVANT de set formData
+      if (extractedData.circonscription_fonciere) {
+        setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
+      }
+      
       setFormData(prev => ({
         ...prev,
         numero_lot: extractedData.numero_lot || prev.numero_lot,
         circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
-        cadastre: extractedData.cadastre || 'Québec',
+        cadastre: 'Québec',
         date_bpd: extractedData.date_bpd || prev.date_bpd,
       }));
       
       setConcordancesAnterieure(extractedData.concordances_anterieures || []);
-      
-      if (extractedData.circonscription_fonciere) {
-        setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
-      }
       
       setShowImportSuccess(true);
       setHasFormChanges(true);
@@ -1928,7 +1929,7 @@ export default function Lots() {
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-slate-300 text-center">
-                Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans le cadastre <span className="text-emerald-400 font-semibold">{formData.cadastre}</span> de <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.
+                Le lot <span className="text-emerald-400 font-semibold">{formData.numero_lot}</span> existe déjà dans <span className="text-emerald-400 font-semibold">{formData.circonscription_fonciere}</span>.
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button 
