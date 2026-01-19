@@ -418,7 +418,7 @@ export default function Lots() {
       circonscription_fonciere: lot.circonscription_fonciere || "",
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
-      date_bpd: lot.date_bpd && !isNaN(new Date(lot.date_bpd).getTime()) ? format(new Date(lot.date_bpd), 'yyyy-MM-dd') : "",
+      date_bpd: lot.date_bpd || "",
       type_operation: lot.type_operation || ""
     });
     setConcordancesAnterieure(lot.concordances_anterieures || []);
@@ -633,13 +633,10 @@ export default function Lots() {
         if (dateBpd) {
           // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
           if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
-            const year = parseInt(dateBpd.substring(0, 4));
-            const month = parseInt(dateBpd.substring(4, 6));
-            const day = parseInt(dateBpd.substring(6, 8));
-            // Create date and add 1 day to compensate for timezone offset
-            const date = new Date(year, month - 1, day);
-            date.setDate(date.getDate() + 1);
-            extractedData.date_bpd = format(date, 'yyyy-MM-dd');
+            const year = dateBpd.substring(0, 4);
+            const month = dateBpd.substring(4, 6);
+            const day = dateBpd.substring(6, 8);
+            extractedData.date_bpd = `${year}-${month}-${day}`;
           } else {
             // Already in correct format or use as-is
             extractedData.date_bpd = dateBpd;
@@ -755,13 +752,10 @@ export default function Lots() {
           if (dateBpd) {
             // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
             if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
-              const year = parseInt(dateBpd.substring(0, 4));
-              const month = parseInt(dateBpd.substring(4, 6));
-              const day = parseInt(dateBpd.substring(6, 8));
-              // Create date and add 1 day to compensate for timezone offset
-              const date = new Date(year, month - 1, day);
-              date.setDate(date.getDate() + 1);
-              baseData.date_bpd = format(date, 'yyyy-MM-dd');
+              const year = dateBpd.substring(0, 4);
+              const month = dateBpd.substring(4, 6);
+              const day = dateBpd.substring(6, 8);
+              baseData.date_bpd = `${year}-${month}-${day}`;
             } else {
               // Already in correct format or use as-is
               baseData.date_bpd = dateBpd;
@@ -1187,7 +1181,7 @@ export default function Lots() {
                       <div>
                         <Label className="text-slate-400 text-sm">Date BPD</Label>
                         <p className="text-white font-medium mt-1">
-                          {viewingLot.date_bpd && !isNaN(new Date(viewingLot.date_bpd).getTime()) ? format(new Date(viewingLot.date_bpd), "dd MMMM yyyy", { locale: fr }) : "-"}
+                          {viewingLot.date_bpd && !isNaN(new Date(viewingLot.date_bpd + 'T00:00:00').getTime()) ? format(new Date(viewingLot.date_bpd + 'T00:00:00'), "dd MMMM yyyy", { locale: fr }) : "-"}
                         </p>
                       </div>
                       <div>
@@ -1362,7 +1356,7 @@ export default function Lots() {
                                           </Badge>
                                         </TableCell>
                                         <TableCell className="text-slate-300 text-sm">
-                                          {item.mandat?.date_minute && !isNaN(new Date(item.mandat.date_minute).getTime()) ? format(new Date(item.mandat.date_minute), "dd MMM yyyy", { locale: fr }) : "-"}
+                                          {item.mandat?.date_minute && !isNaN(new Date(item.mandat.date_minute + 'T00:00:00').getTime()) ? format(new Date(item.mandat.date_minute + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                         </TableCell>
                                         <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                           {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
@@ -1924,7 +1918,7 @@ export default function Lots() {
                         {lot.rang || "-"}
                       </TableCell>
                       <TableCell className="text-slate-300 text-sm">
-                        {lot.date_bpd && !isNaN(new Date(lot.date_bpd).getTime()) ? format(new Date(lot.date_bpd), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {lot.date_bpd && !isNaN(new Date(lot.date_bpd + 'T00:00:00').getTime()) ? format(new Date(lot.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                       </TableCell>
                       <TableCell className="text-slate-300">
                         {lot.type_operation || "-"}
