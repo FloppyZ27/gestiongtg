@@ -182,6 +182,7 @@ export default function Lots() {
   const [formFilterArpenteur, setFormFilterArpenteur] = useState("all");
   const [formFilterTypeMandat, setFormFilterTypeMandat] = useState("all");
   const [formFilterVille, setFormFilterVille] = useState("all");
+  const [formFilterStatut, setFormFilterStatut] = useState("all");
   const [formSortField, setFormSortField] = useState(null);
   const [formSortDirection, setFormSortDirection] = useState("asc");
   const [showImportSuccess, setShowImportSuccess] = useState(false);
@@ -538,6 +539,7 @@ export default function Lots() {
     const filterArpenteur = isFormDialog ? formFilterArpenteur : viewFilterArpenteur;
     const filterTypeMandat = isFormDialog ? formFilterTypeMandat : viewFilterTypeMandat;
     const filterVille = isFormDialog ? formFilterVille : viewFilterVille;
+    const filterStatut = isFormDialog ? formFilterStatut : "all";
     const sortField = isFormDialog ? formSortField : viewSortField;
     const sortDirection = isFormDialog ? formSortDirection : viewSortDirection;
     
@@ -558,8 +560,9 @@ export default function Lots() {
       const matchesArpenteur = filterArpenteur === "all" || item.dossier.arpenteur_geometre === filterArpenteur;
       const matchesTypeMandat = filterTypeMandat === "all" || item.mandat?.type_mandat === filterTypeMandat;
       const matchesVille = filterVille === "all" || item.mandat?.adresse_travaux?.ville === filterVille;
+      const matchesStatut = filterStatut === "all" || item.dossier.statut === filterStatut;
 
-      return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille;
+      return matchesSearch && matchesArpenteur && matchesTypeMandat && matchesVille && matchesStatut;
     });
 
     // Sort
@@ -588,6 +591,14 @@ export default function Lots() {
         case 'date_minute':
           aValue = a.mandat?.date_minute ? new Date(a.mandat.date_minute).getTime() : 0;
           bValue = b.mandat?.date_minute ? new Date(b.mandat.date_minute).getTime() : 0;
+          break;
+        case 'date_ouverture':
+          aValue = a.dossier?.date_ouverture ? new Date(a.dossier.date_ouverture).getTime() : 0;
+          bValue = b.dossier?.date_ouverture ? new Date(b.dossier.date_ouverture).getTime() : 0;
+          break;
+        case 'statut':
+          aValue = (a.dossier?.statut || '').toLowerCase();
+          bValue = (b.dossier?.statut || '').toLowerCase();
           break;
         default:
           return 0;
@@ -1161,13 +1172,19 @@ export default function Lots() {
                               <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
                                 <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
                               </div>
-                              <CardTitle className="text-emerald-300 text-base">
-                                Dossiers associés
+                              <div className="flex items-center gap-2">
+                                <CardTitle className="text-emerald-300 text-base">
+                                  Dossiers associés
+                                </CardTitle>
                                 {(() => {
                                   const associatedDossiers = getDossiersWithLot(formData.numero_lot);
-                                  return associatedDossiers.length > 0 && ` (${associatedDossiers.length} mandat${associatedDossiers.length > 1 ? 's' : ''})`;
+                                  return associatedDossiers.length > 0 && (
+                                    <Badge className="bg-emerald-500/30 text-emerald-300 border-emerald-500/50 px-2 py-0.5 text-xs">
+                                      {associatedDossiers.length}
+                                    </Badge>
+                                  );
                                 })()}
-                              </CardTitle>
+                              </div>
                             </div>
                             {dossiersAssociesFormCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                           </div>
@@ -1198,13 +1215,13 @@ export default function Lots() {
                                         className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                                       />
                                     </div>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-4 gap-2">
                                       <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
                                         <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Arpenteur" />
+                                          <SelectValue placeholder="Arpenteur (Tous)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous</SelectItem>
                                           {ARPENTEURS.map(arp => (
                                             <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
                                           ))}
@@ -1212,10 +1229,10 @@ export default function Lots() {
                                       </Select>
                                       <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
                                         <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Type mandat" />
+                                          <SelectValue placeholder="Mandat (Tous)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous</SelectItem>
                                           {TYPES_MANDATS.map(type => (
                                             <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
                                           ))}
@@ -1223,13 +1240,24 @@ export default function Lots() {
                                       </Select>
                                       <Select value={formFilterVille} onValueChange={setFormFilterVille}>
                                         <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
-                                          <SelectValue placeholder="Ville" />
+                                          <SelectValue placeholder="Ville (Toutes)" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
+                                          <SelectItem value="all" className="text-white">Toutes</SelectItem>
                                           {uniqueVilles.map(ville => (
                                             <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
                                           ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <Select value={formFilterStatut} onValueChange={setFormFilterStatut}>
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                          <SelectValue placeholder="Tous statuts" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                          <SelectItem value="all" className="text-white">Tous</SelectItem>
+                                          <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
+                                          <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
+                                          <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
@@ -1247,21 +1275,27 @@ export default function Lots() {
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white"
-                                            onClick={() => handleFormSort('clients')}
-                                          >
-                                            Clients {getFormSortIcon('clients')}
-                                          </TableHead>
-                                          <TableHead 
-                                            className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('type_mandat')}
                                           >
-                                            Type de mandat {getFormSortIcon('type_mandat')}
+                                            Mandats {getFormSortIcon('type_mandat')}
                                           </TableHead>
                                           <TableHead 
                                             className="text-slate-300 cursor-pointer hover:text-white"
                                             onClick={() => handleFormSort('adresse_travaux')}
                                           >
                                             Adresse des travaux {getFormSortIcon('adresse_travaux')}
+                                          </TableHead>
+                                          <TableHead 
+                                            className="text-slate-300 cursor-pointer hover:text-white"
+                                            onClick={() => handleFormSort('statut')}
+                                          >
+                                            Statut {getFormSortIcon('statut')}
+                                          </TableHead>
+                                          <TableHead 
+                                            className="text-slate-300 cursor-pointer hover:text-white"
+                                            onClick={() => handleFormSort('date_ouverture')}
+                                          >
+                                            Date {getFormSortIcon('date_ouverture')}
                                           </TableHead>
                                         </TableRow>
                                       </TableHeader>
@@ -1277,22 +1311,27 @@ export default function Lots() {
                                                   {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
                                                 </Badge>
                                               </TableCell>
-                                              <TableCell className="text-slate-300 text-sm">
-                                                {getClientsNames(item.dossier.clients_ids)}
-                                              </TableCell>
                                               <TableCell>
                                                 <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                                  {item.mandat.type_mandat}
+                                                  {item.mandat?.type_mandat || "Aucun"}
                                                 </Badge>
                                               </TableCell>
                                               <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                                 {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
                                               </TableCell>
+                                              <TableCell>
+                                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                                                  {item.dossier.statut}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell className="text-slate-300 text-sm">
+                                                {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
+                                              </TableCell>
                                             </TableRow>
                                           ))
                                         ) : (
                                           <TableRow>
-                                            <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                            <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                                               Aucun dossier trouvé
                                             </TableCell>
                                           </TableRow>
