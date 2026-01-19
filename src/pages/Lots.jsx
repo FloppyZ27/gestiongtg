@@ -1239,162 +1239,170 @@ export default function Lots() {
                                 <>
                                   {/* Barre de recherche et filtres */}
                                   <div className="mb-3">
-                                    <div className="grid grid-cols-5 gap-2">
-                                      <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={formDossierSearchTerm}
-                                          onChange={(e) => setFormDossierSearchTerm(e.target.value)}
-                                          className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                                        />
-                                      </div>
-                                      <DropdownMenu>
-                                       <DropdownMenuTrigger asChild>
-                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
-                                           <span>Arpenteur ({formFilterArpenteur.length || 'Tous'})</span>
-                                           <ChevronDown className="w-4 h-4" />
-                                         </Button>
-                                       </DropdownMenuTrigger>
-                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
-                                         <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
-                                         <DropdownMenuSeparator />
-                                         <DropdownMenuCheckboxItem
-                                           checked={formFilterArpenteur.length === 0}
-                                           onCheckedChange={(checked) => {
-                                             if (checked) setFormFilterArpenteur([]);
-                                           }}
-                                         >
-                                           Tous
-                                         </DropdownMenuCheckboxItem>
-                                         <DropdownMenuSeparator />
-                                         {ARPENTEURS.map(arp => (
-                                           <DropdownMenuCheckboxItem
-                                             key={arp}
-                                             checked={formFilterArpenteur.includes(arp)}
-                                             onCheckedChange={(checked) => {
-                                               if (checked) {
-                                                 setFormFilterArpenteur([...formFilterArpenteur, arp]);
-                                               } else {
-                                                 setFormFilterArpenteur(formFilterArpenteur.filter(a => a !== arp));
-                                               }
-                                             }}
-                                           >
-                                             {arp}
-                                           </DropdownMenuCheckboxItem>
-                                         ))}
-                                       </DropdownMenuContent>
+                                   <div className="flex gap-2">
+                                     <div className="relative flex-[0_0_25%]">
+                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                       <Input
+                                         placeholder="Rechercher..."
+                                         value={formDossierSearchTerm}
+                                         onChange={(e) => setFormDossierSearchTerm(e.target.value)}
+                                         className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                       />
+                                     </div>
+                                      <div className="flex-1">
+                                       <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                            <span>Arpenteur ({formFilterArpenteur.length || 'Tous'})</span>
+                                            <ChevronDown className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                          <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuCheckboxItem
+                                            checked={formFilterArpenteur.length === 0}
+                                            onCheckedChange={(checked) => {
+                                              if (checked) setFormFilterArpenteur([]);
+                                            }}
+                                          >
+                                            Tous
+                                          </DropdownMenuCheckboxItem>
+                                          <DropdownMenuSeparator />
+                                          {ARPENTEURS.map(arp => (
+                                            <DropdownMenuCheckboxItem
+                                              key={arp}
+                                              checked={formFilterArpenteur.includes(arp)}
+                                              onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                  setFormFilterArpenteur([...formFilterArpenteur, arp]);
+                                                } else {
+                                                  setFormFilterArpenteur(formFilterArpenteur.filter(a => a !== arp));
+                                                }
+                                              }}
+                                            >
+                                              {arp}
+                                            </DropdownMenuCheckboxItem>
+                                          ))}
+                                        </DropdownMenuContent>
                                       </DropdownMenu>
+                                      </div>
+                                      <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Type ({formFilterTypeMandat.length || 'Tous'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
                                         </DropdownMenuTrigger>
-                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
-                                         <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
-                                         <DropdownMenuSeparator />
-                                         <DropdownMenuCheckboxItem
-                                           checked={formFilterTypeMandat.length === 0}
-                                           onCheckedChange={(checked) => {
-                                             if (checked) setFormFilterTypeMandat([]);
-                                           }}
-                                         >
-                                           Tous
-                                         </DropdownMenuCheckboxItem>
-                                         <DropdownMenuSeparator />
-                                         {TYPES_MANDATS.map(type => (
-                                           <DropdownMenuCheckboxItem
-                                             key={type}
-                                             checked={formFilterTypeMandat.includes(type)}
-                                             onCheckedChange={(checked) => {
-                                               if (checked) {
-                                                 setFormFilterTypeMandat([...formFilterTypeMandat, type]);
-                                               } else {
-                                                 setFormFilterTypeMandat(formFilterTypeMandat.filter(t => t !== type));
-                                               }
-                                             }}
-                                           >
-                                             {type}
-                                           </DropdownMenuCheckboxItem>
-                                         ))}
-                                       </DropdownMenuContent>
+                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                          <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuCheckboxItem
+                                            checked={formFilterTypeMandat.length === 0}
+                                            onCheckedChange={(checked) => {
+                                              if (checked) setFormFilterTypeMandat([]);
+                                            }}
+                                          >
+                                            Tous
+                                          </DropdownMenuCheckboxItem>
+                                          <DropdownMenuSeparator />
+                                          {TYPES_MANDATS.map(type => (
+                                            <DropdownMenuCheckboxItem
+                                              key={type}
+                                              checked={formFilterTypeMandat.includes(type)}
+                                              onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                  setFormFilterTypeMandat([...formFilterTypeMandat, type]);
+                                                } else {
+                                                  setFormFilterTypeMandat(formFilterTypeMandat.filter(t => t !== type));
+                                                }
+                                              }}
+                                            >
+                                              {type}
+                                            </DropdownMenuCheckboxItem>
+                                          ))}
+                                        </DropdownMenuContent>
                                       </DropdownMenu>
+                                      </div>
+                                      <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Ville ({formFilterVille.length || 'Toutes'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
                                         </DropdownMenuTrigger>
-                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
-                                         <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
-                                         <DropdownMenuSeparator />
-                                         <DropdownMenuCheckboxItem
-                                           checked={formFilterVille.length === 0}
-                                           onCheckedChange={(checked) => {
-                                             if (checked) setFormFilterVille([]);
-                                           }}
-                                         >
-                                           Toutes
-                                         </DropdownMenuCheckboxItem>
-                                         <DropdownMenuSeparator />
-                                         {uniqueVilles.map(ville => (
-                                           <DropdownMenuCheckboxItem
-                                             key={ville}
-                                             checked={formFilterVille.includes(ville)}
-                                             onCheckedChange={(checked) => {
-                                               if (checked) {
-                                                 setFormFilterVille([...formFilterVille, ville]);
-                                               } else {
-                                                 setFormFilterVille(formFilterVille.filter(v => v !== ville));
-                                               }
-                                             }}
-                                           >
-                                             {ville}
-                                           </DropdownMenuCheckboxItem>
-                                         ))}
-                                       </DropdownMenuContent>
+                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                          <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuCheckboxItem
+                                            checked={formFilterVille.length === 0}
+                                            onCheckedChange={(checked) => {
+                                              if (checked) setFormFilterVille([]);
+                                            }}
+                                          >
+                                            Toutes
+                                          </DropdownMenuCheckboxItem>
+                                          <DropdownMenuSeparator />
+                                          {uniqueVilles.map(ville => (
+                                            <DropdownMenuCheckboxItem
+                                              key={ville}
+                                              checked={formFilterVille.includes(ville)}
+                                              onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                  setFormFilterVille([...formFilterVille, ville]);
+                                                } else {
+                                                  setFormFilterVille(formFilterVille.filter(v => v !== ville));
+                                                }
+                                              }}
+                                            >
+                                              {ville}
+                                            </DropdownMenuCheckboxItem>
+                                          ))}
+                                        </DropdownMenuContent>
                                       </DropdownMenu>
+                                      </div>
+                                      <div className="flex-1">
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                          <Button variant="outline" className="w-full bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                             <span>Statut ({formFilterStatut.length || 'Tous'})</span>
                                             <ChevronDown className="w-4 h-4" />
                                           </Button>
                                         </DropdownMenuTrigger>
-                                       <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
-                                         <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-                                         <DropdownMenuSeparator />
-                                         <DropdownMenuCheckboxItem
-                                           checked={formFilterStatut.length === 0}
-                                           onCheckedChange={(checked) => {
-                                             if (checked) setFormFilterStatut([]);
-                                           }}
-                                         >
-                                           Tous
-                                         </DropdownMenuCheckboxItem>
-                                         <DropdownMenuSeparator />
-                                         {["Ouvert", "Fermé", "Mandats à ouvrir"].map(statut => (
-                                           <DropdownMenuCheckboxItem
-                                             key={statut}
-                                             checked={formFilterStatut.includes(statut)}
-                                             onCheckedChange={(checked) => {
-                                               if (checked) {
-                                                 setFormFilterStatut([...formFilterStatut, statut]);
-                                               } else {
-                                                 setFormFilterStatut(formFilterStatut.filter(s => s !== statut));
-                                               }
-                                             }}
-                                           >
-                                             {statut}
-                                           </DropdownMenuCheckboxItem>
-                                         ))}
-                                       </DropdownMenuContent>
+                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                                          <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuCheckboxItem
+                                            checked={formFilterStatut.length === 0}
+                                            onCheckedChange={(checked) => {
+                                              if (checked) setFormFilterStatut([]);
+                                            }}
+                                          >
+                                            Tous
+                                          </DropdownMenuCheckboxItem>
+                                          <DropdownMenuSeparator />
+                                          {["Ouvert", "Fermé", "Mandats à ouvrir"].map(statut => (
+                                            <DropdownMenuCheckboxItem
+                                              key={statut}
+                                              checked={formFilterStatut.includes(statut)}
+                                              onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                  setFormFilterStatut([...formFilterStatut, statut]);
+                                                } else {
+                                                  setFormFilterStatut(formFilterStatut.filter(s => s !== statut));
+                                                }
+                                              }}
+                                            >
+                                              {statut}
+                                            </DropdownMenuCheckboxItem>
+                                          ))}
+                                        </DropdownMenuContent>
                                       </DropdownMenu>
-                                    </div>
-                                  </div>
+                                      </div>
+                                      </div>
+                                      </div>
 
                                   <div className="border border-slate-700 rounded-lg overflow-hidden">
                                     <Table>
