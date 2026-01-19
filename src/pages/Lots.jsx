@@ -629,7 +629,16 @@ export default function Lots() {
       if (suLine) {
         const suParts = suLine.split(';');
         extractedData.circonscription_fonciere = suParts[2] || '';
-        extractedData.date_bpd = suParts[3] || '';
+        // Parse date without timezone offset to avoid -1 day issue
+        const dateBpd = suParts[3] || '';
+        if (dateBpd && dateBpd.length >= 8) {
+          const year = dateBpd.substring(0, 4);
+          const month = dateBpd.substring(4, 6);
+          const day = dateBpd.substring(6, 8);
+          extractedData.date_bpd = `${year}-${month}-${day}`;
+        } else {
+          extractedData.date_bpd = dateBpd;
+        }
       }
       
       extractedData.cadastre = 'Québec';
@@ -736,7 +745,16 @@ export default function Lots() {
         if (suLine) {
           const suParts = suLine.split(';');
           baseData.circonscription_fonciere = suParts[2] || '';
-          baseData.date_bpd = suParts[3] || '';
+          // Parse date without timezone offset to avoid -1 day issue
+          const dateBpd = suParts[3] || '';
+          if (dateBpd && dateBpd.length >= 8) {
+            const year = dateBpd.substring(0, 4);
+            const month = dateBpd.substring(4, 6);
+            const day = dateBpd.substring(6, 8);
+            baseData.date_bpd = `${year}-${month}-${day}`;
+          } else {
+            baseData.date_bpd = dateBpd;
+          }
         }
         
         // Trouver les lignes CO entre cette SU et la prochaine SU (ou fin du fichier)
@@ -916,7 +934,7 @@ export default function Lots() {
                 className="hidden"
                 disabled={isBulkImporting}
               />
-              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg">
+              <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
                 {isBulkImporting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
