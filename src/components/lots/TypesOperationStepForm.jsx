@@ -48,6 +48,7 @@ export default function TypesOperationStepForm({
   const [editingConcordanceIndex, setEditingConcordanceIndex] = useState(null);
   const [selectedTypeIndex, setSelectedTypeIndex] = useState(null);
   const [lotListSearchTerm, setLotListSearchTerm] = useState("");
+  const [concordancesCollapsed, setConcordancesCollapsed] = useState(false);
 
   const handleAddTypeOperation = () => {
     if (!newTypeOperation.type_operation || !newTypeOperation.date_bpd) {
@@ -216,10 +217,17 @@ export default function TypesOperationStepForm({
                 </div>
               </div>
 
-              {/* Section Concordances antérieures - Layout 60/40 */}
-              <div className="border-t border-slate-700 pt-3">
-                <Label className="text-slate-300 mb-2 text-xs block">Concordances antérieures</Label>
+              {/* Section Concordances antérieures - Colapsable */}
+              <div className="border-t border-slate-700 pt-2">
+                <div 
+                  className="cursor-pointer hover:bg-slate-700/30 transition-colors p-2 rounded mb-2 flex items-center justify-between"
+                  onClick={() => setConcordancesCollapsed(!concordancesCollapsed)}
+                >
+                  <Label className="text-slate-300 text-xs font-semibold cursor-pointer">Concordances antérieures</Label>
+                  {concordancesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                </div>
 
+                {!concordancesCollapsed && (
                 <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-2">
                   {/* Colonne gauche - Formulaire et tableau */}
                   <div className="space-y-2">
@@ -434,9 +442,10 @@ export default function TypesOperationStepForm({
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              </div>
+                    </div>
+                    </div>
+                    )}
+                    </div>
 
               <div className="flex gap-2 pt-2 border-t border-slate-700">
                 <Button
