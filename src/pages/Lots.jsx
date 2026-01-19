@@ -1251,7 +1251,7 @@ export default function Lots() {
                                       </div>
                                       <DropdownMenu>
                                        <DropdownMenuTrigger asChild>
-                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
+                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
                                            <span>Arpenteur ({formFilterArpenteur.length || 'Tous'})</span>
                                            <ChevronDown className="w-4 h-4" />
                                          </Button>
@@ -1286,12 +1286,12 @@ export default function Lots() {
                                        </DropdownMenuContent>
                                       </DropdownMenu>
                                       <DropdownMenu>
-                                       <DropdownMenuTrigger asChild>
-                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
-                                           <span>Type ({formFilterTypeMandat.length || 'Tous'})</span>
-                                           <ChevronDown className="w-4 h-4" />
-                                         </Button>
-                                       </DropdownMenuTrigger>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                            <span>Type ({formFilterTypeMandat.length || 'Tous'})</span>
+                                            <ChevronDown className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
                                          <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
                                          <DropdownMenuSeparator />
@@ -1322,12 +1322,12 @@ export default function Lots() {
                                        </DropdownMenuContent>
                                       </DropdownMenu>
                                       <DropdownMenu>
-                                       <DropdownMenuTrigger asChild>
-                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
-                                           <span>Ville ({formFilterVille.length || 'Toutes'})</span>
-                                           <ChevronDown className="w-4 h-4" />
-                                         </Button>
-                                       </DropdownMenuTrigger>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                            <span>Ville ({formFilterVille.length || 'Toutes'})</span>
+                                            <ChevronDown className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
                                          <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
                                          <DropdownMenuSeparator />
@@ -1358,12 +1358,12 @@ export default function Lots() {
                                        </DropdownMenuContent>
                                       </DropdownMenu>
                                       <DropdownMenu>
-                                       <DropdownMenuTrigger asChild>
-                                         <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-sm justify-between">
-                                           <span>Statut ({formFilterStatut.length || 'Tous'})</span>
-                                           <ChevronDown className="w-4 h-4" />
-                                         </Button>
-                                       </DropdownMenuTrigger>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="outline" className="bg-slate-800/50 border-slate-700 text-white text-xs justify-between">
+                                            <span>Statut ({formFilterStatut.length || 'Tous'})</span>
+                                            <ChevronDown className="w-4 h-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
                                        <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
                                          <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
                                          <DropdownMenuSeparator />
