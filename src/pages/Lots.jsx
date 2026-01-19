@@ -1305,6 +1305,9 @@ export default function Lots() {
                                                   {getArpenteurInitials(item.dossier.arpenteur_geometre)}{item.dossier.numero_dossier}
                                                 </Badge>
                                               </TableCell>
+                                              <TableCell className="text-slate-300 text-sm">
+                                                {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
+                                              </TableCell>
                                               <TableCell>
                                                 <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
                                                   {item.mandat?.type_mandat || "Aucun"}
@@ -1312,14 +1315,6 @@ export default function Lots() {
                                               </TableCell>
                                               <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                                 {item.mandat?.adresse_travaux ? formatAdresse(item.mandat.adresse_travaux) : "-"}
-                                              </TableCell>
-                                              <TableCell>
-                                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                                  {item.dossier.statut}
-                                                </Badge>
-                                              </TableCell>
-                                              <TableCell className="text-slate-300 text-sm">
-                                                {item.dossier.date_ouverture && !isNaN(new Date(item.dossier.date_ouverture + 'T00:00:00').getTime()) ? format(new Date(item.dossier.date_ouverture + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
                                               </TableCell>
                                             </TableRow>
                                           ))
