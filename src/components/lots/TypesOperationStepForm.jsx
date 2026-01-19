@@ -295,18 +295,15 @@ export default function TypesOperationStepForm({
                    />
                  </div>
 
-                 <div className="flex items-end">
-                   <Button
-                     type="button"
-                     size="icon"
-                     onClick={handleAddTypeOperation}
-                     disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                     className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 h-9 w-9 flex-shrink-0 !bg-gradient-to-r"
-                     title="Ajouter le type d'opération"
-                   >
-                     <Plus className="w-5 h-5" />
-                   </Button>
-                 </div>
+                 <Button
+                   type="button"
+                   onClick={handleAddTypeOperation}
+                   disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
+                   className="bg-purple-600 hover:bg-purple-700 text-white px-3 h-9 self-end"
+                 >
+                   <Plus className="w-4 h-4 mr-1" />
+                   Ajouter
+                 </Button>
                </div>
 
               {/* Section Concordances antérieures - Colapsable */}
