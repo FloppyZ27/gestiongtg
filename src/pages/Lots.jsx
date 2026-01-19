@@ -909,7 +909,10 @@ export default function Lots() {
               <input
                 type="file"
                 accept=".d01"
-                onChange={handleBulkD01FileSelect}
+                onChange={(e) => {
+                  handleBulkD01FileSelect(e);
+                  e.target.value = '';
+                }}
                 className="hidden"
                 disabled={isBulkImporting}
               />
