@@ -1240,7 +1240,7 @@ export default function Lots() {
                                   {/* Barre de recherche et filtres */}
                                   <div className="mb-3">
                                    <div className="flex gap-2">
-                                     <div className="relative flex-[0_0_25%]">
+                                     <div className="relative flex-[0_0_33%]">
                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                                        <Input
                                          placeholder="Rechercher..."
