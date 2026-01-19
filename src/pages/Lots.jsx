@@ -1205,56 +1205,56 @@ export default function Lots() {
                               return allAssociatedDossiers.length > 0 ? (
                                 <>
                                   {/* Barre de recherche et filtres */}
-                                  <div className="mb-3">
-                                    <div className="flex gap-2">
-                                      <div className="relative flex-1">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                                        <Input
-                                          placeholder="Rechercher..."
-                                          value={formDossierSearchTerm}
-                                          onChange={(e) => setFormDossierSearchTerm(e.target.value)}
-                                          className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                                        />
-                                      </div>
+                                  <div className="space-y-3 mb-3">
+                                    <div className="relative">
+                                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                                      <Input
+                                        placeholder="Rechercher..."
+                                        value={formDossierSearchTerm}
+                                        onChange={(e) => setFormDossierSearchTerm(e.target.value)}
+                                        className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2">
                                       <Select value={formFilterArpenteur} onValueChange={setFormFilterArpenteur}>
-                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
-                                          <SelectValue placeholder="Arpenteur (Tous)" />
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                          <SelectValue placeholder="Arpenteur" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Arpenteur (Tous)</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
                                           {ARPENTEURS.map(arp => (
                                             <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterTypeMandat} onValueChange={setFormFilterTypeMandat}>
-                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
-                                          <SelectValue placeholder="Mandat (Tous)" />
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                          <SelectValue placeholder="Type mandat" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Mandat (Tous)</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous les types</SelectItem>
                                           {TYPES_MANDATS.map(type => (
                                             <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterVille} onValueChange={setFormFilterVille}>
-                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
-                                          <SelectValue placeholder="Ville (Toutes)" />
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                          <SelectValue placeholder="Ville" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Ville (Toutes)</SelectItem>
+                                          <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
                                           {uniqueVilles.map(ville => (
                                             <SelectItem key={ville} value={ville} className="text-white">{ville}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                       <Select value={formFilterStatut} onValueChange={setFormFilterStatut}>
-                                        <SelectTrigger className="bg-slate-900/50 border border-slate-700/50 text-slate-300 text-sm w-[180px] rounded-md hover:bg-slate-800/50 transition-colors">
-                                          <SelectValue placeholder="Statut (Tous)" />
+                                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white text-sm">
+                                          <SelectValue placeholder="Statut" />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-800 border-slate-700">
-                                          <SelectItem value="all" className="text-white">Statut (Tous)</SelectItem>
+                                          <SelectItem value="all" className="text-white">Tous statuts</SelectItem>
                                           <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
                                           <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
                                           <SelectItem value="Mandats à ouvrir" className="text-white">Mandats à ouvrir</SelectItem>
