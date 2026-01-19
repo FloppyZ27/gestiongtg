@@ -184,6 +184,7 @@ export default function Lots() {
   const [formFilterVille, setFormFilterVille] = useState("all");
   const [formSortField, setFormSortField] = useState(null);
   const [formSortDirection, setFormSortDirection] = useState("asc");
+  const [showImportSuccess, setShowImportSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_lot: "",
@@ -741,7 +742,8 @@ export default function Lots() {
         setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
       }
       
-      alert("Données importées avec succès depuis le fichier .d01");
+      setShowImportSuccess(true);
+      setHasFormChanges(true);
     } catch (error) {
       console.error("Erreur import .d01:", error);
       alert("Erreur lors de l'importation du fichier .d01");
@@ -1882,6 +1884,53 @@ export default function Lots() {
                   Fermer
                 </Button>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'importation .d01 */}
+        <Dialog open={showImportSuccess} onOpenChange={setShowImportSuccess}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">✓</span>
+                Importation réussie
+                <span className="text-2xl">✓</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Les données ont été importées avec succès depuis le fichier .d01.
+              </p>
+              <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Numéro de lot:</span>
+                  <span className="text-white font-medium">{formData.numero_lot || "-"}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Circonscription:</span>
+                  <span className="text-white font-medium">{formData.circonscription_fonciere || "-"}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Cadastre:</span>
+                  <span className="text-white font-medium">{formData.cadastre || "-"}</span>
+                </div>
+                {concordancesAnterieure.length > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Concordances:</span>
+                    <span className="text-emerald-400 font-medium">{concordancesAnterieure.length}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowImportSuccess(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
