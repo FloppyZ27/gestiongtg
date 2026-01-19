@@ -140,6 +140,9 @@ export default function Lots() {
   const [dossiersAssociesCollapsed, setDossiersAssociesCollapsed] = useState(false);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
+  const [isBulkImporting, setIsBulkImporting] = useState(false);
+  const [bulkImportResults, setBulkImportResults] = useState(null);
+  const [isBulkImportDialogOpen, setIsBulkImportDialogOpen] = useState(false);
   const [newConcordance, setNewConcordance] = useState({
     circonscription_fonciere: "",
     cadastre: "",
@@ -706,6 +709,114 @@ export default function Lots() {
     }
   };
 
+  const handleBulkD01Import = async (file) => {
+    setIsBulkImporting(true);
+    try {
+      const fileContent = await file.text();
+      const lines = fileContent.split('\n');
+      const lotLine = lines.find(line => line.startsWith('LO'));
+      const suLines = lines.filter(line => line.startsWith('SU'));
+      
+      let coLines = [];
+      if (suLines.length >= 2) {
+        const firstSuIndex = lines.indexOf(suLines[0]);
+        const secondSuIndex = lines.indexOf(suLines[1]);
+        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
+      }
+      
+      const suLine = suLines[0];
+      let baseData = {};
+      
+      if (suLine) {
+        const suParts = suLine.split(';');
+        baseData.circonscription_fonciere = suParts[2] || '';
+        baseData.date_bpd = suParts[3] || '';
+      }
+      
+      const createdLots = [];
+      
+      // Créer un lot pour chaque ligne CO
+      for (const coLine of coLines) {
+        const coParts = coLine.split(';');
+        const cadastreCode = coParts[1] || '';
+        const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
+        let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
+        if (rang.match(/^Rang 0(\d+)$/)) {
+          rang = rang.replace(/^Rang 0/, 'Rang ');
+        }
+        const numeroLot = coParts[3] || '';
+        const estPartie = coParts[4] === 'O';
+        
+        // Vérifier si le lot existe déjà
+        const lotExistant = lots.find(l =>
+          l.numero_lot === numeroLot &&
+          l.cadastre === cadastre &&
+          l.circonscription_fonciere === baseData.circonscription_fonciere
+        );
+        
+        if (lotExistant) {
+          createdLots.push({
+            success: false,
+            numero_lot: numeroLot,
+            cadastre: cadastre,
+            rang: rang,
+            circonscription_fonciere: baseData.circonscription_fonciere,
+            error: "Lot déjà existant"
+          });
+          continue;
+        }
+        
+        // Créer le lot
+        try {
+          const newLot = await base44.entities.Lot.create({
+            numero_lot: numeroLot,
+            circonscription_fonciere: baseData.circonscription_fonciere,
+            cadastre: cadastre,
+            rang: rang,
+            date_bpd: baseData.date_bpd,
+            concordances_anterieures: []
+          });
+          
+          createdLots.push({
+            success: true,
+            numero_lot: numeroLot,
+            cadastre: cadastre,
+            rang: rang,
+            circonscription_fonciere: baseData.circonscription_fonciere,
+            date_bpd: baseData.date_bpd,
+            id: newLot.id
+          });
+        } catch (error) {
+          createdLots.push({
+            success: false,
+            numero_lot: numeroLot,
+            cadastre: cadastre,
+            rang: rang,
+            circonscription_fonciere: baseData.circonscription_fonciere,
+            error: error.message
+          });
+        }
+      }
+      
+      setBulkImportResults(createdLots);
+      setIsBulkImportDialogOpen(true);
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      
+    } catch (error) {
+      console.error("Erreur importation en masse .d01:", error);
+      alert("Erreur lors de l'importation du fichier .d01");
+    } finally {
+      setIsBulkImporting(false);
+    }
+  };
+
+  const handleBulkD01FileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleBulkD01Import(file);
+    }
+  };
+
   const handleExportCSV = () => {
     const csvData = sortedLots.map(lot => ({
       'Numéro de lot': lot.numero_lot,
@@ -779,6 +890,30 @@ export default function Lots() {
               <Download className="w-4 h-4 mr-2" />
               Extraction CSV
             </Button>
+            <label>
+              <input
+                type="file"
+                accept=".d01"
+                onChange={handleBulkD01FileSelect}
+                className="hidden"
+              />
+              <Button
+                as="span"
+                disabled={isBulkImporting}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg cursor-pointer">
+                {isBulkImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importation...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importation
+                  </>
+                )}
+              </Button>
+            </label>
             <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
               setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
               if (!open) resetForm();
@@ -1238,6 +1373,99 @@ export default function Lots() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Import Results Dialog */}
+        <Dialog open={isBulkImportDialogOpen} onOpenChange={setIsBulkImportDialogOpen}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl shadow-black/50">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Résultats de l'importation</DialogTitle>
+            </DialogHeader>
+            
+            <div className="overflow-y-auto max-h-[70vh] p-4">
+              {bulkImportResults && (
+                <>
+                  <div className="mb-4 flex gap-4">
+                    <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex-1">
+                      <p className="text-emerald-400 font-semibold">
+                        {bulkImportResults.filter(r => r.success).length} lots créés
+                      </p>
+                    </div>
+                    {bulkImportResults.filter(r => !r.success).length > 0 && (
+                      <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg flex-1">
+                        <p className="text-red-400 font-semibold">
+                          {bulkImportResults.filter(r => !r.success).length} erreurs
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                          <TableHead className="text-slate-300">Statut</TableHead>
+                          <TableHead className="text-slate-300">Numéro de lot</TableHead>
+                          <TableHead className="text-slate-300">Cadastre</TableHead>
+                          <TableHead className="text-slate-300">Rang</TableHead>
+                          <TableHead className="text-slate-300">Circonscription</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bulkImportResults.map((result, index) => (
+                          <TableRow key={index} className="border-slate-800">
+                            <TableCell>
+                              {result.success ? (
+                                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                                  Créé
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                                  Erreur
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-white font-medium">
+                              {result.numero_lot}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {result.cadastre || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {result.rang || "-"}
+                            </TableCell>
+                            <TableCell className="text-slate-300">
+                              {result.circonscription_fonciere}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {bulkImportResults.filter(r => !r.success).length > 0 && (
+                    <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
+                      <p className="text-slate-400 text-sm mb-2 font-semibold">Détails des erreurs:</p>
+                      {bulkImportResults.filter(r => !r.success).map((result, index) => (
+                        <p key={index} className="text-red-400 text-sm">
+                          • {result.numero_lot}: {result.error}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <Button 
+                onClick={() => setIsBulkImportDialogOpen(false)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              >
+                Fermer
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
 
