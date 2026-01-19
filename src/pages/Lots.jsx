@@ -629,15 +629,18 @@ export default function Lots() {
       if (suLine) {
         const suParts = suLine.split(';');
         extractedData.circonscription_fonciere = suParts[2] || '';
-        // Parse date without timezone offset to avoid -1 day issue
         const dateBpd = suParts[3] || '';
-        if (dateBpd && dateBpd.length >= 8) {
-          const year = dateBpd.substring(0, 4);
-          const month = dateBpd.substring(4, 6);
-          const day = dateBpd.substring(6, 8);
-          extractedData.date_bpd = `${year}-${month}-${day}`;
-        } else {
-          extractedData.date_bpd = dateBpd;
+        if (dateBpd) {
+          // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
+          if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
+            const year = dateBpd.substring(0, 4);
+            const month = dateBpd.substring(4, 6);
+            const day = dateBpd.substring(6, 8);
+            extractedData.date_bpd = `${year}-${month}-${day}`;
+          } else {
+            // Already in correct format or use as-is
+            extractedData.date_bpd = dateBpd;
+          }
         }
       }
       
@@ -745,15 +748,18 @@ export default function Lots() {
         if (suLine) {
           const suParts = suLine.split(';');
           baseData.circonscription_fonciere = suParts[2] || '';
-          // Parse date without timezone offset to avoid -1 day issue
           const dateBpd = suParts[3] || '';
-          if (dateBpd && dateBpd.length >= 8) {
-            const year = dateBpd.substring(0, 4);
-            const month = dateBpd.substring(4, 6);
-            const day = dateBpd.substring(6, 8);
-            baseData.date_bpd = `${year}-${month}-${day}`;
-          } else {
-            baseData.date_bpd = dateBpd;
+          if (dateBpd) {
+            // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
+            if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
+              const year = dateBpd.substring(0, 4);
+              const month = dateBpd.substring(4, 6);
+              const day = dateBpd.substring(6, 8);
+              baseData.date_bpd = `${year}-${month}-${day}`;
+            } else {
+              // Already in correct format or use as-is
+              baseData.date_bpd = dateBpd;
+            }
           }
         }
         
