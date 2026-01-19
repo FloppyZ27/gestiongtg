@@ -1045,7 +1045,7 @@ export default function Lots() {
                   Nouveau lot
                 </Button>
                 </DialogTrigger>
-            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingLot ? "Modifier le lot" : "Nouveau lot"}
@@ -1438,7 +1438,7 @@ export default function Lots() {
             setViewSortDirection("asc");
           }
         }}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du lot</DialogTitle>
             </DialogHeader>
