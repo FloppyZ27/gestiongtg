@@ -152,6 +152,11 @@ export default function Lots() {
     numero_lot: "",
     rang: ""
   });
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showCreateConfirm, setShowCreateConfirm] = useState(false);
+  const [showModifyConfirm, setShowModifyConfirm] = useState(false);
+  const [hasFormChanges, setHasFormChanges] = useState(false);
+  const [initialFormData, setInitialFormData] = useState(null);
 
   // New state for View Dialog filters and sorting
   const [viewDossierSearchTerm, setViewDossierSearchTerm] = useState("");
@@ -313,6 +318,14 @@ export default function Lots() {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    if (editingLot) {
+      setShowModifyConfirm(true);
+    } else {
+      setShowCreateConfirm(true);
+    }
+  };
+
+  const confirmSubmit = () => {
     // Validation pour vérifier si le lot existe déjà
     const lotExistant = lots.find(l =>
       l.id !== editingLot?.id && // Exclure le lot actuel en modification
@@ -323,6 +336,8 @@ export default function Lots() {
 
     if (lotExistant) {
       alert(`Un lot ${formData.numero_lot} existe déjà dans le cadastre ${formData.cadastre} de ${formData.circonscription_fonciere}.`);
+      setShowCreateConfirm(false);
+      setShowModifyConfirm(false);
       return;
     }
 
@@ -336,11 +351,15 @@ export default function Lots() {
     } else {
       createLotMutation.mutate(dataToSubmit);
     }
+    
+    setShowCreateConfirm(false);
+    setShowModifyConfirm(false);
   };
 
   const handleCirconscriptionChange = (value) => {
     setFormData(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
     setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+    setHasFormChanges(true);
   };
 
   const addConcordance = () => {
@@ -406,6 +425,8 @@ export default function Lots() {
     setAvailableCadastres([]);
     setEditingConcordanceIndex(null);
     setCommentairesTemporaires([]);
+    setHasFormChanges(false);
+    setInitialFormData(null);
   };
 
   const handleEdit = (lot) => {
@@ -413,20 +434,23 @@ export default function Lots() {
     setViewingLot(null);
     
     setEditingLot(lot);
-    setFormData({
+    const lotData = {
       numero_lot: lot.numero_lot || "",
       circonscription_fonciere: lot.circonscription_fonciere || "",
       cadastre: lot.cadastre || "",
       rang: lot.rang || "",
       date_bpd: lot.date_bpd || "",
       type_operation: lot.type_operation || ""
-    });
+    };
+    setFormData(lotData);
+    setInitialFormData(JSON.parse(JSON.stringify(lotData)));
     setConcordancesAnterieure(lot.concordances_anterieures || []);
     if (lot.circonscription_fonciere) {
       setAvailableCadastres(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
     }
     setIsFormDialogOpen(true); // Renamed from setIsDialogOpen
     setEditingConcordanceIndex(null);
+    setHasFormChanges(false);
   };
 
   const handleView = (lot) => {
@@ -440,10 +464,12 @@ export default function Lots() {
     }
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [lotToDelete, setLotToDelete] = useState(null);
+
   const handleDelete = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce lot ?")) {
-      deleteLotMutation.mutate(id);
-    }
+    setLotToDelete(id);
+    setShowDeleteConfirm(true);
   };
 
   const handleSort = (field) => {
@@ -955,7 +981,11 @@ export default function Lots() {
               </span>
             </label>
             <Dialog open={isFormDialogOpen} onOpenChange={(open) => {
-              setIsFormDialogOpen(open); // Renamed from setIsDialogOpen
+              if (!open && hasFormChanges) {
+                setShowCancelConfirm(true);
+                return;
+              }
+              setIsFormDialogOpen(open);
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
@@ -1023,7 +1053,10 @@ export default function Lots() {
                     {/* Section Informations du lot */}
                     <LotInfoStepForm
                       lotForm={formData}
-                      onLotFormChange={setFormData}
+                      onLotFormChange={(data) => {
+                        setFormData(data);
+                        setHasFormChanges(true);
+                      }}
                       availableCadastres={availableCadastres}
                       onCirconscriptionChange={handleCirconscriptionChange}
                       isCollapsed={lotInfoCollapsed}
@@ -1035,13 +1068,28 @@ export default function Lots() {
                     {/* Section Concordances antérieures */}
                     <ConcordanceStepForm
                       concordancesAnterieure={concordancesAnterieure}
-                      onConcordancesChange={setConcordancesAnterieure}
+                      onConcordancesChange={(data) => {
+                        setConcordancesAnterieure(data);
+                        setHasFormChanges(true);
+                      }}
                       newConcordance={newConcordance}
-                      onNewConcordanceChange={setNewConcordance}
+                      onNewConcordanceChange={(data) => {
+                        setNewConcordance(data);
+                        setHasFormChanges(true);
+                      }}
                       availableCadastres={newConcordance.circonscription_fonciere ? CADASTRES_PAR_CIRCONSCRIPTION[newConcordance.circonscription_fonciere] : []}
-                      onAddConcordance={addConcordance}
-                      onRemoveConcordance={removeConcordance}
-                      onCirconscriptionChange={(value) => setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""})}
+                      onAddConcordance={() => {
+                        addConcordance();
+                        setHasFormChanges(true);
+                      }}
+                      onRemoveConcordance={(index) => {
+                        removeConcordance(index);
+                        setHasFormChanges(true);
+                      }}
+                      onCirconscriptionChange={(value) => {
+                        setNewConcordance({...newConcordance, circonscription_fonciere: value, cadastre: ""});
+                        setHasFormChanges(true);
+                      }}
                       editingIndex={editingConcordanceIndex}
                       onEditConcordance={editConcordance}
                       onCancelEdit={cancelEditConcordance}
@@ -1064,7 +1112,14 @@ export default function Lots() {
 
                   {/* Boutons Annuler/Créer tout en bas */}
                   <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 mt-6">
-                    <Button type="button" variant="outline" onClick={() => setIsFormDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                    <Button type="button" variant="outline" onClick={() => {
+                      if (hasFormChanges) {
+                        setShowCancelConfirm(true);
+                      } else {
+                        setIsFormDialogOpen(false);
+                        resetForm();
+                      }
+                    }} className="border-red-500 text-red-400 hover:bg-red-500/10">
                       Annuler
                     </Button>
                     <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
@@ -1649,6 +1704,155 @@ export default function Lots() {
                   Fermer
                 </Button>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de création */}
+        <Dialog open={showCreateConfirm} onOpenChange={setShowCreateConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">✓</span>
+                Confirmer la création
+                <span className="text-2xl">✓</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir créer ce lot ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => setShowCreateConfirm(false)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={confirmSubmit}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de modification */}
+        <Dialog open={showModifyConfirm} onOpenChange={setShowModifyConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Confirmer la modification
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir modifier ce lot ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => setShowModifyConfirm(false)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={confirmSubmit}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation d'annulation */}
+        <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Attention
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowCancelConfirm(false);
+                    setIsFormDialogOpen(false);
+                    resetForm();
+                  }}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Abandonner
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer l'édition
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Confirmer la suppression
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce lot ? Cette action est irréversible.
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setLotToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (lotToDelete) {
+                      deleteLotMutation.mutate(lotToDelete);
+                    }
+                    setShowDeleteConfirm(false);
+                    setLotToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Supprimer
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
