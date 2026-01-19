@@ -799,20 +799,14 @@ export default function Lots() {
     if (!bulkImportPreview) return;
     
     setIsCreatingBulkLots(true);
-    const results = [];
     
     for (const lotData of bulkImportPreview) {
       if (lotData.alreadyExists) {
-        results.push({
-          success: false,
-          ...lotData,
-          error: "Lot déjà existant"
-        });
         continue;
       }
       
       try {
-        const newLot = await base44.entities.Lot.create({
+        await base44.entities.Lot.create({
           numero_lot: lotData.numero_lot,
           circonscription_fonciere: lotData.circonscription_fonciere,
           cadastre: lotData.cadastre,
@@ -820,25 +814,15 @@ export default function Lots() {
           date_bpd: lotData.date_bpd,
           concordances_anterieures: lotData.concordances
         });
-        
-        results.push({
-          success: true,
-          ...lotData,
-          id: newLot.id
-        });
       } catch (error) {
-        results.push({
-          success: false,
-          ...lotData,
-          error: error.message
-        });
+        console.error(`Erreur création lot ${lotData.numero_lot}:`, error);
       }
     }
     
-    setBulkImportResults(results);
+    queryClient.invalidateQueries({ queryKey: ['lots'] });
     setBulkImportPreview(null);
     setIsCreatingBulkLots(false);
-    queryClient.invalidateQueries({ queryKey: ['lots'] });
+    setIsBulkImportDialogOpen(false);
   };
 
   const handleBulkD01FileSelect = (e) => {
