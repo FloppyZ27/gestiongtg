@@ -32,6 +32,8 @@ import TarificationStepForm from "../components/mandat/TarificationStepForm";
 import ProfessionnelStepForm from "../components/mandat/ProfessionnelStepForm";
 import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
+import LotInfoStepForm from "../components/lots/LotInfoStepForm";
+import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
 import DossierInfoStepForm from "../components/mandat/DossierInfoStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
