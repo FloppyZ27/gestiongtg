@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock, Loader2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -137,11 +138,11 @@ export default function Dossiers() {
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
   const [showD01ImportSuccess, setShowD01ImportSuccess] = useState(false);
-  const [filterArpenteur, setFilterArpenteur] = useState("all");
-  const [filterVille, setFilterVille] = useState("all");
-  const [filterStatut, setFilterStatut] = useState("all");
-  const [filterMandat, setFilterMandat] = useState("all");
-  const [filterTache, setFilterTache] = useState("all");
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
+  const [filterVille, setFilterVille] = useState([]);
+  const [filterStatut, setFilterStatut] = useState([]);
+  const [filterMandat, setFilterMandat] = useState([]);
+  const [filterTache, setFilterTache] = useState([]);
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [isCloseDossierDialogOpen, setIsCloseDossierDialogOpen] = useState(false);
@@ -1646,11 +1647,11 @@ export default function Dossiers() {
         item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
         item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
 
-      const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
-      const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
-      const matchesStatut = filterStatut === "all" || item.statut === filterStatut;
-      const matchesMandat = filterMandat === "all" || item.mandatInfo?.type_mandat === filterMandat;
-      const matchesTache = filterTache === "all" || item.mandatInfo?.tache_actuelle === filterTache;
+      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(item.arpenteur_geometre);
+      const matchesVille = filterVille.length === 0 || filterVille.includes(item.mandatInfo?.adresse_travaux?.ville);
+      const matchesStatut = filterStatut.length === 0 || filterStatut.includes(item.statut);
+      const matchesMandat = filterMandat.length === 0 || filterMandat.includes(item.mandatInfo?.type_mandat);
+      const matchesTache = filterTache.length === 0 || filterTache.includes(item.mandatInfo?.tache_actuelle);
       return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
     });
   }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, getClientsNames]);
@@ -1668,7 +1669,7 @@ export default function Dossiers() {
   };
 
   const hasActiveFilters = () => {
-    return filterArpenteur !== "all" || filterVille !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all";
+    return filterArpenteur.length > 0 || filterVille.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0;
   };
 
   const getSortIcon = (field) => {
@@ -3403,83 +3404,210 @@ export default function Dossiers() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Arpenteur" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
-                  {ARPENTEURS.map((arp) =>
-                  <SelectItem key={arp} value={arp} className="text-white">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Arpenteurs ({filterArpenteur.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterArpenteur.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterArpenteur([]);
+                    }}
+                  >
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {ARPENTEURS.map((arp) => (
+                    <DropdownMenuCheckboxItem
+                      key={arp}
+                      checked={filterArpenteur.includes(arp)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterArpenteur([...filterArpenteur, arp]);
+                        } else {
+                          setFilterArpenteur(filterArpenteur.filter((a) => a !== arp));
+                        }
+                      }}
+                    >
                       {arp}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <Select value={filterStatut} onValueChange={setFilterStatut}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les statuts</SelectItem>
-                  <SelectItem value="Ouvert" className="text-white">Ouvert</SelectItem>
-                  <SelectItem value="Fermé" className="text-white">Fermé</SelectItem>
-                </SelectContent>
-              </Select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Statuts ({filterStatut.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterStatut.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterStatut([]);
+                    }}
+                  >
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterStatut.includes("Ouvert")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFilterStatut([...filterStatut, "Ouvert"]);
+                      } else {
+                        setFilterStatut(filterStatut.filter((s) => s !== "Ouvert"));
+                      }
+                    }}
+                  >
+                    Ouvert
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={filterStatut.includes("Fermé")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFilterStatut([...filterStatut, "Fermé"]);
+                      } else {
+                        setFilterStatut(filterStatut.filter((s) => s !== "Fermé"));
+                      }
+                    }}
+                  >
+                    Fermé
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <Select value={filterMandat} onValueChange={setFilterMandat}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Mandat" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les mandats</SelectItem>
-                  {TYPES_MANDATS.map((type) =>
-                  <SelectItem key={type} value={type} className="text-white">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Mandats ({filterMandat.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
+                  <DropdownMenuLabel>Filtrer par mandat</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterMandat.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterMandat([]);
+                    }}
+                  >
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {TYPES_MANDATS.map((type) => (
+                    <DropdownMenuCheckboxItem
+                      key={type}
+                      checked={filterMandat.includes(type)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterMandat([...filterMandat, type]);
+                        } else {
+                          setFilterMandat(filterMandat.filter((t) => t !== type));
+                        }
+                      }}
+                    >
                       {type}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <Select value={filterTache} onValueChange={setFilterTache}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Tâche" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Toutes les tâches</SelectItem>
-                  {TACHES.map((tache) =>
-                  <SelectItem key={tache} value={tache} className="text-white">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Tâches ({filterTache.length || 'Toutes'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
+                  <DropdownMenuLabel>Filtrer par tâche</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterTache.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterTache([]);
+                    }}
+                  >
+                    Toutes
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {TACHES.map((tache) => (
+                    <DropdownMenuCheckboxItem
+                      key={tache}
+                      checked={filterTache.includes(tache)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterTache([...filterTache, tache]);
+                        } else {
+                          setFilterTache(filterTache.filter((t) => t !== tache));
+                        }
+                      }}
+                    >
                       {tache}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <Select value={filterVille} onValueChange={setFilterVille}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Ville" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Toutes les villes</SelectItem>
-                  {uniqueVilles.map((ville) =>
-                  <SelectItem key={ville} value={ville} className="text-white">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Villes ({filterVille.length || 'Toutes'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
+                  <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterVille.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterVille([]);
+                    }}
+                  >
+                    Toutes
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {uniqueVilles.map((ville) => (
+                    <DropdownMenuCheckboxItem
+                      key={ville}
+                      checked={filterVille.includes(ville)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterVille([...filterVille, ville]);
+                        } else {
+                          setFilterVille(filterVille.filter((v) => v !== ville));
+                        }
+                      }}
+                    >
                       {ville}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              {(filterArpenteur !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all" || filterVille !== "all") &&
+              {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0) &&
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setFilterArpenteur("all");
-                  setFilterStatut("all");
-                  setFilterMandat("all");
-                  setFilterTache("all");
-                  setFilterVille("all");
+                  setFilterArpenteur([]);
+                  setFilterStatut([]);
+                  setFilterMandat([]);
+                  setFilterTache([]);
+                  setFilterVille([]);
                 }}
                 className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
 
