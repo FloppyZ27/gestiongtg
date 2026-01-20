@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -536,9 +536,17 @@ export default function Dossiers() {
   const notaires = clients.filter((c) => c.type_client === 'Notaire');
   const courtiers = clients.filter((c) => c.type_client === 'Courtier immobilier');
 
-  const getClientById = (id) => clients.find((c) => c.id === id);
-  const getLotById = (numeroLot) => lots.find((l) => l.id === numeroLot);
-  const getUserByEmail = (email) => users.find((u) => u.email === email);
+  const getClientById = useCallback((id) => clients.find((c) => c.id === id), [clients]);
+  const getLotById = useCallback((numeroLot) => lots.find((l) => l.id === numeroLot), [lots]);
+  const getUserByEmail = useCallback((email) => users.find((u) => u.email === email), [users]);
+  
+  const getClientsNames = useCallback((clientIds) => {
+    if (!clientIds || clientIds.length === 0) return "-";
+    return clientIds.map((id) => {
+      const client = getClientById(id);
+      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
+    }).join(", ");
+  }, [getClientById]);
 
   const availableLotCadastres = newLotForm.circonscription_fonciere ? CADASTRES_PAR_CIRCONSCRIPTION[newLotForm.circonscription_fonciere] || [] : [];
 
@@ -1019,13 +1027,7 @@ export default function Dossiers() {
     return parts.filter((p) => p).join(', ');
   };
 
-  const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map((id) => {
-      const client = getClientById(id);
-      return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
-    }).join(", ");
-  };
+
 
   const getFirstAdresseTravaux = (mandats) => {
     if (!mandats || mandats.length === 0 || !mandats[0].adresse_travaux) return "-";
@@ -1651,7 +1653,7 @@ export default function Dossiers() {
       const matchesTache = filterTache === "all" || item.mandatInfo?.tache_actuelle === filterTache;
       return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
     });
-  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache]);
+  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, getClientsNames]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -1723,7 +1725,7 @@ export default function Dossiers() {
         return 0;
       }
     });
-  }, [filteredDossiersWithMandats, sortField, sortDirection]);
+  }, [filteredDossiersWithMandats, sortField, sortDirection, getClientsNames]);
 
   const handleCloseDossier = () => {
     if (!closingDossierId) return;
