@@ -440,79 +440,36 @@ export default function RetoursAppel() {
               </DialogHeader>
 
               <div className="flex h-[90vh]">
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                <div className="flex-[0_0_60%] overflow-y-auto p-6 border-r border-slate-800">
                   <h2 className="text-2xl font-bold text-white mb-6">
                     {editingDossier ? "Modifier le retour d'appel" : "Nouveau retour d'appel"}
                   </h2>
 
-                  <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                        <Select
-                          value={formData.arpenteur_geometre}
-                          onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}
-                          disabled={!!dossierReferenceId}
-                        >
-                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {ARPENTEURS.map((arpenteur) => (
-                              <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Utilisateur assigné</Label>
-                        <Select
-                          value={formData.utilisateur_assigne || ""}
-                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                        >
-                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                            <SelectValue placeholder="Sélectionner un utilisateur" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                            {users.map((user) => (
-                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-slate-300">Créer à partir d'un dossier existant</Label>
+                  {!dossierReferenceId ? (
+                    <div className="space-y-4">
+                      <Label className="text-slate-300 text-lg font-semibold">Sélectionner un dossier existant</Label>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                         <Input
-                          placeholder="Rechercher un dossier par numéro, client, etc."
+                          placeholder="Rechercher un dossier..."
                           value={dossierSearchForReference}
                           onChange={(e) => setDossierSearchForReference(e.target.value)}
-                          className="pl-10 bg-slate-700 border-slate-600"
+                          className="pl-10 bg-slate-800 border-slate-700"
                         />
                       </div>
                       {dossierSearchForReference && (
-                        <div className="max-h-48 overflow-y-auto mt-2 border border-slate-700 rounded-md">
+                        <div className="max-h-96 overflow-y-auto border border-slate-700 rounded-lg">
                           {filteredDossiersForReference.length > 0 ? (
                             filteredDossiersForReference.map(d => (
                               <div
                                 key={d.id}
-                                className="p-2 cursor-pointer hover:bg-slate-700/50 flex justify-between items-center text-sm border-b border-slate-800 last:border-b-0"
-                                onClick={() => loadDossierReference(d.id)}
+                                className="p-3 cursor-pointer hover:bg-slate-800/50 border-b border-slate-800 last:border-b-0"
+                                onClick={() => selectDossier(d.id)}
                               >
-                                <div>
-                                  <p className="font-medium text-white">
-                                    {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""} - {getClientsNames(d.clients_ids)}
-                                  </p>
-                                  <p className="text-slate-400 text-xs truncate">{getFirstAdresseTravaux(d.mandats)}</p>
-                                </div>
-                                <Button type="button" size="sm" variant="ghost" className="text-emerald-400">
-                                  <Plus className="w-4 h-4 mr-1" /> Sélectionner
-                                </Button>
+                                <p className="font-medium text-white">
+                                  {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""} - {getClientsNames(d.clients_ids)}
+                                </p>
+                                <p className="text-slate-400 text-xs mt-1">{getFirstAdresseTravaux(d.mandats)}</p>
                               </div>
                             ))
                           ) : (
@@ -520,141 +477,139 @@ export default function RetoursAppel() {
                           )}
                         </div>
                       )}
-                      {dossierReferenceId && (
-                        <div className="mt-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => { setDossierReferenceId(null); resetForm(); }}
-                            className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                    </div>
+                  ) : (
+                    <form id="retour-appel-form" onSubmit={handleSubmit} className="space-y-6">
+                      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <Label className="text-slate-300 text-sm">Dossier sélectionné</Label>
+                        <p className="text-white font-medium mt-2">
+                          {getArpenteurInitials(dossiers.find(d => d.id === dossierReferenceId)?.arpenteur_geometre)}{dossiers.find(d => d.id === dossierReferenceId)?.numero_dossier}
+                        </p>
+                        <p className="text-slate-400 text-sm mt-1">{getClientsNames(dossiers.find(d => d.id === dossierReferenceId)?.clients_ids)}</p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { setDossierReferenceId(null); resetForm(); }}
+                          className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 mt-3"
+                        >
+                          Changer de dossier
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Date de l'appel <span className="text-red-400">*</span></Label>
+                          <Input
+                            type="date"
+                            value={formData.date_appel}
+                            onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
+                            required
+                            className="bg-slate-800 border-slate-700"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Statut du retour d'appel <span className="text-red-400">*</span></Label>
+                          <Select
+                            value={formData.statut_retour_appel}
+                            onValueChange={(value) => setFormData({...formData, statut_retour_appel: value})}
                           >
-                            Effacer le dossier de référence
-                          </Button>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value="Message laissé" className="text-white">Message laissé</SelectItem>
+                              <SelectItem value="Terminé" className="text-white">Terminé</SelectItem>
+                              <SelectItem value="En attente" className="text-white">En attente</SelectItem>
+                              <SelectItem value="Reporté" className="text-white">Reporté</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
-                    </div>
-
-                    {dossierReferenceId && (
-                      <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <div className="space-y-2">
-                          <Label>N° de dossier de référence</Label>
-                          <Input value={formData.numero_dossier} className="bg-slate-800 border-slate-700" disabled />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Date d'ouverture du dossier de référence</Label>
-                          <Input type="date" value={formData.date_ouverture} className="bg-slate-800 border-slate-700" disabled />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Clients</Label>
-                          <Button type="button" size="sm" onClick={() => setIsClientSelectorOpen(true)} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400" disabled={!!dossierReferenceId}>
-                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
-                        </div>
-                        {formData.clients_ids.length > 0 ? (
-                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                            {formData.clients_ids.map(clientId => {
-                              const client = getClientById(clientId);
-                              return client ? (
-                                <Badge key={clientId} variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-pointer hover:bg-blue-500/30 relative pr-8 w-full justify-start">
-                                  <span onClick={() => setViewingClientDetails(client)} className="cursor-pointer flex-1">{client.prenom} {client.nom}</span>
-                                  {!dossierReferenceId && (
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(clientId, 'clients'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                              ) : null;
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun client</p>
-                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Notaires</Label>
-                          <Button type="button" size="sm" onClick={() => setIsNotaireSelectorOpen(true)} className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400" disabled={!!dossierReferenceId}>
-                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
-                        </div>
-                        {formData.notaires_ids.length > 0 ? (
-                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                            {formData.notaires_ids.map(notaireId => {
-                              const notaire = getClientById(notaireId);
-                              return notaire ? (
-                                <Badge key={notaireId} variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/30 relative pr-8 w-full justify-start">
-                                  <span onClick={() => setViewingClientDetails(notaire)} className="cursor-pointer flex-1">{notaire.prenom} {notaire.nom}</span>
-                                  {!dossierReferenceId && (
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                              ) : null;
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun notaire</p>
-                        )}
+                        <Label>Utilisateur assigné <span className="text-red-400">*</span></Label>
+                        <Select
+                          value={formData.utilisateur_assigne || ""}
+                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                          required
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                            <SelectValue placeholder="Sélectionner un utilisateur" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {users.map((user) => (
+                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Courtiers immobiliers</Label>
-                          <Button type="button" size="sm" onClick={() => setIsCourtierSelectorOpen(true)} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400" disabled={!!dossierReferenceId}>
-                            <UserPlus className="w-4 h-4 mr-1" /> Ajouter
-                          </Button>
-                        </div>
-                        {formData.courtiers_ids.length > 0 ? (
-                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded-lg min-h-[100px]">
-                            {formData.courtiers_ids.map(courtierId => {
-                              const courtier = getClientById(courtierId);
-                              return courtier ? (
-                                <Badge key={courtierId} variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30 cursor-pointer hover:bg-orange-500/30 relative pr-8 w-full justify-start">
-                                  <span onClick={() => setViewingClientDetails(courtier)} className="cursor-pointer flex-1">{courtier.prenom} {courtier.nom}</span>
-                                  {!dossierReferenceId && (
-                                    <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1/2 -translate-y-1/2 hover:text-red-400">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  )}
-                                </Badge>
-                              ) : null;
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-slate-500 text-sm text-center py-8 bg-slate-800/30 rounded-lg">Aucun courtier</p>
+                        <Label>Notes</Label>
+                        <Textarea
+                          value={formData.notes}
+                          onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                          placeholder="Ajouter des notes..."
+                          className="bg-slate-800 border-slate-700 h-24"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
+                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                        <Button type="submit" className="bg-gradient-to-r from-blue-500 to-cyan-600">
+                          {editingDossier ? "Modifier" : "Créer"}
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+
+                {dossierReferenceId && (
+                  <div className="flex-[0_0_40%] flex flex-col h-full overflow-hidden border-l border-slate-800">
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                      <div className="p-6 border-b border-slate-800 flex-shrink-0">
+                        <h3 className="text-lg font-bold text-white">Informations du dossier</h3>
+                      </div>
+                      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {dossiers.find(d => d.id === dossierReferenceId) && (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
+                              <p className="text-white font-medium">{dossiers.find(d => d.id === dossierReferenceId)?.arpenteur_geometre}</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-slate-400 text-sm">Clients</Label>
+                              <div className="flex flex-col gap-2">
+                                {dossiers.find(d => d.id === dossierReferenceId)?.clients_ids?.map(clientId => {
+                                  const client = getClientById(clientId);
+                                  return client ? (
+                                    <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start">
+                                      {client.prenom} {client.nom}
+                                    </Badge>
+                                  ) : null;
+                                })}
+                              </div>
+                            </div>
+                          </>
                         )}
                       </div>
                     </div>
-                  </form>
 
-                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
-                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-blue-500 to-cyan-600">
-                      {editingDossier ? "Modifier" : "Créer"}
-                    </Button>
+                    <div className="flex-1 flex flex-col overflow-hidden border-t border-slate-800">
+                      <div className="p-4 border-b border-slate-800 flex-shrink-0">
+                        <h3 className="text-lg font-bold text-white">Commentaires</h3>
+                      </div>
+                      <div className="flex-1 overflow-hidden p-4">
+                        <CommentairesSection
+                          dossierId={dossierReferenceId}
+                          dossierTemporaire={false}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex-[0_0_30%] flex flex-col h-full overflow-hidden">
-                  <div className="p-6 border-b border-slate-800 flex-shrink-0">
-                    <h3 className="text-lg font-bold text-white">Commentaires</h3>
-                  </div>
-                  <div className="flex-1 overflow-hidden p-6">
-                    <CommentairesSection
-                      dossierId={editingDossier?.id}
-                      dossierTemporaire={!editingDossier}
-                      onCommentairesTempChange={setCommentairesTemporaires}
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             </DialogContent>
           </Dialog>
