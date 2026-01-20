@@ -724,19 +724,6 @@ export default function EditDossierForm({
                               </Select>
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Tâche</Label>
-                              <Select value={mandat.tache_actuelle || "Ouverture"} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
-                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                                  <SelectValue placeholder="Sélectionner" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700">
-                                  {TACHES.map((tache) => (
-                                    <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
                               <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
@@ -745,6 +732,19 @@ export default function EditDossierForm({
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   {users.map((u) => (
                                     <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Tâche</Label>
+                              <Select value={mandat.tache_actuelle || "Ouverture"} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  {TACHES.map((tache) => (
+                                    <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
