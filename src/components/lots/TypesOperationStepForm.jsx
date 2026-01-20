@@ -211,19 +211,28 @@ export default function TypesOperationStepForm({
           {/* Types d'opération ajoutés */}
           {typesOperation.length > 0 && (
             <div className="mb-3 flex gap-1">
-                {typesOperation.map((typeOp, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
-                      editingTypeIndex === index 
-                        ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
-                        : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
-                    }`}
-                    onClick={() => handleEditTypeOperation(index)}
-                  >
-                    {typeOp.type_operation}
-                  </div>
-                ))}
+                {[...typesOperation]
+                  .sort((a, b) => {
+                    if (!a.date_bpd) return 1;
+                    if (!b.date_bpd) return -1;
+                    return new Date(b.date_bpd) - new Date(a.date_bpd);
+                  })
+                  .map((typeOp) => {
+                    const originalIndex = typesOperation.indexOf(typeOp);
+                    return (
+                      <div 
+                        key={originalIndex} 
+                        className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
+                          editingTypeIndex === originalIndex 
+                            ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
+                            : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
+                        }`}
+                        onClick={() => handleEditTypeOperation(originalIndex)}
+                      >
+                        {typeOp.type_operation}
+                      </div>
+                    );
+                  })}
               </div>
             )
           }
