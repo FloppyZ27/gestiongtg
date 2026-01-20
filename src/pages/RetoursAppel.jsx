@@ -982,9 +982,9 @@ export default function RetoursAppel() {
           </CardHeader>
         </Card>
 
-        {/* Table des tous les retours d'appel */}
-        <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg">
-          <div className="p-0">
+        {/* Table des retours d'appel */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
