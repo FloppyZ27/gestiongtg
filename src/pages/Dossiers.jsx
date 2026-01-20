@@ -1612,40 +1612,46 @@ export default function Dossiers() {
   const dossiersOuverts = dossiers.filter((d) => d.statut === "Ouvert");
   const dossierStats = getCountsByPeriodWithComparison(dossiersOuverts, 'date_ouverture');
 
-  const dossiersWithMandats = dossiers.filter((d) => d.statut === "Ouvert" || d.statut === "Fermé").flatMap((dossier) => {
-    if (dossier.mandats && dossier.mandats.length > 0) {
-      return dossier.mandats.map((mandat, idx) => ({
-        ...dossier,
-        mandatInfo: mandat,
-        mandatIndex: idx,
-        displayId: `${dossier.id}-${idx}`
-      }));
-    }
-    return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
-  });
+  const dossiersWithMandats = useMemo(() => {
+    return dossiers.filter((d) => d.statut === "Ouvert" || d.statut === "Fermé").flatMap((dossier) => {
+      if (dossier.mandats && dossier.mandats.length > 0) {
+        return dossier.mandats.map((mandat, idx) => ({
+          ...dossier,
+          mandatInfo: mandat,
+          mandatIndex: idx,
+          displayId: `${dossier.id}-${idx}`
+        }));
+      }
+      return [{ ...dossier, mandatInfo: null, mandatIndex: null, displayId: dossier.id }];
+    });
+  }, [dossiers]);
 
-  const uniqueVilles = [...new Set(dossiersWithMandats.filter((item) => item.mandatInfo?.adresse_travaux?.ville).map((item) => item.mandatInfo.adresse_travaux.ville))].sort();
+  const uniqueVilles = useMemo(() => {
+    return [...new Set(dossiersWithMandats.filter((item) => item.mandatInfo?.adresse_travaux?.ville).map((item) => item.mandatInfo.adresse_travaux.ville))].sort();
+  }, [dossiersWithMandats]);
 
-  const filteredDossiersWithMandats = dossiersWithMandats.filter((item) => {
-    const searchLower = searchTerm.toLowerCase();
-    const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
-    const clientsNames = getClientsNames(item.clients_ids);
-    const matchesSearch =
-      fullNumber.toLowerCase().includes(searchLower) ||
-      item.numero_dossier?.toLowerCase().includes(searchLower) ||
-      clientsNames.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
-      item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
+  const filteredDossiersWithMandats = useMemo(() => {
+    return dossiersWithMandats.filter((item) => {
+      const searchLower = searchTerm.toLowerCase();
+      const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
+      const clientsNames = getClientsNames(item.clients_ids);
+      const matchesSearch =
+        fullNumber.toLowerCase().includes(searchLower) ||
+        item.numero_dossier?.toLowerCase().includes(searchLower) ||
+        clientsNames.toLowerCase().includes(searchLower) ||
+        item.mandatInfo?.type_mandat?.toLowerCase().includes(searchLower) ||
+        item.mandatInfo?.tache_actuelle?.toLowerCase().includes(searchLower) ||
+        item.mandatInfo?.adresse_travaux?.rue?.toLowerCase().includes(searchLower) ||
+        item.mandatInfo?.adresse_travaux?.ville?.toLowerCase().includes(searchLower);
 
-    const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
-    const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
-    const matchesStatut = filterStatut === "all" || item.statut === filterStatut;
-    const matchesMandat = filterMandat === "all" || item.mandatInfo?.type_mandat === filterMandat;
-    const matchesTache = filterTache === "all" || item.mandatInfo?.tache_actuelle === filterTache;
-    return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
-  });
+      const matchesArpenteur = filterArpenteur === "all" || item.arpenteur_geometre === filterArpenteur;
+      const matchesVille = filterVille === "all" || item.mandatInfo?.adresse_travaux?.ville === filterVille;
+      const matchesStatut = filterStatut === "all" || item.statut === filterStatut;
+      const matchesMandat = filterMandat === "all" || item.mandatInfo?.type_mandat === filterMandat;
+      const matchesTache = filterTache === "all" || item.mandatInfo?.tache_actuelle === filterTache;
+      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
+    });
+  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache]);
 
   const handleSort = (field) => {
     if (sortField === field) {
