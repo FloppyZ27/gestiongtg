@@ -3465,31 +3465,9 @@ export default function Dossiers() {
                             {dossier.ttl === "Oui" ? (dossier.clients_texte || "-") : getClientsNames(dossier.clients_ids)}
                           </TableCell>
                           <TableCell className="text-slate-300">
-                            {dossier.mandatInfo?.type_mandat ?
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {dossier.mandatInfo?.type_mandat ? (
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
                                 {dossier.mandatInfo.type_mandat}
-                              </Badge> :
-
-                      <span className="text-slate-600 text-xs">-</span>
-                      }
-                          </TableCell>
-                          <TableCell className="text-slate-300">
-                            {dossier.mandatInfo?.minutes_list && dossier.mandatInfo.minutes_list.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {dossier.mandatInfo.minutes_list.slice(0, 2).map((minute, idx) => (
-                                  <Badge key={idx} className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                    {minute.minute}
-                                  </Badge>
-                                ))}
-                                {dossier.mandatInfo.minutes_list.length > 2 && (
-                                  <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                    +{dossier.mandatInfo.minutes_list.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : dossier.mandatInfo?.minute ? (
-                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                                {dossier.mandatInfo.minute}
                               </Badge>
                             ) : (
                               <span className="text-slate-600 text-xs">-</span>
