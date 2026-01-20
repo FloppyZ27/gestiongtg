@@ -635,16 +635,17 @@ export default function Dossiers() {
       return;
     }
     
-    // Vérifier si le lot existe déjà (mais pas si c'est le lot en cours de modification)
-    const lotExistant = lots.find(l => 
-      l.numero_lot === newLotForm.numero_lot && 
-      l.circonscription_fonciere === newLotForm.circonscription_fonciere &&
-      (!editingLot || l.id !== editingLot.id)
-    );
-    
-    if (lotExistant) {
-      alert(`Le lot ${newLotForm.numero_lot} existe déjà dans ${newLotForm.circonscription_fonciere}.`);
-      return;
+    // Vérifier si le lot existe déjà seulement en création
+    if (!editingLot) {
+      const lotExistant = lots.find(l => 
+        l.numero_lot === newLotForm.numero_lot && 
+        l.circonscription_fonciere === newLotForm.circonscription_fonciere
+      );
+      
+      if (lotExistant) {
+        alert(`Le lot ${newLotForm.numero_lot} existe déjà dans ${newLotForm.circonscription_fonciere}.`);
+        return;
+      }
     }
     
     if (editingLot) {
