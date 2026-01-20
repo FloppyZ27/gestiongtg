@@ -123,6 +123,8 @@ export default function EditDossierForm({
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
+  const [minutesCollapsed, setMinutesCollapsed] = useState(true);
+  const [activeMinuteMandat, setActiveMinuteMandat] = useState("0");
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -1238,6 +1240,173 @@ export default function EditDossierForm({
               isCollapsed={tarificationStepCollapsed}
               onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
             />
+
+            {/* Section Minutes */}
+            {formData.mandats.length > 0 && (
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
+                  onClick={() => setMinutesCollapsed(!minutesCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
+                        <FileText className="w-3.5 h-3.5 text-purple-400" />
+                      </div>
+                      <CardTitle className="text-purple-300 text-base">Minutes</CardTitle>
+                      {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0) > 0 && (
+                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                          {formData.mandats.reduce((total, m) => total + (m.minutes_list?.length || 0), 0)} minute(s)
+                        </Badge>
+                      )}
+                    </div>
+                    {minutesCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
+
+                {!minutesCollapsed && (
+                  <CardContent className="pt-2 pb-3">
+                    <Tabs value={activeMinuteMandat} onValueChange={setActiveMinuteMandat} className="w-full">
+                      <div className="flex justify-between items-center mb-3 gap-3">
+                        <div className="flex-1">
+                          <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
+                            {formData.mandats.map((mandat, index) => (
+                              <TabsTrigger
+                                key={index}
+                                value={index.toString()}
+                                className="purple data-[state=active]:bg-purple-500/30 data-[state=active]:text-purple-300 data-[state=active]:border-b-2 data-[state=active]:border-purple-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
+                              >
+                                {mandat.type_mandat || `Mandat ${index + 1}`}
+                                {mandat.minutes_list && mandat.minutes_list.length > 0 && (
+                                  <Badge className="ml-1.5 bg-purple-500/30 text-purple-300 text-[10px] h-4 px-1">
+                                    {mandat.minutes_list.length}
+                                  </Badge>
+                                )}
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </div>
+                      </div>
+
+                      {formData.mandats.map((mandat, mandatIndex) => (
+                        <TabsContent key={mandatIndex} value={mandatIndex.toString()} className="mt-2 space-y-2">
+                          {/* Liste des minutes existantes */}
+                          {mandat.minutes_list && mandat.minutes_list.length > 0 && (
+                            <div className="space-y-2 mb-3">
+                              <Label className="text-slate-400 text-xs">Minutes existantes</Label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {mandat.minutes_list.map((minute, minuteIndex) => (
+                                  <div 
+                                    key={minuteIndex}
+                                    className="bg-purple-500/10 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative"
+                                  >
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updatedMandats = [...formData.mandats];
+                                        updatedMandats[mandatIndex].minutes_list = updatedMandats[mandatIndex].minutes_list.filter((_, idx) => idx !== minuteIndex);
+                                        setFormData({...formData, mandats: updatedMandats});
+                                      }}
+                                      className="absolute right-1 top-1 hover:text-red-400"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                    <div className="pr-5 space-y-0.5">
+                                      <p className="font-semibold text-purple-400">Minute {minute.minute}</p>
+                                      {minute.date_minute && (
+                                        <p className="text-slate-400 text-[10px]">
+                                          📅 {format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr })}
+                                        </p>
+                                      )}
+                                      {minute.type_minute && (
+                                        <Badge className="bg-purple-500/20 text-purple-300 text-[10px] h-4 px-1">
+                                          {minute.type_minute}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Formulaire d'ajout de minute */}
+                          <div className="border border-slate-700 rounded-lg p-3 bg-slate-800/20">
+                            <Label className="text-slate-400 text-xs mb-2 block">Ajouter une minute</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="space-y-1">
+                                <Label className="text-slate-500 text-[10px]">Numéro de minute</Label>
+                                <Input 
+                                  placeholder="Ex: 12345"
+                                  id={`minute-${mandatIndex}`}
+                                  className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-500 text-[10px]">Date de minute</Label>
+                                <Input 
+                                  type="date"
+                                  id={`date-minute-${mandatIndex}`}
+                                  className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-500 text-[10px]">Type</Label>
+                                <Select id={`type-minute-${mandatIndex}`} defaultValue="Initiale">
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    <SelectItem value="Initiale" className="text-white text-xs">Initiale</SelectItem>
+                                    <SelectItem value="Remplace" className="text-white text-xs">Remplace</SelectItem>
+                                    <SelectItem value="Corrige" className="text-white text-xs">Corrige</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <Button 
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                const minuteInput = document.getElementById(`minute-${mandatIndex}`);
+                                const dateMinuteInput = document.getElementById(`date-minute-${mandatIndex}`);
+                                const typeMinuteSelect = document.getElementById(`type-minute-${mandatIndex}`);
+                                
+                                if (!minuteInput.value) {
+                                  alert("Veuillez entrer un numéro de minute");
+                                  return;
+                                }
+
+                                const newMinute = {
+                                  minute: minuteInput.value,
+                                  date_minute: dateMinuteInput.value || null,
+                                  type_minute: typeMinuteSelect.value || "Initiale"
+                                };
+
+                                const updatedMandats = [...formData.mandats];
+                                if (!updatedMandats[mandatIndex].minutes_list) {
+                                  updatedMandats[mandatIndex].minutes_list = [];
+                                }
+                                updatedMandats[mandatIndex].minutes_list.push(newMinute);
+                                
+                                setFormData({...formData, mandats: updatedMandats});
+                                
+                                minuteInput.value = "";
+                                dateMinuteInput.value = "";
+                              }}
+                              className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 h-7 text-xs mt-2 w-full"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Ajouter la minute
+                            </Button>
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {!editingDossier && formData.numero_dossier && formData.arpenteur_geometre && (
