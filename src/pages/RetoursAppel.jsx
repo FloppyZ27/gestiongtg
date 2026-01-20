@@ -764,46 +764,10 @@ export default function RetoursAppel() {
           </DialogContent>
         </Dialog>
 
-        {/* Main Table */}
+        {/* Table des tous les retours d'appel */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[250px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
-              </div>
-
-              <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Arpenteur" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
-                  {ARPENTEURS.map((arp) => (
-                    <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={filterUtilisateurAssigne} onValueChange={setFilterUtilisateurAssigne}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Utilisateur assigné" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
-                  <SelectItem value="non-assigne" className="text-white">Non assigné</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {(filterArpenteur !== "all" || filterUtilisateurAssigne !== "all") && (
-                <Button variant="outline" size="sm" onClick={() => { setFilterArpenteur("all"); setFilterUtilisateurAssigne("all"); }} className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
-                  Réinitialiser les filtres
-                </Button>
-              )}
-            </div>
+            <h2 className="text-xl font-bold text-white mb-4">Tous les retours d'appel</h2>
           </CardHeader>
 
           <CardContent className="p-0">
@@ -811,51 +775,51 @@ export default function RetoursAppel() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('numero_dossier')}>
-                      Dossier {sortField === 'numero_dossier' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('created_date')}>
-                      Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('utilisateur_assigne')}>
-                      Utilisateur assigné {sortField === 'utilisateur_assigne' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('clients')}>
-                      Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
-                    <TableHead className="text-slate-300 cursor-pointer hover:text-white" onClick={() => handleSort('adresse_travaux')}>
-                      Adresse travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </TableHead>
+                    <TableHead className="text-slate-300">Dossier</TableHead>
+                    <TableHead className="text-slate-300">Date de l'appel</TableHead>
+                    <TableHead className="text-slate-300">Statut</TableHead>
+                    <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
+                    <TableHead className="text-slate-300">Clients</TableHead>
+                    <TableHead className="text-slate-300">Raison</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedRetourAppel.map((dossier) => (
-                    <TableRow key={dossier.id} className="hover:bg-slate-800/30 border-slate-800 cursor-pointer" onClick={() => handleView(dossier)}>
+                  {sortedAllRetoursAppels.map((retour) => (
+                    <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium">
-                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                          {dossier.numero_dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                        {retour.dossier && (
+                          <Badge variant="outline" className={`${getArpenteurColor(retour.dossier.arpenteur_geometre)} border`}>
+                            {retour.dossier.numero_dossier ? `${getArpenteurInitials(retour.dossier.arpenteur_geometre)}${retour.dossier.numero_dossier}` : getArpenteurInitials(retour.dossier.arpenteur_geometre).slice(0, -1)}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                      <TableCell>
+                        <Badge className={
+                          retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border" :
+                          retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30 border" :
+                          retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
+                          "bg-slate-700 text-slate-300"
+                        }>
+                          {retour.statut}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-slate-300">{dossier.created_date ? format(new Date(dossier.created_date), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{dossier.utilisateur_assigne ? (users.find(u => u.email === dossier.utilisateur_assigne)?.full_name || dossier.utilisateur_assigne) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{getClientsNames(dossier.clients_ids)}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{getFirstAdresseTravaux(dossier.mandats)}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.dossier ? getClientsNames(retour.dossier.clients_ids) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.raison || "-"}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(dossier)} className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(dossier.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
-                            <Trash2 className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" onClick={() => handleView(retour.dossier)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                            <Eye className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {sortedRetourAppel.length === 0 && (
+                  {sortedAllRetoursAppels.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-slate-500">Aucun retour d'appel</TableCell>
+                      <TableCell colSpan={7} className="text-center py-12 text-slate-500">Aucun retour d'appel</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
