@@ -292,8 +292,45 @@ export default function Lots() {
 
   const updateLotMutation = useMutation({
     mutationFn: async ({ id, lotData }) => {
-      // Validation moved to handleSubmit
+      // Récupérer l'ancien lot pour comparer
+      const oldLot = lots.find(l => l.id === id);
+      
       const updatedLot = await base44.entities.Lot.update(id, lotData);
+      
+      // Déterminer les changements
+      const changes = [];
+      if (oldLot) {
+        if (oldLot.numero_lot !== lotData.numero_lot) {
+          changes.push(`Numéro de lot: ${oldLot.numero_lot} → ${lotData.numero_lot}`);
+        }
+        if (oldLot.circonscription_fonciere !== lotData.circonscription_fonciere) {
+          changes.push(`Circonscription: ${oldLot.circonscription_fonciere} → ${lotData.circonscription_fonciere}`);
+        }
+        if (oldLot.cadastre !== lotData.cadastre) {
+          changes.push(`Cadastre: ${oldLot.cadastre || '-'} → ${lotData.cadastre || '-'}`);
+        }
+        if (oldLot.rang !== lotData.rang) {
+          changes.push(`Rang: ${oldLot.rang || '-'} → ${lotData.rang || '-'}`);
+        }
+        
+        // Comparer les types d'opération
+        const oldTypesCount = oldLot.types_operation?.length || 0;
+        const newTypesCount = lotData.types_operation?.length || 0;
+        if (oldTypesCount !== newTypesCount) {
+          changes.push(`Types d'opération: ${oldTypesCount} → ${newTypesCount}`);
+        } else if (oldTypesCount > 0) {
+          // Vérifier si les types ont changé
+          const oldTypes = JSON.stringify(oldLot.types_operation);
+          const newTypes = JSON.stringify(lotData.types_operation);
+          if (oldTypes !== newTypes) {
+            changes.push('Types d\'opération modifiés');
+          }
+        }
+      }
+      
+      const details = changes.length > 0 
+        ? `Lot ${lotData.numero_lot} - ${changes.join(', ')}`
+        : `Lot ${lotData.numero_lot} modifié`;
       
       // Créer une entrée dans l'historique
       await base44.entities.ActionLog.create({
@@ -302,7 +339,7 @@ export default function Lots() {
         action: 'Modification',
         entite: 'Lot',
         entite_id: id,
-        details: `Lot ${lotData.numero_lot} modifié`
+        details
       });
       
       return updatedLot;
@@ -310,11 +347,11 @@ export default function Lots() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
       queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
-      setIsFormDialogOpen(false); // Renamed from setIsDialogOpen
-      setIsViewDialogOpen(false); // Added as lot might be updated from view dialog
+      setIsFormDialogOpen(false);
+      setIsViewDialogOpen(false);
       resetForm();
     },
-    onError: (error) => { // Added onError
+    onError: (error) => {
       alert(error.message);
     }
   });
