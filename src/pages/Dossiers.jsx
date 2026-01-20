@@ -3321,71 +3321,7 @@ export default function Dossiers() {
           </DialogContent>
         </Dialog>
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-600/20">
-                <FolderOpen className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div>
-                <CardTitle className="text-xl text-white">Dossiers ouverts</CardTitle>
-                <p className="text-sm text-slate-400">Statistique par période</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Aujourd'hui</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{dossierStats.byDay}</p>
-                  {dossierStats.percentages.day !== 0 &&
-                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.day >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {dossierStats.percentages.day > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {dossierStats.percentages.day > 0 ? '+' : ''}{dossierStats.percentages.day}%
-                    </span>
-                  }
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Cette semaine</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{dossierStats.byWeek}</p>
-                  {dossierStats.percentages.week !== 0 &&
-                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.week >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {dossierStats.percentages.week > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {dossierStats.percentages.week > 0 ? '+' : ''}{dossierStats.percentages.week}%
-                    </span>
-                  }
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Ce mois</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{dossierStats.byMonth}</p>
-                  {dossierStats.percentages.month !== 0 &&
-                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.month >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {dossierStats.percentages.month > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {dossierStats.percentages.month > 0 ? '+' : ''}{dossierStats.percentages.month}%
-                    </span>
-                  }
-                </div>
-              </div>
-              <div className="bg-slate-800/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-slate-400 mb-1">Cette année</p>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-2xl font-bold text-white">{dossierStats.byYear}</p>
-                  {dossierStats.percentages.year !== 0 &&
-                  <span className={`text-xs font-medium flex items-center gap-1 ${dossierStats.percentages.year >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {dossierStats.percentages.year > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {dossierStats.percentages.year > 0 ? '+' : ''}{dossierStats.percentages.year}%
-                    </span>
-                  }
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader>
