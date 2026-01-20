@@ -1679,34 +1679,31 @@ export default function EditDossierForm({
 
                     {/* Formulaire d'ajout */}
                     <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
-                      <Label className="text-blue-300 text-sm mb-3 block font-semibold">Ajouter un retour d'appel</Label>
                       <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
-                            <Input 
-                              type="date"
-                              value={newRetourAppel.date_appel}
-                              onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
-                              className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                            <Select 
-                              value={newRetourAppel.utilisateur_assigne}
-                              onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                                <SelectValue placeholder="Sélectionner" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-700">
-                                {users.map((u) => (
-                                  <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
+                          <Input 
+                            type="date"
+                            value={newRetourAppel.date_appel}
+                            onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                          <Select 
+                            value={newRetourAppel.utilisateur_assigne}
+                            onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {users.map((u) => (
+                                <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Raison de l'appel <span className="text-red-400">*</span></Label>
@@ -1716,23 +1713,6 @@ export default function EditDossierForm({
                             onChange={(e) => setNewRetourAppel({...newRetourAppel, raison: e.target.value})}
                             className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                           />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Statut</Label>
-                          <Select 
-                            value={newRetourAppel.statut}
-                            onValueChange={(value) => setNewRetourAppel({...newRetourAppel, statut: value})}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
-                              <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
-                              <SelectItem value="En attente" className="text-white text-xs">En attente</SelectItem>
-                              <SelectItem value="Reporté" className="text-white text-xs">Reporté</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                         <Button 
                           type="button"
@@ -1748,7 +1728,7 @@ export default function EditDossierForm({
                               date_appel: newRetourAppel.date_appel,
                               utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
                               raison: newRetourAppel.raison,
-                              statut: newRetourAppel.statut
+                              statut: "Retour d'appel"
                             });
 
                             // Ajouter le nouveau retour à la liste
@@ -1777,7 +1757,7 @@ export default function EditDossierForm({
                               date_appel: new Date().toISOString().split('T')[0],
                               utilisateur_assigne: "",
                               raison: "",
-                              statut: "En attente"
+                              statut: "Retour d'appel"
                             });
                           }}
                           className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-8 text-xs w-full border border-blue-500/30"
