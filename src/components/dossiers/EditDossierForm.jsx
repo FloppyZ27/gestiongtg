@@ -1340,7 +1340,7 @@ export default function EditDossierForm({
                                   </div>
                                 </TableHead>
                                 <TableHead className="text-slate-300">Minute référence</TableHead>
-                                <TableHead className="text-slate-300 w-12"></TableHead>
+                                <TableHead className="text-slate-300 w-12">Action</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -1388,7 +1388,7 @@ export default function EditDossierForm({
                                     <TableCell className="text-slate-300 font-medium">{minute.minute}</TableCell>
                                     <TableCell>
                                       <Badge className={`${getMandatColor(formData.mandats[minute.mandatIndex].type_mandat)} border text-xs`}>
-                                        {minute.mandatName}
+                                        {getAbbreviatedMandatType(formData.mandats[minute.mandatIndex].type_mandat) || minute.mandatName}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300">
