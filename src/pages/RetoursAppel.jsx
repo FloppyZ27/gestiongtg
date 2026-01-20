@@ -768,6 +768,24 @@ export default function RetoursAppel() {
           </DialogContent>
         </Dialog>
 
+        <Dialog open={!!viewingRaison} onOpenChange={(open) => !open && setViewingRaison(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle>Raison de l'appel</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm whitespace-pre-wrap break-words">
+                {viewingRaison?.raison}
+              </p>
+              <div className="flex justify-end">
+                <Button onClick={() => setViewingRaison(null)} className="bg-slate-700 hover:bg-slate-600">
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Table des tous les retours d'appel */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
