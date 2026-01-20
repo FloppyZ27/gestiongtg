@@ -20,6 +20,7 @@ import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
 import EditDossierForm from "../components/dossiers/EditDossierForm";
+import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -130,6 +131,7 @@ export default function Dossiers() {
     date_fermeture: "",
     statut: "Ouvert",
     ttl: "Non",
+    place_affaire: "",
     clients_ids: [],
     clients_texte: "",
     notaires_ids: [],
@@ -139,6 +141,27 @@ export default function Dossiers() {
     mandats: [],
     description: ""
   });
+
+  // Fonction pour calculer le prochain numéro de dossier disponible
+  const calculerProchainNumeroDossier = (arpenteur) => {
+    const arpenteurDossiers = dossiers.filter(d => d.arpenteur_geometre === arpenteur && d.numero_dossier);
+    const maxDossier = arpenteurDossiers.reduce((max, d) => {
+      const num = parseInt(d.numero_dossier, 10);
+      return isNaN(num) ? max : Math.max(max, num);
+    }, 0);
+    
+    const arpenteurPriseMandats = priseMandats.filter(p => 
+      p.arpenteur_geometre === arpenteur && 
+      p.statut === "Mandats à ouvrir" && 
+      p.numero_dossier
+    );
+    const maxPriseMandat = arpenteurPriseMandats.reduce((max, p) => {
+      const num = parseInt(p.numero_dossier, 10);
+      return isNaN(num) ? max : Math.max(max, num);
+    }, 0);
+    
+    return (Math.max(maxDossier, maxPriseMandat) + 1).toString();
+  };
 
   const queryClient = useQueryClient();
 
@@ -175,6 +198,12 @@ export default function Dossiers() {
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+  });
+
+  const { data: priseMandats = [] } = useQuery({
+    queryKey: ['priseMandats'],
+    queryFn: () => base44.entities.PriseMandat.list(),
+    initialData: [],
   });
 
   // Détecter si un dossier_id est passé dans l'URL
@@ -1834,6 +1863,8 @@ export default function Dossiers() {
                   setIsClientFormDialogOpen={setIsClientFormDialogOpen}
                   setClientTypeForForm={setClientTypeForForm}
                   setViewingClientDetails={setViewingClientDetails}
+                  calculerProchainNumeroDossier={calculerProchainNumeroDossier}
+                  editingDossier={editingDossier}
                 />
               </DialogContent>
             </Dialog>
