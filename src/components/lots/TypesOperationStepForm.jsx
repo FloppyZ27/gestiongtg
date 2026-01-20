@@ -188,14 +188,28 @@ export default function TypesOperationStepForm({
                 {typesOperation.map((typeOp, index) => (
                   <div 
                     key={index} 
-                    className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
-                      editingTypeIndex === index 
-                        ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
-                        : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
-                    }`}
-                    onClick={() => handleEditTypeOperation(index)}
+                    className="flex items-center gap-1 group"
                   >
-                    {typeOp.type_operation}
+                    <div 
+                      className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
+                        editingTypeIndex === index 
+                          ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
+                          : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
+                      }`}
+                      onClick={() => handleEditTypeOperation(index)}
+                    >
+                      {typeOp.type_operation}
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleRemoveTypeOperation(index)}
+                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 h-5 w-5 p-0 transition-opacity"
+                      disabled={disabled}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -241,9 +255,9 @@ export default function TypesOperationStepForm({
                    type="button"
                    onClick={handleAddTypeOperation}
                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                   className="h-9 self-end text-xs"
+                   className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 h-7 w-7 self-end p-0"
                  >
-                   <Plus className="w-3.5 h-3.5" />
+                   <Plus className="w-3 h-3" />
                  </Button>
                </div>
 
@@ -497,15 +511,6 @@ export default function TypesOperationStepForm({
                     className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-xs"
                   >
                     <Check className="w-3 h-3 mr-1" /> Modifier le type
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCancelEditTypeOperation}
-                    className="border-red-500 text-red-400 hover:bg-red-500/10 text-xs"
-                  >
-                    <X className="w-3 h-3 mr-1" /> Annuler
                   </Button>
                 </div>
               )}
