@@ -1731,7 +1731,7 @@ export default function EditDossierForm({
                                       <SelectTrigger className={`border-slate-600 h-8 text-xs w-32 ${
                                         retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
                                         retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                                        retour.statut === "Aucune réponse" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                                        retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
                                         "bg-slate-700 text-white"
                                       }`}>
                                         <SelectValue />
