@@ -431,11 +431,34 @@ export default function RetoursAppel() {
     };
   });
 
-  const sortedAllRetoursAppels = [...allRetoursAppelsWithDossier].sort((a, b) => {
-    const dateA = new Date(a.date_appel || 0).getTime();
-    const dateB = new Date(b.date_appel || 0).getTime();
-    return dateB - dateA; // Tri décroissant (plus récent en premier)
-  });
+  const getFilteredRetoursAppels = () => {
+    return allRetoursAppelsWithDossier.filter(retour => {
+      const matchesSearch = searchRetoursAppel === "" || 
+        retour.raison?.toLowerCase().includes(searchRetoursAppel.toLowerCase()) ||
+        retour.dossier?.numero_dossier?.toLowerCase().includes(searchRetoursAppel.toLowerCase());
+      
+      const matchesArpenteur = filterArpenteurs.length === 0 || 
+        (retour.dossier && filterArpenteurs.includes(retour.dossier.arpenteur_geometre));
+      
+      const matchesUtilisateur = filterUtilisateurs.length === 0 || 
+        filterUtilisateurs.includes(retour.utilisateur_assigne);
+      
+      const matchesStatut = filterStatuts.length === 0 || 
+        filterStatuts.includes(retour.statut);
+      
+      const retourDate = new Date(retour.date_appel);
+      const matchesDateStart = filterDateStart === "" || retourDate >= new Date(filterDateStart);
+      const matchesDateEnd = filterDateEnd === "" || retourDate <= new Date(filterDateEnd + "T23:59:59");
+      
+      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesStatut && matchesDateStart && matchesDateEnd;
+    }).sort((a, b) => {
+      const dateA = new Date(a.date_appel || 0).getTime();
+      const dateB = new Date(b.date_appel || 0).getTime();
+      return dateB - dateA;
+    });
+  };
+
+  const sortedAllRetoursAppels = getFilteredRetoursAppels();
 
   const getCurrentValue = (items, key) => {
     const current = items?.find(item => item.actuel || item.actuelle);
