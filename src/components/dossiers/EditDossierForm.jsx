@@ -94,7 +94,8 @@ export default function EditDossierForm({
   setViewingClientDetails,
   calculerProchainNumeroDossier,
   editingDossier,
-  onOpenNewLotDialog
+  onOpenNewLotDialog,
+  setEditingClient
 }) {
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [activeContactTab, setActiveContactTab] = useState("clients");
@@ -315,11 +316,14 @@ export default function EditDossierForm({
                                         const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
                                         return (
                                           <div 
-                                            key={clientId} 
-                                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                            onClick={() => {
-                                              setViewingClientDetails(client);
-                                            }}
+                                           key={clientId} 
+                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                           onClick={() => {
+                                             if (setEditingClient) {
+                                               setEditingClient(client);
+                                               setIsClientFormDialogOpen(true);
+                                             }
+                                           }}
                                           >
                                             <button 
                                               type="button" 
@@ -1042,7 +1046,16 @@ export default function EditDossierForm({
                                   <Checkbox
                                     id={`sameLotsForAllMandats-${index}`}
                                     checked={sameLotsForAllMandats}
-                                    onCheckedChange={(checked) => setSameLotsForAllMandats(checked)}
+                                    onCheckedChange={(checked) => {
+                                      setSameLotsForAllMandats(checked);
+                                      if (checked) {
+                                        const currentLots = mandat.lots || [];
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          mandats: prev.mandats.map(m => ({ ...m, lots: [...currentLots] }))
+                                        }));
+                                      }
+                                    }}
                                   />
                                   <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
                                 </div>
