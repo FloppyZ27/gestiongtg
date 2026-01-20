@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -132,6 +132,7 @@ export default function EditDossierForm({
   const [activeMinuteMandat, setActiveMinuteMandat] = useState("0");
   const [newMinuteForm, setNewMinuteForm] = useState({});
   const [minutesSortConfig, setMinutesSortConfig] = useState({ key: null, direction: 'asc' });
+  const [retourAppelCollapsed, setRetourAppelCollapsed] = useState(true);
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -1560,8 +1561,70 @@ export default function EditDossierForm({
               </Card>
             )}
 
+            {/* Section Retour d'appel */}
+            <Card className="border-slate-700 bg-slate-800/30">
+              <CardHeader 
+                className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
+                  </div>
+                  {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                </div>
+              </CardHeader>
+
+              {!retourAppelCollapsed && (
+                <CardContent className="pt-4 pb-3">
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Date de l'appel</Label>
+                        <Input 
+                          type="date"
+                          value={formData.date_appel || ""}
+                          onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Statut du retour d'appel</Label>
+                        <Select 
+                          value={formData.statut_retour_appel || ""}
+                          onValueChange={(value) => setFormData({...formData, statut_retour_appel: value})}
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                            <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
+                            <SelectItem value="En attente" className="text-white text-xs">En attente</SelectItem>
+                            <SelectItem value="Reporté" className="text-white text-xs">Reporté</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-slate-400 text-xs">Notes du retour d'appel</Label>
+                      <Input 
+                        placeholder="Notes..."
+                        value={formData.notes_retour_appel || ""}
+                        onChange={(e) => setFormData({...formData, notes_retour_appel: e.target.value})}
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
-            {!editingDossier && formData.numero_dossier && formData.arpenteur_geometre && (
+            {formData.numero_dossier && formData.arpenteur_geometre && (
               <DocumentsStepForm
                 arpenteurGeometre={formData.arpenteur_geometre}
                 numeroDossier={formData.numero_dossier}
