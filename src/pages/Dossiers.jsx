@@ -1649,7 +1649,7 @@ export default function Dossiers() {
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
       setSortDirection("asc");
@@ -1666,53 +1666,58 @@ export default function Dossiers() {
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
-  const sortedDossiers = [...filteredDossiersWithMandats].sort((a, b) => {
-    if (!sortField) return 0;
-    let aValue, bValue;
-    switch (sortField) {
-      case 'numero_dossier':
-        aValue = (getArpenteurInitials(a.arpenteur_geometre) + a.numero_dossier).toLowerCase();
-        bValue = (getArpenteurInitials(b.arpenteur_geometre) + b.numero_dossier).toLowerCase();
-        break;
-      case 'clients':
-        aValue = getClientsNames(a.clients_ids).toLowerCase();
-        bValue = getClientsNames(b.clients_ids).toLowerCase();
-        break;
-      case 'date_ouverture':
-        aValue = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
-        bValue = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
-        break;
-      case 'statut':
-        aValue = (a.statut || '').toLowerCase();
-        bValue = (b.statut || '').toLowerCase();
-        break;
-      case 'type_mandat':
-        aValue = (a.mandatInfo?.type_mandat || '').toLowerCase();
-        bValue = (b.mandatInfo?.type_mandat || '').toLowerCase();
-        break;
-      case 'tache_actuelle':
-        aValue = (a.mandatInfo?.tache_actuelle || '').toLowerCase();
-        bValue = (b.mandatInfo?.tache_actuelle || '').toLowerCase();
-        break;
-      case 'ville':
-        aValue = (a.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
-        bValue = (b.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
-        break;
-      case 'date_fermeture':
-        aValue = a.date_fermeture ? new Date(a.date_fermeture).getTime() : 0;
-        bValue = b.date_fermeture ? new Date(b.date_fermeture).getTime() : 0;
-        break;
-      default:
+  const sortedDossiers = useMemo(() => {
+    if (!sortField) return filteredDossiersWithMandats;
+    
+    return [...filteredDossiersWithMandats].sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case 'numero_dossier':
+          aValue = (getArpenteurInitials(a.arpenteur_geometre) + a.numero_dossier).toLowerCase();
+          bValue = (getArpenteurInitials(b.arpenteur_geometre) + b.numero_dossier).toLowerCase();
+          break;
+        case 'clients':
+          aValue = getClientsNames(a.clients_ids).toLowerCase();
+          bValue = getClientsNames(b.clients_ids).toLowerCase();
+          break;
+        case 'date_ouverture':
+          aValue = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
+          bValue = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
+          break;
+        case 'statut':
+          aValue = (a.statut || '').toLowerCase();
+          bValue = (b.statut || '').toLowerCase();
+          break;
+        case 'type_mandat':
+          aValue = (a.mandatInfo?.type_mandat || '').toLowerCase();
+          bValue = (b.mandatInfo?.type_mandat || '').toLowerCase();
+          break;
+        case 'tache_actuelle':
+          aValue = (a.mandatInfo?.tache_actuelle || '').toLowerCase();
+          bValue = (b.mandatInfo?.tache_actuelle || '').toLowerCase();
+          break;
+        case 'ville':
+          aValue = (a.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
+          bValue = (b.mandatInfo?.adresse_travaux?.ville || '').toLowerCase();
+          break;
+        case 'date_fermeture':
+          aValue = a.date_fermeture ? new Date(a.date_fermeture).getTime() : 0;
+          bValue = b.date_fermeture ? new Date(b.date_fermeture).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else {
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
         return 0;
-    }
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-    } else {
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    }
-  });
+      }
+    });
+  }, [filteredDossiersWithMandats, sortField, sortDirection]);
 
   const handleCloseDossier = () => {
     if (!closingDossierId) return;
