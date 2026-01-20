@@ -1714,13 +1714,16 @@ export default function EditDossierForm({
                               return;
                             }
 
-                            await base44.entities.RetourAppel.create({
+                            const createdRetour = await base44.entities.RetourAppel.create({
                               dossier_id: editingDossier.id,
                               date_appel: newRetourAppel.date_appel,
                               utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
                               raison: newRetourAppel.raison,
                               statut: newRetourAppel.statut
                             });
+
+                            // Ajouter le nouveau retour à la liste
+                            setRetoursAppel(prev => [createdRetour, ...prev]);
 
                             // Mettre à jour le statut du dossier à "Retour d'appel"
                             setFormData({...formData, statut: "Retour d'appel"});
@@ -1738,7 +1741,6 @@ export default function EditDossierForm({
                               });
                             }
 
-                            queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier.id] });
                             queryClient.invalidateQueries({ queryKey: ['notifications'] });
                             
                             // Réinitialiser le formulaire
