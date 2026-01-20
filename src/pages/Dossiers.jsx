@@ -1656,8 +1656,13 @@ export default function Dossiers() {
     }
   };
 
+  const hasActiveFilters = () => {
+    return filterArpenteur !== "all" || filterVille !== "all" || filterStatut !== "all" || filterMandat !== "all" || filterTache !== "all";
+  };
+
   const getSortIcon = (field) => {
-    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    if (!hasActiveFilters()) return null;
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-50" />;
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
 
