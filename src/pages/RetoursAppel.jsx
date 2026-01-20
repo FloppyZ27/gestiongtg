@@ -107,6 +107,12 @@ export default function RetoursAppel() {
     queryFn: () => base44.auth.me(),
   });
 
+  const { data: retoursAppels = [] } = useQuery({
+    queryKey: ['retoursAppels'],
+    queryFn: () => base44.entities.RetourAppel.list(),
+    initialData: [],
+  });
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const dossierIdFromUrl = urlParams.get('dossier_id');
