@@ -787,8 +787,8 @@ export default function RetoursAppel() {
         </Dialog>
 
         {/* Table des tous les retours d'appel */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardContent className="p-0">
+        <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg">
+          <div className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
