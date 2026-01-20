@@ -348,8 +348,10 @@ export default function RetoursAppel() {
   };
 
   const handleDelete = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
-      deleteDossierMutation.mutate(id);
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce retour d'appel ?")) {
+      base44.entities.RetourAppel.delete(id).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+      });
     }
   };
 
