@@ -1728,7 +1728,12 @@ export default function EditDossierForm({
                                         queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
                                       }}
                                     >
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-32">
+                                      <SelectTrigger className={`border-slate-600 h-8 text-xs w-32 ${
+                                        retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                                        retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
+                                        retour.statut === "Aucune réponse" ? "bg-red-500/20 text-red-400 border-red-500/30" :
+                                        "bg-slate-700 text-white"
+                                      }`}>
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent className="bg-slate-800 border-slate-700">
