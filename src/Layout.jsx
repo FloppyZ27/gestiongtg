@@ -1059,45 +1059,65 @@ function LayoutContent({ children, currentPageName }) {
               )}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      {isCollapsed ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton 
-                              asChild 
-                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                location.pathname === item.url 
-                                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                              }`}
-                            >
-                              <Link to={item.url} className="flex items-center justify-center p-2.5">
-                                <item.icon className="w-5 h-5" />
-                              </Link>
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
-                            <p>{item.title}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <SidebarMenuButton 
-                          asChild 
-                          className={`transition-all duration-200 rounded-lg mb-0.5 ${
-                            location.pathname === item.url 
-                              ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                              : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                          }`}
-                        >
-                          <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-medium">{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      )}
-                    </SidebarMenuItem>
-                  ))}
+                  {navigationItems.map((item) => {
+                    // Compter les retours d'appel assignés à l'utilisateur avec le statut "Retour d'appel"
+                    let badgeCount = 0;
+                    if (item.title === "Retours d'appel" && user) {
+                      badgeCount = retoursAppels.filter(r => 
+                        r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
+                      ).length;
+                    }
+
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        {isCollapsed ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <SidebarMenuButton 
+                                asChild 
+                                className={`transition-all duration-200 rounded-lg mb-0.5 justify-center relative ${
+                                  location.pathname === item.url 
+                                    ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                }`}
+                              >
+                                <Link to={item.url} className="flex items-center justify-center p-2.5">
+                                  <item.icon className="w-5 h-5" />
+                                  {badgeCount > 0 && (
+                                    <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                      {badgeCount}
+                                    </div>
+                                  )}
+                                </Link>
+                              </SidebarMenuButton>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
+                              <p>{item.title}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <SidebarMenuButton 
+                            asChild 
+                            className={`transition-all duration-200 rounded-lg mb-0.5 relative ${
+                              location.pathname === item.url 
+                                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
+                                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                            }`}
+                          >
+                            <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
+                              <item.icon className="w-5 h-5" />
+                              <span className="font-medium">{item.title}</span>
+                              {badgeCount > 0 && (
+                                <div className="ml-auto bg-red-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+                                  {badgeCount}
+                                </div>
+                              )}
+                            </Link>
+                          </SidebarMenuButton>
+                        )}
+                      </SidebarMenuItem>
+                    );
+                  })}
 
                   {/* Admin menu item */}
                   {user?.role === 'admin' && (
