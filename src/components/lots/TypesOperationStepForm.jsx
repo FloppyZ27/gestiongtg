@@ -74,6 +74,12 @@ export default function TypesOperationStepForm({
   };
 
   const handleEditTypeOperation = (index) => {
+    // Si on clique sur le type déjà en édition, désactiver le mode édition
+    if (editingTypeIndex === index) {
+      handleCancelEditTypeOperation();
+      return;
+    }
+    
     const typeOp = typesOperation[index];
     setNewTypeOperation({ 
       ...typeOp,
