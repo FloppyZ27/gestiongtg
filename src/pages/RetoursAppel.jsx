@@ -233,6 +233,15 @@ export default function RetoursAppel() {
     setDossierSearchForReference("");
   };
 
+  const getRetourAppelByDossier = (dossierId) => {
+    return retoursAppels.find(r => r.dossier_id === dossierId);
+  };
+
+  const getDossierByRetourAppel = (retourAppelId) => {
+    const retour = retoursAppels.find(r => r.id === retourAppelId);
+    return retour ? dossiers.find(d => d.id === retour.dossier_id) : null;
+  };
+
   const retourAppelDossiers = dossiers.filter(d => d.statut === "Retour d'appel" && d.statut !== "Rejeté");
 
   const applyFilters = (dossiersList) => {
