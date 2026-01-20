@@ -708,7 +708,7 @@ export default function EditDossierForm({
 
                       {formData.mandats.map((mandat, index) => (
                         <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-3 gap-2">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Type de mandat</Label>
                               <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
@@ -718,6 +718,19 @@ export default function EditDossierForm({
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   {TYPES_MANDATS.map((type) => (
                                     <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Tâche</Label>
+                              <Select value={mandat.tache_actuelle || "Ouverture"} onValueChange={(value) => updateMandat(index, 'tache_actuelle', value)}>
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  {TACHES.map((tache) => (
+                                    <SelectItem key={tache} value={tache} className="text-white text-xs">{tache}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>

@@ -935,7 +935,7 @@ export default function Dossiers() {
         date_minute: "",
         type_minute: "Initiale",
         minutes_list: [],
-        tache_actuelle: "",
+        tache_actuelle: "Ouverture",
         statut_terrain: "",
         adresse_travaux: defaultAdresse,
         lots: defaultLots,
