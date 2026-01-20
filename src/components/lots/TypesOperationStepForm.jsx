@@ -111,10 +111,19 @@ export default function TypesOperationStepForm({
       concordances.push({ ...newConcordance });
     }
 
-    setNewTypeOperation({
+    const updatedTypeOperation = {
       ...newTypeOperation,
       concordances_anterieures: concordances
-    });
+    };
+
+    setNewTypeOperation(updatedTypeOperation);
+
+    // Si on édite un type existant, sauvegarder immédiatement les concordances
+    if (editingTypeIndex !== null) {
+      const updated = [...typesOperation];
+      updated[editingTypeIndex] = updatedTypeOperation;
+      onTypesOperationChange(updated);
+    }
 
     setNewConcordance({
       circonscription_fonciere: "",
@@ -141,10 +150,20 @@ export default function TypesOperationStepForm({
 
   const handleRemoveConcordance = (index) => {
     const concordances = newTypeOperation.concordances_anterieures.filter((_, i) => i !== index);
-    setNewTypeOperation({
+    const updatedTypeOperation = {
       ...newTypeOperation,
       concordances_anterieures: concordances
-    });
+    };
+    
+    setNewTypeOperation(updatedTypeOperation);
+
+    // Si on édite un type existant, sauvegarder immédiatement
+    if (editingTypeIndex !== null) {
+      const updated = [...typesOperation];
+      updated[editingTypeIndex] = updatedTypeOperation;
+      onTypesOperationChange(updated);
+    }
+
     if (editingConcordanceIndex === index) {
       handleCancelEditConcordance();
     }
