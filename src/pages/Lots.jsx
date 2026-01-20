@@ -2447,10 +2447,28 @@ export default function Lots() {
                         {lot.rang || "-"}
                       </TableCell>
                       <TableCell className="text-slate-300 text-sm">
-                        {lot.date_bpd && !isNaN(new Date(lot.date_bpd + 'T00:00:00').getTime()) ? format(new Date(lot.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {(() => {
+                          if (!lot.types_operation || lot.types_operation.length === 0) return "-";
+                          const mostRecent = lot.types_operation.reduce((latest, current) => {
+                            if (!current.date_bpd) return latest;
+                            if (!latest.date_bpd) return current;
+                            return new Date(current.date_bpd) > new Date(latest.date_bpd) ? current : latest;
+                          }, lot.types_operation[0]);
+                          return mostRecent.date_bpd && !isNaN(new Date(mostRecent.date_bpd + 'T00:00:00').getTime()) 
+                            ? format(new Date(mostRecent.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) 
+                            : "-";
+                        })()}
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {lot.type_operation || "-"}
+                        {(() => {
+                          if (!lot.types_operation || lot.types_operation.length === 0) return "-";
+                          const mostRecent = lot.types_operation.reduce((latest, current) => {
+                            if (!current.date_bpd) return latest;
+                            if (!latest.date_bpd) return current;
+                            return new Date(current.date_bpd) > new Date(latest.date_bpd) ? current : latest;
+                          }, lot.types_operation[0]);
+                          return mostRecent.type_operation || "-";
+                        })()}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
