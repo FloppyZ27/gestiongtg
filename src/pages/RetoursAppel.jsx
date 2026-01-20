@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -425,10 +425,11 @@ export default function RetoursAppel() {
   const [viewingRaison, setViewingRaison] = useState(null);
   const [filterArpenteurs, setFilterArpenteurs] = useState([]);
   const [filterUtilisateurs, setFilterUtilisateurs] = useState([]);
-  const [filterStatuts, setFilterStatuts] = useState([]);
+
   const [filterDateStart, setFilterDateStart] = useState("");
   const [filterDateEnd, setFilterDateEnd] = useState("");
   const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
+  const [activeListTab, setActiveListTab] = useState("retour_appel");
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
 
@@ -443,6 +444,19 @@ export default function RetoursAppel() {
 
   const getFilteredRetoursAppels = () => {
     return allRetoursAppelsWithDossier.filter(retour => {
+      // Filtre par tab actif
+      const tabStatut = activeListTab === "retour_appel" 
+        ? "Retour d'appel"
+        : activeListTab === "message_laisse"
+        ? ["Message laissé", "Aucune réponse"]
+        : "Terminé";
+      
+      const matchesTabStatut = Array.isArray(tabStatut) 
+        ? tabStatut.includes(retour.statut)
+        : retour.statut === tabStatut;
+      
+      if (!matchesTabStatut) return false;
+      
       const matchesSearch = searchRetoursAppel === "" || 
         retour.raison?.toLowerCase().includes(searchRetoursAppel.toLowerCase()) ||
         retour.dossier?.numero_dossier?.toLowerCase().includes(searchRetoursAppel.toLowerCase());
@@ -453,14 +467,11 @@ export default function RetoursAppel() {
       const matchesUtilisateur = filterUtilisateurs.length === 0 || 
         filterUtilisateurs.includes(retour.utilisateur_assigne);
       
-      const matchesStatut = filterStatuts.length === 0 || 
-        filterStatuts.includes(retour.statut);
-      
       const retourDate = new Date(retour.date_appel);
       const matchesDateStart = filterDateStart === "" || retourDate >= new Date(filterDateStart);
       const matchesDateEnd = filterDateEnd === "" || retourDate <= new Date(filterDateEnd + "T23:59:59");
       
-      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesStatut && matchesDateStart && matchesDateEnd;
+      return matchesSearch && matchesArpenteur && matchesUtilisateur && matchesDateStart && matchesDateEnd;
     }).sort((a, b) => {
       const dateA = new Date(a.date_appel || 0).getTime();
       const dateB = new Date(b.date_appel || 0).getTime();
@@ -820,6 +831,56 @@ export default function RetoursAppel() {
         {/* Card avec filtres comme page Dossiers */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardHeader>
+            <div className="flex flex-col gap-4">
+              {/* Tabs pour les statuts */}
+              <div className="flex w-full border-b border-slate-700">
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("retour_appel")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "retour_appel"
+                      ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                      : "border-transparent text-slate-400 hover:text-blue-400 hover:bg-blue-500/5"
+                  }`}
+                >
+                  <Phone className="w-4 h-4" />
+                  Retour d'appel
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 ml-1">
+                    {retoursAppels.filter(r => r.statut === "Retour d'appel").length}
+                  </Badge>
+                </button>
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("message_laisse")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "message_laisse"
+                      ? "border-orange-500 text-orange-400 bg-orange-500/10"
+                      : "border-transparent text-slate-400 hover:text-orange-400 hover:bg-orange-500/5"
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Message laissé / Aucune réponse
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 ml-1">
+                    {retoursAppels.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length}
+                  </Badge>
+                </button>
+                <button
+                  role="tab"
+                  onClick={() => setActiveListTab("termine")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                    activeListTab === "termine"
+                      ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
+                      : "border-transparent text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5"
+                  }`}
+                >
+                  <Check className="w-4 h-4" />
+                  Terminé
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-1">
+                    {retoursAppels.filter(r => r.statut === "Terminé").length}
+                  </Badge>
+                </button>
+              </div>
+
             <div className="flex flex-wrap gap-3">
               <div className="relative flex-1 min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
@@ -905,43 +966,6 @@ export default function RetoursAppel() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Statuts ({filterStatuts.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                  <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterStatuts.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterStatuts([]);
-                    }}
-                  >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {["Retour d'appel", "Message laissé", "Aucune réponse", "Terminé"].map((statut) => (
-                    <DropdownMenuCheckboxItem
-                      key={statut}
-                      checked={filterStatuts.includes(statut)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterStatuts([...filterStatuts, statut]);
-                        } else {
-                          setFilterStatuts(filterStatuts.filter((s) => s !== statut));
-                        }
-                      }}
-                    >
-                      {statut}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               <div className="flex items-center gap-2">
                 <Label className="text-slate-400 text-sm whitespace-nowrap">Date d'appel:</Label>
                 <Input
@@ -961,14 +985,13 @@ export default function RetoursAppel() {
                 />
               </div>
 
-              {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterStatuts.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) &&
+              {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) &&
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setFilterArpenteurs([]);
                   setFilterUtilisateurs([]);
-                  setFilterStatuts([]);
                   setFilterDateStart("");
                   setFilterDateEnd("");
                   setSearchRetoursAppel("");
@@ -977,6 +1000,7 @@ export default function RetoursAppel() {
                 Réinitialiser les filtres
               </Button>
               }
+            </div>
             </div>
           </CardHeader>
         </Card>
