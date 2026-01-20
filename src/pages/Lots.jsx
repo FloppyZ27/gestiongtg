@@ -313,23 +313,55 @@ export default function Lots() {
           changes.push(`Rang: ${oldLot.rang || '-'} → ${lotData.rang || '-'}`);
         }
         
-        // Comparer les types d'opération
-        const oldTypesCount = oldLot.types_operation?.length || 0;
-        const newTypesCount = lotData.types_operation?.length || 0;
-        if (oldTypesCount !== newTypesCount) {
-          changes.push(`Types d'opération: ${oldTypesCount} → ${newTypesCount}`);
-        } else if (oldTypesCount > 0) {
-          // Vérifier si les types ont changé
-          const oldTypes = JSON.stringify(oldLot.types_operation);
-          const newTypes = JSON.stringify(lotData.types_operation);
-          if (oldTypes !== newTypes) {
-            changes.push('Types d\'opération modifiés');
+        // Comparer les types d'opération de manière détaillée
+        const oldTypes = oldLot.types_operation || [];
+        const newTypes = lotData.types_operation || [];
+        
+        // Détecter les ajouts
+        if (newTypes.length > oldTypes.length) {
+          const addedCount = newTypes.length - oldTypes.length;
+          const lastAdded = newTypes[newTypes.length - 1];
+          if (lastAdded) {
+            changes.push(`Ajout type d'opération: ${lastAdded.type_operation || 'N/A'} (${lastAdded.date_bpd || 'sans date'})`);
+          } else if (addedCount > 1) {
+            changes.push(`${addedCount} types d'opération ajoutés`);
+          }
+        }
+        
+        // Détecter les suppressions
+        if (newTypes.length < oldTypes.length) {
+          const removedCount = oldTypes.length - newTypes.length;
+          changes.push(`${removedCount} type(s) d'opération supprimé(s)`);
+        }
+        
+        // Détecter les modifications (même nombre mais contenus différents)
+        if (newTypes.length === oldTypes.length && newTypes.length > 0) {
+          for (let i = 0; i < newTypes.length; i++) {
+            const oldType = oldTypes[i];
+            const newType = newTypes[i];
+            
+            if (oldType.type_operation !== newType.type_operation) {
+              changes.push(`Type d'opération modifié: ${oldType.type_operation || 'N/A'} → ${newType.type_operation || 'N/A'}`);
+            }
+            if (oldType.date_bpd !== newType.date_bpd) {
+              changes.push(`Date BPD modifiée: ${oldType.date_bpd || 'sans date'} → ${newType.date_bpd || 'sans date'}`);
+            }
+            
+            // Comparer les concordances
+            const oldConcordances = oldType.concordances_anterieures || [];
+            const newConcordances = newType.concordances_anterieures || [];
+            
+            if (oldConcordances.length !== newConcordances.length) {
+              changes.push(`Concordances modifiées: ${oldConcordances.length} → ${newConcordances.length}`);
+            } else if (JSON.stringify(oldConcordances) !== JSON.stringify(newConcordances)) {
+              changes.push(`Concordances modifiées pour ${newType.type_operation || 'type d\'opération'}`);
+            }
           }
         }
       }
       
       const details = changes.length > 0 
-        ? `Lot ${lotData.numero_lot} - ${changes.join(', ')}`
+        ? changes.join(' • ')
         : `Lot ${lotData.numero_lot} modifié`;
       
       // Créer une entrée dans l'historique
