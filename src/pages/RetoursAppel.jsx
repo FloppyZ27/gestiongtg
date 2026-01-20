@@ -818,131 +818,169 @@ export default function RetoursAppel() {
           </DialogContent>
         </Dialog>
 
-        {/* Filtres et Recherche */}
-        <div className="mb-6 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-            <Input
-              placeholder="Rechercher par raison ou numéro de dossier..."
-              value={searchRetoursAppel}
-              onChange={(e) => setSearchRetoursAppel(e.target.value)}
-              className="pl-10 bg-slate-800 border-slate-700"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Filtre Arpenteur */}
-            <div className="space-y-2">
-              <Label className="text-sm">Arpenteur-géomètre</Label>
-              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
-                {ARPENTEURS.map(arpenteur => (
-                  <button
-                    key={arpenteur}
-                    onClick={() => setFilterArpenteurs(prev => 
-                      prev.includes(arpenteur) 
-                        ? prev.filter(a => a !== arpenteur)
-                        : [...prev, arpenteur]
-                    )}
-                    className={`text-xs px-2 py-1 rounded transition-colors ${
-                      filterArpenteurs.includes(arpenteur)
-                        ? 'bg-blue-500/50 text-blue-300 border border-blue-400'
-                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                    }`}
-                  >
-                    {arpenteur}
-                  </button>
-                ))}
+        {/* Card avec filtres comme page Dossiers */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <CardHeader>
+            <div className="flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[250px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={searchRetoursAppel}
+                  onChange={(e) => setSearchRetoursAppel(e.target.value)}
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                />
               </div>
-            </div>
 
-            {/* Filtre Utilisateur */}
-            <div className="space-y-2">
-              <Label className="text-sm">Utilisateur assigné</Label>
-              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
-                {users.map(u => (
-                  <button
-                    key={u.email}
-                    onClick={() => setFilterUtilisateurs(prev => 
-                      prev.includes(u.email) 
-                        ? prev.filter(ut => ut !== u.email)
-                        : [...prev, u.email]
-                    )}
-                    className={`text-xs px-2 py-1 rounded transition-colors ${
-                      filterUtilisateurs.includes(u.email)
-                        ? 'bg-emerald-500/50 text-emerald-300 border border-emerald-400'
-                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                    }`}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Arpenteurs ({filterArpenteurs.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterArpenteurs.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterArpenteurs([]);
+                    }}
                   >
-                    {u.full_name}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {ARPENTEURS.map((arp) => (
+                    <DropdownMenuCheckboxItem
+                      key={arp}
+                      checked={filterArpenteurs.includes(arp)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterArpenteurs([...filterArpenteurs, arp]);
+                        } else {
+                          setFilterArpenteurs(filterArpenteurs.filter((a) => a !== arp));
+                        }
+                      }}
+                    >
+                      {arp}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Filtre Statut */}
-            <div className="space-y-2">
-              <Label className="text-sm">Statut</Label>
-              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
-                {["Retour d'appel", "Message laissé", "Aucune réponse", "Terminé"].map(statut => (
-                  <button
-                    key={statut}
-                    onClick={() => setFilterStatuts(prev => 
-                      prev.includes(statut) 
-                        ? prev.filter(s => s !== statut)
-                        : [...prev, statut]
-                    )}
-                    className={`text-xs px-2 py-1 rounded transition-colors ${
-                      filterStatuts.includes(statut)
-                        ? 'bg-purple-500/50 text-purple-300 border border-purple-400'
-                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                    }`}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-56 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Utilisateurs ({filterUtilisateurs.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
+                  <DropdownMenuLabel>Filtrer par utilisateur</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterUtilisateurs.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterUtilisateurs([]);
+                    }}
                   >
-                    {statut}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {users.map((u) => (
+                    <DropdownMenuCheckboxItem
+                      key={u.email}
+                      checked={filterUtilisateurs.includes(u.email)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterUtilisateurs([...filterUtilisateurs, u.email]);
+                        } else {
+                          setFilterUtilisateurs(filterUtilisateurs.filter((ut) => ut !== u.email));
+                        }
+                      }}
+                    >
+                      {u.full_name}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Filtre Plage de dates */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-2">
-                <Label className="text-xs">Du</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <span>Statuts ({filterStatuts.length || 'Tous'})</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterStatuts.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterStatuts([]);
+                    }}
+                  >
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {["Retour d'appel", "Message laissé", "Aucune réponse", "Terminé"].map((statut) => (
+                    <DropdownMenuCheckboxItem
+                      key={statut}
+                      checked={filterStatuts.includes(statut)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterStatuts([...filterStatuts, statut]);
+                        } else {
+                          setFilterStatuts(filterStatuts.filter((s) => s !== statut));
+                        }
+                      }}
+                    >
+                      {statut}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="flex items-center gap-2">
+                <Label className="text-slate-400 text-sm whitespace-nowrap">Date d'appel:</Label>
                 <Input
                   type="date"
                   value={filterDateStart}
                   onChange={(e) => setFilterDateStart(e.target.value)}
-                  className="bg-slate-800 border-slate-700 h-8 text-xs"
+                  placeholder="Du"
+                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Au</Label>
+                <span className="text-slate-500">-</span>
                 <Input
                   type="date"
                   value={filterDateEnd}
                   onChange={(e) => setFilterDateEnd(e.target.value)}
-                  className="bg-slate-800 border-slate-700 h-8 text-xs"
+                  placeholder="Au"
+                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
                 />
               </div>
-            </div>
-          </div>
 
-          {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterStatuts.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) && (
-            <Button
-              size="sm"
-              onClick={() => {
-                setFilterArpenteurs([]);
-                setFilterUtilisateurs([]);
-                setFilterStatuts([]);
-                setFilterDateStart("");
-                setFilterDateEnd("");
-                setSearchRetoursAppel("");
-              }}
-              className="bg-slate-700 hover:bg-slate-600 text-slate-300 h-8"
-            >
-              <X className="w-3 h-3 mr-1" /> Réinitialiser les filtres
-            </Button>
-          )}
-        </div>
+              {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterStatuts.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) &&
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFilterArpenteurs([]);
+                  setFilterUtilisateurs([]);
+                  setFilterStatuts([]);
+                  setFilterDateStart("");
+                  setFilterDateEnd("");
+                  setSearchRetoursAppel("");
+                }}
+                className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+                Réinitialiser les filtres
+              </Button>
+              }
+            </div>
+          </CardHeader>
+        </Card>
 
         {/* Table des tous les retours d'appel */}
         <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg">
