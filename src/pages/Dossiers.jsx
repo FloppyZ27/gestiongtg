@@ -143,6 +143,8 @@ export default function Dossiers() {
   const [filterStatut, setFilterStatut] = useState([]);
   const [filterMandat, setFilterMandat] = useState([]);
   const [filterTache, setFilterTache] = useState([]);
+  const [filterDateDebut, setFilterDateDebut] = useState("");
+  const [filterDateFin, setFilterDateFin] = useState("");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [isCloseDossierDialogOpen, setIsCloseDossierDialogOpen] = useState(false);
@@ -1652,9 +1654,21 @@ export default function Dossiers() {
       const matchesStatut = filterStatut.length === 0 || filterStatut.includes(item.statut);
       const matchesMandat = filterMandat.length === 0 || filterMandat.includes(item.mandatInfo?.type_mandat);
       const matchesTache = filterTache.length === 0 || filterTache.includes(item.mandatInfo?.tache_actuelle);
-      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache;
+      
+      const matchesDateRange = (() => {
+        if (!filterDateDebut && !filterDateFin) return true;
+        if (!item.date_ouverture) return false;
+        const dateOuverture = new Date(item.date_ouverture);
+        const dateDebut = filterDateDebut ? new Date(filterDateDebut) : null;
+        const dateFin = filterDateFin ? new Date(filterDateFin) : null;
+        if (dateDebut && dateOuverture < dateDebut) return false;
+        if (dateFin && dateOuverture > dateFin) return false;
+        return true;
+      })();
+      
+      return matchesSearch && matchesArpenteur && matchesVille && matchesStatut && matchesMandat && matchesTache && matchesDateRange;
     });
-  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, getClientsNames]);
+  }, [dossiersWithMandats, searchTerm, filterArpenteur, filterVille, filterStatut, filterMandat, filterTache, filterDateDebut, filterDateFin, getClientsNames]);
 
   const handleSort = (field) => {
     setSortField(prevField => {
@@ -1669,7 +1683,7 @@ export default function Dossiers() {
   };
 
   const hasActiveFilters = () => {
-    return filterArpenteur.length > 0 || filterVille.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0;
+    return filterArpenteur.length > 0 || filterVille.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterDateDebut || filterDateFin;
   };
 
   const getSortIcon = (field) => {
@@ -3393,8 +3407,7 @@ export default function Dossiers() {
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
-              <CardTitle className="text-xl text-white">Liste des dossiers</CardTitle>
-              <div className="relative w-96">
+              <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher..."
@@ -3598,7 +3611,26 @@ export default function Dossiers() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0) &&
+              <div className="flex items-center gap-2">
+                <Label className="text-slate-400 text-sm whitespace-nowrap">Date ouverture:</Label>
+                <Input
+                  type="date"
+                  value={filterDateDebut}
+                  onChange={(e) => setFilterDateDebut(e.target.value)}
+                  placeholder="Du"
+                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                />
+                <span className="text-slate-500">-</span>
+                <Input
+                  type="date"
+                  value={filterDateFin}
+                  onChange={(e) => setFilterDateFin(e.target.value)}
+                  placeholder="Au"
+                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                />
+              </div>
+
+              {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) &&
               <Button
                 variant="outline"
                 size="sm"
@@ -3608,6 +3640,8 @@ export default function Dossiers() {
                   setFilterMandat([]);
                   setFilterTache([]);
                   setFilterVille([]);
+                  setFilterDateDebut("");
+                  setFilterDateFin("");
                 }}
                 className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
 
