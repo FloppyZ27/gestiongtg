@@ -1014,7 +1014,16 @@ export default function RetoursAppel() {
                         {retour.raison ? (
                           <>
                             <span className="line-clamp-1 cursor-help">{retour.raison}</span>
-                            <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-50 text-slate-300 text-xs whitespace-normal break-words shadow-lg">
+                            <div className="fixed hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-[9999] text-slate-300 text-xs whitespace-normal break-words shadow-lg" style={{
+                              top: event?.target?.getBoundingClientRect?.()?.top + 30 + 'px',
+                              left: event?.target?.getBoundingClientRect?.()?.left + 'px'
+                            }} onMouseEnter={(e) => {
+                              const rect = e.currentTarget.previousElementSibling?.getBoundingClientRect?.();
+                              if (rect) {
+                                e.currentTarget.style.top = (rect.top + 30) + 'px';
+                                e.currentTarget.style.left = rect.left + 'px';
+                              }
+                            }}>
                               {retour.raison}
                             </div>
                           </>
