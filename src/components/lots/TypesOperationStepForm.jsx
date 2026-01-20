@@ -552,20 +552,6 @@ export default function TypesOperationStepForm({
                     </div>
                     )}
                     </div>
-
-              {editingTypeIndex !== null && (
-                <div className="flex gap-2 pt-2 border-t border-slate-700">
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleAddTypeOperation}
-                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-xs"
-                  >
-                    <Check className="w-3 h-3 mr-1" /> Modifier le type
-                  </Button>
-                </div>
-              )}
             </div>
 
 
