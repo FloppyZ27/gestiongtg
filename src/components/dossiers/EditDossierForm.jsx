@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import MandatTabs from "./MandatTabs";
 import CommentairesSection from "./CommentairesSection";
+import DocumentsStepForm from "../mandat/DocumentsStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -89,7 +90,9 @@ export default function EditDossierForm({
   getLotById,
   setIsClientFormDialogOpen,
   setClientTypeForForm,
-  setViewingClientDetails
+  setViewingClientDetails,
+  calculerProchainNumeroDossier,
+  editingDossier
 }) {
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [activeContactTab, setActiveContactTab] = useState("clients");
@@ -114,6 +117,7 @@ export default function EditDossierForm({
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(false);
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
+  const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -166,7 +170,7 @@ export default function EditDossierForm({
         {/* Main content - 70% */}
         <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white">Modifier le dossier</h2>
+            <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
             {formData.numero_dossier && formData.arpenteur_geometre && (
               <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
                 <span>
@@ -223,7 +227,10 @@ export default function EditDossierForm({
                     <div className="space-y-2 border-r border-slate-700 pr-4">
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                        <Select value={formData.arpenteur_geometre} onValueChange={(value) => setFormData({...formData, arpenteur_geometre: value})}>
+                        <Select value={formData.arpenteur_geometre} onValueChange={(value) => {
+                          const newNumeroDossier = !editingDossier && calculerProchainNumeroDossier ? calculerProchainNumeroDossier(value) : formData.numero_dossier;
+                          setFormData({...formData, arpenteur_geometre: value, numero_dossier: newNumeroDossier});
+                        }}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                             <SelectValue placeholder="Sélectionner" />
                           </SelectTrigger>
@@ -231,6 +238,18 @@ export default function EditDossierForm({
                             {ARPENTEURS.map((arpenteur) => (
                               <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
                             ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+                        <Select value={formData.place_affaire || ""} onValueChange={(value) => setFormData({...formData, place_affaire: value})}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                            <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -663,8 +682,10 @@ export default function EditDossierForm({
                               variant="ghost"
                               onClick={() => {
                                 const indexToRemove = parseInt(activeTabMandat);
-                                setMandatIndexToDelete(indexToRemove);
-                                setShowDeleteMandatConfirm(true);
+                                if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
+                                  removeMandat(indexToRemove);
+                                  setActiveTabMandat(Math.max(0, indexToRemove - 1).toString());
+                                }
                               }}
                               className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
                             >
@@ -706,6 +727,17 @@ export default function EditDossierForm({
                 </CardContent>
               )}
             </Card>
+
+            {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
+            {!editingDossier && formData.numero_dossier && formData.arpenteur_geometre && (
+              <DocumentsStepForm
+                arpenteurGeometre={formData.arpenteur_geometre}
+                numeroDossier={formData.numero_dossier}
+                isCollapsed={documentsCollapsed}
+                onToggleCollapse={() => setDocumentsCollapsed(!documentsCollapsed)}
+                onDocumentsChange={() => {}}
+              />
+            )}
           </form>
         </div>
 
@@ -800,7 +832,7 @@ export default function EditDossierForm({
           Annuler
         </Button>
         <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-          Modifier
+          {editingDossier ? "Modifier" : "Créer"}
         </Button>
       </div>
     </motion.div>
