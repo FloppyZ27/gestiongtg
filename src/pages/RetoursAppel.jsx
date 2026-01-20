@@ -427,7 +427,7 @@ export default function RetoursAppel() {
       ...retour,
       dossier
     };
-  }).filter(item => item.dossier); // Filtrer les retours sans dossier associé
+  });
 
   const sortedAllRetoursAppels = [...allRetoursAppelsWithDossier].sort((a, b) => {
     const dateA = new Date(a.date_appel || 0).getTime();
