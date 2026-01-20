@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -1339,6 +1339,7 @@ export default function EditDossierForm({
                                     )}
                                   </div>
                                 </TableHead>
+                                <TableHead className="text-slate-300">Minute référence</TableHead>
                                 <TableHead className="text-slate-300 w-12"></TableHead>
                               </TableRow>
                             </TableHeader>
@@ -1394,6 +1395,7 @@ export default function EditDossierForm({
                                       {minute.date_minute ? format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr }) : "-"}
                                     </TableCell>
                                     <TableCell className="text-slate-300">{minute.type_minute || "Initiale"}</TableCell>
+                                    <TableCell className="text-slate-300">{minute.minute_reference || "-"}</TableCell>
                                     <TableCell className="text-right">
                                       <button 
                                         type="button" 
@@ -1404,7 +1406,7 @@ export default function EditDossierForm({
                                         }}
                                         className="text-slate-400 hover:text-red-400 transition-colors"
                                       >
-                                        <X className="w-4 h-4" />
+                                        <Trash className="w-4 h-4" />
                                       </button>
                                     </TableCell>
                                   </TableRow>
