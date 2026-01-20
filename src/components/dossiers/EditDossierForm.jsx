@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,7 +98,10 @@ export default function EditDossierForm({
   calculerProchainNumeroDossier,
   editingDossier,
   onOpenNewLotDialog,
-  setEditingClient
+  setEditingClient,
+  setEditingLot,
+  setNewLotForm,
+  setLotActionLogs
 }) {
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [activeContactTab, setActiveContactTab] = useState("clients");
@@ -1087,26 +1091,43 @@ export default function EditDossierForm({
                                         const lot = getLotById(lotId);
                                         return (
                                           <div 
-                                            key={lotId} 
-                                            className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                           key={lotId} 
+                                           className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                           onClick={async () => {
+                                             if (onOpenNewLotDialog && lot) {
+                                               const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: lot.id }, '-created_date');
+                                               if (setEditingLot) setEditingLot(lot);
+                                               if (setNewLotForm) {
+                                                 setNewLotForm({
+                                                   numero_lot: lot.numero_lot || "",
+                                                   circonscription_fonciere: lot.circonscription_fonciere || "",
+                                                   cadastre: lot.cadastre || "Québec",
+                                                   rang: lot.rang || "",
+                                                   types_operation: lot.types_operation || []
+                                                 });
+                                               }
+                                               if (setLotActionLogs) setLotActionLogs(logs);
+                                               onOpenNewLotDialog(index);
+                                             }
+                                           }}
                                           >
-                                            <button 
-                                              type="button" 
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                removeLotFromMandat(index, lotId);
-                                              }}
-                                              className="absolute right-1 top-1 hover:text-red-400"
-                                            >
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <div className="pr-5 space-y-0.5">
-                                              <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
-                                              <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
-                                              <p className="text-slate-500">
-                                                {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
-                                              </p>
-                                            </div>
+                                           <button 
+                                             type="button" 
+                                             onClick={(e) => {
+                                               e.stopPropagation();
+                                               removeLotFromMandat(index, lotId);
+                                             }}
+                                             className="absolute right-1 top-1 hover:text-red-400"
+                                           >
+                                             <X className="w-3 h-3" />
+                                           </button>
+                                           <div className="pr-5 space-y-0.5">
+                                             <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
+                                             <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
+                                             <p className="text-slate-500">
+                                               {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
+                                             </p>
+                                           </div>
                                           </div>
                                         );
                                       })}
@@ -1620,7 +1641,7 @@ export default function EditDossierForm({
               </TabsList>
               
               <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
-                <CommentairesSection dossierId={formData.id} dossierTemporaire={false} />
+                <CommentairesSection dossierId={editingDossier?.id} dossierTemporaire={false} />
               </TabsContent>
               
               <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">

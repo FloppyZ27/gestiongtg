@@ -2137,6 +2137,9 @@ export default function Dossiers() {
                     setIsNewLotDialogOpen(true);
                   }}
                   setEditingClient={setEditingClientForForm}
+                  setEditingLot={setEditingLot}
+                  setNewLotForm={setNewLotForm}
+                  setLotActionLogs={setLotActionLogs}
                 />
               </DialogContent>
             </Dialog>
