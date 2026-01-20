@@ -139,7 +139,7 @@ export default function EditDossierForm({
     date_appel: new Date().toISOString().split('T')[0],
     utilisateur_assigne: "",
     raison: "",
-    statut: "En attente"
+    statut: "Retour d'appel"
   });
   const [retoursAppel, setRetoursAppel] = useState([]);
 
@@ -1637,8 +1637,8 @@ export default function EditDossierForm({
                                           {retour.raison || "-"}
                                         </div>
                                       </TooltipTrigger>
-                                      {retour.raison && retour.raison.length > 50 && (
-                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm">
+                                      {retour.raison && (
+                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
                                           {retour.raison}
                                         </TooltipContent>
                                       )}
@@ -1663,10 +1663,10 @@ export default function EditDossierForm({
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
                                       <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                                      <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
                                       <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
-                                      <SelectItem value="En attente" className="text-white text-xs">En attente</SelectItem>
-                                      <SelectItem value="Reporté" className="text-white text-xs">Reporté</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </TableCell>
