@@ -3496,7 +3496,7 @@ export default function Dossiers() {
                           <TableCell className="text-slate-300">
                             {dossier.mandatInfo?.type_mandat ? (
                               <Badge className={`${getMandatColor(dossier.mandatInfo.type_mandat)} border text-xs`}>
-                                {dossier.mandatInfo.type_mandat}
+                                {getAbbreviatedMandatType(dossier.mandatInfo.type_mandat)}
                               </Badge>
                             ) : (
                               <span className="text-slate-600 text-xs">-</span>
