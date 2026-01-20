@@ -347,8 +347,47 @@ export default function TypesOperationStepForm({
 
                 {!concordancesCollapsed && (
                   <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-2 w-full">
-                  {/* Colonne gauche - Formulaire et tableau */}
+                  {/* Colonne gauche - Tableau et formulaire */}
                   <div className="space-y-2">
+                    {/* Tableau des concordances */}
+                    {newTypeOperation.concordances_anterieures.length > 0 && (
+                      <div className="border border-slate-700 rounded overflow-hidden max-h-48 overflow-y-auto">
+                        <Table>
+                          <TableHeader className="sticky top-0">
+                            <TableRow className="bg-slate-800/50 border-slate-700">
+                              <TableHead className="text-slate-400 text-xs py-1">N° Lot</TableHead>
+                              <TableHead className="text-slate-400 text-xs py-1">Circ.</TableHead>
+                              <TableHead className="text-slate-400 text-xs py-1">Cadastre</TableHead>
+                              <TableHead className="text-slate-400 text-xs py-1">Rang</TableHead>
+                              <TableHead className="text-slate-400 text-xs py-1 text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {newTypeOperation.concordances_anterieures.map((conc, index) => (
+                              <TableRow key={index} className="border-slate-800">
+                                <TableCell className="text-white text-xs py-1">{conc.numero_lot}{conc.est_partie ? " Ptie" : ""}</TableCell>
+                                <TableCell className="text-slate-300 text-xs py-1">{conc.circonscription_fonciere}</TableCell>
+                                <TableCell className="text-slate-300 text-xs py-1">{conc.cadastre || "-"}</TableCell>
+                                <TableCell className="text-slate-300 text-xs py-1">{conc.rang || "-"}</TableCell>
+                                <TableCell className="text-right py-1">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleRemoveConcordance(index)}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 w-5 p-0"
+                                    disabled={disabled}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+
                     {/* Formulaire d'ajout */}
                     <div className="p-2 bg-slate-700/30 border border-slate-600 rounded-lg space-y-2">
                       <div className="grid grid-cols-[1fr_auto_1fr] gap-2">
@@ -437,45 +476,6 @@ export default function TypesOperationStepForm({
                         {editingConcordanceIndex !== null ? "Modifier" : "Ajouter"}
                       </Button>
                     </div>
-
-                    {/* Tableau des concordances */}
-                    {newTypeOperation.concordances_anterieures.length > 0 && (
-                      <div className="border border-slate-700 rounded overflow-hidden max-h-48 overflow-y-auto">
-                        <Table>
-                          <TableHeader className="sticky top-0">
-                            <TableRow className="bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-400 text-xs py-1">N° Lot</TableHead>
-                              <TableHead className="text-slate-400 text-xs py-1">Circ.</TableHead>
-                              <TableHead className="text-slate-400 text-xs py-1">Cadastre</TableHead>
-                              <TableHead className="text-slate-400 text-xs py-1">Rang</TableHead>
-                              <TableHead className="text-slate-400 text-xs py-1 text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {newTypeOperation.concordances_anterieures.map((conc, index) => (
-                              <TableRow key={index} className="border-slate-800">
-                                <TableCell className="text-white text-xs py-1">{conc.numero_lot}{conc.est_partie ? " Ptie" : ""}</TableCell>
-                                <TableCell className="text-slate-300 text-xs py-1">{conc.circonscription_fonciere}</TableCell>
-                                <TableCell className="text-slate-300 text-xs py-1">{conc.cadastre || "-"}</TableCell>
-                                <TableCell className="text-slate-300 text-xs py-1">{conc.rang || "-"}</TableCell>
-                                <TableCell className="text-right py-1">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleRemoveConcordance(index)}
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 w-5 p-0"
-                                    disabled={disabled}
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
                   </div>
 
                   {/* Séparateur */}
