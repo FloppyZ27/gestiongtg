@@ -121,12 +121,6 @@ export default function EditDossierForm({
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
-  const [addressSearchQuery, setAddressSearchQuery] = useState("");
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
-  const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
-  const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
-  const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(false);
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
