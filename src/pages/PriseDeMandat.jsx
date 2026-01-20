@@ -211,31 +211,20 @@ export default function PriseDeMandat() {
     circonscription_fonciere: "",
     cadastre: "Québec",
     rang: "",
-    date_bpd: "",
-    type_operation: "",
-    concordances_anterieures: [],
-    document_pdf_url: "",
+    types_operation: []
   });
-  const [uploadingLotPdf, setUploadingLotPdf] = useState(false);
   const [availableCadastresForNewLot, setAvailableCadastresForNewLot] = useState([]);
   const [commentairesTemporairesLot, setCommentairesTemporairesLot] = useState([]);
   const [sidebarTabLot, setSidebarTabLot] = useState("commentaires");
   const [editingLot, setEditingLot] = useState(null);
   const [initialLotForm, setInitialLotForm] = useState(null);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
-  const [lotConcordanceCollapsed, setLotConcordanceCollapsed] = useState(false);
+  const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
   const [lotDocumentsCollapsed, setLotDocumentsCollapsed] = useState(false);
   const [isImportingD01, setIsImportingD01] = useState(false);
   const [isDragOverD01, setIsDragOverD01] = useState(false);
-  const [currentConcordanceForm, setCurrentConcordanceForm] = useState({
-    circonscription_fonciere: "",
-    cadastre: "",
-    numero_lot: "",
-    rang: "",
-    est_partie: false
-  });
-  const [availableCadastresForConcordance, setAvailableCadastresForConcordance] = useState([]);
-  const [lotListSearchTerm, setLotListSearchTerm] = useState("");
+  const [sidebarCollapsedLot, setSidebarCollapsedLot] = useState(false);
+  const [lotActionLogs, setLotActionLogs] = useState([]);
   const [isAddMinuteDialogOpen, setIsAddMinuteDialogOpen] = useState(false);
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
   const [newMinuteForm, setNewMinuteForm] = useState({
@@ -924,19 +913,6 @@ export default function PriseDeMandat() {
     mutationFn: async (lotData) => {
       const newLot = await base44.entities.Lot.create(lotData);
       
-      // Créer le dossier SharePoint pour le lot
-      if (lotData.numero_lot) {
-        try {
-          await base44.functions.invoke('sharepoint', {
-            action: 'createFolder',
-            folderPath: `CONSULTATION/RECHERCHES/LOTS/${lotData.numero_lot}`
-          });
-        } catch (error) {
-          console.error("Erreur création dossier SharePoint pour le lot:", error);
-          // Ne pas bloquer la création du lot si SharePoint échoue
-        }
-      }
-      
       // Créer les commentaires temporaires si présents
       if (commentairesTemporairesLot.length > 0) {
         const commentairePromises = commentairesTemporairesLot.map(comment =>
@@ -954,10 +930,10 @@ export default function PriseDeMandat() {
       await base44.entities.ActionLog.create({
         utilisateur_email: user?.email || "",
         utilisateur_nom: user?.full_name || "Système",
-        action: "Création du lot",
+        action: "Création",
         entite: "Lot",
         entite_id: newLot.id,
-        details: `Lot ${lotData.numero_lot} créé dans ${lotData.circonscription_fonciere}`,
+        details: `Lot ${lotData.numero_lot} créé`
       });
       
       return newLot;
@@ -968,6 +944,100 @@ export default function PriseDeMandat() {
       setIsNewLotDialogOpen(false);
       resetLotForm();
       setCommentairesTemporairesLot([]);
+    },
+  });
+
+  const updateLotMutation = useMutation({
+    mutationFn: async ({ id, lotData }) => {
+      // Récupérer l'ancien lot pour comparer
+      const oldLot = lots.find(l => l.id === id);
+      
+      const updatedLot = await base44.entities.Lot.update(id, lotData);
+      
+      // Déterminer les changements
+      const changes = [];
+      if (oldLot) {
+        if (oldLot.numero_lot !== lotData.numero_lot) {
+          changes.push(`Numéro de lot: ${oldLot.numero_lot} → ${lotData.numero_lot}`);
+        }
+        if (oldLot.circonscription_fonciere !== lotData.circonscription_fonciere) {
+          changes.push(`Circonscription: ${oldLot.circonscription_fonciere} → ${lotData.circonscription_fonciere}`);
+        }
+        if (oldLot.cadastre !== lotData.cadastre) {
+          changes.push(`Cadastre: ${oldLot.cadastre || '-'} → ${lotData.cadastre || '-'}`);
+        }
+        if (oldLot.rang !== lotData.rang) {
+          changes.push(`Rang: ${oldLot.rang || '-'} → ${lotData.rang || '-'}`);
+        }
+        
+        // Comparer les types d'opération de manière détaillée
+        const oldTypes = oldLot.types_operation || [];
+        const newTypes = lotData.types_operation || [];
+        
+        // Détecter les ajouts
+        if (newTypes.length > oldTypes.length) {
+          const addedCount = newTypes.length - oldTypes.length;
+          const lastAdded = newTypes[newTypes.length - 1];
+          if (lastAdded) {
+            changes.push(`Ajout type d'opération: ${lastAdded.type_operation || 'N/A'} (${lastAdded.date_bpd || 'sans date'})`);
+          } else if (addedCount > 1) {
+            changes.push(`${addedCount} types d'opération ajoutés`);
+          }
+        }
+        
+        // Détecter les suppressions
+        if (newTypes.length < oldTypes.length) {
+          const removedCount = oldTypes.length - newTypes.length;
+          changes.push(`${removedCount} type(s) d'opération supprimé(s)`);
+        }
+        
+        // Détecter les modifications (même nombre mais contenus différents)
+        if (newTypes.length === oldTypes.length && newTypes.length > 0) {
+          for (let i = 0; i < newTypes.length; i++) {
+            const oldType = oldTypes[i];
+            const newType = newTypes[i];
+            
+            if (oldType.type_operation !== newType.type_operation) {
+              changes.push(`Type d'opération modifié: ${oldType.type_operation || 'N/A'} → ${newType.type_operation || 'N/A'}`);
+            }
+            if (oldType.date_bpd !== newType.date_bpd) {
+              changes.push(`Date BPD modifiée: ${oldType.date_bpd || 'sans date'} → ${newType.date_bpd || 'sans date'}`);
+            }
+            
+            // Comparer les concordances
+            const oldConcordances = oldType.concordances_anterieures || [];
+            const newConcordances = newType.concordances_anterieures || [];
+            
+            if (oldConcordances.length !== newConcordances.length) {
+              changes.push(`Concordances modifiées: ${oldConcordances.length} → ${newConcordances.length}`);
+            } else if (JSON.stringify(oldConcordances) !== JSON.stringify(newConcordances)) {
+              changes.push(`Concordances modifiées pour ${newType.type_operation || 'type d\'opération'}`);
+            }
+          }
+        }
+      }
+      
+      const details = changes.length > 0 
+        ? changes.join(' • ')
+        : `Lot ${lotData.numero_lot} modifié`;
+      
+      // Créer une entrée dans l'historique
+      await base44.entities.ActionLog.create({
+        utilisateur_email: user?.email || '',
+        utilisateur_nom: user?.full_name || '',
+        action: 'Modification',
+        entite: 'Lot',
+        entite_id: id,
+        details
+      });
+      
+      return updatedLot;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['actionLogs'] });
+      setIsNewLotDialogOpen(false);
+      resetLotForm();
     },
   });
 
@@ -1609,8 +1679,7 @@ export default function PriseDeMandat() {
     
     if (editingLot) {
       // Mode modification
-      await base44.entities.Lot.update(editingLot.id, newLotForm);
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      await updateLotMutation.mutateAsync({ id: editingLot.id, lotData: newLotForm });
       setIsNewLotDialogOpen(false);
       resetLotForm();
       setCommentairesTemporairesLot([]);
@@ -1755,18 +1824,16 @@ export default function PriseDeMandat() {
       circonscription_fonciere: "",
       cadastre: "Québec",
       rang: "",
-      date_bpd: "",
-      type_operation: "",
-      concordances_anterieures: [],
-      document_pdf_url: "",
+      types_operation: []
     });
     setAvailableCadastresForNewLot([]);
     setCommentairesTemporairesLot([]);
     setEditingLot(null);
     setInitialLotForm(null);
     setLotInfoCollapsed(false);
-    setLotConcordanceCollapsed(false);
+    setTypesOperationCollapsed(false);
     setLotDocumentsCollapsed(false);
+    setLotActionLogs([]);
   };
   // END NEW FUNCTION
 
@@ -2031,77 +2098,18 @@ export default function PriseDeMandat() {
 
   // NEW FUNCTIONS
   const handleLotCirconscriptionChange = (value) => {
-    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" })); // Reset cadastre when circonscription changes
+    setNewLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
     setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
-  };
-
-  const handleLotFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setUploadingLotPdf(true);
-    try {
-      const response = await base44.storage.upload({
-        file: file,
-        folder: "lots_documents",
-      });
-      setNewLotForm(prev => ({ ...prev, document_pdf_url: response.url }));
-      alert("Fichier PDF téléchargé avec succès !");
-    } catch (error) {
-      console.error("Erreur lors du téléchargement du fichier:", error);
-      alert("Échec du téléchargement du fichier PDF.");
-    } finally {
-      setUploadingLotPdf(false);
-    }
-  };
-  
-  const addConcordanceFromForm = () => {
-    if (!currentConcordanceForm.numero_lot || !currentConcordanceForm.circonscription_fonciere || !currentConcordanceForm.cadastre) {
-      setShowConcordanceWarning(true);
-      return;
-    }
-    
-    setNewLotForm(prev => ({
-      ...prev,
-      concordances_anterieures: [
-        ...(prev.concordances_anterieures || []),
-        { ...currentConcordanceForm }
-      ]
-    }));
-    
-    // Reset form
-    setCurrentConcordanceForm({
-      circonscription_fonciere: "",
-      cadastre: "",
-      numero_lot: "",
-      rang: "",
-      est_partie: false
-    });
-    setAvailableCadastresForConcordance([]);
-  };
-  
-  const removeConcordance = (index) => {
-    setConcordanceIndexToDelete(index);
-    setShowDeleteConcordanceConfirm(true);
-  };
-  
-  const handleConcordanceCirconscriptionChange = (value) => {
-    setCurrentConcordanceForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: "" }));
-    setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
   };
 
   const handleD01Import = async (file) => {
     setIsImportingD01(true);
     try {
-      // Lire le contenu du fichier
       const fileContent = await file.text();
-      
-      // Parser le fichier .d01
       const lines = fileContent.split('\n');
       const lotLine = lines.find(line => line.startsWith('LO'));
       const suLines = lines.filter(line => line.startsWith('SU'));
       
-      // Extraire uniquement les lignes CO entre deux lignes SU
       let coLines = [];
       if (suLines.length >= 2) {
         const firstSuIndex = lines.indexOf(suLines[0]);
@@ -2110,42 +2118,45 @@ export default function PriseDeMandat() {
       }
       
       const suLine = suLines[0];
-      
       let extractedData = {};
       
       if (lotLine) {
         const lotParts = lotLine.split(';');
-        // Le numéro de lot est entre les deux premiers ";"
         extractedData.numero_lot = lotParts[1] || '';
       }
       
       if (suLine) {
         const suParts = suLine.split(';');
-        // La circonscription est le deuxième élément
         extractedData.circonscription_fonciere = suParts[2] || '';
-        // La date BPD est le troisième élément
-        extractedData.date_bpd = suParts[3] || '';
+        const dateBpd = suParts[3] || '';
+        if (dateBpd) {
+          if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
+            const year = dateBpd.substring(0, 4);
+            const month = dateBpd.substring(4, 6);
+            const day = dateBpd.substring(6, 8);
+            extractedData.date_bpd = `${year}-${month}-${day}`;
+          } else {
+            extractedData.date_bpd = dateBpd;
+          }
+        }
       }
       
-      // Le cadastre est toujours "Québec" pour les imports .d01
       extractedData.cadastre = 'Québec';
+      const concordances_anterieures = [];
       
-      // Parser les concordances antérieures (lignes CO entre deux lignes SU)
-      extractedData.concordances_anterieures = [];
       if (coLines.length > 0) {
         coLines.forEach(coLine => {
           const coParts = coLine.split(';');
-          const cadastreCode = coParts[1] || ''; // Deuxième élément - code numérique
-          const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec'; // Convertir le code en nom
-          let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : ''; // Troisième élément
-          // Supprimer le premier chiffre si c'est un "0" (ex: "Rang 01" devient "Rang 1", mais "Rang 10" reste "Rang 10")
+          const cadastreCode = coParts[1] || '';
+          const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
+          let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
           if (rang.match(/^Rang 0(\d+)$/)) {
             rang = rang.replace(/^Rang 0/, 'Rang ');
           }
-          const numeroLot = coParts[3] || ''; // Quatrième élément
-          const estPartie = coParts[4] === 'O'; // Cinquième élément: 'O' = coché, 'N' = pas coché
+          const numeroLot = coParts[3] || '';
+          const estPartie = coParts[4] === 'O';
           
-          extractedData.concordances_anterieures.push({
+          concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
             cadastre: cadastre,
             numero_lot: numeroLot,
@@ -2155,32 +2166,27 @@ export default function PriseDeMandat() {
         });
       }
       
-      const extractResponse = { status: "success", output: extractedData };
-
-      if (extractResponse.status === "success" && extractResponse.output) {
-        const data = extractResponse.output;
-        
-        // Remplir le formulaire avec les données extraites
-        setNewLotForm(prev => ({
-          ...prev,
-          numero_lot: data.numero_lot || prev.numero_lot,
-          circonscription_fonciere: data.circonscription_fonciere || prev.circonscription_fonciere,
-          cadastre: data.cadastre || prev.cadastre,
-          rang: data.rang || prev.rang,
-          date_bpd: data.date_bpd || prev.date_bpd,
-          type_operation: data.type_operation || prev.type_operation,
-          concordances_anterieures: data.concordances_anterieures || prev.concordances_anterieures
-        }));
-
-        // Mettre à jour les cadastres disponibles si une circonscription a été détectée
-        if (data.circonscription_fonciere) {
-          setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[data.circonscription_fonciere] || []);
-        }
-
-        setShowD01ImportSuccess(true);
-      } else {
-        alert("Erreur lors de l'extraction des données du fichier .d01");
+      // Créer un type d'opération avec la date BPD et les concordances
+      const typeOperation = {
+        type_operation: "Remplacement",
+        date_bpd: extractedData.date_bpd || '',
+        concordances_anterieures: concordances_anterieures
+      };
+      
+      // Mettre à jour les cadastres disponibles AVANT de set formData
+      if (extractedData.circonscription_fonciere) {
+        setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
       }
+      
+      setNewLotForm(prev => ({
+        ...prev,
+        numero_lot: extractedData.numero_lot || prev.numero_lot,
+        circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
+        cadastre: 'Québec',
+        types_operation: [typeOperation]
+      }));
+      
+      setShowD01ImportSuccess(true);
     } catch (error) {
       console.error("Erreur import .d01:", error);
       alert("Erreur lors de l'importation du fichier .d01");
@@ -4440,27 +4446,29 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                                      <div 
                                                        key={lotId} 
                                                        className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
-                                                       onClick={() => {
-                                                          setEditingLot(lot);
-                                                          const formState = {
-                                                            numero_lot: lot?.numero_lot || "",
-                                                            circonscription_fonciere: lot?.circonscription_fonciere || "",
-                                                            cadastre: lot?.cadastre || "Québec",
-                                                            rang: lot?.rang || "",
-                                                            date_bpd: lot?.date_bpd || "",
-                                                            type_operation: lot?.type_operation || "",
-                                                            concordances_anterieures: lot?.concordances_anterieures || [],
-                                                            document_pdf_url: lot?.document_pdf_url || "",
-                                                          };
-                                                          setNewLotForm(formState);
-                                                          setInitialLotForm(formState);
-                                                          setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot?.circonscription_fonciere] || []);
-                                                          setCommentairesTemporairesLot([]);
-                                                          setLotInfoCollapsed(false);
-                                                          setLotConcordanceCollapsed(false);
-                                                          setLotDocumentsCollapsed(false);
-                                                          setIsNewLotDialogOpen(true);
-                                                        }}
+                                                       onClick={async () => {
+                                                         setEditingLot(lot);
+                                                         const formState = {
+                                                           numero_lot: lot?.numero_lot || "",
+                                                           circonscription_fonciere: lot?.circonscription_fonciere || "",
+                                                           cadastre: lot?.cadastre || "Québec",
+                                                           rang: lot?.rang || "",
+                                                           types_operation: lot?.types_operation || []
+                                                         };
+                                                         setNewLotForm(formState);
+                                                         setInitialLotForm(formState);
+                                                         setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[lot?.circonscription_fonciere] || []);
+                                                         setCommentairesTemporairesLot([]);
+                                                         setLotInfoCollapsed(true);
+                                                         setTypesOperationCollapsed(true);
+                                                         setLotDocumentsCollapsed(true);
+
+                                                         // Charger l'historique du lot
+                                                         const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: lot.id }, '-created_date');
+                                                         setLotActionLogs(logs);
+
+                                                         setIsNewLotDialogOpen(true);
+                                                       }}
                                                      >
                                                        <button 
                                                          type="button" 
@@ -5921,14 +5929,13 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
         <Dialog open={isNewLotDialogOpen} onOpenChange={(open) => {
           if (!open) {
             let hasChanges = false;
-            if (editingLot) { // In edit mode
+            if (editingLot) {
                 hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
-            } else { // In create mode
+            } else {
                 hasChanges = newLotForm.numero_lot || 
                   newLotForm.circonscription_fonciere || 
                   newLotForm.rang || 
-                  newLotForm.concordances_anterieures.length > 0 || 
-                  newLotForm.document_pdf_url ||
+                  newLotForm.types_operation.length > 0 ||
                   commentairesTemporairesLot.length > 0;
             }
             
@@ -5939,6 +5946,14 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
               resetLotForm();
             }
           } else {
+            // Charger l'historique du lot lors de l'ouverture en mode édition
+            if (open && editingLot) {
+              const loadActionLogs = async () => {
+                const logs = await base44.entities.ActionLog.filter({ entite: 'Lot', entite_id: editingLot.id }, '-created_date');
+                setLotActionLogs(logs);
+              };
+              loadActionLogs();
+            }
             setIsNewLotDialogOpen(open);
           }
         }}>
@@ -5961,412 +5976,70 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     <h2 className="text-xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
                   </div>
                   
-                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-2">
-                    {/* Section Import .d01 */}
-                    <div 
-                      className={`border border-dashed rounded-lg p-2 transition-all ${
-                        isDragOverD01 
-                          ? 'border-emerald-500 bg-emerald-500/10' 
-                          : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
-                      }`}
-                      onDragOver={handleD01DragOver}
-                      onDragLeave={handleD01DragLeave}
-                      onDrop={handleD01Drop}
-                    >
-                      {isImportingD01 ? (
-                        <div className="flex items-center justify-center gap-2 text-teal-400">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span className="text-xs">Importation...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <Upload className="w-4 h-4 text-slate-400" />
-                            <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
-                          </div>
-                          <label>
-                            <input
-                              type="file"
-                              accept=".d01"
-                              onChange={handleD01FileSelect}
-                              className="hidden"
-                            />
-                            <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
-                              Parcourir
-                            </span>
-                          </label>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Section 1: Informations du lot */}
-                    <Card className="border-slate-700 bg-slate-800/30">
-                       <CardHeader 
-                         className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1 bg-blue-900/20"
-                         onClick={() => setLotInfoCollapsed(!lotInfoCollapsed)}
-                       >
-                         <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2">
-                             <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
-                               <Grid3x3 className="w-3 h-3 text-blue-400" />
-                             </div>
-                             <CardTitle className="text-blue-300 text-sm">Informations du lot</CardTitle>
-                           </div>
-                           {lotInfoCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                         </div>
-                       </CardHeader>
-
-                       {!lotInfoCollapsed && (
-                         <CardContent className="pt-1 pb-1.5 space-y-1.5">
-                           <div className="grid grid-cols-2 gap-2">
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
-                               <Input
-                                 value={newLotForm.numero_lot}
-                                 onChange={(e) => setNewLotForm({...newLotForm, numero_lot: e.target.value})}
-                                 required
-                                 placeholder="Ex: 1234-5678"
-                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
-                               />
-                             </div>
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Rang</Label>
-                               <Input
-                                 value={newLotForm.rang}
-                                 onChange={(e) => setNewLotForm({...newLotForm, rang: e.target.value})}
-                                 placeholder="Ex: Rang 4"
-                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
-                               />
-                             </div>
-                           </div>
-
-                           <div className="grid grid-cols-2 gap-2">
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
-                               <Select value={newLotForm.circonscription_fonciere} onValueChange={(value) => {
-                                 if (value === "") {
-                                   setNewLotForm(prev => ({ ...prev, circonscription_fonciere: "", cadastre: "" }));
-                                   setAvailableCadastresForNewLot([]);
-                                 } else {
-                                   handleLotCirconscriptionChange(value);
-                                 }
-                               }}>
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                   <SelectValue placeholder="Sélectionner" />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                   {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                     <SelectItem key={circ} value={circ} className="text-white text-xs">
-                                       {circ}
-                                     </SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Cadastre</Label>
-                               <Select
-                                 value={newLotForm.cadastre}
-                                 onValueChange={(value) => setNewLotForm({...newLotForm, cadastre: value})}
-                                 disabled={!newLotForm.circonscription_fonciere}
-                               >
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                   <SelectValue placeholder={newLotForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                   {availableCadastresForNewLot.map((cadastre) => (
-                                     <SelectItem key={cadastre} value={cadastre} className="text-white text-xs">
-                                       {cadastre}
-                                     </SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                           </div>
-
-                           <div className="grid grid-cols-2 gap-2">
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Date BPD</Label>
-                               <Input
-                                 type="date"
-                                 value={newLotForm.date_bpd}
-                                 onChange={(e) => setNewLotForm({...newLotForm, date_bpd: e.target.value})}
-                                 className="bg-slate-700 border-slate-600 h-6 text-xs"
-                               />
-                             </div>
-                             <div className="space-y-0.5">
-                               <Label className="text-slate-400 text-xs">Type d'opération</Label>
-                               <Select
-                                 value={newLotForm.type_operation}
-                                 onValueChange={(value) => setNewLotForm({...newLotForm, type_operation: value})}
-                               >
-                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs">
-                                   <SelectValue placeholder="Sélectionner" />
-                                 </SelectTrigger>
-                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                   <SelectItem value={null} className="text-slate-500 text-xs opacity-50">Effacer</SelectItem>
-                                   {["Division du territoire", "Subdivision", "Remplacement", "Correction", "Annulation", "Rénovation cadastrale"].map(type => (
-                                     <SelectItem key={type} value={type} className="text-white text-xs">
-                                       {type}
-                                     </SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                           </div>
-                         </CardContent>
-                       )}
-                     </Card>
-
-                      {/* Section 2: Concordances */}
-                      <Card className="border-slate-700 bg-slate-800/30">
-                      <CardHeader 
-                        className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
-                        onClick={() => setLotConcordanceCollapsed(!lotConcordanceCollapsed)}
+                  <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
+                    {/* Section Import .d01 - Visible uniquement en mode création */}
+                    {!editingLot && (
+                      <div 
+                        className={`border border-dashed rounded-lg p-2 transition-all ${
+                          isDragOverD01 
+                            ? 'border-emerald-500 bg-emerald-500/10' 
+                            : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
+                        }`}
+                        onDragOver={handleD01DragOver}
+                        onDragLeave={handleD01DragLeave}
+                        onDrop={handleD01Drop}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-                              <FileText className="w-3.5 h-3.5 text-purple-400" />
-                            </div>
-                            <CardTitle className="text-purple-300 text-base">Concordances antérieures</CardTitle>
-                            {newLotForm.concordances_anterieures?.length > 0 && (
-                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-                                {newLotForm.concordances_anterieures.length}
-                              </Badge>
-                            )}
+                        {isImportingD01 ? (
+                          <div className="flex items-center justify-center gap-2 text-teal-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-xs">Importation...</span>
                           </div>
-                          {lotConcordanceCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                        </div>
-                      </CardHeader>
-
-                      {!lotConcordanceCollapsed && (
-                      <CardContent className="pt-2 pb-3">
-                        <div className="grid grid-cols-[60%_1px_calc(40%-1px)] gap-4">
-                           {/* Colonne gauche - Formulaire et tableau */}
-                           <div className="space-y-3">
-                              {/* Formulaire d'ajout toujours visible */}
-                              <div className="p-3 bg-slate-700/30 border border-purple-500/30 rounded-lg space-y-3">
-                                <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
-                                  <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Numéro de lot <span className="text-red-400">*</span></Label>
-                                    <Input
-                                      value={currentConcordanceForm.numero_lot}
-                                      onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, numero_lot: e.target.value})}
-                                      placeholder="Ex: 123"
-                                      className="bg-slate-700 border-slate-600 h-8 text-sm"
-                                    />
-                                  </div>
-                                  <div className="space-y-1 flex flex-col items-center justify-start" style={{ paddingTop: '5px' }}>
-                                    <Label className="text-slate-400 text-xs">Partie</Label>
-                                    <div className="h-8 flex items-center justify-center">
-                                      <Checkbox
-                                        checked={currentConcordanceForm.est_partie}
-                                        onCheckedChange={(checked) => setCurrentConcordanceForm({...currentConcordanceForm, est_partie: checked})}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Rang</Label>
-                                    <Input
-                                      value={currentConcordanceForm.rang}
-                                      onChange={(e) => setCurrentConcordanceForm({...currentConcordanceForm, rang: e.target.value})}
-                                      placeholder="Ex: Rang 4"
-                                      className="bg-slate-700 border-slate-600 h-8 text-sm"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Circonscription foncière <span className="text-red-400">*</span></Label>
-                                    <Select 
-                                      value={currentConcordanceForm.circonscription_fonciere} 
-                                      onValueChange={(value) => {
-                                        if (value === "") {
-                                          setCurrentConcordanceForm({...currentConcordanceForm, circonscription_fonciere: "", cadastre: ""});
-                                          setAvailableCadastresForConcordance([]);
-                                        } else {
-                                          handleConcordanceCirconscriptionChange(value);
-                                        }
-                                      }}
-                                    >
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
-                                        <SelectValue placeholder="Sélectionner" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700">
-                                        <SelectItem value={null} className="text-slate-500 text-sm opacity-50">Effacer</SelectItem>
-                                        {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                                          <SelectItem key={circ} value={circ} className="text-white text-sm">
-                                            {circ}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-slate-400 text-xs">Cadastre <span className="text-red-400">*</span></Label>
-                                    <Select
-                                      value={currentConcordanceForm.cadastre}
-                                      onValueChange={(value) => setCurrentConcordanceForm({...currentConcordanceForm, cadastre: value})}
-                                      disabled={!currentConcordanceForm.circonscription_fonciere}
-                                    >
-                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
-                                        <SelectValue placeholder={currentConcordanceForm.circonscription_fonciere ? "Sélectionner" : "Choisir d'abord"} />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
-                                        <SelectItem value={null} className="text-slate-500 text-sm opacity-50">Effacer</SelectItem>
-                                        {availableCadastresForConcordance.map((cadastre) => (
-                                          <SelectItem key={cadastre} value={cadastre} className="text-white text-sm">
-                                            {cadastre}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                                
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={addConcordanceFromForm}
-                                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 w-full"
-                                >
-                                  <Plus className="w-4 h-4 mr-2" />
-                                  Ajouter cette concordance
-                                </Button>
-                              </div>
-
-                              {/* Tableau des concordances */}
-                              {newLotForm.concordances_anterieures.length > 0 && (
-                              <div className="border border-slate-700 rounded-lg overflow-hidden">
-                                  <Table>
-                                    <TableHeader>
-                                      <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                                        <TableHead className="text-slate-300 text-xs">N° Lot</TableHead>
-                                        <TableHead className="text-slate-300 text-xs">Rang</TableHead>
-                                        <TableHead className="text-slate-300 text-xs">Circonscription</TableHead>
-                                        <TableHead className="text-slate-300 text-xs">Cadastre</TableHead>
-                                        <TableHead className="text-slate-300 text-right text-xs">Actions</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                     {newLotForm.concordances_anterieures.map((concordance, index) => (
-                                             <TableRow key={index} className="hover:bg-slate-800/30 border-slate-800">
-                                               <TableCell className="text-white text-sm">
-                                                 {concordance.numero_lot}{concordance.est_partie ? " Ptie" : ""}
-                                               </TableCell>
-                                               <TableCell className="text-slate-300 text-sm">
-                                                 {concordance.rang || "-"}
-                                               </TableCell>
-                                               <TableCell className="text-slate-300 text-sm">
-                                                 {concordance.circonscription_fonciere}
-                                               </TableCell>
-                                               <TableCell className="text-slate-300 text-sm">
-                                                 {concordance.cadastre || "-"}
-                                               </TableCell>
-                                        <TableCell className="text-right">
-                                          <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => removeConcordance(index)}
-                                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
-                                          >
-                                            <Trash2 className="w-3 h-3" />
-                                          </Button>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                    </TableBody>
-                                  </Table>
-                                  </div>
-                                  )}
-                                  </div>
-
-                            {/* Séparateur vertical */}
-                            <div className="bg-slate-600"></div>
-                            
-                            {/* Colonne droite - Liste des lots existants */}
-                            <div className="pl-1 pr-4">
-                              
-                              <div className="mb-2">
-                                <Label className="text-slate-400 text-xs">Lots existants</Label>
-                              </div>
-
-                              <div className="space-y-1" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                {lots
-                                  .filter(lot => {
-                                    const searchLower = lotListSearchTerm.toLowerCase();
-                                    const matchesSearch = !lotListSearchTerm || 
-                                      lot.numero_lot?.toLowerCase().includes(searchLower) ||
-                                      lot.rang?.toLowerCase().includes(searchLower) ||
-                                      lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
-                                      lot.cadastre?.toLowerCase().includes(searchLower);
-                                    const matchesNumero = !currentConcordanceForm.numero_lot || 
-                                      lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
-                                    const matchesRang = !currentConcordanceForm.rang || 
-                                      lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
-                                    const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
-                                      lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
-                                    const matchesCadastre = !currentConcordanceForm.cadastre || 
-                                      lot.cadastre === currentConcordanceForm.cadastre;
-                                    
-                                    return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
-                                  })
-                                  .map((lot) => (
-                                    <div 
-                                      key={lot.id} 
-                                      onClick={() => {
-                                        setCurrentConcordanceForm({
-                                          circonscription_fonciere: lot.circonscription_fonciere || "",
-                                          cadastre: lot.cadastre || "",
-                                          numero_lot: lot.numero_lot || "",
-                                          rang: lot.rang || ""
-                                        });
-                                        setAvailableCadastresForConcordance(CADASTRES_PAR_CIRCONSCRIPTION[lot.circonscription_fonciere] || []);
-                                      }}
-                                      className="p-1.5 bg-slate-700/30 border border-slate-600 rounded hover:bg-slate-700/50 hover:border-purple-500 cursor-pointer transition-all"
-                                    >
-                                      <div className="text-xs font-semibold">
-                                         <span className="text-white">{lot.numero_lot}</span>
-                                         <span className="text-slate-400">{lot.rang ? ` • ${lot.rang}` : ''}{lot.cadastre ? ` • ${lot.cadastre}` : ''} • {lot.circonscription_fonciere}</span>
-                                       </div>
-                                    </div>
-                                  ))}
-                                {lots.filter(lot => {
-                                  const searchLower = lotListSearchTerm.toLowerCase();
-                                  const matchesSearch = !lotListSearchTerm || 
-                                    lot.numero_lot?.toLowerCase().includes(searchLower) ||
-                                    lot.rang?.toLowerCase().includes(searchLower) ||
-                                    lot.circonscription_fonciere?.toLowerCase().includes(searchLower) ||
-                                    lot.cadastre?.toLowerCase().includes(searchLower);
-                                  const matchesNumero = !currentConcordanceForm.numero_lot || 
-                                    lot.numero_lot?.toLowerCase().includes(currentConcordanceForm.numero_lot.toLowerCase());
-                                  const matchesRang = !currentConcordanceForm.rang || 
-                                    lot.rang?.toLowerCase().includes(currentConcordanceForm.rang.toLowerCase());
-                                  const matchesCirconscription = !currentConcordanceForm.circonscription_fonciere || 
-                                    lot.circonscription_fonciere === currentConcordanceForm.circonscription_fonciere;
-                                  const matchesCadastre = !currentConcordanceForm.cadastre || 
-                                    lot.cadastre === currentConcordanceForm.cadastre;
-                                  
-                                  return matchesSearch && matchesNumero && matchesRang && matchesCirconscription && matchesCadastre;
-                                }).length === 0 && (
-                                  <div className="text-center py-6 text-slate-500">
-                                    <Grid3x3 className="w-6 h-6 mx-auto mb-2 opacity-50" />
-                                    <p className="text-xs">Aucun lot trouvé</p>
-                                  </div>
-                                )}
-                              </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
                             </div>
+                            <label>
+                              <input
+                                type="file"
+                                accept=".d01"
+                                onChange={handleD01FileSelect}
+                                className="hidden"
+                              />
+                              <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
+                                Parcourir
+                              </span>
+                            </label>
                           </div>
-                        </CardContent>
-                      )}
-                    </Card>
+                        )}
+                      </div>
+                    )}
 
-                    {/* Section 3: Documents */}
+                    {/* Section Informations du lot */}
+                    <LotInfoStepForm
+                      lotForm={newLotForm}
+                      onLotFormChange={(data) => setNewLotForm(data)}
+                      availableCadastres={availableCadastresForNewLot}
+                      onCirconscriptionChange={handleLotCirconscriptionChange}
+                      isCollapsed={lotInfoCollapsed}
+                      onToggleCollapse={() => setLotInfoCollapsed(!lotInfoCollapsed)}
+                      disabled={false}
+                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                    />
+
+                    {/* Section Types d'opération */}
+                    <TypesOperationStepForm
+                      typesOperation={newLotForm.types_operation || []}
+                      onTypesOperationChange={(data) => setNewLotForm({...newLotForm, types_operation: data})}
+                      isCollapsed={typesOperationCollapsed}
+                      onToggleCollapse={() => setTypesOperationCollapsed(!typesOperationCollapsed)}
+                      disabled={false}
+                      CADASTRES_PAR_CIRCONSCRIPTION={CADASTRES_PAR_CIRCONSCRIPTION}
+                      allLots={lots}
+                    />
+
+                    {/* Section Documents */}
                     <DocumentsStepFormLot
                       lotNumero={newLotForm.numero_lot || ""}
                       circonscription={newLotForm.circonscription_fonciere || ""}
@@ -6382,7 +6055,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                  {/* Header Tabs Commentaires/Historique - Collapsible */}
                  <div 
                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
-                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                   onClick={() => setSidebarCollapsedLot(!sidebarCollapsedLot)}
                  >
                    <div className="flex items-center gap-2">
                      {sidebarTabLot === "commentaires" ? <MessageSquare className="w-5 h-5 text-slate-400" /> : <Clock className="w-5 h-5 text-slate-400" />}
@@ -6390,25 +6063,23 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                        {sidebarTabLot === "commentaires" ? "Commentaires" : "Historique"}
                      </h3>
                    </div>
-                   {sidebarCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                   {sidebarCollapsedLot ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                  </div>
 
-                 {!sidebarCollapsed && (
+                 {!sidebarCollapsedLot && (
                    <Tabs value={sidebarTabLot} onValueChange={setSidebarTabLot} className="flex-1 flex flex-col overflow-hidden">
-                     <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                       <TabsList className="grid grid-cols-2 h-9 w-full bg-transparent gap-2">
-                         <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
-                           <MessageSquare className="w-4 h-4 mr-1" />
-                           Commentaires
-                         </TabsTrigger>
-                         <TabsTrigger value="historique" className="orange text-xs bg-transparent border-none data-[state=active]:text-orange-400 data-[state=inactive]:text-slate-400 hover:text-orange-300">
-                           <Clock className="w-4 h-4 mr-1" />
-                           Historique
-                         </TabsTrigger>
-                       </TabsList>
-                     </div>
+                     <TabsList className="grid grid-cols-2 h-9 mx-4 mr-6 mt-2 flex-shrink-0 bg-transparent gap-2">
+                       <TabsTrigger value="commentaires" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                         <MessageSquare className="w-4 h-4 mr-1" />
+                         Commentaires
+                       </TabsTrigger>
+                       <TabsTrigger value="historique" className="text-xs bg-transparent border-none data-[state=active]:text-emerald-400 data-[state=active]:bg-emerald-500/20 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 data-[state=inactive]:text-slate-400 hover:text-emerald-300">
+                         <Clock className="w-4 h-4 mr-1" />
+                         Historique
+                       </TabsTrigger>
+                     </TabsList>
 
-                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 mt-0">
+                     <TabsContent value="commentaires" className="flex-1 overflow-hidden p-4 pr-6 mt-0">
                        <CommentairesSectionLot
                          lotId={editingLot?.id}
                          lotTemporaire={!editingLot}
@@ -6417,14 +6088,41 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                        />
                      </TabsContent>
 
-                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 mt-0">
-                       <div className="flex items-center justify-center h-full text-center">
-                         <div>
-                           <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                           <p className="text-slate-500">Aucune action enregistrée</p>
-                           <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                     <TabsContent value="historique" className="flex-1 overflow-y-auto p-4 pr-6 mt-0">
+                       {lotActionLogs.length > 0 ? (
+                         <div className="space-y-3">
+                           {lotActionLogs.map((log) => (
+                             <div key={log.id} className="p-3 bg-slate-800/30 border border-slate-700 rounded-lg">
+                               <div className="flex items-start justify-between gap-2">
+                                 <div className="flex-1">
+                                   <div className="flex items-center gap-2 mb-1">
+                                     <Badge className={`text-xs ${
+                                       log.action === 'Création' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                       log.action === 'Modification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                                       'bg-red-500/20 text-red-400 border-red-500/30'
+                                     }`}>
+                                       {log.action}
+                                     </Badge>
+                                     <span className="text-slate-400 text-xs">
+                                       {log.created_date && format(new Date(log.created_date), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                                     </span>
+                                   </div>
+                                   <p className="text-slate-300 text-sm">{log.details}</p>
+                                   <p className="text-slate-500 text-xs mt-1">Par {log.utilisateur_nom}</p>
+                                 </div>
+                               </div>
+                             </div>
+                           ))}
                          </div>
-                       </div>
+                       ) : (
+                         <div className="flex items-center justify-center h-full text-center">
+                           <div>
+                             <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                             <p className="text-slate-500">Aucune action enregistrée</p>
+                             <p className="text-slate-600 text-sm mt-1">L'historique apparaîtra ici</p>
+                           </div>
+                         </div>
+                       )}
                      </TabsContent>
                    </Tabs>
                  )}
@@ -6432,17 +6130,16 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
               </div>
 
               {/* Boutons tout en bas - pleine largeur */}
-              <div className="flex justify-end gap-3 p-3 bg-slate-900 border-t border-slate-800">
+              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
                 <Button type="button" variant="outline" onClick={() => {
                  let hasChanges = false;
-                 if (editingLot) { // In edit mode
+                 if (editingLot) {
                      hasChanges = JSON.stringify(newLotForm) !== JSON.stringify(initialLotForm) || commentairesTemporairesLot.length > 0;
-                 } else { // In create mode
+                 } else {
                      hasChanges = newLotForm.numero_lot || 
                        newLotForm.circonscription_fonciere || 
                        newLotForm.rang || 
-                       newLotForm.concordances_anterieures.length > 0 || 
-                       newLotForm.document_pdf_url ||
+                       newLotForm.types_operation.length > 0 ||
                        commentairesTemporairesLot.length > 0;
                  }
 
@@ -6452,10 +6149,10 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     setIsNewLotDialogOpen(false);
                     resetLotForm();
                   }
-                }} className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm">
+                }} className="border-red-500 text-red-400 hover:bg-red-500/10">
                   Annuler
                 </Button>
-                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm">
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
                    {editingLot ? "Modifier" : "Créer"}
                  </Button>
               </div>
