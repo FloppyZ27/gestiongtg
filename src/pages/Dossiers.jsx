@@ -1677,7 +1677,7 @@ export default function Dossiers() {
   const sortedDossiers = useMemo(() => {
     if (!sortField) return filteredDossiersWithMandats;
     
-    return [...filteredDossiersWithMandats].sort((a, b) => {
+    const sorted = [...filteredDossiersWithMandats].sort((a, b) => {
       let aValue, bValue;
       
       switch (sortField) {
@@ -1688,6 +1688,10 @@ export default function Dossiers() {
         case 'clients':
           aValue = getClientsNames(a.clients_ids).toLowerCase();
           bValue = getClientsNames(b.clients_ids).toLowerCase();
+          break;
+        case 'lots':
+          aValue = (a.mandatInfo?.lots?.[0] ? getLotById(a.mandatInfo.lots[0])?.numero_lot || '' : '').toLowerCase();
+          bValue = (b.mandatInfo?.lots?.[0] ? getLotById(b.mandatInfo.lots[0])?.numero_lot || '' : '').toLowerCase();
           break;
         case 'date_ouverture':
           aValue = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
@@ -1725,7 +1729,8 @@ export default function Dossiers() {
         return 0;
       }
     });
-  }, [filteredDossiersWithMandats, sortField, sortDirection, getClientsNames]);
+    return sorted;
+  }, [filteredDossiersWithMandats, sortField, sortDirection]);
 
   const handleCloseDossier = () => {
     if (!closingDossierId) return;
@@ -3481,7 +3486,7 @@ export default function Dossiers() {
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('numero_dossier')}>N° Dossier {getSortIcon('numero_dossier')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('clients')}>Clients {getSortIcon('clients')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('type_mandat')}>Mandat {getSortIcon('type_mandat')}</TableHead>
-                      <TableHead className="text-slate-300">Lot</TableHead>
+                      <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('lots')}>Lot {getSortIcon('lots')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('tache_actuelle')}>Tâche actuelle {getSortIcon('tache_actuelle')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('ville')}>Adresse Travaux {getSortIcon('ville')}</TableHead>
                       <TableHead className="text-slate-300 cursor-pointer" onClick={() => handleSort('date_ouverture')}>Date ouverture {getSortIcon('date_ouverture')}</TableHead>
