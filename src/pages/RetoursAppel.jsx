@@ -810,7 +810,7 @@ export default function RetoursAppel() {
                       <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.raison || "-"}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleView(retour.dossier)} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                          <Button variant="ghost" size="sm" onClick={() => handleView(dossiers.find(d => d.id === retour.dossier_id))} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
                             <Eye className="w-4 h-4" />
                           </Button>
                         </div>
