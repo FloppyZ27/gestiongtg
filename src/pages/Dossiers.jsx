@@ -64,6 +64,17 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 const getMandatColor = (typeMandat) => {
   const colors = {
     "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
