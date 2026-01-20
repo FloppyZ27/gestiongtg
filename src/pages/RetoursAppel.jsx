@@ -615,8 +615,7 @@ export default function RetoursAppel() {
           </Dialog>
         </div>
 
-        {/* Client Selector Dialogs */}
-        <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+        {/* Removed unused client selector dialogs */}
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl" hideClose>
             <DialogHeader><DialogTitle>Sélectionner des clients</DialogTitle></DialogHeader>
             <div className="space-y-4">
