@@ -6,11 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3 } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import MandatTabs from "./MandatTabs";
 import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
@@ -126,6 +127,7 @@ export default function EditDossierForm({
   const [minutesCollapsed, setMinutesCollapsed] = useState(true);
   const [activeMinuteMandat, setActiveMinuteMandat] = useState("0");
   const [newMinuteForm, setNewMinuteForm] = useState({});
+  const [minutesSortConfig, setMinutesSortConfig] = useState({ key: null, direction: 'asc' });
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -1269,65 +1271,152 @@ export default function EditDossierForm({
                   <CardContent className="pt-2 pb-3">
                     {/* Liste des minutes existantes */}
                     {formData.mandats.some(m => m.minutes_list && m.minutes_list.length > 0) && (
-                      <div className="space-y-2 mb-3">
+                      <div className="space-y-2 mb-4">
                         <Label className="text-slate-400 text-xs">Minutes existantes</Label>
-                        <div className="space-y-2">
-                          {formData.mandats.map((mandat, mandatIndex) => 
-                            mandat.minutes_list && mandat.minutes_list.length > 0 && mandat.minutes_list.map((minute, minuteIndex) => (
-                              <div 
-                                key={`${mandatIndex}-${minuteIndex}`}
-                                className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded p-2 text-xs relative flex items-center gap-3"
-                              >
-                                <button 
-                                  type="button" 
+                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead 
+                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
                                   onClick={() => {
-                                    const updatedMandats = [...formData.mandats];
-                                    updatedMandats[mandatIndex].minutes_list = updatedMandats[mandatIndex].minutes_list.filter((_, idx) => idx !== minuteIndex);
-                                    setFormData({...formData, mandats: updatedMandats});
+                                    setMinutesSortConfig({
+                                      key: 'minute',
+                                      direction: minutesSortConfig.key === 'minute' && minutesSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                    });
                                   }}
-                                  className="absolute right-1 top-1 hover:text-red-400"
                                 >
-                                  <X className="w-3 h-3" />
-                                </button>
-                                <div className="flex-1 flex items-center gap-3 pr-6">
-                                  <div className="flex items-center gap-2 min-w-[150px]">
-                                    <FileText className="w-4 h-4 text-cyan-400" />
-                                    <p className="font-semibold text-cyan-400">Minute {minute.minute}</p>
+                                  <div className="flex items-center gap-1">
+                                    N° Minute
+                                    <ArrowUpDown className="w-3 h-3" />
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                      {mandat.type_mandat || `Mandat ${mandatIndex + 1}`}
-                                    </Badge>
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  onClick={() => {
+                                    setMinutesSortConfig({
+                                      key: 'mandat',
+                                      direction: minutesSortConfig.key === 'mandat' && minutesSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                    });
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Mandat
+                                    <ArrowUpDown className="w-3 h-3" />
                                   </div>
-                                  {minute.date_minute && (
-                                    <p className="text-slate-400 text-xs">
-                                      📅 {format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr })}
-                                    </p>
-                                  )}
-                                  {minute.type_minute && (
-                                    <Badge className="bg-cyan-500/20 text-cyan-300 text-xs">
-                                      {minute.type_minute}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            ))
-                          )}
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  onClick={() => {
+                                    setMinutesSortConfig({
+                                      key: 'date',
+                                      direction: minutesSortConfig.key === 'date' && minutesSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                    });
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Date
+                                    <ArrowUpDown className="w-3 h-3" />
+                                  </div>
+                                </TableHead>
+                                <TableHead 
+                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  onClick={() => {
+                                    setMinutesSortConfig({
+                                      key: 'type',
+                                      direction: minutesSortConfig.key === 'type' && minutesSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                    });
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Type
+                                    <ArrowUpDown className="w-3 h-3" />
+                                  </div>
+                                </TableHead>
+                                <TableHead className="text-slate-300 w-12"></TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {(() => {
+                                const allMinutes = [];
+                                formData.mandats.forEach((mandat, mandatIndex) => {
+                                  if (mandat.minutes_list && mandat.minutes_list.length > 0) {
+                                    mandat.minutes_list.forEach((minute, minuteIndex) => {
+                                      allMinutes.push({
+                                        ...minute,
+                                        mandatIndex,
+                                        minuteIndex,
+                                        mandatName: mandat.type_mandat || `Mandat ${mandatIndex + 1}`
+                                      });
+                                    });
+                                  }
+                                });
+
+                                // Tri
+                                if (minutesSortConfig.key) {
+                                  allMinutes.sort((a, b) => {
+                                    let aVal, bVal;
+                                    if (minutesSortConfig.key === 'minute') {
+                                      aVal = a.minute || '';
+                                      bVal = b.minute || '';
+                                    } else if (minutesSortConfig.key === 'mandat') {
+                                      aVal = a.mandatName;
+                                      bVal = b.mandatName;
+                                    } else if (minutesSortConfig.key === 'date') {
+                                      aVal = a.date_minute || '';
+                                      bVal = b.date_minute || '';
+                                    } else if (minutesSortConfig.key === 'type') {
+                                      aVal = a.type_minute || '';
+                                      bVal = b.type_minute || '';
+                                    }
+
+                                    if (aVal < bVal) return minutesSortConfig.direction === 'asc' ? -1 : 1;
+                                    if (aVal > bVal) return minutesSortConfig.direction === 'asc' ? 1 : -1;
+                                    return 0;
+                                  });
+                                }
+
+                                return allMinutes.map((minute) => (
+                                  <TableRow key={`${minute.mandatIndex}-${minute.minuteIndex}`} className="hover:bg-cyan-900/20 border-slate-800">
+                                    <TableCell className="text-cyan-400 font-medium">{minute.minute}</TableCell>
+                                    <TableCell className="text-slate-300">{minute.mandatName}</TableCell>
+                                    <TableCell className="text-slate-300">
+                                      {minute.date_minute ? format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr }) : "-"}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300">{minute.type_minute || "Initiale"}</TableCell>
+                                    <TableCell className="text-right">
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          const updatedMandats = [...formData.mandats];
+                                          updatedMandats[minute.mandatIndex].minutes_list = updatedMandats[minute.mandatIndex].minutes_list.filter((_, idx) => idx !== minute.minuteIndex);
+                                          setFormData({...formData, mandats: updatedMandats});
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 transition-colors"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                    </TableCell>
+                                  </TableRow>
+                                ));
+                              })()}
+                            </TableBody>
+                          </Table>
                         </div>
                       </div>
                     )}
 
                     {/* Formulaire d'ajout de minute */}
-                    <div className="border border-slate-700 rounded-lg p-3 bg-slate-800/20">
-                      <Label className="text-slate-400 text-xs mb-2 block">Ajouter une minute</Label>
-                      <div className="grid grid-cols-4 gap-2">
+                    <div className="border-2 border-cyan-500/30 rounded-lg p-4 bg-cyan-900/10">
+                      <Label className="text-cyan-300 text-sm mb-3 block font-semibold">Ajouter une minute</Label>
+                      <div className="grid grid-cols-4 gap-3">
                         <div className="space-y-1">
-                          <Label className="text-slate-500 text-[10px]">Mandat <span className="text-red-400">*</span></Label>
+                          <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                           <Select 
                             value={newMinuteForm.mandatIndex?.toString() || ""}
                             onValueChange={(value) => setNewMinuteForm({...newMinuteForm, mandatIndex: parseInt(value)})}
                           >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -1340,30 +1429,30 @@ export default function EditDossierForm({
                           </Select>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-slate-500 text-[10px]">Numéro de minute <span className="text-red-400">*</span></Label>
+                          <Label className="text-slate-400 text-xs">Numéro de minute <span className="text-red-400">*</span></Label>
                           <Input 
                             placeholder="Ex: 12345"
                             value={newMinuteForm.minute || ""}
                             onChange={(e) => setNewMinuteForm({...newMinuteForm, minute: e.target.value})}
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-slate-500 text-[10px]">Date de minute</Label>
+                          <Label className="text-slate-400 text-xs">Date de minute</Label>
                           <Input 
                             type="date"
                             value={newMinuteForm.date_minute || ""}
                             onChange={(e) => setNewMinuteForm({...newMinuteForm, date_minute: e.target.value})}
-                            className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-slate-500 text-[10px]">Type</Label>
+                          <Label className="text-slate-400 text-xs">Type</Label>
                           <Select 
                             value={newMinuteForm.type_minute || "Initiale"}
                             onValueChange={(value) => setNewMinuteForm({...newMinuteForm, type_minute: value})}
                           >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
@@ -1405,7 +1494,7 @@ export default function EditDossierForm({
                           // Réinitialiser le formulaire
                           setNewMinuteForm({});
                         }}
-                        className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-7 text-xs mt-2 w-full"
+                        className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-8 text-xs mt-3 w-full border border-cyan-500/30"
                       >
                         <Plus className="w-3 h-3 mr-1" />
                         Ajouter la minute
