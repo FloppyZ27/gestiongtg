@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUpDown } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -1269,16 +1269,14 @@ export default function EditDossierForm({
 
                 {!minutesCollapsed && (
                   <CardContent className="pt-2 pb-3">
-                    {/* Liste des minutes existantes */}
                     {formData.mandats.some(m => m.minutes_list && m.minutes_list.length > 0) && (
                       <div className="space-y-2 mb-4">
-                        <Label className="text-slate-400 text-xs">Minutes existantes</Label>
                         <div className="border border-slate-700 rounded-lg overflow-hidden">
                           <Table>
                             <TableHeader>
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                 <TableHead 
-                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
                                   onClick={() => {
                                     setMinutesSortConfig({
                                       key: 'minute',
@@ -1288,11 +1286,13 @@ export default function EditDossierForm({
                                 >
                                   <div className="flex items-center gap-1">
                                     N° Minute
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    {minutesSortConfig.key === 'minute' && (
+                                      minutesSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                    )}
                                   </div>
                                 </TableHead>
                                 <TableHead 
-                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
                                   onClick={() => {
                                     setMinutesSortConfig({
                                       key: 'mandat',
@@ -1302,11 +1302,13 @@ export default function EditDossierForm({
                                 >
                                   <div className="flex items-center gap-1">
                                     Mandat
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    {minutesSortConfig.key === 'mandat' && (
+                                      minutesSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                    )}
                                   </div>
                                 </TableHead>
                                 <TableHead 
-                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
                                   onClick={() => {
                                     setMinutesSortConfig({
                                       key: 'date',
@@ -1316,11 +1318,13 @@ export default function EditDossierForm({
                                 >
                                   <div className="flex items-center gap-1">
                                     Date
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    {minutesSortConfig.key === 'date' && (
+                                      minutesSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                    )}
                                   </div>
                                 </TableHead>
                                 <TableHead 
-                                  className="text-slate-300 cursor-pointer hover:text-cyan-400 transition-colors"
+                                  className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
                                   onClick={() => {
                                     setMinutesSortConfig({
                                       key: 'type',
@@ -1330,7 +1334,9 @@ export default function EditDossierForm({
                                 >
                                   <div className="flex items-center gap-1">
                                     Type
-                                    <ArrowUpDown className="w-3 h-3" />
+                                    {minutesSortConfig.key === 'type' && (
+                                      minutesSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                    )}
                                   </div>
                                 </TableHead>
                                 <TableHead className="text-slate-300 w-12"></TableHead>
@@ -1377,8 +1383,8 @@ export default function EditDossierForm({
                                 }
 
                                 return allMinutes.map((minute) => (
-                                  <TableRow key={`${minute.mandatIndex}-${minute.minuteIndex}`} className="hover:bg-cyan-900/20 border-slate-800">
-                                    <TableCell className="text-cyan-400 font-medium">{minute.minute}</TableCell>
+                                  <TableRow key={`${minute.mandatIndex}-${minute.minuteIndex}`} className="hover:bg-slate-800/30 border-slate-800">
+                                    <TableCell className="text-slate-300 font-medium">{minute.minute}</TableCell>
                                     <TableCell className="text-slate-300">{minute.mandatName}</TableCell>
                                     <TableCell className="text-slate-300">
                                       {minute.date_minute ? format(new Date(minute.date_minute), "d MMMM yyyy", { locale: fr }) : "-"}
@@ -1406,9 +1412,7 @@ export default function EditDossierForm({
                       </div>
                     )}
 
-                    {/* Formulaire d'ajout de minute */}
                     <div className="border-2 border-cyan-500/30 rounded-lg p-4 bg-cyan-900/10">
-                      <Label className="text-cyan-300 text-sm mb-3 block font-semibold">Ajouter une minute</Label>
                       <div className="grid grid-cols-4 gap-3">
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
