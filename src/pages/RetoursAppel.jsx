@@ -420,6 +420,21 @@ export default function RetoursAppel() {
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
 
+  // Créer une liste de tous les retours d'appel avec leurs informations de dossier associé
+  const allRetoursAppelsWithDossier = retoursAppels.map(retour => {
+    const dossier = getDossierByRetourAppel(retour.id);
+    return {
+      ...retour,
+      dossier
+    };
+  }).filter(item => item.dossier); // Filtrer les retours sans dossier associé
+
+  const sortedAllRetoursAppels = [...allRetoursAppelsWithDossier].sort((a, b) => {
+    const dateA = new Date(a.date_appel || 0).getTime();
+    const dateB = new Date(b.date_appel || 0).getTime();
+    return dateB - dateA; // Tri décroissant (plus récent en premier)
+  });
+
   const getCurrentValue = (items, key) => {
     const current = items?.find(item => item.actuel || item.actuelle);
     return current?.[key] || "";
