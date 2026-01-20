@@ -1811,60 +1811,63 @@ export default function Lots() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {bulkImportPreview.map((lot, index) => (
-                          <TableRow key={index} className="border-slate-800">
-                            <TableCell>
-                              {lot.alreadyExists ? (
-                                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                                  Existe déjà
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                                  À créer
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-white font-medium">
-                              {lot.numero_lot}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.cadastre || "-"}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.circonscription_fonciere}
-                            </TableCell>
-                            <TableCell className="text-slate-300">
-                              {lot.concordances && lot.concordances.length > 0 ? (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="flex items-center gap-1 cursor-help">
-                                        <span>{lot.concordances_count}</span>
-                                        <Info className="w-3 h-3 text-slate-500" />
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
-                                      <div className="space-y-1">
-                                        {lot.concordances.map((conc, idx) => (
-                                          <div key={idx} className="text-xs">
-                                            <span className="text-white font-medium">{conc.numero_lot}</span>
-                                            {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
-                                            <span className="text-slate-400">
-                                              {conc.rang ? ` • ${conc.rang}` : ''}
-                                              {conc.cadastre ? ` • ${conc.cadastre}` : ''}
-                                            </span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              ) : (
-                                "0"
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {bulkImportPreview.map((lot, index) => {
+                          const concordances = lot.types_operation?.[0]?.concordances_anterieures || [];
+                          return (
+                            <TableRow key={index} className="border-slate-800">
+                              <TableCell>
+                                {lot.alreadyExists ? (
+                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                                    Existe déjà
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                    À créer
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-white font-medium">
+                                {lot.numero_lot}
+                              </TableCell>
+                              <TableCell className="text-slate-300">
+                                {lot.cadastre || "-"}
+                              </TableCell>
+                              <TableCell className="text-slate-300">
+                                {lot.circonscription_fonciere}
+                              </TableCell>
+                              <TableCell className="text-slate-300">
+                                {concordances.length > 0 ? (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 cursor-help">
+                                          <span>{concordances.length}</span>
+                                          <Info className="w-3 h-3 text-slate-500" />
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right" className="bg-slate-800 border-slate-700 max-w-sm">
+                                        <div className="space-y-1">
+                                          {concordances.map((conc, idx) => (
+                                            <div key={idx} className="text-xs">
+                                              <span className="text-white font-medium">{conc.numero_lot}</span>
+                                              {conc.est_partie && <span className="text-slate-400"> Ptie</span>}
+                                              <span className="text-slate-400">
+                                                {conc.rang ? ` • ${conc.rang}` : ''}
+                                                {conc.cadastre ? ` • ${conc.cadastre}` : ''}
+                                              </span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ) : (
+                                  "0"
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
