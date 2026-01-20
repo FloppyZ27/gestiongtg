@@ -700,24 +700,293 @@ export default function EditDossierForm({
                       </div>
 
                       {formData.mandats.map((mandat, index) => (
-                        <TabsContent key={index} value={index.toString()} className="mt-2">
-                          <MandatTabs
-                            mandat={mandat}
-                            mandatIndex={index}
-                            updateMandat={updateMandat}
-                            updateMandatAddress={() => {}}
-                            openLotSelector={openLotSelector}
-                            openAddMinuteDialog={openAddMinuteDialog}
-                            openNewLotDialog={() => {}}
-                            removeLotFromMandat={removeLotFromMandat}
-                            removeMinuteFromMandat={removeMinuteFromMandat}
-                            getLotById={getLotById}
-                            users={users}
-                            formStatut={formData.statut}
-                            onRemoveMandat={null}
-                            isReferenceDisabled={false}
-                            isTTL={formData.ttl === "Oui"}
-                          />
+                        <TabsContent key={index} value={index.toString()} className="mt-2 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Type de mandat</Label>
+                              <Select value={mandat.type_mandat} onValueChange={(value) => updateMandat(index, 'type_mandat', value)}>
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  {TYPES_MANDATS.map((type) => (
+                                    <SelectItem key={type} value={type} className="text-white text-xs">{type}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                              <Select value={mandat.utilisateur_assigne || ""} onValueChange={(value) => updateMandat(index, 'utilisateur_assigne', value)}>
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  {users.map((u) => (
+                                    <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="border-t border-slate-600 my-2"></div>
+
+                          <div className="grid grid-cols-[60%_1px_40%] gap-3">
+                            <div className="space-y-2">
+                              <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                              <div className="grid grid-cols-[100px_1fr] gap-1">
+                                <div className="space-y-0.5">
+                                  <Label className="text-slate-500 text-[10px]">N° civique</Label>
+                                  <Input 
+                                    placeholder="123" 
+                                    value={mandat.adresse_travaux?.numeros_civiques?.[0] || ""} 
+                                    onChange={(e) => {
+                                      const addr = mandat.adresse_travaux || {};
+                                      updateMandat(index, 'adresse_travaux', { ...addr, numeros_civiques: [e.target.value] });
+                                    }}
+                                    className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <Label className="text-slate-500 text-[10px]">Rue</Label>
+                                  <Input 
+                                    placeholder="Rue principale" 
+                                    value={mandat.adresse_travaux?.rue || ""} 
+                                    onChange={(e) => {
+                                      const addr = mandat.adresse_travaux || {};
+                                      updateMandat(index, 'adresse_travaux', { ...addr, rue: e.target.value });
+                                    }}
+                                    className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-3 gap-1">
+                                <div className="space-y-0.5">
+                                  <Label className="text-slate-500 text-[10px]">Ville</Label>
+                                  <Input 
+                                    placeholder="Ville" 
+                                    value={mandat.adresse_travaux?.ville || ""} 
+                                    onChange={(e) => {
+                                      const addr = mandat.adresse_travaux || {};
+                                      updateMandat(index, 'adresse_travaux', { ...addr, ville: e.target.value });
+                                    }}
+                                    className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <Label className="text-slate-500 text-[10px]">Code postal</Label>
+                                  <Input 
+                                    placeholder="G0A 1A0" 
+                                    value={mandat.adresse_travaux?.code_postal || ""} 
+                                    onChange={(e) => {
+                                      const addr = mandat.adresse_travaux || {};
+                                      updateMandat(index, 'adresse_travaux', { ...addr, code_postal: e.target.value });
+                                    }}
+                                    className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-0.5">
+                                  <Label className="text-slate-500 text-[10px]">Province</Label>
+                                  <Select 
+                                    value={mandat.adresse_travaux?.province || "QC"} 
+                                    onValueChange={(value) => {
+                                      const addr = mandat.adresse_travaux || {};
+                                      updateMandat(index, 'adresse_travaux', { ...addr, province: value });
+                                    }}
+                                  >
+                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-6 text-xs w-20">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      {["QC", "AB", "BC", "PE", "MB", "NB", "NS", "NU", "ON", "SK", "NL", "NT", "YT"].map(prov => (
+                                        <SelectItem key={prov} value={prov} className="text-white text-xs">{prov}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-600"></div>
+
+                            <div className="space-y-2 pr-2">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Date de signature</Label>
+                                <Input 
+                                  type="date" 
+                                  value={mandat.date_signature || ""} 
+                                  onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Début des travaux</Label>
+                                <Input 
+                                  type="date" 
+                                  value={mandat.date_debut_travaux || ""} 
+                                  onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Date de livraison</Label>
+                                <Input 
+                                  type="date" 
+                                  value={mandat.date_livraison || ""} 
+                                  onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="border-t border-slate-600 my-2"></div>
+
+                          <div className={`grid ${lotTabExpanded && currentMandatIndexForLot === index ? 'grid-cols-[50%_50%]' : 'grid-cols-1'} gap-4 transition-all`}>
+                            <div className={`space-y-2 ${lotTabExpanded && currentMandatIndexForLot === index ? 'border-r border-slate-700 pr-4' : ''}`}>
+                              <div className="flex items-center justify-between">
+                                <Label className="text-slate-400 text-xs">Lots</Label>
+                                <div className="flex items-center gap-1.5">
+                                  <Checkbox
+                                    id={`sameLotsForAllMandats-${index}`}
+                                    checked={sameLotsForAllMandats}
+                                    onCheckedChange={(checked) => setSameLotsForAllMandats(checked)}
+                                  />
+                                  <Label htmlFor={`sameLotsForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                  {mandat.lots && mandat.lots.length > 0 ? (
+                                    <div className="grid grid-cols-2 gap-2">
+                                      {mandat.lots.map((lotId) => {
+                                        const lot = getLotById(lotId);
+                                        return (
+                                          <div 
+                                            key={lotId} 
+                                            className="bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                          >
+                                            <button 
+                                              type="button" 
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeLotFromMandat(index, lotId);
+                                              }}
+                                              className="absolute right-1 top-1 hover:text-red-400"
+                                            >
+                                              <X className="w-3 h-3" />
+                                            </button>
+                                            <div className="pr-5 space-y-0.5">
+                                              <p className="font-semibold text-orange-400">{lot?.numero_lot || lotId}</p>
+                                              <p className="text-slate-400">{lot?.circonscription_fonciere}</p>
+                                              <p className="text-slate-500">
+                                                {[lot?.rang, lot?.cadastre].filter(Boolean).join(' • ')}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                      Aucun lot sélectionné
+                                    </div>
+                                  )}
+                                </div>
+                                {!(lotTabExpanded && currentMandatIndexForLot === index) && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setCurrentMandatIndexForLot(index);
+                                      setLotTabExpanded(true);
+                                    }}
+                                    className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                  >
+                                    <ChevronDown className="w-4 h-4 rotate-90" />
+                                  </Button>
+                                )}
+                                {lotTabExpanded && currentMandatIndexForLot === index && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setLotTabExpanded(false)}
+                                    className="text-slate-400 hover:text-white h-6 w-6 p-0"
+                                  >
+                                    <ChevronUp className="w-4 h-4 rotate-90" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className={`border-l border-slate-700 pl-3 pr-2 ${!(lotTabExpanded && currentMandatIndexForLot === index) ? 'hidden' : ''}`}>
+                              <div className="mb-2 flex gap-2">
+                                <div className="relative flex-1">
+                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                  <Input
+                                    placeholder="Rechercher lot..."
+                                    value={lotSearchTerm}
+                                    onChange={(e) => setLotSearchTerm(e.target.value)}
+                                    className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs"
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => openLotSelector(index)}
+                                  className="text-orange-400 hover:text-orange-300 h-6 w-6 p-0"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </Button>
+                              </div>
+
+                              <p className="text-slate-400 text-xs mb-2">Lots existants ({lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length})</p>
+                              <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                {lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).length > 0 ? (
+                                  lots.filter(l => !lotSearchTerm || l.numero_lot?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.rang?.toLowerCase().includes(lotSearchTerm.toLowerCase()) || l.cadastre?.toLowerCase().includes(lotSearchTerm.toLowerCase())).slice(0, 20).map((lot) => {
+                                    const isSelected = mandat.lots?.includes(lot.id);
+                                    return (
+                                      <div
+                                        key={lot.id}
+                                        onClick={() => {
+                                          const currentLots = formData.mandats[index].lots || [];
+                                          const lotIsSelected = currentLots.includes(lot.id);
+                                          const newLots = lotIsSelected
+                                            ? currentLots.filter(id => id !== lot.id)
+                                            : [...currentLots, lot.id];
+
+                                          if (sameLotsForAllMandats) {
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              mandats: prev.mandats.map(m => ({ ...m, lots: newLots }))
+                                            }));
+                                          } else {
+                                            updateMandat(index, 'lots', newLots);
+                                          }
+                                        }}
+                                        className={`px-2 py-1.5 rounded text-xs cursor-pointer transition-all ${
+                                          isSelected ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:border-orange-500'
+                                        }`}
+                                      >
+                                        <p className="text-white font-semibold text-xs truncate">
+                                          {lot.numero_lot}
+                                          {lot.rang && <span className="text-slate-300 font-normal"> • {lot.rang}</span>}
+                                          {lot.cadastre && <span className="text-slate-300 font-normal"> • {lot.cadastre}</span>}
+                                          <span className="text-slate-400 font-normal"> • {lot.circonscription_fonciere}</span>
+                                          {isSelected && <Check className="w-3 h-3 ml-2 inline" />}
+                                        </p>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="text-slate-500 text-xs text-center py-2">Aucun lot</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </TabsContent>
                       ))}
                     </Tabs>
