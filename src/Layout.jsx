@@ -1084,7 +1084,7 @@ function LayoutContent({ children, currentPageName }) {
                                 <Link to={item.url} className="flex items-center justify-center p-2.5">
                                   <item.icon className="w-5 h-5" />
                                   {badgeCount > 0 && (
-                                    <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    <div className="absolute -top-1 -right-1 bg-red-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                       {badgeCount}
                                     </div>
                                   )}
@@ -1108,7 +1108,7 @@ function LayoutContent({ children, currentPageName }) {
                               <item.icon className="w-5 h-5" />
                               <span className="font-medium">{item.title}</span>
                               {badgeCount > 0 && (
-                                <div className="ml-auto bg-red-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+                                <div className="ml-auto bg-red-700 text-white text-xs rounded-full px-2 py-0.5 font-bold">
                                   {badgeCount}
                                 </div>
                               )}

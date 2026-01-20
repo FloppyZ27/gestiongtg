@@ -16,9 +16,9 @@ import Notaires from './pages/Notaires';
 import PriseDeMandat from './pages/PriseDeMandat';
 import Profil from './pages/Profil';
 import Recherches from './pages/Recherches';
-import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import RetoursAppel from './pages/RetoursAppel';
 import __Layout from './Layout.jsx';
 
 
@@ -41,9 +41,9 @@ export const PAGES = {
     "PriseDeMandat": PriseDeMandat,
     "Profil": Profil,
     "Recherches": Recherches,
-    "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "RetoursAppel": RetoursAppel,
 }
 
 export const pagesConfig = {
