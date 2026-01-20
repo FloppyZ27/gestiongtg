@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,15 +140,20 @@ export default function EditDossierForm({
     raison: "",
     statut: "En attente"
   });
+  const [retoursAppel, setRetoursAppel] = useState([]);
 
-  const { data: retoursAppel = [] } = useQuery({
-    queryKey: ['retoursAppel', editingDossier?.id],
-    queryFn: () => editingDossier?.id 
-      ? base44.entities.RetourAppel.filter({ dossier_id: editingDossier.id }, '-date_appel')
-      : Promise.resolve([]),
-    enabled: !!editingDossier?.id,
-    initialData: []
-  });
+  const queryClient = useQueryClient();
+
+  // Charger les retours d'appel quand le dossier change
+  React.useEffect(() => {
+    if (editingDossier?.id) {
+      base44.entities.RetourAppel.filter({ dossier_id: editingDossier.id }, '-date_appel')
+        .then(setRetoursAppel)
+        .catch(() => setRetoursAppel([]));
+    } else {
+      setRetoursAppel([]);
+    }
+  }, [editingDossier?.id]);
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
