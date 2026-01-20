@@ -1011,22 +1011,22 @@ export default function RetoursAppel() {
                       <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
                       <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-[200px] group relative">
+                      <TableCell 
+                        className="text-slate-300 text-sm max-w-[200px] relative"
+                        onMouseMove={(e) => setTooltipPos({ x: e.clientX + 10, y: e.clientY + 10 })}
+                        onMouseLeave={() => setTooltipPos({ x: 0, y: 0 })}
+                      >
                         {retour.raison ? (
                           <>
                             <span className="line-clamp-1 cursor-help">{retour.raison}</span>
-                            <div className="fixed hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-[9999] text-slate-300 text-xs whitespace-normal break-words shadow-lg" style={{
-                              top: event?.target?.getBoundingClientRect?.()?.top + 30 + 'px',
-                              left: event?.target?.getBoundingClientRect?.()?.left + 'px'
-                            }} onMouseEnter={(e) => {
-                              const rect = e.currentTarget.previousElementSibling?.getBoundingClientRect?.();
-                              if (rect) {
-                                e.currentTarget.style.top = (rect.top + 30) + 'px';
-                                e.currentTarget.style.left = rect.left + 'px';
-                              }
-                            }}>
-                              {retour.raison}
-                            </div>
+                            {tooltipPos.x > 0 && (
+                              <div className="fixed bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-[9999] text-slate-300 text-xs whitespace-normal break-words shadow-lg pointer-events-none" style={{
+                                top: tooltipPos.y + 'px',
+                                left: tooltipPos.x + 'px'
+                              }}>
+                                {retour.raison}
+                              </div>
+                            )}
                           </>
                         ) : (
                           "-"
