@@ -420,6 +420,14 @@ export default function RetoursAppel() {
     });
   };
 
+  const [viewingRaison, setViewingRaison] = useState(null);
+  const [filterArpenteurs, setFilterArpenteurs] = useState([]);
+  const [filterUtilisateurs, setFilterUtilisateurs] = useState([]);
+  const [filterStatuts, setFilterStatuts] = useState([]);
+  const [filterDateStart, setFilterDateStart] = useState("");
+  const [filterDateEnd, setFilterDateEnd] = useState("");
+  const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
+
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
 
   // Créer une liste de tous les retours d'appel avec leurs informations de dossier associé
@@ -464,14 +472,6 @@ export default function RetoursAppel() {
     const current = items?.find(item => item.actuel || item.actuelle);
     return current?.[key] || "";
   };
-
-  const [viewingRaison, setViewingRaison] = useState(null);
-  const [filterArpenteurs, setFilterArpenteurs] = useState([]);
-  const [filterUtilisateurs, setFilterUtilisateurs] = useState([]);
-  const [filterStatuts, setFilterStatuts] = useState([]);
-  const [filterDateStart, setFilterDateStart] = useState("");
-  const [filterDateEnd, setFilterDateEnd] = useState("");
-  const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
