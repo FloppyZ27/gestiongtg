@@ -155,6 +155,12 @@ function LayoutContent({ children, currentPageName }) {
     initialData: [],
   });
 
+  const { data: retoursAppels = [] } = useQuery({
+    queryKey: ['retoursAppels'],
+    queryFn: () => base44.entities.RetourAppel.filter({}, '-date_appel'),
+    initialData: [],
+  });
+
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
     heures: "",
