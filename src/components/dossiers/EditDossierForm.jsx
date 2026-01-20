@@ -14,6 +14,7 @@ import { fr } from "date-fns/locale";
 import MandatTabs from "./MandatTabs";
 import CommentairesSection from "./CommentairesSection";
 import DocumentsStepForm from "../mandat/DocumentsStepForm";
+import TarificationStepForm from "../mandat/TarificationStepForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -119,6 +120,7 @@ export default function EditDossierForm({
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
+  const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -1007,6 +1009,20 @@ export default function EditDossierForm({
                 </CardContent>
               )}
             </Card>
+
+            {/* Section Tarification */}
+            <TarificationStepForm
+              disabled={false}
+              mandats={formData.mandats}
+              onTarificationChange={(updatedMandats) => {
+                setFormData(prev => ({
+                  ...prev,
+                  mandats: updatedMandats
+                }));
+              }}
+              isCollapsed={tarificationStepCollapsed}
+              onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+            />
 
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {!editingDossier && formData.numero_dossier && formData.arpenteur_geometre && (
