@@ -135,6 +135,7 @@ export default function EditDossierForm({
   const [newMinuteForm, setNewMinuteForm] = useState({});
   const [minutesSortConfig, setMinutesSortConfig] = useState({ key: null, direction: 'asc' });
   const [retourAppelCollapsed, setRetourAppelCollapsed] = useState(true);
+  const [retourAppelSortConfig, setRetourAppelSortConfig] = useState({ key: null, direction: 'asc' });
   const [newRetourAppel, setNewRetourAppel] = useState({
     date_appel: new Date().toISOString().split('T')[0],
     utilisateur_assigne: "",
@@ -1614,64 +1615,133 @@ export default function EditDossierForm({
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300">Date</TableHead>
-                              <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
+                              <TableHead 
+                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
+                                onClick={() => {
+                                  setRetourAppelSortConfig({
+                                    key: 'date',
+                                    direction: retourAppelSortConfig.key === 'date' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                  });
+                                }}
+                              >
+                                <div className="flex items-center gap-1">
+                                  Date
+                                  {retourAppelSortConfig.key === 'date' && (
+                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                  )}
+                                </div>
+                              </TableHead>
+                              <TableHead 
+                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
+                                onClick={() => {
+                                  setRetourAppelSortConfig({
+                                    key: 'utilisateur',
+                                    direction: retourAppelSortConfig.key === 'utilisateur' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                  });
+                                }}
+                              >
+                                <div className="flex items-center gap-1">
+                                  Utilisateur assigné
+                                  {retourAppelSortConfig.key === 'utilisateur' && (
+                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                  )}
+                                </div>
+                              </TableHead>
                               <TableHead className="text-slate-300">Notes</TableHead>
-                              <TableHead className="text-slate-300">Statut</TableHead>
+                              <TableHead 
+                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
+                                onClick={() => {
+                                  setRetourAppelSortConfig({
+                                    key: 'statut',
+                                    direction: retourAppelSortConfig.key === 'statut' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
+                                  });
+                                }}
+                              >
+                                <div className="flex items-center gap-1">
+                                  Statut
+                                  {retourAppelSortConfig.key === 'statut' && (
+                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                  )}
+                                </div>
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {retoursAppel.map((retour) => (
-                              <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                                <TableCell className="text-slate-300">
-                                  {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  {users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne || "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="max-w-xs truncate cursor-help">
-                                          {retour.raison || "-"}
-                                        </div>
-                                      </TooltipTrigger>
-                                      {retour.raison && (
-                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
-                                          {retour.raison}
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </TableCell>
-                                <TableCell>
-                                  <Select 
-                                    value={retour.statut}
-                                    onValueChange={async (newStatut) => {
-                                      await base44.entities.RetourAppel.update(retour.id, {
-                                        ...retour,
-                                        statut: newStatut
-                                      });
-                                      setRetoursAppel(prev => 
-                                        prev.map(r => r.id === retour.id ? {...r, statut: newStatut} : r)
-                                      );
-                                      queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
-                                    }}
-                                  >
-                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-32">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-slate-700">
-                                      <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
-                                      <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
-                                      <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
-                                      <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                            {(() => {
+                              let sortedRetoursAppel = [...retoursAppel];
+                              
+                              if (retourAppelSortConfig.key) {
+                                sortedRetoursAppel.sort((a, b) => {
+                                  let aVal, bVal;
+                                  if (retourAppelSortConfig.key === 'date') {
+                                    aVal = a.date_appel || '';
+                                    bVal = b.date_appel || '';
+                                  } else if (retourAppelSortConfig.key === 'utilisateur') {
+                                    aVal = users.find(u => u.email === a.utilisateur_assigne)?.full_name || a.utilisateur_assigne || '';
+                                    bVal = users.find(u => u.email === b.utilisateur_assigne)?.full_name || b.utilisateur_assigne || '';
+                                  } else if (retourAppelSortConfig.key === 'statut') {
+                                    aVal = a.statut || '';
+                                    bVal = b.statut || '';
+                                  }
+
+                                  if (aVal < bVal) return retourAppelSortConfig.direction === 'asc' ? -1 : 1;
+                                  if (aVal > bVal) return retourAppelSortConfig.direction === 'asc' ? 1 : -1;
+                                  return 0;
+                                });
+                              }
+
+                              return sortedRetoursAppel.map((retour) => (
+                                <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
+                                  <TableCell className="text-slate-300">
+                                    {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300">
+                                    {users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne || "-"}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300">
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="max-w-xs truncate cursor-help">
+                                            {retour.raison || "-"}
+                                          </div>
+                                        </TooltipTrigger>
+                                        {retour.raison && (
+                                          <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
+                                            {retour.raison}
+                                          </TooltipContent>
+                                        )}
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Select 
+                                      value={retour.statut}
+                                      onValueChange={async (newStatut) => {
+                                        await base44.entities.RetourAppel.update(retour.id, {
+                                          ...retour,
+                                          statut: newStatut
+                                        });
+                                        setRetoursAppel(prev => 
+                                          prev.map(r => r.id === retour.id ? {...r, statut: newStatut} : r)
+                                        );
+                                        queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
+                                      }}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-32">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
+                                        <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                                        <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
+                                        <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                </TableRow>
+                              ));
+                            })()}
                           </TableBody>
                         </Table>
                       </div>
@@ -1679,93 +1749,95 @@ export default function EditDossierForm({
 
                     {/* Formulaire d'ajout */}
                     <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
-                          <Input 
-                            type="date"
-                            value={newRetourAppel.date_appel}
-                            onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
-                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
-                          <Select 
-                            value={newRetourAppel.utilisateur_assigne}
-                            onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              {users.map((u) => (
-                                <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      <div className="grid grid-cols-[1fr_1fr] gap-3 items-start">
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
+                            <Input 
+                              type="date"
+                              value={newRetourAppel.date_appel}
+                              onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
+                              className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                            <Select 
+                              value={newRetourAppel.utilisateur_assigne}
+                              onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                <SelectValue placeholder="Sélectionner" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                {users.map((u) => (
+                                  <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Raison de l'appel <span className="text-red-400">*</span></Label>
-                          <Input 
+                          <textarea 
                             placeholder="Notes sur l'appel..."
                             value={newRetourAppel.raison}
                             onChange={(e) => setNewRetourAppel({...newRetourAppel, raison: e.target.value})}
-                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                            className="bg-slate-700 border border-slate-600 text-white h-[88px] text-xs p-2 rounded resize-none"
                           />
                         </div>
-                        <Button 
-                          type="button"
-                          size="sm"
-                          onClick={async () => {
-                            if (!newRetourAppel.raison) {
-                              alert("Veuillez entrer la raison de l'appel");
-                              return;
-                            }
-
-                            const createdRetour = await base44.entities.RetourAppel.create({
-                              dossier_id: editingDossier.id,
-                              date_appel: newRetourAppel.date_appel,
-                              utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
-                              raison: newRetourAppel.raison,
-                              statut: "Retour d'appel"
-                            });
-
-                            // Ajouter le nouveau retour à la liste
-                            setRetoursAppel(prev => [createdRetour, ...prev]);
-
-                            // Mettre à jour le statut du dossier à "Retour d'appel"
-                            setFormData({...formData, statut: "Retour d'appel"});
-
-                            // Créer une notification si utilisateur assigné
-                            if (newRetourAppel.utilisateur_assigne) {
-                              const clientsNames = getClientsNames(formData.clients_ids);
-                              await base44.entities.Notification.create({
-                                utilisateur_email: newRetourAppel.utilisateur_assigne,
-                                titre: "Nouveau retour d'appel assigné",
-                                message: `Un retour d'appel vous a été assigné pour le dossier ${getArpenteurInitials(formData.arpenteur_geometre)}${formData.numero_dossier}${clientsNames !== "-" ? ` - ${clientsNames}` : ""}.`,
-                                type: "retour_appel",
-                                dossier_id: editingDossier.id,
-                                lue: false
-                              });
-                            }
-
-                            queryClient.invalidateQueries({ queryKey: ['notifications'] });
-                            
-                            // Réinitialiser le formulaire
-                            setNewRetourAppel({
-                              date_appel: new Date().toISOString().split('T')[0],
-                              utilisateur_assigne: "",
-                              raison: "",
-                              statut: "Retour d'appel"
-                            });
-                          }}
-                          className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-8 text-xs w-full border border-blue-500/30"
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Ajouter le retour d'appel
-                        </Button>
                       </div>
+                      <Button 
+                        type="button"
+                        size="sm"
+                        onClick={async () => {
+                          if (!newRetourAppel.raison) {
+                            alert("Veuillez entrer la raison de l'appel");
+                            return;
+                          }
+
+                          const createdRetour = await base44.entities.RetourAppel.create({
+                            dossier_id: editingDossier.id,
+                            date_appel: newRetourAppel.date_appel,
+                            utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
+                            raison: newRetourAppel.raison,
+                            statut: "Retour d'appel"
+                          });
+
+                          // Ajouter le nouveau retour à la liste
+                          setRetoursAppel(prev => [createdRetour, ...prev]);
+
+                          // Mettre à jour le statut du dossier à "Retour d'appel"
+                          setFormData({...formData, statut: "Retour d'appel"});
+
+                          // Créer une notification si utilisateur assigné
+                          if (newRetourAppel.utilisateur_assigne) {
+                            const clientsNames = getClientsNames(formData.clients_ids);
+                            await base44.entities.Notification.create({
+                              utilisateur_email: newRetourAppel.utilisateur_assigne,
+                              titre: "Nouveau retour d'appel assigné",
+                              message: `Un retour d'appel vous a été assigné pour le dossier ${getArpenteurInitials(formData.arpenteur_geometre)}${formData.numero_dossier}${clientsNames !== "-" ? ` - ${clientsNames}` : ""}.`,
+                              type: "retour_appel",
+                              dossier_id: editingDossier.id,
+                              lue: false
+                            });
+                          }
+
+                          queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                          
+                          // Réinitialiser le formulaire
+                          setNewRetourAppel({
+                            date_appel: new Date().toISOString().split('T')[0],
+                            utilisateur_assigne: "",
+                            raison: "",
+                            statut: "Retour d'appel"
+                          });
+                        }}
+                        className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-8 text-xs w-full border border-blue-500/30 mt-3"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Ajouter le retour d'appel
+                      </Button>
                     </div>
                   </CardContent>
                 )}
