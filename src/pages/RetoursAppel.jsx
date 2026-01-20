@@ -794,11 +794,11 @@ export default function RetoursAppel() {
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">Dossier</TableHead>
-                    <TableHead className="text-slate-300">Date de l'appel</TableHead>
-                    <TableHead className="text-slate-300">Statut</TableHead>
-                    <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
                     <TableHead className="text-slate-300">Clients</TableHead>
+                    <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
+                    <TableHead className="text-slate-300">Date de l'appel</TableHead>
                     <TableHead className="text-slate-300">Raison</TableHead>
+                    <TableHead className="text-slate-300">Statut</TableHead>
                     <TableHead className="text-slate-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
