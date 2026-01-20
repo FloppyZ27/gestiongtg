@@ -1075,8 +1075,8 @@ export default function RetoursAppel() {
                 </TableBody>
               </Table>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
