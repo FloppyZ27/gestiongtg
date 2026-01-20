@@ -3406,8 +3406,8 @@ export default function Dossiers() {
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardHeader>
-            <div className="flex justify-between items-center mb-4">
-              <div className="relative flex-1 max-w-md">
+            <div className="flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher..."
@@ -3415,8 +3415,7 @@ export default function Dossiers() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
               </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
