@@ -82,7 +82,8 @@ export default function TypesOperationStepForm({
     
     const typeOp = typesOperation[index];
     setNewTypeOperation({ 
-      ...typeOp,
+      type_operation: typeOp.type_operation || "",
+      date_bpd: typeOp.date_bpd || "",
       concordances_anterieures: typeOp.concordances_anterieures || []
     });
     setEditingTypeIndex(index);
