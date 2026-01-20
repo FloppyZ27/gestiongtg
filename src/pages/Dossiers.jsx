@@ -3519,7 +3519,7 @@ export default function Dossiers() {
                   ) :
 
                   <TableRow>
-                        <TableCell colSpan={12} className="text-center py-12 text-slate-500">
+                        <TableCell colSpan={11} className="text-center py-12 text-slate-500">
                           <FolderOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                           <p>Aucun dossier trouvé.</p>
                         </TableCell>
