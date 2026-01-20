@@ -688,7 +688,7 @@ export default function Lots() {
       }
       
       extractedData.cadastre = 'Québec';
-      extractedData.concordances_anterieures = [];
+      const concordances_anterieures = [];
       
       if (coLines.length > 0) {
         coLines.forEach(coLine => {
@@ -702,7 +702,7 @@ export default function Lots() {
           const numeroLot = coParts[3] || '';
           const estPartie = coParts[4] === 'O';
           
-          extractedData.concordances_anterieures.push({
+          concordances_anterieures.push({
             circonscription_fonciere: extractedData.circonscription_fonciere,
             cadastre: cadastre,
             numero_lot: numeroLot,
@@ -711,6 +711,13 @@ export default function Lots() {
           });
         });
       }
+      
+      // Créer un type d'opération avec la date BPD et les concordances
+      const typeOperation = {
+        type_operation: "Remplacement",
+        date_bpd: extractedData.date_bpd || '',
+        concordances_anterieures: concordances_anterieures
+      };
       
       // Mettre à jour les cadastres disponibles AVANT de set formData
       if (extractedData.circonscription_fonciere) {
@@ -722,6 +729,7 @@ export default function Lots() {
         numero_lot: extractedData.numero_lot || prev.numero_lot,
         circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
         cadastre: 'Québec',
+        types_operation: [typeOperation]
       }));
       
       setShowImportSuccess(true);
