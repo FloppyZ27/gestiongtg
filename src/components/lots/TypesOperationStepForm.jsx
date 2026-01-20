@@ -74,7 +74,11 @@ export default function TypesOperationStepForm({
   };
 
   const handleEditTypeOperation = (index) => {
-    setNewTypeOperation({ ...typesOperation[index] });
+    const typeOp = typesOperation[index];
+    setNewTypeOperation({ 
+      ...typeOp,
+      concordances_anterieures: typeOp.concordances_anterieures || []
+    });
     setEditingTypeIndex(index);
     setSelectedTypeIndex(index);
   };
