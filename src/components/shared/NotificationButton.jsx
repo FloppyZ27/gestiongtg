@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -101,7 +100,7 @@ export default function NotificationButton({ user }) {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 bg-slate-900 border-slate-700" align="end">
+      <PopoverContent className="w-96 p-0 bg-slate-900 border-slate-700" align="end" side="bottom" sideOffset={0}>
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <h3 className="font-semibold text-white">Notifications</h3>
           {notifications.length > 0 && (
