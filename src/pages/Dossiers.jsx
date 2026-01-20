@@ -1661,7 +1661,7 @@ export default function Dossiers() {
   };
 
   const getSortIcon = (field) => {
-    if (!hasActiveFilters()) return null;
+    if (!hasActiveFilters() && sortField !== field) return null;
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 inline opacity-50" />;
     return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 ml-1 inline" /> : <ArrowDown className="w-4 h-4 ml-1 inline" />;
   };
