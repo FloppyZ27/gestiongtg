@@ -69,19 +69,11 @@ export default function RetoursAppel() {
   const [sortDirection, setSortDirection] = useState("asc");
 
   const [formData, setFormData] = useState({
-    numero_dossier: "",
-    arpenteur_geometre: "",
-    date_ouverture: new Date().toISOString().split('T')[0],
-    statut: "Retour d'appel",
-    ttl: "Non",
+    dossier_reference_id: "",
     utilisateur_assigne: "",
-    clients_ids: [],
-    clients_texte: "",
-    notaires_ids: [],
-    notaires_texte: "",
-    courtiers_ids: [],
-    courtiers_texte: "",
-    mandats: []
+    date_appel: new Date().toISOString().split('T')[0],
+    statut_retour_appel: "Message laissé",
+    notes: ""
   });
 
   const queryClient = useQueryClient();
@@ -127,58 +119,60 @@ export default function RetoursAppel() {
     }
   }, [dossiers]);
 
-  const createDossierMutation = useMutation({
-    mutationFn: async (dossierData) => {
-      const newDossier = await base44.entities.Dossier.create(dossierData);
-      if (commentairesTemporaires.length > 0) {
-        const commentairePromises = commentairesTemporaires.map(comment =>
-          base44.entities.CommentaireDossier.create({
-            dossier_id: newDossier.id,
-            contenu: comment.contenu,
-            utilisateur_email: comment.utilisateur_email,
-            utilisateur_nom: comment.utilisateur_nom
-          })
-        );
-        await Promise.all(commentairePromises);
-      }
-      if (dossierData.utilisateur_assigne) {
-        const clientsNames = getClientsNames(dossierData.clients_ids);
+  const createRetourAppelMutation = useMutation({
+    mutationFn: async (retourData) => {
+      const dossierId = retourData.dossier_reference_id;
+      const dossier = dossiers.find(d => d.id === dossierId);
+      if (!dossier) throw new Error("Dossier non trouvé");
+      
+      await base44.entities.Dossier.update(dossierId, {
+        ...dossier,
+        utilisateur_assigne: retourData.utilisateur_assigne,
+        statut: "Retour d'appel"
+      });
+      
+      if (retourData.utilisateur_assigne) {
+        const clientsNames = getClientsNames(dossier.clients_ids);
         await base44.entities.Notification.create({
-          utilisateur_email: dossierData.utilisateur_assigne,
+          utilisateur_email: retourData.utilisateur_assigne,
           titre: "Nouveau retour d'appel assigné",
           message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
           type: "retour_appel",
-          dossier_id: newDossier.id,
+          dossier_id: dossierId,
           lue: false
         });
       }
-      return newDossier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setIsDialogOpen(false);
       resetForm();
-      setCommentairesTemporaires([]);
     },
   });
 
-  const updateDossierMutation = useMutation({
-    mutationFn: async ({ id, dossierData }) => {
-      const oldDossier = dossiers.find(d => d.id === id);
-      const updatedDossier = await base44.entities.Dossier.update(id, dossierData);
-      if (dossierData.utilisateur_assigne && oldDossier?.utilisateur_assigne !== dossierData.utilisateur_assigne) {
-        const clientsNames = getClientsNames(dossierData.clients_ids);
+  const updateRetourAppelMutation = useMutation({
+    mutationFn: async ({ id, retourData }) => {
+      const dossier = dossiers.find(d => d.id === id);
+      if (!dossier) throw new Error("Dossier non trouvé");
+      
+      const oldUtilisateur = dossier.utilisateur_assigne;
+      await base44.entities.Dossier.update(id, {
+        ...dossier,
+        utilisateur_assigne: retourData.utilisateur_assigne
+      });
+      
+      if (retourData.utilisateur_assigne && oldUtilisateur !== retourData.utilisateur_assigne) {
+        const clientsNames = getClientsNames(dossier.clients_ids);
         await base44.entities.Notification.create({
-          utilisateur_email: dossierData.utilisateur_assigne,
+          utilisateur_email: retourData.utilisateur_assigne,
           titre: "Nouveau retour d'appel assigné",
           message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
           type: "retour_appel",
-          dossier_id: updatedDossier.id,
+          dossier_id: id,
           lue: false
         });
       }
-      return updatedDossier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
@@ -224,35 +218,12 @@ export default function RetoursAppel() {
     return formatAdresse(mandats[0].adresse_travaux);
   };
 
-  const loadDossierReference = (dossierId) => {
-    const dossier = dossiers.find(d => d.id === dossierId);
-    if (!dossier) return;
-    setFormData({
-      numero_dossier: dossier.numero_dossier || "",
-      arpenteur_geometre: dossier.arpenteur_geometre || "",
-      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: "Retour d'appel",
-      ttl: dossier.ttl || "Non",
-      utilisateur_assigne: formData.utilisateur_assigne || "",
-      clients_ids: dossier.clients_ids || [],
-      clients_texte: dossier.clients_texte || "",
-      notaires_ids: dossier.notaires_ids || [],
-      notaires_texte: dossier.notaires_texte || "",
-      courtiers_ids: dossier.courtiers_ids || [],
-      courtiers_texte: dossier.courtiers_texte || "",
-      mandats: dossier.mandats?.map(m => ({
-        ...m,
-        adresse_travaux: m.adresse_travaux || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
-        lots: m.lots || [],
-        prix_estime: m.prix_estime || 0,
-        rabais: m.rabais || 0,
-        taxes_incluses: m.taxes_incluses || false,
-        tache_actuelle: "",
-        utilisateur_assigne: ""
-      })) || []
-    });
-    setActiveTabMandat("0");
+  const selectDossier = (dossierId) => {
     setDossierReferenceId(dossierId);
+    setFormData(prev => ({
+      ...prev,
+      dossier_reference_id: dossierId
+    }));
     setDossierSearchForReference("");
   };
 
@@ -313,62 +284,43 @@ export default function RetoursAppel() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.dossier_reference_id) {
+      alert("Veuillez sélectionner un dossier");
+      return;
+    }
     if (editingDossier) {
-      updateDossierMutation.mutate({ id: editingDossier.id, dossierData: formData });
+      updateRetourAppelMutation.mutate({ id: editingDossier.id, retourData: formData });
     } else {
-      createDossierMutation.mutate(formData);
+      createRetourAppelMutation.mutate(formData);
     }
   };
 
   const resetForm = () => {
     setFormData({
-      numero_dossier: "",
-      arpenteur_geometre: "",
-      date_ouverture: new Date().toISOString().split('T')[0],
-      statut: "Retour d'appel",
-      ttl: "Non",
+      dossier_reference_id: "",
       utilisateur_assigne: "",
-      clients_ids: [],
-      clients_texte: "",
-      notaires_ids: [],
-      notaires_texte: "",
-      courtiers_ids: [],
-      courtiers_texte: "",
-      mandats: []
+      date_appel: new Date().toISOString().split('T')[0],
+      statut_retour_appel: "Message laissé",
+      notes: ""
     });
     setEditingDossier(null);
-    setActiveTabMandat("0");
     setDossierReferenceId(null);
     setDossierSearchForReference("");
-    setCommentairesTemporaires([]);
   };
 
   const handleEdit = (dossier) => {
     setIsViewDialogOpen(false);
     setViewingDossier(null);
-    setDossierReferenceId(null);
     setEditingDossier(dossier);
     setFormData({
-      numero_dossier: dossier.numero_dossier || "",
-      arpenteur_geometre: dossier.arpenteur_geometre || "",
-      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
-      statut: "Retour d'appel",
-      ttl: dossier.ttl || "Non",
+      dossier_reference_id: dossier.id,
       utilisateur_assigne: dossier.utilisateur_assigne || "",
-      clients_ids: dossier.clients_ids || [],
-      clients_texte: dossier.clients_texte || "",
-      notaires_ids: dossier.notaires_ids || [],
-      notaires_texte: dossier.notaires_texte || "",
-      courtiers_ids: dossier.courtiers_ids || [],
-      courtiers_texte: dossier.courtiers_texte || "",
-      mandats: dossier.mandats?.map(m => ({
-        ...m,
-        adresse_travaux: m.adresse_travaux || { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
-        lots: m.lots || []
-      })) || []
+      date_appel: new Date().toISOString().split('T')[0],
+      statut_retour_appel: "Message laissé",
+      notes: ""
     });
+    setDossierReferenceId(dossier.id);
     setIsDialogOpen(true);
-    setActiveTabMandat("0");
   };
 
   const handleView = (dossier) => {
