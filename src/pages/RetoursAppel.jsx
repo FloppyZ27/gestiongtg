@@ -1014,7 +1014,7 @@ export default function RetoursAppel() {
                         {retour.raison ? (
                           <>
                             <span className="line-clamp-1 cursor-help">{retour.raison}</span>
-                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-50 text-slate-300 text-xs whitespace-normal break-words shadow-lg">
+                            <div className="absolute left-0 top-full mt-2 hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-50 text-slate-300 text-xs whitespace-normal break-words shadow-lg">
                               {retour.raison}
                             </div>
                           </>
