@@ -722,7 +722,12 @@ export default function EditDossierForm({
                       ))}
                     </Tabs>
                   ) : (
-                    <div className="text-center py-4 text-slate-400 bg-slate-800/30 rounded-lg text-xs">Aucun mandat</div>
+                    <div className="flex items-center justify-center py-6">
+                      <Button type="button" size="sm" onClick={addMandat} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 h-7 text-xs">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Ajouter un mandat
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               )}
