@@ -770,9 +770,7 @@ export default function RetoursAppel() {
 
         {/* Table des tous les retours d'appel */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
-            <h2 className="text-xl font-bold text-white mb-4">Tous les retours d'appel</h2>
-          </CardHeader>
+          <CardContent className="p-0 pt-6">
 
           <CardContent className="p-0">
             <div className="overflow-x-auto">
