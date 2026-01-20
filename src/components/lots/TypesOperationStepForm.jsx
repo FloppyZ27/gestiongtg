@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3, Link2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3, Link2, Copy } from "lucide-react";
 
 const TYPES_OPERATIONS = [
   "Division du territoire",
@@ -91,6 +91,17 @@ export default function TypesOperationStepForm({
       type_operation: "",
       date_bpd: "",
       concordances_anterieures: []
+    });
+    setEditingTypeIndex(null);
+    setSelectedTypeIndex(null);
+  };
+
+  const handleCopyTypeOperation = (index) => {
+    const typeOp = typesOperation[index];
+    setNewTypeOperation({
+      type_operation: "",
+      date_bpd: "",
+      concordances_anterieures: typeOp.concordances_anterieures || []
     });
     setEditingTypeIndex(null);
     setSelectedTypeIndex(null);
@@ -222,14 +233,29 @@ export default function TypesOperationStepForm({
                     return (
                       <div 
                         key={originalIndex} 
-                        className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
+                        className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all ${
                           editingTypeIndex === originalIndex 
                             ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
                             : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
                         }`}
-                        onClick={() => handleEditTypeOperation(originalIndex)}
                       >
-                        {typeOp.type_operation}
+                        <span 
+                          className="cursor-pointer"
+                          onClick={() => handleEditTypeOperation(originalIndex)}
+                        >
+                          {typeOp.type_operation}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyTypeOperation(originalIndex);
+                          }}
+                          className="ml-1 hover:text-purple-100 transition-colors"
+                          title="Copier ce type d'opération"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
                       </div>
                     );
                   })}
