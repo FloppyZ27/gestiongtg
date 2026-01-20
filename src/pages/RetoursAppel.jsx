@@ -428,6 +428,7 @@ export default function RetoursAppel() {
   const [filterStatuts, setFilterStatuts] = useState([]);
   const [filterDateStart, setFilterDateStart] = useState("");
   const [filterDateEnd, setFilterDateEnd] = useState("");
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
