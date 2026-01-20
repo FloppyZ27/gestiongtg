@@ -815,6 +815,132 @@ export default function RetoursAppel() {
           </DialogContent>
         </Dialog>
 
+        {/* Filtres et Recherche */}
+        <div className="mb-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+            <Input
+              placeholder="Rechercher par raison ou numéro de dossier..."
+              value={searchRetoursAppel}
+              onChange={(e) => setSearchRetoursAppel(e.target.value)}
+              className="pl-10 bg-slate-800 border-slate-700"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Filtre Arpenteur */}
+            <div className="space-y-2">
+              <Label className="text-sm">Arpenteur-géomètre</Label>
+              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
+                {ARPENTEURS.map(arpenteur => (
+                  <button
+                    key={arpenteur}
+                    onClick={() => setFilterArpenteurs(prev => 
+                      prev.includes(arpenteur) 
+                        ? prev.filter(a => a !== arpenteur)
+                        : [...prev, arpenteur]
+                    )}
+                    className={`text-xs px-2 py-1 rounded transition-colors ${
+                      filterArpenteurs.includes(arpenteur)
+                        ? 'bg-blue-500/50 text-blue-300 border border-blue-400'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {arpenteur}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtre Utilisateur */}
+            <div className="space-y-2">
+              <Label className="text-sm">Utilisateur assigné</Label>
+              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
+                {users.map(u => (
+                  <button
+                    key={u.email}
+                    onClick={() => setFilterUtilisateurs(prev => 
+                      prev.includes(u.email) 
+                        ? prev.filter(ut => ut !== u.email)
+                        : [...prev, u.email]
+                    )}
+                    className={`text-xs px-2 py-1 rounded transition-colors ${
+                      filterUtilisateurs.includes(u.email)
+                        ? 'bg-emerald-500/50 text-emerald-300 border border-emerald-400'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {u.full_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtre Statut */}
+            <div className="space-y-2">
+              <Label className="text-sm">Statut</Label>
+              <div className="flex flex-wrap gap-2 p-2 bg-slate-800 border border-slate-700 rounded-md max-h-24 overflow-y-auto">
+                {["Retour d'appel", "Message laissé", "Aucune réponse", "Terminé"].map(statut => (
+                  <button
+                    key={statut}
+                    onClick={() => setFilterStatuts(prev => 
+                      prev.includes(statut) 
+                        ? prev.filter(s => s !== statut)
+                        : [...prev, statut]
+                    )}
+                    className={`text-xs px-2 py-1 rounded transition-colors ${
+                      filterStatuts.includes(statut)
+                        ? 'bg-purple-500/50 text-purple-300 border border-purple-400'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {statut}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtre Plage de dates */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <Label className="text-xs">Du</Label>
+                <Input
+                  type="date"
+                  value={filterDateStart}
+                  onChange={(e) => setFilterDateStart(e.target.value)}
+                  className="bg-slate-800 border-slate-700 h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Au</Label>
+                <Input
+                  type="date"
+                  value={filterDateEnd}
+                  onChange={(e) => setFilterDateEnd(e.target.value)}
+                  className="bg-slate-800 border-slate-700 h-8 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterStatuts.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setFilterArpenteurs([]);
+                setFilterUtilisateurs([]);
+                setFilterStatuts([]);
+                setFilterDateStart("");
+                setFilterDateEnd("");
+                setSearchRetoursAppel("");
+              }}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-300 h-8"
+            >
+              <X className="w-3 h-3 mr-1" /> Réinitialiser les filtres
+            </Button>
+          )}
+        </div>
+
         {/* Table des tous les retours d'appel */}
         <div className="border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl rounded-lg">
           <div className="p-0">
