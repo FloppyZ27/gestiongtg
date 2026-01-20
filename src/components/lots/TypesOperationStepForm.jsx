@@ -186,45 +186,21 @@ export default function TypesOperationStepForm({
           {typesOperation.length > 0 && (
             <div className="mb-3 flex gap-1">
                 {typesOperation.map((typeOp, index) => (
-                  <div key={index} className="group relative">
-                    <div className="flex items-center gap-1 px-2 py-1 bg-purple-500/15 border border-purple-500/30 rounded text-xs text-purple-300 hover:bg-purple-500/25 transition-colors cursor-pointer"
-                      onClick={() => handleEditTypeOperation(index)}
-                    >
-                      {typeOp.type_operation}
-                      <div className="hidden group-hover:flex gap-0.5 ml-1 pl-1 border-l border-purple-500/30">
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditTypeOperation(index);
-                          }}
-                          className="text-blue-400 hover:text-blue-300 h-4 w-4 p-0"
-                          disabled={disabled}
-                        >
-                          <Edit2 className="w-2.5 h-2.5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveTypeOperation(index);
-                          }}
-                          className="text-red-400 hover:text-red-300 h-4 w-4 p-0"
-                          disabled={disabled}
-                        >
-                          <Trash2 className="w-2.5 h-2.5" />
-                        </Button>
-                      </div>
-                    </div>
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
+                      editingTypeIndex === index 
+                        ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
+                        : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
+                    }`}
+                    onClick={() => handleEditTypeOperation(index)}
+                  >
+                    {typeOp.type_operation}
                   </div>
                 ))}
               </div>
-            )}
-          )}
+            )
+          }
 
           <div className="space-y-4 w-full">
              {/* Formulaire d'ajout/édition de type d'opération */}
@@ -265,10 +241,9 @@ export default function TypesOperationStepForm({
                    type="button"
                    onClick={handleAddTypeOperation}
                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                   className="bg-purple-600 hover:bg-purple-700 text-white px-3 h-9 self-end"
+                   className="h-9 self-end text-xs"
                  >
-                   <Plus className="w-4 h-4 mr-1" />
-                   Ajouter
+                   <Plus className="w-3.5 h-3.5" />
                  </Button>
                </div>
 
