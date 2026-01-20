@@ -207,28 +207,14 @@ export default function TypesOperationStepForm({
                 {typesOperation.map((typeOp, index) => (
                   <div 
                     key={index} 
-                    className="flex items-center gap-1 group"
+                    className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
+                      editingTypeIndex === index 
+                        ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
+                        : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
+                    }`}
+                    onClick={() => handleEditTypeOperation(index)}
                   >
-                    <div 
-                      className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
-                        editingTypeIndex === index 
-                          ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
-                          : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
-                      }`}
-                      onClick={() => handleEditTypeOperation(index)}
-                    >
-                      {typeOp.type_operation}
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleRemoveTypeOperation(index)}
-                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 h-5 w-5 p-0 transition-opacity"
-                      disabled={disabled}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                    {typeOp.type_operation}
                   </div>
                 ))}
               </div>
@@ -238,7 +224,7 @@ export default function TypesOperationStepForm({
           <div className="space-y-4 w-full">
              {/* Formulaire d'ajout/édition de type d'opération */}
              <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3 w-full">
-               <div className="grid grid-cols-[1fr_1fr_auto] gap-3 items-end">
+               <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-3 items-end">
                  <div>
                    <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
                    <Select
@@ -278,6 +264,17 @@ export default function TypesOperationStepForm({
                  >
                    <Plus className="w-3 h-3" />
                  </Button>
+
+                 {editingTypeIndex !== null && (
+                   <Button
+                     type="button"
+                     onClick={() => handleRemoveTypeOperation(editingTypeIndex)}
+                     disabled={disabled}
+                     className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 h-7 w-7 self-end p-0"
+                   >
+                     <Trash2 className="w-3 h-3" />
+                   </Button>
+                 )}
                </div>
 
               {/* Section Concordances antérieures - Colapsable */}
@@ -414,28 +411,16 @@ export default function TypesOperationStepForm({
                                 <TableCell className="text-slate-300 text-xs py-1">{conc.cadastre || "-"}</TableCell>
                                 <TableCell className="text-slate-300 text-xs py-1">{conc.rang || "-"}</TableCell>
                                 <TableCell className="text-right py-1">
-                                  <div className="flex justify-end gap-1">
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleEditConcordance(index)}
-                                      className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-5 w-5 p-0"
-                                      disabled={disabled}
-                                    >
-                                      <Edit2 className="w-3 h-3" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleRemoveConcordance(index)}
-                                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 w-5 p-0"
-                                      disabled={disabled}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleRemoveConcordance(index)}
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-5 w-5 p-0"
+                                    disabled={disabled}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
