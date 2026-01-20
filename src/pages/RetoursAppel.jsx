@@ -806,7 +806,7 @@ export default function RetoursAppel() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.dossier ? getClientsNames(retour.dossier.clients_ids) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
                       <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.raison || "-"}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
