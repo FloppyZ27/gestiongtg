@@ -847,6 +847,13 @@ export default function Lots() {
           l.circonscription_fonciere === baseData.circonscription_fonciere
         );
         
+        // Créer le type d'opération comme pour l'import simple
+        const typeOperation = {
+          type_operation: "Remplacement",
+          date_bpd: baseData.date_bpd || '',
+          concordances_anterieures: concordances
+        };
+
         previewLots.push({
           numero_lot: numeroLot,
           cadastre: 'Québec',
@@ -854,7 +861,8 @@ export default function Lots() {
           date_bpd: baseData.date_bpd,
           concordances: concordances,
           concordances_count: concordances.length,
-          alreadyExists: !!lotExistant
+          alreadyExists: !!lotExistant,
+          types_operation: [typeOperation]
         });
       }
       
@@ -885,8 +893,7 @@ export default function Lots() {
           circonscription_fonciere: lotData.circonscription_fonciere,
           cadastre: lotData.cadastre,
           rang: '',
-          date_bpd: lotData.date_bpd,
-          concordances_anterieures: lotData.concordances
+          types_operation: lotData.types_operation || []
         });
       } catch (error) {
         console.error(`Erreur création lot ${lotData.numero_lot}:`, error);
