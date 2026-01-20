@@ -109,7 +109,7 @@ export default function RetoursAppel() {
 
   const { data: retoursAppels = [] } = useQuery({
     queryKey: ['retoursAppels'],
-    queryFn: () => base44.entities.RetourAppel.list(),
+    queryFn: () => base44.entities.RetourAppel.filter({}, '-date_appel'),
     initialData: [],
   });
 
