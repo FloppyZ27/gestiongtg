@@ -1749,7 +1749,7 @@ export default function EditDossierForm({
 
                     {/* Formulaire d'ajout */}
                     <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
-                      <div className="grid grid-cols-[1fr_1fr] gap-3 items-start">
+                      <div className="grid grid-cols-[1fr_1fr] gap-3">
                         <div className="space-y-3">
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
@@ -1777,13 +1777,13 @@ export default function EditDossierForm({
                             </Select>
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Raison de l'appel <span className="text-red-400">*</span></Label>
+                        <div className="flex flex-col">
+                          <Label className="text-slate-400 text-xs mb-1">Raison de l'appel <span className="text-red-400">*</span></Label>
                           <textarea 
                             placeholder="Notes sur l'appel..."
                             value={newRetourAppel.raison}
                             onChange={(e) => setNewRetourAppel({...newRetourAppel, raison: e.target.value})}
-                            className="bg-slate-700 border border-slate-600 text-white h-[88px] text-xs p-2 rounded resize-none"
+                            className="bg-slate-700 border border-slate-600 text-white flex-1 text-xs p-2 rounded resize-none"
                           />
                         </div>
                       </div>
