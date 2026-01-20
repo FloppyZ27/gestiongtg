@@ -11,16 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, Plus, Trash2, Edit2, Check, X, Layers, Grid3x3, Link2 } from "lucide-react";
 
 const TYPES_OPERATIONS = [
-  "Vente",
-  "Cession",
-  "Donation",
-  "Déclaration de Transmission",
-  "Jugement",
-  "Rectification",
-  "Retrocession",
+  "Division du territoire",
   "Subdivision",
-  "Morcellement",
-  "Autre"
+  "Remplacement",
+  "Rénovation cadastrale",
+  "Correction",
+  "Annulation"
 ];
 
 export default function TypesOperationStepForm({
