@@ -796,24 +796,61 @@ export default function RetoursAppel() {
                           </TableCell>
                       <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
                       <TableCell>
-                        <Badge className={
-                          retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border" :
-                          retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30 border" :
-                          retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
-                          "bg-slate-700 text-slate-300"
-                        }>
-                          {retour.statut}
-                        </Badge>
+                        <Select 
+                          value={retour.statut}
+                          onValueChange={async (newStatut) => {
+                            if (user?.email === retour.utilisateur_assigne || user?.role === 'admin') {
+                              await base44.entities.RetourAppel.update(retour.id, {
+                                ...retour,
+                                statut: newStatut
+                              });
+                              queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+                            } else {
+                              alert("Seul l'utilisateur assigné peut modifier le statut");
+                            }
+                          }}
+                          disabled={user?.email !== retour.utilisateur_assigne && user?.role !== 'admin'}
+                        >
+                          <SelectTrigger className={`border-slate-600 h-8 text-xs w-36 ${
+                            retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                            retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
+                            retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
+                            "bg-slate-700 text-white"
+                          } ${user?.email !== retour.utilisateur_assigne && user?.role !== 'admin' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            <SelectItem value="Retour d'appel" className="text-white text-xs">Retour d'appel</SelectItem>
+                            <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                            <SelectItem value="Aucune réponse" className="text-white text-xs">Aucune réponse</SelectItem>
+                            <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
                       <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{retour.raison || "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs">
+                        {retour.raison ? (
+                          <button 
+                            onClick={() => setViewingRaison(retour)}
+                            className="text-slate-300 hover:text-emerald-400 cursor-help underline truncate"
+                            title="Cliquer pour voir le message complet"
+                          >
+                            {retour.raison}
+                          </button>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleView(dossiers.find(d => d.id === retour.dossier_id))} className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDelete(retour.id)} 
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
