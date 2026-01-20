@@ -839,13 +839,13 @@ export default function RetoursAppel() {
                   onClick={() => setActiveListTab("retour_appel")}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "retour_appel"
-                      ? "border-blue-500 text-blue-400 bg-blue-500/10"
-                      : "border-transparent text-slate-400 hover:text-blue-400 hover:bg-blue-500/5"
+                      ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
+                      : "border-transparent text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5"
                   }`}
                 >
                   <Phone className="w-4 h-4" />
                   Retour d'appel
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 ml-1">
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-1">
                     {retoursAppels.filter(r => r.statut === "Retour d'appel").length}
                   </Badge>
                 </button>
@@ -869,13 +869,13 @@ export default function RetoursAppel() {
                   onClick={() => setActiveListTab("termine")}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "termine"
-                      ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
-                      : "border-transparent text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5"
+                      ? "border-blue-500 text-blue-400 bg-blue-500/10"
+                      : "border-transparent text-slate-400 hover:text-blue-400 hover:bg-blue-500/5"
                   }`}
                 >
                   <Check className="w-4 h-4" />
                   Terminé
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-1">
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 ml-1">
                     {retoursAppels.filter(r => r.statut === "Terminé").length}
                   </Badge>
                 </button>
