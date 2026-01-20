@@ -788,12 +788,12 @@ export default function RetoursAppel() {
                   {sortedAllRetoursAppels.map((retour) => (
                     <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
                       <TableCell className="font-medium">
-                        {retour.dossier && (
-                          <Badge variant="outline" className={`${getArpenteurColor(retour.dossier.arpenteur_geometre)} border`}>
-                            {retour.dossier.numero_dossier ? `${getArpenteurInitials(retour.dossier.arpenteur_geometre)}${retour.dossier.numero_dossier}` : getArpenteurInitials(retour.dossier.arpenteur_geometre).slice(0, -1)}
-                          </Badge>
-                        )}
-                      </TableCell>
+                            {dossiers.find(d => d.id === retour.dossier_id) ? (
+                              <Badge variant="outline" className={`${getArpenteurColor(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre)} border`}>
+                                {dossiers.find(d => d.id === retour.dossier_id)?.numero_dossier ? `${getArpenteurInitials(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre)}${dossiers.find(d => d.id === retour.dossier_id)?.numero_dossier}` : getArpenteurInitials(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre).slice(0, -1)}
+                              </Badge>
+                            ) : null}
+                          </TableCell>
                       <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
                       <TableCell>
                         <Badge className={
