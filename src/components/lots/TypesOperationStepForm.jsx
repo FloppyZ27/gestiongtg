@@ -267,9 +267,9 @@ export default function TypesOperationStepForm({
                    type="button"
                    onClick={handleAddTypeOperation}
                    disabled={!newTypeOperation.type_operation || !newTypeOperation.date_bpd || disabled}
-                   className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 h-7 w-7 self-end p-0"
+                   className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 h-7 px-2 self-end"
                  >
-                   <Plus className="w-3 h-3" />
+                   {editingTypeIndex !== null ? "Modifier" : <Plus className="w-3 h-3" />}
                  </Button>
 
                  {editingTypeIndex !== null && (

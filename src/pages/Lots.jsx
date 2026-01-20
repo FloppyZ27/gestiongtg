@@ -800,14 +800,12 @@ export default function Lots() {
           baseData.circonscription_fonciere = suParts[2] || '';
           const dateBpd = suParts[3] || '';
           if (dateBpd) {
-            // If date is in format YYYYMMDD (8 digits), convert to YYYY-MM-DD
             if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
               const year = dateBpd.substring(0, 4);
               const month = dateBpd.substring(4, 6);
               const day = dateBpd.substring(6, 8);
               baseData.date_bpd = `${year}-${month}-${day}`;
             } else {
-              // Already in correct format or use as-is
               baseData.date_bpd = dateBpd;
             }
           }
@@ -858,11 +856,9 @@ export default function Lots() {
           numero_lot: numeroLot,
           cadastre: 'Québec',
           circonscription_fonciere: baseData.circonscription_fonciere,
-          date_bpd: baseData.date_bpd,
-          concordances: concordances,
+          types_operation: [typeOperation],
           concordances_count: concordances.length,
-          alreadyExists: !!lotExistant,
-          types_operation: [typeOperation]
+          alreadyExists: !!lotExistant
         });
       }
       
