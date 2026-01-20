@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -1628,18 +1629,46 @@ export default function EditDossierForm({
                                 <TableCell className="text-slate-300">
                                   {users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne || "-"}
                                 </TableCell>
-                                <TableCell className="text-slate-300 max-w-xs truncate">
-                                  {retour.raison || "-"}
+                                <TableCell className="text-slate-300">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="max-w-xs truncate cursor-help">
+                                          {retour.raison || "-"}
+                                        </div>
+                                      </TooltipTrigger>
+                                      {retour.raison && retour.raison.length > 50 && (
+                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm">
+                                          {retour.raison}
+                                        </TooltipContent>
+                                      )}
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </TableCell>
                                 <TableCell>
-                                  <Badge className={`border text-xs ${
-                                    retour.statut === "Terminé" ? "bg-green-500/20 text-green-400 border-green-500/30" :
-                                    retour.statut === "Message laissé" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
-                                    retour.statut === "Reporté" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
-                                    "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                                  }`}>
-                                    {retour.statut}
-                                  </Badge>
+                                  <Select 
+                                    value={retour.statut}
+                                    onValueChange={async (newStatut) => {
+                                      await base44.entities.RetourAppel.update(retour.id, {
+                                        ...retour,
+                                        statut: newStatut
+                                      });
+                                      setRetoursAppel(prev => 
+                                        prev.map(r => r.id === retour.id ? {...r, statut: newStatut} : r)
+                                      );
+                                      queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
+                                    }}
+                                  >
+                                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                      <SelectItem value="Message laissé" className="text-white text-xs">Message laissé</SelectItem>
+                                      <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
+                                      <SelectItem value="En attente" className="text-white text-xs">En attente</SelectItem>
+                                      <SelectItem value="Reporté" className="text-white text-xs">Reporté</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </TableCell>
                               </TableRow>
                             ))}
