@@ -125,6 +125,7 @@ export default function EditDossierForm({
   const [tarificationStepCollapsed, setTarificationStepCollapsed] = useState(true);
   const [minutesCollapsed, setMinutesCollapsed] = useState(true);
   const [activeMinuteMandat, setActiveMinuteMandat] = useState("0");
+  const [newMinuteForm, setNewMinuteForm] = useState({});
 
   const clientsReguliers = clients.filter(c => c.type_client === 'Client' || !c.type_client);
   const notaires = clients.filter(c => c.type_client === 'Notaire');
@@ -1338,7 +1339,8 @@ export default function EditDossierForm({
                                 <Label className="text-slate-500 text-[10px]">Numéro de minute</Label>
                                 <Input 
                                   placeholder="Ex: 12345"
-                                  id={`minute-${mandatIndex}`}
+                                  value={newMinuteForm[mandatIndex]?.minute || ""}
+                                  onChange={(e) => setNewMinuteForm({...newMinuteForm, [mandatIndex]: {...(newMinuteForm[mandatIndex] || {}), minute: e.target.value}})}
                                   className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                                 />
                               </div>
@@ -1346,13 +1348,17 @@ export default function EditDossierForm({
                                 <Label className="text-slate-500 text-[10px]">Date de minute</Label>
                                 <Input 
                                   type="date"
-                                  id={`date-minute-${mandatIndex}`}
+                                  value={newMinuteForm[mandatIndex]?.date_minute || ""}
+                                  onChange={(e) => setNewMinuteForm({...newMinuteForm, [mandatIndex]: {...(newMinuteForm[mandatIndex] || {}), date_minute: e.target.value}})}
                                   className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                                 />
                               </div>
                               <div className="space-y-1">
                                 <Label className="text-slate-500 text-[10px]">Type</Label>
-                                <Select id={`type-minute-${mandatIndex}`} defaultValue="Initiale">
+                                <Select 
+                                  value={newMinuteForm[mandatIndex]?.type_minute || "Initiale"}
+                                  onValueChange={(value) => setNewMinuteForm({...newMinuteForm, [mandatIndex]: {...(newMinuteForm[mandatIndex] || {}), type_minute: value}})}
+                                >
                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
                                     <SelectValue />
                                   </SelectTrigger>
@@ -1368,19 +1374,17 @@ export default function EditDossierForm({
                               type="button"
                               size="sm"
                               onClick={() => {
-                                const minuteInput = document.getElementById(`minute-${mandatIndex}`);
-                                const dateMinuteInput = document.getElementById(`date-minute-${mandatIndex}`);
-                                const typeMinuteSelect = document.getElementById(`type-minute-${mandatIndex}`);
+                                const currentForm = newMinuteForm[mandatIndex] || {};
                                 
-                                if (!minuteInput.value) {
+                                if (!currentForm.minute) {
                                   alert("Veuillez entrer un numéro de minute");
                                   return;
                                 }
 
                                 const newMinute = {
-                                  minute: minuteInput.value,
-                                  date_minute: dateMinuteInput.value || null,
-                                  type_minute: typeMinuteSelect.value || "Initiale"
+                                  minute: currentForm.minute,
+                                  date_minute: currentForm.date_minute || null,
+                                  type_minute: currentForm.type_minute || "Initiale"
                                 };
 
                                 const updatedMandats = [...formData.mandats];
@@ -1391,8 +1395,8 @@ export default function EditDossierForm({
                                 
                                 setFormData({...formData, mandats: updatedMandats});
                                 
-                                minuteInput.value = "";
-                                dateMinuteInput.value = "";
+                                // Réinitialiser le formulaire pour ce mandat
+                                setNewMinuteForm({...newMinuteForm, [mandatIndex]: {}});
                               }}
                               className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 h-7 text-xs mt-2 w-full"
                             >
