@@ -2002,6 +2002,10 @@ export default function Dossiers() {
                   setViewingClientDetails={setViewingClientDetails}
                   calculerProchainNumeroDossier={calculerProchainNumeroDossier}
                   editingDossier={editingDossier}
+                  onOpenNewLotDialog={(mandatIndex) => {
+                    setCurrentMandatIndex(mandatIndex);
+                    setIsNewLotDialogOpen(true);
+                  }}
                 />
               </DialogContent>
             </Dialog>

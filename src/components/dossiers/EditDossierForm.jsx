@@ -92,7 +92,8 @@ export default function EditDossierForm({
   setClientTypeForForm,
   setViewingClientDetails,
   calculerProchainNumeroDossier,
-  editingDossier
+  editingDossier,
+  onOpenNewLotDialog
 }) {
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [activeContactTab, setActiveContactTab] = useState("clients");
@@ -936,7 +937,12 @@ export default function EditDossierForm({
                                 <Button
                                   type="button"
                                   size="sm"
-                                  onClick={() => openLotSelector(index)}
+                                  onClick={() => {
+                                    setCurrentMandatIndexForLot(index);
+                                    if (onOpenNewLotDialog) {
+                                      onOpenNewLotDialog(index);
+                                    }
+                                  }}
                                   className="text-orange-400 hover:text-orange-300 h-6 w-6 p-0"
                                 >
                                   <Plus className="w-3 h-3" />
