@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +30,10 @@ import { motion } from "framer-motion";
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+
+const CADASTRE_CODES = {
+  "010010": "Île-du-Havre-Aubert", "010020": "Île-d'Entrée", "010030": "Île-du-Cap-aux-Meules", "010040": "Île-du-Havre-aux-Maisons", "010050": "Grosse-Île", "010060": "Île-Brion", "010070": "Île-Coffin", "010080": "Île-au-Loup", "010090": "Île-du-Corps-Mort", "010100": "Rochers-aux-Oiseaux", "020010": "Île-Bonaventure", "020020": "Canton de Percé", "020040": "Municipalité de Grande-Rivière", "020060": "Municipalité de Pabos", "020080": "Canton de Newport", "020100": "Canton de Raudin", "020110": "Canton de Pellegrin", "020120": "Canton de Rameau", "020140": "Canton de Malbaie", "020160": "Canton de Douglas", "020180": "Canton de York", "020200": "Village de Gaspé", "020210": "Canton de Baie-de-Gaspé-Sud", "020220": "Canton de Larocque", "020230": "Canton de Galt", "020240": "Canton de Baie-de-Gaspé-Nord", "020260": "Canton de Cap-des-Rosiers", "020280": "Canton de Fox", "020300": "Canton de Sydenham", "020310": "Canton de Cloridorme", "020320": "Seigneurie de la Grande-Vallée-des-Monts-Notre-Dame", "020340": "Canton de Port-Daniel", "020360": "Canton de Hope", "020380": "Canton de Cox", "020400": "Canton de Garin", "020410": "Canton de Hamilton", "020420": "Canton de New Richmond", "020430": "Canton de Marcil", "020440": "Canton de Robidoux", "020460": "Canton de Maria", "020480": "Canton de Carleton", "020500": "Municipalité de Shoolbred", "020510": "Canton de Dugal", "020520": "Canton de Mann", "020540": "Canton de Ristigouche", "020560": "Canton de Matapédia", "020580": "Canton de Patapédia", "020600": "Canton de Biencourt", "020610": "Canton de Laroche", "020620": "Canton de Varin", "020640": "Canton de Flynn", "020660": "Canton de Ouimet", "020680": "Canton de Massé", "020700": "Paroisse de Sainte-Angèle-de-Mérici", "020710": "Canton de Fleuriau", "020720": "Canton de Neigette", "020740": "Canton de Macpès", "020760": "Canton de Duquesne", "020780": "Canton de Chénier", "020800": "Canton de Bédard", "020810": "Paroisse de Saint-Mathieu", "020820": "Paroisse de Saint-Simon", "020840": "Paroisse de Saint-Fabien", "020860": "Paroisse de Sainte-Cécile-du-Bic", "020880": "Paroisse de Notre-Dame-du-Sacré-Coeur", "020900": "Ville de Saint-Germain-de-Rimouski", "020910": "Paroisse de Saint-Germain-de-Rimouski", "020920": "Paroisse de Saint-Anaclet", "020940": "Paroisse de Sainte-Luce", "020960": "Paroisse de Saint-Donat", "020980": "Paroisse de Saint-Joseph-de-Lepage", "021000": "Paroisse de Sainte-Flavie", "021010": "Canton d'Assemetquagan", "021020": "Canton de Milnikek", "021040": "Canton de Jetté", "021060": "Canton de Matalik", "021080": "Canton de Casupscull", "021100": "Canton de La Vérendrye", "021110": "Canton de Casault", "021120": "Canton de Lepage", "021140": "Canton de Humqui", "021160": "Canton de Pinault", "021180": "Canton de Nemtayé", "021200": "Paroisse de Saint-Benoît-Joseph-Labre", "021210": "Canton de Blais", "021220": "Canton de Langis", "021240": "Paroisse de Saint-Pierre-du-Lac", "021260": "Canton d'Awantjish", "021280": "Augmentation du canton d'Awantjish", "021300": "Paroisse de Sainte-Marie-de-Sayabec", "021310": "Canton de Matane", "021320": "Augmentation du canton de MacNider", "021340": "Canton de MacNider", "021360": "Canton de Cabot", "021380": "Paroisse de Saint-Octave-de-Métis", "021390": "Canton de Faribault", "021400": "Paroisse de Notre-Dame-de-L'Assomption-de-MacNider", "021410": "Paroisse de Saint-Ulric", "021420": "Paroisse de Saint-Jérôme-de-Matane", "021440": "Canton de Tessier", "021460": "Canton de Saint-Denis", "021480": "Paroisse de Sainte-Félicité", "021500": "Canton de Cherbourg", "021510": "Canton de Dalibaire", "021520": "Canton de Romieu", "021530": "Canton de La Potardière", "021540": "Canton de Cap-Chat", "021560": "Fief de Sainte-Anne-des-Monts", "021580": "Canton de Tourelle", "021600": "Canton de Christie", "021610": "Canton de Boisbuisson", "021620": "Canton de Duchesnay", "021630": "Canton de La Rivière", "021640": "Municipalité de Saint-Maxime-du-Mont-Louis", "021650": "Canton de Bonnécamp", "021660": "Canton de Taschereau", "021680": "Canton de Denoue", "021700": "Canton de Holland", "021710": "Canton d'Asselin", "021720": "Canton de Baillargeon", "021730": "Canton d'Angers", "021740": "Canton de Lemieux", "021750": "Brochu", "021760": "Canton de Lesseps", "021770": "Canton de Champou", "021780": "Canton de Flahault", "080620": "Village d'Hébertville", "080630": "Canton de Saint-Hilaire", "080640": "Canton de Caron", "080660": "Canton de Métabetchouan", "080700": "Canton de Signay", "080710": "Canton de De l'Île", "080720": "Canton de Taillon", "080740": "Canton de Garnier", "080760": "Canton de Crespieul", "080780": "Canton de Malherbe", "080800": "Augmentation du canton de Dequen", "080810": "Canton de Dablon", "080820": "Canton de Dequen", "080840": "Canton de Charlevoix", "080860": "Canton de Roberval", "080880": "Village de Roberval", "080900": "Canton de Ross", "080910": "Canton de Déchêne", "080920": "Canton de Ouiatchouan", "080940": "Canton d'Ashuapmouchouan", "080960": "Canton de Demeulles", "080980": "Canton de Parent", "081000": "Canton de Racine", "081010": "Canton de Dolbeau", "081020": "Canton de Dalmas", "081040": "Canton de Jogues", "081060": "Canton de Maltais", "081080": "Canton de Constantin", "081100": "Canton de Saint-Onge", "081110": "Canton de Milot", "081120": "Canton de Proulx", "081140": "Canton de Hudon", "081160": "Canton de La Trappe", "081180": "Canton de Pelletier", "081200": "Canton d'Albanel", "081210": "Canton de Normandin", "081240": "Canton de Dufferin", "081260": "Canton de Dumais", "081280": "Canton de Girard", "080010": "Canton de Boilleau", "080020": "Canton de Périgny", "080040": "Canton de Dumas", "080050": "Canton de Labrosse", "080060": "Canton de Saint-Jean", "080080": "Canton de Hébert", "080100": "Canton d'Otis", "080110": "Canton de Ferland", "080120": "Paroisse de Saint-Alexis", "080130": "Paroisse de Saint-Alphonse", "080140": "Village de Grande-Baie", "080160": "Village de Bagotville", "080180": "Canton de Bagot", "080200": "Canton de Laterrière", "080210": "Paroisse de Chicoutimi", "080220": "Ville de Chicoutimi", "080240": "Canton de Chicoutimi", "080260": "Cité d'Arvida", "080280": "Canton de Jonquière", "080300": "Canton de Kénogami", "080310": "Canton de Labarre", "080320": "Canton de Taché", "080340": "Canton de Bourget", "080360": "Canton de Simard", "080380": "Canton de Tremblay", "080400": "Village de Sainte-Anne-de-Chicoutimi", "080410": "Canton de Harvey", "080420": "Canton de Saint-Germains", "080430": "Canton de Chardon", "080440": "Canton de Durocher", "080460": "Canton de Falardeau", "080470": "Canton de Gagné", "080480": "Canton de Bégin", "080500": "Canton de Labrecque", "080510": "Canton de Rouleau", "080520": "Canton d'Aulneau"
+};
 
 const CADASTRES_PAR_CIRCONSCRIPTION = {
   "Lac-Saint-Jean-Est": ["Québec", "Canton de Caron", "Canton de de l'Île", "Canton de Garnier", "Village d'Héberville", "Canton d'Hébertville-Station", "Canton de Labarre", "Canton de Mésy", "Canton de Métabetchouan", "Canton de Signay", "Canton de Taillon"],
@@ -101,6 +105,9 @@ export default function Dossiers() {
   const [lotActionLogs, setLotActionLogs] = useState([]);
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
+  const [isImportingD01, setIsImportingD01] = useState(false);
+  const [isDragOverD01, setIsDragOverD01] = useState(false);
+  const [showD01ImportSuccess, setShowD01ImportSuccess] = useState(false);
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterVille, setFilterVille] = useState("all");
   const [filterStatut, setFilterStatut] = useState("all");
@@ -650,6 +657,129 @@ export default function Dossiers() {
   const handleLotCirconscriptionChange = (value) => {
     setNewLotForm(prev => ({ ...prev, circonscription_fonciere: value, cadastre: prev.cadastre || "Québec" }));
     setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[value] || []);
+  };
+
+  const handleD01Import = async (file) => {
+    setIsImportingD01(true);
+    try {
+      const fileContent = await file.text();
+      const lines = fileContent.split('\n');
+      const lotLine = lines.find(line => line.startsWith('LO'));
+      const suLines = lines.filter(line => line.startsWith('SU'));
+      
+      let coLines = [];
+      if (suLines.length >= 2) {
+        const firstSuIndex = lines.indexOf(suLines[0]);
+        const secondSuIndex = lines.indexOf(suLines[1]);
+        coLines = lines.slice(firstSuIndex + 1, secondSuIndex).filter(line => line.startsWith('CO'));
+      }
+      
+      const suLine = suLines[0];
+      let extractedData = {};
+      
+      if (lotLine) {
+        const lotParts = lotLine.split(';');
+        extractedData.numero_lot = lotParts[1] || '';
+      }
+      
+      if (suLine) {
+        const suParts = suLine.split(';');
+        extractedData.circonscription_fonciere = suParts[2] || '';
+        const dateBpd = suParts[3] || '';
+        if (dateBpd) {
+          if (dateBpd.length === 8 && /^\d{8}$/.test(dateBpd)) {
+            const year = dateBpd.substring(0, 4);
+            const month = dateBpd.substring(4, 6);
+            const day = dateBpd.substring(6, 8);
+            extractedData.date_bpd = `${year}-${month}-${day}`;
+          } else {
+            extractedData.date_bpd = dateBpd;
+          }
+        }
+      }
+      
+      extractedData.cadastre = 'Québec';
+      const concordances_anterieures = [];
+      
+      if (coLines.length > 0) {
+        coLines.forEach(coLine => {
+          const coParts = coLine.split(';');
+          const cadastreCode = coParts[1] || '';
+          const cadastre = CADASTRE_CODES[cadastreCode] || cadastreCode || 'Québec';
+          let rang = coParts[2] ? coParts[2].replace('R', 'Rang ') : '';
+          if (rang.match(/^Rang 0(\d+)$/)) {
+            rang = rang.replace(/^Rang 0/, 'Rang ');
+          }
+          const numeroLot = coParts[3] || '';
+          const estPartie = coParts[4] === 'O';
+          
+          concordances_anterieures.push({
+            circonscription_fonciere: extractedData.circonscription_fonciere,
+            cadastre: cadastre,
+            numero_lot: numeroLot,
+            rang: rang,
+            est_partie: estPartie
+          });
+        });
+      }
+      
+      const typeOperation = {
+        type_operation: "Remplacement",
+        date_bpd: extractedData.date_bpd || '',
+        concordances_anterieures: concordances_anterieures
+      };
+      
+      if (extractedData.circonscription_fonciere) {
+        setAvailableCadastresForNewLot(CADASTRES_PAR_CIRCONSCRIPTION[extractedData.circonscription_fonciere] || []);
+      }
+      
+      setNewLotForm(prev => ({
+        ...prev,
+        numero_lot: extractedData.numero_lot || prev.numero_lot,
+        circonscription_fonciere: extractedData.circonscription_fonciere || prev.circonscription_fonciere,
+        cadastre: 'Québec',
+        types_operation: [typeOperation]
+      }));
+      
+      setShowD01ImportSuccess(true);
+    } catch (error) {
+      console.error("Erreur import .d01:", error);
+      alert("Erreur lors de l'importation du fichier .d01");
+    } finally {
+      setIsImportingD01(false);
+    }
+  };
+
+  const handleD01FileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleD01Import(file);
+    }
+  };
+
+  const handleD01DragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(true);
+  };
+
+  const handleD01DragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+  };
+
+  const handleD01Drop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverD01(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.d01')) {
+      handleD01Import(file);
+    } else {
+      alert("Veuillez déposer un fichier .d01");
+    }
   };
 
   const resetForm = () => {
@@ -3398,6 +3528,45 @@ export default function Dossiers() {
                   </div>
                   
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
+                    {/* Section Import .d01 - Visible uniquement en mode création */}
+                    {!editingLot && (
+                      <div 
+                        className={`border border-dashed rounded-lg p-2 transition-all ${
+                          isDragOverD01 
+                            ? 'border-emerald-500 bg-emerald-500/10' 
+                            : 'border-slate-600 bg-slate-800/20 hover:border-slate-500'
+                        }`}
+                        onDragOver={handleD01DragOver}
+                        onDragLeave={handleD01DragLeave}
+                        onDrop={handleD01Drop}
+                      >
+                        {isImportingD01 ? (
+                          <div className="flex items-center justify-center gap-2 text-teal-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-xs">Importation...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-slate-400" />
+                              <span className="text-slate-400 text-xs">Importer depuis un fichier .d01</span>
+                            </div>
+                            <label>
+                              <input
+                                type="file"
+                                accept=".d01"
+                                onChange={handleD01FileSelect}
+                                className="hidden"
+                              />
+                              <span className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded cursor-pointer transition-colors inline-block">
+                                Parcourir
+                              </span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <LotInfoStepForm
                       lotForm={newLotForm}
                       onLotFormChange={(data) => setNewLotForm(data)}
@@ -3517,6 +3686,38 @@ export default function Dossiers() {
                 </Button>
                 <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
                   {editingLot ? "Modifier" : "Créer"}
+                </Button>
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de succès d'import .d01 */}
+        <Dialog open={showD01ImportSuccess} onOpenChange={setShowD01ImportSuccess}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-emerald-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">✅</span>
+                Succès
+                <span className="text-2xl">✅</span>
+              </DialogTitle>
+            </DialogHeader>
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <p className="text-slate-300 text-center">
+                Données importées avec succès depuis le fichier .d01
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  onClick={() => setShowD01ImportSuccess(false)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  OK
                 </Button>
               </div>
             </motion.div>
