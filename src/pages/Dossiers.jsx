@@ -2136,6 +2136,7 @@ export default function Dossiers() {
                     setCurrentMandatIndex(mandatIndex);
                     setIsNewLotDialogOpen(true);
                   }}
+                  setEditingClient={setEditingClientForForm}
                 />
               </DialogContent>
             </Dialog>
