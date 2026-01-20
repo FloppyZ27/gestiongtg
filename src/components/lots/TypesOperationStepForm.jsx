@@ -96,12 +96,22 @@ export default function TypesOperationStepForm({
     setSelectedTypeIndex(null);
   };
 
-  const handleCopyTypeOperation = (index) => {
-    const typeOp = typesOperation[index];
+  const handleCopyTypeOperation = () => {
+    if (editingTypeIndex === null) return;
+    
+    const typeOp = typesOperation[editingTypeIndex];
+    const newType = {
+      type_operation: "",
+      date_bpd: "",
+      concordances_anterieures: [...(typeOp.concordances_anterieures || [])]
+    };
+    
+    onTypesOperationChange([...typesOperation, newType]);
+    
     setNewTypeOperation({
       type_operation: "",
       date_bpd: "",
-      concordances_anterieures: typeOp.concordances_anterieures || []
+      concordances_anterieures: []
     });
     setEditingTypeIndex(null);
     setSelectedTypeIndex(null);
@@ -233,29 +243,14 @@ export default function TypesOperationStepForm({
                     return (
                       <div 
                         key={originalIndex} 
-                        className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all ${
+                        className={`flex items-center gap-1 px-2 py-1 border rounded text-xs transition-all cursor-pointer ${
                           editingTypeIndex === originalIndex 
                             ? 'bg-purple-500/30 border-purple-400 text-purple-200' 
                             : 'bg-purple-500/15 border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
                         }`}
+                        onClick={() => handleEditTypeOperation(originalIndex)}
                       >
-                        <span 
-                          className="cursor-pointer"
-                          onClick={() => handleEditTypeOperation(originalIndex)}
-                        >
-                          {typeOp.type_operation}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyTypeOperation(originalIndex);
-                          }}
-                          className="ml-1 hover:text-purple-100 transition-colors"
-                          title="Copier ce type d'opération"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
+                        {typeOp.type_operation}
                       </div>
                     );
                   })}
@@ -266,7 +261,7 @@ export default function TypesOperationStepForm({
           <div className="space-y-4 w-full">
              {/* Formulaire d'ajout/édition de type d'opération */}
              <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg space-y-3 w-full">
-               <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-3 items-end">
+               <div className={`grid ${editingTypeIndex !== null ? 'grid-cols-[1fr_1fr_auto_auto_auto]' : 'grid-cols-[1fr_1fr_auto]'} gap-3 items-end`}>
                  <div>
                    <Label className="text-slate-300 mb-1 text-xs">Type d'opération <span className="text-red-400">*</span></Label>
                    <Select
@@ -308,14 +303,25 @@ export default function TypesOperationStepForm({
                  </Button>
 
                  {editingTypeIndex !== null && (
-                   <Button
-                     type="button"
-                     onClick={() => handleRemoveTypeOperation(editingTypeIndex)}
-                     disabled={disabled}
-                     className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 h-7 w-7 self-end p-0"
-                   >
-                     <Trash2 className="w-3 h-3" />
-                   </Button>
+                   <>
+                     <Button
+                       type="button"
+                       onClick={handleCopyTypeOperation}
+                       disabled={disabled}
+                       className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 h-7 w-7 self-end p-0"
+                       title="Copier avec les mêmes concordances"
+                     >
+                       <Copy className="w-3 h-3" />
+                     </Button>
+                     <Button
+                       type="button"
+                       onClick={() => handleRemoveTypeOperation(editingTypeIndex)}
+                       disabled={disabled}
+                       className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 h-7 w-7 self-end p-0"
+                     >
+                       <Trash2 className="w-3 h-3" />
+                     </Button>
+                   </>
                  )}
                </div>
 
