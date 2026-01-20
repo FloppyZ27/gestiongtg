@@ -812,7 +812,21 @@ export default function RetoursAppel() {
                               </Badge>
                             ) : null}
                           </TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
                       <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm max-w-xs group relative">
+                        {retour.raison ? (
+                          <>
+                            <span className="truncate cursor-help">{retour.raison}</span>
+                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-slate-800 border border-slate-700 rounded-lg p-3 w-48 z-50 text-slate-300 text-xs whitespace-normal break-words shadow-lg">
+                              {retour.raison}
+                            </div>
+                          </>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Select 
                           value={retour.statut}
@@ -844,21 +858,6 @@ export default function RetoursAppel() {
                             <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
                           </SelectContent>
                         </Select>
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs">
-                        {retour.raison ? (
-                          <button 
-                            onClick={() => setViewingRaison(retour)}
-                            className="text-slate-300 hover:text-emerald-400 cursor-help underline truncate"
-                            title="Cliquer pour voir le message complet"
-                          >
-                            {retour.raison}
-                          </button>
-                        ) : (
-                          "-"
-                        )}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <Button 
