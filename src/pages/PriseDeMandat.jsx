@@ -6601,12 +6601,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                         </div>
                         
                         <div className="grid grid-cols-4 gap-2">
-                          <div className="space-y-1">
-                            <Label className="text-xs text-emerald-500">Arpenteurs</Label>
+                          <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
-                                  <span className="truncate">{filterArpenteur.length > 0 ? `${filterArpenteur.length} sel.` : 'Tous'}</span>
+                                  <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -6631,12 +6630,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                             </DropdownMenu>
                           </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-xs text-emerald-500">Villes</Label>
+                          <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
-                                  <span className="truncate">{filterVille.length > 0 ? `${filterVille.length} sel.` : 'Toutes'}</span>
+                                  <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -6661,12 +6659,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                             </DropdownMenu>
                           </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-xs text-emerald-500">Types</Label>
+                          <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
-                                  <span className="truncate">{filterTypeMandat.length > 0 ? `${filterTypeMandat.length} sel.` : 'Tous'}</span>
+                                  <span className="truncate">Types ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -6691,12 +6688,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                             </DropdownMenu>
                           </div>
 
-                          <div className="space-y-1">
-                            <Label className="text-xs text-emerald-500">Urgence</Label>
+                          <div className="space-y-0">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
-                                  <span className="truncate">{filterUrgence.length > 0 ? `${filterUrgence.length} sel.` : 'Toutes'}</span>
+                                  <span className="truncate">Urgence ({filterUrgence.length > 0 ? `${filterUrgence.length}` : 'Toutes'})</span>
                                   <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
                               </DropdownMenuTrigger>
