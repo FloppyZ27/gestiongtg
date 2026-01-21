@@ -90,6 +90,7 @@ export default function NewRetourAppelForm({
   const [selectedNumeroDossier, setSelectedNumeroDossier] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
   const [dossierFound, setDossierFound] = useState(false);
+  const [aucunDossier, setAucunDossier] = useState(false);
 
   const handleSearchDossier = () => {
     if (!selectedArpenteur || !selectedNumeroDossier) {
@@ -301,6 +302,8 @@ export default function NewRetourAppelForm({
                     </div>
                   </div>
                 </div>
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>
@@ -382,7 +385,7 @@ export default function NewRetourAppelForm({
           type="submit" 
           form="retour-appel-form" 
           className="bg-gradient-to-r from-blue-500 to-cyan-600"
-          disabled={!dossierFound}
+          disabled={!aucunDossier && !dossierFound}
         >
           Créer
         </Button>
