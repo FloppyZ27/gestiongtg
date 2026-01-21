@@ -252,18 +252,18 @@ export default function NewRetourAppelForm({
                                     {dossier.mandats && dossier.mandats.length > 0 ? (
                                       <div className="flex flex-wrap gap-1">
                                         {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-[10px]`}>
+                                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
                                             {mandat.type_mandat}
                                           </Badge>
                                         ))}
                                         {dossier.mandats.length > 2 && (
-                                          <Badge className="bg-slate-700 text-slate-300 text-[10px]">
+                                          <Badge className="bg-slate-700 text-slate-300 text-xs">
                                             +{dossier.mandats.length - 2}
                                           </Badge>
                                         )}
                                       </div>
                                     ) : (
-                                      <span className="text-slate-600">-</span>
+                                      <span className="text-slate-600 text-xs">Aucun</span>
                                     )}
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs max-w-[120px] truncate">
