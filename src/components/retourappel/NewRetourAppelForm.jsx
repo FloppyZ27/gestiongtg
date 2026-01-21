@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, ChevronUp, FolderOpen, Phone } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, Phone, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -20,6 +22,17 @@ const getArpenteurInitials = (arpenteur) => {
     "Frédéric Gilbert": "FG-"
   };
   return mapping[arpenteur] || "";
+};
+
+const getArpenteurColor = (arpenteur) => {
+  const colors = {
+    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+  };
+  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
 export default function NewRetourAppelForm({
@@ -99,15 +112,17 @@ export default function NewRetourAppelForm({
 
             {!infoDossierCollapsed && (
               <CardContent className="pt-4 pb-3">
-                {!dossierFound ? (
-                  <div className="space-y-4">
+                <div className="grid grid-cols-[30%_70%] gap-4">
+                  {/* Colonne gauche - Filtres */}
+                  <div className="space-y-3 border-r border-slate-700 pr-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                      <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
                       <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
-                          <SelectValue placeholder="Sélectionner un arpenteur" />
+                          <SelectValue placeholder="Tous" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value={null} className="text-white text-sm">Tous</SelectItem>
                           {ARPENTEURS.map((arpenteur) => (
                             <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
                           ))}
@@ -116,51 +131,83 @@ export default function NewRetourAppelForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
+                      <Label className="text-slate-400 text-xs">N° de dossier</Label>
                       <Input
-                        placeholder="Ex: 123"
+                        placeholder="Rechercher..."
                         value={selectedNumeroDossier}
                         onChange={(e) => setSelectedNumeroDossier(e.target.value)}
                         className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                       />
                     </div>
-
-                    <Button 
-                      type="button"
-                      onClick={handleSearchDossier}
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 h-8 text-sm"
-                    >
-                      Rechercher le dossier
-                    </Button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                      <Label className="text-slate-400 text-xs">Dossier sélectionné</Label>
-                      <p className="text-white font-medium mt-2 text-sm">
-                        {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                      </p>
-                      <p className="text-slate-300 text-xs mt-1">{getClientsNames(selectedDossier?.clients_ids)}</p>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setDossierFound(false);
-                          setSelectedArpenteur("");
-                          setSelectedNumeroDossier("");
-                          setFormData(prev => ({
-                            ...prev,
-                            dossier_reference_id: ""
-                          }));
-                        }}
-                        className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 mt-3 h-7 text-xs"
-                      >
-                        Changer de dossier
-                      </Button>
+
+                  {/* Colonne droite - Liste des dossiers */}
+                  <div className="overflow-hidden flex flex-col">
+                    <p className="text-slate-400 text-xs mb-2">
+                      Sélectionner un dossier ({dossiers.filter(d => {
+                        const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
+                        const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
+                        return matchesArpenteur && matchesNumero;
+                      }).length})
+                    </p>
+                    <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
+                      <Table>
+                        <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
+                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                            <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {dossiers.filter(d => {
+                            const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
+                            const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
+                            return matchesArpenteur && matchesNumero;
+                          }).map((dossier) => {
+                            const isSelected = formData.dossier_reference_id === dossier.id;
+                            return (
+                              <TableRow
+                                key={dossier.id}
+                                className={`cursor-pointer border-slate-800 ${
+                                  isSelected 
+                                    ? 'bg-blue-500/20 hover:bg-blue-500/30' 
+                                    : 'hover:bg-slate-800/30'
+                                }`}
+                                onClick={() => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    dossier_reference_id: dossier.id
+                                  }));
+                                  setDossierFound(true);
+                                }}
+                              >
+                                <TableCell className="text-slate-300 text-xs">
+                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs">
+                                  {getClientsNames(dossier.clients_ids)}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                          {dossiers.filter(d => {
+                            const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
+                            const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
+                            return matchesArpenteur && matchesNumero;
+                          }).length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={2} className="text-center py-8 text-slate-500 text-xs">
+                                Aucun dossier trouvé
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
-                )}
+                </div>
               </CardContent>
             )}
           </Card>
