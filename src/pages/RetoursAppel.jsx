@@ -47,6 +47,15 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
+const formatPhoneNumber = (phone) => {
+  if (!phone) return "-";
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  }
+  return phone;
+};
+
 export default function RetoursAppel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -923,7 +932,7 @@ export default function RetoursAppel() {
                               onClick={(e) => e.stopPropagation()}
                               className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                             >
-                              {phoneNumber}
+                              {formatPhoneNumber(phoneNumber)}
                             </a>
                           ) : "-"}
                         </TableCell>
