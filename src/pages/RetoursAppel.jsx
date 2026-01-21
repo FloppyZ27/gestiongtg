@@ -611,7 +611,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
           }}>
             <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[50vw] w-[50vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
               <DialogHeader className="sr-only">
-                <DialogTitle>Nouveau retour d'appel</DialogTitle>
+                <DialogTitle>Modifier retour d'appel</DialogTitle>
               </DialogHeader>
               <NewRetourAppelForm
                 formData={formData}
@@ -626,8 +626,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                 getClientsNames={getClientsNames}
               />
             </DialogContent>
-            </Dialog>
-        </div>
+          </Dialog>
 
         <ClientFormDialog
           open={isClientFormDialogOpen}
