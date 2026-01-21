@@ -64,6 +64,17 @@ const getMandatColor = (typeMandat) => {
   return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 export default function NewRetourAppelForm({
   formData,
   setFormData,
@@ -253,7 +264,7 @@ export default function NewRetourAppelForm({
                                       <div className="flex flex-wrap gap-1">
                                         {dossier.mandats.slice(0, 2).map((mandat, idx) => (
                                           <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                            {mandat.type_mandat}
+                                            {getAbbreviatedMandatType(mandat.type_mandat)}
                                           </Badge>
                                         ))}
                                         {dossier.mandats.length > 2 && (
