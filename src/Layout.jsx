@@ -547,20 +547,50 @@ function LayoutContent({ children, currentPageName }) {
           border-bottom: 2px solid rgb(251, 146, 60) !important;
         }
 
-        /* Tabs spécifiques pour les retours d'appel */
-        .retour-appel-tab {
+        /* Tabs spécifiques pour les retours d'appel - inactives */
+        .retour-appel-tab:not(.border-emerald-500) {
+          background: transparent !important;
+          color: rgb(148, 163, 184) !important;
+        }
+
+        .retour-appel-tab:not(.border-emerald-500):hover {
+          background: rgba(16, 185, 129, 0.05) !important;
+          color: rgb(16, 185, 129) !important;
+        }
+
+        .retour-appel-tab.border-emerald-500 {
           background: rgba(16, 185, 129, 0.1) !important;
           color: rgb(16, 185, 129) !important;
           border-bottom-color: rgb(16, 185, 129) !important;
         }
 
-        .message-laisse-tab {
+        .message-laisse-tab:not(.border-orange-500) {
+          background: transparent !important;
+          color: rgb(148, 163, 184) !important;
+        }
+
+        .message-laisse-tab:not(.border-orange-500):hover {
+          background: rgba(249, 115, 22, 0.05) !important;
+          color: rgb(251, 146, 60) !important;
+        }
+
+        .message-laisse-tab.border-orange-500 {
           background: rgba(249, 115, 22, 0.1) !important;
           color: rgb(251, 146, 60) !important;
           border-bottom-color: rgb(251, 146, 60) !important;
         }
 
-        .termine-tab {
+        .termine-tab:not(.border-blue-500) {
+          background: transparent !important;
+          color: rgb(148, 163, 184) !important;
+        }
+
+        .termine-tab:not(.border-blue-500):hover {
+          background: rgba(59, 130, 246, 0.05) !important;
+          color: rgb(59, 130, 246) !important;
+        }
+
+        .termine-tab.border-blue-500 {
           background: rgba(59, 130, 246, 0.1) !important;
           color: rgb(59, 130, 246) !important;
           border-bottom-color: rgb(59, 130, 246) !important;
