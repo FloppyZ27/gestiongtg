@@ -6490,7 +6490,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
         {/* Table des prises de mandat */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800 pb-2">
+          <CardHeader className="border-b border-slate-800 pb-1">
             <div className="flex flex-col gap-2">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
@@ -6542,7 +6542,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 </button>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex justify-between items-center gap-2">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
