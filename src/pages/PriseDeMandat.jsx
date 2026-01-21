@@ -6570,8 +6570,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-[600px] bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl" 
-                    align="end"
+                    className="w-full bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl" 
+                    align="start"
                     sideOffset={8}
                   >
                     <div className="space-y-4">
