@@ -837,7 +837,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                   variant="ghost" 
                   size="sm"
                   onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
+                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   <span className="text-sm">Filtres</span>
@@ -881,7 +881,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                         <div className="space-y-0">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                              <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
                                 <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
                                 <ChevronDown className="w-3 h-3 flex-shrink-0" />
                               </Button>
@@ -910,7 +910,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                         <div className="space-y-0">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-8 text-xs px-2">
+                              <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
                                 <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
                                 <ChevronDown className="w-3 h-3 flex-shrink-0" />
                               </Button>
@@ -945,7 +945,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                             value={filterDateStart}
                             onChange={(e) => setFilterDateStart(e.target.value)}
                             placeholder="Du"
-                            className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2"
+                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
                           />
                           <span className="text-emerald-500 text-xs">→</span>
                           <Input
@@ -953,7 +953,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                             value={filterDateEnd}
                             onChange={(e) => setFilterDateEnd(e.target.value)}
                             placeholder="Au"
-                            className="flex-1 border-emerald-500/30 text-emerald-500 h-8 text-xs px-2"
+                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
                           />
                         </div>
                       </div>
