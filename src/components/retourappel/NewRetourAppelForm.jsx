@@ -169,6 +169,16 @@ export default function NewRetourAppelForm({
                         className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-xs">Client</Label>
+                      <Input
+                        placeholder="Rechercher..."
+                        value={selectedClient}
+                        onChange={(e) => setSelectedClient(e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Colonne droite - Liste des dossiers */}
@@ -177,7 +187,9 @@ export default function NewRetourAppelForm({
                       Sélectionner un dossier ({dossiers.filter(d => {
                         const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                         const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
-                        return matchesArpenteur && matchesNumero;
+                        const clientsNames = getClientsNames(d.clients_ids).toLowerCase();
+                        const matchesClient = !selectedClient || clientsNames.includes(selectedClient.toLowerCase());
+                        return matchesArpenteur && matchesNumero && matchesClient;
                       }).length})
                     </p>
                     <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
@@ -186,49 +198,89 @@ export default function NewRetourAppelForm({
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                             <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
                             <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
+                            <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
+                          {dossiers
+                            .filter(d => {
+                              const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
+                              const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
+                              const clientsNames = getClientsNames(d.clients_ids).toLowerCase();
+                              const matchesClient = !selectedClient || clientsNames.includes(selectedClient.toLowerCase());
+                              return matchesArpenteur && matchesNumero && matchesClient;
+                            })
+                            .sort((a, b) => {
+                              const dateA = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
+                              const dateB = b.date_ouverture ? new Date(b.date_ouverture).getTime() : 0;
+                              return dateB - dateA;
+                            })
+                            .map((dossier) => {
+                              const isSelected = formData.dossier_reference_id === dossier.id;
+                              const firstAdresse = dossier.mandats?.[0]?.adresse_travaux 
+                                ? formatAdresse(dossier.mandats[0].adresse_travaux) 
+                                : "-";
+                              return (
+                                <TableRow
+                                  key={dossier.id}
+                                  className={`cursor-pointer border-slate-800 ${
+                                    isSelected 
+                                      ? 'bg-blue-500/20 hover:bg-blue-500/30' 
+                                      : 'hover:bg-slate-800/30'
+                                  }`}
+                                  onClick={() => {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      dossier_reference_id: dossier.id
+                                    }));
+                                    setDossierFound(true);
+                                    setSelectedArpenteur(dossier.arpenteur_geometre);
+                                    setSelectedNumeroDossier(dossier.numero_dossier);
+                                    setSelectedClient(getClientsNames(dossier.clients_ids));
+                                  }}
+                                >
+                                  <TableCell className="text-slate-300 text-xs">
+                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                      {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    {getClientsNames(dossier.clients_ids)}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    {dossier.mandats && dossier.mandats.length > 0 ? (
+                                      <div className="flex flex-wrap gap-1">
+                                        {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-[10px]`}>
+                                            {mandat.type_mandat}
+                                          </Badge>
+                                        ))}
+                                        {dossier.mandats.length > 2 && (
+                                          <Badge className="bg-slate-700 text-slate-300 text-[10px]">
+                                            +{dossier.mandats.length - 2}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="text-slate-600">-</span>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs max-w-[120px] truncate">
+                                    {firstAdresse}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
                           {dossiers.filter(d => {
                             const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                             const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
-                            return matchesArpenteur && matchesNumero;
-                          }).map((dossier) => {
-                            const isSelected = formData.dossier_reference_id === dossier.id;
-                            return (
-                              <TableRow
-                                key={dossier.id}
-                                className={`cursor-pointer border-slate-800 ${
-                                  isSelected 
-                                    ? 'bg-blue-500/20 hover:bg-blue-500/30' 
-                                    : 'hover:bg-slate-800/30'
-                                }`}
-                                onClick={() => {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    dossier_reference_id: dossier.id
-                                  }));
-                                  setDossierFound(true);
-                                }}
-                              >
-                                <TableCell className="text-slate-300 text-xs">
-                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-xs">
-                                  {getClientsNames(dossier.clients_ids)}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                          {dossiers.filter(d => {
-                            const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
-                            const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
-                            return matchesArpenteur && matchesNumero;
+                            const clientsNames = getClientsNames(d.clients_ids).toLowerCase();
+                            const matchesClient = !selectedClient || clientsNames.includes(selectedClient.toLowerCase());
+                            return matchesArpenteur && matchesNumero && matchesClient;
                           }).length === 0 && (
                             <TableRow>
-                              <TableCell colSpan={2} className="text-center py-8 text-slate-500 text-xs">
+                              <TableCell colSpan={4} className="text-center py-8 text-slate-500 text-xs">
                                 Aucun dossier trouvé
                               </TableCell>
                             </TableRow>
