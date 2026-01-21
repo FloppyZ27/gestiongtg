@@ -132,22 +132,22 @@ export default function NewRetourAppelForm({
           {/* Section Informations du dossier */}
           <Card className="border-slate-700 bg-slate-800/30">
             <CardHeader 
-              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1 bg-blue-900/20"
+              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
               onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
-                    <FolderOpen className="w-3 h-3 text-blue-400" />
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                    <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
                   </div>
-                  <CardTitle className="text-blue-300 text-sm">Informations du dossier</CardTitle>
+                  <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
                   {selectedDossier && (
                     <span className="text-slate-300 text-xs">
                       {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
                     </span>
                   )}
                 </div>
-                {infoDossierCollapsed ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronUp className="w-3 h-3 text-slate-400" />}
+                {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
               </div>
             </CardHeader>
 
@@ -194,7 +194,7 @@ export default function NewRetourAppelForm({
 
                   {/* Colonne droite - Liste des dossiers */}
                   <div className="overflow-hidden flex flex-col">
-                    <p className="text-slate-400 text-[10px] mb-1">
+                    <p className="text-slate-400 text-xs mb-2">
                       Sélectionner un dossier ({dossiers.filter(d => {
                         const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                         const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
@@ -203,14 +203,14 @@ export default function NewRetourAppelForm({
                         return matchesArpenteur && matchesNumero && matchesClient;
                       }).length})
                     </p>
-                    <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[250px]">
+                    <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
                       <Table>
                         <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300 text-[10px] py-1">N° Dossier</TableHead>
-                            <TableHead className="text-slate-300 text-[10px] py-1">Clients</TableHead>
-                            <TableHead className="text-slate-300 text-[10px] py-1">Mandats</TableHead>
-                            <TableHead className="text-slate-300 text-[10px] py-1">Adresse</TableHead>
+                            <TableHead className="text-slate-300">N° Dossier</TableHead>
+                            <TableHead className="text-slate-300">Clients</TableHead>
+                            <TableHead className="text-slate-300">Mandats</TableHead>
+                            <TableHead className="text-slate-300">Adresse</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -251,33 +251,33 @@ export default function NewRetourAppelForm({
                                     setSelectedClient(getClientsNames(dossier.clients_ids));
                                   }}
                                 >
-                                  <TableCell className="text-slate-300 text-[10px] py-1.5">
-                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-[10px]`}>
+                                  <TableCell className="text-slate-300">
+                                    <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
                                       {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-[10px] py-1.5">
+                                  <TableCell className="text-slate-300 text-sm">
                                     {getClientsNames(dossier.clients_ids)}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-[10px] py-1.5">
+                                  <TableCell className="text-slate-300">
                                     {dossier.mandats && dossier.mandats.length > 0 ? (
-                                      <div className="flex flex-wrap gap-0.5">
+                                      <div className="flex flex-wrap gap-1">
                                         {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-[10px] px-1.5 py-0`}>
+                                          <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
                                             {getAbbreviatedMandatType(mandat.type_mandat)}
                                           </Badge>
                                         ))}
                                         {dossier.mandats.length > 2 && (
-                                          <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">
+                                          <Badge className="bg-slate-700 text-slate-300 text-xs">
                                             +{dossier.mandats.length - 2}
                                           </Badge>
                                         )}
                                       </div>
                                     ) : (
-                                      <span className="text-slate-600 text-[10px]">Aucun</span>
+                                      <span className="text-slate-600 text-xs">Aucun</span>
                                     )}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-[10px] py-1.5 max-w-[120px] truncate">
+                                  <TableCell className="text-slate-300 text-sm max-w-xs truncate">
                                     {firstAdresse}
                                   </TableCell>
                                 </TableRow>
@@ -291,7 +291,7 @@ export default function NewRetourAppelForm({
                             return matchesArpenteur && matchesNumero && matchesClient;
                           }).length === 0 && (
                             <TableRow>
-                              <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-[10px]">
+                              <TableCell colSpan={4} className="text-center py-12 text-slate-500">
                                 Aucun dossier trouvé
                               </TableCell>
                             </TableRow>
@@ -309,61 +309,61 @@ export default function NewRetourAppelForm({
           {dossierFound && (
             <Card className="border-slate-700 bg-slate-800/30">
               <CardHeader 
-                className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1 bg-cyan-900/20"
+                className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
                 onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
-                      <Phone className="w-3 h-3 text-cyan-400" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-cyan-400" />
                     </div>
-                    <CardTitle className="text-cyan-300 text-sm">Retour d'appel</CardTitle>
+                    <CardTitle className="text-cyan-300 text-base">Retour d'appel</CardTitle>
                   </div>
-                  {retourAppelCollapsed ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronUp className="w-3 h-3 text-slate-400" />}
+                  {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
               </CardHeader>
 
               {!retourAppelCollapsed && (
-                <CardContent className="pt-2 pb-2 space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Date de l'appel <span className="text-red-400">*</span></Label>
+                <CardContent className="pt-4 pb-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
                       <Input
                         type="date"
                         value={formData.date_appel}
                         onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
                         required
-                        className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
+                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <Label className="text-slate-400 text-[10px]">Utilisateur assigné <span className="text-red-400">*</span></Label>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
                       <Select
                         value={formData.utilisateur_assigne || ""}
                         onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
                         required
                       >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
-                          <SelectValue placeholder="Sélectionner" />
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                          <SelectValue placeholder="Sélectionner un utilisateur" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
                           {users.map((user) => (
-                            <SelectItem key={user.email} value={user.email} className="text-white text-xs">{user.full_name}</SelectItem>
+                            <SelectItem key={user.email} value={user.email} className="text-white text-sm">{user.full_name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label className="text-slate-400 text-[10px]">Notes</Label>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 text-xs">Notes</Label>
                     <Textarea
                       value={formData.notes}
                       onChange={(e) => setFormData({...formData, notes: e.target.value})}
                       placeholder="Ajouter des notes..."
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      rows={3}
+                      className="bg-slate-700 border-slate-600 text-white text-sm"
+                      rows={4}
                     />
                   </div>
                 </CardContent>
