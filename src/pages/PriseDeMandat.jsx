@@ -6542,20 +6542,18 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 </button>
               </div>
 
-              <Popover>
-                <div className="flex justify-between items-center gap-2">
-                  <PopoverTrigger asChild>
-                    <div className="relative flex-1 cursor-pointer">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4 pointer-events-none z-10" />
-                      <Input
-                        placeholder="Rechercher..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                      />
-                    </div>
-                  </PopoverTrigger>
+              <div className="flex justify-between items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                  />
+                </div>
 
+                <Popover>
                   <PopoverTrigger asChild>
                     <Button 
                       variant="ghost" 
@@ -6571,13 +6569,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       )}
                     </Button>
                   </PopoverTrigger>
-                </div>
-                
-                <PopoverContent 
-                  className="w-[calc(100vw-20rem)] max-w-full bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl p-6" 
-                  align="start"
-                  sideOffset={4}
-                >
+                  <PopoverContent 
+                    className="w-[calc(100vw-20rem)] max-w-full bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl p-6" 
+                    align="start"
+                    sideOffset={4}
+                  >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
                         <div className="flex items-center gap-2">
