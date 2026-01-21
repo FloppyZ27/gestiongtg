@@ -189,7 +189,7 @@ export default function NewRetourAppelForm({
                       <Label className="text-slate-400 text-xs">N° de téléphone <span className="text-red-400">*</span></Label>
                       <Input
                         id="new-telephone-retour"
-                        placeholder="(XXX) XXX-XXXX"
+                        placeholder="(000) 000-0000"
                         value={formData.client_telephone || ""}
                         onChange={(e) => {
                           const input = e.target.value.replace(/\D/g, '');
