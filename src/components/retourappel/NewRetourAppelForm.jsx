@@ -189,9 +189,22 @@ export default function NewRetourAppelForm({
                       <Label className="text-slate-400 text-xs">N° de téléphone <span className="text-red-400">*</span></Label>
                       <Input
                         id="new-telephone-retour"
-                        placeholder="Téléphone"
+                        placeholder="(XXX) XXX-XXXX"
                         value={formData.client_telephone || ""}
-                        onChange={(e) => setFormData({...formData, client_telephone: e.target.value})}
+                        onChange={(e) => {
+                          const input = e.target.value.replace(/\D/g, '');
+                          let formatted = input;
+                          if (input.length > 0) {
+                            if (input.length <= 3) {
+                              formatted = `(${input}`;
+                            } else if (input.length <= 6) {
+                              formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+                            } else {
+                              formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
+                            }
+                          }
+                          setFormData({...formData, client_telephone: formatted});
+                        }}
                         required
                         className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                       />
