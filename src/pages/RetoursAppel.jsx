@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ClientDetailView from "../components/clients/ClientDetailView";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
@@ -837,7 +838,7 @@ export default function RetoursAppel() {
                 <button
                   role="tab"
                   onClick={() => setActiveListTab("retour_appel")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`retour-appel-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "retour_appel"
                       ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
                       : "border-transparent text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5"
@@ -845,14 +846,14 @@ export default function RetoursAppel() {
                 >
                   <Phone className="w-4 h-4" />
                   Retour d'appel
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 ml-1">
+                  <Badge className={`ml-1 ${activeListTab === "retour_appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-slate-700 text-slate-300"}`}>
                     {retoursAppels.filter(r => r.statut === "Retour d'appel").length}
                   </Badge>
                 </button>
                 <button
                   role="tab"
                   onClick={() => setActiveListTab("message_laisse")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`message-laisse-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "message_laisse"
                       ? "border-orange-500 text-orange-400 bg-orange-500/10"
                       : "border-transparent text-slate-400 hover:text-orange-400 hover:bg-orange-500/5"
@@ -860,14 +861,14 @@ export default function RetoursAppel() {
                 >
                   <MessageSquare className="w-4 h-4" />
                   Message laissé / Aucune réponse
-                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 ml-1">
+                  <Badge className={`ml-1 ${activeListTab === "message_laisse" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" : "bg-slate-700 text-slate-300"}`}>
                     {retoursAppels.filter(r => r.statut === "Message laissé" || r.statut === "Aucune réponse").length}
                   </Badge>
                 </button>
                 <button
                   role="tab"
                   onClick={() => setActiveListTab("termine")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
+                  className={`termine-tab flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${
                     activeListTab === "termine"
                       ? "border-blue-500 text-blue-400 bg-blue-500/10"
                       : "border-transparent text-slate-400 hover:text-blue-400 hover:bg-blue-500/5"
@@ -875,7 +876,7 @@ export default function RetoursAppel() {
                 >
                   <Check className="w-4 h-4" />
                   Terminé
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 ml-1">
+                  <Badge className={`ml-1 ${activeListTab === "termine" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-slate-700 text-slate-300"}`}>
                     {retoursAppels.filter(r => r.statut === "Terminé").length}
                   </Badge>
                 </button>
@@ -1032,7 +1033,23 @@ export default function RetoursAppel() {
                             ) : null}
                           </TableCell>
                       <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{retour.utilisateur_assigne ? (users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {retour.utilisateur_assigne ? (
+                          <div className="flex items-center gap-2">
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                {(users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne)
+                                  .split(' ')
+                                  .map(n => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne}</span>
+                          </div>
+                        ) : "-"}
+                      </TableCell>
                       <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
                       <TableCell className="text-slate-300 text-sm max-w-[200px] group relative">
                         {retour.raison ? (
