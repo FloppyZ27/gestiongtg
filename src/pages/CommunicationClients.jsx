@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FilePlus, Phone, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 import PriseDeMandat from "./PriseDeMandat";
 import RetoursAppel from "./RetoursAppel";
 
@@ -9,6 +11,21 @@ export default function CommunicationClients() {
   const [activeTab, setActiveTab] = useState("prise-mandat");
   const priseMandatRef = useRef();
   const retoursAppelRef = useRef();
+
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: retoursAppels = [] } = useQuery({
+    queryKey: ['retoursAppels'],
+    queryFn: () => base44.entities.RetourAppel.filter({}, '-date_appel'),
+    initialData: [],
+  });
+
+  const retourAppelCount = user ? retoursAppels.filter(r => 
+    r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
+  ).length : 0;
 
   const handleNewMandat = () => {
     setActiveTab("prise-mandat");
