@@ -878,63 +878,59 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                       </div>
                       
                       <div className="grid grid-cols-3 gap-2">
-                        <div className="space-y-0">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
-                                <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
-                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                              {ARPENTEURS.map((arp) => (
-                                <DropdownMenuCheckboxItem
-                                  key={arp}
-                                  checked={filterArpenteurs.includes(arp)}
-                                  onCheckedChange={(checked) => {
-                                    setFilterArpenteurs(
-                                      checked
-                                        ? [...filterArpenteurs, arp]
-                                        : filterArpenteurs.filter((a) => a !== arp)
-                                    );
-                                  }}
-                                  className="text-white"
-                                >
-                                  {arp}
-                                </DropdownMenuCheckboxItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
+                              <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {ARPENTEURS.map((arp) => (
+                              <DropdownMenuCheckboxItem
+                                key={arp}
+                                checked={filterArpenteurs.includes(arp)}
+                                onCheckedChange={(checked) => {
+                                  setFilterArpenteurs(
+                                    checked
+                                      ? [...filterArpenteurs, arp]
+                                      : filterArpenteurs.filter((a) => a !== arp)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {arp}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <div className="space-y-0">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
-                                <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
-                                <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                              {users.map((user) => (
-                                <DropdownMenuCheckboxItem
-                                  key={user.email}
-                                  checked={filterUtilisateurs.includes(user.email)}
-                                  onCheckedChange={(checked) => {
-                                    setFilterUtilisateurs(
-                                      checked
-                                        ? [...filterUtilisateurs, user.email]
-                                        : filterUtilisateurs.filter((u) => u !== user.email)
-                                    );
-                                  }}
-                                  className="text-white"
-                                >
-                                  {user.full_name}
-                                </DropdownMenuCheckboxItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 border-none bg-transparent hover:bg-emerald-500/10">
+                              <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {users.map((user) => (
+                              <DropdownMenuCheckboxItem
+                                key={user.email}
+                                checked={filterUtilisateurs.includes(user.email)}
+                                onCheckedChange={(checked) => {
+                                  setFilterUtilisateurs(
+                                    checked
+                                      ? [...filterUtilisateurs, user.email]
+                                      : filterUtilisateurs.filter((u) => u !== user.email)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {user.full_name}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
 
                       <div className="space-y-1 pt-1 border-t border-emerald-500/30">
