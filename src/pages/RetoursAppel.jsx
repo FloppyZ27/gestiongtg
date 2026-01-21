@@ -582,95 +582,94 @@ export default function RetoursAppel() {
                 </div>
               ) : (
                 <form id="retour-appel-form" onSubmit={handleSubmit} className="space-y-4">
-                      <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <Label className="text-slate-300 text-sm">Dossier sélectionné</Label>
-                        <p className="text-white font-medium mt-2">
-                          {getArpenteurInitials(dossiers.find(d => d.id === dossierReferenceId)?.arpenteur_geometre)}{dossiers.find(d => d.id === dossierReferenceId)?.numero_dossier}
-                        </p>
-                        <p className="text-slate-400 text-sm mt-1">{getClientsNames(dossiers.find(d => d.id === dossierReferenceId)?.clients_ids)}</p>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => { setDossierReferenceId(null); resetForm(); }}
-                          className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 mt-3"
-                        >
-                          Changer de dossier
-                        </Button>
-                      </div>
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <Label className="text-slate-300 text-sm">Dossier sélectionné</Label>
+                    <p className="text-white font-medium mt-2">
+                      {getArpenteurInitials(dossiers.find(d => d.id === dossierReferenceId)?.arpenteur_geometre)}{dossiers.find(d => d.id === dossierReferenceId)?.numero_dossier}
+                    </p>
+                    <p className="text-slate-400 text-sm mt-1">{getClientsNames(dossiers.find(d => d.id === dossierReferenceId)?.clients_ids)}</p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { setDossierReferenceId(null); resetForm(); }}
+                      className="bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 mt-3"
+                    >
+                      Changer de dossier
+                    </Button>
+                  </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Date de l'appel <span className="text-red-400">*</span></Label>
-                          <Input
-                            type="date"
-                            value={formData.date_appel}
-                            onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
-                            required
-                            className="bg-slate-800 border-slate-700"
-                          />
-                        </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Date de l'appel <span className="text-red-400">*</span></Label>
+                      <Input
+                        type="date"
+                        value={formData.date_appel}
+                        onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
+                        required
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
 
-                        <div className="space-y-2">
-                          <Label>Statut du retour d'appel <span className="text-red-400">*</span></Label>
-                          <Select
-                            value={formData.statut_retour_appel}
-                            onValueChange={(value) => setFormData({...formData, statut_retour_appel: value})}
-                          >
-                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              <SelectItem value="Message laissé" className="text-white">Message laissé</SelectItem>
-                              <SelectItem value="Terminé" className="text-white">Terminé</SelectItem>
-                              <SelectItem value="En attente" className="text-white">En attente</SelectItem>
-                              <SelectItem value="Reporté" className="text-white">Reporté</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <Label>Statut du retour d'appel <span className="text-red-400">*</span></Label>
+                      <Select
+                        value={formData.statut_retour_appel}
+                        onValueChange={(value) => setFormData({...formData, statut_retour_appel: value})}
+                      >
+                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-700">
+                          <SelectItem value="Message laissé" className="text-white">Message laissé</SelectItem>
+                          <SelectItem value="Terminé" className="text-white">Terminé</SelectItem>
+                          <SelectItem value="En attente" className="text-white">En attente</SelectItem>
+                          <SelectItem value="Reporté" className="text-white">Reporté</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-                      <div className="space-y-2">
-                        <Label>Utilisateur assigné <span className="text-red-400">*</span></Label>
-                        <Select
-                          value={formData.utilisateur_assigne || ""}
-                          onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                          required
-                        >
-                          <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                            <SelectValue placeholder="Sélectionner un utilisateur" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {users.map((user) => (
-                              <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <div className="space-y-2">
+                    <Label>Utilisateur assigné <span className="text-red-400">*</span></Label>
+                    <Select
+                      value={formData.utilisateur_assigne || ""}
+                      onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                      required
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner un utilisateur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {users.map((user) => (
+                          <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                      <div className="space-y-2">
-                        <Label>Notes</Label>
-                        <Textarea
-                          value={formData.notes}
-                          onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                          placeholder="Ajouter des notes..."
-                          className="bg-slate-800 border-slate-700 h-24"
-                        />
-                      </div>
+                  <div className="space-y-2">
+                    <Label>Notes</Label>
+                    <Textarea
+                      value={formData.notes}
+                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                      placeholder="Ajouter des notes..."
+                      className="bg-slate-800 border-slate-700 h-24"
+                    />
+                  </div>
 
-                      <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                        <Button type="button" variant="outline" onClick={() => {
-                          setDossierReferenceId(null);
-                          setSelectedArpenteur("");
-                          setSelectedNumeroDossier("");
-                        }}>Retour</Button>
-                        <Button type="submit" className="bg-gradient-to-r from-blue-500 to-cyan-600">
-                          Créer
-                        </Button>
-                      </div>
-                    </form>
-                  )}
-              </div>
+                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => {
+                      setDossierReferenceId(null);
+                      setSelectedArpenteur("");
+                      setSelectedNumeroDossier("");
+                    }}>Retour</Button>
+                    <Button type="submit" className="bg-gradient-to-r from-blue-500 to-cyan-600">
+                      Créer
+                    </Button>
+                  </div>
+                </form>
+              )}
             </DialogContent>
           </Dialog>
         </div>
