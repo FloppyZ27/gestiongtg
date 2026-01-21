@@ -11,15 +11,21 @@ export default function CommunicationClients() {
   const retoursAppelRef = useRef();
 
   const handleNewMandat = () => {
-    if (priseMandatRef.current && priseMandatRef.current.openNewDialog) {
-      priseMandatRef.current.openNewDialog();
-    }
+    setActiveTab("prise-mandat");
+    setTimeout(() => {
+      if (priseMandatRef.current && priseMandatRef.current.openNewDialog) {
+        priseMandatRef.current.openNewDialog();
+      }
+    }, 50);
   };
 
   const handleNewRetourAppel = () => {
-    if (retoursAppelRef.current && retoursAppelRef.current.openNewDialog) {
-      retoursAppelRef.current.openNewDialog();
-    }
+    setActiveTab("retours-appel");
+    setTimeout(() => {
+      if (retoursAppelRef.current && retoursAppelRef.current.openNewDialog) {
+        retoursAppelRef.current.openNewDialog();
+      }
+    }, 50);
   };
 
   return (
