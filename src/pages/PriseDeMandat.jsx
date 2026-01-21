@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, Edit, Trash2, FileCheck, User, X, UserPlus, Calendar, Eye, Check, Grid3x3, Send, Package, FileText, FilePlus, ChevronDown, ChevronUp, MapPin, MessageSquare, FileQuestion, FolderOpen, XCircle, Briefcase, Loader2, Upload, File, ExternalLink, Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -225,6 +226,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const [commentairesTemporairesLot, setCommentairesTemporairesLot] = useState([]);
   const [sidebarTabLot, setSidebarTabLot] = useState("commentaires");
   const [editingLot, setEditingLot] = useState(null);
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
   const [initialLotForm, setInitialLotForm] = useState(null);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
@@ -6487,8 +6489,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
         {/* Table des prises de mandat */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader className="border-b border-slate-800">
-            <div className="flex flex-col gap-4">
+          <CardHeader className="border-b border-slate-800 pb-2">
+            <div className="flex flex-col gap-2">
               
               {/* Tabs pour les statuts - style tabs pleine largeur */}
               <div className="flex w-full border-b border-slate-700">
@@ -6539,7 +6541,15 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <Collapsible open={!isFiltersCollapsed} onOpenChange={(open) => setIsFiltersCollapsed(!open)}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-between h-8 text-slate-400 hover:text-white hover:bg-slate-800/50">
+                    <span className="text-sm">Filtres</span>
+                    {isFiltersCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+              <div className="flex flex-wrap gap-3 pt-2">
                 <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
@@ -6735,6 +6745,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                   </Button>
                 )}
               </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
           </CardHeader>
           <CardContent className="p-0">

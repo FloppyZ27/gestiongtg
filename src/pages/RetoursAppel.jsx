@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare, ChevronUp } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -488,6 +489,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   const [filterDateEnd, setFilterDateEnd] = useState("");
   const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
   const [activeListTab, setActiveListTab] = useState("retour_appel");
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
 
@@ -766,9 +768,9 @@ const RetoursAppel = React.forwardRef((props, ref) => {
         </Dialog>
 
         {/* Card avec filtres comme page Dossiers */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader>
-            <div className="flex flex-col gap-4">
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+          <CardHeader className="pb-2">
+            <div className="flex flex-col gap-2">
               {/* Tabs pour les statuts */}
               <div className="flex w-full border-b border-slate-700">
                 <button
@@ -818,7 +820,15 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                 </button>
               </div>
 
-            <div className="flex flex-wrap gap-3">
+            <Collapsible open={!isFiltersCollapsed} onOpenChange={(open) => setIsFiltersCollapsed(!open)}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between h-8 text-slate-400 hover:text-white hover:bg-slate-800/50">
+                  <span className="text-sm">Filtres</span>
+                  {isFiltersCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+            <div className="flex flex-wrap gap-3 pt-2">
               <div className="relative flex-1 min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
@@ -938,6 +948,8 @@ const RetoursAppel = React.forwardRef((props, ref) => {
               </Button>
               }
             </div>
+              </CollapsibleContent>
+            </Collapsible>
             </div>
           </CardHeader>
         </Card>
