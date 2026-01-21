@@ -547,6 +547,25 @@ function LayoutContent({ children, currentPageName }) {
           border-bottom: 2px solid rgb(251, 146, 60) !important;
         }
 
+        /* Tabs spécifiques pour les retours d'appel */
+        .retour-appel-tab {
+          background: rgba(16, 185, 129, 0.1) !important;
+          color: rgb(16, 185, 129) !important;
+          border-bottom-color: rgb(16, 185, 129) !important;
+        }
+
+        .message-laisse-tab {
+          background: rgba(249, 115, 22, 0.1) !important;
+          color: rgb(251, 146, 60) !important;
+          border-bottom-color: rgb(251, 146, 60) !important;
+        }
+
+        .termine-tab {
+          background: rgba(59, 130, 246, 0.1) !important;
+          color: rgb(59, 130, 246) !important;
+          border-bottom-color: rgb(59, 130, 246) !important;
+        }
+
         /* Badges et éléments orange dans les sections mandats - en orange */
         .bg-orange-500\/20 {
           background-color: rgba(249, 115, 22, 0.2) !important;
