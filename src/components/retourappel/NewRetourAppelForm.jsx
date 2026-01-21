@@ -132,69 +132,69 @@ export default function NewRetourAppelForm({
           {/* Section Informations du dossier */}
           <Card className="border-slate-700 bg-slate-800/30">
             <CardHeader 
-              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+              className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1 bg-blue-900/20"
               onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                    <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                    <FolderOpen className="w-3 h-3 text-blue-400" />
                   </div>
-                  <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+                  <CardTitle className="text-blue-300 text-sm">Informations du dossier</CardTitle>
                   {selectedDossier && (
-                    <span className="text-slate-300 text-sm">
+                    <span className="text-slate-300 text-xs">
                       {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
                     </span>
                   )}
                 </div>
-                {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                {infoDossierCollapsed ? <ChevronDown className="w-3 h-3 text-slate-400" /> : <ChevronUp className="w-3 h-3 text-slate-400" />}
               </div>
             </CardHeader>
 
             {!infoDossierCollapsed && (
-              <CardContent className="pt-4 pb-3">
-                <div className="grid grid-cols-[30%_70%] gap-4">
+              <CardContent className="pt-2 pb-2">
+                <div className="grid grid-cols-[30%_70%] gap-3">
                   {/* Colonne gauche - Filtres */}
-                  <div className="space-y-3 border-r border-slate-700 pr-4">
-                    <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">Arpenteur-géomètre</Label>
+                  <div className="space-y-2 border-r border-slate-700 pr-3">
+                    <div className="space-y-1">
+                      <Label className="text-slate-400 text-[10px]">Arpenteur-géomètre</Label>
                       <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-xs">
                           <SelectValue placeholder="Tous" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-700">
-                          <SelectItem value={null} className="text-white text-sm">Tous</SelectItem>
+                          <SelectItem value={null} className="text-white text-xs">Tous</SelectItem>
                           {ARPENTEURS.map((arpenteur) => (
-                            <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
+                            <SelectItem key={arpenteur} value={arpenteur} className="text-white text-xs">{arpenteur}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">N° de dossier</Label>
+                    <div className="space-y-1">
+                      <Label className="text-slate-400 text-[10px]">N° de dossier</Label>
                       <Input
                         placeholder="Rechercher..."
                         value={selectedNumeroDossier}
                         onChange={(e) => setSelectedNumeroDossier(e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">Client</Label>
+                    <div className="space-y-1">
+                      <Label className="text-slate-400 text-[10px]">Client</Label>
                       <Input
                         placeholder="Rechercher..."
                         value={selectedClient}
                         onChange={(e) => setSelectedClient(e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-xs"
                       />
                     </div>
                   </div>
 
                   {/* Colonne droite - Liste des dossiers */}
                   <div className="overflow-hidden flex flex-col">
-                    <p className="text-slate-400 text-xs mb-2">
+                    <p className="text-slate-400 text-[10px] mb-1">
                       Sélectionner un dossier ({dossiers.filter(d => {
                         const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                         const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
@@ -203,7 +203,7 @@ export default function NewRetourAppelForm({
                         return matchesArpenteur && matchesNumero && matchesClient;
                       }).length})
                     </p>
-                    <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
+                    <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[250px]">
                       <Table>
                         <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
                           <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
