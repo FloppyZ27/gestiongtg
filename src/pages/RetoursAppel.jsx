@@ -133,6 +133,30 @@ export default function RetoursAppel() {
 
   const createRetourAppelMutation = useMutation({
     mutationFn: async (retourData) => {
+      // Si aucun dossier, créer retour d'appel sans dossier
+      if (!retourData.dossier_reference_id) {
+        await base44.entities.RetourAppel.create({
+          dossier_id: null,
+          date_appel: retourData.date_appel,
+          utilisateur_assigne: retourData.utilisateur_assigne,
+          raison: retourData.notes || "",
+          statut: "Retour d'appel",
+          client_nom: retourData.client_nom || "",
+          client_telephone: retourData.client_telephone || ""
+        });
+        
+        if (retourData.utilisateur_assigne) {
+          await base44.entities.Notification.create({
+            utilisateur_email: retourData.utilisateur_assigne,
+            titre: "Nouveau retour d'appel assigné",
+            message: `Un retour d'appel vous a été assigné${retourData.client_nom ? ` pour ${retourData.client_nom}` : ''}.`,
+            type: "retour_appel",
+            lue: false
+          });
+        }
+        return;
+      }
+      
       const dossierId = retourData.dossier_reference_id;
       const dossier = dossiers.find(d => d.id === dossierId);
       if (!dossier) throw new Error("Dossier non trouvé");
@@ -314,10 +338,6 @@ export default function RetoursAppel() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.dossier_reference_id) {
-      alert("Veuillez sélectionner un dossier");
-      return;
-    }
     if (editingDossier) {
       updateRetourAppelMutation.mutate({ id: editingDossier.id, retourData: formData });
     } else {
@@ -868,6 +888,7 @@ export default function RetoursAppel() {
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead className="text-slate-300">Dossier</TableHead>
                     <TableHead className="text-slate-300">Clients</TableHead>
+                    <TableHead className="text-slate-300">N° de téléphone</TableHead>
                     <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
                     <TableHead className="text-slate-300">Date de l'appel</TableHead>
                     <TableHead className="text-slate-300">Raison</TableHead>
@@ -876,17 +897,27 @@ export default function RetoursAppel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedAllRetoursAppels.map((retour) => (
-                    <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                      <TableCell className="font-medium">
-                            {dossiers.find(d => d.id === retour.dossier_id) ? (
-                              <Badge variant="outline" className={`${getArpenteurColor(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre)} border`}>
-                                {dossiers.find(d => d.id === retour.dossier_id)?.numero_dossier ? `${getArpenteurInitials(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre)}${dossiers.find(d => d.id === retour.dossier_id)?.numero_dossier}` : getArpenteurInitials(dossiers.find(d => d.id === retour.dossier_id)?.arpenteur_geometre).slice(0, -1)}
-                              </Badge>
-                            ) : null}
-                          </TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-xs truncate">{dossiers.find(d => d.id === retour.dossier_id) ? getClientsNames(dossiers.find(d => d.id === retour.dossier_id)?.clients_ids) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">
+                  {sortedAllRetoursAppels.map((retour) => {
+                    const dossier = dossiers.find(d => d.id === retour.dossier_id);
+                    const firstClient = dossier?.clients_ids?.[0] ? getClientById(dossier.clients_ids[0]) : null;
+                    const phoneNumber = retour.client_telephone || (firstClient?.telephones?.find(t => t.actuel)?.telephone || firstClient?.telephones?.[0]?.telephone || "-");
+                    
+                    return (
+                      <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
+                        <TableCell className="font-medium">
+                          {dossier ? (
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                              {dossier.numero_dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
+                            </Badge>
+                          ) : (
+                            <span className="text-slate-500 text-xs">Aucun dossier</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                          {retour.client_nom || (dossier ? getClientsNames(dossier.clients_ids) : "-")}
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-sm">{phoneNumber}</TableCell>
+                        <TableCell className="text-slate-300 text-sm">
                         {retour.utilisateur_assigne ? (
                           <div className="flex items-center gap-2">
                             <Avatar className="w-8 h-8">
@@ -967,10 +998,11 @@ export default function RetoursAppel() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                   {sortedAllRetoursAppels.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-12 text-slate-500">Aucun retour d'appel</TableCell>
+                      <TableCell colSpan={8} className="text-center py-12 text-slate-500">Aucun retour d'appel</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
