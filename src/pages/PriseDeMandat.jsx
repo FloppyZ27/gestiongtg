@@ -6573,12 +6573,12 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                 <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                   <CollapsibleContent>
-                    <div className="p-4 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+                    <div className="p-4 border border-emerald-500/30 rounded-lg">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
+                        <div className="flex items-center justify-between pb-3 border-b border-emerald-500/30">
                           <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-emerald-400" />
-                            <h4 className="text-sm font-semibold text-white">Filtrer les mandats</h4>
+                            <Filter className="w-4 h-4 text-emerald-500" />
+                            <h4 className="text-sm font-semibold text-emerald-500">Filtrer les mandats</h4>
                           </div>
                           {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0 || filterDateStart || filterDateEnd) && (
                             <Button
@@ -6592,7 +6592,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                 setFilterDateStart("");
                                 setFilterDateEnd("");
                               }}
-                              className="h-7 text-xs text-slate-400 hover:text-white"
+                              className="h-7 text-xs text-emerald-500 hover:text-emerald-400"
                             >
                               <X className="w-3 h-3 mr-1" />
                               Réinitialiser
@@ -6600,12 +6600,12 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           )}
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-4 gap-3">
                           <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Arpenteurs</Label>
+                            <Label className="text-xs text-emerald-500">Arpenteurs</Label>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-9 text-sm">
                                   <span>{filterArpenteur.length > 0 ? `${filterArpenteur.length} sélectionné(s)` : 'Tous'}</span>
                                   <ChevronDown className="w-4 h-4" />
                                 </Button>
@@ -6632,10 +6632,10 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Villes</Label>
+                            <Label className="text-xs text-emerald-500">Villes</Label>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-9 text-sm">
                                   <span>{filterVille.length > 0 ? `${filterVille.length} sélectionnée(s)` : 'Toutes'}</span>
                                   <ChevronDown className="w-4 h-4" />
                                 </Button>
@@ -6662,10 +6662,10 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Types de mandat</Label>
+                            <Label className="text-xs text-emerald-500">Types de mandat</Label>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-9 text-sm">
                                   <span>{filterTypeMandat.length > 0 ? `${filterTypeMandat.length} sélectionné(s)` : 'Tous'}</span>
                                   <ChevronDown className="w-4 h-4" />
                                 </Button>
@@ -6692,10 +6692,10 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-xs text-slate-400">Urgence</Label>
+                            <Label className="text-xs text-emerald-500">Urgence</Label>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                                <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-500 justify-between h-9 text-sm">
                                   <span>{filterUrgence.length > 0 ? `${filterUrgence.length} sélectionnée(s)` : 'Toutes'}</span>
                                   <ChevronDown className="w-4 h-4" />
                                 </Button>
@@ -6722,23 +6722,23 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           </div>
                         </div>
 
-                        <div className="space-y-2 pt-2 border-t border-slate-700/50">
-                          <Label className="text-xs text-slate-400">Période</Label>
+                        <div className="space-y-2 pt-2 border-t border-emerald-500/30">
+                          <Label className="text-xs text-emerald-500">Période</Label>
                           <div className="flex items-center gap-2">
                             <Input
                               type="date"
                               value={filterDateStart}
                               onChange={(e) => setFilterDateStart(e.target.value)}
                               placeholder="Du"
-                              className="flex-1 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
+                              className="flex-1 border-emerald-500/30 text-emerald-500 h-9 text-sm"
                             />
-                            <span className="text-slate-500 text-sm">→</span>
+                            <span className="text-emerald-500 text-sm">→</span>
                             <Input
                               type="date"
                               value={filterDateEnd}
                               onChange={(e) => setFilterDateEnd(e.target.value)}
                               placeholder="Au"
-                              className="flex-1 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
+                              className="flex-1 border-emerald-500/30 text-emerald-500 h-9 text-sm"
                             />
                           </div>
                         </div>
