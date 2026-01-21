@@ -251,6 +251,8 @@ export default function PriseDeMandat() {
   const [filterTypeMandat, setFilterTypeMandat] = useState([]);
   const [filterUrgence, setFilterUrgence] = useState([]);
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
+  const [filterDateStart, setFilterDateStart] = useState("");
+  const [filterDateEnd, setFilterDateEnd] = useState("");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [clientStepCollapsed, setClientStepCollapsed] = useState(false);
@@ -1262,41 +1264,29 @@ export default function PriseDeMandat() {
   };
 
   // New filtering logic
-  const applyFilters = (dossiersList) => {
-    return dossiersList.filter(dossier => {
+  const applyFilters = (priseMandatsList) => {
+    return priseMandatsList.filter(pm => {
       const searchLower = searchTerm.toLowerCase();
+      const clientName = pm.client_info?.prenom || pm.client_info?.nom 
+        ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
+        : getClientsNames(pm.clients_ids).toLowerCase();
       const matchesSearch = (
-        dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
-        dossier.numero_dossier?.toLowerCase().includes(searchLower) || // Added numero_dossier to search
-        dossier.clients_ids.some(id => {
-          const client = getClientById(id);
-          return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
-        }) ||
-        dossier.mandats?.some(m =>
-          m.type_mandat?.toLowerCase().includes(searchLower) ||
-          formatAdresse(m.adresse_travaux)?.toLowerCase().includes(searchLower)
-        )
+        pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
+        clientName.includes(searchLower) ||
+        formatAdresse(pm.adresse_travaux)?.toLowerCase().includes(searchLower) ||
+        pm.mandats?.some(m => m.type_mandat?.toLowerCase().includes(searchLower))
       );
 
-      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(dossier.arpenteur_geometre);
+      const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(pm.arpenteur_geometre);
+      const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
+      const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
+      const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
 
-      let matchesUtilisateurAssigne;
-      if (filterUtilisateurAssigne === "all") {
-        matchesUtilisateurAssigne = true;
-      } else if (filterUtilisateurAssigne === "non-assigne") {
-        matchesUtilisateurAssigne = !dossier.utilisateur_assigne;
-      } else {
-        matchesUtilisateurAssigne = dossier.utilisateur_assigne === filterUtilisateurAssigne;
-      }
+      const pmDate = new Date(pm.created_date);
+      const matchesDateStart = filterDateStart === "" || pmDate >= new Date(filterDateStart);
+      const matchesDateEnd = filterDateEnd === "" || pmDate <= new Date(filterDateEnd + "T23:59:59");
 
-      let matchesStatut = filterStatut === "all" || dossier.statut === filterStatut;
-      if (filterStatut === "Nouveau mandat/Demande d'information") {
-        matchesStatut = matchesStatut || dossier.statut === "Demande d'information" || dossier.statut === "Nouveau mandat";
-      } else if (filterStatut === "Soumission") { // New condition to combine Soumission and Mandats à ouvrir
-          matchesStatut = matchesStatut || dossier.statut === "Mandats à ouvrir";
-      }
-
-      return matchesSearch && matchesArpenteur && matchesStatut && matchesUtilisateurAssigne;
+      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence && matchesDateStart && matchesDateEnd;
     });
   };
 
@@ -6714,7 +6704,26 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0) && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-slate-400 text-sm whitespace-nowrap">Date:</Label>
+                  <Input
+                    type="date"
+                    value={filterDateStart}
+                    onChange={(e) => setFilterDateStart(e.target.value)}
+                    placeholder="Du"
+                    className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                  />
+                  <span className="text-slate-500">-</span>
+                  <Input
+                    type="date"
+                    value={filterDateEnd}
+                    onChange={(e) => setFilterDateEnd(e.target.value)}
+                    placeholder="Au"
+                    className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                  />
+                </div>
+
+                {(filterArpenteur.length > 0 || filterVille.length > 0 || filterTypeMandat.length > 0 || filterUrgence.length > 0 || filterDateStart || filterDateEnd) && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -6723,6 +6732,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       setFilterVille([]);
                       setFilterTypeMandat([]);
                       setFilterUrgence([]);
+                      setFilterDateStart("");
+                      setFilterDateEnd("");
                     }}
                     className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
                   >
@@ -6791,8 +6802,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                         : activeListTab === "ouvrir"
                         ? "Mandats à ouvrir"
                         : "Mandat non octroyé";
-                      if (pm.statut !== tabStatut) return false;
-
+                      return pm.statut === tabStatut;
+                    })
+                    .filter(pm => {
                       const searchLower = searchTerm.toLowerCase();
                       const clientName = pm.client_info?.prenom || pm.client_info?.nom 
                         ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
@@ -6807,7 +6819,12 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       const matchesVille = filterVille.length === 0 || filterVille.includes(pm.adresse_travaux?.ville);
                       const matchesTypeMandat = filterTypeMandat.length === 0 || pm.mandats?.some(m => filterTypeMandat.includes(m.type_mandat));
                       const matchesUrgence = filterUrgence.length === 0 || filterUrgence.includes(pm.urgence_percue);
-                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence;
+                      
+                      const pmDate = new Date(pm.created_date);
+                      const matchesDateStart = filterDateStart === "" || pmDate >= new Date(filterDateStart);
+                      const matchesDateEnd = filterDateEnd === "" || pmDate <= new Date(filterDateEnd + "T23:59:59");
+                      
+                      return matchesSearch && matchesArpenteur && matchesVille && matchesTypeMandat && matchesUrgence && matchesDateStart && matchesDateEnd;
                     })
                     .sort((a, b) => {
                       if (!sortField) return 0;

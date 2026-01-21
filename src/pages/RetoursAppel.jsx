@@ -1037,14 +1037,22 @@ export default function RetoursAppel() {
                         {retour.utilisateur_assigne ? (
                           <div className="flex items-center gap-2">
                             <Avatar className="w-8 h-8">
-                              <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-xs">
-                                {(users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne)
-                                  .split(' ')
-                                  .map(n => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)}
-                              </AvatarFallback>
+                              {users.find(u => u.email === retour.utilisateur_assigne)?.photo_url ? (
+                                <img 
+                                  src={users.find(u => u.email === retour.utilisateur_assigne).photo_url} 
+                                  alt={(users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne)}
+                                  className="w-full h-full object-cover rounded-full"
+                                />
+                              ) : (
+                                <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                  {(users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne)
+                                    .split(' ')
+                                    .map(n => n[0])
+                                    .join('')
+                                    .toUpperCase()
+                                    .slice(0, 2)}
+                                </AvatarFallback>
+                              )}
                             </Avatar>
                             <span>{users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne}</span>
                           </div>
