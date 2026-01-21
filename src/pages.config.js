@@ -19,6 +19,7 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import CommunicationClients from './pages/CommunicationClients';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "CommunicationClients": CommunicationClients,
 }
 
 export const pagesConfig = {

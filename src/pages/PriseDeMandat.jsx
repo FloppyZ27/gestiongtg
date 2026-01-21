@@ -2315,18 +2315,10 @@ export default function PriseDeMandat() {
   const allVilles = [...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+    <div className="w-full">
       <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Prise de mandat
-              </h1>
-              <FilePlus className="w-6 h-6 text-emerald-400" />
-            </div>
-            <p className="text-slate-400">Gestion des prise de mandat</p>
-          </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
             if (!open && hasFormChanges && !isLocked && !isOuvrirDossierDialogOpen) {

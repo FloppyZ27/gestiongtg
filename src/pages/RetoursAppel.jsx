@@ -531,18 +531,10 @@ export default function RetoursAppel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
-                Retours d'appel
-              </h1>
-              <Phone className="w-6 h-6 text-blue-400" />
-            </div>
-            <p className="text-slate-400">Gestion des retours d'appel</p>
-          </div>
 
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);

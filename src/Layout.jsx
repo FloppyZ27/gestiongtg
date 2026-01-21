@@ -45,14 +45,9 @@ const navigationItems = [
     icon: UserCircle,
   },
   {
-    title: "Prise de mandat",
-    url: createPageUrl("PriseDeMandat"),
-    icon: FilePlus,
-  },
-  {
-    title: "Retours d'appel",
-    url: createPageUrl("RetoursAppel"),
-    icon: Phone,
+    title: "Communication clients",
+    url: createPageUrl("CommunicationClients"),
+    icon: MessageCircle,
   },
   {
     title: "Dossiers",
@@ -1111,7 +1106,7 @@ function LayoutContent({ children, currentPageName }) {
                   {navigationItems.map((item) => {
                     // Compter les retours d'appel assignés à l'utilisateur avec le statut "Retour d'appel"
                     let badgeCount = 0;
-                    if (item.title === "Retours d'appel" && user) {
+                    if (item.title === "Communication clients" && user) {
                       badgeCount = retoursAppels.filter(r => 
                         r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
                       ).length;
