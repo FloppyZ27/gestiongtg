@@ -136,6 +136,14 @@ export default function RetoursAppel() {
       const dossier = dossiers.find(d => d.id === dossierId);
       if (!dossier) throw new Error("Dossier non trouvé");
       
+      await base44.entities.RetourAppel.create({
+        dossier_id: dossierId,
+        date_appel: retourData.date_appel,
+        utilisateur_assigne: retourData.utilisateur_assigne,
+        raison: retourData.notes || "",
+        statut: "Retour d'appel"
+      });
+      
       await base44.entities.Dossier.update(dossierId, {
         ...dossier,
         utilisateur_assigne: retourData.utilisateur_assigne,
@@ -156,6 +164,7 @@ export default function RetoursAppel() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setIsDialogOpen(false);
       resetForm();
