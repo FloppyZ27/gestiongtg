@@ -174,25 +174,26 @@ export default function NewRetourAppelForm({
 
                 {aucunDossier ? (
                   <div className="space-y-3">
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label className="text-slate-400 text-xs">Client <span className="text-red-400">*</span></Label>
                       <Input
                         placeholder="Nom du client"
                         value={formData.client_nom || ""}
                         onChange={(e) => setFormData({...formData, client_nom: e.target.value})}
                         required
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label className="text-slate-400 text-xs">N° de téléphone <span className="text-red-400">*</span></Label>
                       <Input
-                        placeholder="Numéro de téléphone"
+                        id="new-telephone-retour"
+                        placeholder="Téléphone"
                         value={formData.client_telephone || ""}
                         onChange={(e) => setFormData({...formData, client_telephone: e.target.value})}
                         required
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                        className="bg-slate-700 border-slate-600 text-white h-7 text-sm"
                       />
                     </div>
                   </div>

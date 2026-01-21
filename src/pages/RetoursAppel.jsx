@@ -886,14 +886,14 @@ export default function RetoursAppel() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                    <TableHead className="text-slate-300">Dossier</TableHead>
-                    <TableHead className="text-slate-300">Clients</TableHead>
-                    <TableHead className="text-slate-300">N° de téléphone</TableHead>
-                    <TableHead className="text-slate-300">Utilisateur assigné</TableHead>
-                    <TableHead className="text-slate-300">Date de l'appel</TableHead>
-                    <TableHead className="text-slate-300">Raison</TableHead>
-                    <TableHead className="text-slate-300">Statut</TableHead>
-                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Dossier</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                    <TableHead className="text-slate-300 text-xs">N° de téléphone</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Utilisateur assigné</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Date de l'appel</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Raison</TableHead>
+                    <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                    <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -906,21 +906,31 @@ export default function RetoursAppel() {
                       <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
                         <TableCell className="font-medium">
                           {dossier ? (
-                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                            <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
                               {dossier.numero_dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : getArpenteurInitials(dossier.arpenteur_geometre).slice(0, -1)}
                             </Badge>
                           ) : (
                             <span className="text-slate-500 text-xs">Aucun dossier</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                        <TableCell className="text-slate-300 text-xs max-w-xs truncate">
                           {retour.client_nom || (dossier ? getClientsNames(dossier.clients_ids) : "-")}
                         </TableCell>
-                        <TableCell className="text-slate-300 text-sm">{phoneNumber}</TableCell>
-                        <TableCell className="text-slate-300 text-sm">
+                        <TableCell className="text-slate-300 text-xs">
+                          {phoneNumber !== "-" ? (
+                            <a 
+                              href={`tel:${phoneNumber.replace(/\D/g, '')}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                            >
+                              {phoneNumber}
+                            </a>
+                          ) : "-"}
+                        </TableCell>
+                        <TableCell className="text-slate-300 text-xs">
                         {retour.utilisateur_assigne ? (
                           <div className="flex items-center gap-2">
-                            <Avatar className="w-8 h-8">
+                            <Avatar className="w-7 h-7">
                               {users.find(u => u.email === retour.utilisateur_assigne)?.photo_url ? (
                                 <img 
                                   src={users.find(u => u.email === retour.utilisateur_assigne).photo_url} 
@@ -928,7 +938,7 @@ export default function RetoursAppel() {
                                   className="w-full h-full object-cover rounded-full"
                                 />
                               ) : (
-                                <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-xs">
+                                <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-[10px]">
                                   {(users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne)
                                     .split(' ')
                                     .map(n => n[0])
@@ -938,12 +948,12 @@ export default function RetoursAppel() {
                                 </AvatarFallback>
                               )}
                             </Avatar>
-                            <span>{users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne}</span>
+                            <span className="text-xs">{users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne}</span>
                           </div>
                         ) : "-"}
                       </TableCell>
-                      <TableCell className="text-slate-300">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
-                      <TableCell className="text-slate-300 text-sm max-w-[200px] group relative">
+                      <TableCell className="text-slate-300 text-xs">{retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}</TableCell>
+                      <TableCell className="text-slate-300 text-xs max-w-[200px] group relative">
                         {retour.raison ? (
                           <>
                             <span className="line-clamp-1 cursor-help">{retour.raison}</span>
