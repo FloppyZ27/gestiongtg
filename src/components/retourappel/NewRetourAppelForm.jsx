@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, FolderOpen, Phone, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
@@ -154,23 +155,21 @@ export default function NewRetourAppelForm({
 
             {!infoDossierCollapsed && (
               <CardContent className="pt-2 pb-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Checkbox
                     id="aucunDossier"
                     checked={aucunDossier}
-                    onChange={(e) => {
-                      setAucunDossier(e.target.checked);
-                      if (!e.target.checked) {
+                    onCheckedChange={(checked) => {
+                      setAucunDossier(checked);
+                      if (!checked) {
                         setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
                       } else {
                         setFormData(prev => ({...prev, dossier_reference_id: null}));
                         setDossierFound(true);
                       }
                     }}
-                    className="w-4 h-4"
                   />
-                  <Label htmlFor="aucunDossier" className="text-slate-300 text-sm cursor-pointer">Aucun dossier</Label>
+                  <Label htmlFor="aucunDossier" className="text-slate-400 text-[11px] cursor-pointer">Aucun dossier</Label>
                 </div>
 
                 {aucunDossier ? (
@@ -355,62 +354,62 @@ export default function NewRetourAppelForm({
           {(dossierFound || aucunDossier) && (
             <Card className="border-slate-700 bg-slate-800/30">
               <CardHeader 
-                className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
+                className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                 onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center">
-                      <Phone className="w-3.5 h-3.5 text-cyan-400" />
+                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                      <Phone className="w-3.5 h-3.5 text-blue-400" />
                     </div>
-                    <CardTitle className="text-cyan-300 text-base">Retour d'appel</CardTitle>
+                    <CardTitle className="text-blue-300 text-base">Retour d'appel</CardTitle>
                   </div>
                   {retourAppelCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                 </div>
               </CardHeader>
 
               {!retourAppelCollapsed && (
-                <CardContent className="pt-4 pb-3 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
-                      <Input
-                        type="date"
-                        value={formData.date_appel}
-                        onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
-                        required
-                        className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
-                      />
+                <CardContent className="pt-4 pb-3 space-y-4">
+                  <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
+                    <div className="grid grid-cols-[1fr_1fr] gap-3">
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
+                          <Input
+                            type="date"
+                            value={formData.date_appel}
+                            onChange={(e) => setFormData({...formData, date_appel: e.target.value})}
+                            required
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                          <Select
+                            value={formData.utilisateur_assigne || ""}
+                            onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {users.map((user) => (
+                                <SelectItem key={user.email} value={user.email} className="text-white text-xs">{user.full_name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <Label className="text-slate-400 text-xs mb-1">Raison de l'appel <span className="text-red-400">*</span></Label>
+                        <textarea
+                          placeholder="Notes sur l'appel..."
+                          value={formData.notes}
+                          onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                          className="bg-slate-700 border border-slate-600 text-white flex-1 text-xs p-2 rounded resize-none"
+                        />
+                      </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-slate-400 text-xs">Utilisateur assigné <span className="text-red-400">*</span></Label>
-                      <Select
-                        value={formData.utilisateur_assigne || ""}
-                        onValueChange={(value) => setFormData({...formData, utilisateur_assigne: value})}
-                        required
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
-                          <SelectValue placeholder="Sélectionner un utilisateur" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {users.map((user) => (
-                            <SelectItem key={user.email} value={user.email} className="text-white text-sm">{user.full_name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-slate-400 text-xs">Notes</Label>
-                    <Textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                      placeholder="Ajouter des notes..."
-                      className="bg-slate-700 border-slate-600 text-white text-sm"
-                      rows={4}
-                    />
                   </div>
                 </CardContent>
               )}
