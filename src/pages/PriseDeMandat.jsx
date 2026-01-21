@@ -6744,7 +6744,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       </div>
                     </div>
                   </PopoverContent>
-              </Popover>
+                </Popover>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
