@@ -489,7 +489,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   const [filterDateEnd, setFilterDateEnd] = useState("");
   const [searchRetoursAppel, setSearchRetoursAppel] = useState("");
   const [activeListTab, setActiveListTab] = useState("retour_appel");
-  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
 
   const sortedRetourAppel = sortDossiers(filteredRetourAppel);
 
@@ -844,7 +844,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
+                  <Button variant="outline" className="w-52 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                     <span>Arpenteurs ({filterArpenteurs.length || 'Tous'})</span>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
@@ -881,7 +881,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-56 bg-slate-800/50 border-slate-700 text-white justify-between">
+                  <Button variant="outline" className="w-56 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                     <span>Utilisateurs ({filterUtilisateurs.length || 'Tous'})</span>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
@@ -917,13 +917,13 @@ const RetoursAppel = React.forwardRef((props, ref) => {
               </DropdownMenu>
 
               <div className="flex items-center gap-2">
-                <Label className="text-slate-400 text-sm whitespace-nowrap">Date d'appel:</Label>
+                <Label className="text-slate-500 text-sm whitespace-nowrap">Date d'appel:</Label>
                 <Input
                   type="date"
                   value={filterDateStart}
                   onChange={(e) => setFilterDateStart(e.target.value)}
                   placeholder="Du"
-                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                  className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
                 />
                 <span className="text-slate-500">-</span>
                 <Input
@@ -931,7 +931,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                   value={filterDateEnd}
                   onChange={(e) => setFilterDateEnd(e.target.value)}
                   placeholder="Au"
-                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                  className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
                 />
               </div>
 
@@ -946,7 +946,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                   setFilterDateEnd("");
                   setSearchRetoursAppel("");
                 }}
-                className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+                className="bg-slate-800/30 border-slate-700/50 text-slate-500 hover:bg-slate-800 hover:text-white">
                 Réinitialiser les filtres
               </Button>
               }

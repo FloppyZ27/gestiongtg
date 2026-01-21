@@ -226,7 +226,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const [commentairesTemporairesLot, setCommentairesTemporairesLot] = useState([]);
   const [sidebarTabLot, setSidebarTabLot] = useState("commentaires");
   const [editingLot, setEditingLot] = useState(null);
-  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
   const [initialLotForm, setInitialLotForm] = useState(null);
   const [lotInfoCollapsed, setLotInfoCollapsed] = useState(false);
   const [typesOperationCollapsed, setTypesOperationCollapsed] = useState(false);
@@ -6565,7 +6565,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <Button variant="outline" className="w-44 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                       <span>Arpenteurs ({filterArpenteur.length || 'Tous'})</span>
                       <ChevronDown className="w-4 h-4" />
                     </Button>
@@ -6602,7 +6602,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <Button variant="outline" className="w-40 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                       <span>Villes ({filterVille.length || 'Toutes'})</span>
                       <ChevronDown className="w-4 h-4" />
                     </Button>
@@ -6639,7 +6639,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <Button variant="outline" className="w-48 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                       <span>Types ({filterTypeMandat.length || 'Tous'})</span>
                       <ChevronDown className="w-4 h-4" />
                     </Button>
@@ -6676,7 +6676,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-36 bg-slate-800/50 border-slate-700 text-white justify-between">
+                    <Button variant="outline" className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
                       <span>Urgence ({filterUrgence.length || 'Toutes'})</span>
                       <ChevronDown className="w-4 h-4" />
                     </Button>
@@ -6712,13 +6712,13 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 </DropdownMenu>
 
                 <div className="flex items-center gap-2">
-                  <Label className="text-slate-400 text-sm whitespace-nowrap">Date de prise de mandat:</Label>
+                  <Label className="text-slate-500 text-sm whitespace-nowrap">Date de prise de mandat:</Label>
                   <Input
                     type="date"
                     value={filterDateStart}
                     onChange={(e) => setFilterDateStart(e.target.value)}
                     placeholder="Du"
-                    className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                    className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
                   />
                   <span className="text-slate-500">-</span>
                   <Input
@@ -6726,7 +6726,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     value={filterDateEnd}
                     onChange={(e) => setFilterDateEnd(e.target.value)}
                     placeholder="Au"
-                    className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
+                    className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
                   />
                 </div>
 
@@ -6742,7 +6742,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       setFilterDateStart("");
                       setFilterDateEnd("");
                     }}
-                    className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    className="bg-slate-800/30 border-slate-700/50 text-slate-500 hover:bg-slate-800 hover:text-white"
                   >
                     Réinitialiser
                   </Button>
