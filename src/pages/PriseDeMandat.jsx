@@ -168,7 +168,13 @@ const getArpenteurInitials = (arpenteur) => {
   return mapping[arpenteur] || "";
 };
 
-export default function PriseDeMandat() {
+const PriseDeMandat = React.forwardRef((props, ref) => {
+  React.useImperativeHandle(ref, () => ({
+    openNewDialog: () => {
+      resetFullForm();
+      setIsDialogOpen(true);
+    }
+  }));
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
@@ -2315,7 +2321,7 @@ export default function PriseDeMandat() {
   const allVilles = [...new Set(priseMandats.map(pm => pm.adresse_travaux?.ville).filter(v => v))].sort();
 
   return (
-    <div className="w-full">
+    <>
       <div className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -2346,12 +2352,7 @@ export default function PriseDeMandat() {
               setIsDialogOpen(open);
             }
           }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
-                <Plus className="w-5 h-5 mr-2" />
-                Nouveau mandat
-              </Button>
-            </DialogTrigger>
+
             <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
@@ -6976,6 +6977,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
-}
+});
+
+export default PriseDeMandat;

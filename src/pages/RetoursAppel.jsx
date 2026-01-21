@@ -56,7 +56,21 @@ const formatPhoneNumber = (phone) => {
   return phone;
 };
 
-export default function RetoursAppel() {
+const RetoursAppel = React.forwardRef((props, ref) => {
+  React.useImperativeHandle(ref, () => ({
+    openNewDialog: () => {
+      setNewRetourForm({
+        dossier_id: null,
+        date_appel: new Date().toISOString().split('T')[0],
+        utilisateur_assigne: "",
+        raison: "",
+        statut: "Retour d'appel",
+        client_nom: "",
+        client_telephone: ""
+      });
+      setIsNewRetourDialogOpen(true);
+    }
+  }));
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
@@ -541,12 +555,7 @@ export default function RetoursAppel() {
             setIsDialogOpen(open);
             if (!open) resetForm();
           }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/50">
-                <Plus className="w-5 h-5 mr-2" />
-                Nouveau retour d'appel
-              </Button>
-            </DialogTrigger>
+
             <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[50vw] w-[50vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle>Nouveau retour d'appel</DialogTitle>
@@ -1023,6 +1032,8 @@ export default function RetoursAppel() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
-}
+});
+
+export default RetoursAppel;
