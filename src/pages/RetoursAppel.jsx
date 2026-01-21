@@ -65,6 +65,8 @@ export default function RetoursAppel() {
   const [activeTabMandat, setActiveTabMandat] = useState("0");
   const [dossierReferenceId, setDossierReferenceId] = useState(null);
   const [dossierSearchForReference, setDossierSearchForReference] = useState("");
+  const [selectedArpenteur, setSelectedArpenteur] = useState("");
+  const [selectedNumeroDossier, setSelectedNumeroDossier] = useState("");
   const [commentairesTemporaires, setCommentairesTemporaires] = useState([]);
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
@@ -324,6 +326,8 @@ export default function RetoursAppel() {
     setEditingDossier(null);
     setDossierReferenceId(null);
     setDossierSearchForReference("");
+    setSelectedArpenteur("");
+    setSelectedNumeroDossier("");
   };
 
   const handleEdit = (dossier) => {
@@ -511,52 +515,64 @@ export default function RetoursAppel() {
                 Nouveau retour d'appel
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
-              <DialogHeader className="sr-only">
-                <DialogTitle>{editingDossier ? "Modifier" : "Nouveau retour d'appel"}</DialogTitle>
+            <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+              <DialogHeader>
+                <DialogTitle>Nouveau retour d'appel</DialogTitle>
               </DialogHeader>
 
-              <div className="flex h-[90vh]">
-                <div className="flex-[0_0_60%] overflow-y-auto p-6 border-r border-slate-800">
-                  <h2 className="text-2xl font-bold text-white mb-6">
-                    {editingDossier ? "Modifier le retour d'appel" : "Nouveau retour d'appel"}
-                  </h2>
+              {!dossierReferenceId ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                    <Select value={selectedArpenteur} onValueChange={(value) => setSelectedArpenteur(value)}>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner un arpenteur" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {ARPENTEURS.map((arpenteur) => (
+                          <SelectItem key={arpenteur} value={arpenteur} className="text-white">{arpenteur}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                  {!dossierReferenceId ? (
-                    <div className="space-y-4">
-                      <Label className="text-slate-300 text-lg font-semibold">Sélectionner un dossier existant</Label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                        <Input
-                          placeholder="Rechercher un dossier..."
-                          value={dossierSearchForReference}
-                          onChange={(e) => setDossierSearchForReference(e.target.value)}
-                          className="pl-10 bg-slate-800 border-slate-700"
-                        />
-                      </div>
-                      {dossierSearchForReference && (
-                        <div className="max-h-96 overflow-y-auto border border-slate-700 rounded-lg">
-                          {filteredDossiersForReference.length > 0 ? (
-                            filteredDossiersForReference.map(d => (
-                              <div
-                                key={d.id}
-                                className="p-3 cursor-pointer hover:bg-slate-800/50 border-b border-slate-800 last:border-b-0"
-                                onClick={() => selectDossier(d.id)}
-                              >
-                                <p className="font-medium text-white">
-                                  {d.arpenteur_geometre ? getArpenteurInitials(d.arpenteur_geometre) : ""}{d.numero_dossier || ""} - {getClientsNames(d.clients_ids)}
-                                </p>
-                                <p className="text-slate-400 text-xs mt-1">{getFirstAdresseTravaux(d.mandats)}</p>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="p-3 text-center text-slate-500 text-sm">Aucun dossier trouvé.</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <form id="retour-appel-form" onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>N° de dossier <span className="text-red-400">*</span></Label>
+                    <Input
+                      placeholder="Ex: 123"
+                      value={selectedNumeroDossier}
+                      onChange={(e) => setSelectedNumeroDossier(e.target.value)}
+                      className="bg-slate-800 border-slate-700"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                    <Button 
+                      type="button" 
+                      onClick={() => {
+                        if (!selectedArpenteur || !selectedNumeroDossier) {
+                          alert("Veuillez sélectionner un arpenteur et saisir un numéro de dossier");
+                          return;
+                        }
+                        const dossier = dossiers.find(d => 
+                          d.arpenteur_geometre === selectedArpenteur && 
+                          d.numero_dossier === selectedNumeroDossier
+                        );
+                        if (dossier) {
+                          selectDossier(dossier.id);
+                        } else {
+                          alert("Aucun dossier trouvé avec ces critères");
+                        }
+                      }}
+                      className="bg-gradient-to-r from-blue-500 to-cyan-600"
+                    >
+                      Suivant
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <form id="retour-appel-form" onSubmit={handleSubmit} className="space-y-4">
                       <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                         <Label className="text-slate-300 text-sm">Dossier sélectionné</Label>
                         <p className="text-white font-medium mt-2">
@@ -633,60 +649,18 @@ export default function RetoursAppel() {
                         />
                       </div>
 
-                      <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                      <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                        <Button type="button" variant="outline" onClick={() => {
+                          setDossierReferenceId(null);
+                          setSelectedArpenteur("");
+                          setSelectedNumeroDossier("");
+                        }}>Retour</Button>
                         <Button type="submit" className="bg-gradient-to-r from-blue-500 to-cyan-600">
-                          {editingDossier ? "Modifier" : "Créer"}
+                          Créer
                         </Button>
                       </div>
                     </form>
                   )}
-                </div>
-
-                {dossierReferenceId && (
-                  <div className="flex-[0_0_40%] flex flex-col h-full overflow-hidden border-l border-slate-800">
-                    <div className="flex-1 flex flex-col overflow-hidden">
-                      <div className="p-6 border-b border-slate-800 flex-shrink-0">
-                        <h3 className="text-lg font-bold text-white">Informations du dossier</h3>
-                      </div>
-                      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                        {dossiers.find(d => d.id === dossierReferenceId) && (
-                          <>
-                            <div className="space-y-2">
-                              <Label className="text-slate-400 text-sm">Arpenteur-géomètre</Label>
-                              <p className="text-white font-medium">{dossiers.find(d => d.id === dossierReferenceId)?.arpenteur_geometre}</p>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-slate-400 text-sm">Clients</Label>
-                              <div className="flex flex-col gap-2">
-                                {dossiers.find(d => d.id === dossierReferenceId)?.clients_ids?.map(clientId => {
-                                  const client = getClientById(clientId);
-                                  return client ? (
-                                    <Badge key={clientId} className="bg-blue-500/20 text-blue-400 border-blue-500/30 border w-full justify-start">
-                                      {client.prenom} {client.nom}
-                                    </Badge>
-                                  ) : null;
-                                })}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col overflow-hidden border-t border-slate-800">
-                      <div className="p-4 border-b border-slate-800 flex-shrink-0">
-                        <h3 className="text-lg font-bold text-white">Commentaires</h3>
-                      </div>
-                      <div className="flex-1 overflow-hidden p-4">
-                        <CommentairesSection
-                          dossierId={dossierReferenceId}
-                          dossierTemporaire={false}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </DialogContent>
           </Dialog>

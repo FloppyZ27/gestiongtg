@@ -6705,7 +6705,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 </DropdownMenu>
 
                 <div className="flex items-center gap-2">
-                  <Label className="text-slate-400 text-sm whitespace-nowrap">Date:</Label>
+                  <Label className="text-slate-400 text-sm whitespace-nowrap">Date de prise de mandat:</Label>
                   <Input
                     type="date"
                     value={filterDateStart}
