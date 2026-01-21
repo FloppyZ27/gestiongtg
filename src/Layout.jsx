@@ -586,7 +586,7 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         .termine-tab:not(.border-blue-500):hover {
-          background: rgba(59, 130, 246, 0.15) !important;
+          background: rgba(59, 130, 246, 0.2) !important;
           color: rgb(59, 130, 246) !important;
         }
 
