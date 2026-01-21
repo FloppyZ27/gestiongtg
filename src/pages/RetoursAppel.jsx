@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronDown } from "lucide-react";
@@ -820,19 +821,8 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                 </button>
               </div>
 
-            <Collapsible open={!isFiltersCollapsed} onOpenChange={(open) => setIsFiltersCollapsed(!open)}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between h-8 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    <span className="text-sm">Filtres</span>
-                  </div>
-                  {isFiltersCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <div className="relative flex-1 min-w-[250px]">
+            <div className="flex justify-between items-center gap-2">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
                   placeholder="Rechercher..."
@@ -842,117 +832,137 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                 />
               </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-52 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
-                    <span>Arpenteurs ({filterArpenteurs.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                  <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterArpenteurs.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterArpenteurs([]);
-                    }}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 border border-slate-700/50 relative"
                   >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {ARPENTEURS.map((arp) => (
-                    <DropdownMenuCheckboxItem
-                      key={arp}
-                      checked={filterArpenteurs.includes(arp)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterArpenteurs([...filterArpenteurs, arp]);
-                        } else {
-                          setFilterArpenteurs(filterArpenteurs.filter((a) => a !== arp));
-                        }
-                      }}
-                    >
-                      {arp}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-56 bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between">
-                    <span>Utilisateurs ({filterUtilisateurs.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
+                    <Filter className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Filtres</span>
+                    {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterDateStart || filterDateEnd) && (
+                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                        {filterArpenteurs.length + filterUtilisateurs.length + (filterDateStart ? 1 : 0) + (filterDateEnd ? 1 : 0)}
+                      </Badge>
+                    )}
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
-                  <DropdownMenuLabel>Filtrer par utilisateur</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterUtilisateurs.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterUtilisateurs([]);
-                    }}
-                  >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {users.map((u) => (
-                    <DropdownMenuCheckboxItem
-                      key={u.email}
-                      checked={filterUtilisateurs.includes(u.email)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterUtilisateurs([...filterUtilisateurs, u.email]);
-                        } else {
-                          setFilterUtilisateurs(filterUtilisateurs.filter((ut) => ut !== u.email));
-                        }
-                      }}
-                    >
-                      {u.full_name}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-[500px] bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl" 
+                  align="end"
+                  sideOffset={8}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-700/50">
+                      <div className="flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-sm font-semibold text-white">Filtrer les retours d'appel</h4>
+                      </div>
+                      {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterDateStart || filterDateEnd) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setFilterArpenteurs([]);
+                            setFilterUtilisateurs([]);
+                            setFilterDateStart("");
+                            setFilterDateEnd("");
+                          }}
+                          className="h-7 text-xs text-slate-400 hover:text-white"
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Réinitialiser
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs text-slate-400">Arpenteurs</Label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                              <span>{filterArpenteurs.length > 0 ? `${filterArpenteurs.length} sélectionné(s)` : 'Tous'}</span>
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {ARPENTEURS.map((arp) => (
+                              <DropdownMenuCheckboxItem
+                                key={arp}
+                                checked={filterArpenteurs.includes(arp)}
+                                onCheckedChange={(checked) => {
+                                  setFilterArpenteurs(
+                                    checked
+                                      ? [...filterArpenteurs, arp]
+                                      : filterArpenteurs.filter((a) => a !== arp)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {arp}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
 
-              <div className="flex items-center gap-2">
-                <Label className="text-slate-500 text-sm whitespace-nowrap">Date d'appel:</Label>
-                <Input
-                  type="date"
-                  value={filterDateStart}
-                  onChange={(e) => setFilterDateStart(e.target.value)}
-                  placeholder="Du"
-                  className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
-                />
-                <span className="text-slate-500">-</span>
-                <Input
-                  type="date"
-                  value={filterDateEnd}
-                  onChange={(e) => setFilterDateEnd(e.target.value)}
-                  placeholder="Au"
-                  className="w-36 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
-                />
-              </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs text-slate-400">Utilisateurs assignés</Label>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full bg-slate-800/30 border-slate-700/50 text-slate-400 justify-between h-9 text-sm">
+                              <span>{filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length} sélectionné(s)` : 'Tous'}</span>
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {users.map((user) => (
+                              <DropdownMenuCheckboxItem
+                                key={user.email}
+                                checked={filterUtilisateurs.includes(user.email)}
+                                onCheckedChange={(checked) => {
+                                  setFilterUtilisateurs(
+                                    checked
+                                      ? [...filterUtilisateurs, user.email]
+                                      : filterUtilisateurs.filter((u) => u !== user.email)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {user.full_name}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
 
-              {(filterArpenteurs.length > 0 || filterUtilisateurs.length > 0 || filterDateStart || filterDateEnd || searchRetoursAppel) &&
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setFilterArpenteurs([]);
-                  setFilterUtilisateurs([]);
-                  setFilterDateStart("");
-                  setFilterDateEnd("");
-                  setSearchRetoursAppel("");
-                }}
-                className="bg-slate-800/30 border-slate-700/50 text-slate-500 hover:bg-slate-800 hover:text-white">
-                Réinitialiser les filtres
-              </Button>
-              }
+                    <div className="space-y-2 pt-2 border-t border-slate-700/50">
+                      <Label className="text-xs text-slate-400">Période</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="date"
+                          value={filterDateStart}
+                          onChange={(e) => setFilterDateStart(e.target.value)}
+                          placeholder="Du"
+                          className="flex-1 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
+                        />
+                        <span className="text-slate-500 text-sm">→</span>
+                        <Input
+                          type="date"
+                          value={filterDateEnd}
+                          onChange={(e) => setFilterDateEnd(e.target.value)}
+                          placeholder="Au"
+                          className="flex-1 bg-slate-800/30 border-slate-700/50 text-slate-400 h-9 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-              </CollapsibleContent>
-            </Collapsible>
             </div>
           </CardHeader>
         </Card>
