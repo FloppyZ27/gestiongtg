@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare, ChevronUp } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Phone, X, UserPlus, Eye, Trash, Check, MessageSquare, ChevronUp, Filter } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
@@ -822,8 +822,11 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
             <Collapsible open={!isFiltersCollapsed} onOpenChange={(open) => setIsFiltersCollapsed(!open)}>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between h-8 text-slate-400 hover:text-white hover:bg-slate-800/50">
-                  <span className="text-sm">Filtres</span>
+                <Button variant="ghost" className="w-full justify-between h-8 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    <span className="text-sm">Filtres</span>
+                  </div>
                   {isFiltersCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                 </Button>
               </CollapsibleTrigger>
