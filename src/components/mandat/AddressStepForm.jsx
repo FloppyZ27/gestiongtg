@@ -86,23 +86,22 @@ export default function AddressStepForm({
       const almaLat = 48.5506;
       const almaLon = -71.6492;
       
-      // Construire la requête avec Alma, QC pour prioriser la région
-      const searchQuery = `${query}, Alma, QC`;
-      const encodedQuery = encodeURIComponent(searchQuery);
+      // Recherche normale sans forcer Alma
+      const encodedQuery = encodeURIComponent(query);
       
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=50`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=100`
       );
       const data = await response.json();
       
       if (data.candidates && data.candidates.length > 0) {
-        // Calculer la distance et filtrer dans un rayon de 250km
+        // Calculer la distance et filtrer dans un rayon de 250km d'Alma
         const formattedAddresses = data.candidates
           .map(candidate => {
             const location = candidate.location;
             if (!location) return null;
             
-            // Calculer la distance en km (formule haversine simplifiée)
+            // Calculer la distance en km (formule haversine)
             const R = 6371; // Rayon de la Terre en km
             const dLat = (location.y - almaLat) * Math.PI / 180;
             const dLon = (location.x - almaLon) * Math.PI / 180;
@@ -158,7 +157,7 @@ export default function AddressStepForm({
             };
           })
           .filter(addr => addr !== null)
-          .sort((a, b) => a.distance - b.distance) // Trier par distance
+          .sort((a, b) => a.distance - b.distance) // Trier par distance d'Alma
           .slice(0, 10); // Garder les 10 plus proches
         
         setSuggestions(formattedAddresses);
