@@ -25,32 +25,32 @@ Deno.serve(async (req) => {
     const siteId = "girardtremblaygilbert365.sharepoint.com,df242f6d-91a5-4248-a3a4-41b7e44073a2,64921d7b-e2e8-4c9e-bd7e-311465aaf30d";
     const driveId = "b!bS8k36WRSEKjpEG35EBzonsdkmTo4p5MvX4xFGWq8w1fkwthDsxdQL8_MK0t_B3b";
 
-    // Get access token
+    // Get access token - comme dans sharepoint.js
+    const bodyString = `grant_type=client_credentials&client_id=${encodeURIComponent(clientId)}&client_secret=${encodeURIComponent(clientSecret)}&scope=${encodeURIComponent('https://graph.microsoft.com/.default')}`;
+    
     const tokenResponse = await fetch(
       `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          scope: 'https://graph.microsoft.com/.default',
-          grant_type: 'client_credentials'
-        })
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: bodyString
       }
     );
 
+    const tokenData = await tokenResponse.json();
+    
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error(`[MOVE] Erreur obtention token:`, errorText);
+      console.error(`[MOVE] Erreur obtention token:`, JSON.stringify(tokenData));
       return Response.json({ 
         success: false, 
-        error: `Erreur d'authentification Microsoft: ${errorText}`,
+        error: `Erreur d'authentification: ${tokenData.error_description || tokenData.error}`,
         movedCount: 0 
       }, { status: 500 });
     }
 
-    const tokenData = await tokenResponse.json();
     const access_token = tokenData.access_token;
     
     if (!access_token) {
