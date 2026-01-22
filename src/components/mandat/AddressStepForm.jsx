@@ -149,8 +149,9 @@ export default function AddressStepForm({
           };
         });
         
-        // Trier par distance d'Alma
+        // Filtrer dans un rayon de 250 km d'Alma et trier par distance
         const sortedAddresses = formattedAddresses
+          .filter(addr => addr.distance <= 250)
           .sort((a, b) => a.distance - b.distance)
           .slice(0, 20);
         
