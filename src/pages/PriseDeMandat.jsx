@@ -3054,6 +3054,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
                       // Transférer les documents du dossier temporaire vers le dossier définitif
                       const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre).replace('-', '');
+                      
+                      // Utiliser le même nom de client que celui utilisé lors de l'upload initial
                       const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
                       const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
                       const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
@@ -3069,12 +3071,19 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         });
 
                         if (moveResponse.data?.success) {
-                          console.log(`[TRANSFERT] ✓ ${moveResponse.data.movedCount} fichier(s) déplacé(s) avec succès`);
+                          console.log(`[TRANSFERT] ✓ ${moveResponse.data.movedCount} fichier(s) déplacé(s)`);
+                          if (moveResponse.data.movedCount > 0) {
+                            alert(`✓ ${moveResponse.data.movedCount} document(s) transféré(s) avec succès`);
+                          }
                         } else {
                           console.error(`[TRANSFERT] ✗ Erreur:`, moveResponse.data?.error);
+                          if (moveResponse.data?.movedCount === 0 && !moveResponse.data?.error?.includes('introuvable')) {
+                            alert(`⚠️ Aucun document trouvé à transférer`);
+                          }
                         }
                       } catch (transferError) {
                         console.error("[TRANSFERT] ✗ Erreur lors du transfert:", transferError);
+                        alert(`✗ Erreur lors du transfert des documents: ${transferError.message}`);
                       }
 
                       // Mettre à jour chaque mandat avec tache_actuelle: "Cédule"
