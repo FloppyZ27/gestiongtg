@@ -2944,12 +2944,28 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     </Tabs>
                   )}
                   </div>
-                </div>
+                  </div>
 
+                  {/* Boutons Annuler/Créer tout en bas */}
+                  <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                  <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
+                    if (hasFormChanges) {
+                      setShowCancelConfirm(true);
+                    } else {
+                      setIsDialogOpen(false);
+                      resetFullForm();
+                    }
+                  }}>
+                    Annuler
+                  </Button>
+                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600" disabled={isLocked}>
+                    {editingPriseMandat ? "Modifier" : "Créer"}
+                  </Button>
+                  </div>
 
-              </motion.div>
-            </DialogContent>
-          </Dialog>
+                  </motion.div>
+                  </DialogContent>
+                  </Dialog>
 
           {/* Dialog pour ouvrir un dossier - Formulaire complet comme dans Dossiers */}
           <Dialog open={isOuvrirDossierDialogOpen} onOpenChange={(open) => {
