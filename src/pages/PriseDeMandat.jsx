@@ -3045,7 +3045,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       return;
                     }
 
-                    try {
                       // Créer le dossier SharePoint
                       await base44.functions.invoke('createSharePointFolder', {
                         arpenteur_geometre: nouveauDossierForm.arpenteur_geometre,
@@ -3055,8 +3054,12 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       // Transférer les documents du dossier temporaire vers le dossier définitif
                       const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre).replace('-', '');
                       const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
-                      const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
-                      const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
+                      const tempFolderPath = `ARPENTEUR/PLP/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
+                      const finalFolderPath = `ARPENTEUR/PLP/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
+
+                      console.log(`Tentative de transfert des documents...`);
+                      console.log(`Dossier temporaire: ${tempFolderPath}`);
+                      console.log(`Dossier final: ${finalFolderPath}`);
 
                       try {
                         // Récupérer les fichiers du dossier temporaire
@@ -3067,48 +3070,59 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         
                         const tempFiles = tempFilesResponse.data?.files || [];
                         
-                        console.log(`Transfert de ${tempFiles.length} fichiers de ${tempFolderPath} vers ${finalFolderPath}`);
+                        console.log(`${tempFiles.length} fichier(s) trouvé(s) dans le dossier temporaire`);
                         
-                        // Transférer chaque fichier
-                        for (const file of tempFiles) {
-                          try {
-                            // Télécharger le fichier temporaire
-                            const downloadResponse = await base44.functions.invoke('sharepoint', {
-                              action: 'getDownloadUrl',
-                              fileId: file.id
-                            });
-                            
-                            if (downloadResponse.data?.downloadUrl) {
-                              // Télécharger le contenu
-                              const fileResponse = await fetch(downloadResponse.data.downloadUrl);
-                              const arrayBuffer = await fileResponse.arrayBuffer();
-                              const uint8Array = new Uint8Array(arrayBuffer);
-                              const base64 = btoa(String.fromCharCode.apply(null, uint8Array));
+                        if (tempFiles.length > 0) {
+                          // Transférer chaque fichier
+                          for (const file of tempFiles) {
+                            try {
+                              console.log(`Transfert de: ${file.name}`);
                               
-                              // Uploader vers le dossier final
-                              await base44.functions.invoke('uploadToSharePoint', {
-                                folderPath: finalFolderPath,
-                                fileName: file.name,
-                                fileContent: base64,
-                                contentType: file.mimeType || 'application/octet-stream'
-                              });
-                              
-                              console.log(`Fichier ${file.name} transféré avec succès`);
-                              
-                              // Supprimer le fichier temporaire
-                              await base44.functions.invoke('sharepoint', {
-                                action: 'delete',
+                              // Télécharger le fichier temporaire
+                              const downloadResponse = await base44.functions.invoke('sharepoint', {
+                                action: 'getDownloadUrl',
                                 fileId: file.id
                               });
+                              
+                              if (downloadResponse.data?.downloadUrl) {
+                                // Télécharger le contenu
+                                const fileResponse = await fetch(downloadResponse.data.downloadUrl);
+                                const arrayBuffer = await fileResponse.arrayBuffer();
+                                const uint8Array = new Uint8Array(arrayBuffer);
+                                let binary = '';
+                                for (let i = 0; i < uint8Array.length; i++) {
+                                  binary += String.fromCharCode(uint8Array[i]);
+                                }
+                                const base64 = btoa(binary);
+                                
+                                // Uploader vers le dossier final
+                                await base44.functions.invoke('uploadToSharePoint', {
+                                  folderPath: finalFolderPath,
+                                  fileName: file.name,
+                                  fileContent: base64,
+                                  contentType: file.mimeType || 'application/octet-stream'
+                                });
+                                
+                                console.log(`✓ ${file.name} transféré avec succès`);
+                                
+                                // Supprimer le fichier temporaire
+                                await base44.functions.invoke('sharepoint', {
+                                  action: 'delete',
+                                  fileId: file.id
+                                });
+                                
+                                console.log(`✓ ${file.name} supprimé du dossier temporaire`);
+                              }
+                            } catch (fileError) {
+                              console.error(`✗ Erreur transfert fichier ${file.name}:`, fileError);
                             }
-                          } catch (fileError) {
-                            console.error(`Erreur transfert fichier ${file.name}:`, fileError);
                           }
+                          console.log(`✓ Transfert terminé: ${tempFiles.length} fichier(s) traité(s)`);
+                        } else {
+                          console.log('Aucun fichier à transférer');
                         }
-                        
-                        console.log('Transfert des documents terminé');
                       } catch (transferError) {
-                        console.error("Erreur transfert documents:", transferError);
+                        console.error("✗ Erreur lors de la récupération des fichiers du dossier temporaire:", transferError);
                       }
 
                       // Mettre à jour chaque mandat avec tache_actuelle: "Cédule"
@@ -4704,7 +4718,53 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                   ))}
                                   </Tabs>
                                   ) : (
-                                  <div className="text-center py-4 text-slate-400 bg-slate-800/30 rounded-lg text-xs">Aucun mandat</div>
+                                  <div className="text-center py-8 text-slate-400 bg-slate-800/30 rounded-lg">
+                                    <FileText className="w-12 h-12 mx-auto mb-3 text-slate-600" />
+                                    <p className="text-sm mb-4">Aucun mandat ajouté</p>
+                                    <Button type="button" size="sm" onClick={() => {
+                                      const newIndex = 0;
+                                      setNouveauDossierForm(prev => ({
+                                        ...prev,
+                                        mandats: [{
+                                          type_mandat: "",
+                                          date_ouverture: "",
+                                          minute: "",
+                                          date_minute: "",
+                                          type_minute: "Initiale",
+                                          minutes_list: [],
+                                          tache_actuelle: "",
+                                          statut_terrain: "",
+                                          adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "QC" },
+                                          lots: [],
+                                          prix_estime: 0,
+                                          rabais: 0,
+                                          taxes_incluses: false,
+                                          date_livraison: "",
+                                          date_signature: "",
+                                          date_debut_travaux: "",
+                                          terrain: {
+                                            date_limite_leve: "",
+                                            instruments_requis: "",
+                                            a_rendez_vous: false,
+                                            date_rendez_vous: "",
+                                            heure_rendez_vous: "",
+                                            donneur: "",
+                                            technicien: "",
+                                            dossier_simultane: "",
+                                            temps_prevu: "",
+                                            notes: ""
+                                          },
+                                          factures: [],
+                                          notes: "",
+                                          utilisateur_assigne: ""
+                                        }]
+                                      }));
+                                      setActiveTabMandatDossier(newIndex.toString());
+                                    }} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
+                                      <Plus className="w-4 h-4 mr-2" />
+                                      Ajouter un mandat
+                                    </Button>
+                                  </div>
                                   )}
                                   </CardContent>
                                   )}
