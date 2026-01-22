@@ -62,8 +62,9 @@ Deno.serve(async (req) => {
       }, { status: 500 });
     }
 
-    // List files in source folder
-    const listUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/root:/${sourceFolderPath}:/children`;
+    // List files in source folder - encoder le chemin correctement
+    const encodedSourcePath = encodeURIComponent(sourceFolderPath).replace(/%2F/g, '/');
+    const listUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/${encodedSourcePath}:/children`;
     console.log(`[MOVE] Liste des fichiers: ${listUrl}`);
     
     const listResponse = await fetch(listUrl, {
