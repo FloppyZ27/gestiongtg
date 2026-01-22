@@ -13,12 +13,6 @@ const ARPENTEUR_INITIALS = {
   "Frédéric Gilbert": "FG"
 };
 
-const TEMPLATE_STRUCTURE = [
-  'INTRANTS',
-  'RESULTATS',
-  'FACTURES'
-];
-
 async function getAccessToken() {
   const tokenUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`;
   
