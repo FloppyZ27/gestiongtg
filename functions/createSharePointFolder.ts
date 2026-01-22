@@ -156,8 +156,14 @@ Deno.serve(async (req) => {
       // Copier la structure du dossier modèle
       await copyFolderStructure(accessToken, templatePath, destParentPath, dossierName);
     } else {
-      // Créer simplement le dossier si le modèle n'existe pas
+      // Créer le dossier et ses sous-dossiers standards
       await createFolder(accessToken, destParentPath, dossierName);
+      
+      // Créer les sous-dossiers standards
+      const subfolders = ['INTRANTS', 'RESULTATS', 'FACTURES'];
+      for (const subfolder of subfolders) {
+        await createFolder(accessToken, destPath, subfolder);
+      }
     }
 
     return Response.json({ 
