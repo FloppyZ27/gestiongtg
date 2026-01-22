@@ -2633,7 +2633,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       setHasFormChanges(true);
                     }}
                     statut={formData.statut}
-                    onStatutChange={(value) => {
+                    onStatutChange={async (value) => {
                       if (isLocked) return;
                       // Si un numéro de dossier est inscrit et qu'on change de statut, demander confirmation
                       if (formData.numero_dossier && value !== formData.statut) {
@@ -2642,8 +2642,42 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         return;
                       }
                       
-                      // Ne pas attribuer automatiquement le numéro de dossier
-                      if (value !== "Mandats à ouvrir") {
+                      // Si on passe à "Mandats à ouvrir", créer le dossier SharePoint et transférer les documents
+                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre) {
+                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
+                        const initialsArp = getArpenteurInitials(formData.arpenteur_geometre).replace('-', '');
+                        
+                        try {
+                          // Créer le dossier SharePoint
+                          await base44.functions.invoke('createSharePointFolder', {
+                            arpenteur_geometre: formData.arpenteur_geometre,
+                            numero_dossier: prochainNumero
+                          });
+                          
+                          // Transférer les documents depuis le dossier temporaire
+                          const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+                          const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
+                          const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS`;
+                          
+                          console.log(`[TRANSFERT AUTO] Source: ${tempFolderPath}`);
+                          console.log(`[TRANSFERT AUTO] Destination: ${finalFolderPath}`);
+                          
+                          const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                            sourceFolderPath: tempFolderPath,
+                            destinationFolderPath: finalFolderPath
+                          });
+                          
+                          console.log(`[TRANSFERT AUTO] Réponse:`, moveResponse.data);
+                          
+                          if (moveResponse.data?.movedCount > 0) {
+                            alert(`✓ ${moveResponse.data.movedCount} document(s) transféré(s) automatiquement`);
+                          }
+                        } catch (error) {
+                          console.error("[TRANSFERT AUTO] Erreur:", error);
+                        }
+                        
+                        setFormData({...formData, statut: value, numero_dossier: prochainNumero, date_ouverture: new Date().toISOString().split('T')[0]});
+                      } else if (value !== "Mandats à ouvrir") {
                         setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
                       } else {
                         setFormData({...formData, statut: value});
