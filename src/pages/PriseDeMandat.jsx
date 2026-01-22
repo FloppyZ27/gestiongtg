@@ -2829,14 +2829,16 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
                   />
 
-                  {/* Étape 6: Documents - Visible uniquement si statut "Mandats à ouvrir" et numéro de dossier existe */}
-                  {formData.statut === "Mandats à ouvrir" && formData.numero_dossier && formData.arpenteur_geometre && (
+                  {/* Étape 6: Documents */}
+                  {formData.arpenteur_geometre && (clientInfo.prenom || clientInfo.nom || formData.numero_dossier) && (
                     <DocumentsStepForm
                       arpenteurGeometre={formData.arpenteur_geometre}
                       numeroDossier={formData.numero_dossier}
                       isCollapsed={documentsStepCollapsed}
                       onToggleCollapse={() => setDocumentsStepCollapsed(!documentsStepCollapsed)}
                       onDocumentsChange={setHasDocuments}
+                      isTemporaire={!formData.numero_dossier}
+                      clientInfo={clientInfo}
                     />
                   )}
 

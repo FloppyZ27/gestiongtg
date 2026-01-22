@@ -119,7 +119,9 @@ export default function DocumentsStepForm({
   numeroDossier,
   isCollapsed,
   onToggleCollapse,
-  onDocumentsChange
+  onDocumentsChange,
+  isTemporaire = false,
+  clientInfo = null
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -130,13 +132,20 @@ export default function DocumentsStepForm({
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
 
-
   const initials = getArpenteurInitials(arpenteurGeometre);
-  const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+  
+  // Construire le chemin selon si c'est temporaire ou non
+  let folderPath;
+  if (isTemporaire && clientInfo) {
+    const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+    folderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
+  } else {
+    folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+  }
 
   // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-intrant', arpenteurGeometre, numeroDossier],
+    queryKey: ['sharepoint-intrant', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -144,7 +153,7 @@ export default function DocumentsStepForm({
       });
       return response.data;
     },
-    enabled: !!arpenteurGeometre && !!numeroDossier,
+    enabled: !!arpenteurGeometre && (!!numeroDossier || (isTemporaire && !!clientInfo)),
     staleTime: 30000
   });
 
