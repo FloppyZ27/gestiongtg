@@ -23,6 +23,12 @@ export default function CommunicationClients() {
     initialData: [],
   });
 
+  const { data: priseMandats = [] } = useQuery({
+    queryKey: ['priseMandats'],
+    queryFn: () => base44.entities.PriseMandat.list('-created_date'),
+    initialData: [],
+  });
+
   const retourAppelCount = user ? retoursAppels.filter(r => 
     r.utilisateur_assigne === user.email && r.statut === "Retour d'appel"
   ).length : 0;
