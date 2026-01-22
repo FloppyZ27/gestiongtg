@@ -3065,21 +3065,24 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       console.log(`[TRANSFERT] Destination: ${finalFolderPath}`);
 
                       try {
+                        console.log(`[DEBUG] Appel moveSharePointFiles avec:`);
+                        console.log(`[DEBUG] Source: ${tempFolderPath}`);
+                        console.log(`[DEBUG] Destination: ${finalFolderPath}`);
+                        
                         const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
                           sourceFolderPath: tempFolderPath,
                           destinationFolderPath: finalFolderPath
                         });
 
+                        console.log(`[DEBUG] Réponse complète:`, moveResponse);
+                        console.log(`[DEBUG] moveResponse.data:`, moveResponse.data);
+
                         if (moveResponse.data?.success) {
                           console.log(`[TRANSFERT] ✓ ${moveResponse.data.movedCount} fichier(s) déplacé(s)`);
-                          if (moveResponse.data.movedCount > 0) {
-                            alert(`✓ ${moveResponse.data.movedCount} document(s) transféré(s) avec succès`);
-                          }
+                          alert(`✓ ${moveResponse.data.movedCount} document(s) transféré(s) avec succès`);
                         } else {
                           console.error(`[TRANSFERT] ✗ Erreur:`, moveResponse.data?.error);
-                          if (moveResponse.data?.movedCount === 0 && !moveResponse.data?.error?.includes('introuvable')) {
-                            alert(`⚠️ Aucun document trouvé à transférer`);
-                          }
+                          alert(`⚠️ Erreur: ${moveResponse.data?.error || 'Aucun document trouvé'}`);
                         }
                       } catch (transferError) {
                         console.error("[TRANSFERT] ✗ Erreur lors du transfert:", transferError);
