@@ -91,7 +91,7 @@ export default function AddressStepForm({
       const almaLon = -71.6492;
       
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&location=${almaLon},${almaLat}&distance=50000&f=json&outFields=*&maxLocations=10`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&location=${almaLon},${almaLat}&distance=250000&f=json&outFields=*&maxLocations=10`
       );
       const data = await response.json();
       
