@@ -72,18 +72,37 @@ Deno.serve(async (req) => {
     let movedCount = 0;
     const errors = [];
 
+    // Get destination folder ID
+    const destUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/root:/${destinationFolderPath}`;
+    const destResponse = await fetch(destUrl, {
+      headers: { 'Authorization': `Bearer ${access_token}` }
+    });
+
+    if (!destResponse.ok) {
+      console.error(`[MOVE] Dossier de destination introuvable: ${destinationFolderPath}`);
+      return Response.json({ 
+        success: false, 
+        error: `Dossier de destination introuvable: ${destinationFolderPath}`,
+        movedCount: 0 
+      });
+    }
+
+    const destData = await destResponse.json();
+    const destFolderId = destData.id;
+    console.log(`[MOVE] Dossier de destination trouvé: ${destFolderId}`);
+
     // Move each file
     for (const file of files) {
       try {
         console.log(`[MOVE] Déplacement: ${file.name}`);
 
-        // Build the move request
         const moveUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${file.id}`;
         
         const moveBody = {
           parentReference: {
-            path: `/drives/${driveId}/root:/${destinationFolderPath}`
-          }
+            id: destFolderId
+          },
+          name: file.name
         };
 
         const moveResponse = await fetch(moveUrl, {
@@ -96,7 +115,7 @@ Deno.serve(async (req) => {
         });
 
         if (moveResponse.ok) {
-          console.log(`[MOVE] ✓ ${file.name} déplacé`);
+          console.log(`[MOVE] ✓ ${file.name} déplacé avec succès`);
           movedCount++;
         } else {
           const errorText = await moveResponse.text();
