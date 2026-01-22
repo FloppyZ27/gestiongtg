@@ -87,7 +87,7 @@ export default function AddressStepForm({
       const almaLon = -71.6492;
       
       const encodedQuery = encodeURIComponent(query);
-      const url = `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&outSR=4326&maxLocations=50`;
+      const url = `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&outSR=4326&maxLocations=100`;
       
       const response = await fetch(url);
       const data = await response.json();
@@ -149,11 +149,11 @@ export default function AddressStepForm({
           };
         });
         
-        // Filtrer dans un rayon de 250 km d'Alma et trier par distance
+        // Filtrer dans un rayon de 100 km d'Alma et trier par distance
         const sortedAddresses = formattedAddresses
-          .filter(addr => addr.distance <= 250)
+          .filter(addr => addr.distance <= 100)
           .sort((a, b) => a.distance - b.distance)
-          .slice(0, 20);
+          .slice(0, 50);
         
         setSuggestions(sortedAddresses);
       } else {
