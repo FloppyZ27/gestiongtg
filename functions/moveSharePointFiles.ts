@@ -2,15 +2,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
+    console.log(`[MOVE] ===== FONCTION APPELÉE =====`);
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
     if (!user) {
+      console.log(`[MOVE] Erreur: utilisateur non authentifié`);
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { sourceFolderPath, destinationFolderPath } = await req.json();
 
+    console.log(`[MOVE] Utilisateur: ${user.email}`);
     console.log(`[MOVE] Début du transfert`);
     console.log(`[MOVE] Source: ${sourceFolderPath}`);
     console.log(`[MOVE] Destination: ${destinationFolderPath}`);
