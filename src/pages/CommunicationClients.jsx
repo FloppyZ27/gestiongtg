@@ -56,8 +56,8 @@ export default function CommunicationClients() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex flex-col items-center gap-3 mb-0">
-            <TabsList className="bg-slate-800/50 h-12 w-[30%]">
+          <div className="flex items-center justify-between gap-4 mb-0">
+            <TabsList className="bg-slate-800/50 h-12 w-[70%]">
               <TabsTrigger 
                 value="prise-mandat" 
                 className="text-sm data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 flex items-center gap-2 flex-1"
