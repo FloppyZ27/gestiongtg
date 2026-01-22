@@ -3058,72 +3058,23 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
                       const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
 
-                      console.log(`Tentative de transfert des documents...`);
-                      console.log(`Dossier temporaire: ${tempFolderPath}`);
-                      console.log(`Dossier final: ${finalFolderPath}`);
+                      console.log(`[TRANSFERT] Début du transfert des documents`);
+                      console.log(`[TRANSFERT] Source: ${tempFolderPath}`);
+                      console.log(`[TRANSFERT] Destination: ${finalFolderPath}`);
 
                       try {
-                        // Récupérer les fichiers du dossier temporaire
-                        const tempFilesResponse = await base44.functions.invoke('sharepoint', {
-                          action: 'list',
-                          folderPath: tempFolderPath
+                        const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                          sourceFolderPath: tempFolderPath,
+                          destinationFolderPath: finalFolderPath
                         });
-                        
-                        const tempFiles = tempFilesResponse.data?.files || [];
-                        
-                        console.log(`${tempFiles.length} fichier(s) trouvé(s) dans le dossier temporaire`);
-                        
-                        if (tempFiles.length > 0) {
-                          // Transférer chaque fichier
-                          for (const file of tempFiles) {
-                            try {
-                              console.log(`Transfert de: ${file.name}`);
-                              
-                              // Télécharger le fichier temporaire
-                              const downloadResponse = await base44.functions.invoke('sharepoint', {
-                                action: 'getDownloadUrl',
-                                fileId: file.id
-                              });
-                              
-                              if (downloadResponse.data?.downloadUrl) {
-                                // Télécharger le contenu
-                                const fileResponse = await fetch(downloadResponse.data.downloadUrl);
-                                const arrayBuffer = await fileResponse.arrayBuffer();
-                                const uint8Array = new Uint8Array(arrayBuffer);
-                                let binary = '';
-                                for (let i = 0; i < uint8Array.length; i++) {
-                                  binary += String.fromCharCode(uint8Array[i]);
-                                }
-                                const base64 = btoa(binary);
-                                
-                                // Uploader vers le dossier final
-                                await base44.functions.invoke('uploadToSharePoint', {
-                                  folderPath: finalFolderPath,
-                                  fileName: file.name,
-                                  fileContent: base64,
-                                  contentType: file.mimeType || 'application/octet-stream'
-                                });
-                                
-                                console.log(`✓ ${file.name} transféré avec succès`);
-                                
-                                // Supprimer le fichier temporaire
-                                await base44.functions.invoke('sharepoint', {
-                                  action: 'delete',
-                                  fileId: file.id
-                                });
-                                
-                                console.log(`✓ ${file.name} supprimé du dossier temporaire`);
-                              }
-                            } catch (fileError) {
-                              console.error(`✗ Erreur transfert fichier ${file.name}:`, fileError);
-                            }
-                          }
-                          console.log(`✓ Transfert terminé: ${tempFiles.length} fichier(s) traité(s)`);
+
+                        if (moveResponse.data?.success) {
+                          console.log(`[TRANSFERT] ✓ ${moveResponse.data.movedCount} fichier(s) déplacé(s) avec succès`);
                         } else {
-                          console.log('Aucun fichier à transférer');
+                          console.error(`[TRANSFERT] ✗ Erreur:`, moveResponse.data?.error);
                         }
                       } catch (transferError) {
-                        console.error("✗ Erreur lors de la récupération des fichiers du dossier temporaire:", transferError);
+                        console.error("[TRANSFERT] ✗ Erreur lors du transfert:", transferError);
                       }
 
                       // Mettre à jour chaque mandat avec tache_actuelle: "Cédule"
