@@ -82,12 +82,16 @@ export default function AddressStepForm({
 
     setIsSearching(true);
     try {
-      // Ajouter "Alma" à la recherche pour prioriser cette région
+      // Ajouter "Alma, Québec" à la recherche pour prioriser cette région
       const searchQuery = query.toLowerCase().includes('alma') ? query : `${query}, Alma, Québec`;
       const encodedQuery = encodeURIComponent(searchQuery);
       
+      // Coordonnées d'Alma, Québec pour centrer la recherche
+      const almaLat = 48.5506;
+      const almaLon = -71.6492;
+      
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&location=${almaLon},${almaLat}&distance=50000&f=json&outFields=*&maxLocations=10`
       );
       const data = await response.json();
       
