@@ -85,19 +85,16 @@ export default function AddressStepForm({
       // Coordonnées d'Alma, Québec
       const almaLat = 48.5506;
       const almaLon = -71.6492;
+      const maxDistanceKm = 250;
       
-      // Ajouter "Québec" à la recherche si non présent
-      let searchQuery = query;
-      if (!query.toLowerCase().includes('québec') && !query.toLowerCase().includes('quebec') && !query.toLowerCase().includes('qc')) {
-        searchQuery = `${query}, Québec`;
-      }
-      
-      const encodedQuery = encodeURIComponent(searchQuery);
+      const encodedQuery = encodeURIComponent(query);
       
       const response = await fetch(
         `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=50`
       );
       const data = await response.json();
+      
+      console.log("Réponse API:", data);
       
       if (data.candidates && data.candidates.length > 0) {
         // Filtrer et trier par distance d'Alma
@@ -107,8 +104,8 @@ export default function AddressStepForm({
             const location = candidate.location;
             const fullAddr = candidate.address || attrs.Match_addr || "";
             
-            // Calculer la distance d'Alma si location disponible
-            let distance = Infinity;
+            // Calculer la distance d'Alma
+            let distance = 0;
             if (location && location.x && location.y) {
               // Formule Haversine pour calculer la distance
               const R = 6371; // Rayon de la Terre en km
@@ -158,15 +155,21 @@ export default function AddressStepForm({
               province: "QC",
               code_postal,
               full_address: fullAddr,
-              distance
+              distance: Math.round(distance)
             };
           })
-          .filter(addr => addr.distance <= 250) // Garder seulement dans le rayon de 250km
-          .sort((a, b) => a.distance - b.distance) // Trier par distance
-          .slice(0, 10); // Limiter à 10 résultats
+          .filter(addr => addr.distance <= maxDistanceKm) // Garder seulement dans le rayon de 250km
+          .sort((a, b) => a.distance - b.distance); // Trier par distance
         
-        setSuggestions(formattedAddresses);
+        console.log(`Adresses filtrées (${formattedAddresses.length} dans le rayon de ${maxDistanceKm}km):`, formattedAddresses);
+        
+        if (formattedAddresses.length === 0) {
+          console.log(`Aucune adresse trouvée dans un rayon de ${maxDistanceKm}km d'Alma`);
+        }
+        
+        setSuggestions(formattedAddresses.slice(0, 10));
       } else {
+        console.log("Aucun résultat de l'API");
         setSuggestions([]);
       }
     } catch (error) {
