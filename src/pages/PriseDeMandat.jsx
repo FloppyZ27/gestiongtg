@@ -500,8 +500,15 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
       const priseMandatData = {
         arpenteur_geometre: data.arpenteur_geometre,
+        place_affaire: data.place_affaire,
+        numero_dossier: data.numero_dossier,
+        date_ouverture: data.date_ouverture,
         clients_ids: data.clients_ids,
+        notaires_ids: data.notaires_ids,
+        courtiers_ids: data.courtiers_ids,
+        compagnies_ids: data.compagnies_ids,
         client_info: data.client_info,
+        professionnel_info: data.professionnel_info,
         adresse_travaux: data.adresse_travaux,
         mandats: data.mandats,
         echeance_souhaitee: data.echeance_souhaitee,
@@ -510,7 +517,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         date_livraison: data.date_livraison,
         urgence_percue: data.urgence_percue,
         statut: data.statut,
-        commentaires: commentsToSave
+        commentaires: commentsToSave,
+        historique: data.historique
       };
 
       return await base44.entities.PriseMandat.create(priseMandatData);
@@ -2946,22 +2954,14 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                   </div>
 
-                  {/* Boutons Annuler/Créer tout en bas */}
-                  <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                  <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={() => {
-                    if (hasFormChanges) {
-                      setShowCancelConfirm(true);
-                    } else {
-                      setIsDialogOpen(false);
-                      resetFullForm();
-                    }
-                  }}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600" disabled={isLocked}>
-                    {editingPriseMandat ? "Modifier" : "Créer"}
-                  </Button>
-                  </div>
+                  {/* Boutons - Seulement bouton Créer pour nouveau mandat */}
+                  {!editingPriseMandat && (
+                    <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                      <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                        Créer
+                      </Button>
+                    </div>
+                  )}
 
                   </motion.div>
                   </DialogContent>
