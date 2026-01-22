@@ -74,6 +74,43 @@ async function folderExists(accessToken, folderPath) {
   return checkResponse.ok;
 }
 
+async function getFolderContents(accessToken, folderPath) {
+  const url = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${folderPath}:/children`;
+  
+  const response = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${accessToken}` }
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  return data.value || [];
+}
+
+async function copyFolderStructure(accessToken, sourcePath, destParentPath, destFolderName) {
+  // Créer le dossier destination
+  await createFolder(accessToken, destParentPath, destFolderName);
+  
+  const destPath = destParentPath ? `${destParentPath}/${destFolderName}` : destFolderName;
+  
+  // Récupérer le contenu du dossier source
+  const contents = await getFolderContents(accessToken, sourcePath);
+  
+  // Copier récursivement les sous-dossiers
+  for (const item of contents) {
+    if (item.folder) {
+      await copyFolderStructure(
+        accessToken, 
+        `${sourcePath}/${item.name}`, 
+        destPath, 
+        item.name
+      );
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
