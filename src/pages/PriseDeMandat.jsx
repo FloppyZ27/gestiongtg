@@ -855,11 +855,15 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           const updatedHistorique = [...newHistoriqueEntries, ...historique];
 
           // Sauvegarder automatiquement
-          await updatePriseMandatMutation.mutateAsync({ 
-            id: editingPriseMandat.id, 
-            data: { ...dataToSubmit, historique: updatedHistorique },
-            autoSave: true
-          });
+          try {
+            await updatePriseMandatMutation.mutateAsync({ 
+              id: editingPriseMandat.id, 
+              data: { ...dataToSubmit, historique: updatedHistorique },
+              autoSave: true
+            });
+          } catch (error) {
+            console.error("Erreur sauvegarde auto:", error);
+          }
         }, 1500); // Délai de 1.5 secondes
 
         return () => clearTimeout(timer);
