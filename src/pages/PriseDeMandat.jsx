@@ -566,14 +566,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     // Charger l'historique si présent
     setHistorique(pm.historique || []);
     
-    // Utiliser le numéro de dossier existant si disponible, sinon calculer
+    // Utiliser le numéro de dossier existant si disponible
     let numeroDossier = pm.numero_dossier || "";
     let dateOuverture = pm.date_ouverture || new Date().toISOString().split('T')[0];
-    
-    // Si pas de numéro de dossier existant et statut "Mandats à ouvrir", calculer automatiquement
-    if (!numeroDossier && pm.statut === "Mandats à ouvrir" && pm.arpenteur_geometre) {
-      numeroDossier = calculerProchainNumeroDossier(pm.arpenteur_geometre, pm.id);
-    }
     
     // Remplir le formulaire avec les données existantes
     setFormData({
@@ -1529,21 +1524,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       statut: formData.statut
     };
 
-    // Créer le dossier SharePoint si statut "Mandats à ouvrir" et numéro de dossier attribué
-    const createSharePointFolder = async () => {
-      if (formData.statut === "Mandats à ouvrir" && formData.numero_dossier && formData.arpenteur_geometre) {
-        try {
-          await base44.functions.invoke('createSharePointFolder', {
-            arpenteur_geometre: formData.arpenteur_geometre,
-            numero_dossier: formData.numero_dossier
-          });
-        } catch (error) {
-          console.error("Erreur création dossier SharePoint:", error);
-          // Ne pas bloquer la sauvegarde si SharePoint échoue
-        }
-      }
-    };
-
     if (editingPriseMandat) {
       // Détecter les changements et créer des entrées d'historique
       const newHistoriqueEntries = [];
@@ -1713,11 +1693,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
       const updatedHistorique = [...newHistoriqueEntries, ...historique];
       
-      // Créer le dossier SharePoint si nouveau statut "Mandats à ouvrir"
-      if (formData.statut === "Mandats à ouvrir" && editingPriseMandat.statut !== "Mandats à ouvrir") {
-        createSharePointFolder();
-      }
-      
       updatePriseMandatMutation.mutate({ id: editingPriseMandat.id, data: { ...dataToSubmit, historique: updatedHistorique } });
     } else {
       // Création
@@ -1740,11 +1715,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         utilisateur_email: user?.email || "",
         date: new Date().toISOString()
       }];
-      
-      // Créer le dossier SharePoint si statut "Mandats à ouvrir"
-      if (formData.statut === "Mandats à ouvrir") {
-        createSharePointFolder();
-      }
       
       createPriseMandatMutation.mutate({ ...dataToSubmit, historique: creationHistorique });
     }
@@ -2503,8 +2473,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         type="button"
                         className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 border-2 border-purple-500 text-purple-300"
                         onClick={() => {
-                          // Utiliser le numéro de dossier déjà attribué
-                          const prochainNumero = formData.numero_dossier;
+                          // Calculer le prochain numéro de dossier
+                          const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
                           
                           setNouveauDossierForm({
                             numero_dossier: prochainNumero,
@@ -2659,12 +2629,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     arpenteurGeometre={formData.arpenteur_geometre}
                     onArpenteurChange={(value) => {
                       if (isLocked) return;
-                      if (formData.statut === "Mandats à ouvrir" && !editingPriseMandat?.numero_dossier) {
-                        const prochainNumero = calculerProchainNumeroDossier(value, editingPriseMandat?.id);
-                        setFormData({...formData, arpenteur_geometre: value, numero_dossier: prochainNumero});
-                      } else {
-                        setFormData({...formData, arpenteur_geometre: value});
-                      }
+                      setFormData({...formData, arpenteur_geometre: value});
                       setHasFormChanges(true);
                     }}
                     statut={formData.statut}
@@ -2677,10 +2642,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         return;
                       }
                       
-                      if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
-                        const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                        setFormData({...formData, statut: value, numero_dossier: prochainNumero});
-                      } else if (value !== "Mandats à ouvrir") {
+                      // Ne pas attribuer automatiquement le numéro de dossier
+                      if (value !== "Mandats à ouvrir") {
                         setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
                       } else {
                         setFormData({...formData, statut: value});
@@ -3083,6 +3046,64 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     }
 
                     try {
+                      // Créer le dossier SharePoint
+                      await base44.functions.invoke('createSharePointFolder', {
+                        arpenteur_geometre: nouveauDossierForm.arpenteur_geometre,
+                        numero_dossier: nouveauDossierForm.numero_dossier
+                      });
+
+                      // Transférer les documents du dossier temporaire vers le dossier définitif
+                      const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre);
+                      const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+                      const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
+                      const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
+
+                      try {
+                        // Récupérer les fichiers du dossier temporaire
+                        const tempFilesResponse = await base44.functions.invoke('sharepoint', {
+                          action: 'list',
+                          folderPath: tempFolderPath
+                        });
+                        
+                        const tempFiles = tempFilesResponse.data?.files || [];
+                        
+                        // Transférer chaque fichier
+                        for (const file of tempFiles) {
+                          try {
+                            // Télécharger le fichier temporaire
+                            const downloadResponse = await base44.functions.invoke('sharepoint', {
+                              action: 'getDownloadUrl',
+                              fileId: file.id
+                            });
+                            
+                            if (downloadResponse.data?.downloadUrl) {
+                              // Télécharger le contenu
+                              const fileBlob = await fetch(downloadResponse.data.downloadUrl);
+                              const arrayBuffer = await fileBlob.arrayBuffer();
+                              const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                              
+                              // Uploader vers le dossier final
+                              await base44.functions.invoke('uploadToSharePoint', {
+                                folderPath: finalFolderPath,
+                                fileName: file.name,
+                                fileContent: base64,
+                                contentType: file.mimeType || 'application/octet-stream'
+                              });
+                              
+                              // Supprimer le fichier temporaire
+                              await base44.functions.invoke('sharepoint', {
+                                action: 'delete',
+                                fileId: file.id
+                              });
+                            }
+                          } catch (fileError) {
+                            console.error(`Erreur transfert fichier ${file.name}:`, fileError);
+                          }
+                        }
+                      } catch (transferError) {
+                        console.error("Erreur transfert documents:", transferError);
+                      }
+
                       // Mettre à jour chaque mandat avec tache_actuelle: "Cédule"
                       const mandatsAvecCedule = nouveauDossierForm.mandats.map(m => ({
                         ...m,
@@ -4937,10 +4958,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       }
                     }
                     
-                    if (value === "Mandats à ouvrir" && formData.arpenteur_geometre && !editingPriseMandat?.numero_dossier) {
-                      const prochainNumero = calculerProchainNumeroDossier(formData.arpenteur_geometre, editingPriseMandat?.id);
-                      setFormData({...formData, statut: value, numero_dossier: prochainNumero});
-                    } else if (value !== "Mandats à ouvrir") {
+                    if (value !== "Mandats à ouvrir") {
                       setFormData({...formData, statut: value, numero_dossier: "", date_ouverture: ""});
                     } else {
                       setFormData({...formData, statut: value});
