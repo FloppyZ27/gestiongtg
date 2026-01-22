@@ -3978,10 +3978,10 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           <CardContent className="pt-2 pb-3">
                             {nouveauDossierForm.mandats.length > 0 ? (
                               <Tabs value={activeTabMandatDossier} onValueChange={setActiveTabMandatDossier} className="w-full">
-                                <div className="flex justify-between items-center mb-2 gap-3">
-                                  {/* Tabs à gauche */}
-                                  <div className="flex-1">
-                                    <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
+                                <div className="flex justify-between items-center mb-0 gap-3">
+                                 {/* Tabs à gauche */}
+                                 <div className="flex-1">
+                                   <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
                                       {nouveauDossierForm.mandats.map((mandat, index) => (
                                         <TabsTrigger
                                           key={index}
