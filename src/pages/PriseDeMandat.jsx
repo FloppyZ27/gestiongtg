@@ -4761,7 +4761,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                         }]
                                       }));
                                       setActiveTabMandatDossier(newIndex.toString());
-                                    }} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border-none"
+                                    }} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border-none">
                                       <Plus className="w-4 h-4 mr-2" />
                                       Ajouter un mandat
                                     </Button>
