@@ -123,8 +123,22 @@ Deno.serve(async (req) => {
     const accessToken = await getAccessToken();
     const results = [];
 
+    // Utiliser PLP-0 comme source modèle
+    const sourcePath = `ARPENTEUR/PLP/DOSSIER/PLP-0`;
+    
+    // Vérifier que le modèle source existe
+    if (!await folderExists(accessToken, sourcePath)) {
+      throw new Error('Modèle source PLP-0 non trouvé');
+    }
+
     // Créer les dossiers modèles pour chaque arpenteur
     for (const [arpenteurName, initials] of Object.entries(ARPENTEUR_INITIALS)) {
+      if (initials === 'PLP') {
+        console.log(`[TEMPLATE] ${arpenteurName} (PLP) - modèle source, skippé`);
+        results.push({ arpenteur: arpenteurName, status: 'source', path: sourcePath });
+        continue;
+      }
+
       const dossiersPath = `ARPENTEUR/${initials}/DOSSIER`;
       const templateName = `${initials}-0`;
       const templatePath = `${dossiersPath}/${templateName}`;
@@ -138,15 +152,9 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Créer le dossier modèle principal
-      await createFolder(accessToken, dossiersPath, templateName);
-      console.log(`[TEMPLATE] Dossier ${templateName} créé`);
-
-      // Créer les sous-dossiers standards
-      for (const subfolder of TEMPLATE_STRUCTURE) {
-        await createFolder(accessToken, templatePath, subfolder);
-        console.log(`[TEMPLATE] Sous-dossier ${subfolder} créé dans ${templateName}`);
-      }
+      // Copier la structure complète de PLP-0
+      await copyFolderStructure(accessToken, sourcePath, dossiersPath, templateName);
+      console.log(`[TEMPLATE] ${templateName} créé avec la structure de PLP-0`);
 
       results.push({ arpenteur: arpenteurName, status: 'created', path: templatePath });
     }
