@@ -87,7 +87,7 @@ export default function AddressStepForm({
       const almaLon = -71.6492;
       
       const encodedQuery = encodeURIComponent(query);
-      const url = `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=50`;
+      const url = `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&outSR=4326&maxLocations=50`;
       
       const response = await fetch(url);
       const data = await response.json();
@@ -98,14 +98,17 @@ export default function AddressStepForm({
           const location = candidate.location;
           const fullAddr = candidate.address || attrs.Match_addr || "";
           
-          // Calculer la distance d'Alma
+          // Calculer la distance d'Alma avec les bonnes coordonnées (WGS84)
           let distance = Infinity;
           if (location && location.x && location.y) {
+            const lat = location.y;
+            const lon = location.x;
+            
             const R = 6371; // Rayon de la Terre en km
-            const dLat = (location.y - almaLat) * Math.PI / 180;
-            const dLon = (location.x - almaLon) * Math.PI / 180;
+            const dLat = (lat - almaLat) * Math.PI / 180;
+            const dLon = (lon - almaLon) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                     Math.cos(almaLat * Math.PI / 180) * Math.cos(location.y * Math.PI / 180) *
+                     Math.cos(almaLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
                      Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             distance = R * c;
