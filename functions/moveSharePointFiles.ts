@@ -101,8 +101,9 @@ Deno.serve(async (req) => {
     let movedCount = 0;
     const errors = [];
 
-    // Get destination folder ID
-    const destUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/root:/${destinationFolderPath}`;
+    // Get destination folder ID - encoder le chemin correctement
+    const encodedDestPath = encodeURIComponent(destinationFolderPath).replace(/%2F/g, '/');
+    const destUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/${encodedDestPath}`;
     const destResponse = await fetch(destUrl, {
       headers: { 'Authorization': `Bearer ${access_token}` }
     });
