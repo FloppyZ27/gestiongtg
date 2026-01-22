@@ -659,7 +659,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   };
 
   const updatePriseMandatMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
+    mutationFn: async ({ id, data, autoSave = false }) => {
       const commentsToSave = commentairesTemporaires.map(c => ({
         contenu: c.contenu,
         utilisateur_email: c.utilisateur_email,
@@ -688,22 +688,45 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         statut: data.statut,
         commentaires: commentsToSave,
         historique: data.historique,
-        locked_by: null,
-        locked_at: null
+        locked_by: autoSave ? data.locked_by : null,
+        locked_at: autoSave ? data.locked_at : null
       };
 
       return await base44.entities.PriseMandat.update(id, priseMandatData);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-      setIsDialogOpen(false);
-      resetFullForm();
-      setCommentairesTemporaires([]);
-      setEditingPriseMandat(null);
-      setIsLocked(false);
-      setLockedBy("");
-      setHasFormChanges(false);
-      setInitialPriseMandatData(null);
+      
+      // Ne fermer le dialog que si ce n'est pas une sauvegarde automatique
+      if (!variables.autoSave) {
+        setIsDialogOpen(false);
+        resetFullForm();
+        setCommentairesTemporaires([]);
+        setEditingPriseMandat(null);
+        setIsLocked(false);
+        setLockedBy("");
+        setHasFormChanges(false);
+        setInitialPriseMandatData(null);
+      } else {
+        // Mettre à jour les données initiales après sauvegarde auto
+        setInitialPriseMandatData(JSON.parse(JSON.stringify({
+          ...editingPriseMandat,
+          arpenteur_geometre: formData.arpenteur_geometre,
+          place_affaire: formData.placeAffaire,
+          numero_dossier: formData.numero_dossier,
+          date_ouverture: formData.date_ouverture,
+          clients_ids: formData.clients_ids,
+          notaires_ids: formData.notaires_ids,
+          courtiers_ids: formData.courtiers_ids,
+          compagnies_ids: formData.compagnies_ids,
+          client_info: clientInfo,
+          professionnel_info: professionnelInfo,
+          adresse_travaux: workAddress,
+          mandats: mandatsInfo,
+          statut: formData.statut
+        })));
+        setHasFormChanges(false);
+      }
     },
   });
 
@@ -790,7 +813,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
             date_livraison: mandatsInfo[0]?.date_livraison || "",
             urgence_percue: mandatsInfo[0]?.urgence_percue || "",
-            statut: formData.statut
+            statut: formData.statut,
+            locked_by: user?.email,
+            locked_at: editingPriseMandat.locked_at
           };
 
           // Créer les entrées d'historique
@@ -824,9 +849,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           // Sauvegarder automatiquement
           await updatePriseMandatMutation.mutateAsync({ 
             id: editingPriseMandat.id, 
-            data: { ...dataToSubmit, historique: updatedHistorique } 
+            data: { ...dataToSubmit, historique: updatedHistorique },
+            autoSave: true
           });
-        }, 1000); // Délai de 1 seconde pour éviter trop de sauvegardes
+        }, 1500); // Délai de 1.5 secondes
 
         return () => clearTimeout(timer);
       }
@@ -2405,11 +2431,6 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
-            if (!open && hasFormChanges && !isLocked && !isOuvrirDossierDialogOpen) {
-              setShowUnsavedWarning(true);
-              return;
-            }
-            
             if (!open) {
               // Déverrouiller le mandat si on était en train de l'éditer
               if (editingPriseMandat && !isLocked) {
@@ -2430,7 +2451,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             }
           }}>
 
-            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} hideClose>
+            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} onInteractOutside={(e) => e.preventDefault()} hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2934,7 +2955,26 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                {/* Pas de boutons - sauvegarde automatique */}
+                {/* Bouton Fermer en bas à droite */}
+                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                  <Button type="button" variant="outline" className="border-slate-500 text-slate-400 hover:bg-slate-500/10" onClick={async () => {
+                    // Déverrouiller le mandat
+                    if (editingPriseMandat && !isLocked) {
+                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
+                        ...editingPriseMandat,
+                        locked_by: null,
+                        locked_at: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
+                    }
+                    setIsDialogOpen(false);
+                    resetFullForm();
+                    setIsLocked(false);
+                    setLockedBy("");
+                  }}>
+                    Fermer
+                  </Button>
+                </div>
               </motion.div>
             </DialogContent>
           </Dialog>
