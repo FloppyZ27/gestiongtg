@@ -2485,28 +2485,40 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                               numero_dossier: prochainNumero
                             });
 
-                            // Transférer les documents depuis le dossier temporaire
-                            const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
+                            // Transférer les documents depuis le dossier temporaire (si il existe)
+                            const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || 
+                                             (formData.clients_ids.length > 0 ? getClientsNames(formData.clients_ids) : "Client");
                             const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
                             const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${prochainNumero}/INTRANTS`;
                             
-                            console.log(`[OUVRIR DOSSIER] Transfert documents`);
+                            console.log(`[OUVRIR DOSSIER] Vérification documents temporaires`);
                             console.log(`[OUVRIR DOSSIER] Source: ${tempFolderPath}`);
                             console.log(`[OUVRIR DOSSIER] Destination: ${finalFolderPath}`);
                             
-                            const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
-                              sourceFolderPath: tempFolderPath,
-                              destinationFolderPath: finalFolderPath
+                            // Vérifier si le dossier temporaire existe avant de transférer
+                            const checkResponse = await base44.functions.invoke('sharepoint', {
+                              action: 'list',
+                              folderPath: tempFolderPath
                             });
                             
-                            console.log(`[OUVRIR DOSSIER] Réponse:`, moveResponse.data);
-                            
-                            if (moveResponse.data?.movedCount > 0) {
-                              console.log(`[OUVRIR DOSSIER] ✓ ${moveResponse.data.movedCount} fichier(s) transféré(s)`);
+                            if (checkResponse.data?.files && checkResponse.data.files.length > 0) {
+                              console.log(`[OUVRIR DOSSIER] ${checkResponse.data.files.length} document(s) trouvé(s), transfert en cours...`);
+                              
+                              const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                                sourceFolderPath: tempFolderPath,
+                                destinationFolderPath: finalFolderPath
+                              });
+                              
+                              console.log(`[OUVRIR DOSSIER] Réponse transfert:`, moveResponse.data);
+                              
+                              if (moveResponse.data?.movedCount > 0) {
+                                console.log(`[OUVRIR DOSSIER] ✓ ${moveResponse.data.movedCount} fichier(s) transféré(s)`);
+                              }
+                            } else {
+                              console.log(`[OUVRIR DOSSIER] Aucun document temporaire trouvé`);
                             }
                           } catch (error) {
                             console.error("[OUVRIR DOSSIER] Erreur:", error);
-                            alert(`Erreur lors de la préparation du dossier: ${error.message}`);
                           }
                           
                           setNouveauDossierForm({
