@@ -39,7 +39,27 @@ Deno.serve(async (req) => {
       }
     );
 
-    const { access_token } = await tokenResponse.json();
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error(`[MOVE] Erreur obtention token:`, errorText);
+      return Response.json({ 
+        success: false, 
+        error: `Erreur d'authentification Microsoft: ${errorText}`,
+        movedCount: 0 
+      }, { status: 500 });
+    }
+
+    const tokenData = await tokenResponse.json();
+    const access_token = tokenData.access_token;
+    
+    if (!access_token) {
+      console.error(`[MOVE] Token manquant dans la réponse:`, tokenData);
+      return Response.json({ 
+        success: false, 
+        error: 'Token d\'accès manquant',
+        movedCount: 0 
+      }, { status: 500 });
+    }
 
     // List files in source folder
     const listUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/root:/${sourceFolderPath}:/children`;
