@@ -694,11 +694,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
       return await base44.entities.PriseMandat.update(id, priseMandatData);
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-      
+    onSuccess: (updatedPriseMandat, variables) => {
       // Ne fermer le dialog que si ce n'est pas une sauvegarde automatique
       if (!variables.autoSave) {
+        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
         setIsDialogOpen(false);
         resetFullForm();
         setCommentairesTemporaires([]);
@@ -708,8 +707,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         setHasFormChanges(false);
         setInitialPriseMandatData(null);
       } else {
-        // Mettre à jour les données initiales après sauvegarde auto
-        setInitialPriseMandatData(JSON.parse(JSON.stringify({
+        // En mode auto-save, ne pas invalider les queries pour éviter de recharger
+        // Mettre à jour les états locaux avec les nouvelles données
+        const newData = {
           ...editingPriseMandat,
           arpenteur_geometre: formData.arpenteur_geometre,
           place_affaire: formData.placeAffaire,
@@ -723,8 +723,16 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
           professionnel_info: professionnelInfo,
           adresse_travaux: workAddress,
           mandats: mandatsInfo,
-          statut: formData.statut
-        })));
+          statut: formData.statut,
+          echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
+          date_signature: mandatsInfo[0]?.date_signature || "",
+          date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
+          date_livraison: mandatsInfo[0]?.date_livraison || "",
+          urgence_percue: mandatsInfo[0]?.urgence_percue || ""
+        };
+        
+        setEditingPriseMandat(newData);
+        setInitialPriseMandatData(JSON.parse(JSON.stringify(newData)));
         setHasFormChanges(false);
       }
     },
