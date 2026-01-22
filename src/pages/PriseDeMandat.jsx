@@ -696,7 +696,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     },
     onSuccess: (updatedPriseMandat, variables) => {
       if (!variables.autoSave) {
-        // Sauvegarde manuelle - fermer le dialog
+        // Sauvegarde manuelle - fermer le dialog et rafraîchir
         queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
         setIsDialogOpen(false);
         resetFullForm();
@@ -707,10 +707,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         setHasFormChanges(false);
         setInitialPriseMandatData(null);
       } else {
-        // Auto-save - garder le dialog ouvert et mettre à jour les états
-        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-        
-        // Utiliser les données retournées par le serveur
+        // Auto-save - NE PAS rafraîchir, juste mettre à jour les états locaux
         setEditingPriseMandat(updatedPriseMandat);
         setInitialPriseMandatData(JSON.parse(JSON.stringify(updatedPriseMandat)));
         setHasFormChanges(false);
@@ -2431,8 +2428,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   locked_by: null,
                   locked_at: null
                 });
-                queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
               }
+              
+              // Rafraîchir la liste à la fermeture
+              queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
               
               setIsDialogOpen(false);
               resetFullForm();
@@ -2443,7 +2442,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
             }
           }}>
 
-            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`} onInteractOutside={(e) => e.preventDefault()} hideClose>
+            <DialogContent className={`backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 ${isOuvrirDossierDialogOpen ? '!invisible' : ''}`}>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingDossier ? "Modifier le dossier" : "Nouveau dossier"}
@@ -2947,26 +2946,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                {/* Bouton Fermer en bas à droite */}
-                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                  <Button type="button" variant="outline" className="border-slate-500 text-slate-400 hover:bg-slate-500/10" onClick={async () => {
-                    // Déverrouiller le mandat
-                    if (editingPriseMandat && !isLocked) {
-                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                        ...editingPriseMandat,
-                        locked_by: null,
-                        locked_at: null
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                    }
-                    setIsDialogOpen(false);
-                    resetFullForm();
-                    setIsLocked(false);
-                    setLockedBy("");
-                  }}>
-                    Fermer
-                  </Button>
-                </div>
+
               </motion.div>
             </DialogContent>
           </Dialog>
