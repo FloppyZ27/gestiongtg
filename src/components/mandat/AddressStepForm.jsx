@@ -87,41 +87,22 @@ export default function AddressStepForm({
       const almaLon = -71.6492;
       const maxDistanceKm = 250;
       
-      // Liste des villes de la région pour essayer plusieurs recherches
-      const villesRegion = ['Alma', 'Saguenay', 'Roberval', 'Dolbeau-Mistassini', 'Saint-Félicien', 'Chicoutimi', 'La Baie', 'Jonquière'];
+      // Ajouter "Québec" à la requête pour améliorer les résultats
+      const searchQuery = query.toLowerCase().includes('québec') || query.toLowerCase().includes('qc') 
+        ? query 
+        : `${query} Québec`;
       
-      let allCandidates = [];
+      const encodedQuery = encodeURIComponent(searchQuery);
       
-      // Essayer d'abord avec la requête simple
-      let encodedQuery = encodeURIComponent(query);
-      let response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=50`
+      // Utiliser le paramètre location pour centrer autour d'Alma
+      const response = await fetch(
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&location=${almaLon},${almaLat}&distance=250000&f=json&outFields=*&maxLocations=50`
       );
-      let data = await response.json();
+      const data = await response.json();
       
-      if (data.candidates) {
-        allCandidates = [...data.candidates];
-      }
-      
-      // Si pas de résultats, essayer avec chaque ville de la région
-      if (allCandidates.length === 0) {
-        for (const ville of villesRegion) {
-          const queryWithCity = `${query}, ${ville}, QC`;
-          encodedQuery = encodeURIComponent(queryWithCity);
-          response = await fetch(
-            `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
-          );
-          data = await response.json();
-          
-          if (data.candidates && data.candidates.length > 0) {
-            allCandidates = [...allCandidates, ...data.candidates];
-          }
-        }
-      }
-      
-      if (allCandidates.length > 0) {
+      if (data.candidates && data.candidates.length > 0) {
         // Filtrer et trier par distance d'Alma
-        const formattedAddresses = allCandidates
+        const formattedAddresses = data.candidates
           .map(candidate => {
             const attrs = candidate.attributes || {};
             const location = candidate.location;
@@ -181,11 +162,8 @@ export default function AddressStepForm({
               distance: Math.round(distance)
             };
           })
-          .filter(addr => addr.distance <= maxDistanceKm) // Garder seulement dans le rayon de 250km
-          .sort((a, b) => a.distance - b.distance) // Trier par distance
-          .filter((addr, index, self) => 
-            index === self.findIndex(a => a.full_address === addr.full_address)
-          ); // Enlever les doublons
+          .filter(addr => addr.distance <= maxDistanceKm)
+          .sort((a, b) => a.distance - b.distance);
         
         setSuggestions(formattedAddresses.slice(0, 10));
       } else {
