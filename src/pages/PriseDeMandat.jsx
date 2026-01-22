@@ -3045,6 +3045,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       return;
                     }
 
+                    try {
                       // Créer le dossier SharePoint
                       await base44.functions.invoke('createSharePointFolder', {
                         arpenteur_geometre: nouveauDossierForm.arpenteur_geometre,
