@@ -75,7 +75,7 @@ export default function AddressStepForm({
   };
 
   const searchAddress = async (query) => {
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       setSuggestions([]);
       return;
     }
@@ -170,7 +170,7 @@ export default function AddressStepForm({
   const handleSearchChange = (value) => {
     setSearchQuery(value);
     if (searchTimeout) clearTimeout(searchTimeout);
-    const timeout = setTimeout(() => searchAddress(value), 500);
+    const timeout = setTimeout(() => searchAddress(value), 300);
     setSearchTimeoutState(timeout);
   };
 
