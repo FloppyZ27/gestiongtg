@@ -86,7 +86,9 @@ export default function AddressStepForm({
       const almaLat = 48.5506;
       const almaLon = -71.6492;
       
-      const encodedQuery = encodeURIComponent(query);
+      // Ajouter un wildcard pour permettre la recherche partielle
+      const searchQuery = query.trim() + '*';
+      const encodedQuery = encodeURIComponent(searchQuery);
       const url = `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&outSR=4326&maxLocations=100`;
       
       const response = await fetch(url);
