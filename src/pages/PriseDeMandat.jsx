@@ -3055,8 +3055,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       // Transférer les documents du dossier temporaire vers le dossier définitif
                       const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre).replace('-', '');
                       const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
-                      const tempFolderPath = `ARPENTEUR/PLP/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
-                      const finalFolderPath = `ARPENTEUR/PLP/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
+                      const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
+                      const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
 
                       console.log(`Tentative de transfert des documents...`);
                       console.log(`Dossier temporaire: ${tempFolderPath}`);
@@ -4761,7 +4761,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                         }]
                                       }));
                                       setActiveTabMandatDossier(newIndex.toString());
-                                    }} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
+                                    }} className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border-none"
                                       <Plus className="w-4 h-4 mr-2" />
                                       Ajouter un mandat
                                     </Button>
