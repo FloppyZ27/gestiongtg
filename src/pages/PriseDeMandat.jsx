@@ -695,8 +695,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       return await base44.entities.PriseMandat.update(id, priseMandatData);
     },
     onSuccess: (updatedPriseMandat, variables) => {
-      // Ne fermer le dialog que si ce n'est pas une sauvegarde automatique
       if (!variables.autoSave) {
+        // Sauvegarde manuelle - fermer le dialog
         queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
         setIsDialogOpen(false);
         resetFullForm();
@@ -707,32 +707,12 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
         setHasFormChanges(false);
         setInitialPriseMandatData(null);
       } else {
-        // En mode auto-save, ne pas invalider les queries pour éviter de recharger
-        // Mettre à jour les états locaux avec les nouvelles données
-        const newData = {
-          ...editingPriseMandat,
-          arpenteur_geometre: formData.arpenteur_geometre,
-          place_affaire: formData.placeAffaire,
-          numero_dossier: formData.numero_dossier,
-          date_ouverture: formData.date_ouverture,
-          clients_ids: formData.clients_ids,
-          notaires_ids: formData.notaires_ids,
-          courtiers_ids: formData.courtiers_ids,
-          compagnies_ids: formData.compagnies_ids,
-          client_info: clientInfo,
-          professionnel_info: professionnelInfo,
-          adresse_travaux: workAddress,
-          mandats: mandatsInfo,
-          statut: formData.statut,
-          echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
-          date_signature: mandatsInfo[0]?.date_signature || "",
-          date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
-          date_livraison: mandatsInfo[0]?.date_livraison || "",
-          urgence_percue: mandatsInfo[0]?.urgence_percue || ""
-        };
+        // Auto-save - garder le dialog ouvert et mettre à jour les états
+        queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
         
-        setEditingPriseMandat(newData);
-        setInitialPriseMandatData(JSON.parse(JSON.stringify(newData)));
+        // Utiliser les données retournées par le serveur
+        setEditingPriseMandat(updatedPriseMandat);
+        setInitialPriseMandatData(JSON.parse(JSON.stringify(updatedPriseMandat)));
         setHasFormChanges(false);
       }
     },
