@@ -3053,7 +3053,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       });
 
                       // Transférer les documents du dossier temporaire vers le dossier définitif
-                      const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre);
+                      const initialsArp = getArpenteurInitials(nouveauDossierForm.arpenteur_geometre).replace('-', '');
                       const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
                       const tempFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/TEMPORAIRE/${initialsArp}-${clientName}/INTRANTS`;
                       const finalFolderPath = `ARPENTEUR/${initialsArp}/DOSSIER/${initialsArp}-${nouveauDossierForm.numero_dossier}/INTRANTS`;
@@ -3067,6 +3067,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         
                         const tempFiles = tempFilesResponse.data?.files || [];
                         
+                        console.log(`Transfert de ${tempFiles.length} fichiers de ${tempFolderPath} vers ${finalFolderPath}`);
+                        
                         // Transférer chaque fichier
                         for (const file of tempFiles) {
                           try {
@@ -3078,9 +3080,10 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                             
                             if (downloadResponse.data?.downloadUrl) {
                               // Télécharger le contenu
-                              const fileBlob = await fetch(downloadResponse.data.downloadUrl);
-                              const arrayBuffer = await fileBlob.arrayBuffer();
-                              const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                              const fileResponse = await fetch(downloadResponse.data.downloadUrl);
+                              const arrayBuffer = await fileResponse.arrayBuffer();
+                              const uint8Array = new Uint8Array(arrayBuffer);
+                              const base64 = btoa(String.fromCharCode.apply(null, uint8Array));
                               
                               // Uploader vers le dossier final
                               await base44.functions.invoke('uploadToSharePoint', {
@@ -3089,6 +3092,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                                 fileContent: base64,
                                 contentType: file.mimeType || 'application/octet-stream'
                               });
+                              
+                              console.log(`Fichier ${file.name} transféré avec succès`);
                               
                               // Supprimer le fichier temporaire
                               await base44.functions.invoke('sharepoint', {
@@ -3100,6 +3105,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                             console.error(`Erreur transfert fichier ${file.name}:`, fileError);
                           }
                         }
+                        
+                        console.log('Transfert des documents terminé');
                       } catch (transferError) {
                         console.error("Erreur transfert documents:", transferError);
                       }
