@@ -11,8 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
 const OBJECTIFS = ["Vente", "Refinancement", "Projet de construction", "Litige"];
-const ECHEANCES = ["Dès que possible", "D'ici un mois", "Date précise"];
-const URGENCES = ["Pas pressé", "Normal", "Rapide"];
+const ECHEANCES = ["1 semaine", "2 semaines", "3 semaines", "4 semaines", "5 semaines", "6 semaines", "7 semaines", "8 semaines ou plus"];
+const DELAIS_RAPPEL = ["Normal", "Urgent"];
 
 export default function MandatStepForm({ 
   mandats = [],
@@ -112,9 +112,8 @@ export default function MandatStepForm({
 
   const getUrgenceColor = (urgence) => {
     switch (urgence) {
-      case "Pas pressé": return "bg-green-500/20 text-green-400 border-green-500/30";
       case "Normal": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      case "Rapide": return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "Urgent": return "bg-red-500/20 text-red-400 border-red-500/30";
       default: return "bg-slate-500/20 text-slate-400 border-slate-500/30";
     }
   };
@@ -212,14 +211,14 @@ export default function MandatStepForm({
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Urgence perçue</Label>
+                <Label className="text-slate-400 text-xs">Délais de rappel</Label>
                 <Select value={sharedInfo.urgence_percue} onValueChange={(value) => handleSharedInfoChange('urgence_percue', value)} disabled={disabled}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {URGENCES.map((urgence) => (
-                      <SelectItem key={urgence} value={urgence} className="text-white">{urgence}</SelectItem>
+                    {DELAIS_RAPPEL.map((delai) => (
+                      <SelectItem key={delai} value={delai} className="text-white">{delai}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
