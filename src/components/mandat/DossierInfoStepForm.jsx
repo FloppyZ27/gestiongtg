@@ -108,31 +108,7 @@ export default function DossierInfoStepForm({
               </div>
             </div>
 
-            {/* Ligne 3: N° Dossier et Date d'ouverture - Visible uniquement si statut "Mandats à ouvrir" */}
-            {statut === "Mandats à ouvrir" && (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-0.5">
-                  <Label className="text-slate-400 text-xs">N° de dossier</Label>
-                  <Input
-                    value={numeroDossier || ""}
-                    onChange={(e) => onNumeroDossierChange(e.target.value)}
-                    placeholder="Ex: 12345"
-                    disabled={disabled}
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
-                </div>
-                <div className="space-y-0.5">
-                  <Label className="text-slate-400 text-xs">Date d'ouverture</Label>
-                  <Input
-                    type="date"
-                    value={dateOuverture || ""}
-                    onChange={(e) => onDateOuvertureChange(e.target.value)}
-                    disabled={disabled}
-                    className="bg-slate-700 border-slate-600 text-white h-6 text-sm"
-                  />
-                </div>
-              </div>
-            )}
+
           </div>
         </CardContent>
       )}
