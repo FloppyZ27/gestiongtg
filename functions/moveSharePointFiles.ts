@@ -57,9 +57,13 @@ Deno.serve(async (req) => {
     }
 
     const listData = await listResponse.json();
-    const files = listData.value || [];
+    const allItems = listData.value || [];
+    
+    // Filtrer pour garder seulement les fichiers (exclure les dossiers)
+    const files = allItems.filter(item => !item.folder);
 
-    console.log(`[MOVE] ${files.length} fichier(s) trouvé(s)`);
+    console.log(`[MOVE] ${files.length} fichier(s) trouvé(s) sur ${allItems.length} élément(s)`);
+    files.forEach(f => console.log(`[MOVE] - ${f.name}`));
 
     if (files.length === 0) {
       return Response.json({ 
