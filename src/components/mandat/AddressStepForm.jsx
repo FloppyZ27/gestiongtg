@@ -87,21 +87,16 @@ export default function AddressStepForm({
       const almaLon = -71.6492;
       const maxDistanceKm = 250;
       
-      // Ajouter "Québec" à la requête pour améliorer les résultats
-      const searchQuery = query.toLowerCase().includes('québec') || query.toLowerCase().includes('qc') 
-        ? query 
-        : `${query} Québec`;
+      const encodedQuery = encodeURIComponent(query);
       
-      const encodedQuery = encodeURIComponent(searchQuery);
-      
-      // Utiliser le paramètre location pour centrer autour d'Alma
+      // Recherche simple sans paramètres restrictifs
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&location=${almaLon},${almaLat}&distance=250000&f=json&outFields=*&maxLocations=50`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=100`
       );
       const data = await response.json();
       
       if (data.candidates && data.candidates.length > 0) {
-        // Filtrer et trier par distance d'Alma
+        // Formater et filtrer les adresses
         const formattedAddresses = data.candidates
           .map(candidate => {
             const attrs = candidate.attributes || {};
@@ -111,8 +106,7 @@ export default function AddressStepForm({
             // Calculer la distance d'Alma
             let distance = 0;
             if (location && location.x && location.y) {
-              // Formule Haversine pour calculer la distance
-              const R = 6371; // Rayon de la Terre en km
+              const R = 6371;
               const dLat = (location.y - almaLat) * Math.PI / 180;
               const dLon = (location.x - almaLon) * Math.PI / 180;
               const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -128,7 +122,6 @@ export default function AddressStepForm({
             let ville = attrs.City || attrs.Municipalit || "";
             let code_postal = attrs.Postal || "";
             
-            // Parser l'adresse complète si nécessaire
             if (!numero_civique || !rue) {
               const parts = fullAddr.split(',');
               if (parts.length > 0) {
@@ -163,9 +156,10 @@ export default function AddressStepForm({
             };
           })
           .filter(addr => addr.distance <= maxDistanceKm)
-          .sort((a, b) => a.distance - b.distance);
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 10);
         
-        setSuggestions(formattedAddresses.slice(0, 10));
+        setSuggestions(formattedAddresses);
       } else {
         setSuggestions([]);
       }
