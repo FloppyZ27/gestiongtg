@@ -707,9 +707,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
     },
   });
 
-  // Détecter les changements dans le formulaire
+  // Détecter les changements et sauvegarder automatiquement
   useEffect(() => {
-    if (initialPriseMandatData && editingPriseMandat) {
+    if (initialPriseMandatData && editingPriseMandat && !isLocked) {
       const currentData = {
         arpenteur_geometre: formData.arpenteur_geometre,
         place_affaire: formData.placeAffaire,
@@ -756,6 +756,80 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       
       const hasChanges = JSON.stringify(currentData) !== JSON.stringify(initialData);
       setHasFormChanges(hasChanges);
+
+      // Sauvegarder automatiquement si changements détectés
+      if (hasChanges) {
+        const timer = setTimeout(async () => {
+          // Préparer les mandats
+          const mandatsToSave = mandatsInfo
+            .filter(m => m.type_mandat)
+            .map(m => ({
+              type_mandat: m.type_mandat,
+              prix_estime: m.prix_estime || 0,
+              prix_premier_lot: m.prix_premier_lot || 0,
+              prix_autres_lots: m.prix_autres_lots || 0,
+              rabais: m.rabais || 0,
+              taxes_incluses: m.taxes_incluses || false
+            }));
+
+          const dataToSubmit = {
+            arpenteur_geometre: formData.arpenteur_geometre,
+            place_affaire: formData.placeAffaire,
+            numero_dossier: formData.numero_dossier,
+            date_ouverture: formData.date_ouverture,
+            clients_ids: formData.clients_ids,
+            notaires_ids: formData.notaires_ids || [],
+            courtiers_ids: formData.courtiers_ids || [],
+            compagnies_ids: formData.compagnies_ids || [],
+            client_info: clientInfo,
+            professionnel_info: professionnelInfo,
+            adresse_travaux: workAddress,
+            mandats: mandatsToSave,
+            echeance_souhaitee: mandatsInfo[0]?.echeance_souhaitee || "",
+            date_signature: mandatsInfo[0]?.date_signature || "",
+            date_debut_travaux: mandatsInfo[0]?.date_debut_travaux || "",
+            date_livraison: mandatsInfo[0]?.date_livraison || "",
+            urgence_percue: mandatsInfo[0]?.urgence_percue || "",
+            statut: formData.statut
+          };
+
+          // Créer les entrées d'historique
+          const newHistoriqueEntries = [];
+          const now = new Date().toISOString();
+          const userName = user?.full_name || "Utilisateur";
+          const userEmail = user?.email || "";
+
+          if (editingPriseMandat.statut !== formData.statut) {
+            newHistoriqueEntries.push({
+              action: "Changement de statut",
+              details: `${editingPriseMandat.statut} → ${formData.statut}`,
+              utilisateur_nom: userName,
+              utilisateur_email: userEmail,
+              date: now
+            });
+          }
+
+          if (editingPriseMandat.arpenteur_geometre !== formData.arpenteur_geometre) {
+            newHistoriqueEntries.push({
+              action: "Changement d'arpenteur-géomètre",
+              details: `${editingPriseMandat.arpenteur_geometre || 'Non défini'} → ${formData.arpenteur_geometre}`,
+              utilisateur_nom: userName,
+              utilisateur_email: userEmail,
+              date: now
+            });
+          }
+
+          const updatedHistorique = [...newHistoriqueEntries, ...historique];
+
+          // Sauvegarder automatiquement
+          await updatePriseMandatMutation.mutateAsync({ 
+            id: editingPriseMandat.id, 
+            data: { ...dataToSubmit, historique: updatedHistorique } 
+          });
+        }, 1000); // Délai de 1 seconde pour éviter trop de sauvegardes
+
+        return () => clearTimeout(timer);
+      }
     }
   }, [formData, clientInfo, professionnelInfo, workAddress, mandatsInfo, initialPriseMandatData, editingPriseMandat]);
 
@@ -2860,36 +2934,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
-                <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                  <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={async () => {
-                    if (hasFormChanges && !isLocked) {
-                      setShowUnsavedWarning(true);
-                      return;
-                    }
-                    
-                    // Déverrouiller le mandat si on annule
-                    if (editingPriseMandat && !isLocked) {
-                      await base44.entities.PriseMandat.update(editingPriseMandat.id, {
-                        ...editingPriseMandat,
-                        locked_by: null,
-                        locked_at: null
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['priseMandats'] });
-                    }
-                    setIsDialogOpen(false);
-                    resetFullForm();
-                    setIsLocked(false);
-                    setLockedBy("");
-                  }}>
-                    Annuler
-                  </Button>
-                  {!isLocked && (
-                    <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      {editingPriseMandat ? "Modifier" : "Créer"}
-                    </Button>
-                  )}
-                </div>
+                {/* Pas de boutons - sauvegarde automatique */}
               </motion.div>
             </DialogContent>
           </Dialog>

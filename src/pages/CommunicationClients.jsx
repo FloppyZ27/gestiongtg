@@ -67,14 +67,14 @@ export default function CommunicationClients() {
               <TabsList className="bg-slate-800/50 h-14 w-full">
                 <TabsTrigger 
                   value="prise-mandat" 
-                  className="text-sm data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 flex items-center gap-2 flex-1"
+                  className="text-sm data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-400 flex items-center gap-2 flex-1 h-full"
                 >
                   <FilePlus className="w-4 h-4" />
                   Prise de mandat
                 </TabsTrigger>
                 <TabsTrigger 
                   value="retours-appel" 
-                  className="text-sm data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-2 relative flex-1"
+                  className="text-sm data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-2 relative flex-1 h-full"
                 >
                   <Phone className="w-4 h-4" />
                   Retours d'appel
@@ -113,7 +113,7 @@ export default function CommunicationClients() {
                       URL.revokeObjectURL(url);
                     }}
                     size="sm"
-                    className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white"
+                    className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg"
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Extraction CSV
@@ -154,7 +154,7 @@ export default function CommunicationClients() {
                       URL.revokeObjectURL(url);
                     }}
                     size="sm"
-                    className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white"
+                    className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg"
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Extraction CSV
