@@ -18,11 +18,12 @@ Deno.serve(async (req) => {
     console.log(`[MOVE] Source: ${sourceFolderPath}`);
     console.log(`[MOVE] Destination: ${destinationFolderPath}`);
 
-    const tenantId = Deno.env.get('MICROSOFT_TENANT_ID');
-    const clientId = Deno.env.get('MICROSOFT_CLIENT_ID');
-    const clientSecret = Deno.env.get('MICROSOFT_CLIENT_SECRET');
-    const siteId = Deno.env.get('SHAREPOINT_SITE_ID');
-    const driveId = Deno.env.get('SHAREPOINT_DRIVE_ID');
+    // Utiliser les valeurs en dur comme dans sharepoint.js
+    const tenantId = "31adb05b-e471-4daf-8831-4d46014be9b8";
+    const clientId = "1291551b-48b1-4e33-beff-d3cb64fa888a";
+    const clientSecret = "vTQ8Q~uhNn1dsGeHfGr3VZvLnQmkYZQ54~gcXcim";
+    const siteId = "girardtremblaygilbert365.sharepoint.com,df242f6d-91a5-4248-a3a4-41b7e44073a2,64921d7b-e2e8-4c9e-bd7e-311465aaf30d";
+    const driveId = "b!bS8k36WRSEKjpEG35EBzonsdkmTo4p5MvX4xFGWq8w1fkwthDsxdQL8_MK0t_B3b";
 
     // Get access token
     const tokenResponse = await fetch(
