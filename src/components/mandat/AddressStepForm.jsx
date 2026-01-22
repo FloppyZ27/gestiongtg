@@ -82,83 +82,61 @@ export default function AddressStepForm({
 
     setIsSearching(true);
     try {
-      // Coordonnées d'Alma, Québec
-      const almaLat = 48.5506;
-      const almaLon = -71.6492;
-      
-      // Recherche normale sans forcer Alma
       const encodedQuery = encodeURIComponent(query);
       
+      // Définir une zone de recherche autour d'Alma (bbox en Web Mercator)
+      // Approximativement 250km autour d'Alma
+      const searchExtent = "-8000000,6100000,-7800000,6300000";
+      
       const response = await fetch(
-        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=100`
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&searchExtent=${searchExtent}&f=json&outFields=*&maxLocations=10`
       );
       const data = await response.json();
       
       if (data.candidates && data.candidates.length > 0) {
-        // Calculer la distance et filtrer dans un rayon de 250km d'Alma
-        const formattedAddresses = data.candidates
-          .map(candidate => {
-            const location = candidate.location;
-            if (!location) return null;
-            
-            // Calculer la distance en km (formule haversine)
-            const R = 6371; // Rayon de la Terre en km
-            const dLat = (location.y - almaLat) * Math.PI / 180;
-            const dLon = (location.x - almaLon) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                     Math.cos(almaLat * Math.PI / 180) * Math.cos(location.y * Math.PI / 180) *
-                     Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distance = R * c;
-            
-            if (distance > 250) return null; // Ignorer si > 250km
-            
-            const attrs = candidate.attributes || {};
-            const fullAddr = candidate.address || attrs.Match_addr || "";
-            
-            // Extraire les composants d'adresse
-            let numero_civique = attrs.AddNum || "";
-            let rue = attrs.StName || "";
-            let ville = attrs.City || attrs.Municipalit || "";
-            let code_postal = attrs.Postal || "";
-            
-            // Parser l'adresse complète si nécessaire
-            if (!numero_civique || !rue) {
-              const parts = fullAddr.split(',');
-              if (parts.length > 0) {
-                const streetPart = parts[0].trim();
-                const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
-                if (numMatch) {
-                  numero_civique = numMatch[1];
-                  rue = numMatch[2];
-                } else {
-                  rue = streetPart;
-                }
-              }
-              if (parts.length > 1 && !ville) {
-                ville = parts[1].trim();
-              }
-              if (!code_postal) {
-                const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
-                if (postalMatch) {
-                  code_postal = postalMatch[1].toUpperCase();
-                }
+        const formattedAddresses = data.candidates.map(candidate => {
+          const attrs = candidate.attributes || {};
+          const fullAddr = candidate.address || attrs.Match_addr || "";
+          
+          // Extraire les composants d'adresse
+          let numero_civique = attrs.AddNum || "";
+          let rue = attrs.StName || "";
+          let ville = attrs.City || attrs.Municipalit || "";
+          let code_postal = attrs.Postal || "";
+          
+          // Parser l'adresse complète si nécessaire
+          if (!numero_civique || !rue) {
+            const parts = fullAddr.split(',');
+            if (parts.length > 0) {
+              const streetPart = parts[0].trim();
+              const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
+              if (numMatch) {
+                numero_civique = numMatch[1];
+                rue = numMatch[2];
+              } else {
+                rue = streetPart;
               }
             }
-            
-            return {
-              numero_civique,
-              rue,
-              ville,
-              province: "QC",
-              code_postal,
-              full_address: fullAddr,
-              distance
-            };
-          })
-          .filter(addr => addr !== null)
-          .sort((a, b) => a.distance - b.distance) // Trier par distance d'Alma
-          .slice(0, 10); // Garder les 10 plus proches
+            if (parts.length > 1 && !ville) {
+              ville = parts[1].trim();
+            }
+            if (!code_postal) {
+              const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+              if (postalMatch) {
+                code_postal = postalMatch[1].toUpperCase();
+              }
+            }
+          }
+          
+          return {
+            numero_civique,
+            rue,
+            ville,
+            province: "QC",
+            code_postal,
+            full_address: fullAddr
+          };
+        });
         
         setSuggestions(formattedAddresses);
       } else {
