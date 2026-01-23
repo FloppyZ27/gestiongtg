@@ -1960,72 +1960,80 @@ export default function EditDossierForm({
         <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
           Annuler
         </Button>
-        <Button 
-          type="button" 
-          onClick={async () => {
-            console.log("[DEBUG] Bouton Ouvrir dossier cliqué!");
-            setIsCreatingFolder(true);
-            console.log("[DEBUG] isCreatingFolder =", true);
-            setCreationProgress({ step: 'Initialisation...', details: '', isComplete: false, error: null });
-            
-            try {
-              // Étape 1: Vérifier le dossier
-              setCreationProgress({ step: 'Vérification du dossier', details: 'Vérification des informations...', isComplete: false, error: null });
-              await new Promise(resolve => setTimeout(resolve, 500));
+        
+        {!isCreatingFolder ? (
+          <Button 
+            type="button" 
+            onClick={async () => {
+              console.log("[DEBUG] Bouton Ouvrir dossier cliqué!");
+              setIsCreatingFolder(true);
+              console.log("[DEBUG] isCreatingFolder =", true);
+              setCreationProgress({ step: 'Initialisation...', details: '', isComplete: false, error: null });
               
-              // Étape 2: Créer le dossier SharePoint
-              setCreationProgress({ step: 'Création du dossier SharePoint', details: `Création de ${formData.arpenteur_geometre?.split(' ').map(p => p[0]).join('')}-${formData.numero_dossier}...`, isComplete: false, error: null });
-              
-              const createResponse = await base44.functions.invoke('createSharePointFolder', {
-                arpenteurGeometre: formData.arpenteur_geometre,
-                numeroDossier: formData.numero_dossier
-              });
-              
-              if (!createResponse.data.success) {
-                throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
+              try {
+                // Étape 1: Vérifier le dossier
+                setCreationProgress({ step: 'Vérification du dossier', details: 'Vérification des informations...', isComplete: false, error: null });
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Étape 2: Créer le dossier SharePoint
+                setCreationProgress({ step: 'Création du dossier SharePoint', details: `Création de ${formData.arpenteur_geometre?.split(' ').map(p => p[0]).join('')}-${formData.numero_dossier}...`, isComplete: false, error: null });
+                
+                const createResponse = await base44.functions.invoke('createSharePointFolder', {
+                  arpenteurGeometre: formData.arpenteur_geometre,
+                  numeroDossier: formData.numero_dossier
+                });
+                
+                if (!createResponse.data.success) {
+                  throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Étape 3: Transfert des documents
+                setCreationProgress({ step: 'Transfert des documents', details: 'Déplacement des fichiers depuis le dossier temporaire...', isComplete: false, error: null });
+                
+                const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                  sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
+                  destinationFolderPath: createResponse.data.folderPath
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Étape 4: Finalisation
+                setCreationProgress({ 
+                  step: 'Dossier créé avec succès', 
+                  details: `${moveResponse.data?.movedCount || 0} fichier(s) transféré(s)`, 
+                  isComplete: true, 
+                  error: null 
+                });
+                
+                setTimeout(() => {
+                  setIsCreatingFolder(false);
+                  setCreationProgress({ step: '', details: '', isComplete: false, error: null });
+                }, 2000);
+                
+              } catch (error) {
+                console.error('Erreur création dossier:', error);
+                setCreationProgress({ 
+                  step: 'Erreur', 
+                  details: error.message || 'Une erreur est survenue', 
+                  isComplete: false, 
+                  error: error.message 
+                });
               }
-              
-              await new Promise(resolve => setTimeout(resolve, 500));
-              
-              // Étape 3: Transfert des documents
-              setCreationProgress({ step: 'Transfert des documents', details: 'Déplacement des fichiers depuis le dossier temporaire...', isComplete: false, error: null });
-              
-              const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
-                sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
-                destinationFolderPath: createResponse.data.folderPath
-              });
-              
-              await new Promise(resolve => setTimeout(resolve, 500));
-              
-              // Étape 4: Finalisation
-              setCreationProgress({ 
-                step: 'Dossier créé avec succès', 
-                details: `${moveResponse.data?.movedCount || 0} fichier(s) transféré(s)`, 
-                isComplete: true, 
-                error: null 
-              });
-              
-              setTimeout(() => {
-                setIsCreatingFolder(false);
-                setCreationProgress({ step: '', details: '', isComplete: false, error: null });
-              }, 2000);
-              
-            } catch (error) {
-              console.error('Erreur création dossier:', error);
-              setCreationProgress({ 
-                step: 'Erreur', 
-                details: error.message || 'Une erreur est survenue', 
-                isComplete: false, 
-                error: error.message 
-              });
-            }
-          }}
-          className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-          disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
-        >
-          <FolderOpen className="w-4 h-4 mr-2" />
-          Ouvrir dossier
-        </Button>
+            }}
+            className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+            disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
+          >
+            <FolderOpen className="w-4 h-4 mr-2" />
+            Ouvrir dossier
+          </Button>
+        ) : (
+          <div className="flex items-center gap-2 px-6 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+            <span className="text-blue-400 text-sm font-medium">Ouverture en cours...</span>
+          </div>
+        )}
         <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
           {editingDossier ? "Modifier" : "Créer"}
         </Button>
