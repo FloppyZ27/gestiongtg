@@ -62,10 +62,10 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
       setNewRetourForm({
-        dossier_id: null,
+        dossier_reference_id: null,
         date_appel: new Date().toISOString().split('T')[0],
         utilisateur_assigne: "",
-        raison: "",
+        notes: "",
         statut: "Retour d'appel",
         client_nom: "",
         client_telephone: ""
@@ -549,10 +549,10 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
   const [isNewRetourDialogOpen, setIsNewRetourDialogOpen] = useState(false);
   const [newRetourForm, setNewRetourForm] = useState({
-    dossier_id: null,
+    dossier_reference_id: null,
     date_appel: new Date().toISOString().split('T')[0],
     utilisateur_assigne: "",
-    raison: "",
+    notes: "",
     statut: "Retour d'appel",
     client_nom: "",
     client_telephone: ""
@@ -573,19 +573,19 @@ const RetoursAppel = React.forwardRef((props, ref) => {
             onSubmit={async (e) => {
               e.preventDefault();
               await createRetourAppelMutation.mutateAsync({
-                dossier_reference_id: newRetourForm.dossier_id,
+                dossier_reference_id: newRetourForm.dossier_reference_id,
                 utilisateur_assigne: newRetourForm.utilisateur_assigne,
                 date_appel: newRetourForm.date_appel,
-                notes: newRetourForm.raison,
+                notes: newRetourForm.notes,
                 client_nom: newRetourForm.client_nom,
                 client_telephone: newRetourForm.client_telephone
               });
               setIsNewRetourDialogOpen(false);
               setNewRetourForm({
-                dossier_id: null,
+                dossier_reference_id: null,
                 date_appel: new Date().toISOString().split('T')[0],
                 utilisateur_assigne: "",
-                raison: "",
+                notes: "",
                 statut: "Retour d'appel",
                 client_nom: "",
                 client_telephone: ""
@@ -594,10 +594,10 @@ const RetoursAppel = React.forwardRef((props, ref) => {
             onCancel={() => {
               setIsNewRetourDialogOpen(false);
               setNewRetourForm({
-                dossier_id: null,
+                dossier_reference_id: null,
                 date_appel: new Date().toISOString().split('T')[0],
                 utilisateur_assigne: "",
-                raison: "",
+                notes: "",
                 statut: "Retour d'appel",
                 client_nom: "",
                 client_telephone: ""
