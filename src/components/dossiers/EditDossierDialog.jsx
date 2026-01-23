@@ -1305,65 +1305,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
         }}
       />
 
-      {/* Dialog de progression de création du dossier */}
-      <Dialog open={isCreatingFolder} onOpenChange={() => {}}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md" hideCloseButton>
-          <DialogHeader>
-            <DialogTitle className="text-xl flex items-center gap-2">
-              <FolderOpen className="w-5 h-5 text-blue-400" />
-              Création du dossier SharePoint
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Étapes de progression */}
-            <div className="space-y-3">
-              {/* Étape actuelle */}
-              <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                {creationProgress.error ? (
-                  <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                ) : creationProgress.isComplete ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <p className={`font-medium ${
-                    creationProgress.error ? 'text-red-400' : 
-                    creationProgress.isComplete ? 'text-emerald-400' : 
-                    'text-blue-400'
-                  }`}>
-                    {creationProgress.step}
-                  </p>
-                  {creationProgress.details && (
-                    <p className="text-sm text-slate-400 mt-1">{creationProgress.details}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Message d'erreur détaillé */}
-            {creationProgress.error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                <p className="text-red-400 text-sm">{creationProgress.error}</p>
-              </div>
-            )}
-
-            {/* Bouton de fermeture */}
-            {(creationProgress.isComplete || creationProgress.error) && (
-              <Button 
-                onClick={() => {
-                  setIsCreatingFolder(false);
-                  setCreationProgress({ step: '', details: '', isComplete: false, error: null });
-                }}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
-              >
-                Fermer
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Dialog d'avertissement modifications non sauvegardées */}
       <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
         <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
@@ -1397,6 +1338,63 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de progression de création du dossier - EN DEHORS du Dialog principal */}
+      {isCreatingFolder && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 text-white max-w-md w-full mx-4 rounded-lg shadow-2xl p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <FolderOpen className="w-5 h-5 text-blue-400" />
+              <h2 className="text-xl font-semibold">Création du dossier SharePoint</h2>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Étape actuelle */}
+              <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                {creationProgress.error ? (
+                  <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                ) : creationProgress.isComplete ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className={`font-medium ${
+                    creationProgress.error ? 'text-red-400' : 
+                    creationProgress.isComplete ? 'text-emerald-400' : 
+                    'text-blue-400'
+                  }`}>
+                    {creationProgress.step}
+                  </p>
+                  {creationProgress.details && (
+                    <p className="text-sm text-slate-400 mt-1">{creationProgress.details}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Message d'erreur détaillé */}
+              {creationProgress.error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400 text-sm">{creationProgress.error}</p>
+                </div>
+              )}
+
+              {/* Bouton de fermeture */}
+              {(creationProgress.isComplete || creationProgress.error) && (
+                <Button 
+                  onClick={() => {
+                    setIsCreatingFolder(false);
+                    setCreationProgress({ step: '', details: '', isComplete: false, error: null });
+                  }}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Fermer
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
