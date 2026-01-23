@@ -900,7 +900,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                       <div className="grid grid-cols-3 gap-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2">
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                               <span className="truncate">Arpenteurs ({filterArpenteurs.length > 0 ? `${filterArpenteurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
@@ -927,7 +927,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2">
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                               <span className="truncate">Utilisateurs ({filterUtilisateurs.length > 0 ? `${filterUtilisateurs.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
