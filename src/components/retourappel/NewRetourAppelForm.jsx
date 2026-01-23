@@ -257,8 +257,9 @@ export default function NewRetourAppelForm({
                       setAucunDossier(checked);
                       if (!checked) {
                         setFormData(prev => ({...prev, client_nom: "", client_telephone: ""}));
+                        setDossierFound(false);
                       } else {
-                        setFormData(prev => ({...prev, dossier_reference_id: null}));
+                        setFormData(prev => ({...prev, dossier_reference_id: null, client_nom: "", client_telephone: ""}));
                         setDossierFound(true);
                         setSelectedArpenteur("");
                         setSelectedNumeroDossier("");
