@@ -89,6 +89,18 @@ async function getFolderContents(accessToken, folderPath) {
   return data.value || [];
 }
 
+async function deleteFolder(accessToken, folderPath) {
+  const encodedPath = encodeURIComponent(folderPath).replace(/%2F/g, '/');
+  const url = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${encodedPath}`;
+  
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${accessToken}` }
+  });
+
+  return response.ok;
+}
+
 async function copyFolderStructure(accessToken, sourcePath, destParentPath, destFolderName) {
   // Créer le dossier destination
   await createFolder(accessToken, destParentPath, destFolderName);
