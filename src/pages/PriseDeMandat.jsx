@@ -313,6 +313,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(true);
+  const [sameDatesForAllMandats, setSameDatesForAllMandats] = useState(false);
   const [sameLotsForAllMandats, setSameLotsForAllMandats] = useState(false);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [uploadingDocuments, setUploadingDocuments] = useState(false);
@@ -4269,7 +4270,26 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                     <div className="grid grid-cols-[60%_1px_40%] gap-3">
                                       {/* Adresse des travaux - 60% */}
                                       <div className="space-y-2">
-                                        <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                        <div className="flex items-center justify-between">
+                                          <Label className="text-slate-400 text-xs">Adresse des travaux</Label>
+                                          <div className="flex items-center gap-1.5">
+                                            <Checkbox
+                                              id={`sameAddressForAllMandats-${index}`}
+                                              checked={sameAddressForAllMandats}
+                                              onCheckedChange={(checked) => {
+                                                setSameAddressForAllMandats(checked);
+                                                if (checked) {
+                                                  const currentAddress = mandat.adresse_travaux;
+                                                  setNouveauDossierForm(prev => ({
+                                                    ...prev,
+                                                    mandats: prev.mandats.map(m => ({ ...m, adresse_travaux: currentAddress }))
+                                                  }));
+                                                }
+                                              }}
+                                            />
+                                            <Label htmlFor={`sameAddressForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                          </div>
+                                        </div>
                                         {/* Barre de recherche d'adresse */}
                                         <div className="relative">
                                           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3 z-10" />
@@ -4512,16 +4532,52 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
 
                                         {/* Dates - 40% vertical */}
                                         <div className="space-y-2 pr-2">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <Label className="text-slate-400 text-xs">Dates</Label>
+                                            <div className="flex items-center gap-1.5">
+                                              <Checkbox
+                                                id={`sameDatesForAllMandats-${index}`}
+                                                checked={sameDatesForAllMandats}
+                                                onCheckedChange={(checked) => {
+                                                  setSameDatesForAllMandats(checked);
+                                                  if (checked) {
+                                                    const currentDates = {
+                                                      date_signature: mandat.date_signature,
+                                                      date_debut_travaux: mandat.date_debut_travaux,
+                                                      date_livraison: mandat.date_livraison
+                                                    };
+                                                    setNouveauDossierForm(prev => ({
+                                                      ...prev,
+                                                      mandats: prev.mandats.map(m => ({
+                                                        ...m,
+                                                        date_signature: currentDates.date_signature,
+                                                        date_debut_travaux: currentDates.date_debut_travaux,
+                                                        date_livraison: currentDates.date_livraison
+                                                      }))
+                                                    }));
+                                                  }
+                                                }}
+                                              />
+                                              <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                            </div>
+                                          </div>
                                           <div className="space-y-1">
                                           <Label className="text-slate-400 text-xs">Date de signature</Label>
                                           <Input 
                                             type="date" 
                                             value={mandat.date_signature || ""} 
                                             onChange={(e) => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
-                                              }));
+                                              if (sameDatesForAllMandats) {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(m => ({ ...m, date_signature: e.target.value }))
+                                                }));
+                                              } else {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_signature: e.target.value } : m)
+                                                }));
+                                              }
                                             }}
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
@@ -4532,10 +4588,17 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                             type="date" 
                                             value={mandat.date_debut_travaux || ""} 
                                             onChange={(e) => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
-                                              }));
+                                              if (sameDatesForAllMandats) {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(m => ({ ...m, date_debut_travaux: e.target.value }))
+                                                }));
+                                              } else {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_debut_travaux: e.target.value } : m)
+                                                }));
+                                              }
                                             }}
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
@@ -4546,16 +4609,23 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                             type="date" 
                                             value={mandat.date_livraison || mandatsInfo[0]?.date_livraison || ""} 
                                             onChange={(e) => {
-                                              setNouveauDossierForm(prev => ({
-                                                ...prev,
-                                                mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
-                                              }));
+                                              if (sameDatesForAllMandats) {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map(m => ({ ...m, date_livraison: e.target.value }))
+                                                }));
+                                              } else {
+                                                setNouveauDossierForm(prev => ({
+                                                  ...prev,
+                                                  mandats: prev.mandats.map((m, i) => i === index ? { ...m, date_livraison: e.target.value } : m)
+                                                }));
+                                              }
                                             }}
                                             required
                                             className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                           />
                                         </div>
-                                      </div>
+                                        </div>
                                       </div>
 
                                       {/* Ligne séparatrice */}
