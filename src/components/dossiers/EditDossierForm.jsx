@@ -1963,7 +1963,9 @@ export default function EditDossierForm({
         <Button 
           type="button" 
           onClick={async () => {
+            console.log("[DEBUG] Bouton Ouvrir dossier cliqué!");
             setIsCreatingFolder(true);
+            console.log("[DEBUG] isCreatingFolder =", true);
             setCreationProgress({ step: 'Initialisation...', details: '', isComplete: false, error: null });
             
             try {
