@@ -4149,7 +4149,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                                           value={index.toString()}
                                           className="orange data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-b-2 data-[state=active]:border-orange-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
                                         >
-                                          {mandat.type_mandat || `Mandat ${index + 1}`}
+                                          <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                            {mandat.type_mandat ? getAbbreviatedMandatType(mandat.type_mandat) : `Mandat ${index + 1}`}
+                                          </Badge>
                                         </TabsTrigger>
                                       ))}
                                     </TabsList>
