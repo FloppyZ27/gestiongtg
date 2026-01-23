@@ -207,13 +207,13 @@ export default function NewRetourAppelForm({
 
   return (
     <motion.div 
-      className="flex flex-col h-[90vh]"
+      className="flex flex-col max-h-[70vh]"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 max-h-[calc(70vh-80px)]">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
         </div>
