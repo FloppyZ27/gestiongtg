@@ -125,6 +125,7 @@ export default function NewRetourAppelForm({
       
       await base44.entities.RetourAppel.update(editingRetourAppel.id, {
         ...oldRetour,
+        dossier_id: retourData.dossier_reference_id || null,
         date_appel: retourData.date_appel,
         utilisateur_assigne: retourData.utilisateur_assigne,
         raison: retourData.notes || "",
@@ -264,16 +265,6 @@ export default function NewRetourAppelForm({
                         setSelectedArpenteur("");
                         setSelectedNumeroDossier("");
                         setSelectedClient("");
-                        
-                        // En mode édition, mettre à jour le retour d'appel pour enlever le dossier
-                        if (editingRetourAppel && editingRetourAppel.dossier_id) {
-                          base44.entities.RetourAppel.update(editingRetourAppel.id, {
-                            ...editingRetourAppel,
-                            dossier_id: null
-                          }).then(() => {
-                            queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
-                          });
-                        }
                       }
                     }}
                   />
