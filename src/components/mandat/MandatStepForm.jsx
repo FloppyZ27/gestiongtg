@@ -14,6 +14,35 @@ const OBJECTIFS = ["Vente", "Refinancement", "Projet de construction", "Litige"]
 const ECHEANCES = ["1 semaine", "2 semaines", "3 semaines", "4 semaines", "5 semaines", "6 semaines", "7 semaines", "8 semaines ou plus"];
 const DELAIS_RAPPEL = ["Normal", "Urgent"];
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+};
+
 export default function MandatStepForm({ 
   mandats = [],
   onMandatsChange,
@@ -133,8 +162,8 @@ export default function MandatStepForm({
             {selectedTypes.length > 0 && (
               <div className="flex gap-1 flex-wrap">
                 {selectedTypes.map((type, idx) => (
-                  <Badge key={idx} className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
-                    {type}
+                  <Badge key={idx} className={`${getMandatColor(type)} border text-xs`}>
+                    {getAbbreviatedMandatType(type)}
                   </Badge>
                 ))}
               </div>
