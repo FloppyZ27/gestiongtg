@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, FolderOpen, Calendar, User, X, UserPlus, Check, Upload, FileText, ExternalLink, Grid3x3, TrendingUp, TrendingDown, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Package, Download, FileUp, MessageSquare, Clock, Loader2, Filter } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -175,6 +176,7 @@ export default function Dossiers() {
   const [currentMinuteMandatIndex, setCurrentMinuteMandatIndex] = useState(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importedData, setImportedData] = useState([]);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
@@ -2139,36 +2141,6 @@ export default function Dossiers() {
               Extraction CSV
             </Button>
 
-            <div className="relative">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleImportCSV}
-                className="hidden"
-                id="csv-import-input"
-              />
-              <Button
-                onClick={() => document.getElementById('csv-import-input').click()}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg">
-                <FileUp className="w-5 h-5 mr-2" />
-                Importation CSV
-              </Button>
-            </div>
-
-            <Button
-              onClick={openFacturationDialog}
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg shadow-purple-500/50">
-              <FileText className="w-5 h-5 mr-2" />
-              Facturation
-            </Button>
-
-            <Button
-              onClick={openCloseDossierDialog}
-              className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white shadow-lg shadow-red-500/50">
-              <Check className="w-5 h-5 mr-2" />
-              Fermer dossier
-            </Button>
-
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open) {
@@ -3404,251 +3376,244 @@ export default function Dossiers() {
 
 
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardHeader>
-            <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[250px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white" />
-              </div>
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+          <CardHeader className="pb-2">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                  <Input
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                  />
+                </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Arpenteurs ({filterArpenteur.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                  <DropdownMenuLabel>Filtrer par arpenteur</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterArpenteur.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterArpenteur([]);
-                    }}
-                  >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {ARPENTEURS.map((arp) => (
-                    <DropdownMenuCheckboxItem
-                      key={arp}
-                      checked={filterArpenteur.includes(arp)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterArpenteur([...filterArpenteur, arp]);
-                        } else {
-                          setFilterArpenteur(filterArpenteur.filter((a) => a !== arp));
-                        }
-                      }}
-                    >
-                      {arp}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Statuts ({filterStatut.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                  <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterStatut.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterStatut([]);
-                    }}
-                  >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterStatut.includes("Ouvert")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFilterStatut([...filterStatut, "Ouvert"]);
-                      } else {
-                        setFilterStatut(filterStatut.filter((s) => s !== "Ouvert"));
-                      }
-                    }}
-                  >
-                    Ouvert
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={filterStatut.includes("Fermé")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFilterStatut([...filterStatut, "Fermé"]);
-                      } else {
-                        setFilterStatut(filterStatut.filter((s) => s !== "Fermé"));
-                      }
-                    }}
-                  >
-                    Fermé
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Mandats ({filterMandat.length || 'Tous'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
-                  <DropdownMenuLabel>Filtrer par mandat</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterMandat.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterMandat([]);
-                    }}
-                  >
-                    Tous
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {TYPES_MANDATS.map((type) => (
-                    <DropdownMenuCheckboxItem
-                      key={type}
-                      checked={filterMandat.includes(type)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterMandat([...filterMandat, type]);
-                        } else {
-                          setFilterMandat(filterMandat.filter((t) => t !== type));
-                        }
-                      }}
-                    >
-                      {type}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Tâches ({filterTache.length || 'Toutes'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
-                  <DropdownMenuLabel>Filtrer par tâche</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterTache.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterTache([]);
-                    }}
-                  >
-                    Toutes
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {TACHES.map((tache) => (
-                    <DropdownMenuCheckboxItem
-                      key={tache}
-                      checked={filterTache.includes(tache)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterTache([...filterTache, tache]);
-                        } else {
-                          setFilterTache(filterTache.filter((t) => t !== tache));
-                        }
-                      }}
-                    >
-                      {tache}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
-                    <span>Villes ({filterVille.length || 'Toutes'})</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white max-h-64 overflow-y-auto">
-                  <DropdownMenuLabel>Filtrer par ville</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={filterVille.length === 0}
-                    onCheckedChange={(checked) => {
-                      if (checked) setFilterVille([]);
-                    }}
-                  >
-                    Toutes
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuSeparator />
-                  {uniqueVilles.map((ville) => (
-                    <DropdownMenuCheckboxItem
-                      key={ville}
-                      checked={filterVille.includes(ville)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setFilterVille([...filterVille, ville]);
-                        } else {
-                          setFilterVille(filterVille.filter((v) => v !== ville));
-                        }
-                      }}
-                    >
-                      {ville}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="flex items-center gap-2">
-                <Label className="text-slate-400 text-sm whitespace-nowrap">Date ouverture:</Label>
-                <Input
-                  type="date"
-                  value={filterDateDebut}
-                  onChange={(e) => setFilterDateDebut(e.target.value)}
-                  placeholder="Du"
-                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
-                />
-                <span className="text-slate-500">-</span>
-                <Input
-                  type="date"
-                  value={filterDateFin}
-                  onChange={(e) => setFilterDateFin(e.target.value)}
-                  placeholder="Au"
-                  className="w-36 bg-slate-800/50 border-slate-700 text-white h-9 text-sm"
-                />
-              </div>
-
-              {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) &&
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setFilterArpenteur([]);
-                  setFilterStatut([]);
-                  setFilterMandat([]);
-                  setFilterTache([]);
-                  setFilterVille([]);
-                  setFilterDateDebut("");
-                  setFilterDateFin("");
-                }}
-                className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
-
-                  Réinitialiser les filtres
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Filtres</span>
+                  {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) && (
+                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      {filterArpenteur.length + filterStatut.length + filterMandat.length + filterTache.length + filterVille.length + (filterDateDebut ? 1 : 0) + (filterDateFin ? 1 : 0)}
+                    </Badge>
+                  )}
+                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
                 </Button>
-              }
+              </div>
+
+              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                <CollapsibleContent>
+                  <div className="p-2 border border-emerald-500/30 rounded-lg">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-3 h-3 text-emerald-500" />
+                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                        </div>
+                        {(filterArpenteur.length > 0 || filterStatut.length > 0 || filterMandat.length > 0 || filterTache.length > 0 || filterVille.length > 0 || filterDateDebut || filterDateFin) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setFilterArpenteur([]);
+                              setFilterStatut([]);
+                              setFilterMandat([]);
+                              setFilterTache([]);
+                              setFilterVille([]);
+                              setFilterDateDebut("");
+                              setFilterDateFin("");
+                            }}
+                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                          >
+                            <X className="w-2.5 h-2.5 mr-1" />
+                            Réinitialiser
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-5 gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {ARPENTEURS.map((arp) => (
+                              <DropdownMenuCheckboxItem
+                                key={arp}
+                                checked={filterArpenteur.includes(arp)}
+                                onCheckedChange={(checked) => {
+                                  setFilterArpenteur(
+                                    checked
+                                      ? [...filterArpenteur, arp]
+                                      : filterArpenteur.filter((a) => a !== arp)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {arp}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Statuts ({filterStatut.length > 0 ? `${filterStatut.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            <DropdownMenuCheckboxItem
+                              checked={filterStatut.includes("Ouvert")}
+                              onCheckedChange={(checked) => {
+                                setFilterStatut(
+                                  checked
+                                    ? [...filterStatut, "Ouvert"]
+                                    : filterStatut.filter((s) => s !== "Ouvert")
+                                );
+                              }}
+                              className="text-white"
+                            >
+                              Ouvert
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                              checked={filterStatut.includes("Fermé")}
+                              onCheckedChange={(checked) => {
+                                setFilterStatut(
+                                  checked
+                                    ? [...filterStatut, "Fermé"]
+                                    : filterStatut.filter((s) => s !== "Fermé")
+                                );
+                              }}
+                              className="text-white"
+                            >
+                              Fermé
+                            </DropdownMenuCheckboxItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Mandats ({filterMandat.length > 0 ? `${filterMandat.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            {TYPES_MANDATS.map((type) => (
+                              <DropdownMenuCheckboxItem
+                                key={type}
+                                checked={filterMandat.includes(type)}
+                                onCheckedChange={(checked) => {
+                                  setFilterMandat(
+                                    checked
+                                      ? [...filterMandat, type]
+                                      : filterMandat.filter((t) => t !== type)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {type}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Tâches ({filterTache.length > 0 ? `${filterTache.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            {TACHES.map((tache) => (
+                              <DropdownMenuCheckboxItem
+                                key={tache}
+                                checked={filterTache.includes(tache)}
+                                onCheckedChange={(checked) => {
+                                  setFilterTache(
+                                    checked
+                                      ? [...filterTache, tache]
+                                      : filterTache.filter((t) => t !== tache)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {tache}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            {uniqueVilles.map((ville) => (
+                              <DropdownMenuCheckboxItem
+                                key={ville}
+                                checked={filterVille.includes(ville)}
+                                onCheckedChange={(checked) => {
+                                  setFilterVille(
+                                    checked
+                                      ? [...filterVille, ville]
+                                      : filterVille.filter((v) => v !== ville)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {ville}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="space-y-1 pt-1 border-t border-emerald-500/30">
+                        <Label className="text-xs text-emerald-500">Période d'ouverture</Label>
+                        <div className="flex items-center gap-1.5">
+                          <Input
+                            type="date"
+                            value={filterDateDebut}
+                            onChange={(e) => setFilterDateDebut(e.target.value)}
+                            placeholder="Du"
+                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
+                          />
+                          <span className="text-emerald-500 text-xs">→</span>
+                          <Input
+                            type="date"
+                            value={filterDateFin}
+                            onChange={(e) => setFilterDateFin(e.target.value)}
+                            placeholder="Au"
+                            className="flex-1 text-emerald-500 h-8 text-xs px-2 border-none bg-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
           </CardHeader>
+        </Card>
+
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardContent className="p-0">
           <CardContent className="p-0">
             {isLoading ?
             <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div> :
@@ -3759,6 +3724,6 @@ export default function Dossiers() {
           </CardContent>
         </Card>
       </div>
-    </div>);
-
+    </div>
+  );
 }
