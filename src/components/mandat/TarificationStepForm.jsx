@@ -18,6 +18,24 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+};
+
 export default function TarificationStepForm({ 
   mandats = [],
   onTarificationChange,
@@ -185,7 +203,7 @@ export default function TarificationStepForm({
                       return (
                         <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/30">
                           <td className="p-2">
-                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-xs">
+                            <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
                               {getAbbreviatedMandatType(mandat.type_mandat)}
                             </Badge>
                           </td>
@@ -270,11 +288,11 @@ export default function TarificationStepForm({
               </div>
 
               {/* Section Options et Notes */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Card className="border-slate-700 bg-slate-800/50">
-                  <CardContent className="p-4 space-y-4">
+                  <CardContent className="p-3 space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label className="text-slate-300 text-sm">Taxes incluses</Label>
+                      <Label className="text-slate-300 text-xs">Taxes incluses</Label>
                       <button
                         type="button"
                         onClick={() => setGlobalTaxesIncluses(!globalTaxesIncluses)}
@@ -282,16 +300,16 @@ export default function TarificationStepForm({
                         className="transition-colors"
                       >
                         {globalTaxesIncluses ? (
-                          <ToggleRight className="w-10 h-10 text-purple-400" />
+                          <ToggleRight className="w-8 h-8 text-purple-400" />
                         ) : (
-                          <ToggleLeft className="w-10 h-10 text-slate-500" />
+                          <ToggleLeft className="w-8 h-8 text-slate-500" />
                         )}
                       </button>
                     </div>
 
-                    <div className="border-t border-slate-700 pt-4">
+                    <div className="border-t border-slate-700 pt-3">
                       <div className="flex items-center justify-between">
-                        <Label className="text-slate-300 text-sm">Prix convenu avec le client</Label>
+                        <Label className="text-slate-300 text-xs">Prix convenu</Label>
                         <button
                           type="button"
                           onClick={() => setPrixConvenu(!prixConvenu)}
@@ -299,22 +317,22 @@ export default function TarificationStepForm({
                           className="transition-colors"
                         >
                           {prixConvenu ? (
-                            <ToggleRight className="w-10 h-10 text-emerald-400" />
+                            <ToggleRight className="w-8 h-8 text-emerald-400" />
                           ) : (
-                            <ToggleLeft className="w-10 h-10 text-slate-500" />
+                            <ToggleLeft className="w-8 h-8 text-slate-500" />
                           )}
                         </button>
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-700 pt-4">
-                      <Label className="text-slate-300 text-sm mb-2 block">Notes</Label>
+                    <div className="border-t border-slate-700 pt-3">
+                      <Label className="text-slate-300 text-xs mb-1.5 block">Notes</Label>
                       <Textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Notes concernant la tarification..."
+                        placeholder="Notes..."
                         disabled={disabled}
-                        className="bg-slate-700 border-slate-600 text-white text-xs min-h-[120px] resize-none"
+                        className="bg-slate-700 border-slate-600 text-white text-xs min-h-[100px] resize-none"
                       />
                     </div>
                   </CardContent>
