@@ -264,6 +264,16 @@ export default function NewRetourAppelForm({
                         setSelectedArpenteur("");
                         setSelectedNumeroDossier("");
                         setSelectedClient("");
+                        
+                        // En mode édition, mettre à jour le retour d'appel pour enlever le dossier
+                        if (editingRetourAppel && editingRetourAppel.dossier_id) {
+                          base44.entities.RetourAppel.update(editingRetourAppel.id, {
+                            ...editingRetourAppel,
+                            dossier_id: null
+                          }).then(() => {
+                            queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+                          });
+                        }
                       }
                     }}
                   />
