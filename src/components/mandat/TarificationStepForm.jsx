@@ -158,7 +158,7 @@ export default function TarificationStepForm({
       {!isCollapsed && (
         <CardContent className="p-4">
           {mandatsWithType.length > 0 ? (
-            <div className="grid grid-cols-[1fr_300px] gap-4">
+            <div className="grid grid-cols-[70%_30%] gap-4">
               {/* Tableau de tarification */}
               <div className="border border-slate-700 rounded-lg overflow-hidden">
                 <table className="w-full text-xs">
