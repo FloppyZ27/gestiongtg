@@ -127,6 +127,7 @@ export default function EditDossierForm({
   const [addressSearchTimeout, setAddressSearchTimeout] = useState(null);
   const [currentMandatIndexForAddress, setCurrentMandatIndexForAddress] = useState(null);
   const [sameAddressForAllMandats, setSameAddressForAllMandats] = useState(false);
+  const [sameDatesForAllMandats, setSameDatesForAllMandats] = useState(false);
   const [showDeleteMandatConfirm, setShowDeleteMandatConfirm] = useState(false);
   const [mandatIndexToDelete, setMandatIndexToDelete] = useState(null);
   const [documentsCollapsed, setDocumentsCollapsed] = useState(true);
@@ -1061,9 +1062,9 @@ export default function EditDossierForm({
                                 <div className="flex items-center gap-1.5">
                                   <Checkbox
                                     id={`sameDatesForAllMandats-${index}`}
-                                    checked={sameAddressForAllMandats}
+                                    checked={sameDatesForAllMandats}
                                     onCheckedChange={(checked) => {
-                                      setSameAddressForAllMandats(checked);
+                                      setSameDatesForAllMandats(checked);
                                       if (checked) {
                                         const currentDates = {
                                           date_signature: mandat.date_signature,
@@ -1091,7 +1092,7 @@ export default function EditDossierForm({
                                   type="date" 
                                   value={mandat.date_signature || ""} 
                                   onChange={(e) => {
-                                    if (sameAddressForAllMandats) {
+                                    if (sameDatesForAllMandats) {
                                       setFormData(prev => ({
                                         ...prev,
                                         mandats: prev.mandats.map(m => ({ ...m, date_signature: e.target.value }))
@@ -1109,7 +1110,7 @@ export default function EditDossierForm({
                                   type="date" 
                                   value={mandat.date_debut_travaux || ""} 
                                   onChange={(e) => {
-                                    if (sameAddressForAllMandats) {
+                                    if (sameDatesForAllMandats) {
                                       setFormData(prev => ({
                                         ...prev,
                                         mandats: prev.mandats.map(m => ({ ...m, date_debut_travaux: e.target.value }))
@@ -1127,7 +1128,7 @@ export default function EditDossierForm({
                                   type="date" 
                                   value={mandat.date_livraison || ""} 
                                   onChange={(e) => {
-                                    if (sameAddressForAllMandats) {
+                                    if (sameDatesForAllMandats) {
                                       setFormData(prev => ({
                                         ...prev,
                                         mandats: prev.mandats.map(m => ({ ...m, date_livraison: e.target.value }))
