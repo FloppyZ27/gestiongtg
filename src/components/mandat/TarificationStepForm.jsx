@@ -296,7 +296,7 @@ export default function TarificationStepForm({
                       type="button"
                       onClick={() => setGlobalTaxesIncluses(!globalTaxesIncluses)}
                       disabled={disabled}
-                      className="transition-colors"
+                      className="transition-colors border-0 bg-transparent shadow-none p-0 hover:bg-transparent"
                     >
                       {globalTaxesIncluses ? (
                         <ToggleRight className="w-5 h-5 text-purple-400" />
@@ -312,7 +312,7 @@ export default function TarificationStepForm({
                       type="button"
                       onClick={() => setPrixConvenu(!prixConvenu)}
                       disabled={disabled}
-                      className="transition-colors"
+                      className="transition-colors border-0 bg-transparent shadow-none p-0 hover:bg-transparent"
                     >
                       {prixConvenu ? (
                         <ToggleRight className="w-5 h-5 text-emerald-400" />
