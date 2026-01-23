@@ -172,7 +172,7 @@ export default function NewRetourAppelForm({
 
       saveTimeoutRef.current = setTimeout(() => {
         saveRetourAppelMutation.mutate(formData);
-      }, 1000);
+      }, 300);
     }
 
     return () => {
