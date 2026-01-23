@@ -2029,18 +2029,16 @@ export default function EditDossierForm({
         </Button>
       </div>
 
-      {/* Dialog de progression de création du dossier */}
-      <Dialog open={isCreatingFolder} onOpenChange={() => {}}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl flex items-center gap-2">
+      {/* Dialog de progression de création du dossier - Portal indépendant */}
+      {isCreatingFolder && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 text-white max-w-md w-full mx-4 rounded-lg shadow-2xl p-6">
+            <div className="flex items-center gap-2 mb-6">
               <FolderOpen className="w-5 h-5 text-blue-400" />
-              Création du dossier SharePoint
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Étapes de progression */}
-            <div className="space-y-3">
+              <h2 className="text-xl font-semibold">Création du dossier SharePoint</h2>
+            </div>
+            
+            <div className="space-y-4">
               {/* Étape actuelle */}
               <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
                 {creationProgress.error ? (
@@ -2063,30 +2061,30 @@ export default function EditDossierForm({
                   )}
                 </div>
               </div>
+
+              {/* Message d'erreur détaillé */}
+              {creationProgress.error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400 text-sm">{creationProgress.error}</p>
+                </div>
+              )}
+
+              {/* Bouton de fermeture */}
+              {(creationProgress.isComplete || creationProgress.error) && (
+                <Button 
+                  onClick={() => {
+                    setIsCreatingFolder(false);
+                    setCreationProgress({ step: '', details: '', isComplete: false, error: null });
+                  }}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
+                >
+                  Fermer
+                </Button>
+              )}
             </div>
-
-            {/* Message d'erreur détaillé */}
-            {creationProgress.error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                <p className="text-red-400 text-sm">{creationProgress.error}</p>
-              </div>
-            )}
-
-            {/* Bouton de fermeture */}
-            {(creationProgress.isComplete || creationProgress.error) && (
-              <Button 
-                onClick={() => {
-                  setIsCreatingFolder(false);
-                  setCreationProgress({ step: '', details: '', isComplete: false, error: null });
-                }}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
-              >
-                Fermer
-              </Button>
-            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </motion.div>
   );
 }
