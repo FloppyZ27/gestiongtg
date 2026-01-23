@@ -157,11 +157,11 @@ Deno.serve(async (req) => {
 
       console.log(`[TEMPLATE] Création du modèle pour ${arpenteurName} (${initials})...`);
 
-      // Vérifier si le dossier modèle existe déjà
+      // Si le dossier existe déjà, le supprimer pour le recréer avec la bonne structure
       if (await folderExists(accessToken, templatePath)) {
-        console.log(`[TEMPLATE] ${templateName} existe déjà`);
-        results.push({ arpenteur: arpenteurName, status: 'existing', path: templatePath });
-        continue;
+        console.log(`[TEMPLATE] ${templateName} existe déjà, suppression...`);
+        await deleteFolder(accessToken, templatePath);
+        console.log(`[TEMPLATE] ${templateName} supprimé`);
       }
 
       // Copier la structure complète de PLP-0
