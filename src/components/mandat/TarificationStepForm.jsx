@@ -288,55 +288,51 @@ export default function TarificationStepForm({
               </div>
 
               {/* Section Options et Notes */}
-              <div className="space-y-2">
-                <Card className="border-slate-700 bg-slate-800/50">
-                  <CardContent className="p-2 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-slate-300 text-xs">Taxes incluses</Label>
-                        <button
-                          type="button"
-                          onClick={() => setGlobalTaxesIncluses(!globalTaxesIncluses)}
-                          disabled={disabled}
-                          className="transition-colors"
-                        >
-                          {globalTaxesIncluses ? (
-                            <ToggleRight className="w-6 h-6 text-purple-400" />
-                          ) : (
-                            <ToggleLeft className="w-6 h-6 text-slate-500" />
-                          )}
-                        </button>
-                      </div>
+              <div className="space-y-2 flex flex-col h-full">
+                <div className="grid grid-cols-2 gap-2 px-2">
+                  <div className="flex items-center justify-between py-1">
+                    <Label className="text-slate-300 text-xs">Taxes incluses</Label>
+                    <button
+                      type="button"
+                      onClick={() => setGlobalTaxesIncluses(!globalTaxesIncluses)}
+                      disabled={disabled}
+                      className="transition-colors"
+                    >
+                      {globalTaxesIncluses ? (
+                        <ToggleRight className="w-5 h-5 text-purple-400" />
+                      ) : (
+                        <ToggleLeft className="w-5 h-5 text-slate-500" />
+                      )}
+                    </button>
+                  </div>
 
-                      <div className="flex items-center justify-between">
-                        <Label className="text-slate-300 text-xs">Prix convenu avec le client</Label>
-                        <button
-                          type="button"
-                          onClick={() => setPrixConvenu(!prixConvenu)}
-                          disabled={disabled}
-                          className="transition-colors"
-                        >
-                          {prixConvenu ? (
-                            <ToggleRight className="w-6 h-6 text-emerald-400" />
-                          ) : (
-                            <ToggleLeft className="w-6 h-6 text-slate-500" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between py-1">
+                    <Label className="text-slate-300 text-xs">Prix convenu avec le client</Label>
+                    <button
+                      type="button"
+                      onClick={() => setPrixConvenu(!prixConvenu)}
+                      disabled={disabled}
+                      className="transition-colors"
+                    >
+                      {prixConvenu ? (
+                        <ToggleRight className="w-5 h-5 text-emerald-400" />
+                      ) : (
+                        <ToggleLeft className="w-5 h-5 text-slate-500" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-                    <div className="border-t border-slate-700 pt-2">
-                      <Label className="text-slate-300 text-xs mb-1 block">Notes</Label>
-                      <Textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Notes..."
-                        disabled={disabled}
-                        className="bg-slate-700 border-slate-600 text-white text-xs min-h-[200px] resize-none"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex-1 px-2 pb-2">
+                  <Label className="text-slate-300 text-xs mb-1 block">Notes</Label>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Notes..."
+                    disabled={disabled}
+                    className="bg-slate-700 border-slate-600 text-white text-xs h-full resize-none"
+                  />
+                </div>
               </div>
             </div>
           ) : (
