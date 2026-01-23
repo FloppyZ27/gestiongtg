@@ -61,6 +61,7 @@ const formatPhoneNumber = (phone) => {
 const RetoursAppel = React.forwardRef((props, ref) => {
   React.useImperativeHandle(ref, () => ({
     openNewDialog: () => {
+      setEditingRetourAppel(null);
       setNewRetourForm({
         dossier_reference_id: null,
         date_appel: new Date().toISOString().split('T')[0],
@@ -218,6 +219,60 @@ const RetoursAppel = React.forwardRef((props, ref) => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setIsDialogOpen(false);
       resetForm();
+    },
+  });
+
+  const updateRetourAppelEntityMutation = useMutation({
+    mutationFn: async ({ id, retourData }) => {
+      const oldRetour = retoursAppels.find(r => r.id === id);
+      
+      await base44.entities.RetourAppel.update(id, {
+        ...oldRetour,
+        date_appel: retourData.date_appel,
+        utilisateur_assigne: retourData.utilisateur_assigne,
+        raison: retourData.notes || "",
+        client_nom: retourData.client_nom || "",
+        client_telephone: retourData.client_telephone || ""
+      });
+      
+      // Mettre à jour le dossier si applicable
+      if (oldRetour.dossier_id) {
+        const dossier = dossiers.find(d => d.id === oldRetour.dossier_id);
+        if (dossier && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne) {
+          await base44.entities.Dossier.update(oldRetour.dossier_id, {
+            ...dossier,
+            utilisateur_assigne: retourData.utilisateur_assigne
+          });
+          
+          if (retourData.utilisateur_assigne) {
+            const clientsNames = getClientsNames(dossier.clients_ids);
+            await base44.entities.Notification.create({
+              utilisateur_email: retourData.utilisateur_assigne,
+              titre: "Retour d'appel réassigné",
+              message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+              type: "retour_appel",
+              dossier_id: oldRetour.dossier_id,
+              lue: false
+            });
+          }
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setIsNewRetourDialogOpen(false);
+      setEditingRetourAppel(null);
+      setNewRetourForm({
+        dossier_reference_id: null,
+        date_appel: new Date().toISOString().split('T')[0],
+        utilisateur_assigne: "",
+        notes: "",
+        statut: "Retour d'appel",
+        client_nom: "",
+        client_telephone: ""
+      });
     },
   });
 
@@ -557,6 +612,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
     client_nom: "",
     client_telephone: ""
   });
+  const [editingRetourAppel, setEditingRetourAppel] = useState(null);
 
   return (
     <>
@@ -570,17 +626,33 @@ const RetoursAppel = React.forwardRef((props, ref) => {
             setFormData={setNewRetourForm}
             users={users}
             dossiers={dossiers}
+            editingRetourAppel={editingRetourAppel}
             onSubmit={async (e) => {
               e.preventDefault();
-              await createRetourAppelMutation.mutateAsync({
-                dossier_reference_id: newRetourForm.dossier_reference_id,
-                utilisateur_assigne: newRetourForm.utilisateur_assigne,
-                date_appel: newRetourForm.date_appel,
-                notes: newRetourForm.notes,
-                client_nom: newRetourForm.client_nom,
-                client_telephone: newRetourForm.client_telephone
-              });
+              if (editingRetourAppel) {
+                await updateRetourAppelEntityMutation.mutateAsync({
+                  id: editingRetourAppel.id,
+                  retourData: {
+                    dossier_reference_id: newRetourForm.dossier_reference_id,
+                    utilisateur_assigne: newRetourForm.utilisateur_assigne,
+                    date_appel: newRetourForm.date_appel,
+                    notes: newRetourForm.notes,
+                    client_nom: newRetourForm.client_nom,
+                    client_telephone: newRetourForm.client_telephone
+                  }
+                });
+              } else {
+                await createRetourAppelMutation.mutateAsync({
+                  dossier_reference_id: newRetourForm.dossier_reference_id,
+                  utilisateur_assigne: newRetourForm.utilisateur_assigne,
+                  date_appel: newRetourForm.date_appel,
+                  notes: newRetourForm.notes,
+                  client_nom: newRetourForm.client_nom,
+                  client_telephone: newRetourForm.client_telephone
+                });
+              }
               setIsNewRetourDialogOpen(false);
+              setEditingRetourAppel(null);
               setNewRetourForm({
                 dossier_reference_id: null,
                 date_appel: new Date().toISOString().split('T')[0],
@@ -593,6 +665,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
             }}
             onCancel={() => {
               setIsNewRetourDialogOpen(false);
+              setEditingRetourAppel(null);
               setNewRetourForm({
                 dossier_reference_id: null,
                 date_appel: new Date().toISOString().split('T')[0],
@@ -986,7 +1059,22 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                     const phoneNumber = retour.client_telephone || (firstClient?.telephones?.find(t => t.actuel)?.telephone || firstClient?.telephones?.[0]?.telephone || "-");
                     
                     return (
-                      <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
+                      <TableRow 
+                        key={retour.id} 
+                        className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                        onClick={() => {
+                          setEditingRetourAppel(retour);
+                          setNewRetourForm({
+                            dossier_reference_id: retour.dossier_id,
+                            date_appel: retour.date_appel,
+                            utilisateur_assigne: retour.utilisateur_assigne || "",
+                            notes: retour.raison || "",
+                            statut: retour.statut,
+                            client_nom: retour.client_nom || "",
+                            client_telephone: retour.client_telephone || ""
+                          });
+                          setIsNewRetourDialogOpen(true);
+                        }}>
                         <TableCell className="font-medium">
                           {dossier ? (
                             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>

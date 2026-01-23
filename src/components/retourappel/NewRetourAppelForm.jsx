@@ -83,7 +83,8 @@ export default function NewRetourAppelForm({
   dossiers,
   onSubmit,
   onCancel,
-  getClientsNames
+  getClientsNames,
+  editingRetourAppel = null
 }) {
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [retourAppelCollapsed, setRetourAppelCollapsed] = useState(false);
@@ -92,6 +93,14 @@ export default function NewRetourAppelForm({
   const [selectedClient, setSelectedClient] = useState("");
   const [dossierFound, setDossierFound] = useState(false);
   const [aucunDossier, setAucunDossier] = useState(false);
+
+  // Initialiser l'état en mode édition
+  React.useEffect(() => {
+    if (editingRetourAppel) {
+      setDossierFound(true);
+      setAucunDossier(!editingRetourAppel.dossier_id);
+    }
+  }, [editingRetourAppel]);
 
   const handleSearchDossier = () => {
     if (!selectedArpenteur || !selectedNumeroDossier) {
@@ -127,7 +136,7 @@ export default function NewRetourAppelForm({
     >
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white">Nouveau retour d'appel</h2>
+          <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
         </div>
 
         <form id="retour-appel-form" onSubmit={onSubmit} className="space-y-3">
@@ -443,7 +452,7 @@ export default function NewRetourAppelForm({
           className="bg-gradient-to-r from-blue-500 to-cyan-600"
           disabled={!aucunDossier && !dossierFound}
         >
-          Créer
+          {editingRetourAppel ? "Modifier" : "Créer"}
         </Button>
       </div>
     </motion.div>
