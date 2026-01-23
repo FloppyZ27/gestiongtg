@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit, Package } from "lucide-react";
+import { Plus, X, Trash2, UserPlus, Search, FileText, Check, ChevronDown, ChevronUp, Edit, Package, FolderOpen, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { format } from "date-fns";
@@ -56,6 +56,13 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const [hasChanges, setHasChanges] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [creationProgress, setCreationProgress] = useState({
+    step: '',
+    details: '',
+    isComplete: false,
+    error: null
+  });
 
   const { data: lots = [] } = useQuery({
     queryKey: ['lots'],
@@ -802,6 +809,70 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
 
               <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
                 <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
+                <Button 
+                  type="button" 
+                  onClick={async () => {
+                    setIsCreatingFolder(true);
+                    setCreationProgress({ step: 'Initialisation...', details: '', isComplete: false, error: null });
+                    
+                    try {
+                      // Étape 1: Vérifier le dossier
+                      setCreationProgress({ step: 'Vérification du dossier', details: 'Vérification des informations...', isComplete: false, error: null });
+                      await new Promise(resolve => setTimeout(resolve, 500));
+                      
+                      // Étape 2: Créer le dossier SharePoint
+                      setCreationProgress({ step: 'Création du dossier SharePoint', details: `Création de ${formData.arpenteur_geometre?.split(' ').map(p => p[0]).join('')}-${formData.numero_dossier}...`, isComplete: false, error: null });
+                      
+                      const createResponse = await base44.functions.invoke('createSharePointFolder', {
+                        arpenteurGeometre: formData.arpenteur_geometre,
+                        numeroDossier: formData.numero_dossier
+                      });
+                      
+                      if (!createResponse.data.success) {
+                        throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
+                      }
+                      
+                      await new Promise(resolve => setTimeout(resolve, 500));
+                      
+                      // Étape 3: Transfert des documents
+                      setCreationProgress({ step: 'Transfert des documents', details: 'Déplacement des fichiers depuis le dossier temporaire...', isComplete: false, error: null });
+                      
+                      const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                        sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
+                        destinationFolderPath: createResponse.data.folderPath
+                      });
+                      
+                      await new Promise(resolve => setTimeout(resolve, 500));
+                      
+                      // Étape 4: Finalisation
+                      setCreationProgress({ 
+                        step: 'Dossier créé avec succès', 
+                        details: `${moveResponse.data?.movedCount || 0} fichier(s) transféré(s)`, 
+                        isComplete: true, 
+                        error: null 
+                      });
+                      
+                      setTimeout(() => {
+                        setIsCreatingFolder(false);
+                        setCreationProgress({ step: '', details: '', isComplete: false, error: null });
+                      }, 2000);
+                      
+                    } catch (error) {
+                      console.error('Erreur création dossier:', error);
+                      setCreationProgress({ 
+                        step: 'Erreur', 
+                        details: error.message || 'Une erreur est survenue', 
+                        isComplete: false, 
+                        error: error.message 
+                      });
+                    }
+                  }}
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                  disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
+                >
+                  <FolderOpen className="w-4 h-4 mr-2" />
+                  Ouvrir dossier SharePoint
+                </Button>
                 <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">Modifier</Button>
               </div>
             </div>
@@ -1233,6 +1304,65 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           if (clientTypeForForm === "Courtier immobilier") setIsCourtierSelectorOpen(true);
         }}
       />
+
+      {/* Dialog de progression de création du dossier */}
+      <Dialog open={isCreatingFolder} onOpenChange={() => {}}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md" hideCloseButton>
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-blue-400" />
+              Création du dossier SharePoint
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Étapes de progression */}
+            <div className="space-y-3">
+              {/* Étape actuelle */}
+              <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                {creationProgress.error ? (
+                  <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                ) : creationProgress.isComplete ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className={`font-medium ${
+                    creationProgress.error ? 'text-red-400' : 
+                    creationProgress.isComplete ? 'text-emerald-400' : 
+                    'text-blue-400'
+                  }`}>
+                    {creationProgress.step}
+                  </p>
+                  {creationProgress.details && (
+                    <p className="text-sm text-slate-400 mt-1">{creationProgress.details}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Message d'erreur détaillé */}
+            {creationProgress.error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-red-400 text-sm">{creationProgress.error}</p>
+              </div>
+            )}
+
+            {/* Bouton de fermeture */}
+            {(creationProgress.isComplete || creationProgress.error) && (
+              <Button 
+                onClick={() => {
+                  setIsCreatingFolder(false);
+                  setCreationProgress({ step: '', details: '', isComplete: false, error: null });
+                }}
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
+              >
+                Fermer
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog d'avertissement modifications non sauvegardées */}
       <Dialog open={showUnsavedWarning} onOpenChange={setShowUnsavedWarning}>
