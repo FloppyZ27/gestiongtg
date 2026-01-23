@@ -222,59 +222,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
     },
   });
 
-  const updateRetourAppelEntityMutation = useMutation({
-    mutationFn: async ({ id, retourData }) => {
-      const oldRetour = retoursAppels.find(r => r.id === id);
-      
-      await base44.entities.RetourAppel.update(id, {
-        ...oldRetour,
-        date_appel: retourData.date_appel,
-        utilisateur_assigne: retourData.utilisateur_assigne,
-        raison: retourData.notes || "",
-        client_nom: retourData.client_nom || "",
-        client_telephone: retourData.client_telephone || ""
-      });
-      
-      // Mettre à jour le dossier si applicable
-      if (oldRetour.dossier_id) {
-        const dossier = dossiers.find(d => d.id === oldRetour.dossier_id);
-        if (dossier && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne) {
-          await base44.entities.Dossier.update(oldRetour.dossier_id, {
-            ...dossier,
-            utilisateur_assigne: retourData.utilisateur_assigne
-          });
-          
-          if (retourData.utilisateur_assigne) {
-            const clientsNames = getClientsNames(dossier.clients_ids);
-            await base44.entities.Notification.create({
-              utilisateur_email: retourData.utilisateur_assigne,
-              titre: "Retour d'appel réassigné",
-              message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
-              type: "retour_appel",
-              dossier_id: oldRetour.dossier_id,
-              lue: false
-            });
-          }
-        }
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      setIsNewRetourDialogOpen(false);
-      setEditingRetourAppel(null);
-      setNewRetourForm({
-        dossier_reference_id: null,
-        date_appel: new Date().toISOString().split('T')[0],
-        utilisateur_assigne: "",
-        notes: "",
-        statut: "Retour d'appel",
-        client_nom: "",
-        client_telephone: ""
-      });
-    },
-  });
+
 
   const updateRetourAppelMutation = useMutation({
     mutationFn: async ({ id, retourData }) => {
@@ -616,10 +564,23 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
   return (
     <>
-      <Dialog open={isNewRetourDialogOpen} onOpenChange={setIsNewRetourDialogOpen}>
+      <Dialog open={isNewRetourDialogOpen} onOpenChange={(open) => {
+        if (!open && !editingRetourAppel) {
+          setNewRetourForm({
+            dossier_reference_id: null,
+            date_appel: new Date().toISOString().split('T')[0],
+            utilisateur_assigne: "",
+            notes: "",
+            statut: "Retour d'appel",
+            client_nom: "",
+            client_telephone: ""
+          });
+        }
+        setIsNewRetourDialogOpen(open);
+      }}>
         <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[50vw] w-[50vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
           <DialogHeader className="sr-only">
-            <DialogTitle>Nouveau retour d'appel</DialogTitle>
+            <DialogTitle>{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</DialogTitle>
           </DialogHeader>
           <NewRetourAppelForm
             formData={newRetourForm}
@@ -629,28 +590,14 @@ const RetoursAppel = React.forwardRef((props, ref) => {
             editingRetourAppel={editingRetourAppel}
             onSubmit={async (e) => {
               e.preventDefault();
-              if (editingRetourAppel) {
-                await updateRetourAppelEntityMutation.mutateAsync({
-                  id: editingRetourAppel.id,
-                  retourData: {
-                    dossier_reference_id: newRetourForm.dossier_reference_id,
-                    utilisateur_assigne: newRetourForm.utilisateur_assigne,
-                    date_appel: newRetourForm.date_appel,
-                    notes: newRetourForm.notes,
-                    client_nom: newRetourForm.client_nom,
-                    client_telephone: newRetourForm.client_telephone
-                  }
-                });
-              } else {
-                await createRetourAppelMutation.mutateAsync({
-                  dossier_reference_id: newRetourForm.dossier_reference_id,
-                  utilisateur_assigne: newRetourForm.utilisateur_assigne,
-                  date_appel: newRetourForm.date_appel,
-                  notes: newRetourForm.notes,
-                  client_nom: newRetourForm.client_nom,
-                  client_telephone: newRetourForm.client_telephone
-                });
-              }
+              await createRetourAppelMutation.mutateAsync({
+                dossier_reference_id: newRetourForm.dossier_reference_id,
+                utilisateur_assigne: newRetourForm.utilisateur_assigne,
+                date_appel: newRetourForm.date_appel,
+                notes: newRetourForm.notes,
+                client_nom: newRetourForm.client_nom,
+                client_telephone: newRetourForm.client_telephone
+              });
               setIsNewRetourDialogOpen(false);
               setEditingRetourAppel(null);
               setNewRetourForm({

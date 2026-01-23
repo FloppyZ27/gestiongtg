@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +88,7 @@ export default function NewRetourAppelForm({
   getClientsNames,
   editingRetourAppel = null
 }) {
+  const queryClient = useQueryClient();
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [retourAppelCollapsed, setRetourAppelCollapsed] = useState(false);
   const [selectedArpenteur, setSelectedArpenteur] = useState("");
@@ -93,14 +96,90 @@ export default function NewRetourAppelForm({
   const [selectedClient, setSelectedClient] = useState("");
   const [dossierFound, setDossierFound] = useState(false);
   const [aucunDossier, setAucunDossier] = useState(false);
+  const saveTimeoutRef = useRef(null);
 
   // Initialiser l'état en mode édition
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingRetourAppel) {
       setDossierFound(true);
       setAucunDossier(!editingRetourAppel.dossier_id);
+      
+      // Pré-remplir les filtres de recherche si un dossier existe
+      if (editingRetourAppel.dossier_id) {
+        const dossier = dossiers.find(d => d.id === editingRetourAppel.dossier_id);
+        if (dossier) {
+          setSelectedArpenteur(dossier.arpenteur_geometre);
+          setSelectedNumeroDossier(dossier.numero_dossier);
+          setSelectedClient(getClientsNames(dossier.clients_ids));
+        }
+      }
     }
-  }, [editingRetourAppel]);
+  }, [editingRetourAppel, dossiers]);
+
+  // Mutation pour sauvegarder automatiquement
+  const saveRetourAppelMutation = useMutation({
+    mutationFn: async (retourData) => {
+      if (!editingRetourAppel) return;
+
+      const oldRetour = editingRetourAppel;
+      
+      await base44.entities.RetourAppel.update(editingRetourAppel.id, {
+        ...oldRetour,
+        date_appel: retourData.date_appel,
+        utilisateur_assigne: retourData.utilisateur_assigne,
+        raison: retourData.notes || "",
+        client_nom: retourData.client_nom || "",
+        client_telephone: retourData.client_telephone || ""
+      });
+      
+      // Mettre à jour le dossier si applicable
+      if (oldRetour.dossier_id) {
+        const dossier = dossiers.find(d => d.id === oldRetour.dossier_id);
+        if (dossier && oldRetour.utilisateur_assigne !== retourData.utilisateur_assigne) {
+          await base44.entities.Dossier.update(oldRetour.dossier_id, {
+            ...dossier,
+            utilisateur_assigne: retourData.utilisateur_assigne
+          });
+          
+          if (retourData.utilisateur_assigne) {
+            const clientsNames = getClientsNames(dossier.clients_ids);
+            await base44.entities.Notification.create({
+              utilisateur_email: retourData.utilisateur_assigne,
+              titre: "Retour d'appel réassigné",
+              message: `Un retour d'appel vous a été assigné${clientsNames ? ` pour ${clientsNames}` : ''}.`,
+              type: "retour_appel",
+              dossier_id: oldRetour.dossier_id,
+              lue: false
+            });
+          }
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  // Auto-save avec debounce
+  useEffect(() => {
+    if (editingRetourAppel && (dossierFound || aucunDossier)) {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(() => {
+        saveRetourAppelMutation.mutate(formData);
+      }, 1000);
+    }
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, editingRetourAppel, dossierFound, aucunDossier]);
 
   const handleSearchDossier = () => {
     if (!selectedArpenteur || !selectedNumeroDossier) {
@@ -139,7 +218,13 @@ export default function NewRetourAppelForm({
           <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
         </div>
 
-        <form id="retour-appel-form" onSubmit={onSubmit} className="space-y-3">
+        <form id="retour-appel-form" onSubmit={(e) => {
+          if (!editingRetourAppel) {
+            onSubmit(e);
+          } else {
+            e.preventDefault();
+          }
+        }} className="space-y-3">
           {/* Section Informations du dossier */}
           <Card className="border-slate-700 bg-slate-800/30">
             <CardHeader 
@@ -441,20 +526,22 @@ export default function NewRetourAppelForm({
         </form>
       </div>
 
-      {/* Boutons Annuler/Créer tout en bas */}
-      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-        <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
-          Annuler
-        </Button>
-        <Button 
-          type="submit" 
-          form="retour-appel-form" 
-          className="bg-gradient-to-r from-blue-500 to-cyan-600"
-          disabled={!aucunDossier && !dossierFound}
-        >
-          {editingRetourAppel ? "Modifier" : "Créer"}
-        </Button>
-      </div>
+      {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
+      {!editingRetourAppel && (
+        <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button 
+            type="submit" 
+            form="retour-appel-form" 
+            className="bg-gradient-to-r from-blue-500 to-cyan-600"
+            disabled={!aucunDossier && !dossierFound}
+          >
+            Créer
+          </Button>
+        </div>
+      )}
     </motion.div>
   );
 }
