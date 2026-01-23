@@ -145,12 +145,7 @@ export default function EditDossierForm({
   });
   const [retoursAppel, setRetoursAppel] = useState([]);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [creationProgress, setCreationProgress] = useState({
-    step: '',
-    details: '',
-    isComplete: false,
-    error: null
-  });
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -1965,19 +1960,13 @@ export default function EditDossierForm({
           <Button 
             type="button" 
             onClick={async () => {
-              console.log("[DEBUG] Bouton Ouvrir dossier cliqué!");
               setIsCreatingFolder(true);
-              console.log("[DEBUG] isCreatingFolder =", true);
-              setCreationProgress({ step: 'Initialisation...', details: '', isComplete: false, error: null });
+              setLoadingMessage("Vérification...");
               
               try {
-                // Étape 1: Vérifier le dossier
-                setCreationProgress({ step: 'Vérification du dossier', details: 'Vérification des informations...', isComplete: false, error: null });
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 300));
                 
-                // Étape 2: Créer le dossier SharePoint
-                setCreationProgress({ step: 'Création du dossier SharePoint', details: `Création de ${formData.arpenteur_geometre?.split(' ').map(p => p[0]).join('')}-${formData.numero_dossier}...`, isComplete: false, error: null });
-                
+                setLoadingMessage("Création du dossier SharePoint...");
                 const createResponse = await base44.functions.invoke('createSharePointFolder', {
                   arpenteurGeometre: formData.arpenteur_geometre,
                   numeroDossier: formData.numero_dossier
@@ -1987,39 +1976,26 @@ export default function EditDossierForm({
                   throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
                 }
                 
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Étape 3: Transfert des documents
-                setCreationProgress({ step: 'Transfert des documents', details: 'Déplacement des fichiers depuis le dossier temporaire...', isComplete: false, error: null });
-                
+                setLoadingMessage("Transfert des documents...");
                 const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
                   sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
                   destinationFolderPath: createResponse.data.folderPath
                 });
                 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                setLoadingMessage("Finalisation...");
+                await new Promise(resolve => setTimeout(resolve, 300));
                 
-                // Étape 4: Finalisation
-                setCreationProgress({ 
-                  step: 'Dossier créé avec succès', 
-                  details: `${moveResponse.data?.movedCount || 0} fichier(s) transféré(s)`, 
-                  isComplete: true, 
-                  error: null 
-                });
+                setLoadingMessage("✅ Terminé!");
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                setTimeout(() => {
-                  setIsCreatingFolder(false);
-                  setCreationProgress({ step: '', details: '', isComplete: false, error: null });
-                }, 2000);
+                setIsCreatingFolder(false);
+                setLoadingMessage("");
                 
               } catch (error) {
                 console.error('Erreur création dossier:', error);
-                setCreationProgress({ 
-                  step: 'Erreur', 
-                  details: error.message || 'Une erreur est survenue', 
-                  isComplete: false, 
-                  error: error.message 
-                });
+                alert(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+                setIsCreatingFolder(false);
+                setLoadingMessage("");
               }
             }}
             className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
@@ -2029,9 +2005,9 @@ export default function EditDossierForm({
             Ouvrir dossier
           </Button>
         ) : (
-          <div className="flex items-center gap-2 px-6 py-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+          <div className="flex items-center gap-3 px-6 py-2.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
             <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-            <span className="text-blue-400 text-sm font-medium">Ouverture en cours...</span>
+            <span className="text-blue-400 text-sm font-medium">{loadingMessage}</span>
           </div>
         )}
         <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
@@ -2039,62 +2015,6 @@ export default function EditDossierForm({
         </Button>
       </div>
 
-      {/* Dialog de progression de création du dossier - Portal indépendant */}
-      {isCreatingFolder && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 text-white max-w-md w-full mx-4 rounded-lg shadow-2xl p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <FolderOpen className="w-5 h-5 text-blue-400" />
-              <h2 className="text-xl font-semibold">Création du dossier SharePoint</h2>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Étape actuelle */}
-              <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                {creationProgress.error ? (
-                  <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                ) : creationProgress.isComplete ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <p className={`font-medium ${
-                    creationProgress.error ? 'text-red-400' : 
-                    creationProgress.isComplete ? 'text-emerald-400' : 
-                    'text-blue-400'
-                  }`}>
-                    {creationProgress.step}
-                  </p>
-                  {creationProgress.details && (
-                    <p className="text-sm text-slate-400 mt-1">{creationProgress.details}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Message d'erreur détaillé */}
-              {creationProgress.error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-red-400 text-sm">{creationProgress.error}</p>
-                </div>
-              )}
-
-              {/* Bouton de fermeture */}
-              {(creationProgress.isComplete || creationProgress.error) && (
-                <Button 
-                  onClick={() => {
-                    setIsCreatingFolder(false);
-                    setCreationProgress({ step: '', details: '', isComplete: false, error: null });
-                  }}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
-                >
-                  Fermer
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 }
