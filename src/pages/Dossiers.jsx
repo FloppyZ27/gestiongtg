@@ -3614,7 +3614,6 @@ export default function Dossiers() {
 
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
-          <CardContent className="p-0">
             {isLoading ?
             <div className="text-center py-8 text-slate-500">Chargement des dossiers...</div> :
 
@@ -3718,12 +3717,12 @@ export default function Dossiers() {
                       </TableRow>
                   }
                   </TableBody>
-                </Table>
-              </div>
-            }
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
+                  </Table>
+                  </div>
+                  }
+                  </CardContent>
+                  </Card>
+                  </div>
+                  </div>
+                  );
+                  }
