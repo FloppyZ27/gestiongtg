@@ -1056,12 +1056,50 @@ export default function EditDossierForm({
                             <div className="bg-slate-600"></div>
 
                             <div className="space-y-2 pr-2">
+                              <div className="flex items-center justify-between mb-1">
+                                <Label className="text-slate-400 text-xs">Dates</Label>
+                                <div className="flex items-center gap-1.5">
+                                  <Checkbox
+                                    id={`sameDatesForAllMandats-${index}`}
+                                    checked={sameAddressForAllMandats}
+                                    onCheckedChange={(checked) => {
+                                      setSameAddressForAllMandats(checked);
+                                      if (checked) {
+                                        const currentDates = {
+                                          date_signature: mandat.date_signature,
+                                          date_debut_travaux: mandat.date_debut_travaux,
+                                          date_livraison: mandat.date_livraison
+                                        };
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          mandats: prev.mandats.map(m => ({ 
+                                            ...m, 
+                                            date_signature: currentDates.date_signature,
+                                            date_debut_travaux: currentDates.date_debut_travaux,
+                                            date_livraison: currentDates.date_livraison
+                                          }))
+                                        }));
+                                      }
+                                    }}
+                                  />
+                                  <Label htmlFor={`sameDatesForAllMandats-${index}`} className="text-slate-400 text-[11px] cursor-pointer">Appliquer à tous</Label>
+                                </div>
+                              </div>
                               <div className="space-y-1">
                                 <Label className="text-slate-400 text-xs">Date de signature</Label>
                                 <Input 
                                   type="date" 
                                   value={mandat.date_signature || ""} 
-                                  onChange={(e) => updateMandat(index, 'date_signature', e.target.value)}
+                                  onChange={(e) => {
+                                    if (sameAddressForAllMandats) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map(m => ({ ...m, date_signature: e.target.value }))
+                                      }));
+                                    } else {
+                                      updateMandat(index, 'date_signature', e.target.value);
+                                    }
+                                  }}
                                   className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                 />
                               </div>
@@ -1070,7 +1108,16 @@ export default function EditDossierForm({
                                 <Input 
                                   type="date" 
                                   value={mandat.date_debut_travaux || ""} 
-                                  onChange={(e) => updateMandat(index, 'date_debut_travaux', e.target.value)}
+                                  onChange={(e) => {
+                                    if (sameAddressForAllMandats) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map(m => ({ ...m, date_debut_travaux: e.target.value }))
+                                      }));
+                                    } else {
+                                      updateMandat(index, 'date_debut_travaux', e.target.value);
+                                    }
+                                  }}
                                   className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                 />
                               </div>
@@ -1079,7 +1126,16 @@ export default function EditDossierForm({
                                 <Input 
                                   type="date" 
                                   value={mandat.date_livraison || ""} 
-                                  onChange={(e) => updateMandat(index, 'date_livraison', e.target.value)}
+                                  onChange={(e) => {
+                                    if (sameAddressForAllMandats) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        mandats: prev.mandats.map(m => ({ ...m, date_livraison: e.target.value }))
+                                      }));
+                                    } else {
+                                      updateMandat(index, 'date_livraison', e.target.value);
+                                    }
+                                  }}
                                   className="bg-slate-700 border-slate-600 text-white h-6 text-xs"
                                 />
                               </div>
