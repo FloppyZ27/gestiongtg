@@ -106,6 +106,9 @@ export default function ClientFormDialog({
   // Disable courriels and telephones
   const [courrielDisabled, setCourrielDisabled] = useState(false);
   const [telephoneDisabled, setTelephoneDisabled] = useState(false);
+  
+  // Auto-save
+  const saveTimeoutRef = React.useRef(null);
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData) => {
@@ -143,6 +146,19 @@ export default function ClientFormDialog({
       resetForm();
       onOpenChange(false);
       if (onSuccess) onSuccess();
+    },
+  });
+
+  // Auto-save mutation
+  const autoSaveMutation = useMutation({
+    mutationFn: async ({ id, clientData }) => {
+      if (!editingClient) return;
+      
+      const updatedClient = await base44.entities.Client.update(id, clientData);
+      return updatedClient;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
   });
 
@@ -297,13 +313,43 @@ export default function ClientFormDialog({
     },
   });
 
-  // Détecter les changements
+  // Détecter les changements et auto-save
   React.useEffect(() => {
     if (initialFormData) {
       const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
       setHasChanges(hasFormChanges);
+      
+      // Auto-save en mode édition
+      if (editingClient && hasFormChanges) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+
+        saveTimeoutRef.current = setTimeout(() => {
+          const cleanedData = {
+            ...formData,
+            adresses: formData.adresses.filter(a => 
+              (a.numeros_civiques && a.numeros_civiques.some(n => n.trim() !== "")) ||
+              (a.rue && a.rue.trim() !== "") ||
+              (a.ville && a.ville.trim() !== "") ||
+              (a.code_postal && a.code_postal.trim() !== "") ||
+              (a.province && a.province.trim() !== "")
+            ),
+            courriels: formData.courriels.filter(c => c.courriel.trim() !== ""),
+            telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
+          };
+          
+          autoSaveMutation.mutate({ id: editingClient.id, clientData: cleanedData });
+        }, 300);
+      }
     }
-  }, [formData, initialFormData]);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, initialFormData, editingClient]);
 
   const formatAdresse = (addr) => {
     if (!addr) return "";
@@ -508,6 +554,14 @@ export default function ClientFormDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // En mode édition, ne rien faire (auto-save gère tout)
+    if (editingClient) {
+      e.preventDefault();
+      return;
+    }
+    
+    // En mode création
     const cleanedData = {
       ...formData,
       adresses: formData.adresses.filter(a => 
@@ -521,18 +575,14 @@ export default function ClientFormDialog({
       telephones: formData.telephones.filter(t => t.telephone.trim() !== "")
     };
 
-    if (editingClient) {
-      updateClientMutation.mutate({ id: editingClient.id, clientData: cleanedData, oldData: editingClient });
+    // Check for duplicates before creating
+    const duplicates = checkForDuplicates(cleanedData);
+    if (duplicates.length > 0) {
+      setDuplicateClients(duplicates);
+      setPendingClientData(cleanedData);
+      setShowDuplicateDialog(true);
     } else {
-      // Check for duplicates before creating
-      const duplicates = checkForDuplicates(cleanedData);
-      if (duplicates.length > 0) {
-        setDuplicateClients(duplicates);
-        setPendingClientData(cleanedData);
-        setShowDuplicateDialog(true);
-      } else {
-        createClientMutation.mutate(cleanedData);
-      }
+      createClientMutation.mutate(cleanedData);
     }
   };
 
@@ -1847,15 +1897,17 @@ export default function ClientFormDialog({
               </div>
           </div>
 
-          {/* Boutons Annuler/Créer tout en bas - pleine largeur */}
-          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
-              Annuler
-            </Button>
-            <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-              {editingClient ? "Modifier" : "Créer"}
-            </Button>
-          </div>
+          {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
+          {!editingClient && (
+            <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+              <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                Annuler
+              </Button>
+              <Button type="submit" form="client-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                Créer
+              </Button>
+            </div>
+          )}
         </motion.div>
       </DialogContent>
     </Dialog>
