@@ -40,6 +40,8 @@ export default function Clients() {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [filterType, setFilterType] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -173,9 +175,16 @@ export default function Clients() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
-      deleteClientMutation.mutate(id);
+  const handleDelete = (client) => {
+    setClientToDelete(client);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (clientToDelete) {
+      deleteClientMutation.mutate(clientToDelete.id);
+      setShowDeleteConfirm(false);
+      setClientToDelete(null);
     }
   };
 
@@ -438,7 +447,7 @@ export default function Clients() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(client.id)}
+                              onClick={() => handleDelete(client)}
                               className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -473,6 +482,43 @@ export default function Clients() {
                   }}
                 />
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Confirmation
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer {clientToDelete?.prenom} {clientToDelete?.nom} ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setClientToDelete(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={confirmDelete}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Supprimer
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
