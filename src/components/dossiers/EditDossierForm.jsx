@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,8 +147,43 @@ export default function EditDossierForm({
   const [retoursAppel, setRetoursAppel] = useState([]);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
+
+  const { data: user } = base44.auth.me ? { data: null } : { data: null };
+
+  // Auto-save mutation
+  const autoSaveMutation = useMutation({
+    mutationFn: async (dossierData) => {
+      if (!editingDossier) return;
+      
+      const updatedDossier = await base44.entities.Dossier.update(editingDossier.id, dossierData);
+      return updatedDossier;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    },
+  });
+
+  // Auto-save avec debounce
+  useEffect(() => {
+    if (editingDossier) {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(() => {
+        autoSaveMutation.mutate(formData);
+      }, 300);
+    }
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, editingDossier]);
 
   // Charger les retours d'appel quand le dossier change
   React.useEffect(() => {
@@ -239,7 +274,13 @@ export default function EditDossierForm({
             )}
           </div>
 
-          <form id="edit-dossier-form" onSubmit={onSubmit} className="space-y-3">
+          <form id="edit-dossier-form" onSubmit={(e) => {
+            if (!editingDossier) {
+              onSubmit(e);
+            } else {
+              e.preventDefault();
+            }
+          }} className="space-y-3">
             {/* Section Informations du dossier */}
             <Card className="border-slate-700 bg-slate-800/30">
               <CardHeader 
@@ -2015,70 +2056,72 @@ export default function EditDossierForm({
         </div>
       </div>
 
-      {/* Boutons Annuler/Modifier tout en bas */}
-      <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-        <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
-          Annuler
-        </Button>
-        
-        {!isCreatingFolder ? (
-          <Button 
-            type="button" 
-            onClick={async () => {
-              setIsCreatingFolder(true);
-              setLoadingMessage("Vérification...");
-              
-              try {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                setLoadingMessage("Création du dossier SharePoint...");
-                const createResponse = await base44.functions.invoke('createSharePointFolder', {
-                  arpenteurGeometre: formData.arpenteur_geometre,
-                  numeroDossier: formData.numero_dossier
-                });
-                
-                if (!createResponse.data.success) {
-                  throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
-                }
-                
-                setLoadingMessage("Transfert des documents...");
-                const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
-                  sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
-                  destinationFolderPath: createResponse.data.folderPath
-                });
-                
-                setLoadingMessage("Finalisation...");
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                setLoadingMessage("✅ Terminé!");
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                setIsCreatingFolder(false);
-                setLoadingMessage("");
-                
-              } catch (error) {
-                console.error('Erreur création dossier:', error);
-                alert(`Erreur: ${error.message || 'Une erreur est survenue'}`);
-                setIsCreatingFolder(false);
-                setLoadingMessage("");
-              }
-            }}
-            className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-            disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
-          >
-            <FolderOpen className="w-4 h-4 mr-2" />
-            Ouvrir dossier
+      {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
+      {!editingDossier && (
+        <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
+            Annuler
           </Button>
-        ) : (
-          <div className="flex items-center gap-3 px-6 py-2.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
-            <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-            <span className="text-blue-400 text-sm font-medium">{loadingMessage}</span>
-          </div>
-        )}
-        <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-          {editingDossier ? "Modifier" : "Créer"}
-        </Button>
-      </div>
+          
+          {!isCreatingFolder ? (
+            <Button 
+              type="button" 
+              onClick={async () => {
+                setIsCreatingFolder(true);
+                setLoadingMessage("Vérification...");
+                
+                try {
+                  await new Promise(resolve => setTimeout(resolve, 300));
+                  
+                  setLoadingMessage("Création du dossier SharePoint...");
+                  const createResponse = await base44.functions.invoke('createSharePointFolder', {
+                    arpenteurGeometre: formData.arpenteur_geometre,
+                    numeroDossier: formData.numero_dossier
+                  });
+                  
+                  if (!createResponse.data.success) {
+                    throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
+                  }
+                  
+                  setLoadingMessage("Transfert des documents...");
+                  const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
+                    sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
+                    destinationFolderPath: createResponse.data.folderPath
+                  });
+                  
+                  setLoadingMessage("Finalisation...");
+                  await new Promise(resolve => setTimeout(resolve, 300));
+                  
+                  setLoadingMessage("✅ Terminé!");
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  
+                  setIsCreatingFolder(false);
+                  setLoadingMessage("");
+                  
+                } catch (error) {
+                  console.error('Erreur création dossier:', error);
+                  alert(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+                  setIsCreatingFolder(false);
+                  setLoadingMessage("");
+                }
+              }}
+              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+              disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
+            >
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Ouvrir dossier
+            </Button>
+          ) : (
+            <div className="flex items-center gap-3 px-6 py-2.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
+              <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+              <span className="text-blue-400 text-sm font-medium">{loadingMessage}</span>
+            </div>
+          )}
+          <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+            Créer
+          </Button>
+        </div>
+      )}
 
     </motion.div>
   );
