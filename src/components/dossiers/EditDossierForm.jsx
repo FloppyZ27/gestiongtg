@@ -707,17 +707,23 @@ export default function EditDossierForm({
                       <div className="flex justify-between items-center mb-2 gap-3">
                         <div className="flex-1">
                           <TabsList className="bg-slate-800/30 border border-slate-700 h-auto justify-start p-1 rounded-lg inline-flex">
-                            {formData.mandats.map((mandat, index) => (
-                              <TabsTrigger
-                                key={index}
-                                value={index.toString()}
-                                className="orange data-[state=active]:bg-orange-500/30 data-[state=active]:text-orange-300 data-[state=active]:border-b-2 data-[state=active]:border-orange-300 text-slate-300 px-3 py-1 text-xs font-medium rounded-md transition-all"
-                              >
-                                <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                  {mandat.type_mandat ? getAbbreviatedMandatType(mandat.type_mandat) : `Mandat ${index + 1}`}
-                                </Badge>
-                              </TabsTrigger>
-                            ))}
+                            {formData.mandats.map((mandat, index) => {
+                              const mandatColor = getMandatColor(mandat.type_mandat);
+                              const isActive = activeTabMandat === index.toString();
+                              return (
+                                <TabsTrigger
+                                  key={index}
+                                  value={index.toString()}
+                                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                                    isActive ? mandatColor : 'text-slate-400'
+                                  }`}
+                                >
+                                  <Badge className={`${mandatColor} border text-xs`}>
+                                    {mandat.type_mandat ? getAbbreviatedMandatType(mandat.type_mandat) : `Mandat ${index + 1}`}
+                                  </Badge>
+                                </TabsTrigger>
+                              );
+                            })}
                           </TabsList>
                         </div>
                         
