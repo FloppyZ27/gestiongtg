@@ -208,17 +208,17 @@ export default function NewRetourAppelForm({
 
   return (
     <motion.div 
-      className="flex flex-col"
+      className="flex flex-col h-full"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="overflow-y-auto p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
-        </div>
+      <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+        <h2 className="text-2xl font-bold text-white">{editingRetourAppel ? "Modifier retour d'appel" : "Nouveau retour d'appel"}</h2>
+      </div>
 
+      <div className="flex-1 overflow-y-auto p-6 pt-3">
         <form id="retour-appel-form" onSubmit={(e) => {
           if (!editingRetourAppel) {
             onSubmit(e);

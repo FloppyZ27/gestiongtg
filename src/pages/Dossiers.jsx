@@ -2202,11 +2202,11 @@ export default function Dossiers() {
 
         {/* Dialog pour ajouter une minute */}
         <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
-            <DialogHeader>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md flex flex-col max-h-[90vh] overflow-hidden">
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-xl">Ajouter une minute</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="flex-1 overflow-y-auto space-y-4 px-6">
               <div className="space-y-2">
                 <Label>Minute <span className="text-red-400">*</span></Label>
                 <Input
@@ -2241,19 +2241,19 @@ export default function Dossiers() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleAddMinuteFromDialog}
-                  disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600">
+            </div>
+            <div className="flex justify-end gap-3 p-6 pt-4 border-t border-slate-800 bg-slate-900">
+              <Button type="button" variant="outline" onClick={() => setIsAddMinuteDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                onClick={handleAddMinuteFromDialog}
+                disabled={!newMinuteForm.minute || !newMinuteForm.date_minute}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600">
 
-                  Ajouter
-                </Button>
-              </div>
+                Ajouter
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -2261,7 +2261,7 @@ export default function Dossiers() {
         {/* Dialog d'importation CSV */}
         <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">Importation CSV - Aperçu</DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg">
@@ -2315,7 +2315,7 @@ export default function Dossiers() {
         {/* Dialog for local facturation (from editing dossier) */}
         <Dialog open={isFacturationMandatsDialogOpen} onOpenChange={setIsFacturationMandatsDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">Sélectionner les mandats à facturer</DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto space-y-2 p-4">
@@ -2376,7 +2376,7 @@ export default function Dossiers() {
 
         <Dialog open={isFacturationDialogOpen} onOpenChange={setIsFacturationDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">Générer une facture</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
@@ -2586,7 +2586,7 @@ export default function Dossiers() {
           }
         }}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">Fermer un dossier</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
@@ -2756,7 +2756,7 @@ export default function Dossiers() {
         {/* Dialog de sélection des clients */}
         <Dialog open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les clients</DialogTitle>
                 <Button
@@ -2837,7 +2837,7 @@ export default function Dossiers() {
         {/* Dialog de sélection des notaires */}
         <Dialog open={isNotaireSelectorOpen} onOpenChange={setIsNotaireSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les notaires</DialogTitle>
                 <Button
@@ -2918,7 +2918,7 @@ export default function Dossiers() {
         {/* Dialog de sélection des courtiers */}
         <Dialog open={isCourtierSelectorOpen} onOpenChange={setIsCourtierSelectorOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" hideCloseButton>
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-2xl">Sélectionner les courtiers immobiliers</DialogTitle>
                 <Button
@@ -3019,7 +3019,7 @@ export default function Dossiers() {
 
         <Dialog open={isLotSelectorOpen} onOpenChange={(open) => {setIsLotSelectorOpen(open);if (!open) {setLotSearchTerm("");setLotCadastreFilter("Québec");}}}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sticky top-0 z-10 bg-slate-900 pb-4 border-b border-slate-800">
               <DialogTitle className="text-2xl">Sélectionner des lots</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
