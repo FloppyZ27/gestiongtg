@@ -2437,7 +2437,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
               >
                 <div className="flex-1 flex overflow-hidden">
                   {/* Main form content - 70% */}
-                  <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                   {/* Bandeau de verrouillage */}
                   {isLocked && (
                     <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
@@ -2453,7 +2454,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     </div>
                   )}
                   
-                  <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white">
                         {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
@@ -2662,12 +2663,14 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                     )}
                   </div>
                   {formData.ttl === "Oui" && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg mb-6">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
                       <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
                       <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
                     </div>
                   )}
+                  </div>
 
+                  <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
                   <DossierInfoStepForm
@@ -2883,13 +2886,14 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       isTemporaire={!formData.numero_dossier}
                       clientInfo={clientInfo}
                     />
-                  )}
+                    )}
 
-                </form>
-                  </div>
+                    </form>
+                    </div>
+                    </div>
 
-                  {/* Sidebar - 30% */}
-                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                    {/* Sidebar - 30% */}
+                    <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -3070,8 +3074,8 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex-1 flex overflow-hidden">
-                  <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
+                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
                     <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
                     {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
                       <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
@@ -3095,10 +3099,12 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                             )}
                           </span>
                         )}
-                      </p>
-                    )}
-                  </div>
-                  <form id="nouveau-dossier-form" onSubmit={async (e) => {
+                        </p>
+                        )}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 pt-3">
+                        <form id="nouveau-dossier-form" onSubmit={async (e) => {
                     e.preventDefault();
                     
                     // Vérifier que le numéro de dossier n'existe pas déjà
@@ -4911,8 +4917,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     )}
                   </form>
                   </div>
+                  </div>
 
-                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                   {/* Carte de l'adresse des travaux - Collapsible */}
                   <div 
                     className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
@@ -6235,11 +6242,12 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
             >
               <div className="flex-1 flex overflow-hidden">
                 {/* Colonne gauche - Formulaire - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-4 border-r border-slate-800">
-                  <div className="mb-4">
+                <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="sticky top-0 z-10 bg-slate-900 p-4 pb-3 border-b border-slate-800">
                     <h2 className="text-xl font-bold text-white">{editingLot ? "Modifier lot" : "Nouveau lot"}</h2>
                   </div>
                   
+                  <div className="flex-1 overflow-y-auto p-4 pt-2">
                   <form id="lot-form" onSubmit={handleNewLotSubmit} className="space-y-3">
                     {/* Section Import .d01 - Visible uniquement en mode création */}
                     {!editingLot && (
@@ -6312,10 +6320,11 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                       disabled={false}
                     />
                   </form>
+                  </div>
                 </div>
 
                 {/* Colonne droite - Commentaires et Historique - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                  {/* Header Tabs Commentaires/Historique - Collapsible */}
                  <div 
                    className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"

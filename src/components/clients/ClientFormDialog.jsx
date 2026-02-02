@@ -922,13 +922,14 @@ export default function ClientFormDialog({
         >
           <div className="flex-1 flex overflow-hidden">
             {/* Main form content - 70% */}
-            <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-            <div className="mb-6">
+            <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+            <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
               <h2 className="text-2xl font-bold text-white">
                 {editingClient ? `Modifier ${editingClient.type_client}` : `Nouveau ${formData.type_client}`}
               </h2>
             </div>
 
+            <div className="flex-1 overflow-y-auto p-6 pt-3">
             <form id="client-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations Client */}
               <Card className="border-slate-700 bg-slate-800/30">
@@ -1763,13 +1764,14 @@ export default function ClientFormDialog({
                       )}
                     </CardContent>
                   )}
-                </Card>
-              )}
-            </form>
-            </div>
+                  </Card>
+                  )}
+                  </form>
+                  </div>
+                  </div>
 
-            {/* Right side - Commentaires et Historique Sidebar - 30% */}
-            <div className="flex-[0_0_30%] flex flex-col overflow-hidden pt-10">
+                  {/* Right side - Commentaires et Historique Sidebar - 30% */}
+                  <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
             {/* Header Tabs Commentaires/Historique - Collapsible */}
             <div 
               className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
