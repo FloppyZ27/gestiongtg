@@ -533,14 +533,11 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
-          <DialogHeader className="sr-only">
+          <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
             <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
           </DialogHeader>
-          <div className="flex h-[90vh]">
+          <div className="flex h-[calc(90vh-80px)]">
             <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white">Modifier le dossier</h2>
-              </div>
 
               <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-3 gap-4">
