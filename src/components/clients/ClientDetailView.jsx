@@ -422,149 +422,147 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
                 </Label>
 
                 {/* Filtres et recherche */}
-                <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-3 mb-3">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                        <Input
-                          placeholder="Rechercher..."
-                          value={dossierSearchTerm}
-                          onChange={(e) => setDossierSearchTerm(e.target.value)}
-                          className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                        />
-                      </div>
-
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                        className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
-                      >
-                        <Filter className="w-4 h-4 mr-2" />
-                        <span className="text-sm">Filtres</span>
-                        {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterVille.length > 0) && (
-                          <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                            {filterArpenteur.length + filterTypeMandat.length + filterVille.length}
-                          </Badge>
-                        )}
-                        {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
-                      </Button>
+                <div className="space-y-3 mb-3">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input
+                        placeholder="Rechercher..."
+                        value={dossierSearchTerm}
+                        onChange={(e) => setDossierSearchTerm(e.target.value)}
+                        className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                      />
                     </div>
 
-                    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                      <CollapsibleContent>
-                        <div className="p-2 border border-emerald-500/30 rounded-lg">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
-                              <div className="flex items-center gap-2">
-                                <Filter className="w-3 h-3 text-emerald-500" />
-                                <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
-                              </div>
-                              {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterVille.length > 0) && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setFilterArpenteur([]);
-                                    setFilterTypeMandat([]);
-                                    setFilterVille([]);
-                                  }}
-                                  className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
-                                >
-                                  <X className="w-2.5 h-2.5 mr-1" />
-                                  Réinitialiser
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                      className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                    >
+                      <Filter className="w-4 h-4 mr-2" />
+                      <span className="text-sm">Filtres</span>
+                      {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterVille.length > 0) && (
+                        <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                          {filterArpenteur.length + filterTypeMandat.length + filterVille.length}
+                        </Badge>
+                      )}
+                      {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                    </Button>
+                  </div>
+
+                  <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                    <CollapsibleContent>
+                      <div className="p-2 border border-emerald-500/30 rounded-lg">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                            <div className="flex items-center gap-2">
+                              <Filter className="w-3 h-3 text-emerald-500" />
+                              <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                            </div>
+                            {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterVille.length > 0) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setFilterArpenteur([]);
+                                  setFilterTypeMandat([]);
+                                  setFilterVille([]);
+                                }}
+                                className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                              >
+                                <X className="w-2.5 h-2.5 mr-1" />
+                                Réinitialiser
+                              </Button>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                  <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
+                                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                 </Button>
-                              )}
-                            </div>
-                            
-                            <div className="grid grid-cols-3 gap-2">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                    <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
-                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                  {ARPENTEURS.map((arp) => (
-                                    <DropdownMenuCheckboxItem
-                                      key={arp}
-                                      checked={filterArpenteur.includes(arp)}
-                                      onCheckedChange={(checked) => {
-                                        setFilterArpenteur(
-                                          checked
-                                            ? [...filterArpenteur, arp]
-                                            : filterArpenteur.filter((a) => a !== arp)
-                                        );
-                                      }}
-                                      className="text-white"
-                                    >
-                                      {arp}
-                                    </DropdownMenuCheckboxItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                                {ARPENTEURS.map((arp) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={arp}
+                                    checked={filterArpenteur.includes(arp)}
+                                    onCheckedChange={(checked) => {
+                                      setFilterArpenteur(
+                                        checked
+                                          ? [...filterArpenteur, arp]
+                                          : filterArpenteur.filter((a) => a !== arp)
+                                      );
+                                    }}
+                                    className="text-white"
+                                  >
+                                    {arp}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
 
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                    <span className="truncate">Types ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
-                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                  {uniqueTypesMandats.map((type) => (
-                                    <DropdownMenuCheckboxItem
-                                      key={type}
-                                      checked={filterTypeMandat.includes(type)}
-                                      onCheckedChange={(checked) => {
-                                        setFilterTypeMandat(
-                                          checked
-                                            ? [...filterTypeMandat, type]
-                                            : filterTypeMandat.filter((t) => t !== type)
-                                        );
-                                      }}
-                                      className="text-white"
-                                    >
-                                      {type}
-                                    </DropdownMenuCheckboxItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                  <span className="truncate">Types ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
+                                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                                {uniqueTypesMandats.map((type) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={type}
+                                    checked={filterTypeMandat.includes(type)}
+                                    onCheckedChange={(checked) => {
+                                      setFilterTypeMandat(
+                                        checked
+                                          ? [...filterTypeMandat, type]
+                                          : filterTypeMandat.filter((t) => t !== type)
+                                      );
+                                    }}
+                                    className="text-white"
+                                  >
+                                    {type}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
 
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                                    <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
-                                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                                  {uniqueVilles.map((ville) => (
-                                    <DropdownMenuCheckboxItem
-                                      key={ville}
-                                      checked={filterVille.includes(ville)}
-                                      onCheckedChange={(checked) => {
-                                        setFilterVille(
-                                          checked
-                                            ? [...filterVille, ville]
-                                            : filterVille.filter((v) => v !== ville)
-                                        );
-                                      }}
-                                      className="text-white"
-                                    >
-                                      {ville}
-                                    </DropdownMenuCheckboxItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                  <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
+                                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                                {uniqueVilles.map((ville) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={ville}
+                                    checked={filterVille.includes(ville)}
+                                    onCheckedChange={(checked) => {
+                                      setFilterVille(
+                                        checked
+                                          ? [...filterVille, ville]
+                                          : filterVille.filter((v) => v !== ville)
+                                      );
+                                    }}
+                                    className="text-white"
+                                  >
+                                    {ville}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
 
                 <div className="border border-slate-700 rounded-lg overflow-hidden">
