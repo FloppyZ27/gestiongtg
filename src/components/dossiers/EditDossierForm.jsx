@@ -1792,12 +1792,10 @@ export default function EditDossierForm({
                                   </TooltipProvider>
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-[10px] font-semibold flex-shrink-0">
-                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name?.split(' ').map(n => n[0]).join('') || "?"}
-                                    </div>
-                                    <span className="truncate">
-                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name || entree.utilisateur_email || "-"}
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex-shrink-0"></div>
+                                    <span>
+                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name?.split(' ').map(n => n[0]).join('') || "-"}
                                     </span>
                                   </div>
                                 </TableCell>
