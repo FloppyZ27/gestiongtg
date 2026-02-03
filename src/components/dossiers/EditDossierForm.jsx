@@ -1798,15 +1798,15 @@ export default function EditDossierForm({
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
                                   <div className="flex items-center gap-1.5">
+                                    <span>
+                                      {getUserInitials(users.find(u => u.email === entree.utilisateur_email)?.full_name) || "-"}
+                                    </span>
                                     <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
                                       <AvatarImage src={users.find(u => u.email === entree.utilisateur_email)?.photo_url} />
                                       <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
                                         {getUserInitials(users.find(u => u.email === entree.utilisateur_email)?.full_name)}
                                       </AvatarFallback>
                                     </Avatar>
-                                    <span>
-                                      {getUserInitials(users.find(u => u.email === entree.utilisateur_email)?.full_name) || "-"}
-                                    </span>
                                   </div>
                                 </TableCell>
                               </TableRow>
