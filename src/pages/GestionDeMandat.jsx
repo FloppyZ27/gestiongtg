@@ -468,11 +468,19 @@ export default function GestionDeMandat() {
             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
               <User className="w-3 h-3 text-emerald-500" />
             </div>
-          )}
-        </div>
-      </div>
-    );
-  };
+            )}
+            </div>
+
+            {/* Barre de progression */}
+            <div className="mt-2 w-full bg-slate-900/50 h-1.5 rounded-full overflow-hidden border border-slate-700/50">
+            <div 
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" 
+            style={{ width: `${((TACHES.indexOf(card.mandat.tache_actuelle) + 1) / TACHES.length) * 100}%` }}
+            />
+            </div>
+            </div>
+            );
+            };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
