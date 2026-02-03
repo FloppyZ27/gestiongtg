@@ -19,6 +19,7 @@ import AddressInput from "../shared/AddressInput";
 import ClientFormDialog from "../clients/ClientFormDialog";
 import ClientDetailView from "../clients/ClientDetailView";
 import MandatTabs from "./MandatTabs";
+import EditDossierForm from "./EditDossierForm";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 
