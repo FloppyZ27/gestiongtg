@@ -765,265 +765,305 @@ function LayoutContent({ children, currentPageName }) {
           setIsEntreeTempsOpen(open);
         }
       }}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Nouvelle entrée de temps</DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex-1 flex gap-6 overflow-hidden">
-            {/* Colonne gauche - Sélection du dossier (60%) */}
-            <div className="flex-[0_0_60%] flex flex-col space-y-4 overflow-hidden">
-              <Label className="text-lg font-semibold">Sélection du dossier</Label>
-              
-              {!selectedDossierId ? (
-                <>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher un dossier..."
-                      value={dossierSearchTerm}
-                      onChange={(e) => setDossierSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800 border-slate-700"
-                    />
-                  </div>
-                  
-                  {/* Tableau de sélection des dossiers */}
-                  <div className="flex-1 overflow-hidden border border-slate-700 rounded-lg">
-                    <div className="overflow-y-auto max-h-[500px]">
-                      <Table>
-                        <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
-                          <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                            <TableHead className="text-slate-300">N° Dossier</TableHead>
-                            <TableHead className="text-slate-300">Clients</TableHead>
-                            <TableHead className="text-slate-300">Mandats</TableHead>
-                            <TableHead className="text-slate-300">Adresse</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).map((dossier) => {
-                            const clientsNames = getClientsNames(dossier.clients_ids);
-                            return (
-                              <TableRow
-                                key={dossier.id}
-                                className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                                onClick={() => handleDossierSelect(dossier.id)}
-                              >
-                                <TableCell className="font-medium">
-                                  <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                    {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm">
-                                  {clientsNames || "-"}
-                                </TableCell>
-                                <TableCell className="text-slate-300">
-                                  {dossier.mandats && dossier.mandats.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                        <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                          {mandat.type_mandat}
-                                        </Badge>
-                                      ))}
-                                      {dossier.mandats.length > 2 && (
-                                        <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                          +{dossier.mandats.length - 2}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <span className="text-slate-600 text-xs">Aucun</span>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-slate-300 text-sm max-w-xs truncate">
-                                  {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                          {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).length === 0 && (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center py-8 text-slate-500">
-                                Aucun dossier trouvé
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-                    <div className="flex-1">
-                      <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2`}>
-                        {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                      </Badge>
-                      <p className="text-slate-400 text-sm">{getClientsNames(selectedDossier?.clients_ids)}</p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedDossierId(null);
-                        setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
-                      }}
-                      className="text-slate-400"
-                    >
-                      Changer
-                    </Button>
-                  </div>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
+          </div>
 
-                  {availableMandats.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Mandat</Label>
-                      <Select value={entreeForm.mandat} onValueChange={(value) => {
-                        const mandat = availableMandats.find(m => m.type_mandat === value);
-                        setEntreeForm({
-                          ...entreeForm, 
-                          mandat: value,
-                          tache_suivante: mandat?.tache_actuelle || "",
-                          utilisateur_assigne: mandat?.utilisateur_assigne || ""
-                        });
-                        setHasEntreeChanges(true);
-                      }}>
-                        <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                          <SelectValue placeholder="Sélectionner un mandat" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
-                          {availableMandats.map((mandat, index) => (
-                            <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white">
-                              {mandat.type_mandat || `Mandat ${index + 1}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+          <div className="flex-1 overflow-y-auto p-6 pt-3">
+            <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
+              {/* Section Informations du dossier */}
+              <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+                <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                      <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <h3 className="text-emerald-300 text-base font-semibold">Informations du dossier</h3>
+                    {selectedDossier && (
+                      <span className="text-slate-300 text-xs">
+                        {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 pb-3 px-4">
+                  {!selectedDossierId ? (
+                    <>
+                      <div className="relative mb-3">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          placeholder="Rechercher un dossier..."
+                          value={dossierSearchTerm}
+                          onChange={(e) => setDossierSearchTerm(e.target.value)}
+                          className="pl-10 bg-slate-800 border-slate-700 h-8 text-sm"
+                        />
+                      </div>
+
+                      <div className="overflow-hidden border border-slate-700 rounded-lg">
+                        <div className="overflow-y-auto max-h-[300px]">
+                          <Table>
+                            <TableHeader className="sticky top-0 bg-slate-800/95 z-10">
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).map((dossier) => {
+                                const clientsNames = getClientsNames(dossier.clients_ids);
+                                return (
+                                  <TableRow
+                                    key={dossier.id}
+                                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                    onClick={() => handleDossierSelect(dossier.id)}
+                                  >
+                                    <TableCell className="font-medium text-xs">
+                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {clientsNames || "-"}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {dossier.mandats && dossier.mandats.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1">
+                                          {dossier.mandats.slice(0, 2).map((mandat, idx) => (
+                                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                              {mandat.type_mandat}
+                                            </Badge>
+                                          ))}
+                                          {dossier.mandats.length > 2 && (
+                                            <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                              +{dossier.mandats.length - 2}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <span className="text-slate-600 text-xs">Aucun</span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs max-w-xs truncate">
+                                      {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                              {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).length === 0 && (
+                                <TableRow>
+                                  <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-xs">
+                                    Aucun dossier trouvé
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                        <div className="flex-1">
+                          <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2 text-xs`}>
+                            {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                          </Badge>
+                          <p className="text-slate-400 text-xs">{getClientsNames(selectedDossier?.clients_ids)}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedDossierId(null);
+                            setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
+                          }}
+                          className="text-slate-400 text-xs h-7"
+                        >
+                          Changer
+                        </Button>
+                      </div>
+
+                      {availableMandats.length > 0 && (
+                        <div className="space-y-1">
+                          <Label className="text-xs text-slate-400">Mandat</Label>
+                          <Select value={entreeForm.mandat} onValueChange={(value) => {
+                            const mandat = availableMandats.find(m => m.type_mandat === value);
+                            setEntreeForm({
+                              ...entreeForm, 
+                              mandat: value,
+                              tache_suivante: mandat?.tache_actuelle || "",
+                              utilisateur_assigne: mandat?.utilisateur_assigne || ""
+                            });
+                            setHasEntreeChanges(true);
+                          }}>
+                            <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner un mandat" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {availableMandats.map((mandat, index) => (
+                                <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white text-xs">
+                                  {mandat.type_mandat || `Mandat ${index + 1}`}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   )}
+                </div>
+              </div>
 
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea
-                      value={entreeForm.description}
-                      onChange={(e) => {
-                        setEntreeForm({...entreeForm, description: e.target.value});
-                        setHasEntreeChanges(true);
-                      }}
-                      placeholder="Détails supplémentaires..."
-                      className="bg-slate-800 border-slate-700 h-32"
-                    />
+              {/* Section Détails de l'entrée */}
+              {selectedDossierId && (
+                <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+                  <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                        <Timer className="w-3.5 h-3.5 text-emerald-400" />
+                      </div>
+                      <h3 className="text-emerald-300 text-base font-semibold">Détails de l'entrée</h3>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 pb-3 px-4">
+                    <div className="border-2 border-emerald-500/30 rounded-lg p-4 bg-emerald-900/10">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                          <Input
+                            type="date"
+                            value={entreeForm.date}
+                            onChange={(e) => {
+                              setEntreeForm({...entreeForm, date: e.target.value});
+                              setHasEntreeChanges(true);
+                            }}
+                            required
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
+                          <Input
+                            type="number"
+                            step="0.25"
+                            min="0"
+                            value={entreeForm.heures}
+                            onChange={(e) => {
+                              setEntreeForm({...entreeForm, heures: e.target.value});
+                              setHasEntreeChanges(true);
+                            }}
+                            required
+                            placeholder="Ex: 2.5"
+                            className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
+                          <Select value={entreeForm.tache} onValueChange={(value) => {
+                            setEntreeForm({...entreeForm, tache: value});
+                            setHasEntreeChanges(true);
+                          }}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {TACHES.map((tache) => (
+                                <SelectItem key={tache} value={tache} className="text-white text-xs">
+                                  {tache}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Tâche suivante</Label>
+                          <Select value={entreeForm.tache_suivante} onValueChange={(value) => {
+                            setEntreeForm({...entreeForm, tache_suivante: value});
+                            setHasEntreeChanges(true);
+                          }}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              {TACHES.map((tache) => (
+                                <SelectItem key={tache} value={tache} className="text-white text-xs">
+                                  {tache}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                          <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => {
+                            setEntreeForm({...entreeForm, utilisateur_assigne: value});
+                            setHasEntreeChanges(true);
+                          }}>
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue placeholder="Sélectionner" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-700">
+                              <SelectItem value={""} className="text-white text-xs">Aucun</SelectItem>
+                              {users.map((usr) => (
+                                <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">
+                                  {usr.full_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 space-y-1">
+                        <Label className="text-slate-400 text-xs">Description</Label>
+                        <Textarea
+                          value={entreeForm.description}
+                          onChange={(e) => {
+                            setEntreeForm({...entreeForm, description: e.target.value});
+                            setHasEntreeChanges(true);
+                          }}
+                          placeholder="Détails supplémentaires..."
+                          className="bg-slate-700 border-slate-600 text-white h-20 text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Colonne droite - Champs de formulaire (40%) */}
-            <div className="flex-[0_0_40%] flex flex-col space-y-4 overflow-y-auto border-l border-slate-700 pl-6 pr-6">
-              <Label className="text-lg font-semibold">Détails de l'entrée</Label>
-              
-              <div className="space-y-2">
-                <Label>Date <span className="text-red-400">*</span></Label>
-                <Input
-                  type="date"
-                  value={entreeForm.date}
-                  onChange={(e) => {
-                    setEntreeForm({...entreeForm, date: e.target.value});
-                    setHasEntreeChanges(true);
-                  }}
-                  required
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Temps <span className="text-red-400">*</span></Label>
-                <Input
-                  type="number"
-                  step="0.25"
-                  min="0"
-                  value={entreeForm.heures}
-                  onChange={(e) => {
-                    setEntreeForm({...entreeForm, heures: e.target.value});
-                    setHasEntreeChanges(true);
-                  }}
-                  required
-                  placeholder="Ex: 2.5"
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Tâche accomplie <span className="text-red-400">*</span></Label>
-                <Select value={entreeForm.tache} onValueChange={(value) => {
-                  setEntreeForm({...entreeForm, tache: value});
-                  setHasEntreeChanges(true);
-                }}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner une tâche" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {TACHES.map((tache) => (
-                      <SelectItem key={tache} value={tache} className="text-white">
-                        {tache}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Tâche suivante</Label>
-                <Select value={entreeForm.tache_suivante} onValueChange={(value) => {
-                  setEntreeForm({...entreeForm, tache_suivante: value});
-                  setHasEntreeChanges(true);
-                }}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner une tâche" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    {TACHES.map((tache) => (
-                      <SelectItem key={tache} value={tache} className="text-white">
-                        {tache}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Utilisateur assigné</Label>
-                <Select value={entreeForm.utilisateur_assigne} onValueChange={(value) => {
-                  setEntreeForm({...entreeForm, utilisateur_assigne: value});
-                  setHasEntreeChanges(true);
-                }}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner un utilisateur" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value={null} className="text-white">Aucun utilisateur</SelectItem>
-                    {users.map((user) => (
-                      <SelectItem key={user.email} value={user.email} className="text-white">
-                        {user.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            </form>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={() => {
-              if (hasEntreeChanges) {
-                setShowUnsavedWarning(true);
-              } else {
-                setIsEntreeTempsOpen(false);
-              }
-            }} className="border-red-500 text-red-400 hover:bg-red-500/10">
+          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm"
+              onClick={() => {
+                if (hasEntreeChanges) {
+                  setShowUnsavedWarning(true);
+                } else {
+                  setIsEntreeTempsOpen(false);
+                }
+              }}
+            >
               Annuler
             </Button>
-            <Button type="submit" onClick={handleSubmit} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+            <Button 
+              type="submit" 
+              form="entree-temps-form" 
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm"
+              disabled={!selectedDossierId}
+            >
               Enregistrer
             </Button>
           </div>
