@@ -1033,7 +1033,8 @@ function LayoutContent({ children, currentPageName }) {
                                   const matchesArpenteur = entreeTempsFilterArpenteur.length === 0 || entreeTempsFilterArpenteur.includes(dossier.arpenteur_geometre);
                                   const matchesMandat = entreeTempsFilterMandat.length === 0 || entreeTempsFilterMandat.includes(mandat.type_mandat);
                                   const matchesTache = entreeTempsFilterTache.length === 0 || entreeTempsFilterTache.includes(mandat.tache_actuelle);
-                                  return matchesArpenteur && matchesMandat && matchesTache;
+                                  const matchesVille = entreeTempsFilterVille.length === 0 || entreeTempsFilterVille.includes(mandat.adresse_travaux?.ville);
+                                  return matchesArpenteur && matchesMandat && matchesTache && matchesVille;
                                 }).map((mandat, idx) => {
                                   const lotsDisplay = mandat.lots && mandat.lots.length > 0 
                                     ? mandat.lots.map(lotId => {
