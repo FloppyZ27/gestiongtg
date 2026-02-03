@@ -359,13 +359,7 @@ export default function GestionDeMandat() {
   };
 
   const handleCardClick = (card) => {
-    setViewingDossier(card.dossier);
-    setIsViewDialogOpen(true);
-  };
-
-  const handleEdit = (dossier) => {
-    setIsViewDialogOpen(false);
-    setEditingDossier(dossier);
+    setEditingDossier(card.dossier);
     setIsEditingDialogOpen(true);
   };
 
