@@ -1881,7 +1881,7 @@ export default function EditDossierForm({
                        </div>
 
                        {!newRetourAppelFormCollapsed && (
-                         <div className="space-y-3">
+                         <div className="p-4 border-t border-blue-500/30 space-y-3">
                            <div className="grid grid-cols-[1fr_1fr] gap-3">
                              <div className="space-y-3">
                                <div className="space-y-1">
