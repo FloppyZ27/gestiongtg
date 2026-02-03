@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
@@ -272,490 +273,448 @@ export default function EditDossierForm({
         )}
       </div>
 
-      {/* Section Carte/Informations du dossier sur toute la largeur */}
-      <div className="px-6 pt-4 pb-4 border-b border-slate-800 flex-shrink-0">
-        <form id="edit-dossier-form" onSubmit={(e) => {
-          if (!editingDossier) {
-            onSubmit(e);
-          } else {
-            e.preventDefault();
-          }
-        }}>
-          <Card className="border-slate-700 bg-slate-800/30">
-              <CardHeader 
-                className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
-                onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                      <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
-                    </div>
-                    <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
-                    {formData.numero_dossier && (
-                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
-                        {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                      </Badge>
-                    )}
-                  </div>
-                  {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                </div>
-              </CardHeader>
-
-              {!infoDossierCollapsed && (
-                <CardContent className="pt-2 pb-3">
-                  <div className="grid grid-cols-[33%_67%] gap-4">
-                    {/* Colonne gauche - Informations de base */}
-                    <div className="space-y-2 border-r border-slate-700 pr-4">
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
-                        <Select value={formData.arpenteur_geometre} onValueChange={(value) => {
-                          const newNumeroDossier = !editingDossier && calculerProchainNumeroDossier ? calculerProchainNumeroDossier(value) : formData.numero_dossier;
-                          setFormData({...formData, arpenteur_geometre: value, numero_dossier: newNumeroDossier});
-                        }}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            {ARPENTEURS.map((arpenteur) => (
-                              <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-                        <Select value={formData.place_affaire || ""} onValueChange={(value) => setFormData({...formData, place_affaire: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
-                            <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
-                        <Input value={formData.numero_dossier} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
-                        <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Statut</Label>
-                        <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
-                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-700">
-                            <SelectItem value="Ouvert" className="text-white text-sm">Ouvert</SelectItem>
-                            <SelectItem value="Fermé" className="text-white text-sm">Fermé</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Colonne droite - Tabs Clients/Notaires/Courtiers */}
-                    <div>
-                      <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
-                          <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            Clients {formData.clients_ids.length > 0 && `(${formData.clients_ids.length})`}
-                          </TabsTrigger>
-                          <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
-                            <FileText className="w-3 h-3" />
-                            Notaires {formData.notaires_ids.length > 0 && `(${formData.notaires_ids.length})`}
-                          </TabsTrigger>
-                          <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            Courtiers {formData.courtiers_ids.length > 0 && `(${formData.courtiers_ids.length})`}
-                          </TabsTrigger>
-                          <TabsTrigger value="compagnies" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
-                            <Briefcase className="w-3 h-3" />
-                            Compagnies {(formData.compagnies_ids || []).length > 0 && `(${formData.compagnies_ids.length})`}
-                          </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="clients" className="mt-2">
-                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                            {/* Colonne gauche - Clients sélectionnés */}
-                            <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                  {formData.clients_ids.length > 0 ? (
-                                    <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                      {formData.clients_ids.map(clientId => {
-                                        const client = clients.find(c => c.id === clientId);
-                                        if (!client) return null;
-                                        const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
-                                        const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
-                                        return (
-                                          <div 
-                                           key={clientId} 
-                                           className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-blue-500/30 transition-colors"
-                                           onClick={() => {
-                                             if (setEditingClient) {
-                                               setEditingClient(client);
-                                               setIsClientFormDialogOpen(true);
-                                             }
-                                           }}
-                                          >
-                                            <button 
-                                              type="button" 
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                removeClient(clientId, 'clients');
-                                              }} 
-                                              className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
-                                            >
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <div className="space-y-1 pr-4">
-                                              <div className="font-semibold">{client.prenom} {client.nom}</div>
-                                              {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
-                                              {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
-                                      Aucun client sélectionné
-                                    </div>
-                                  )}
-                                </div>
-                                {!contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronUp className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                                {contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronDown className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Colonne droite - Liste des clients existants */}
-                            <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                              <div className="mb-2 flex gap-2">
-                                <div className="relative flex-1">
-                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input placeholder="Rechercher..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
-                                </div>
-                                <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Client"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
-                              <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                {filteredClientsForSelector.length > 0 ? (
-                                  filteredClientsForSelector.slice(0, 15).map((client) => {
-                                    const isSelected = formData.clients_ids.includes(client.id);
-                                    return (
-                                      <div key={client.id} onClick={() => {
-                                        setFormData(prev => ({
-                                          ...prev,
-                                          clients_ids: prev.clients_ids.includes(client.id)
-                                            ? prev.clients_ids.filter(id => id !== client.id)
-                                            : [...prev.clients_ids, client.id]
-                                        }));
-                                      }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-medium truncate">{client.prenom} {client.nom}</span>
-                                          {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                                        </div>
-                                      </div>
-                                    );
-                                  })
-                                ) : (
-                                  <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-
-                        {/* Notaires Tab */}
-                        <TabsContent value="notaires" className="mt-2">
-                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                            <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                  {formData.notaires_ids.length > 0 ? (
-                                    <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                      {formData.notaires_ids.map(notaireId => {
-                                        const notaire = clients.find(c => c.id === notaireId);
-                                        if (!notaire) return null;
-                                        return (
-                                          <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-purple-500/30 transition-colors">
-                                            <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1 hover:text-red-400 text-purple-300">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <div className="space-y-1 pr-4">
-                                              <div className="font-semibold">{notaire.prenom} {notaire.nom}</div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucun notaire sélectionné</div>
-                                  )}
-                                </div>
-                                {!contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronUp className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                                {contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronDown className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                              <div className="mb-2 flex gap-2">
-                                <div className="relative flex-1">
-                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input placeholder="Rechercher..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
-                                </div>
-                                <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Notaire"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
-                              <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                {filteredNotairesForSelector.slice(0, 15).map((notaire) => {
-                                  const isSelected = formData.notaires_ids.includes(notaire.id);
-                                  return (
-                                    <div key={notaire.id} onClick={() => {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        notaires_ids: prev.notaires_ids.includes(notaire.id)
-                                          ? prev.notaires_ids.filter(id => id !== notaire.id)
-                                          : [...prev.notaires_ids, notaire.id]
-                                      }));
-                                    }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-medium truncate">{notaire.prenom} {notaire.nom}</span>
-                                        {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-
-                        {/* Courtiers Tab */}
-                        <TabsContent value="courtiers" className="mt-2">
-                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                            <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                  {formData.courtiers_ids.length > 0 ? (
-                                    <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                      {formData.courtiers_ids.map(courtierId => {
-                                        const courtier = clients.find(c => c.id === courtierId);
-                                        if (!courtier) return null;
-                                        return (
-                                          <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/30 transition-colors">
-                                            <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1 hover:text-red-400 text-orange-300">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <div className="space-y-1 pr-4">
-                                              <div className="font-semibold">{courtier.prenom} {courtier.nom}</div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucun courtier sélectionné</div>
-                                  )}
-                                </div>
-                                {!contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronUp className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                                {contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronDown className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                              <div className="mb-2 flex gap-2">
-                                <div className="relative flex-1">
-                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
-                                </div>
-                                <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Courtier immobilier"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
-                              <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                {filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
-                                  const isSelected = formData.courtiers_ids.includes(courtier.id);
-                                  return (
-                                    <div key={courtier.id} onClick={() => {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        courtiers_ids: prev.courtiers_ids.includes(courtier.id)
-                                          ? prev.courtiers_ids.filter(id => id !== courtier.id)
-                                          : [...prev.courtiers_ids, courtier.id]
-                                      }));
-                                    }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-medium truncate">{courtier.prenom} {courtier.nom}</span>
-                                        {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-
-                        {/* Compagnies Tab */}
-                        <TabsContent value="compagnies" className="mt-2">
-                          <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
-                            <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
-                                  {(formData.compagnies_ids || []).length > 0 ? (
-                                    <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                      {formData.compagnies_ids.map(compagnieId => {
-                                        const compagnie = clients.find(c => c.id === compagnieId);
-                                        if (!compagnie) return null;
-                                        return (
-                                          <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-green-500/30 transition-colors">
-                                            <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)})); }} className="absolute right-1 top-1 hover:text-red-400 text-green-300">
-                                              <X className="w-3 h-3" />
-                                            </button>
-                                            <div className="space-y-1 pr-4">
-                                              <div className="font-semibold">{compagnie.prenom} {compagnie.nom}</div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucune compagnie sélectionnée</div>
-                                  )}
-                                </div>
-                                {!contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronUp className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                                {contactsListCollapsed && (
-                                  <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
-                                    <ChevronDown className="w-4 h-4 rotate-90" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
-                              <div className="mb-2 flex gap-2">
-                                <div className="relative flex-1">
-                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
-                                  <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
-                                </div>
-                                <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Compagnie"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-slate-400 text-xs mb-2">Compagnies existantes ({filteredCompagniesForSelector.length})</p>
-                              <div className="max-h-[200px] overflow-y-auto space-y-1">
-                                {filteredCompagniesForSelector.slice(0, 15).map((compagnie) => {
-                                  const isSelected = (formData.compagnies_ids || []).includes(compagnie.id);
-                                  return (
-                                    <div key={compagnie.id} onClick={() => {
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        compagnies_ids: (prev.compagnies_ids || []).includes(compagnie.id)
-                                          ? prev.compagnies_ids.filter(id => id !== compagnie.id)
-                                          : [...(prev.compagnies_ids || []), compagnie.id]
-                                      }));
-                                    }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-medium truncate">{compagnie.prenom} {compagnie.nom}</span>
-                                        {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-        </form>
-      </div>
-
-      {/* Section Carte sur toute la largeur */}
-      {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
-        formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
-      ) && (
-        <div className="px-6 pt-4 pb-4 border-b border-slate-800 flex-shrink-0">
-          <div 
-            className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border border-slate-800 rounded-t-lg flex items-center justify-between bg-slate-900/50"
-            onClick={() => setMapCollapsed(!mapCollapsed)}
-          >
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-slate-400" />
-              <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
-            </div>
-            {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-          </div>
-          {!mapCollapsed && (
-            <div className="bg-slate-800/50 border border-slate-700 border-t-0 rounded-b-lg overflow-hidden">
-              <div className="aspect-video w-full max-h-[400px]">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-                    `${formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${formData.mandats[activeTabMandat]?.adresse_travaux?.rue || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.ville || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.province || 'Québec'}, Canada`
-                  )}&zoom=15`}
-                />
-              </div>
-              <div className="p-3 bg-slate-800/80 border-t border-slate-700">
-                <p className="text-sm text-slate-300">
-                  📍 {formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0]} {formData.mandats[activeTabMandat]?.adresse_travaux?.rue}, {formData.mandats[activeTabMandat]?.adresse_travaux?.ville}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Division 70%-30% pour Mandats et Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Main content - 70% */}
         <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
           <div className="flex-1 overflow-y-auto p-6">
+            {/* Section Informations du dossier */}
+            <form id="edit-dossier-form" onSubmit={(e) => {
+              if (!editingDossier) {
+                onSubmit(e);
+              } else {
+                e.preventDefault();
+              }
+            }}>
+              <Card className="border-slate-700 bg-slate-800/30 mb-3">
+                  <CardHeader 
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
+                    onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                          <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                        </div>
+                        <CardTitle className="text-blue-300 text-base">Informations du dossier</CardTitle>
+                        {formData.numero_dossier && (
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                            {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                          </Badge>
+                        )}
+                      </div>
+                      {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                    </div>
+                  </CardHeader>
+
+                  {!infoDossierCollapsed && (
+                    <CardContent className="pt-2 pb-3">
+                      <div className="grid grid-cols-[33%_67%] gap-4">
+                        {/* Colonne gauche - Informations de base */}
+                        <div className="space-y-2 border-r border-slate-700 pr-4">
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Arpenteur-géomètre <span className="text-red-400">*</span></Label>
+                            <Select value={formData.arpenteur_geometre} onValueChange={(value) => {
+                              const newNumeroDossier = !editingDossier && calculerProchainNumeroDossier ? calculerProchainNumeroDossier(value) : formData.numero_dossier;
+                              setFormData({...formData, arpenteur_geometre: value, numero_dossier: newNumeroDossier});
+                            }}>
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                <SelectValue placeholder="Sélectionner" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                {ARPENTEURS.map((arpenteur) => (
+                                  <SelectItem key={arpenteur} value={arpenteur} className="text-white text-sm">{arpenteur}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Place d'affaire</Label>
+                            <Select value={formData.place_affaire || ""} onValueChange={(value) => setFormData({...formData, place_affaire: value})}>
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                <SelectValue placeholder="Sélectionner" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectItem value="Alma" className="text-white text-sm">Alma</SelectItem>
+                                <SelectItem value="Saguenay" className="text-white text-sm">Saguenay</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">N° de dossier <span className="text-red-400">*</span></Label>
+                            <Input value={formData.numero_dossier} onChange={(e) => setFormData({...formData, numero_dossier: e.target.value})} required placeholder="Ex: 2024-001" className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Date d'ouverture <span className="text-red-400">*</span></Label>
+                            <Input type="date" value={formData.date_ouverture} onChange={(e) => setFormData({...formData, date_ouverture: e.target.value})} required className="bg-slate-700 border-slate-600 text-white h-7 text-sm" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Statut</Label>
+                            <Select value={formData.statut} onValueChange={(value) => setFormData({...formData, statut: value})}>
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
+                                <SelectValue placeholder="Sélectionner" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-700">
+                                <SelectItem value="Ouvert" className="text-white text-sm">Ouvert</SelectItem>
+                                <SelectItem value="Fermé" className="text-white text-sm">Fermé</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Colonne droite - Tabs Clients/Notaires/Courtiers */}
+                        <div>
+                          <Tabs value={activeContactTab} onValueChange={setActiveContactTab} className="w-full">
+                            <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 h-7">
+                              <TabsTrigger value="clients" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                Clients {formData.clients_ids.length > 0 && `(${formData.clients_ids.length})`}
+                              </TabsTrigger>
+                              <TabsTrigger value="notaires" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                Notaires {formData.notaires_ids.length > 0 && `(${formData.notaires_ids.length})`}
+                              </TabsTrigger>
+                              <TabsTrigger value="courtiers" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                Courtiers {formData.courtiers_ids.length > 0 && `(${formData.courtiers_ids.length})`}
+                              </TabsTrigger>
+                              <TabsTrigger value="compagnies" className="text-xs data-[state=active]:bg-blue-500/30 data-[state=active]:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-400 flex items-center gap-1">
+                                <Briefcase className="w-3 h-3" />
+                                Compagnies {(formData.compagnies_ids || []).length > 0 && `(${formData.compagnies_ids.length})`}
+                              </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="clients" className="mt-2">
+                              <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                {/* Colonne gauche - Clients sélectionnés */}
+                                <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                      {formData.clients_ids.length > 0 ? (
+                                        <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                          {formData.clients_ids.map(clientId => {
+                                            const client = clients.find(c => c.id === clientId);
+                                            if (!client) return null;
+                                            const currentPhone = client.telephones?.find(t => t.actuel)?.telephone || client.telephones?.[0]?.telephone || "";
+                                            const currentEmail = client.courriels?.find(c => c.actuel)?.courriel || client.courriels?.[0]?.courriel || "";
+                                            return (
+                                              <div 
+                                               key={clientId} 
+                                               className="bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-blue-500/30 transition-colors"
+                                               onClick={() => {
+                                                 if (setEditingClient) {
+                                                   setEditingClient(client);
+                                                   setIsClientFormDialogOpen(true);
+                                                 }
+                                               }}
+                                              >
+                                                <button 
+                                                  type="button" 
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeClient(clientId, 'clients');
+                                                  }} 
+                                                  className="absolute right-1 top-1 hover:text-red-400 text-blue-300"
+                                                >
+                                                  <X className="w-3 h-3" />
+                                                </button>
+                                                <div className="space-y-1 pr-4">
+                                                  <div className="font-semibold">{client.prenom} {client.nom}</div>
+                                                  {currentEmail && <div className="text-[10px] text-slate-300">✉️ {currentEmail}</div>}
+                                                  {currentPhone && <div className="text-[10px] text-slate-300">📞 {currentPhone}</div>}
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">
+                                          Aucun client sélectionné
+                                        </div>
+                                      )}
+                                    </div>
+                                    {!contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                    {contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronDown className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Colonne droite - Liste des clients existants */}
+                                <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                  <div className="mb-2 flex gap-2">
+                                    <div className="relative flex-1">
+                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Input placeholder="Rechercher..." value={clientSearchTerm} onChange={(e) => setClientSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
+                                    </div>
+                                    <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Client"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <p className="text-slate-400 text-xs mb-2">Clients existants ({filteredClientsForSelector.length})</p>
+                                  <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                    {filteredClientsForSelector.length > 0 ? (
+                                      filteredClientsForSelector.slice(0, 15).map((client) => {
+                                        const isSelected = formData.clients_ids.includes(client.id);
+                                        return (
+                                          <div key={client.id} onClick={() => {
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              clients_ids: prev.clients_ids.includes(client.id)
+                                                ? prev.clients_ids.filter(id => id !== client.id)
+                                                : [...prev.clients_ids, client.id]
+                                            }));
+                                          }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-medium truncate">{client.prenom} {client.nom}</span>
+                                              {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                            </div>
+                                          </div>
+                                        );
+                                      })
+                                    ) : (
+                                      <p className="text-slate-500 text-xs text-center py-2">Aucun client</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            {/* Notaires Tab */}
+                            <TabsContent value="notaires" className="mt-2">
+                              <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                      {formData.notaires_ids.length > 0 ? (
+                                        <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                          {formData.notaires_ids.map(notaireId => {
+                                            const notaire = clients.find(c => c.id === notaireId);
+                                            if (!notaire) return null;
+                                            return (
+                                              <div key={notaireId} className="bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-purple-500/30 transition-colors">
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(notaireId, 'notaires'); }} className="absolute right-1 top-1 hover:text-red-400 text-purple-300">
+                                                  <X className="w-3 h-3" />
+                                                </button>
+                                                <div className="space-y-1 pr-4">
+                                                  <div className="font-semibold">{notaire.prenom} {notaire.nom}</div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucun notaire sélectionné</div>
+                                      )}
+                                    </div>
+                                    {!contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                    {contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronDown className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                  <div className="mb-2 flex gap-2">
+                                    <div className="relative flex-1">
+                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Input placeholder="Rechercher..." value={notaireSearchTerm} onChange={(e) => setNotaireSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
+                                    </div>
+                                    <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Notaire"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <p className="text-slate-400 text-xs mb-2">Notaires existants ({filteredNotairesForSelector.length})</p>
+                                  <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                    {filteredNotairesForSelector.slice(0, 15).map((notaire) => {
+                                      const isSelected = formData.notaires_ids.includes(notaire.id);
+                                      return (
+                                        <div key={notaire.id} onClick={() => {
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            notaires_ids: prev.notaires_ids.includes(notaire.id)
+                                              ? prev.notaires_ids.filter(id => id !== notaire.id)
+                                              : [...prev.notaires_ids, notaire.id]
+                                          }));
+                                        }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+                                          <div className="flex items-center justify-between">
+                                            <span className="font-medium truncate">{notaire.prenom} {notaire.nom}</span>
+                                            {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            {/* Courtiers Tab */}
+                            <TabsContent value="courtiers" className="mt-2">
+                              <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                      {formData.courtiers_ids.length > 0 ? (
+                                        <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                          {formData.courtiers_ids.map(courtierId => {
+                                            const courtier = clients.find(c => c.id === courtierId);
+                                            if (!courtier) return null;
+                                            return (
+                                              <div key={courtierId} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-orange-500/30 transition-colors">
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); removeClient(courtierId, 'courtiers'); }} className="absolute right-1 top-1 hover:text-red-400 text-orange-300">
+                                                  <X className="w-3 h-3" />
+                                                </button>
+                                                <div className="space-y-1 pr-4">
+                                                  <div className="font-semibold">{courtier.prenom} {courtier.nom}</div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucun courtier sélectionné</div>
+                                      )}
+                                    </div>
+                                    {!contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                    {contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronDown className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                  <div className="mb-2 flex gap-2">
+                                    <div className="relative flex-1">
+                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
+                                    </div>
+                                    <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Courtier immobilier"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <p className="text-slate-400 text-xs mb-2">Courtiers existants ({filteredCourtiersForSelector.length})</p>
+                                  <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                    {filteredCourtiersForSelector.slice(0, 15).map((courtier) => {
+                                      const isSelected = formData.courtiers_ids.includes(courtier.id);
+                                      return (
+                                        <div key={courtier.id} onClick={() => {
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            courtiers_ids: prev.courtiers_ids.includes(courtier.id)
+                                              ? prev.courtiers_ids.filter(id => id !== courtier.id)
+                                              : [...prev.courtiers_ids, courtier.id]
+                                          }));
+                                        }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+                                          <div className="flex items-center justify-between">
+                                            <span className="font-medium truncate">{courtier.prenom} {courtier.nom}</span>
+                                            {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            {/* Compagnies Tab */}
+                            <TabsContent value="compagnies" className="mt-2">
+                              <div className={`grid ${contactsListCollapsed ? 'grid-cols-1' : 'grid-cols-[50%_50%]'} gap-4 transition-all`}>
+                                <div className={`space-y-2 ${!contactsListCollapsed && 'border-r border-slate-700 pr-4'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1 bg-slate-800/30 rounded-lg p-2 min-h-[60px]">
+                                      {(formData.compagnies_ids || []).length > 0 ? (
+                                        <div className={`grid ${contactsListCollapsed ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                                          {formData.compagnies_ids.map(compagnieId => {
+                                            const compagnie = clients.find(c => c.id === compagnieId);
+                                            if (!compagnie) return null;
+                                            return (
+                                              <div key={compagnieId} className="bg-green-500/20 text-green-400 border border-green-500/30 rounded p-2 text-xs relative cursor-pointer hover:bg-green-500/30 transition-colors">
+                                                <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({...prev, compagnies_ids: (prev.compagnies_ids || []).filter(id => id !== compagnieId)})); }} className="absolute right-1 top-1 hover:text-red-400 text-green-300">
+                                                  <X className="w-3 h-3" />
+                                                </button>
+                                                <div className="space-y-1 pr-4">
+                                                  <div className="font-semibold">{compagnie.prenom} {compagnie.nom}</div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div className="text-slate-500 text-xs text-center flex items-center justify-center h-full">Aucune compagnie sélectionnée</div>
+                                      )}
+                                    </div>
+                                    {!contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(true)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronUp className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                    {contactsListCollapsed && (
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setContactsListCollapsed(false)} className="text-slate-400 hover:text-white h-6 w-6 p-0">
+                                        <ChevronDown className="w-4 h-4 rotate-90" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className={`border-l border-slate-700 pl-3 pr-2 ${contactsListCollapsed ? 'hidden' : ''}`}>
+                                  <div className="mb-2 flex gap-2">
+                                    <div className="relative flex-1">
+                                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-500 w-3 h-3" />
+                                      <Input placeholder="Rechercher..." value={courtierSearchTerm} onChange={(e) => setCourtierSearchTerm(e.target.value)} className="pl-7 bg-slate-700 border-slate-600 h-6 text-xs" />
+                                    </div>
+                                    <Button type="button" size="sm" onClick={() => { setClientTypeForForm("Compagnie"); setIsClientFormDialogOpen(true); }} className="text-blue-400 hover:text-blue-300 h-6 w-6 p-0">
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <p className="text-slate-400 text-xs mb-2">Compagnies existantes ({filteredCompagniesForSelector.length})</p>
+                                  <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                    {filteredCompagniesForSelector.slice(0, 15).map((compagnie) => {
+                                      const isSelected = (formData.compagnies_ids || []).includes(compagnie.id);
+                                      return (
+                                        <div key={compagnie.id} onClick={() => {
+                                          setFormData(prev => ({
+                                            ...prev,
+                                            compagnies_ids: (prev.compagnies_ids || []).includes(compagnie.id)
+                                              ? prev.compagnies_ids.filter(id => id !== compagnie.id)
+                                              : [...(prev.compagnies_ids || []), compagnie.id]
+                                          }));
+                                        }} className={`px-2 py-1.5 rounded text-xs cursor-pointer ${isSelected ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'}`}>
+                                          <div className="flex items-center justify-between">
+                                            <span className="font-medium truncate">{compagnie.prenom} {compagnie.nom}</span>
+                                            {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </div>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+            </form>
+
             {/* Section Mandats */}
             <div className="space-y-3">
             <Card className="border-slate-700 bg-slate-800/30">
@@ -2021,6 +1980,48 @@ export default function EditDossierForm({
 
         {/* Sidebar - 30% */}
         <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+          {/* Section Carte */}
+          {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
+            formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
+          ) && (
+            <>
+              <div 
+                className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
+                onClick={() => setMapCollapsed(!mapCollapsed)}
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-slate-400" />
+                  <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
+                </div>
+                {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+              </div>
+              {!mapCollapsed && (
+                <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[35%]">
+                  <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
+                    <div className="aspect-square w-full max-h-[calc(100%-28px)]">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        allowFullScreen
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                          `${formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${formData.mandats[activeTabMandat]?.adresse_travaux?.rue || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.ville || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.province || 'Québec'}, Canada`
+                        )}&zoom=15`}
+                      />
+                    </div>
+                    <div className="p-2 bg-slate-800/80">
+                      <p className="text-xs text-slate-300 truncate">
+                        📍 {formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0]} {formData.mandats[activeTabMandat]?.adresse_travaux?.rue}, {formData.mandats[activeTabMandat]?.adresse_travaux?.ville}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          
           {/* Header Tabs Commentaires/Historique */}
           <div 
             className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
