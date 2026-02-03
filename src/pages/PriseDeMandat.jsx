@@ -2400,6 +2400,32 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
           <Dialog open={isDialogOpen} onOpenChange={async (open) => {
             if (!open) {
+              // Vérifier s'il y a des changements avant de fermer
+              const hasChanges = 
+                formData.arpenteur_geometre ||
+                formData.clients_ids.length > 0 ||
+                formData.notaires_ids.length > 0 ||
+                formData.courtiers_ids.length > 0 ||
+                formData.compagnies_ids.length > 0 ||
+                clientInfo.prenom ||
+                clientInfo.nom ||
+                clientInfo.telephone ||
+                clientInfo.courriel ||
+                professionnelInfo.notaire ||
+                professionnelInfo.courtier ||
+                professionnelInfo.compagnie ||
+                workAddress.rue ||
+                workAddress.ville ||
+                workAddress.numeros_civiques?.[0] ||
+                workAddress.numero_lot ||
+                mandatsInfo.some(m => m.type_mandat) ||
+                commentairesTemporaires.length > 0;
+              
+              if (hasChanges && !editingPriseMandat) {
+                setShowCancelConfirm(true);
+                return;
+              }
+              
               // Déverrouiller le mandat si on était en train de l'éditer
               if (editingPriseMandat && !isLocked) {
                 await base44.entities.PriseMandat.update(editingPriseMandat.id, {
