@@ -255,22 +255,40 @@ export default function GestionDeMandat() {
   };
 
   const getTacheColor = (tache) => {
-    const colors = {
-      "Ouverture": "bg-blue-500/10 border-blue-500/15",
-      "Cédule": "bg-cyan-500/10 border-cyan-500/15",
-      "Montage": "bg-purple-500/10 border-purple-500/15",
-      "Terrain": "bg-green-500/10 border-green-500/15",
-      "Compilation": "bg-yellow-500/10 border-yellow-500/15",
-      "Reliage": "bg-orange-500/10 border-orange-500/15",
-      "Décision/Calcul": "bg-pink-500/10 border-pink-500/15",
-      "Mise en plan": "bg-indigo-500/10 border-indigo-500/15",
-      "Analyse": "bg-teal-500/10 border-teal-500/15",
-      "Rapport": "bg-red-500/10 border-red-500/15",
-      "Vérification": "bg-amber-500/10 border-amber-500/15",
-      "Facturer": "bg-emerald-500/10 border-emerald-500/15"
-    };
-    return colors[tache] || "bg-slate-500/10 border-slate-500/15";
-  };
+       const colors = {
+         "Ouverture": "bg-blue-500/10 border-blue-500/15",
+         "Cédule": "bg-cyan-500/10 border-cyan-500/15",
+         "Montage": "bg-purple-500/10 border-purple-500/15",
+         "Terrain": "bg-green-500/10 border-green-500/15",
+         "Compilation": "bg-yellow-500/10 border-yellow-500/15",
+         "Reliage": "bg-orange-500/10 border-orange-500/15",
+         "Décision/Calcul": "bg-pink-500/10 border-pink-500/15",
+         "Mise en plan": "bg-indigo-500/10 border-indigo-500/15",
+         "Analyse": "bg-teal-500/10 border-teal-500/15",
+         "Rapport": "bg-red-500/10 border-red-500/15",
+         "Vérification": "bg-amber-500/10 border-amber-500/15",
+         "Facturer": "bg-emerald-500/10 border-emerald-500/15"
+       };
+       return colors[tache] || "bg-slate-500/10 border-slate-500/15";
+     };
+
+     const getMandatColor = (typeMandat) => {
+       const colors = {
+         "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+         "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+         "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+         "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+         "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+         "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+         "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+         "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+         "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+         "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+         "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+         "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+       };
+       return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+     };
 
   const getTacheHeaderColor = (tache) => {
     const colors = {
