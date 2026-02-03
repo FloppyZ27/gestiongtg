@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Mail, Phone, MapPin, Users, X, Check, FolderOpen, Eye, ArrowUpDown, ArrowUp, ArrowDown, Download, ChevronDown, Filter } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -311,62 +311,69 @@ export default function Clients() {
         </div>
         */}
 
+        {/* Filtres et recherche */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                />
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <span className="text-sm">Filtres</span>
+                    {filterType.length > 0 && (
+                      <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                        {filterType.length}
+                      </Badge>
+                    )}
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
+                  <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={filterType.length === 0}
+                    onCheckedChange={(checked) => {
+                      if (checked) setFilterType([]);
+                    }}
+                  >
+                    Tous
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  {["Client", "Notaire", "Courtier immobilier", "Compagnie"].map((type) => (
+                    <DropdownMenuCheckboxItem
+                      key={type}
+                      checked={filterType.includes(type)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterType([...filterType, type]);
+                        } else {
+                          setFilterType(filterType.filter((t) => t !== type));
+                        }
+                      }}
+                    >
+                      {type}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+        </Card>
+
         {/* Table */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
           <CardContent className="p-0">
-            <div className="p-6 border-b border-slate-800">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <CardTitle className="text-xl font-bold text-white">Liste des clients</CardTitle>
-                <div className="flex gap-3 w-full md:w-auto">
-                  <div className="relative flex-1 md:flex-initial md:w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                    <Input
-                      placeholder="Rechercher..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                    />
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-48 bg-slate-800/50 border-slate-700 text-white justify-between">
-                        <span>Types ({filterType.length || 'Tous'})</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={filterType.length === 0}
-                        onCheckedChange={(checked) => {
-                          if (checked) setFilterType([]);
-                        }}
-                      >
-                        Tous
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      {["Client", "Notaire", "Courtier immobilier", "Compagnie"].map((type) => (
-                        <DropdownMenuCheckboxItem
-                          key={type}
-                          checked={filterType.includes(type)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFilterType([...filterType, type]);
-                            } else {
-                              setFilterType(filterType.filter((t) => t !== type));
-                            }
-                          }}
-                        >
-                          {type}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
