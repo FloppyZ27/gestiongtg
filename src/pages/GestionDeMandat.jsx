@@ -180,9 +180,20 @@ export default function GestionDeMandat() {
     return matchesSearch && matchesArpenteur && matchesType && matchesUtilisateur;
   });
 
-  // Organiser les cartes par tâche
+  // Organiser les cartes par tâche avec tri
   const cardsByTache = TACHES.reduce((acc, tache) => {
-    acc[tache] = filteredCards.filter(card => card.tache === tache);
+    let cards = filteredCards.filter(card => card.tache === tache);
+    
+    // Appliquer le tri si défini
+    if (sortTaches[tache]) {
+      cards = [...cards].sort((a, b) => {
+        const dateA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
+        const dateB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
+        return sortTaches[tache] === "asc" ? dateA - dateB : dateB - dateA;
+      });
+    }
+    
+    acc[tache] = cards;
     return acc;
   }, {});
 
