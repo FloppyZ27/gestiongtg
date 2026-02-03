@@ -1766,7 +1766,9 @@ export default function EditDossierForm({
                                   {entree.heures}h
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
-                                  {entree.mandat || "-"}
+                                  <Badge className={`${getMandatColor(entree.mandat)} border text-xs`}>
+                                    {getAbbreviatedMandatType(entree.mandat) || "-"}
+                                  </Badge>
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
                                   <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
@@ -1790,7 +1792,14 @@ export default function EditDossierForm({
                                   </TooltipProvider>
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
-                                  {users.find(u => u.email === entree.utilisateur_email)?.full_name || entree.utilisateur_email || "-"}
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-[10px] font-semibold flex-shrink-0">
+                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name?.split(' ').map(n => n[0]).join('') || "?"}
+                                    </div>
+                                    <span className="truncate">
+                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name || entree.utilisateur_email || "-"}
+                                    </span>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
