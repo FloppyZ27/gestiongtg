@@ -816,8 +816,8 @@ function LayoutContent({ children, currentPageName }) {
         }
       }}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col">
-          <div className="sticky top-0 z-10 bg-slate-900 px-4 py-3 border-b border-slate-800">
-            <h2 className="text-lg font-bold text-white">Nouvelle entrée de temps</h2>
+          <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-3">
