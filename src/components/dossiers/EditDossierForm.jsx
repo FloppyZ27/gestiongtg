@@ -1868,9 +1868,9 @@ export default function EditDossierForm({
                 {!retourAppelCollapsed && (
                    <CardContent className="pt-4 pb-3 space-y-4">
                      {/* Formulaire d'ajout des retours d'appel - en haut et collapsable */}
-                     <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
+                     <div className="border-2 border-blue-500/30 rounded-lg mb-4 bg-blue-900/10">
                        <div 
-                         className="cursor-pointer hover:bg-blue-900/40 transition-colors -p-4 mb-4 flex items-center justify-between"
+                         className="cursor-pointer hover:bg-blue-900/40 transition-colors px-4 py-2 flex items-center justify-between"
                          onClick={() => setNewRetourAppelFormCollapsed(!newRetourAppelFormCollapsed)}
                        >
                          <div className="flex items-center gap-2">
