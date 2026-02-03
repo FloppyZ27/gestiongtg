@@ -896,10 +896,10 @@ function LayoutContent({ children, currentPageName }) {
                                     )}
                                   </div>
 
-                                  <div className="grid grid-cols-3 gap-2">
+                                  <div className="grid grid-cols-2 gap-2">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                        <Button type="button" variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                                           <span className="truncate">Arpenteurs ({entreeTempsFilterArpenteur.length > 0 ? `${entreeTempsFilterArpenteur.length}` : 'Tous'})</span>
                                           <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                         </Button>
@@ -926,7 +926,7 @@ function LayoutContent({ children, currentPageName }) {
 
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                        <Button type="button" variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                                           <span className="truncate">Mandats ({entreeTempsFilterMandat.length > 0 ? `${entreeTempsFilterMandat.length}` : 'Tous'})</span>
                                           <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                         </Button>
@@ -953,7 +953,7 @@ function LayoutContent({ children, currentPageName }) {
 
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                        <Button type="button" variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
                                           <span className="truncate">Tâches ({entreeTempsFilterTache.length > 0 ? `${entreeTempsFilterTache.length}` : 'Toutes'})</span>
                                           <ChevronDown className="w-3 h-3 flex-shrink-0" />
                                         </Button>
@@ -973,6 +973,33 @@ function LayoutContent({ children, currentPageName }) {
                                             className="text-white text-xs"
                                           >
                                             {tache}
+                                          </DropdownMenuCheckboxItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button type="button" variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                          <span className="truncate">Villes ({entreeTempsFilterVille.length > 0 ? `${entreeTempsFilterVille.length}` : 'Toutes'})</span>
+                                          <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                        {[...new Set(dossiers.flatMap(d => d.mandats?.map(m => m.adresse_travaux?.ville).filter(Boolean) || []))].sort().map((ville) => (
+                                          <DropdownMenuCheckboxItem
+                                            key={ville}
+                                            checked={entreeTempsFilterVille.includes(ville)}
+                                            onCheckedChange={(checked) => {
+                                              setEntreeTempsFilterVille(
+                                                checked
+                                                  ? [...entreeTempsFilterVille, ville]
+                                                  : entreeTempsFilterVille.filter((v) => v !== ville)
+                                              );
+                                            }}
+                                            className="text-white text-xs"
+                                          >
+                                            {ville}
                                           </DropdownMenuCheckboxItem>
                                         ))}
                                       </DropdownMenuContent>
