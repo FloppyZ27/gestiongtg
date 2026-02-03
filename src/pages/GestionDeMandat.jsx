@@ -752,7 +752,7 @@ export default function GestionDeMandat() {
                         >
                           <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between w-full">
-                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
+                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5 mr-4">
                                 {cardsInColumn.length}
                               </Badge>
                               <div className="flex items-center gap-2 min-w-0">
