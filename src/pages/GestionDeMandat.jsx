@@ -376,7 +376,7 @@ export default function GestionDeMandat() {
         {/* Type de mandat en haut */}
          <div className="mb-2">
            <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
-             {card.mandat.type_mandat}
+             {getAbbreviatedMandatType(card.mandat.type_mandat)}
            </Badge>
          </div>
 
