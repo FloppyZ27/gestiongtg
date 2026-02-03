@@ -2134,10 +2134,11 @@ export default function EditDossierForm({
                         <Table className="table-fixed w-full">
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300 text-xs w-1/4">Date</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-1/4">Notes</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-1/4">Statut</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-1/4">Utilisateur assigné</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/5">Date</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/5">Notes</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/5">Statut</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/5">Utilisateur assigné</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
