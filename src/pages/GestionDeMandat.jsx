@@ -366,11 +366,22 @@ export default function GestionDeMandat() {
   const renderMandatCard = (card, provided, snapshot) => {
      const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
 
+     const arpenteurColor = getArpenteurColor(card.dossier.arpenteur_geometre);
+     const bgColorClass = arpenteurColor.split(' ')[0];
+     const textColorClass = arpenteurColor.split(' ')[1];
+     const borderColorClass = arpenteurColor.split(' ')[2];
+
+     const shadowColor = bgColorClass.includes('red') ? 'shadow-red-500/50' 
+       : bgColorClass.includes('slate') ? 'shadow-slate-500/50'
+       : bgColorClass.includes('orange') ? 'shadow-orange-500/50'
+       : bgColorClass.includes('yellow') ? 'shadow-yellow-500/50'
+       : 'shadow-cyan-500/50';
+
      return (
        <div 
          onClick={() => !snapshot?.isDragging && handleCardClick(card)}
-         className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
-           snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50' : ''
+         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
+           snapshot?.isDragging ? `shadow-2xl ${shadowColor}` : ''
          }`}
        >
          {/* Entête : N° Dossier (gauche) et Type de mandat (droite) */}
