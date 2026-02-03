@@ -1927,11 +1927,12 @@ export default function Lots() {
                           )
                         );
                       })()}
-                    </div>
-                  </div>
+                      </div>
+                      </div>
+                      </div>
 
-                {/* Right side - Commentaires Sidebar - 30% */}
-                <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+                      {/* Right side - Commentaires Sidebar - 30% */}
+                      <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
                     <h3 className="text-lg font-bold text-white">Commentaires</h3>
                   </div>
