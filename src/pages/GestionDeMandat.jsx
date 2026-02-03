@@ -622,9 +622,7 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`p-3 space-y-3 ${
-                                  snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
-                                }`}
+                                className="p-3 space-y-3"
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -708,9 +706,7 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`p-3 space-y-3 ${
-                                  snapshot.isDraggingOver ? 'bg-slate-800/30' : ''
-                                }`}
+                                className="p-3 space-y-3"
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
