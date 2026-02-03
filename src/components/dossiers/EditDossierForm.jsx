@@ -1761,11 +1761,16 @@ export default function EditDossierForm({
                          <Clock className="w-3.5 h-3.5 text-lime-400" />
                        </div>
                        <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
-                       {entreesTemps.length > 0 && (
-                         <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs">
-                           {entreesTemps.length} entrée{entreesTemps.length > 1 ? 's' : ''}
-                         </Badge>
-                       )}
+                       {entreesTemps.length > 0 && formData.mandats.map((mandat, idx) => {
+                         const totalHeures = entreesTemps
+                           .filter(e => e.mandat === mandat.type_mandat)
+                           .reduce((sum, e) => sum + (e.heures || 0), 0);
+                         return totalHeures > 0 && (
+                           <Badge key={idx} className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                             {getAbbreviatedMandatType(mandat.type_mandat)}: {totalHeures}h
+                           </Badge>
+                         );
+                       })}
                      </div>
                      {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                    </div>
