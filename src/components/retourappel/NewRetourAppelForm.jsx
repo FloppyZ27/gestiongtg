@@ -86,7 +86,8 @@ export default function NewRetourAppelForm({
   onSubmit,
   onCancel,
   getClientsNames,
-  editingRetourAppel = null
+  editingRetourAppel = null,
+  onCancelWithCheck = null
 }) {
   const queryClient = useQueryClient();
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
@@ -536,7 +537,18 @@ export default function NewRetourAppelForm({
       {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
       {!editingRetourAppel && (
         <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-          <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="border-red-500 text-red-400 hover:bg-red-500/10" 
+            onClick={() => {
+              if (onCancelWithCheck) {
+                onCancelWithCheck();
+              } else {
+                onCancel();
+              }
+            }}
+          >
             Annuler
           </Button>
           <Button 

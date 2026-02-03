@@ -101,6 +101,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [showDeleteRetourConfirm, setShowDeleteRetourConfirm] = useState(false);
   const [retourIdToDelete, setRetourIdToDelete] = useState(null);
+  const [showCancelRetourConfirm, setShowCancelRetourConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     dossier_reference_id: "",
@@ -607,17 +608,79 @@ const RetoursAppel = React.forwardRef((props, ref) => {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog de confirmation d'annulation */}
+      <Dialog open={showCancelRetourConfirm} onOpenChange={setShowCancelRetourConfirm}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir annuler ? Toutes les informations saisies seront perdues.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => {
+                  setShowCancelRetourConfirm(false);
+                  setIsNewRetourDialogOpen(false);
+                  setEditingRetourAppel(null);
+                  setNewRetourForm({
+                    dossier_reference_id: null,
+                    date_appel: new Date().toISOString().split('T')[0],
+                    utilisateur_assigne: "",
+                    notes: "",
+                    statut: "Retour d'appel",
+                    client_nom: "",
+                    client_telephone: ""
+                  });
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Abandonner
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => setShowCancelRetourConfirm(false)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Continuer l'édition
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isNewRetourDialogOpen} onOpenChange={(open) => {
-        if (!open && !editingRetourAppel) {
-          setNewRetourForm({
-            dossier_reference_id: null,
-            date_appel: new Date().toISOString().split('T')[0],
-            utilisateur_assigne: "",
-            notes: "",
-            statut: "Retour d'appel",
-            client_nom: "",
-            client_telephone: ""
-          });
+        if (!open) {
+          // Vérifier s'il y a des changements
+          const hasChanges = 
+            newRetourForm.dossier_reference_id ||
+            newRetourForm.utilisateur_assigne ||
+            newRetourForm.notes ||
+            newRetourForm.client_nom ||
+            newRetourForm.client_telephone;
+          
+          if (hasChanges && !editingRetourAppel) {
+            setShowCancelRetourConfirm(true);
+            return;
+          }
+          
+          if (!editingRetourAppel) {
+            setNewRetourForm({
+              dossier_reference_id: null,
+              date_appel: new Date().toISOString().split('T')[0],
+              utilisateur_assigne: "",
+              notes: "",
+              statut: "Retour d'appel",
+              client_nom: "",
+              client_telephone: ""
+            });
+          }
         }
         setIsNewRetourDialogOpen(open);
       }}>
@@ -665,6 +728,30 @@ const RetoursAppel = React.forwardRef((props, ref) => {
                 client_nom: "",
                 client_telephone: ""
               });
+            }}
+            onCancelWithCheck={() => {
+              const hasChanges = 
+                newRetourForm.dossier_reference_id ||
+                newRetourForm.utilisateur_assigne ||
+                newRetourForm.notes ||
+                newRetourForm.client_nom ||
+                newRetourForm.client_telephone;
+              
+              if (hasChanges) {
+                setShowCancelRetourConfirm(true);
+              } else {
+                setIsNewRetourDialogOpen(false);
+                setEditingRetourAppel(null);
+                setNewRetourForm({
+                  dossier_reference_id: null,
+                  date_appel: new Date().toISOString().split('T')[0],
+                  utilisateur_assigne: "",
+                  notes: "",
+                  statut: "Retour d'appel",
+                  client_nom: "",
+                  client_telephone: ""
+                });
+              }
             }}
             getClientsNames={getClientsNames}
           />
