@@ -709,7 +709,19 @@ export default function Lots() {
     });
   };
 
-  const filteredLots = lots.filter(lot => {
+  // Créer une entrée par type d'opération
+  const expandedLots = lots.flatMap(lot => {
+    if (!lot.types_operation || lot.types_operation.length === 0) {
+      return [{ ...lot, typeOperationIndex: null, currentTypeOperation: null }];
+    }
+    return lot.types_operation.map((typeOp, index) => ({
+      ...lot,
+      typeOperationIndex: index,
+      currentTypeOperation: typeOp
+    }));
+  });
+
+  const filteredLots = expandedLots.filter(lot => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = (
       lot.numero_lot?.toLowerCase().includes(searchLower) ||
@@ -720,7 +732,7 @@ export default function Lots() {
 
     const matchesCirconscription = filterCirconscription.length === 0 || filterCirconscription.includes(lot.circonscription_fonciere);
     const matchesCadastre = filterCadastre.length === 0 || filterCadastre.includes(lot.cadastre);
-    const matchesTypeOperation = filterTypeOperation.length === 0 || filterTypeOperation.includes(lot.type_operation);
+    const matchesTypeOperation = filterTypeOperation.length === 0 || !lot.currentTypeOperation || filterTypeOperation.includes(lot.currentTypeOperation.type_operation);
     const matchesRang = filterRang.length === 0 || filterRang.includes(lot.rang);
 
     return matchesSearch && matchesCirconscription && matchesCadastre && matchesTypeOperation && matchesRang;
@@ -749,12 +761,12 @@ export default function Lots() {
         bValue = (b.rang || '').toLowerCase();
         break;
       case 'date_bpd':
-        aValue = a.date_bpd ? new Date(a.date_bpd).getTime() : 0;
-        bValue = b.date_bpd ? new Date(b.date_bpd).getTime() : 0;
+        aValue = a.currentTypeOperation?.date_bpd ? new Date(a.currentTypeOperation.date_bpd).getTime() : 0;
+        bValue = b.currentTypeOperation?.date_bpd ? new Date(b.currentTypeOperation.date_bpd).getTime() : 0;
         break;
       case 'type_operation':
-        aValue = (a.type_operation || '').toLowerCase();
-        bValue = (b.type_operation || '').toLowerCase();
+        aValue = (a.currentTypeOperation?.type_operation || '').toLowerCase();
+        bValue = (b.currentTypeOperation?.type_operation || '').toLowerCase();
         break;
       default:
         return 0;
@@ -2580,9 +2592,9 @@ export default function Lots() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedLots.map((lot) => (
+                  {sortedLots.map((lot, index) => (
                     <TableRow 
-                      key={lot.id} 
+                      key={`${lot.id}-${lot.typeOperationIndex ?? 'no-op'}-${index}`}
                       className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
                       onClick={() => handleEdit(lot)}
                     >
@@ -2599,28 +2611,12 @@ export default function Lots() {
                         {lot.rang || "-"}
                       </TableCell>
                       <TableCell className="text-slate-300 text-sm">
-                        {(() => {
-                          if (!lot.types_operation || lot.types_operation.length === 0) return "-";
-                          const mostRecent = lot.types_operation.reduce((latest, current) => {
-                            if (!current.date_bpd) return latest;
-                            if (!latest.date_bpd) return current;
-                            return new Date(current.date_bpd) > new Date(latest.date_bpd) ? current : latest;
-                          }, lot.types_operation[0]);
-                          return mostRecent.date_bpd && !isNaN(new Date(mostRecent.date_bpd + 'T00:00:00').getTime()) 
-                            ? format(new Date(mostRecent.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) 
-                            : "-";
-                        })()}
+                        {lot.currentTypeOperation?.date_bpd && !isNaN(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00').getTime()) 
+                          ? format(new Date(lot.currentTypeOperation.date_bpd + 'T00:00:00'), "dd MMM yyyy", { locale: fr }) 
+                          : "-"}
                       </TableCell>
                       <TableCell className="text-slate-300">
-                        {(() => {
-                          if (!lot.types_operation || lot.types_operation.length === 0) return "-";
-                          const mostRecent = lot.types_operation.reduce((latest, current) => {
-                            if (!current.date_bpd) return latest;
-                            if (!latest.date_bpd) return current;
-                            return new Date(current.date_bpd) > new Date(latest.date_bpd) ? current : latest;
-                          }, lot.types_operation[0]);
-                          return mostRecent.type_operation || "-";
-                        })()}
+                        {lot.currentTypeOperation?.type_operation || "-"}
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
