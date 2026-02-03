@@ -135,29 +135,6 @@ const getAbbreviatedMandatType = (type) => {
   return abbreviations[type] || type;
 };
 
-const getArpenteurInitials = (arpenteur) => {
-  if (!arpenteur) return "";
-  const mapping = {
-    "Samuel Guay": "SG-",
-    "Dany Gaboury": "DG-",
-    "Pierre-Luc Pilote": "PLP-",
-    "Benjamin Larouche": "BL-",
-    "Frédéric Gilbert": "FG-"
-  };
-  return mapping[arpenteur] || "";
-};
-
-const getArpenteurColor = (arpenteur) => {
-  const colors = {
-    "Samuel Guay": "bg-red-500/20 text-red-400 border-red-500/30",
-    "Pierre-Luc Pilote": "bg-slate-500/20 text-slate-400 border-slate-500/30",
-    "Frédéric Gilbert": "bg-orange-500/20 text-orange-400 border-orange-500/30",
-    "Dany Gaboury": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    "Benjamin Larouche": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-  };
-  return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-};
-
 export default function Lots() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false); // Renamed from isDialogOpen
@@ -1160,21 +1137,39 @@ export default function Lots() {
                   Nouveau lot
                 </Button>
                 </DialogTrigger>
-            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+            <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
               <DialogHeader className="sr-only">
                 <DialogTitle className="text-2xl">
                   {editingLot ? "Modifier le lot" : "Nouveau lot"}
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex h-[90vh]">
-                {/* Main form content - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
+              <motion.div 
+                className="flex flex-col h-[90vh]"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Header pleine largeur */}
+                <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+                  <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                      {editingLot ? "Modifier le lot" : "Nouveau lot"}
+                      {editingLot ? "Modifier lot" : "Nouveau lot"}
                     </h2>
+                    {editingLot && (
+                      <div className="text-right">
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                          Lot {editingLot.numero_lot}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Main form content - 70% */}
+                  <div className="flex-[0_0_70%] overflow-y-auto p-6 pt-3 border-r border-slate-800">
 
                   <form id="lot-form" onSubmit={handleSubmit} className="space-y-3">
                     {/* Section Import .d01 - Visible uniquement en mode création */}
@@ -1557,23 +1552,6 @@ export default function Lots() {
                       </Card>
                     )}
                   </form>
-
-                  {/* Boutons Annuler/Créer tout en bas */}
-                  <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 mt-6">
-                    <Button type="button" variant="outline" onClick={() => {
-                      if (hasFormChanges) {
-                        setShowCancelConfirm(true);
-                      } else {
-                        setIsFormDialogOpen(false);
-                        resetForm();
-                      }
-                    }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                      Annuler
-                    </Button>
-                    <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                      {editingLot ? "Modifier" : "Créer"}
-                    </Button>
-                  </div>
                 </div>
 
                 {/* Right side - Commentaires Sidebar - 30% */}
@@ -1653,6 +1631,24 @@ export default function Lots() {
                   )}
                 </div>
               </div>
+
+              {/* Boutons Annuler/Créer tout en bas */}
+              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => {
+                  if (hasFormChanges) {
+                    setShowCancelConfirm(true);
+                  } else {
+                    setIsFormDialogOpen(false);
+                    resetForm();
+                  }
+                }} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Annuler
+                </Button>
+                <Button type="submit" form="lot-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                  {editingLot ? "Modifier" : "Créer"}
+                </Button>
+              </div>
+            </motion.div>
             </DialogContent>
           </Dialog>
           </div>
@@ -1671,19 +1667,35 @@ export default function Lots() {
             setViewSortDirection("asc");
           }
         }}>
-          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50">
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
             <DialogHeader className="sr-only">
               <DialogTitle className="text-2xl">Détails du lot</DialogTitle>
             </DialogHeader>
             {viewingLot && (
-              <div className="flex h-[90vh]">
-                {/* Main content - 70% */}
-                <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <div className="mb-6">
+              <motion.div 
+                className="flex flex-col h-[90vh]"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Header pleine largeur */}
+                <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+                  <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                      Lot {viewingLot.numero_lot}
+                      Détails - Lot {viewingLot.numero_lot}
                     </h2>
+                    <div className="text-right">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        {viewingLot.circonscription_fonciere}
+                      </Badge>
+                    </div>
                   </div>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Main content - 70% */}
+                  <div className="flex-[0_0_70%] overflow-y-auto p-6 pt-3 border-r border-slate-800">
 
                   <div className="space-y-6">
                     {/* Informations principales */}
@@ -1917,18 +1929,6 @@ export default function Lots() {
                     </div>
                   </div>
 
-                  {/* Boutons Fermer/Modifier tout en bas */}
-                  <div className="flex justify-end gap-3 pt-6 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
-                    <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                      Fermer
-                    </Button>
-                    <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Modifier
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Right side - Commentaires Sidebar - 30% */}
                 <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
                   <div className="p-4 border-b border-slate-800 flex-shrink-0">
@@ -1942,6 +1942,18 @@ export default function Lots() {
                   </div>
                 </div>
               </div>
+
+              {/* Boutons Fermer/Modifier tout en bas */}
+              <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-red-500 text-red-400 hover:bg-red-500/10">
+                  Fermer
+                </Button>
+                <Button type="button" className="bg-gradient-to-r from-emerald-500 to-teal-600" onClick={handleEditFromView}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Modifier
+                </Button>
+              </div>
+            </motion.div>
             )}
           </DialogContent>
         </Dialog>
