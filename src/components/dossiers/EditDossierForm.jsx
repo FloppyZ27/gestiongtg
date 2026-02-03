@@ -243,47 +243,45 @@ export default function EditDossierForm({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main content - 70% */}
-        <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
-          <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
-            <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
-            {formData.numero_dossier && formData.arpenteur_geometre && (
-              <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
-                <span>
-                  {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                  {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
-                    <span> - {getClientsNames(formData.clients_ids)}</span>
-                  )}
-                </span>
-                {formData.mandats && formData.mandats.length > 0 && (
-                  <span className="flex gap-1">
-                    {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
-                      <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                        {getAbbreviatedMandatType(m.type_mandat)}
-                      </Badge>
-                    ))}
-                    {formData.mandats.length > 3 && (
-                      <Badge className="bg-slate-700 text-slate-300 text-xs">
-                        +{formData.mandats.length - 3}
-                      </Badge>
-                    )}
-                  </span>
+      {/* Header sur toute la largeur */}
+      <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+        <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+        {formData.numero_dossier && formData.arpenteur_geometre && (
+          <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
+            <span>
+              {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+              {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
+                <span> - {getClientsNames(formData.clients_ids)}</span>
+              )}
+            </span>
+            {formData.mandats && formData.mandats.length > 0 && (
+              <span className="flex gap-1">
+                {formData.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
+                  <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                    {getAbbreviatedMandatType(m.type_mandat)}
+                  </Badge>
+                ))}
+                {formData.mandats.length > 3 && (
+                  <Badge className="bg-slate-700 text-slate-300 text-xs">
+                    +{formData.mandats.length - 3}
+                  </Badge>
                 )}
-              </p>
+              </span>
             )}
-          </div>
+          </p>
+        )}
+      </div>
 
-          <div className="flex-1 overflow-y-auto p-6 pt-3">
-            <form id="edit-dossier-form" onSubmit={(e) => {
-              if (!editingDossier) {
-                onSubmit(e);
-              } else {
-                e.preventDefault();
-              }
-            }} className="space-y-3">
-            {/* Section Informations du dossier */}
-            <Card className="border-slate-700 bg-slate-800/30">
+      {/* Section Carte/Informations du dossier sur toute la largeur */}
+      <div className="px-6 pt-4 pb-4 border-b border-slate-800 flex-shrink-0">
+        <form id="edit-dossier-form" onSubmit={(e) => {
+          if (!editingDossier) {
+            onSubmit(e);
+          } else {
+            e.preventDefault();
+          }
+        }}>
+          <Card className="border-slate-700 bg-slate-800/30">
               <CardHeader 
                 className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                 onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
@@ -710,8 +708,16 @@ export default function EditDossierForm({
                 </CardContent>
               )}
             </Card>
+        </form>
+      </div>
 
+      {/* Division 70%-30% pour Mandats et Sidebar */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Main content - 70% */}
+        <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+          <div className="flex-1 overflow-y-auto p-6">
             {/* Section Mandats */}
+            <div className="space-y-3">
             <Card className="border-slate-700 bg-slate-800/30">
               <CardHeader 
                 className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
@@ -1969,7 +1975,7 @@ export default function EditDossierForm({
                 onDocumentsChange={() => {}}
               />
             )}
-            </form>
+            </div>
           </div>
         </div>
 
