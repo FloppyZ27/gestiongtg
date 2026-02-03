@@ -80,6 +80,10 @@ const formatAdresse = (addr) => {
   return parts.filter(p => p).join(', ');
 };
 
+const getUserInitials = (name) => {
+  return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+};
+
 export default function EditDossierForm({
   formData,
   setFormData,
