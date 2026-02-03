@@ -562,28 +562,10 @@ export default function GestionDeMandat() {
           </TabsList>
 
           {/* Vue par Tâches */}
-          <TabsContent value="taches" className="mt-0">
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <div 
-                className="overflow-x-auto mb-2 bg-slate-800/30 rounded-lg" 
-                style={{ height: '20px', maxWidth: '1064px', margin: '0 auto' }}
-                onScroll={(e) => {
-                  const bottomScroll = document.getElementById('taskColumnsScroll');
-                  if (bottomScroll) bottomScroll.scrollLeft = e.target.scrollLeft;
-                }}
-              >
-                <div style={{ width: `${TACHES.length * 216}px`, height: '1px' }}></div>
-              </div>
-              <div 
-                id="taskColumnsScroll"
-                className="overflow-x-auto"
-                style={{ maxWidth: '1064px', margin: '0 auto' }}
-                onScroll={(e) => {
-                  const topScroll = e.target.previousElementSibling;
-                  if (topScroll) topScroll.scrollLeft = e.target.scrollLeft;
-                }}
-              >
-                <div className="flex gap-4 p-4">
+           <TabsContent value="taches" className="mt-0">
+             <DragDropContext onDragEnd={handleDragEnd}>
+               <div className="overflow-x-auto w-full -mx-4 md:-mx-8">
+                 <div className="flex gap-4 p-4" style={{ width: 'fit-content', minWidth: '100%' }}>
 
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
