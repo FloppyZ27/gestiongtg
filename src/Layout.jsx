@@ -152,6 +152,7 @@ function LayoutContent({ children, currentPageName }) {
   const [entreeTempsFilterArpenteur, setEntreeTempsFilterArpenteur] = useState([]);
   const [entreeTempsFilterMandat, setEntreeTempsFilterMandat] = useState([]);
   const [entreeTempsFilterTache, setEntreeTempsFilterTache] = useState([]);
+  const [entreeTempsFilterVille, setEntreeTempsFilterVille] = useState([]);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
