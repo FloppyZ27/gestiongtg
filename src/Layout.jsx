@@ -823,16 +823,85 @@ function LayoutContent({ children, currentPageName }) {
                 {!infoDossierCollapsed && (
                 <div className="pt-2 pb-3 px-4">
                   {!selectedDossierId ? (
-                    <>
-                      <div className="relative mb-3">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                        <Input
-                          placeholder="Rechercher un dossier..."
-                          value={dossierSearchTerm}
-                          onChange={(e) => setDossierSearchTerm(e.target.value)}
-                          className="pl-10 bg-slate-800 border-slate-700 h-8 text-sm"
-                        />
-                      </div>
+                        <>
+                          <div className="flex gap-2 mb-3">
+                            <div className="relative flex-1">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                              <Input
+                                placeholder="Rechercher un dossier..."
+                                value={dossierSearchTerm}
+                                onChange={(e) => setDossierSearchTerm(e.target.value)}
+                                className="pl-10 bg-slate-800 border-slate-700 h-8 text-sm"
+                              />
+                            </div>
+                            <DropdownMenu open={isEntreeTempsFiltersOpen} onOpenChange={setIsEntreeTempsFiltersOpen}>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
+                                  <Filter className="w-4 h-4" />
+                                  {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0) && (
+                                    <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                      {entreeTempsFilterArpenteur.length + entreeTempsFilterMandat.length + entreeTempsFilterTache.length}
+                                    </Badge>
+                                  )}
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
+                                <DropdownMenuLabel className="text-slate-300">Filtrer par arpenteur</DropdownMenuLabel>
+                                {ARPENTEURS.map((arp) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={arp}
+                                    checked={entreeTempsFilterArpenteur.includes(arp)}
+                                    onCheckedChange={(checked) => {
+                                      setEntreeTempsFilterArpenteur(
+                                        checked
+                                          ? [...entreeTempsFilterArpenteur, arp]
+                                          : entreeTempsFilterArpenteur.filter((a) => a !== arp)
+                                      );
+                                    }}
+                                    className="text-white text-xs"
+                                  >
+                                    {arp}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                                <DropdownMenuSeparator className="bg-slate-700" />
+                                <DropdownMenuLabel className="text-slate-300">Filtrer par mandat</DropdownMenuLabel>
+                                {TYPES_MANDATS.map((type) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={type}
+                                    checked={entreeTempsFilterMandat.includes(type)}
+                                    onCheckedChange={(checked) => {
+                                      setEntreeTempsFilterMandat(
+                                        checked
+                                          ? [...entreeTempsFilterMandat, type]
+                                          : entreeTempsFilterMandat.filter((t) => t !== type)
+                                      );
+                                    }}
+                                    className="text-white text-xs"
+                                  >
+                                    {type}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                                <DropdownMenuSeparator className="bg-slate-700" />
+                                <DropdownMenuLabel className="text-slate-300">Filtrer par tâche</DropdownMenuLabel>
+                                {TACHES.map((tache) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={tache}
+                                    checked={entreeTempsFilterTache.includes(tache)}
+                                    onCheckedChange={(checked) => {
+                                      setEntreeTempsFilterTache(
+                                        checked
+                                          ? [...entreeTempsFilterTache, tache]
+                                          : entreeTempsFilterTache.filter((t) => t !== tache)
+                                      );
+                                    }}
+                                    className="text-white text-xs"
+                                  >
+                                    {tache}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
 
                       <div className="overflow-hidden border border-slate-700 rounded-lg">
                         <div className="overflow-y-auto max-h-[300px]">
