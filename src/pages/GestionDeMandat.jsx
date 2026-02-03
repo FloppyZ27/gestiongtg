@@ -369,7 +369,7 @@ export default function GestionDeMandat() {
      return (
        <div 
          onClick={() => !snapshot?.isDragging && handleCardClick(card)}
-         className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
+         className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
            snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50' : ''
          }`}
        >
