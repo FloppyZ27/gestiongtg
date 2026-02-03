@@ -21,7 +21,7 @@ import AddressInput from "../components/shared/AddressInput";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import ClientFormDialog from "../components/clients/ClientFormDialog";
 import MandatTabs from "../components/dossiers/MandatTabs";
-import EditDossierDialog from "../components/dossiers/EditDossierDialog";
+import EditDossierForm from "../components/dossiers/EditDossierForm";
 import DocumentsStepForm from "../components/mandat/DocumentsStepForm";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
@@ -2194,31 +2194,59 @@ export default function Dossiers() {
               Extraction CSV
             </Button>
 
-            <Button 
-              onClick={() => {
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) {
                 resetForm();
-                setEditingDossier(null);
-                setIsDialogOpen(true);
-              }}
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
-              <Plus className="w-5 h-5 mr-2" />
-              Nouveau dossier
-            </Button>
-            
-            <EditDossierDialog
-              isOpen={isDialogOpen}
-              onClose={() => {
-                setIsDialogOpen(false);
-                setEditingDossier(null);
-                resetForm();
-              }}
-              dossier={editingDossier}
-              onSuccess={() => {
-                queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-              }}
-              clients={clients}
-              users={users}
-            />
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => {
+                    resetForm();
+                    setIsDialogOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Nouveau dossier
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+                <EditDossierForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  clients={clients}
+                  lots={lots}
+                  users={users}
+                  onSubmit={handleSubmit}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    resetForm();
+                  }}
+                  updateMandat={updateMandat}
+                  addMandat={addMandat}
+                  removeMandat={removeMandat}
+                  openLotSelector={openLotSelector}
+                  removeLotFromMandat={removeLotFromMandat}
+                  openAddMinuteDialog={openAddMinuteDialog}
+                  removeMinuteFromMandat={removeMinuteFromMandat}
+                  getLotById={getLotById}
+                  setIsClientFormDialogOpen={setIsClientFormDialogOpen}
+                  setClientTypeForForm={setClientTypeForForm}
+                  setViewingClientDetails={setViewingClientDetails}
+                  calculerProchainNumeroDossier={calculerProchainNumeroDossier}
+                  editingDossier={editingDossier}
+                  onOpenNewLotDialog={(mandatIndex) => {
+                    setCurrentMandatIndex(mandatIndex);
+                    setIsNewLotDialogOpen(true);
+                  }}
+                  setEditingClient={setEditingClientForForm}
+                  setEditingLot={setEditingLot}
+                  setNewLotForm={setNewLotForm}
+                  setLotActionLogs={setLotActionLogs}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
