@@ -925,8 +925,8 @@ function LayoutContent({ children, currentPageName }) {
                       )}
                     </div>
                     )}
-                    )}
                     </div>
+                    )}
 
                     {/* Section Détails de l'entrée */}
                     {selectedDossierId && (
