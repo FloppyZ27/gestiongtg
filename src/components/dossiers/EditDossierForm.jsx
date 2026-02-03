@@ -1454,8 +1454,140 @@ export default function EditDossierForm({
                 </CardHeader>
 
                 {!minutesCollapsed && (
-                  <CardContent className="pt-2 pb-3">
-                    {formData.mandats.some(m => m.minutes_list && m.minutes_list.length > 0) && (
+                   <CardContent className="pt-2 pb-3">
+                     {/* Formulaire d'ajout des minutes - en haut et collapsable */}
+                     <div className="border-2 border-cyan-500/30 rounded-lg mb-4 bg-cyan-900/10">
+                       <div 
+                         className="cursor-pointer hover:bg-cyan-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                         onClick={() => setNewMinuteFormCollapsed(!newMinuteFormCollapsed)}
+                       >
+                         <div className="flex items-center gap-2">
+                           <Plus className="w-4 h-4 text-cyan-400" />
+                           <span className="text-xs font-semibold text-cyan-400">Ajouter une minute</span>
+                         </div>
+                         {newMinuteFormCollapsed ? <ChevronDown className="w-4 h-4 text-cyan-400" /> : <ChevronUp className="w-4 h-4 text-cyan-400" />}
+                       </div>
+
+                       {!newMinuteFormCollapsed && (
+                         <div className="p-4 border-t border-cyan-500/30">
+                           <div className={`grid ${newMinuteForm.type_minute === "Remplace" || newMinuteForm.type_minute === "Corrige" ? "grid-cols-5" : "grid-cols-4"} gap-3`}>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
+                               <Select 
+                                 value={newMinuteForm.mandatIndex?.toString() || ""}
+                                 onValueChange={(value) => setNewMinuteForm({...newMinuteForm, mandatIndex: parseInt(value)})}
+                               >
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   {formData.mandats.map((mandat, index) => (
+                                     <SelectItem key={index} value={index.toString()} className="text-white text-xs">
+                                       {mandat.type_mandat || `Mandat ${index + 1}`}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Numéro de minute <span className="text-red-400">*</span></Label>
+                               <Input 
+                                 placeholder="Ex: 12345"
+                                 value={newMinuteForm.minute || ""}
+                                 onChange={(e) => setNewMinuteForm({...newMinuteForm, minute: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Date de minute</Label>
+                               <Input 
+                                 type="date"
+                                 value={newMinuteForm.date_minute || ""}
+                                 onChange={(e) => setNewMinuteForm({...newMinuteForm, date_minute: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Type</Label>
+                               <Select 
+                                 value={newMinuteForm.type_minute || "Initiale"}
+                                 onValueChange={(value) => setNewMinuteForm({...newMinuteForm, type_minute: value})}
+                               >
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                   <SelectValue />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   <SelectItem value="Initiale" className="text-white text-xs">Initiale</SelectItem>
+                                   <SelectItem value="Remplace" className="text-white text-xs">Remplace</SelectItem>
+                                   <SelectItem value="Corrige" className="text-white text-xs">Corrige</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             {(newMinuteForm.type_minute === "Remplace" || newMinuteForm.type_minute === "Corrige") && (
+                               <div className="space-y-1">
+                                 <Label className="text-slate-400 text-xs">Minute référence</Label>
+                                 <Select 
+                                   value={newMinuteForm.minute_reference || ""}
+                                   onValueChange={(value) => setNewMinuteForm({...newMinuteForm, minute_reference: value})}
+                                 >
+                                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                     <SelectValue placeholder="Sélectionner" />
+                                   </SelectTrigger>
+                                   <SelectContent className="bg-slate-800 border-slate-700">
+                                     {newMinuteForm.mandatIndex !== undefined && formData.mandats[newMinuteForm.mandatIndex]?.minutes_list?.map((minute, idx) => (
+                                       <SelectItem key={idx} value={minute.minute} className="text-white text-xs">
+                                         {minute.minute}
+                                       </SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+                             )}
+                           </div>
+                           <Button 
+                             type="button"
+                             size="sm"
+                             onClick={() => {
+                               if (newMinuteForm.mandatIndex === undefined || newMinuteForm.mandatIndex === null) {
+                                 alert("Veuillez sélectionner un mandat");
+                                 return;
+                               }
+
+                               if (!newMinuteForm.minute) {
+                                 alert("Veuillez entrer un numéro de minute");
+                                 return;
+                               }
+
+                               const newMinute = {
+                                 minute: newMinuteForm.minute,
+                                 date_minute: newMinuteForm.date_minute || null,
+                                 type_minute: newMinuteForm.type_minute || "Initiale"
+                               };
+
+                               if ((newMinuteForm.type_minute === "Remplace" || newMinuteForm.type_minute === "Corrige") && newMinuteForm.minute_reference) {
+                                 newMinute.minute_reference = newMinuteForm.minute_reference;
+                               }
+
+                               const updatedMandats = [...formData.mandats];
+                               if (!updatedMandats[newMinuteForm.mandatIndex].minutes_list) {
+                                 updatedMandats[newMinuteForm.mandatIndex].minutes_list = [];
+                               }
+                               updatedMandats[newMinuteForm.mandatIndex].minutes_list.push(newMinute);
+
+                               setFormData({...formData, mandats: updatedMandats});
+                               setNewMinuteForm({});
+                               setNewMinuteFormCollapsed(true);
+                             }}
+                             className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-8 text-xs mt-3 w-full border border-cyan-500/30"
+                           >
+                             <Plus className="w-3 h-3 mr-1" />
+                             Ajouter la minute
+                           </Button>
+                         </div>
+                       )}
+                     </div>
+
+                     {formData.mandats.some(m => m.minutes_list && m.minutes_list.length > 0) && (
                       <div className="space-y-2 mb-4">
                         <div className="border border-slate-700 rounded-lg overflow-hidden">
                           <Table>
