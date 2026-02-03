@@ -1920,6 +1920,7 @@ export default function EditDossierForm({
                               <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
                               <TableHead className="text-slate-300 text-xs">Description</TableHead>
                               <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
