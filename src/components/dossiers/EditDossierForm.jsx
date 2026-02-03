@@ -145,6 +145,8 @@ export default function EditDossierForm({
     statut: "Retour d'appel"
   });
   const [retoursAppel, setRetoursAppel] = useState([]);
+  const [entreesTemps, setEntreesTemps] = useState([]);
+  const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const saveTimeoutRef = useRef(null);
@@ -193,6 +195,17 @@ export default function EditDossierForm({
         .catch(() => setRetoursAppel([]));
     } else {
       setRetoursAppel([]);
+    }
+  }, [editingDossier?.id]);
+
+  // Charger les entrées de temps quand le dossier change
+  React.useEffect(() => {
+    if (editingDossier?.id) {
+      base44.entities.EntreeTemps.filter({ dossier_id: editingDossier.id }, '-date')
+        .then(setEntreesTemps)
+        .catch(() => setEntreesTemps([]));
+    } else {
+      setEntreesTemps([]);
     }
   }, [editingDossier?.id]);
 
@@ -1700,6 +1713,96 @@ export default function EditDossierForm({
                         Ajouter la minute
                       </Button>
                     </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
+            {/* Section Entrée de temps */}
+            {editingDossier && (
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
+                  onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-lime-500/30 flex items-center justify-center">
+                        <Clock className="w-3.5 h-3.5 text-lime-400" />
+                      </div>
+                      <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
+                      {entreesTemps.length > 0 && (
+                        <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs">
+                          {entreesTemps.length} entrée{entreesTemps.length > 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
+                    {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
+
+                {!entreeTempsCollapsed && (
+                  <CardContent className="pt-4 pb-3">
+                    {entreesTemps.length > 0 ? (
+                      <div className="border border-slate-700 rounded-lg overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                              <TableHead className="text-slate-300 text-xs">Date</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Heures</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Tâche</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Description</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Utilisateur</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {entreesTemps.map((entree) => (
+                              <TableRow key={entree.id} className="hover:bg-slate-800/30 border-slate-800">
+                                <TableCell className="text-slate-300 text-xs">
+                                  {entree.date ? format(new Date(entree.date), "dd MMM yyyy", { locale: fr }) : "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs font-medium">
+                                  {entree.heures}h
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs">
+                                  {entree.mandat || "-"}
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs">
+                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                                    {entree.tache || "-"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs max-w-xs">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="truncate cursor-help">
+                                          {entree.description || "-"}
+                                        </div>
+                                      </TooltipTrigger>
+                                      {entree.description && (
+                                        <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm whitespace-normal break-words">
+                                          {entree.description}
+                                        </TooltipContent>
+                                      )}
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </TableCell>
+                                <TableCell className="text-slate-300 text-xs">
+                                  {users.find(u => u.email === entree.utilisateur_email)?.full_name || entree.utilisateur_email || "-"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-slate-500">
+                        <Clock className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+                        <p className="text-sm">Aucune entrée de temps</p>
+                      </div>
+                    )}
                   </CardContent>
                 )}
               </Card>
