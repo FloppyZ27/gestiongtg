@@ -711,6 +711,46 @@ export default function EditDossierForm({
         </form>
       </div>
 
+      {/* Section Carte sur toute la largeur */}
+      {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
+        formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
+      ) && (
+        <div className="px-6 pt-4 pb-4 border-b border-slate-800 flex-shrink-0">
+          <div 
+            className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border border-slate-800 rounded-t-lg flex items-center justify-between bg-slate-900/50"
+            onClick={() => setMapCollapsed(!mapCollapsed)}
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-slate-400" />
+              <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
+            </div>
+            {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+          </div>
+          {!mapCollapsed && (
+            <div className="bg-slate-800/50 border border-slate-700 border-t-0 rounded-b-lg overflow-hidden">
+              <div className="aspect-video w-full max-h-[400px]">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
+                    `${formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${formData.mandats[activeTabMandat]?.adresse_travaux?.rue || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.ville || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.province || 'Québec'}, Canada`
+                  )}&zoom=15`}
+                />
+              </div>
+              <div className="p-3 bg-slate-800/80 border-t border-slate-700">
+                <p className="text-sm text-slate-300">
+                  📍 {formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0]} {formData.mandats[activeTabMandat]?.adresse_travaux?.rue}, {formData.mandats[activeTabMandat]?.adresse_travaux?.ville}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Division 70%-30% pour Mandats et Sidebar */}
       <div className="flex-1 flex overflow-hidden">
         {/* Main content - 70% */}
@@ -1981,44 +2021,6 @@ export default function EditDossierForm({
 
         {/* Sidebar - 30% */}
         <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
-          {/* Carte de l'adresse */}
-          <div 
-            className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
-            onClick={() => setMapCollapsed(!mapCollapsed)}
-          >
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-slate-400" />
-              <h3 className="text-slate-300 text-base font-semibold">Carte</h3>
-            </div>
-            {mapCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-          </div>
-          {!mapCollapsed && formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
-            formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
-          ) && (
-            <div className="p-4 border-b border-slate-800 flex-shrink-0 max-h-[25%]">
-              <div className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden h-full">
-                <div className="aspect-square w-full max-h-[calc(100%-28px)]">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-                      `${formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0] || ''} ${formData.mandats[activeTabMandat]?.adresse_travaux?.rue || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.ville || ''}, ${formData.mandats[activeTabMandat]?.adresse_travaux?.province || 'Québec'}, Canada`
-                    )}&zoom=15`}
-                  />
-                </div>
-                <div className="p-2 bg-slate-800/80">
-                  <p className="text-xs text-slate-300 truncate">
-                    📍 {formData.mandats[activeTabMandat]?.adresse_travaux?.numeros_civiques?.[0]} {formData.mandats[activeTabMandat]?.adresse_travaux?.rue}, {formData.mandats[activeTabMandat]?.adresse_travaux?.ville}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          
           {/* Header Tabs Commentaires/Historique */}
           <div 
             className="cursor-pointer hover:bg-slate-800/50 transition-colors py-1.5 px-4 border-b border-slate-800 flex-shrink-0 flex items-center justify-between"
