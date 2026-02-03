@@ -817,16 +817,34 @@ function LayoutContent({ children, currentPageName }) {
                               <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                                 <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Clients</TableHead>
-                                <TableHead className="text-slate-300 text-xs">Mandats</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).map((dossier) => {
+                              {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).flatMap((dossier) => {
                                 const clientsNames = getClientsNames(dossier.clients_ids);
-                                return (
+                                if (!dossier.mandats || dossier.mandats.length === 0) {
+                                  return (
+                                    <TableRow
+                                      key={dossier.id}
+                                      className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
+                                      onClick={() => handleDossierSelect(dossier.id)}
+                                    >
+                                      <TableCell className="font-medium text-xs">
+                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
+                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
+                                      <TableCell className="text-slate-300 text-xs">-</TableCell>
+                                      <TableCell className="text-slate-300 text-xs">-</TableCell>
+                                    </TableRow>
+                                  );
+                                }
+                                return dossier.mandats.map((mandat, idx) => (
                                   <TableRow
-                                    key={dossier.id}
+                                    key={`${dossier.id}-${idx}`}
                                     className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
                                     onClick={() => handleDossierSelect(dossier.id)}
                                   >
@@ -835,32 +853,17 @@ function LayoutContent({ children, currentPageName }) {
                                         {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
                                     </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
                                     <TableCell className="text-slate-300 text-xs">
-                                      {clientsNames || "-"}
-                                    </TableCell>
-                                    <TableCell className="text-slate-300 text-xs">
-                                      {dossier.mandats && dossier.mandats.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1">
-                                          {dossier.mandats.slice(0, 2).map((mandat, idx) => (
-                                            <Badge key={idx} className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                              {mandat.type_mandat}
-                                            </Badge>
-                                          ))}
-                                          {dossier.mandats.length > 2 && (
-                                            <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                              +{dossier.mandats.length - 2}
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <span className="text-slate-600 text-xs">Aucun</span>
-                                      )}
+                                      <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                        {mandat.type_mandat}
+                                      </Badge>
                                     </TableCell>
                                     <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                                      {dossier.mandats?.[0]?.adresse_travaux ? formatAdresse(dossier.mandats[0].adresse_travaux) : "-"}
+                                      {mandat.adresse_travaux ? formatAdresse(mandat.adresse_travaux) : "-"}
                                     </TableCell>
                                   </TableRow>
-                                );
+                                ));
                               })}
                               {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).length === 0 && (
                                 <TableRow>
