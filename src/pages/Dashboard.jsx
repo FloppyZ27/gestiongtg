@@ -27,19 +27,19 @@ export default function Dashboard() {
     initialData: [],
   });
 
-  const filteredActes = actes.filter(acte => {
+  const filteredActes = (actes || []).filter(acte => {
     const searchLower = searchTerm.toLowerCase();
     
     // Recherche dans les vendeurs
     const vendeursMatch = acte.vendeurs?.some(v => 
-      v.nom?.toLowerCase().includes(searchLower) || 
-      v.prenom?.toLowerCase().includes(searchLower)
+      v?.nom?.toLowerCase().includes(searchLower) || 
+      v?.prenom?.toLowerCase().includes(searchLower)
     );
     
     // Recherche dans les acheteurs
     const acheteursMatch = acte.acheteurs?.some(a => 
-      a.nom?.toLowerCase().includes(searchLower) || 
-      a.prenom?.toLowerCase().includes(searchLower)
+      a?.nom?.toLowerCase().includes(searchLower) || 
+      a?.prenom?.toLowerCase().includes(searchLower)
     );
     
     // Filtre par type d'acte
@@ -124,7 +124,7 @@ export default function Dashboard() {
   const statsCards = [
     {
       title: "Total des actes",
-      value: actes.length,
+      value: (actes || []).length,
       icon: FileText,
       gradient: "from-emerald-500 to-teal-600",
       iconBg: "bg-emerald-500/20",
@@ -132,7 +132,7 @@ export default function Dashboard() {
     },
     {
       title: "Ce mois",
-      value: actes.filter(a => {
+      value: (actes || []).filter(a => {
         const acteDate = new Date(a.date_bpd);
         const now = new Date();
         return acteDate.getMonth() === now.getMonth() && acteDate.getFullYear() === now.getFullYear();
@@ -144,7 +144,7 @@ export default function Dashboard() {
     },
     {
       title: "Types d'actes",
-      value: new Set(actes.map(a => a.type_acte)).size,
+      value: new Set((actes || []).map(a => a.type_acte)).size,
       icon: TrendingUp,
       gradient: "from-purple-500 to-pink-600",
       iconBg: "bg-purple-500/20",
