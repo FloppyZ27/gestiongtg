@@ -364,28 +364,24 @@ export default function GestionDeMandat() {
   }
 
   const renderMandatCard = (card, provided, snapshot) => {
-    const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
-    
-    return (
-      <div 
-        onClick={() => !snapshot?.isDragging && handleCardClick(card)}
-        className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
-          snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50' : ''
-        }`}
-      >
-        {/* Type de mandat en haut */}
-         <div className="mb-2">
-           <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
+     const assignedUser = users.find(u => u.email === card.mandat.utilisateur_assigne);
+
+     return (
+       <div 
+         onClick={() => !snapshot?.isDragging && handleCardClick(card)}
+         className={`bg-gradient-to-br from-emerald-900/10 to-teal-900/10 border-2 border-emerald-500/30 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
+           snapshot?.isDragging ? 'shadow-2xl shadow-emerald-500/50' : ''
+         }`}
+       >
+         {/* Entête : N° Dossier (gauche) et Type de mandat (droite) */}
+         <div className="flex items-start justify-between gap-2 mb-2">
+           <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+             {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
+           </Badge>
+           <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
              {getAbbreviatedMandatType(card.mandat.type_mandat)}
            </Badge>
          </div>
-
-        {/* N° Dossier */}
-        <div className="mb-1">
-          <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs`}>
-            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
-          </Badge>
-        </div>
 
         {/* Clients */}
         <div className="flex items-center gap-1 mb-1">
