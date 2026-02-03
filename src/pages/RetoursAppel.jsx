@@ -676,13 +676,12 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
-            <DialogHeader className="sr-only"><DialogTitle>Détails du retour d'appel</DialogTitle></DialogHeader>
+            <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+              <DialogTitle className="text-2xl">Détails - {viewingDossier && `${getArpenteurInitials(viewingDossier.arpenteur_geometre)}${viewingDossier.numero_dossier}`}</DialogTitle>
+            </DialogHeader>
             {viewingDossier && (
-              <div className="flex h-[90vh]">
+              <div className="flex h-[calc(90vh-80px)]">
                 <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
-                  <h2 className="text-2xl font-bold text-white mb-6">
-                    Détails - {getArpenteurInitials(viewingDossier.arpenteur_geometre)}{viewingDossier.numero_dossier}
-                  </h2>
                   <div className="space-y-6">
                     <div className="grid grid-cols-3 gap-4 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
                       <div>
