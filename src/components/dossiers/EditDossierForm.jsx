@@ -1888,23 +1888,10 @@ export default function EditDossierForm({
 
                               return sortedRetoursAppel.map((retour) => (
                                 <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-slate-300 text-xs">
+                                  <TableCell className="text-slate-300 text-xs w-1/4">
                                     {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">
-                                    <div className="flex items-center gap-1.5">
-                                      <span>
-                                        {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
-                                      </span>
-                                      <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
-                                        <AvatarImage src={users.find(u => u.email === retour.utilisateur_assigne)?.photo_url} />
-                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                                          {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs max-w-xs">
+                                  <TableCell className="text-slate-300 text-xs w-1/4">
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
@@ -1920,7 +1907,7 @@ export default function EditDossierForm({
                                       </Tooltip>
                                     </TooltipProvider>
                                   </TableCell>
-                                  <TableCell className="text-xs">
+                                  <TableCell className="text-xs w-1/4">
                                     <Select 
                                       value={retour.statut}
                                       onValueChange={async (newStatut) => {
@@ -1934,7 +1921,7 @@ export default function EditDossierForm({
                                         queryClient.invalidateQueries({ queryKey: ['retoursAppel', editingDossier?.id] });
                                       }}
                                     >
-                                      <SelectTrigger className={`border-slate-600 h-8 text-xs w-32 ${
+                                      <SelectTrigger className={`border-slate-600 h-8 text-xs w-full ${
                                         retour.statut === "Retour d'appel" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
                                         retour.statut === "Message laissé" ? "bg-orange-500/20 text-orange-400 border-orange-500/30" :
                                         retour.statut === "Aucune réponse" ? "bg-slate-700 text-red-400" :
@@ -1949,6 +1936,19 @@ export default function EditDossierForm({
                                         <SelectItem value="Terminé" className="text-white text-xs">Terminé</SelectItem>
                                       </SelectContent>
                                     </Select>
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs w-1/4">
+                                    <div className="flex items-center gap-1.5">
+                                      <span>
+                                        {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
+                                      </span>
+                                      <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
+                                        <AvatarImage src={users.find(u => u.email === retour.utilisateur_assigne)?.photo_url} />
+                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                          {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ));
