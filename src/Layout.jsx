@@ -820,7 +820,7 @@ function LayoutContent({ children, currentPageName }) {
             <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3">
+          <div className="flex-1 overflow-y-auto p-6 pt-3">
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations du dossier */}
               <div className="border border-slate-700 bg-slate-800/30 rounded-lg mb-2">
