@@ -2357,7 +2357,7 @@ export default function EditDossierForm({
       </div>
 
       {/* Boutons Annuler/Créer tout en bas - Seulement en mode création */}
-      {/* Dialog de confirmation suppression minute */}
+      {/* Dialog de confirmation suppression minute/entrée temps/retour appel */}
       <Dialog open={showDeleteMinuteConfirm} onOpenChange={setShowDeleteMinuteConfirm}>
         <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
           <DialogHeader>
@@ -2369,16 +2369,28 @@ export default function EditDossierForm({
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-slate-300 text-center">
-              Êtes-vous sûr de vouloir supprimer cette minute ({minuteToDeleteInfo?.minute}) ?
+              {minuteToDeleteInfo?.minute ? `Êtes-vous sûr de vouloir supprimer cette minute (${minuteToDeleteInfo.minute}) ?` : 
+               minuteToDeleteInfo?.entreeTempsId ? "Êtes-vous sûr de vouloir supprimer cette entrée de temps ?" :
+               minuteToDeleteInfo?.retourAppelId ? "Êtes-vous sûr de vouloir supprimer ce retour d'appel ?" :
+               "Êtes-vous sûr de vouloir supprimer ?"}
             </p>
             <div className="flex justify-center gap-3 pt-4">
               <Button
                 type="button"
-                onClick={() => {
-                  if (minuteToDeleteInfo) {
+                onClick={async () => {
+                  if (minuteToDeleteInfo?.minute && minuteToDeleteInfo?.mandatIndex !== undefined) {
+                    // Supprimer une minute
                     const updatedMandats = [...formData.mandats];
                     updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list = updatedMandats[minuteToDeleteInfo.mandatIndex].minutes_list.filter((_, idx) => idx !== minuteToDeleteInfo.minuteIndex);
                     setFormData({...formData, mandats: updatedMandats});
+                  } else if (minuteToDeleteInfo?.entreeTempsId) {
+                    // Supprimer une entrée de temps
+                    await base44.entities.EntreeTemps.delete(minuteToDeleteInfo.entreeTempsId);
+                    setEntreesTemps(prev => prev.filter(e => e.id !== minuteToDeleteInfo.entreeTempsId));
+                  } else if (minuteToDeleteInfo?.retourAppelId) {
+                    // Supprimer un retour d'appel
+                    await base44.entities.RetourAppel.delete(minuteToDeleteInfo.retourAppelId);
+                    setRetoursAppel(prev => prev.filter(r => r.id !== minuteToDeleteInfo.retourAppelId));
                   }
                   setShowDeleteMinuteConfirm(false);
                   setMinuteToDeleteInfo(null);
