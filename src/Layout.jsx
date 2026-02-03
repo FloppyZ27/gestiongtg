@@ -1067,7 +1067,7 @@ function LayoutContent({ children, currentPageName }) {
                                       <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
                                       <TableCell className="text-slate-300 text-xs">
                                         <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                          {mandat.type_mandat}
+                                          {getAbbreviatedMandatType(mandat.type_mandat)}
                                         </Badge>
                                       </TableCell>
                                       <TableCell className="text-slate-300 text-xs">{lotsDisplay}</TableCell>
