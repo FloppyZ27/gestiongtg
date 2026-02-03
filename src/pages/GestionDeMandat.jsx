@@ -648,23 +648,41 @@ export default function GestionDeMandat() {
                                 {tache}
                               </CardTitle>
                               <div className="flex items-center gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => setSortTaches(prev => ({
-                                    ...prev,
-                                    [tache]: prev[tache] === "asc" ? "desc" : prev[tache] === "desc" ? null : "asc"
-                                  }))}
-                                  className={`h-6 w-6 ${sortTaches[tache] ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-slate-400'}`}
-                                >
-                                  {sortTaches[tache] === "asc" ? (
-                                    <ArrowUp className="w-4 h-4" />
-                                  ) : sortTaches[tache] === "desc" ? (
-                                    <ArrowDown className="w-4 h-4" />
-                                  ) : (
-                                    <Calendar className="w-4 h-4" />
-                                  )}
-                                </Button>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setSortTaches(prev => ({
+                                          ...prev,
+                                          [tache]: prev[tache] === "asc" ? "desc" : prev[tache] === "desc" ? null : "asc"
+                                        }))}
+                                        className={`h-8 px-2 text-xs font-medium ${sortTaches[tache] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
+                                      >
+                                        {sortTaches[tache] === "asc" ? (
+                                          <>
+                                            <ArrowUp className="w-3 h-3 mr-1" />
+                                            Plus anciens
+                                          </>
+                                        ) : sortTaches[tache] === "desc" ? (
+                                          <>
+                                            <ArrowDown className="w-3 h-3 mr-1" />
+                                            Plus récents
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Calendar className="w-3 h-3 mr-1" />
+                                            Trier date
+                                          </>
+                                        )}
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Trier par date de livraison
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
                                   {cardsInColumn.length}
                                 </Badge>
