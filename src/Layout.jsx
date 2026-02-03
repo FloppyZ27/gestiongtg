@@ -1165,23 +1165,23 @@ function LayoutContent({ children, currentPageName }) {
                     {selectedDossierId && (
                     <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
                     <div 
-                    className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-3 px-4 bg-orange-900/20"
+                    className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 px-3 bg-orange-900/20"
                     onClick={() => setDetailsCollapsed(!detailsCollapsed)}
                     >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center">
-                          <Timer className="w-3.5 h-3.5 text-orange-400" />
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
+                          <Timer className="w-3 h-3 text-orange-400" />
                         </div>
-                        <h3 className="text-orange-300 text-base font-semibold">Détails de l'entrée</h3>
+                        <h3 className="text-orange-300 text-sm font-semibold">Détails de l'entrée</h3>
                       </div>
                       {detailsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                     </div>
                     </div>
 
                     {!detailsCollapsed && (
-                    <div className="pt-3 pb-3 px-4">
-                    <div className="rounded-lg p-4">
+                    <div className="pt-2 pb-2 px-3">
+                    <div className="rounded-lg p-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
