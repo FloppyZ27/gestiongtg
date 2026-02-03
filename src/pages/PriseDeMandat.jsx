@@ -3029,9 +3029,44 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                   </div>
 
-                  {/* Boutons - Seulement bouton Créer pour nouveau mandat */}
+                  {/* Boutons - Annuler et Créer pour nouveau mandat */}
                   {!editingPriseMandat && (
                     <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="border-red-500 text-red-400 hover:bg-red-500/10"
+                        onClick={() => {
+                          const hasChanges = 
+                            formData.arpenteur_geometre ||
+                            formData.clients_ids.length > 0 ||
+                            formData.notaires_ids.length > 0 ||
+                            formData.courtiers_ids.length > 0 ||
+                            formData.compagnies_ids.length > 0 ||
+                            clientInfo.prenom ||
+                            clientInfo.nom ||
+                            clientInfo.telephone ||
+                            clientInfo.courriel ||
+                            professionnelInfo.notaire ||
+                            professionnelInfo.courtier ||
+                            professionnelInfo.compagnie ||
+                            workAddress.rue ||
+                            workAddress.ville ||
+                            workAddress.numeros_civiques?.[0] ||
+                            workAddress.numero_lot ||
+                            mandatsInfo.some(m => m.type_mandat) ||
+                            commentairesTemporaires.length > 0;
+                          
+                          if (hasChanges) {
+                            setShowCancelConfirm(true);
+                          } else {
+                            setIsDialogOpen(false);
+                            resetFullForm();
+                          }
+                        }}
+                      >
+                        Annuler
+                      </Button>
                       <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
                         Créer
                       </Button>
