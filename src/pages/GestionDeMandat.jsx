@@ -75,6 +75,8 @@ export default function GestionDeMandat() {
   const [activeView, setActiveView] = useState("taches");
   const [currentMonthStart, setCurrentMonthStart] = useState(startOfMonth(new Date()));
   const [calendarMode, setCalendarMode] = useState("week"); // "week" or "month"
+  const [sortTaches, setSortTaches] = useState({}); // { tache: "asc" | "desc" | null }
+  const [sortUtilisateurs, setSortUtilisateurs] = useState({}); // { email: "asc" | "desc" | null }
 
   const queryClient = useQueryClient();
 
