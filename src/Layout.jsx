@@ -229,11 +229,18 @@ function LayoutContent({ children, currentPageName }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Valider que heures est un nombre valide
+    const heures = parseFloat(entreeForm.heures);
+    if (isNaN(heures) || heures <= 0) {
+      alert("Veuillez entrer un nombre d'heures valide");
+      return;
+    }
+
     // Créer l'entrée de temps
     await createEntreeMutation.mutateAsync({
       ...entreeForm,
-      heures: parseFloat(entreeForm.heures)
+      heures: heures
     });
 
     // Mettre à jour le dossier avec la tâche suivante et l'utilisateur assigné
