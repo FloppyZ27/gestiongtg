@@ -21,6 +21,7 @@ import CommentairesSectionLot from "../components/lots/CommentairesSectionLot";
 import DocumentsStepFormLot from "../components/lots/DocumentsStepFormLot";
 import LotInfoStepForm from "../components/lots/LotInfoStepForm";
 import TypesOperationStepForm from "../components/lots/TypesOperationStepForm";
+import { motion } from "framer-motion";
 
 const CIRCONSCRIPTIONS = ["Lac-Saint-Jean-Est", "Lac-Saint-Jean-Ouest", "Chicoutimi"];
 
