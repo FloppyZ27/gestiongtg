@@ -1094,14 +1094,11 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                     </>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700">
-                        <div className="flex-1">
-                          <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border mb-2 text-xs`}>
-                            {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                          </Badge>
-                          <p className="text-slate-400 text-xs">{getClientsNames(selectedDossier?.clients_ids)}</p>
-                        </div>
+                    <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border text-xs`}>
+                          {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                        </Badge>
                         <Button
                           type="button"
                           size="sm"
@@ -1115,9 +1112,17 @@ function LayoutContent({ children, currentPageName }) {
                           Changer
                         </Button>
                       </div>
+                      <div className="space-y-2 text-xs">
+                        <p className="text-slate-300"><span className="text-slate-400">Clients:</span> {getClientsNames(selectedDossier?.clients_ids)}</p>
+                        {selectedDossier?.statut && <p className="text-slate-300"><span className="text-slate-400">Statut:</span> {selectedDossier.statut}</p>}
+                        {selectedDossier?.date_ouverture && <p className="text-slate-300"><span className="text-slate-400">Ouverture:</span> {format(new Date(selectedDossier.date_ouverture), "dd MMM yyyy")}</p>}
+                        {selectedDossier?.mandats?.length > 0 && (
+                          <p className="text-slate-300"><span className="text-slate-400">Mandats:</span> {selectedDossier.mandats.map(m => getAbbreviatedMandatType(m.type_mandat)).join(", ")}</p>
+                        )}
+                      </div>
 
                       {availableMandats.length > 0 && (
-                        <div className="space-y-1">
+                        <div className="space-y-1 pt-2 border-t border-slate-700">
                           <Label className="text-xs text-slate-400">Mandat</Label>
                           <Select value={entreeForm.mandat} onValueChange={(value) => {
                             const mandat = availableMandats.find(m => m.type_mandat === value);
@@ -1135,7 +1140,7 @@ function LayoutContent({ children, currentPageName }) {
                             <SelectContent className="bg-slate-800 border-slate-700">
                               {availableMandats.map((mandat, index) => (
                                 <SelectItem key={mandat.id || index} value={mandat.type_mandat || `Mandat ${index + 1}`} className="text-white text-xs">
-                                  {mandat.type_mandat || `Mandat ${index + 1}`}
+                                  {getAbbreviatedMandatType(mandat.type_mandat || `Mandat ${index + 1}`)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1143,7 +1148,7 @@ function LayoutContent({ children, currentPageName }) {
                         </div>
                       )}
                     </div>
-                    )}
+                  )}
                     </div>
                     )}
                     </div>
