@@ -976,6 +976,7 @@ export default function GestionDeMandat() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
 
         {/* Dialog de vue du dossier */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
