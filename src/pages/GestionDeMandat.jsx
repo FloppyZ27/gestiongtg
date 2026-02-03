@@ -768,23 +768,41 @@ export default function GestionDeMandat() {
                                 </CardTitle>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => setSortUtilisateurs(prev => ({
-                                    ...prev,
-                                    [user.email]: prev[user.email] === "asc" ? "desc" : prev[user.email] === "desc" ? null : "asc"
-                                  }))}
-                                  className={`h-6 w-6 ${sortUtilisateurs[user.email] ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-slate-400'}`}
-                                >
-                                  {sortUtilisateurs[user.email] === "asc" ? (
-                                    <ArrowUp className="w-4 h-4" />
-                                  ) : sortUtilisateurs[user.email] === "desc" ? (
-                                    <ArrowDown className="w-4 h-4" />
-                                  ) : (
-                                    <Calendar className="w-4 h-4" />
-                                  )}
-                                </Button>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setSortUtilisateurs(prev => ({
+                                          ...prev,
+                                          [user.email]: prev[user.email] === "asc" ? "desc" : prev[user.email] === "desc" ? null : "asc"
+                                        }))}
+                                        className={`h-8 px-2 text-xs font-medium ${sortUtilisateurs[user.email] ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-700/30 text-slate-400 border border-slate-600 hover:bg-slate-700/50 hover:text-slate-300'}`}
+                                      >
+                                        {sortUtilisateurs[user.email] === "asc" ? (
+                                          <>
+                                            <ArrowUp className="w-3 h-3 mr-1" />
+                                            Plus anciens
+                                          </>
+                                        ) : sortUtilisateurs[user.email] === "desc" ? (
+                                          <>
+                                            <ArrowDown className="w-3 h-3 mr-1" />
+                                            Plus récents
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Calendar className="w-3 h-3 mr-1" />
+                                            Trier date
+                                          </>
+                                        )}
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Trier par date de livraison
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
                                   {cardsInColumn.length}
                                 </Badge>
