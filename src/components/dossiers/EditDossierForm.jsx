@@ -1728,11 +1728,8 @@ export default function EditDossierForm({
                                       <button 
                                          type="button" 
                                          onClick={() => {
-                                           if (confirm("Êtes-vous sûr de vouloir supprimer cette minute ?")) {
-                                             const updatedMandats = [...formData.mandats];
-                                             updatedMandats[minute.mandatIndex].minutes_list = updatedMandats[minute.mandatIndex].minutes_list.filter((_, idx) => idx !== minute.minuteIndex);
-                                             setFormData({...formData, mandats: updatedMandats});
-                                           }
+                                           setMinuteToDeleteInfo(minute);
+                                           setShowDeleteMinuteConfirm(true);
                                          }}
                                          className="text-slate-400 hover:text-red-400 transition-colors"
                                        >
