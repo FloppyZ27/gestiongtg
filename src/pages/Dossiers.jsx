@@ -177,6 +177,9 @@ export default function Dossiers() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importedData, setImportedData] = useState([]);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [showDeleteDossierConfirm, setShowDeleteDossierConfirm] = useState(false);
+  const [dossierIdToDelete, setDossierIdToDelete] = useState(null);
+  const [dossierNameToDelete, setDossierNameToDelete] = useState("");
 
   const [formData, setFormData] = useState({
     numero_dossier: "",
