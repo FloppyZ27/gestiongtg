@@ -124,6 +124,8 @@ function LayoutContent({ children, currentPageName }) {
   const [selectedDossierId, setSelectedDossierId] = useState(null);
   const [hasEntreeChanges, setHasEntreeChanges] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
+  const [detailsCollapsed, setDetailsCollapsed] = useState(false);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -774,20 +776,27 @@ function LayoutContent({ children, currentPageName }) {
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations du dossier */}
               <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
-                <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                      <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
+                <div 
+                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 px-4 bg-blue-900/20"
+                  onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                        <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                      </div>
+                      <h3 className="text-blue-300 text-base font-semibold">Informations du dossier</h3>
+                      {selectedDossier && (
+                        <span className="text-slate-300 text-xs">
+                          {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
+                        </span>
+                      )}
                     </div>
-                    <h3 className="text-emerald-300 text-base font-semibold">Informations du dossier</h3>
-                    {selectedDossier && (
-                      <span className="text-slate-300 text-xs">
-                        {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
-                      </span>
-                    )}
+                    {infoDossierCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
                 </div>
 
+                {!infoDossierCollapsed && (
                 <div className="pt-2 pb-3 px-4">
                   {!selectedDossierId ? (
                     <>
@@ -915,23 +924,30 @@ function LayoutContent({ children, currentPageName }) {
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Section Détails de l'entrée */}
-              {selectedDossierId && (
-                <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
-                  <div className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                        <Timer className="w-3.5 h-3.5 text-emerald-400" />
-                      </div>
-                      <h3 className="text-emerald-300 text-base font-semibold">Détails de l'entrée</h3>
+                    )}
+                    )}
                     </div>
-                  </div>
 
-                  <div className="pt-3 pb-3 px-4">
+                    {/* Section Détails de l'entrée */}
+                    {selectedDossierId && (
+                    <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+                    <div 
+                    className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 px-4 bg-blue-900/20"
+                    onClick={() => setDetailsCollapsed(!detailsCollapsed)}
+                    >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
+                          <Timer className="w-3.5 h-3.5 text-blue-400" />
+                        </div>
+                        <h3 className="text-blue-300 text-base font-semibold">Détails de l'entrée</h3>
+                      </div>
+                      {detailsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                    </div>
+                    </div>
+
+                    {!detailsCollapsed && (
+                    <div className="pt-3 pb-3 px-4">
                     <div className="border-2 border-emerald-500/30 rounded-lg p-4 bg-emerald-900/10">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
@@ -1037,9 +1053,10 @@ function LayoutContent({ children, currentPageName }) {
                         />
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                    </div>
+                    )}
+                    </div>
+                    )}
             </form>
           </div>
 
