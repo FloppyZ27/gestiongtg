@@ -609,9 +609,8 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                          key={tache} 
-                         className="flex-shrink-0"
+                         className="flex-1 min-w-0"
                          style={{ 
-                           width: '240px',
                            zIndex: 1 
                          }}
                       >
