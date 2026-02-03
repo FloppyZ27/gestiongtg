@@ -817,11 +817,8 @@ export default function EditDossierForm({
                               size="sm" 
                               variant="ghost"
                               onClick={() => {
-                                const indexToRemove = parseInt(activeTabMandat);
-                                if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
-                                  removeMandat(indexToRemove);
-                                  setActiveTabMandat(Math.max(0, indexToRemove - 1).toString());
-                                }
+                                setMandatIndexToDelete(parseInt(activeTabMandat));
+                                setShowDeleteMandatConfirm(true);
                               }}
                               className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-6 w-6 p-0"
                             >
