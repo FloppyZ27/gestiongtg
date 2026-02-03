@@ -1095,28 +1095,60 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                     </>
                   ) : (
-                    <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded-lg border border-slate-700">
-                      <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border text-xs flex-shrink-0`}>
-                        {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                      </Badge>
-                      <p className="text-slate-300 text-xs truncate flex-shrink-0 min-w-0">{getClientsNames(selectedDossier?.clients_ids) || "-"}</p>
-                      <p className="text-slate-400 text-xs truncate flex-shrink-0 min-w-0 max-w-[100px]">{selectedDossier?.mandats?.map(m => getAbbreviatedMandatType(m.type_mandat)).join(", ") || "-"}</p>
-                      <p className="text-slate-400 text-xs truncate flex-shrink-0 min-w-0">{selectedDossier?.mandats?.[0]?.lots?.map(lotId => {
-                        const lot = lots.find(l => l.id === lotId);
-                        return lot ? lot.numero_lot : lotId;
-                      }).join(", ") || "-"}</p>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedDossierId(null);
-                          setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
-                        }}
-                        className="text-slate-400 text-xs h-7 ml-auto flex-shrink-0"
-                      >
-                        Changer
-                      </Button>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded-lg border border-slate-700 overflow-hidden">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">N°:</span>
+                          <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+                            {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">Clients:</span>
+                          <p className="text-slate-300 text-xs truncate">{getClientsNames(selectedDossier?.clients_ids) || "-"}</p>
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">Mandat:</span>
+                          <Badge className={`${getMandatColor(selectedDossier?.mandats?.[0]?.type_mandat)} border text-xs`}>
+                            {getAbbreviatedMandatType(selectedDossier?.mandats?.[0]?.type_mandat) || "-"}
+                          </Badge>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedDossierId(null);
+                            setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
+                          }}
+                          className="text-slate-400 text-xs h-7 flex-shrink-0"
+                        >
+                          Changer
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2 p-2 bg-slate-800/30 rounded-lg border border-slate-700 overflow-hidden">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">Lot:</span>
+                          <p className="text-slate-300 text-xs truncate">{selectedDossier?.mandats?.[0]?.lots?.map(lotId => {
+                            const lot = lots.find(l => l.id === lotId);
+                            return lot ? lot.numero_lot : lotId;
+                          }).join(", ") || "-"}</p>
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">Tâche:</span>
+                          {selectedDossier?.mandats?.[0]?.tache_actuelle ? (
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                              {selectedDossier.mandats[0].tache_actuelle}
+                            </Badge>
+                          ) : (
+                            <span className="text-slate-400 text-xs">-</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          <span className="text-slate-500 text-xs whitespace-nowrap">Adresse:</span>
+                          <p className="text-slate-300 text-xs truncate">{selectedDossier?.mandats?.[0]?.adresse_travaux ? formatAdresse(selectedDossier.mandats[0].adresse_travaux) : "-"}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                     </div>
