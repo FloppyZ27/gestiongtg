@@ -2079,61 +2079,6 @@ export default function EditDossierForm({
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
             Annuler
           </Button>
-          
-          {!isCreatingFolder ? (
-            <Button 
-              type="button" 
-              onClick={async () => {
-                setIsCreatingFolder(true);
-                setLoadingMessage("Vérification...");
-                
-                try {
-                  await new Promise(resolve => setTimeout(resolve, 300));
-                  
-                  setLoadingMessage("Création du dossier SharePoint...");
-                  const createResponse = await base44.functions.invoke('createSharePointFolder', {
-                    arpenteurGeometre: formData.arpenteur_geometre,
-                    numeroDossier: formData.numero_dossier
-                  });
-                  
-                  if (!createResponse.data.success) {
-                    throw new Error(createResponse.data.error || 'Erreur lors de la création du dossier');
-                  }
-                  
-                  setLoadingMessage("Transfert des documents...");
-                  const moveResponse = await base44.functions.invoke('moveSharePointFiles', {
-                    sourceFolderPath: `PRISEDEMANDAT/TEMPORAIRE`,
-                    destinationFolderPath: createResponse.data.folderPath
-                  });
-                  
-                  setLoadingMessage("Finalisation...");
-                  await new Promise(resolve => setTimeout(resolve, 300));
-                  
-                  setLoadingMessage("✅ Terminé!");
-                  await new Promise(resolve => setTimeout(resolve, 1000));
-                  
-                  setIsCreatingFolder(false);
-                  setLoadingMessage("");
-                  
-                } catch (error) {
-                  console.error('Erreur création dossier:', error);
-                  alert(`Erreur: ${error.message || 'Une erreur est survenue'}`);
-                  setIsCreatingFolder(false);
-                  setLoadingMessage("");
-                }
-              }}
-              className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-              disabled={!formData.arpenteur_geometre || !formData.numero_dossier}
-            >
-              <FolderOpen className="w-4 h-4 mr-2" />
-              Ouvrir dossier
-            </Button>
-          ) : (
-            <div className="flex items-center gap-3 px-6 py-2.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-              <span className="text-blue-400 text-sm font-medium">{loadingMessage}</span>
-            </div>
-          )}
           <Button type="submit" form="edit-dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
             Créer
           </Button>
