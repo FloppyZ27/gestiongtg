@@ -139,6 +139,17 @@ const getMandatColor = (typeMandat) => {
   return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
 };
 
+const getAbbreviatedMandatType = (type) => {
+  const abbreviations = {
+    "Certificat de localisation": "CL",
+    "Description Technique": "DT",
+    "Implantation": "Imp",
+    "Levé topographique": "Levé Topo",
+    "Piquetage": "Piq"
+  };
+  return abbreviations[type] || type;
+};
+
 function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
   const [isEntreeTempsOpen, setIsEntreeTempsOpen] = useState(false);
