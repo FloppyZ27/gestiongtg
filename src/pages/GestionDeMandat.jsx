@@ -748,9 +748,28 @@ export default function GestionDeMandat() {
                                   {user.full_name}
                                 </CardTitle>
                               </div>
-                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
-                                {cardsInColumn.length}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => setSortUtilisateurs(prev => ({
+                                    ...prev,
+                                    [user.email]: prev[user.email] === "asc" ? "desc" : prev[user.email] === "desc" ? null : "asc"
+                                  }))}
+                                  className={`h-6 w-6 ${sortUtilisateurs[user.email] ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-slate-400'}`}
+                                >
+                                  {sortUtilisateurs[user.email] === "asc" ? (
+                                    <ArrowUp className="w-4 h-4" />
+                                  ) : sortUtilisateurs[user.email] === "desc" ? (
+                                    <ArrowDown className="w-4 h-4" />
+                                  ) : (
+                                    <Calendar className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
+                                  {cardsInColumn.length}
+                                </Badge>
+                              </div>
                             </div>
                           </CardHeader>
                           <Droppable droppableId={user.email}>
