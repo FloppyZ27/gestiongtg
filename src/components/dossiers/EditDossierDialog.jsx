@@ -532,14 +532,15 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
           <DialogHeader className="p-6 pb-4 border-b border-slate-800 flex-shrink-0">
             <DialogTitle className="text-2xl">Modifier le dossier</DialogTitle>
           </DialogHeader>
-          <div className="flex h-[calc(90vh-80px)]">
-            <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
 
-              <form id="dossier-form" onSubmit={handleSubmit} className="space-y-6">
+          {/* Section Carte sur toute la largeur */}
+          <div className="px-6 pt-4 pb-4 border-b border-slate-800 flex-shrink-0">
+            <form id="dossier-form" onSubmit={handleSubmit}>
+              <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Arpenteur-géomètre <span className="text-red-400">*</span></Label>
@@ -709,15 +710,21 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                     )}
                   </div>
                 </div>
+              </div>
+            </form>
+          </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Mandats</Label>
-                    <Button type="button" size="sm" onClick={addMandat} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter un mandat
-                    </Button>
-                  </div>
+          {/* Section divisée: Mandats (70%) et Commentaires (30%) */}
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex-[0_0_70%] overflow-y-auto p-6 border-r border-slate-800">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label>Mandats</Label>
+                  <Button type="button" size="sm" onClick={addMandat} className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400">
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ajouter un mandat
+                  </Button>
+                </div>
 
                   {formData.mandats.length > 0 ? (
                     <Tabs value={activeTabMandat} onValueChange={setActiveTabMandat} className="w-full">
@@ -802,9 +809,8 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
                     </div>
                   </div>
                 )}
-              </form>
 
-              <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800 px-6">
+              <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-slate-900/95 backdrop-blur py-4 border-t border-slate-800">
                 <Button type="button" variant="outline" onClick={handleCloseAttempt} className="border-red-500 text-red-400 hover:bg-red-500/10">Annuler</Button>
                 <Button 
                   type="button" 
