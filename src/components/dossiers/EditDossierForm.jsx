@@ -1888,17 +1888,27 @@ export default function EditDossierForm({
 
                               return sortedRetoursAppel.map((retour) => (
                                 <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-slate-300">
+                                  <TableCell className="text-slate-300 text-xs">
                                     {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
-                                  <TableCell className="text-slate-300">
-                                    {users.find(u => u.email === retour.utilisateur_assigne)?.full_name || retour.utilisateur_assigne || "-"}
+                                  <TableCell className="text-slate-300 text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                      <span>
+                                        {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
+                                      </span>
+                                      <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
+                                        <AvatarImage src={users.find(u => u.email === retour.utilisateur_assigne)?.photo_url} />
+                                        <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                          {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    </div>
                                   </TableCell>
-                                  <TableCell className="text-slate-300">
+                                  <TableCell className="text-slate-300 text-xs max-w-xs">
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <div className="max-w-xs truncate cursor-help">
+                                          <div className="truncate cursor-help">
                                             {retour.raison || "-"}
                                           </div>
                                         </TooltipTrigger>
@@ -1910,7 +1920,7 @@ export default function EditDossierForm({
                                       </Tooltip>
                                     </TooltipProvider>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="text-xs">
                                     <Select 
                                       value={retour.statut}
                                       onValueChange={async (newStatut) => {
