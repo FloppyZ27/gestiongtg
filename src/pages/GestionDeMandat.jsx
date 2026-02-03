@@ -647,11 +647,11 @@ export default function GestionDeMandat() {
                     
                     return (
                       <div 
-                        key={user.email} 
-                        className="flex-shrink-0 w-[15.12rem]"
-                        style={{ 
-                          zIndex: 1 
-                        }}
+                         key={user.email} 
+                         className="flex-shrink-0 w-[18.14rem]"
+                         style={{ 
+                           zIndex: 1 
+                         }}
                       >
                         <Card 
                           className={`border-2 ${bgColor} ${borderColor} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
