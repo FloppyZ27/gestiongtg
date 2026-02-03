@@ -877,14 +877,16 @@ function LayoutContent({ children, currentPageName }) {
                                       <Filter className="w-3 h-3 text-emerald-500" />
                                       <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
                                     </div>
-                                    {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0) && (
+                                    {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0 || entreeTempsFilterVille.length > 0) && (
                                       <Button
+                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
                                           setEntreeTempsFilterArpenteur([]);
                                           setEntreeTempsFilterMandat([]);
                                           setEntreeTempsFilterTache([]);
+                                          setEntreeTempsFilterVille([]);
                                         }}
                                         className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
                                       >
