@@ -183,6 +183,12 @@ function LayoutContent({ children, currentPageName }) {
     initialData: [],
   });
 
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots'],
+    queryFn: () => base44.entities.Lot.list(),
+    initialData: [],
+  });
+
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
     heures: "",
