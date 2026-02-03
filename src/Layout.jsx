@@ -1095,47 +1095,63 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                     </>
                   ) : (
-                    <div className="p-2 bg-slate-800/30 rounded-lg border border-slate-700">
-                      <div className="grid grid-cols-6 gap-2 mb-2">
-                        <div className="text-slate-500 text-xs font-semibold">N° Dossier</div>
-                        <div className="text-slate-500 text-xs font-semibold">Clients</div>
-                        <div className="text-slate-500 text-xs font-semibold">Mandat</div>
-                        <div className="text-slate-500 text-xs font-semibold">Lot</div>
-                        <div className="text-slate-500 text-xs font-semibold">Tâche actuelle</div>
-                        <div className="text-slate-500 text-xs font-semibold">Adresse</div>
-                      </div>
-                      <div className="grid grid-cols-6 gap-2 items-center">
-                        <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border text-xs justify-center`}>
-                          {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
-                        </Badge>
-                        <p className="text-slate-300 text-xs truncate">{getClientsNames(selectedDossier?.clients_ids) || "-"}</p>
-                        <Badge className={`${getMandatColor(selectedDossier?.mandats?.[0]?.type_mandat)} border text-xs justify-center`}>
-                          {getAbbreviatedMandatType(selectedDossier?.mandats?.[0]?.type_mandat) || "-"}
-                        </Badge>
-                        <p className="text-slate-300 text-xs truncate">{selectedDossier?.mandats?.[0]?.lots?.map(lotId => {
-                          const lot = lots.find(l => l.id === lotId);
-                          return lot ? lot.numero_lot : lotId;
-                        }).join(", ") || "-"}</p>
-                        {selectedDossier?.mandats?.[0]?.tache_actuelle ? (
-                          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs justify-center">
-                            {selectedDossier.mandats[0].tache_actuelle}
-                          </Badge>
-                        ) : (
-                          <span className="text-slate-400 text-xs">-</span>
-                        )}
-                        <p className="text-slate-300 text-xs truncate">{selectedDossier?.mandats?.[0]?.adresse_travaux ? formatAdresse(selectedDossier.mandats[0].adresse_travaux) : "-"}</p>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedDossierId(null);
-                            setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
-                          }}
-                          className="text-slate-400 text-xs h-7 col-span-6"
-                        >
-                          Changer
-                        </Button>
+                    <div className="p-0 bg-slate-800/30 rounded-lg border border-slate-700">
+                      <div className="overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-slate-800/50">
+                            <TableRow className="hover:bg-slate-800/50 border-slate-700">
+                              <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Clients</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Lot</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Tâche actuelle</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow className="hover:bg-slate-800/30 border-slate-800">
+                              <TableCell className="font-medium text-xs p-2">
+                                <Badge variant="outline" className={`${getArpenteurColor(selectedDossier?.arpenteur_geometre)} border`}>
+                                  {getArpenteurInitials(selectedDossier?.arpenteur_geometre)}{selectedDossier?.numero_dossier}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-xs p-2">{getClientsNames(selectedDossier?.clients_ids) || "-"}</TableCell>
+                              <TableCell className="text-slate-300 text-xs p-2">
+                                <Badge className={`${getMandatColor(selectedDossier?.mandats?.[0]?.type_mandat)} border text-xs`}>
+                                  {getAbbreviatedMandatType(selectedDossier?.mandats?.[0]?.type_mandat) || "-"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-xs p-2">{selectedDossier?.mandats?.[0]?.lots?.map(lotId => {
+                                const lot = lots.find(l => l.id === lotId);
+                                return lot ? lot.numero_lot : lotId;
+                              }).join(", ") || "-"}</TableCell>
+                              <TableCell className="text-slate-300 text-xs p-2">
+                                {selectedDossier?.mandats?.[0]?.tache_actuelle ? (
+                                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                                    {selectedDossier.mandats[0].tache_actuelle}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-slate-400 text-xs">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-slate-300 text-xs p-2 max-w-xs truncate">{selectedDossier?.mandats?.[0]?.adresse_travaux ? formatAdresse(selectedDossier.mandats[0].adresse_travaux) : "-"}</TableCell>
+                              <TableCell className="text-right p-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedDossierId(null);
+                                    setEntreeForm({...entreeForm, dossier_id: "", mandat: "", tache_suivante: "", utilisateur_assigne: ""});
+                                  }}
+                                  className="text-slate-400 text-xs h-7"
+                                >
+                                  Changer
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
                       </div>
                     </div>
                   )}
