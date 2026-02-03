@@ -391,13 +391,13 @@ export default function GestionDeMandat() {
         )}
 
         {/* Tâche actuelle */}
-        {card.mandat.tache_actuelle && (
-          <div className="mb-1">
-            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
-              {card.mandat.tache_actuelle}
-            </Badge>
-          </div>
-        )}
+         {card.mandat.tache_actuelle && (
+           <div className="mb-1">
+             <Badge className={`${getTacheColor(card.mandat.tache_actuelle)} text-white text-xs`}>
+               {card.mandat.tache_actuelle}
+             </Badge>
+           </div>
+         )}
 
         {/* Date de livraison et utilisateur assigné en bas */}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
