@@ -455,88 +455,88 @@ export default function GestionDeMandat() {
 
       `}</style>
       
-      <div className="w-full px-0">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Gestion de Mandat
-              </h1>
-              <Kanban className="w-6 h-6 text-emerald-400" />
-            </div>
-            <p className="text-slate-400">Vue Kanban de vos mandats</p>
-            </div>
-        </div>
+      <div className="w-full px-0 sticky top-0 z-40 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-6">
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+           <div>
+             <div className="flex items-center gap-3 mb-2">
+               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                 Gestion de Mandat
+               </h1>
+               <Kanban className="w-6 h-6 text-emerald-400" />
+             </div>
+             <p className="text-slate-400">Vue Kanban de vos mandats</p>
+             </div>
+         </div>
 
-        {/* Filtres et recherche */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[250px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
-                <Input
-                  placeholder="Rechercher un dossier, client..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-700 text-white"
-                />
-              </div>
-              <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Arpenteur" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
-                  {ARPENTEURS.map(arp => (
-                    <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Type de mandat" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les types</SelectItem>
-                  {TYPES_MANDATS.map(type => (
-                    <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterUtilisateur} onValueChange={setFilterUtilisateur}>
-                <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
-                  <SelectValue placeholder="Utilisateur assigné" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
-                  {users.map(user => (
-                    <SelectItem key={user.email} value={user.email} className="text-white">
-                      {user.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {(searchTerm || filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilterArpenteur("all");
-                    setFilterTypeMandat("all");
-                    setFilterUtilisateur("all");
-                  }}
-                  className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
-                >
-                  Réinitialiser
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+         {/* Filtres et recherche */}
+         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+           <CardContent className="p-4">
+             <div className="flex flex-wrap gap-3">
+               <div className="relative flex-1 min-w-[250px]">
+                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                 <Input
+                   placeholder="Rechercher un dossier, client..."
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                   className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                 />
+               </div>
+               <Select value={filterArpenteur} onValueChange={setFilterArpenteur}>
+                 <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                   <SelectValue placeholder="Arpenteur" />
+                 </SelectTrigger>
+                 <SelectContent className="bg-slate-800 border-slate-700">
+                   <SelectItem value="all" className="text-white">Tous les arpenteurs</SelectItem>
+                   {ARPENTEURS.map(arp => (
+                     <SelectItem key={arp} value={arp} className="text-white">{arp}</SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               <Select value={filterTypeMandat} onValueChange={setFilterTypeMandat}>
+                 <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                   <SelectValue placeholder="Type de mandat" />
+                 </SelectTrigger>
+                 <SelectContent className="bg-slate-800 border-slate-700">
+                   <SelectItem value="all" className="text-white">Tous les types</SelectItem>
+                   {TYPES_MANDATS.map(type => (
+                     <SelectItem key={type} value={type} className="text-white">{type}</SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               <Select value={filterUtilisateur} onValueChange={setFilterUtilisateur}>
+                 <SelectTrigger className="w-52 bg-slate-800/50 border-slate-700 text-white">
+                   <SelectValue placeholder="Utilisateur assigné" />
+                 </SelectTrigger>
+                 <SelectContent className="bg-slate-800 border-slate-700">
+                   <SelectItem value="all" className="text-white">Tous les utilisateurs</SelectItem>
+                   {users.map(user => (
+                     <SelectItem key={user.email} value={user.email} className="text-white">
+                       {user.full_name}
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               {(searchTerm || filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all") && (
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => {
+                     setSearchTerm("");
+                     setFilterArpenteur("all");
+                     setFilterTypeMandat("all");
+                     setFilterUtilisateur("all");
+                   }}
+                   className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
+                 >
+                   Réinitialiser
+                 </Button>
+               )}
+             </div>
+           </CardContent>
+         </Card>
 
-        {/* Tabs pour les différentes vues */}
-        <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+         {/* Tabs pour les différentes vues */}
+         <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
           <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
             <TabsTrigger
               value="taches"
