@@ -823,19 +823,19 @@ function LayoutContent({ children, currentPageName }) {
           <div className="flex-1 overflow-y-auto px-4 py-3">
             <form id="entree-temps-form" onSubmit={handleSubmit} className="space-y-3">
               {/* Section Informations du dossier */}
-              <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+              <div className="border border-slate-700 bg-slate-800/30 rounded-lg mb-2">
                 <div 
-                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-3 px-4 bg-blue-900/20"
+                  className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-2 px-3 bg-blue-900/20"
                   onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center">
-                        <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                        <FolderOpen className="w-3 h-3 text-blue-400" />
                       </div>
-                      <h3 className="text-blue-300 text-base font-semibold">Informations du dossier</h3>
+                      <h3 className="text-blue-300 text-sm font-semibold">Informations du dossier</h3>
                       {selectedDossier && (
-                        <span className="text-slate-300 text-xs">
+                        <span className="text-slate-400 text-xs ml-2">
                           {getArpenteurInitials(selectedDossier.arpenteur_geometre)}{selectedDossier.numero_dossier} - {getClientsNames(selectedDossier.clients_ids)}
                         </span>
                       )}
@@ -845,7 +845,7 @@ function LayoutContent({ children, currentPageName }) {
                 </div>
 
                 {!infoDossierCollapsed && (
-                <div className="pt-2 pb-3 px-4">
+                <div className="pt-2 pb-2 px-3">
                   {!selectedDossierId ? (
                         <>
                           <div className="flex gap-2 mb-3 items-center">
