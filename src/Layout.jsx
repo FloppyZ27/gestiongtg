@@ -832,7 +832,7 @@ function LayoutContent({ children, currentPageName }) {
                 <div className="pt-2 pb-3 px-4">
                   {!selectedDossierId ? (
                         <>
-                          <div className="flex gap-2 mb-3">
+                          <div className="flex gap-2 mb-3 items-center">
                             <div className="relative flex-1">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                               <Input
@@ -842,74 +842,135 @@ function LayoutContent({ children, currentPageName }) {
                                 className="pl-10 bg-slate-800 border-slate-700 h-8 text-sm"
                               />
                             </div>
-                            <DropdownMenu open={isEntreeTempsFiltersOpen} onOpenChange={setIsEntreeTempsFiltersOpen}>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative">
-                                  <Filter className="w-4 h-4" />
-                                  {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0) && (
-                                    <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                      {entreeTempsFilterArpenteur.length + entreeTempsFilterMandat.length + entreeTempsFilterTache.length}
-                                    </Badge>
-                                  )}
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
-                                <DropdownMenuLabel className="text-slate-300">Filtrer par arpenteur</DropdownMenuLabel>
-                                {ARPENTEURS.map((arp) => (
-                                  <DropdownMenuCheckboxItem
-                                    key={arp}
-                                    checked={entreeTempsFilterArpenteur.includes(arp)}
-                                    onCheckedChange={(checked) => {
-                                      setEntreeTempsFilterArpenteur(
-                                        checked
-                                          ? [...entreeTempsFilterArpenteur, arp]
-                                          : entreeTempsFilterArpenteur.filter((a) => a !== arp)
-                                      );
-                                    }}
-                                    className="text-white text-xs"
-                                  >
-                                    {arp}
-                                  </DropdownMenuCheckboxItem>
-                                ))}
-                                <DropdownMenuSeparator className="bg-slate-700" />
-                                <DropdownMenuLabel className="text-slate-300">Filtrer par mandat</DropdownMenuLabel>
-                                {TYPES_MANDATS.map((type) => (
-                                  <DropdownMenuCheckboxItem
-                                    key={type}
-                                    checked={entreeTempsFilterMandat.includes(type)}
-                                    onCheckedChange={(checked) => {
-                                      setEntreeTempsFilterMandat(
-                                        checked
-                                          ? [...entreeTempsFilterMandat, type]
-                                          : entreeTempsFilterMandat.filter((t) => t !== type)
-                                      );
-                                    }}
-                                    className="text-white text-xs"
-                                  >
-                                    {type}
-                                  </DropdownMenuCheckboxItem>
-                                ))}
-                                <DropdownMenuSeparator className="bg-slate-700" />
-                                <DropdownMenuLabel className="text-slate-300">Filtrer par tâche</DropdownMenuLabel>
-                                {TACHES.map((tache) => (
-                                  <DropdownMenuCheckboxItem
-                                    key={tache}
-                                    checked={entreeTempsFilterTache.includes(tache)}
-                                    onCheckedChange={(checked) => {
-                                      setEntreeTempsFilterTache(
-                                        checked
-                                          ? [...entreeTempsFilterTache, tache]
-                                          : entreeTempsFilterTache.filter((t) => t !== tache)
-                                      );
-                                    }}
-                                    className="text-white text-xs"
-                                  >
-                                    {tache}
-                                  </DropdownMenuCheckboxItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setIsEntreeTempsFiltersOpen(!isEntreeTempsFiltersOpen)}
+                              className="h-8 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                            >
+                              <Filter className="w-4 h-4 mr-2" />
+                              <span className="text-sm">Filtres</span>
+                              {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0) && (
+                                <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                  {entreeTempsFilterArpenteur.length + entreeTempsFilterMandat.length + entreeTempsFilterTache.length}
+                                </Badge>
+                              )}
+                              {isEntreeTempsFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                            </Button>
                           </div>
+
+                          <Collapsible open={isEntreeTempsFiltersOpen} onOpenChange={setIsEntreeTempsFiltersOpen}>
+                            <CollapsibleContent>
+                              <div className="p-2 border border-emerald-500/30 rounded-lg mb-3">
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                                    <div className="flex items-center gap-2">
+                                      <Filter className="w-3 h-3 text-emerald-500" />
+                                      <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                                    </div>
+                                    {(entreeTempsFilterArpenteur.length > 0 || entreeTempsFilterMandat.length > 0 || entreeTempsFilterTache.length > 0) && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          setEntreeTempsFilterArpenteur([]);
+                                          setEntreeTempsFilterMandat([]);
+                                          setEntreeTempsFilterTache([]);
+                                        }}
+                                        className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                                      >
+                                        <X className="w-2.5 h-2.5 mr-1" />
+                                        Réinitialiser
+                                      </Button>
+                                    )}
+                                  </div>
+
+                                  <div className="grid grid-cols-3 gap-2">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                          <span className="truncate">Arpenteurs ({entreeTempsFilterArpenteur.length > 0 ? `${entreeTempsFilterArpenteur.length}` : 'Tous'})</span>
+                                          <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700">
+                                        {ARPENTEURS.map((arp) => (
+                                          <DropdownMenuCheckboxItem
+                                            key={arp}
+                                            checked={entreeTempsFilterArpenteur.includes(arp)}
+                                            onCheckedChange={(checked) => {
+                                              setEntreeTempsFilterArpenteur(
+                                                checked
+                                                  ? [...entreeTempsFilterArpenteur, arp]
+                                                  : entreeTempsFilterArpenteur.filter((a) => a !== arp)
+                                              );
+                                            }}
+                                            className="text-white text-xs"
+                                          >
+                                            {arp}
+                                          </DropdownMenuCheckboxItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                          <span className="truncate">Mandats ({entreeTempsFilterMandat.length > 0 ? `${entreeTempsFilterMandat.length}` : 'Tous'})</span>
+                                          <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                        {TYPES_MANDATS.map((type) => (
+                                          <DropdownMenuCheckboxItem
+                                            key={type}
+                                            checked={entreeTempsFilterMandat.includes(type)}
+                                            onCheckedChange={(checked) => {
+                                              setEntreeTempsFilterMandat(
+                                                checked
+                                                  ? [...entreeTempsFilterMandat, type]
+                                                  : entreeTempsFilterMandat.filter((t) => t !== type)
+                                              );
+                                            }}
+                                            className="text-white text-xs"
+                                          >
+                                            {type}
+                                          </DropdownMenuCheckboxItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                                          <span className="truncate">Tâches ({entreeTempsFilterTache.length > 0 ? `${entreeTempsFilterTache.length}` : 'Toutes'})</span>
+                                          <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                                        {TACHES.map((tache) => (
+                                          <DropdownMenuCheckboxItem
+                                            key={tache}
+                                            checked={entreeTempsFilterTache.includes(tache)}
+                                            onCheckedChange={(checked) => {
+                                              setEntreeTempsFilterTache(
+                                                checked
+                                                  ? [...entreeTempsFilterTache, tache]
+                                                  : entreeTempsFilterTache.filter((t) => t !== tache)
+                                              );
+                                            }}
+                                            className="text-white text-xs"
+                                          >
+                                            {tache}
+                                          </DropdownMenuCheckboxItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
 
                       <div className="overflow-hidden border border-slate-700 rounded-lg">
                         <div className="overflow-y-auto max-h-[300px]">
