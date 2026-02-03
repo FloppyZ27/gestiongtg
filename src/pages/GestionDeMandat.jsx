@@ -197,12 +197,23 @@ export default function GestionDeMandat() {
     return acc;
   }, {});
 
-  // Organiser les cartes par utilisateur
+  // Organiser les cartes par utilisateur avec tri
   const usersList = [...users, { email: "non-assigne", full_name: "Non assigné" }];
   const cardsByUtilisateur = usersList.reduce((acc, user) => {
-    acc[user.email] = filteredCards.filter(card => 
+    let cards = filteredCards.filter(card => 
       card.utilisateur === user.email || (card.utilisateur === "non-assigne" && user.email === "non-assigne")
     );
+    
+    // Appliquer le tri si défini
+    if (sortUtilisateurs[user.email]) {
+      cards = [...cards].sort((a, b) => {
+        const dateA = a.mandat.date_livraison ? new Date(a.mandat.date_livraison) : new Date(0);
+        const dateB = b.mandat.date_livraison ? new Date(b.mandat.date_livraison) : new Date(0);
+        return sortUtilisateurs[user.email] === "asc" ? dateA - dateB : dateB - dateA;
+      });
+    }
+    
+    acc[user.email] = cards;
     return acc;
   }, {});
 
