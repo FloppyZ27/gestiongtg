@@ -197,8 +197,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
       
       await base44.entities.Dossier.update(dossierId, {
         ...dossier,
-        utilisateur_assigne: retourData.utilisateur_assigne,
-        statut: "Retour d'appel"
+        utilisateur_assigne: retourData.utilisateur_assigne
       });
       
       if (retourData.utilisateur_assigne) {
