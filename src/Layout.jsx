@@ -326,11 +326,14 @@ function LayoutContent({ children, currentPageName }) {
   const availableMandats = selectedDossier?.mandats || [];
 
   const handleDossierSelect = (dossierId) => {
+    const dossier = dossiers.find(d => d.id === dossierId);
+    const mandatType = dossier?.mandats?.[0]?.type_mandat || "";
+    
     setSelectedDossierId(dossierId);
     setEntreeForm({
       ...entreeForm,
       dossier_id: dossierId,
-      mandat: "",
+      mandat: mandatType,
       tache_suivante: "",
       utilisateur_assigne: ""
     });
@@ -1212,25 +1215,6 @@ function LayoutContent({ children, currentPageName }) {
                             placeholder="Ex: 2.5"
                             className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                           />
-                        </div>
-
-                        <div className="space-y-1">
-                          <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
-                          <Select value={entreeForm.mandat} onValueChange={(value) => {
-                            setEntreeForm({...entreeForm, mandat: value});
-                            setHasEntreeChanges(true);
-                          }}>
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
-                              <SelectValue placeholder="Sélectionner" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-700">
-                              {availableMandats.map((mandat, idx) => (
-                                <SelectItem key={idx} value={mandat.type_mandat} className="text-white text-xs">
-                                  {mandat.type_mandat}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
                         </div>
 
                         <div className="space-y-1">
