@@ -242,39 +242,40 @@ export default function ClientDetailView({ client, onClose, onViewDossier }) {
 
   return (
     <>
+      {/* Header sur toute la largeur */}
+      <div className="border-b border-slate-700 pb-4 mb-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="grid grid-cols-2 gap-4 flex-1">
+            <div>
+              <Label className="text-slate-400 text-sm">Prénom</Label>
+              <p className="text-white font-medium text-lg">{client.prenom}</p>
+            </div>
+            <div>
+              <Label className="text-slate-400 text-sm">Nom</Label>
+              <p className="text-white font-medium text-lg">{client.nom}</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setIsEditDialogOpen(true)}
+            className="bg-emerald-500 hover:bg-emerald-600 ml-4"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Modifier
+          </Button>
+        </div>
+        <div>
+          <Label className="text-slate-400 text-sm">Type</Label>
+          <div className="mt-1">
+            <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
+              {client.type_client || "Client"}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-[70%_30%] gap-6 h-full">
         {/* Colonne gauche - Informations client */}
         <div className="space-y-6 overflow-y-auto pr-4">
-          {/* Header avec bouton Modifier */}
-          <div className="border-b border-slate-700 pb-4">
-            <div className="flex justify-between items-start mb-4">
-              <div className="grid grid-cols-2 gap-4 flex-1">
-                <div>
-                  <Label className="text-slate-400 text-sm">Prénom</Label>
-                  <p className="text-white font-medium text-lg">{client.prenom}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-400 text-sm">Nom</Label>
-                  <p className="text-white font-medium text-lg">{client.nom}</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => setIsEditDialogOpen(true)}
-                className="bg-emerald-500 hover:bg-emerald-600 ml-4"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Modifier
-              </Button>
-            </div>
-            <div>
-              <Label className="text-slate-400 text-sm">Type</Label>
-              <div className="mt-1">
-                <Badge variant="outline" className={`${getTypeColor(client.type_client)} border`}>
-                  {client.type_client || "Client"}
-                </Badge>
-              </div>
-            </div>
-          </div>
 
           {/* Préférences de livraison */}
           {client.preferences_livraison && client.preferences_livraison.length > 0 && (
