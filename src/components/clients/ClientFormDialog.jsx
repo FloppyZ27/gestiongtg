@@ -1375,10 +1375,14 @@ export default function ClientFormDialog({
                           {formData.courriels.map((item, index) => (
                             <React.Fragment key={index}>
                               <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                    <TableCell className="text-white text-sm">
-                                      <a href={`mailto:${item.courriel}`} className="text-blue-400 hover:text-blue-300 transition-colors">
-                                        {item.courriel}
-                                      </a>
+                                    <TableCell className={`text-sm ${courrielDisabled ? 'text-slate-600' : 'text-white'}`}>
+                                     {courrielDisabled ? (
+                                       <span className="text-slate-600">{item.courriel}</span>
+                                     ) : (
+                                       <a href={`mailto:${item.courriel}`} className="text-blue-400 hover:text-blue-300 transition-colors">
+                                         {item.courriel}
+                                       </a>
+                                     )}
                                     </TableCell>
                                     <TableCell>
                                       <Select 
@@ -1505,16 +1509,20 @@ export default function ClientFormDialog({
                                 {formData.telephones.map((item, index) => (
                                   <React.Fragment key={index}>
                                     <TableRow className="hover:bg-slate-800/30 border-slate-800">
-                                        <TableCell className="text-white text-sm">
-                                          <a 
-                                            href={`tel:${item.telephone.replace(/\D/g, '')}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                          >
-                                            {item.telephone}
-                                          </a>
+                                        <TableCell className={`text-sm ${telephoneDisabled ? 'text-slate-600' : 'text-white'}`}>
+                                         {telephoneDisabled ? (
+                                           <span className="text-slate-600">{item.telephone}</span>
+                                         ) : (
+                                           <a 
+                                             href={`tel:${item.telephone.replace(/\D/g, '')}`}
+                                             onClick={(e) => e.stopPropagation()}
+                                             className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                           >
+                                             {item.telephone}
+                                           </a>
+                                         )}
                                         </TableCell>
-                                        <TableCell className="text-slate-400 text-xs">{item.type || "Cellulaire"}</TableCell>
+                                        <TableCell className={`text-xs ${telephoneDisabled ? 'text-slate-700' : 'text-slate-400'}`}>{item.type || "Cellulaire"}</TableCell>
                                         <TableCell>
                                           <Select 
                                             value={item.actuel ? "Actuel" : "Ancien"} 
@@ -2035,10 +2043,8 @@ export default function ClientFormDialog({
               onClick={() => {
                 if (disableType === "courriel") {
                   setCourrielDisabled(true);
-                  setFormData(prev => ({ ...prev, courriels: [] }));
                 } else if (disableType === "telephone") {
                   setTelephoneDisabled(true);
-                  setFormData(prev => ({ ...prev, telephones: [] }));
                 }
                 setShowDisableWarning(false);
                 setDisableType(null);
