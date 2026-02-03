@@ -2216,7 +2216,7 @@ export default function EditDossierForm({
                                       </SelectContent>
                                     </Select>
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs w-1/4">
+                                  <TableCell className="text-slate-300 text-xs w-1/5">
                                     <div className="flex items-center gap-1.5">
                                       <span>
                                         {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
@@ -2229,11 +2229,23 @@ export default function EditDossierForm({
                                       </Avatar>
                                     </div>
                                   </TableCell>
-                                </TableRow>
-                              ));
-                            })()}
-                          </TableBody>
-                        </Table>
+                                  <TableCell className="text-right">
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        setMinuteToDeleteInfo({retourAppelId: retour.id});
+                                        setShowDeleteMinuteConfirm(true);
+                                      }}
+                                      className="text-slate-400 hover:text-red-400 transition-colors"
+                                    >
+                                      <Trash className="w-4 h-4" />
+                                    </button>
+                                  </TableCell>
+                                  </TableRow>
+                                  ));
+                                  })()}
+                                  </TableBody>
+                                  </Table>
                       </div>
                       )}
                   </CardContent>
