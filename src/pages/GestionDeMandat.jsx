@@ -679,7 +679,7 @@ export default function GestionDeMandat() {
                         <Card 
                            className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col border-slate-700/50"
                         >
-                          <CardHeader className={`pb-3 pt-3 border-b-2 border-slate-800`} style={{ background: `linear-gradient(to right, ${gradientColor.includes('blue') ? 'rgba(59, 130, 246, 0.2)' : gradientColor.includes('purple') ? 'rgba(168, 85, 247, 0.2)' : gradientColor.includes('green') ? 'rgba(34, 197, 94, 0.2)' : gradientColor.includes('orange') ? 'rgba(249, 115, 22, 0.2)' : gradientColor.includes('pink') ? 'rgba(236, 72, 153, 0.2)' : gradientColor.includes('cyan') ? 'rgba(6, 182, 212, 0.2)' : gradientColor.includes('yellow') ? 'rgba(234, 179, 8, 0.2)' : 'rgba(239, 68, 68, 0.2)'}, ${gradientColor.includes('blue') ? 'rgba(37, 99, 235, 0.2)' : gradientColor.includes('purple') ? 'rgba(147, 51, 234, 0.2)' : gradientColor.includes('green') ? 'rgba(22, 163, 74, 0.2)' : gradientColor.includes('orange') ? 'rgba(234, 88, 12, 0.2)' : gradientColor.includes('pink') ? 'rgba(219, 39, 119, 0.2)' : gradientColor.includes('cyan') ? 'rgba(8, 145, 178, 0.2)' : gradientColor.includes('yellow') ? 'rgba(202, 138, 4, 0.2)' : 'rgba(220, 38, 38, 0.2)'})` }}>
+                          <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2 min-w-0">
                                 {user.email !== "non-assigne" ? (
