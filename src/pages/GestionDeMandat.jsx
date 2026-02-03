@@ -616,7 +616,7 @@ export default function GestionDeMandat() {
                          }}
                       >
                         <Card 
-                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col border-slate-700/50"
+                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
                         >
                           <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between">
@@ -688,7 +688,7 @@ export default function GestionDeMandat() {
                          }}
                       >
                         <Card 
-                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col border-slate-700/50"
+                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
                         >
                           <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between">
