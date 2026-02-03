@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
@@ -245,10 +244,10 @@ export default function EditDossierForm({
       transition={{ duration: 0.2 }}
     >
       {/* Header sur toute la largeur */}
-      <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800 flex-shrink-0">
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
         {formData.numero_dossier && formData.arpenteur_geometre && (
-          <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
+          <div className="text-emerald-400 text-lg font-semibold flex items-center gap-2 flex-wrap">
             <span>
               {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
               {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
@@ -269,7 +268,7 @@ export default function EditDossierForm({
                 )}
               </span>
             )}
-          </p>
+          </div>
         )}
       </div>
 
