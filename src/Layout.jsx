@@ -1292,11 +1292,11 @@ function LayoutContent({ children, currentPageName }) {
             </form>
           </div>
 
-          <div className="flex justify-end gap-3 px-4 py-2 bg-slate-900 border-t border-slate-800">
+          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
             <Button 
               type="button" 
               variant="outline" 
-              className="border-red-500 text-red-400 hover:bg-red-500/10 h-8 text-sm"
+              className="border-red-500 text-red-400 hover:bg-red-500/10"
               onClick={() => {
                 if (hasEntreeChanges) {
                   setShowUnsavedWarning(true);
@@ -1310,7 +1310,7 @@ function LayoutContent({ children, currentPageName }) {
             <Button 
               type="submit" 
               form="entree-temps-form" 
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8 text-sm"
+              className="bg-gradient-to-r from-emerald-500 to-teal-600"
               disabled={!selectedDossierId}
             >
               Enregistrer
