@@ -1136,7 +1136,7 @@ function LayoutContent({ children, currentPageName }) {
                               </TableCell>
                               <TableCell className="text-slate-300 text-xs p-2 max-w-xs truncate">{selectedDossier?.mandats?.[0]?.adresse_travaux ? formatAdresse(selectedDossier.mandats[0].adresse_travaux) : "-"}</TableCell>
                               <TableCell className="text-right p-2">
-                                <div className="border border-slate-700 rounded px-2 py-1 inline-block">
+                                <div className="border border-slate-500 rounded px-2 py-1 inline-block">
                                   <Button
                                     type="button"
                                     size="sm"
