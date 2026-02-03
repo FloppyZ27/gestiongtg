@@ -353,11 +353,12 @@ export default function NewRetourAppelForm({
                     <div className="overflow-hidden flex flex-col">
                       <p className="text-slate-400 text-xs mb-2">
                         Sélectionner un dossier ({dossiers.filter(d => {
+                          const matchesStatut = d.statut === "Ouvert" || d.statut === "Fermé";
                           const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                           const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
                           const clientsNames = getClientsNames(d.clients_ids).toLowerCase();
                           const matchesClient = !selectedClient || clientsNames.includes(selectedClient.toLowerCase());
-                          return matchesArpenteur && matchesNumero && matchesClient;
+                          return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                         }).length})
                       </p>
                       <div className="flex-1 overflow-y-auto border border-slate-700 rounded-lg max-h-[300px]">
@@ -373,11 +374,12 @@ export default function NewRetourAppelForm({
                           <TableBody>
                             {dossiers
                               .filter(d => {
+                                const matchesStatut = d.statut === "Ouvert" || d.statut === "Fermé";
                                 const matchesArpenteur = !selectedArpenteur || d.arpenteur_geometre === selectedArpenteur;
                                 const matchesNumero = !selectedNumeroDossier || d.numero_dossier?.includes(selectedNumeroDossier);
                                 const clientsNames = getClientsNames(d.clients_ids).toLowerCase();
                                 const matchesClient = !selectedClient || clientsNames.includes(selectedClient.toLowerCase());
-                                return matchesArpenteur && matchesNumero && matchesClient;
+                                return matchesStatut && matchesArpenteur && matchesNumero && matchesClient;
                               })
                               .sort((a, b) => {
                                 const dateA = a.date_ouverture ? new Date(a.date_ouverture).getTime() : 0;
