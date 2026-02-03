@@ -1866,9 +1866,111 @@ export default function EditDossierForm({
                 </CardHeader>
 
                 {!retourAppelCollapsed && (
-                  <CardContent className="pt-4 pb-3 space-y-4">
-                    {/* Liste des retours d'appel */}
-                    {retoursAppel.length > 0 && (
+                   <CardContent className="pt-4 pb-3 space-y-4">
+                     {/* Formulaire d'ajout des retours d'appel - en haut et collapsable */}
+                     <div className="border-2 border-blue-500/30 rounded-lg p-4 bg-blue-900/10">
+                       <div 
+                         className="cursor-pointer hover:bg-blue-900/40 transition-colors -p-4 mb-4 flex items-center justify-between"
+                         onClick={() => setNewRetourAppelFormCollapsed(!newRetourAppelFormCollapsed)}
+                       >
+                         <div className="flex items-center gap-2">
+                           <Plus className="w-4 h-4 text-blue-400" />
+                           <span className="text-xs font-semibold text-blue-400">Ajouter un retour d'appel</span>
+                         </div>
+                         {newRetourAppelFormCollapsed ? <ChevronDown className="w-4 h-4 text-blue-400" /> : <ChevronUp className="w-4 h-4 text-blue-400" />}
+                       </div>
+
+                       {!newRetourAppelFormCollapsed && (
+                         <div className="grid grid-cols-[1fr_1fr] gap-3">
+                           <div className="space-y-3">
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Date de l'appel <span className="text-red-400">*</span></Label>
+                               <Input 
+                                 type="date"
+                                 value={newRetourAppel.date_appel}
+                                 onChange={(e) => setNewRetourAppel({...newRetourAppel, date_appel: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                               <Select 
+                                 value={newRetourAppel.utilisateur_assigne}
+                                 onValueChange={(value) => setNewRetourAppel({...newRetourAppel, utilisateur_assigne: value})}
+                               >
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   {users.map((u) => (
+                                     <SelectItem key={u.email} value={u.email} className="text-white text-xs">{u.full_name}</SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           </div>
+                           <div className="flex flex-col">
+                             <Label className="text-slate-400 text-xs mb-1">Raison de l'appel <span className="text-red-400">*</span></Label>
+                             <textarea 
+                               placeholder="Notes sur l'appel..."
+                               value={newRetourAppel.raison}
+                               onChange={(e) => setNewRetourAppel({...newRetourAppel, raison: e.target.value})}
+                               className="bg-slate-700 border border-slate-600 text-white flex-1 text-xs p-2 rounded resize-none"
+                             />
+                           </div>
+                         </div>
+                       )}
+                       <Button 
+                         type="button"
+                         size="sm"
+                         onClick={async () => {
+                           if (!newRetourAppel.raison) {
+                             alert("Veuillez entrer la raison de l'appel");
+                             return;
+                           }
+
+                           const createdRetour = await base44.entities.RetourAppel.create({
+                             dossier_id: editingDossier.id,
+                             date_appel: newRetourAppel.date_appel,
+                             utilisateur_assigne: newRetourAppel.utilisateur_assigne || null,
+                             raison: newRetourAppel.raison,
+                             statut: "Retour d'appel"
+                           });
+
+                           setRetoursAppel(prev => [createdRetour, ...prev]);
+                           setFormData({...formData, statut: "Retour d'appel"});
+
+                           if (newRetourAppel.utilisateur_assigne) {
+                             const clientsNames = getClientsNames(formData.clients_ids);
+                             await base44.entities.Notification.create({
+                               utilisateur_email: newRetourAppel.utilisateur_assigne,
+                               titre: "Nouveau retour d'appel assigné",
+                               message: `Un retour d'appel vous a été assigné pour le dossier ${getArpenteurInitials(formData.arpenteur_geometre)}${formData.numero_dossier}${clientsNames !== "-" ? ` - ${clientsNames}` : ""}.`,
+                               type: "retour_appel",
+                               dossier_id: editingDossier.id,
+                               lue: false
+                             });
+                           }
+
+                           queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+                           setNewRetourAppel({
+                             date_appel: new Date().toISOString().split('T')[0],
+                             utilisateur_assigne: "",
+                             raison: "",
+                             statut: "Retour d'appel"
+                           });
+                           setNewRetourAppelFormCollapsed(true);
+                         }}
+                         className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-8 text-xs w-full border border-blue-500/30 mt-3"
+                       >
+                         <Plus className="w-3 h-3 mr-1" />
+                         Ajouter le retour d'appel
+                       </Button>
+                     </div>
+
+                     {/* Liste des retours d'appel */}
+                     {retoursAppel.length > 0 && (
                       <div className="border border-slate-700 rounded-lg overflow-hidden">
                         <Table className="table-fixed w-full">
                           <TableHeader>
