@@ -345,11 +345,11 @@ export default function GestionDeMandat() {
         }`}
       >
         {/* Type de mandat en haut */}
-        <div className="mb-2">
-          <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
-            {card.mandat.type_mandat}
-          </Badge>
-        </div>
+         <div className="mb-2">
+           <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold`}>
+             {card.mandat.type_mandat}
+           </Badge>
+         </div>
 
         {/* N° Dossier */}
         <div className="mb-1">
