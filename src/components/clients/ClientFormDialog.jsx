@@ -107,6 +107,8 @@ export default function ClientFormDialog({
   // Disable courriels and telephones
   const [courrielDisabled, setCourrielDisabled] = useState(false);
   const [telephoneDisabled, setTelephoneDisabled] = useState(false);
+  const [showDisableWarning, setShowDisableWarning] = useState(false);
+  const [disableType, setDisableType] = useState(null);
   
   // Auto-save
   const saveTimeoutRef = React.useRef(null);
@@ -1316,9 +1318,11 @@ export default function ClientFormDialog({
                               id="disable-courriel"
                               checked={courrielDisabled}
                               onCheckedChange={(checked) => {
-                                setCourrielDisabled(checked);
                                 if (checked) {
-                                  setFormData(prev => ({ ...prev, courriels: [] }));
+                                  setDisableType("courriel");
+                                  setShowDisableWarning(true);
+                                } else {
+                                  setCourrielDisabled(false);
                                 }
                               }}
                             />
@@ -1429,9 +1433,11 @@ export default function ClientFormDialog({
                               id="disable-telephone"
                               checked={telephoneDisabled}
                               onCheckedChange={(checked) => {
-                                setTelephoneDisabled(checked);
                                 if (checked) {
-                                  setFormData(prev => ({ ...prev, telephones: [] }));
+                                  setDisableType("telephone");
+                                  setShowDisableWarning(true);
+                                } else {
+                                  setTelephoneDisabled(false);
                                 }
                               }}
                             />
@@ -1990,6 +1996,56 @@ export default function ClientFormDialog({
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
             >
               Confirmer
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Avertissement désactivation communication */}
+    <Dialog open={showDisableWarning} onOpenChange={setShowDisableWarning}>
+      <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+            <span className="text-2xl">⚠️</span>
+            Avertissement
+            <span className="text-2xl">⚠️</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-slate-300 text-center">
+            En désactivant {disableType === "courriel" ? "les courriels" : "les téléphones"}, certaines fonctions de communication seront désactivées pour ce client.
+          </p>
+          <p className="text-slate-400 text-sm text-center">
+            Voulez-vous poursuivre ?
+          </p>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button
+              type="button"
+              onClick={() => {
+                setShowDisableWarning(false);
+                setDisableType(null);
+              }}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="button" 
+              onClick={() => {
+                if (disableType === "courriel") {
+                  setCourrielDisabled(true);
+                  setFormData(prev => ({ ...prev, courriels: [] }));
+                } else if (disableType === "telephone") {
+                  setTelephoneDisabled(true);
+                  setFormData(prev => ({ ...prev, telephones: [] }));
+                }
+                setShowDisableWarning(false);
+                setDisableType(null);
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+            >
+              Poursuivre
             </Button>
           </div>
         </div>
