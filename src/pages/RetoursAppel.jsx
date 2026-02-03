@@ -99,6 +99,8 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   const [filterUtilisateurAssigne, setFilterUtilisateurAssigne] = useState("all");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [showDeleteRetourConfirm, setShowDeleteRetourConfirm] = useState(false);
+  const [retourIdToDelete, setRetourIdToDelete] = useState(null);
 
   const [formData, setFormData] = useState({
     dossier_reference_id: "",
@@ -412,11 +414,8 @@ const RetoursAppel = React.forwardRef((props, ref) => {
   };
 
   const handleDelete = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce retour d'appel ?")) {
-      base44.entities.RetourAppel.delete(id).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
-      });
-    }
+    setRetourIdToDelete(id);
+    setShowDeleteRetourConfirm(true);
   };
 
   const toggleClient = (clientId, type) => {
@@ -563,6 +562,51 @@ const RetoursAppel = React.forwardRef((props, ref) => {
 
   return (
     <>
+      {/* Dialog de confirmation de suppression */}
+      <Dialog open={showDeleteRetourConfirm} onOpenChange={setShowDeleteRetourConfirm}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir supprimer ce retour d'appel ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => {
+                  setShowDeleteRetourConfirm(false);
+                  setRetourIdToDelete(null);
+                }}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                onClick={() => {
+                  if (retourIdToDelete) {
+                    base44.entities.RetourAppel.delete(retourIdToDelete).then(() => {
+                      queryClient.invalidateQueries({ queryKey: ['retoursAppels'] });
+                    });
+                  }
+                  setShowDeleteRetourConfirm(false);
+                  setRetourIdToDelete(null);
+                }}
+              >
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isNewRetourDialogOpen} onOpenChange={(open) => {
         if (!open && !editingRetourAppel) {
           setNewRetourForm({
