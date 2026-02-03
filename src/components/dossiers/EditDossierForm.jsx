@@ -156,6 +156,14 @@ export default function EditDossierForm({
   const [loadingMessage, setLoadingMessage] = useState("");
   const [newMinuteFormCollapsed, setNewMinuteFormCollapsed] = useState(true);
   const [newRetourAppelFormCollapsed, setNewRetourAppelFormCollapsed] = useState(true);
+  const [newEntreeTempsFormCollapsed, setNewEntreeTempsFormCollapsed] = useState(true);
+  const [newEntreeTempsForm, setNewEntreeTempsForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    mandat: "",
+    heures: "",
+    tache: "",
+    description: ""
+  });
   const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
