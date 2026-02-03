@@ -1971,10 +1971,22 @@ export default function EditDossierForm({
                                     </Avatar>
                                   </div>
                                 </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                                <TableCell className="text-right">
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      setMinuteToDeleteInfo({entreeTempsId: entree.id});
+                                      setShowDeleteMinuteConfirm(true);
+                                    }}
+                                    className="text-slate-400 hover:text-red-400 transition-colors"
+                                  >
+                                    <Trash className="w-4 h-4" />
+                                  </button>
+                                </TableCell>
+                                </TableRow>
+                                ))}
+                                </TableBody>
+                                </Table>
                       </div>
                     ) : (
                       <div className="text-center py-6 text-slate-500">
