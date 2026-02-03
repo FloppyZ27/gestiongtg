@@ -1856,55 +1856,10 @@ export default function EditDossierForm({
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead 
-                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
-                                onClick={() => {
-                                  setRetourAppelSortConfig({
-                                    key: 'date',
-                                    direction: retourAppelSortConfig.key === 'date' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
-                                  });
-                                }}
-                              >
-                                <div className="flex items-center gap-1">
-                                  Date
-                                  {retourAppelSortConfig.key === 'date' && (
-                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                                  )}
-                                </div>
-                              </TableHead>
-                              <TableHead 
-                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
-                                onClick={() => {
-                                  setRetourAppelSortConfig({
-                                    key: 'utilisateur',
-                                    direction: retourAppelSortConfig.key === 'utilisateur' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
-                                  });
-                                }}
-                              >
-                                <div className="flex items-center gap-1">
-                                  Utilisateur assigné
-                                  {retourAppelSortConfig.key === 'utilisateur' && (
-                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                                  )}
-                                </div>
-                              </TableHead>
-                              <TableHead className="text-slate-300">Notes</TableHead>
-                              <TableHead 
-                                className="text-slate-300 cursor-pointer hover:text-slate-200 transition-colors"
-                                onClick={() => {
-                                  setRetourAppelSortConfig({
-                                    key: 'statut',
-                                    direction: retourAppelSortConfig.key === 'statut' && retourAppelSortConfig.direction === 'asc' ? 'desc' : 'asc'
-                                  });
-                                }}
-                              >
-                                <div className="flex items-center gap-1">
-                                  Statut
-                                  {retourAppelSortConfig.key === 'statut' && (
-                                    retourAppelSortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                                  )}
-                                </div>
-                              </TableHead>
+                              <TableHead className="text-slate-300 text-xs">Date</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Utilisateur assigné</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Notes</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Statut</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
