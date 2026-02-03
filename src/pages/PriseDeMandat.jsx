@@ -3040,9 +3040,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                           const hasChanges = 
                             formData.arpenteur_geometre ||
                             formData.clients_ids.length > 0 ||
-                            formData.notaires_ids.length > 0 ||
-                            formData.courtiers_ids.length > 0 ||
-                            formData.compagnies_ids.length > 0 ||
+                            formData.notaires_ids?.length > 0 ||
+                            formData.courtiers_ids?.length > 0 ||
+                            formData.compagnies_ids?.length > 0 ||
                             clientInfo.prenom ||
                             clientInfo.nom ||
                             clientInfo.telephone ||
@@ -3062,6 +3062,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                           } else {
                             setIsDialogOpen(false);
                             resetFullForm();
+                            setCommentairesTemporaires([]);
                           }
                         }}
                       >
