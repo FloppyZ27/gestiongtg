@@ -572,12 +572,12 @@ export default function GestionDeMandat() {
 
                     return (
                       <div 
-                        key={tache} 
-                        className="flex-shrink-0"
-                        style={{ 
-                          width: '200px',
-                          zIndex: 1 
-                        }}
+                         key={tache} 
+                         className="flex-shrink-0"
+                         style={{ 
+                           width: '240px',
+                           zIndex: 1 
+                         }}
                       >
                         <Card 
                           className={`border-2 ${getTacheColor(tache)} bg-slate-900/50 backdrop-blur-xl shadow-xl flex flex-col`}
