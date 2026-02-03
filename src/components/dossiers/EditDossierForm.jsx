@@ -1724,16 +1724,18 @@ export default function EditDossierForm({
                                     <TableCell className="text-slate-300">{minute.minute_reference || "-"}</TableCell>
                                     <TableCell className="text-right">
                                       <button 
-                                        type="button" 
-                                        onClick={() => {
-                                          const updatedMandats = [...formData.mandats];
-                                          updatedMandats[minute.mandatIndex].minutes_list = updatedMandats[minute.mandatIndex].minutes_list.filter((_, idx) => idx !== minute.minuteIndex);
-                                          setFormData({...formData, mandats: updatedMandats});
-                                        }}
-                                        className="text-slate-400 hover:text-red-400 transition-colors"
-                                      >
-                                        <Trash className="w-4 h-4" />
-                                      </button>
+                                         type="button" 
+                                         onClick={() => {
+                                           if (confirm("Êtes-vous sûr de vouloir supprimer cette minute ?")) {
+                                             const updatedMandats = [...formData.mandats];
+                                             updatedMandats[minute.mandatIndex].minutes_list = updatedMandats[minute.mandatIndex].minutes_list.filter((_, idx) => idx !== minute.minuteIndex);
+                                             setFormData({...formData, mandats: updatedMandats});
+                                           }
+                                         }}
+                                         className="text-slate-400 hover:text-red-400 transition-colors"
+                                       >
+                                         <Trash className="w-4 h-4" />
+                                       </button>
                                     </TableCell>
                                   </TableRow>
                                 ));
