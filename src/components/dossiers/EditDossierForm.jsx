@@ -1856,10 +1856,10 @@ export default function EditDossierForm({
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300 text-xs">Date</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Utilisateur assigné</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Notes</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Statut</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/4">Date</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/4">Notes</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/4">Statut</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-1/4">Utilisateur assigné</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
