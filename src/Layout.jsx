@@ -1181,7 +1181,7 @@ function LayoutContent({ children, currentPageName }) {
 
                     {!detailsCollapsed && (
                     <div className="pt-3 pb-3 px-4">
-                    <div className="border-2 border-emerald-500/30 rounded-lg p-4 bg-emerald-900/10">
+                    <div className="rounded-lg p-4">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
