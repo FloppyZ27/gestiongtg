@@ -164,6 +164,8 @@ export default function EditDossierForm({
     tache: "",
     description: ""
   });
+  const [showDeleteMinuteConfirm, setShowDeleteMinuteConfirm] = useState(false);
+  const [minuteToDeleteInfo, setMinuteToDeleteInfo] = useState(null);
   const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
