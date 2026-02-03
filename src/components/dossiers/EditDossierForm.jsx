@@ -1749,30 +1749,156 @@ export default function EditDossierForm({
             )}
 
             {/* Section Entrée de temps */}
-            {editingDossier && (
-              <Card className="border-slate-700 bg-slate-800/30">
-                <CardHeader 
-                  className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
-                  onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-lime-500/30 flex items-center justify-center">
-                        <Clock className="w-3.5 h-3.5 text-lime-400" />
-                      </div>
-                      <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
-                      {entreesTemps.length > 0 && (
-                        <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs">
-                          {entreesTemps.length} entrée{entreesTemps.length > 1 ? 's' : ''}
-                        </Badge>
-                      )}
-                    </div>
-                    {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                  </div>
-                </CardHeader>
+             {editingDossier && (
+               <Card className="border-slate-700 bg-slate-800/30">
+                 <CardHeader 
+                   className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
+                   onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
+                 >
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                       <div className="w-6 h-6 rounded-full bg-lime-500/30 flex items-center justify-center">
+                         <Clock className="w-3.5 h-3.5 text-lime-400" />
+                       </div>
+                       <CardTitle className="text-lime-300 text-base">Entrée de temps</CardTitle>
+                       {entreesTemps.length > 0 && (
+                         <Badge className="bg-lime-500/20 text-lime-400 border-lime-500/30 text-xs">
+                           {entreesTemps.length} entrée{entreesTemps.length > 1 ? 's' : ''}
+                         </Badge>
+                       )}
+                     </div>
+                     {entreeTempsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                   </div>
+                 </CardHeader>
 
-                {!entreeTempsCollapsed && (
-                  <CardContent className="pt-4 pb-3">
+                 {!entreeTempsCollapsed && (
+                   <CardContent className="pt-2 pb-3 space-y-4">
+                     {/* Formulaire d'ajout des entrées de temps - en haut et collapsable */}
+                     <div className="border-2 border-lime-500/30 rounded-lg mb-4 bg-lime-900/10">
+                       <div 
+                         className="cursor-pointer hover:bg-lime-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                         onClick={() => setNewEntreeTempsFormCollapsed(!newEntreeTempsFormCollapsed)}
+                       >
+                         <div className="flex items-center gap-2">
+                           <Plus className="w-4 h-4 text-lime-400" />
+                           <span className="text-xs font-semibold text-lime-400">Ajouter une entrée de temps</span>
+                         </div>
+                         {newEntreeTempsFormCollapsed ? <ChevronDown className="w-4 h-4 text-lime-400" /> : <ChevronUp className="w-4 h-4 text-lime-400" />}
+                       </div>
+
+                       {!newEntreeTempsFormCollapsed && (
+                         <div className="p-4 border-t border-lime-500/30 space-y-3">
+                           <div className="grid grid-cols-5 gap-3">
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                               <Input 
+                                 type="date"
+                                 value={newEntreeTempsForm.date}
+                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, date: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
+                               <Select value={newEntreeTempsForm.mandat} onValueChange={(value) => setNewEntreeTempsForm({...newEntreeTempsForm, mandat: value})}>
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   {formData.mandats.map((mandat, index) => (
+                                     <SelectItem key={index} value={mandat.type_mandat} className="text-white text-xs">
+                                       {mandat.type_mandat || `Mandat ${index + 1}`}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
+                               <Input 
+                                 type="number"
+                                 step="0.25"
+                                 min="0"
+                                 placeholder="Ex: 2.5"
+                                 value={newEntreeTempsForm.heures}
+                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, heures: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
+                               <Select value={newEntreeTempsForm.tache} onValueChange={(value) => setNewEntreeTempsForm({...newEntreeTempsForm, tache: value})}>
+                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                   <SelectValue placeholder="Sélectionner" />
+                                 </SelectTrigger>
+                                 <SelectContent className="bg-slate-800 border-slate-700">
+                                   {TACHES.map((tache) => (
+                                     <SelectItem key={tache} value={tache} className="text-white text-xs">
+                                       {tache}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                             <div className="space-y-1">
+                               <Label className="text-slate-400 text-xs">Description</Label>
+                               <Input 
+                                 placeholder="Notes..."
+                                 value={newEntreeTempsForm.description}
+                                 onChange={(e) => setNewEntreeTempsForm({...newEntreeTempsForm, description: e.target.value})}
+                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                               />
+                             </div>
+                           </div>
+                           <Button 
+                             type="button"
+                             size="sm"
+                             onClick={async () => {
+                               if (!newEntreeTempsForm.date) {
+                                 alert("Veuillez sélectionner une date");
+                                 return;
+                               }
+                               if (!newEntreeTempsForm.mandat) {
+                                 alert("Veuillez sélectionner un mandat");
+                                 return;
+                               }
+                               if (!newEntreeTempsForm.heures) {
+                                 alert("Veuillez entrer le temps");
+                                 return;
+                               }
+                               if (!newEntreeTempsForm.tache) {
+                                 alert("Veuillez sélectionner une tâche");
+                                 return;
+                               }
+
+                               const createdEntree = await base44.entities.EntreeTemps.create({
+                                 dossier_id: editingDossier.id,
+                                 date: newEntreeTempsForm.date,
+                                 mandat: newEntreeTempsForm.mandat,
+                                 heures: parseFloat(newEntreeTempsForm.heures),
+                                 tache: newEntreeTempsForm.tache,
+                                 description: newEntreeTempsForm.description || "",
+                                 utilisateur_email: ""
+                               });
+
+                               setEntreesTemps(prev => [createdEntree, ...prev]);
+                               setNewEntreeTempsForm({
+                                 date: new Date().toISOString().split('T')[0],
+                                 mandat: "",
+                                 heures: "",
+                                 tache: "",
+                                 description: ""
+                               });
+                               setNewEntreeTempsFormCollapsed(true);
+                             }}
+                             className="bg-lime-500/20 hover:bg-lime-500/30 text-lime-400 h-8 text-xs w-full border border-lime-500/30"
+                           >
+                             <Plus className="w-3 h-3 mr-1" />
+                             Ajouter l'entrée
+                           </Button>
+                         </div>
+                       )}
+                     </div>
                     {entreesTemps.length > 0 ? (
                       <div className="border border-slate-700 rounded-lg overflow-hidden">
                         <Table>
