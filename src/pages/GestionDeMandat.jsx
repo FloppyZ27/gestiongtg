@@ -290,6 +290,15 @@ export default function GestionDeMandat() {
        return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
      };
 
+     const getAbbreviatedTache = (tache) => {
+       const abbreviations = {
+         "Décision/Calcul": "Déc/Calc",
+         "Mise en plan": "MEP",
+         "Vérification": "Vérif"
+       };
+       return abbreviations[tache] || tache;
+     };
+
   const getTacheHeaderColor = (tache) => {
     const colors = {
       "Ouverture": "from-blue-500 to-blue-600",
