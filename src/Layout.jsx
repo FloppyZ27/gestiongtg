@@ -1272,7 +1272,7 @@ function LayoutContent({ children, currentPageName }) {
                         </div>
                       </div>
 
-                      <div className="mt-3 space-y-1">
+                      <div className="mt-2 space-y-0.5">
                         <Label className="text-slate-400 text-xs">Description</Label>
                         <Textarea
                           value={entreeForm.description}
