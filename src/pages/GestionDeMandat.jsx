@@ -646,9 +646,28 @@ export default function GestionDeMandat() {
                               <CardTitle className="text-base font-bold text-white tracking-wide">
                                 {tache}
                               </CardTitle>
-                              <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
-                                {cardsInColumn.length}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => setSortTaches(prev => ({
+                                    ...prev,
+                                    [tache]: prev[tache] === "asc" ? "desc" : prev[tache] === "desc" ? null : "asc"
+                                  }))}
+                                  className={`h-6 w-6 ${sortTaches[tache] ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-slate-400'}`}
+                                >
+                                  {sortTaches[tache] === "asc" ? (
+                                    <ArrowUp className="w-4 h-4" />
+                                  ) : sortTaches[tache] === "desc" ? (
+                                    <ArrowDown className="w-4 h-4" />
+                                  ) : (
+                                    <Calendar className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <Badge className="bg-slate-900/80 text-white font-bold text-xs px-2 py-0.5">
+                                  {cardsInColumn.length}
+                                </Badge>
+                              </div>
                             </div>
                           </CardHeader>
                           <Droppable droppableId={tache}>
