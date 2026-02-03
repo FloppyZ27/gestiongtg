@@ -403,7 +403,7 @@ export default function GestionDeMandat() {
          {card.mandat.tache_actuelle && (
            <div className="mb-1">
              <Badge className={`${getTacheColor(card.mandat.tache_actuelle)} text-white text-xs`}>
-               {card.mandat.tache_actuelle}
+               {getAbbreviatedTache(card.mandat.tache_actuelle)}
              </Badge>
            </div>
          )}
