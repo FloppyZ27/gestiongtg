@@ -474,7 +474,11 @@ export default function GestionDeMandat() {
             {/* Barre de progression */}
             {(() => {
               const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
-              const rawProgress = ((tacheIndex + 1) / TACHES.length) * 100;
+              // Progression linéaire : Ouverture = 0%, Facturer = 95%
+              let rawProgress = 0;
+              if (tacheIndex >= 0 && TACHES.length > 1) {
+                rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
+              }
               const progress = Math.round(rawProgress / 5) * 5;
 
               return (
