@@ -144,6 +144,10 @@ function LayoutContent({ children, currentPageName }) {
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [infoDossierCollapsed, setInfoDossierCollapsed] = useState(false);
   const [detailsCollapsed, setDetailsCollapsed] = useState(false);
+  const [isEntreeTempsFiltersOpen, setIsEntreeTempsFiltersOpen] = useState(false);
+  const [entreeTempsFilterArpenteur, setEntreeTempsFilterArpenteur] = useState([]);
+  const [entreeTempsFilterMandat, setEntreeTempsFilterMandat] = useState([]);
+  const [entreeTempsFilterTache, setEntreeTempsFilterTache] = useState([]);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
