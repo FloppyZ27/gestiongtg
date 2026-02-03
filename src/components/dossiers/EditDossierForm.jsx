@@ -154,6 +154,8 @@ export default function EditDossierForm({
   const [entreeTempsCollapsed, setEntreeTempsCollapsed] = useState(true);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [newMinuteFormCollapsed, setNewMinuteFormCollapsed] = useState(true);
+  const [newRetourAppelFormCollapsed, setNewRetourAppelFormCollapsed] = useState(true);
   const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
