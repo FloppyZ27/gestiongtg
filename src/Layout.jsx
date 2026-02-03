@@ -911,6 +911,8 @@ function LayoutContent({ children, currentPageName }) {
                                 <TableHead className="text-slate-300 text-xs">N° Dossier</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Clients</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Lot</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Tâche actuelle</TableHead>
                                 <TableHead className="text-slate-300 text-xs">Adresse</TableHead>
                               </TableRow>
                             </TableHeader>
@@ -918,9 +920,23 @@ function LayoutContent({ children, currentPageName }) {
                               {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).flatMap((dossier) => {
                                 const clientsNames = getClientsNames(dossier.clients_ids);
                                 if (!dossier.mandats || dossier.mandats.length === 0) {
+                                  return null;
+                                }
+                                return dossier.mandats.filter((mandat) => {
+                                  const matchesArpenteur = entreeTempsFilterArpenteur.length === 0 || entreeTempsFilterArpenteur.includes(dossier.arpenteur_geometre);
+                                  const matchesMandat = entreeTempsFilterMandat.length === 0 || entreeTempsFilterMandat.includes(mandat.type_mandat);
+                                  const matchesTache = entreeTempsFilterTache.length === 0 || entreeTempsFilterTache.includes(mandat.tache_actuelle);
+                                  return matchesArpenteur && matchesMandat && matchesTache;
+                                }).map((mandat, idx) => {
+                                  const lotsDisplay = mandat.lots && mandat.lots.length > 0 
+                                    ? mandat.lots.map(lotId => {
+                                        const lot = lots.find(l => l.id === lotId);
+                                        return lot ? lot.numero_lot : lotId;
+                                      }).join(', ')
+                                    : '-';
                                   return (
                                     <TableRow
-                                      key={dossier.id}
+                                      key={`${dossier.id}-${idx}`}
                                       className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
                                       onClick={() => handleDossierSelect(dossier.id)}
                                     >
@@ -930,37 +946,29 @@ function LayoutContent({ children, currentPageName }) {
                                         </Badge>
                                       </TableCell>
                                       <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
-                                      <TableCell className="text-slate-300 text-xs">-</TableCell>
-                                      <TableCell className="text-slate-300 text-xs">-</TableCell>
+                                      <TableCell className="text-slate-300 text-xs">
+                                        <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                          {mandat.type_mandat}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="text-slate-300 text-xs">{lotsDisplay}</TableCell>
+                                      <TableCell className="text-slate-300 text-xs">
+                                        {mandat.tache_actuelle ? (
+                                          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
+                                            {mandat.tache_actuelle}
+                                          </Badge>
+                                        ) : '-'}
+                                      </TableCell>
+                                      <TableCell className="text-slate-300 text-xs max-w-xs truncate">
+                                        {mandat.adresse_travaux ? formatAdresse(mandat.adresse_travaux) : "-"}
+                                      </TableCell>
                                     </TableRow>
                                   );
-                                }
-                                return dossier.mandats.map((mandat, idx) => (
-                                  <TableRow
-                                    key={`${dossier.id}-${idx}`}
-                                    className="hover:bg-slate-800/30 border-slate-800 cursor-pointer"
-                                    onClick={() => handleDossierSelect(dossier.id)}
-                                  >
-                                    <TableCell className="font-medium text-xs">
-                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border`}>
-                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-slate-300 text-xs">{clientsNames || "-"}</TableCell>
-                                    <TableCell className="text-slate-300 text-xs">
-                                      <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
-                                        {mandat.type_mandat}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-slate-300 text-xs max-w-xs truncate">
-                                      {mandat.adresse_travaux ? formatAdresse(mandat.adresse_travaux) : "-"}
-                                    </TableCell>
-                                  </TableRow>
-                                ));
+                                });
                               })}
                               {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).length === 0 && (
                                 <TableRow>
-                                  <TableCell colSpan={4} className="text-center py-4 text-slate-500 text-xs">
+                                  <TableCell colSpan={6} className="text-center py-4 text-slate-500 text-xs">
                                     Aucun dossier trouvé
                                   </TableCell>
                                 </TableRow>
