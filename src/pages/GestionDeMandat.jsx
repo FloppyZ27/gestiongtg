@@ -472,12 +472,25 @@ export default function GestionDeMandat() {
             </div>
 
             {/* Barre de progression */}
-            <div className="mt-2 w-full bg-slate-900/50 h-1.5 rounded-full overflow-hidden border border-slate-700/50">
-            <div 
-            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500" 
-            style={{ width: `${((TACHES.indexOf(card.mandat.tache_actuelle) + 1) / TACHES.length) * 100}%` }}
-            />
-            </div>
+            {(() => {
+              const tacheIndex = TACHES.indexOf(card.mandat.tache_actuelle);
+              const rawProgress = ((tacheIndex + 1) / TACHES.length) * 100;
+              const progress = Math.round(rawProgress / 5) * 5;
+
+              return (
+                <div className="mt-2 w-full bg-slate-900/50 h-4 rounded-full overflow-hidden border border-slate-700/50 relative">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
+                    style={{ width: `${progress}%` }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-white drop-shadow-md leading-none">
+                      {progress}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
             </div>
             );
             };
