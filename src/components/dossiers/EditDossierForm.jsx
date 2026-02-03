@@ -1798,9 +1798,14 @@ export default function EditDossierForm({
                                 </TableCell>
                                 <TableCell className="text-slate-300 text-xs">
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex-shrink-0"></div>
+                                    <Avatar className="w-6 h-6 border-2 border-emerald-500/50 flex-shrink-0">
+                                      <AvatarImage src={users.find(u => u.email === entree.utilisateur_email)?.photo_url} />
+                                      <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                                        {getUserInitials(users.find(u => u.email === entree.utilisateur_email)?.full_name)}
+                                      </AvatarFallback>
+                                    </Avatar>
                                     <span>
-                                      {users.find(u => u.email === entree.utilisateur_email)?.full_name?.split(' ').map(n => n[0]).join('') || "-"}
+                                      {getUserInitials(users.find(u => u.email === entree.utilisateur_email)?.full_name) || "-"}
                                     </span>
                                   </div>
                                 </TableCell>
