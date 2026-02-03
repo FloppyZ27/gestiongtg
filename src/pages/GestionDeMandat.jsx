@@ -290,6 +290,17 @@ export default function GestionDeMandat() {
        return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
      };
 
+     const getAbbreviatedMandatType = (type) => {
+       const abbreviations = {
+         "Certificat de localisation": "CL",
+         "Description Technique": "DT",
+         "Implantation": "Imp",
+         "Levé topographique": "Levé Topo",
+         "Piquetage": "Piq"
+       };
+       return abbreviations[type] || type;
+     };
+
   const getTacheHeaderColor = (tache) => {
     const colors = {
       "Ouverture": "from-blue-500 to-blue-600",
