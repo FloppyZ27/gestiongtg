@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Grid3x3, ArrowUpDown, ArrowUp, ArrowDown, Eye, ExternalLink, Download, Upload, Loader2, ChevronDown, ChevronUp, MessageSquare, Clock, FolderOpen, Info, Filter, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -189,6 +190,7 @@ export default function Lots() {
   const [hasFormChanges, setHasFormChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
   const [dossiersAssociesFormCollapsed, setDossiersAssociesFormCollapsed] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // New state for View Dialog filters and sorting
   const [viewDossierSearchTerm, setViewDossierSearchTerm] = useState("");
@@ -2355,187 +2357,185 @@ export default function Lots() {
           ))}
         </div>
 
-        {/* Table */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
-          <CardContent className="p-0">
-            <div className="p-6 border-b border-slate-800">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                <div className="relative w-full md:w-auto">
+        {/* Filtres et recherche */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-2">
+          <CardHeader className="pb-2">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center gap-2">
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
                     placeholder="Rechercher..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white md:w-64"
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                   />
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-56 bg-slate-800/50 border-slate-700 text-white justify-between">
-                        <span>Circonscription ({filterCirconscription.length || 'Toutes'})</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuLabel>Filtrer par circonscription</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={filterCirconscription.length === 0}
-                        onCheckedChange={(checked) => {
-                          if (checked) setFilterCirconscription([]);
-                        }}
-                      >
-                        Toutes
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
-                        <DropdownMenuCheckboxItem
-                          key={circ}
-                          checked={filterCirconscription.includes(circ)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFilterCirconscription([...filterCirconscription, circ]);
-                            } else {
-                              setFilterCirconscription(filterCirconscription.filter((c) => c !== circ));
-                            }
-                          }}
-                        >
-                          {circ}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-44 bg-slate-800/50 border-slate-700 text-white justify-between">
-                        <span>Cadastre ({filterCadastre.length || 'Tous'})</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuLabel>Filtrer par cadastre</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={filterCadastre.length === 0}
-                        onCheckedChange={(checked) => {
-                          if (checked) setFilterCadastre([]);
-                        }}
-                      >
-                        Tous
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      {[...new Set(lots.map(l => l.cadastre).filter(c => c))].sort().map((cadastre) => (
-                        <DropdownMenuCheckboxItem
-                          key={cadastre}
-                          checked={filterCadastre.includes(cadastre)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFilterCadastre([...filterCadastre, cadastre]);
-                            } else {
-                              setFilterCadastre(filterCadastre.filter((c) => c !== cadastre));
-                            }
-                          }}
-                        >
-                          {cadastre}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-52 bg-slate-800/50 border-slate-700 text-white justify-between">
-                        <span>Type ({filterTypeOperation.length || 'Tous'})</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuLabel>Filtrer par type</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={filterTypeOperation.length === 0}
-                        onCheckedChange={(checked) => {
-                          if (checked) setFilterTypeOperation([]);
-                        }}
-                      >
-                        Tous
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      {TYPES_OPERATIONS.map((type) => (
-                        <DropdownMenuCheckboxItem
-                          key={type}
-                          checked={filterTypeOperation.includes(type)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFilterTypeOperation([...filterTypeOperation, type]);
-                            } else {
-                              setFilterTypeOperation(filterTypeOperation.filter((t) => t !== type));
-                            }
-                          }}
-                        >
-                          {type}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-40 bg-slate-800/50 border-slate-700 text-white justify-between">
-                        <span>Rang ({filterRang.length || 'Tous'})</span>
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuLabel>Filtrer par rang</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={filterRang.length === 0}
-                        onCheckedChange={(checked) => {
-                          if (checked) setFilterRang([]);
-                        }}
-                      >
-                        Tous
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      {[...new Set(lots.map(l => l.rang).filter(r => r))].sort().map((rang) => (
-                        <DropdownMenuCheckboxItem
-                          key={rang}
-                          checked={filterRang.includes(rang)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setFilterRang([...filterRang, rang]);
-                            } else {
-                              setFilterRang(filterRang.filter((r) => r !== rang));
-                            }
-                          }}
-                        >
-                          {rang}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                  className="h-9 px-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 relative"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Filtres</span>
                   {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setFilterCirconscription([]);
-                        setFilterCadastre([]);
-                        setFilterTypeOperation([]);
-                        setFilterRang([]);
-                      }}
-                      className="bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    >
-                      Réinitialiser
-                    </Button>
+                    <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                      {filterCirconscription.length + filterCadastre.length + filterTypeOperation.length + filterRang.length}
+                    </Badge>
                   )}
-                </div>
+                  {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                </Button>
               </div>
+
+              <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                <CollapsibleContent>
+                  <div className="p-2 border border-emerald-500/30 rounded-lg">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-3 h-3 text-emerald-500" />
+                          <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
+                        </div>
+                        {(filterCirconscription.length > 0 || filterCadastre.length > 0 || filterTypeOperation.length > 0 || filterRang.length > 0) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setFilterCirconscription([]);
+                              setFilterCadastre([]);
+                              setFilterTypeOperation([]);
+                              setFilterRang([]);
+                            }}
+                            className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
+                          >
+                            <X className="w-2.5 h-2.5 mr-1" />
+                            Réinitialiser
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-4 gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Circonscription ({filterCirconscription.length > 0 ? `${filterCirconscription.length}` : 'Toutes'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {Object.keys(CADASTRES_PAR_CIRCONSCRIPTION).map((circ) => (
+                              <DropdownMenuCheckboxItem
+                                key={circ}
+                                checked={filterCirconscription.includes(circ)}
+                                onCheckedChange={(checked) => {
+                                  setFilterCirconscription(
+                                    checked
+                                      ? [...filterCirconscription, circ]
+                                      : filterCirconscription.filter((c) => c !== circ)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {circ}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Cadastre ({filterCadastre.length > 0 ? `${filterCadastre.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {[...new Set(lots.map(l => l.cadastre).filter(c => c))].sort().map((cadastre) => (
+                              <DropdownMenuCheckboxItem
+                                key={cadastre}
+                                checked={filterCadastre.includes(cadastre)}
+                                onCheckedChange={(checked) => {
+                                  setFilterCadastre(
+                                    checked
+                                      ? [...filterCadastre, cadastre]
+                                      : filterCadastre.filter((c) => c !== cadastre)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {cadastre}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Type ({filterTypeOperation.length > 0 ? `${filterTypeOperation.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {TYPES_OPERATIONS.map((type) => (
+                              <DropdownMenuCheckboxItem
+                                key={type}
+                                checked={filterTypeOperation.includes(type)}
+                                onCheckedChange={(checked) => {
+                                  setFilterTypeOperation(
+                                    checked
+                                      ? [...filterTypeOperation, type]
+                                      : filterTypeOperation.filter((t) => t !== type)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {type}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Rang ({filterRang.length > 0 ? `${filterRang.length}` : 'Tous'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
+                            {[...new Set(lots.map(l => l.rang).filter(r => r))].sort().map((rang) => (
+                              <DropdownMenuCheckboxItem
+                                key={rang}
+                                checked={filterRang.includes(rang)}
+                                onCheckedChange={(checked) => {
+                                  setFilterRang(
+                                    checked
+                                      ? [...filterRang, rang]
+                                      : filterRang.filter((r) => r !== rang)
+                                  );
+                                }}
+                                className="text-white"
+                              >
+                                {rang}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
+          </CardHeader>
+        </Card>
+
+        {/* Table */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
