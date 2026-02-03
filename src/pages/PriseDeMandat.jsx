@@ -2435,41 +2435,44 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex-1 flex overflow-hidden">
-                  {/* Main form content - 70% */}
-                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
-                  <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
+                {/* Header sur toute la largeur */}
+                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between">
                   {/* Bandeau de verrouillage */}
                   {isLocked && (
-                    <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute top-0 left-0 right-0 p-3 bg-red-500/10 border-b border-red-500/30 flex items-center gap-3 z-20">
+                      <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <p className="text-red-400 font-semibold">Mandat verrouillé</p>
-                        <p className="text-slate-300 text-sm">Ce mandat est en cours de modification par <span className="text-red-400 font-medium">{lockedBy}</span></p>
+                        <p className="text-red-400 font-semibold text-sm">Mandat verrouillé par <span className="font-bold">{lockedBy}</span></p>
                       </div>
                     </div>
                   )}
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">
-                        {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
-                      </h2>
-                      {formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre && formData.numero_dossier && (
-                        <p className="text-emerald-400 text-lg font-semibold mt-1">
-                          {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
-                          {(clientInfo.prenom || clientInfo.nom || (formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-")) && (
-                            <span> - {clientInfo.prenom || clientInfo.nom 
-                              ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
-                              : getClientsNames(formData.clients_ids)}</span>
-                          )}
-                        </p>
-                      )}
-                    </div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {editingPriseMandat ? "Modifier le mandat" : "Nouveau mandat"}
+                  </h2>
+                  
+                  <div className="flex items-center gap-3">
+                    {formData.statut === "Mandats à ouvrir" && formData.arpenteur_geometre && formData.numero_dossier && (
+                      <div className={`text-lg font-semibold ${
+                        formData.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                        formData.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                        formData.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                        formData.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                        formData.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                        "text-emerald-400"
+                      }`}>
+                        {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                        {(clientInfo.prenom || clientInfo.nom || (formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-")) && (
+                          <span> - {clientInfo.prenom || clientInfo.nom 
+                            ? `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim()
+                            : getClientsNames(formData.clients_ids)}</span>
+                        )}
+                      </div>
+                    )}
                     {formData.statut === "Mandats à ouvrir" && (
                       <Button
                         type="button"
@@ -2662,14 +2665,11 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                       </Button>
                     )}
                   </div>
-                  {formData.ttl === "Oui" && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 rounded-lg">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                      <span className="text-indigo-400 font-semibold text-sm tracking-wide">TTL</span>
-                    </div>
-                  )}
-                  </div>
+                </div>
 
+                <div className="flex-1 flex overflow-hidden">
+                  {/* Main form content - 70% */}
+                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
                   <div className="flex-1 overflow-y-auto p-6 pt-3">
                   <form id="dossier-form" onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }} className="space-y-3">
                   {/* Section Informations du dossier - Toujours en haut */}
@@ -3073,37 +3073,45 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex-1 flex overflow-hidden">
-                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
-                  <div className="sticky top-0 z-10 bg-slate-900 p-6 pb-4 border-b border-slate-800">
-                    <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
-                    {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
-                      <p className="text-emerald-400 text-lg font-semibold mt-1 flex items-center gap-2 flex-wrap">
-                        <span>
-                          {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
-                          {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
-                            <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
+                {/* Header sur toute la largeur */}
+                <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Nouveau dossier</h2>
+                  {nouveauDossierForm.numero_dossier && nouveauDossierForm.arpenteur_geometre && (
+                    <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${
+                      nouveauDossierForm.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                      nouveauDossierForm.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                      nouveauDossierForm.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                      nouveauDossierForm.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                      nouveauDossierForm.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                      "text-emerald-400"
+                    }`}>
+                      <span>
+                        {getArpenteurInitials(nouveauDossierForm.arpenteur_geometre)}{nouveauDossierForm.numero_dossier}
+                        {nouveauDossierForm.clients_ids.length > 0 && getClientsNames(nouveauDossierForm.clients_ids) !== "-" && (
+                          <span> - {getClientsNames(nouveauDossierForm.clients_ids)}</span>
+                        )}
+                      </span>
+                      {nouveauDossierForm.mandats && nouveauDossierForm.mandats.length > 0 && (
+                        <span className="flex gap-1">
+                          {nouveauDossierForm.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
+                            <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
+                              {getAbbreviatedMandatType(m.type_mandat)}
+                            </Badge>
+                          ))}
+                          {nouveauDossierForm.mandats.length > 3 && (
+                            <Badge className="bg-slate-700 text-slate-300 text-xs">
+                              +{nouveauDossierForm.mandats.length - 3}
+                            </Badge>
                           )}
                         </span>
-                        {nouveauDossierForm.mandats && nouveauDossierForm.mandats.length > 0 && (
-                          <span className="flex gap-1">
-                            {nouveauDossierForm.mandats.slice(0, 3).map((m, idx) => m.type_mandat && (
-                              <Badge key={idx} className={`${getMandatColor(m.type_mandat)} border text-xs`}>
-                                {getAbbreviatedMandatType(m.type_mandat)}
-                              </Badge>
-                            ))}
-                            {nouveauDossierForm.mandats.length > 3 && (
-                              <Badge className="bg-slate-700 text-slate-300 text-xs">
-                                +{nouveauDossierForm.mandats.length - 3}
-                              </Badge>
-                            )}
-                          </span>
-                        )}
-                        </p>
-                        )}
-                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 pt-3">
+                <div className="flex-1 flex overflow-hidden">
+                  <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+                  <div className="flex-1 overflow-y-auto p-6 pt-3">
                         <form id="nouveau-dossier-form" onSubmit={async (e) => {
                     e.preventDefault();
                     
