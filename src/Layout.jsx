@@ -1035,7 +1035,7 @@ function LayoutContent({ children, currentPageName }) {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {(dossierSearchTerm ? filteredDossiers : dossiers.slice(0, 10)).flatMap((dossier) => {
+                              {(dossierSearchTerm ? filteredDossiers : [...dossiers].sort((a, b) => new Date(b.date_ouverture) - new Date(a.date_ouverture))).flatMap((dossier) => {
                                 const clientsNames = getClientsNames(dossier.clients_ids);
                                 if (!dossier.mandats || dossier.mandats.length === 0) {
                                   return null;
