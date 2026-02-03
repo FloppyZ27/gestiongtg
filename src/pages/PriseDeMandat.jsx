@@ -1169,7 +1169,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
   // Helper function to get client names - MOVED UP BEFORE USE
   const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
+    if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) return "-";
     const names = clientIds.map(id => {
       const client = getClientById(id);
       return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
@@ -1371,7 +1371,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       const searchLower = searchTerm.toLowerCase();
       const clientName = pm.client_info?.prenom || pm.client_info?.nom 
         ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
-        : getClientsNames(pm.clients_ids).toLowerCase();
+        : getClientsNames(pm.clients_ids || []).toLowerCase();
       const matchesSearch = (
         pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
         clientName.includes(searchLower) ||
@@ -1401,7 +1401,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const filteredDossiersForReference = dossiers.filter(dossier => {
     const searchLower = dossierSearchForReference.toLowerCase();
     const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
-    const clientsNames = getClientsNames(dossier.clients_ids);
+    const clientsNames = getClientsNames(dossier.clients_ids || []);
     return (
       fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
