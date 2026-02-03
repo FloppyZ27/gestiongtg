@@ -386,10 +386,10 @@ export default function GestionDeMandat() {
        >
          {/* Entête : N° Dossier (gauche) et Type de mandat (droite) */}
          <div className="flex items-start justify-between gap-2 mb-2">
-           <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+           <Badge variant="outline" className={`${getArpenteurColor(card.dossier.arpenteur_geometre)} text-xs flex-shrink-0`}>
              {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier}
            </Badge>
-           <Badge className={`${getMandatColor(card.mandat.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+           <Badge className={`${getMandatColor(card.mandat.type_mandat)} text-xs font-semibold flex-shrink-0`}>
              {getAbbreviatedMandatType(card.mandat.type_mandat)}
            </Badge>
          </div>
