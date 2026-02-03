@@ -815,9 +815,9 @@ function LayoutContent({ children, currentPageName }) {
           setIsEntreeTempsOpen(open);
         }
       }}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col">
-          <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800">
-            <h2 className="text-2xl font-bold text-white px-6">Nouvelle entrée de temps</h2>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800 px-6">
+            <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 pt-3">
@@ -1292,7 +1292,7 @@ function LayoutContent({ children, currentPageName }) {
             </form>
           </div>
 
-          <div className="flex justify-end gap-3 py-4 px-6 bg-slate-900 border-t border-slate-800">
+          <div className="flex justify-end gap-3 py-4 px-6 bg-slate-900 border-t border-slate-800 w-full">
             <Button 
               type="button" 
               variant="outline" 
