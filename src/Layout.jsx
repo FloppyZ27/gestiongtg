@@ -1292,7 +1292,7 @@ function LayoutContent({ children, currentPageName }) {
             </form>
           </div>
 
-          <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
+          <div className="flex justify-end gap-3 px-4 py-2 bg-slate-900 border-t border-slate-800">
             <Button 
               type="button" 
               variant="outline" 
