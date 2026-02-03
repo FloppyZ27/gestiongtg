@@ -2376,6 +2376,48 @@ export default function EditDossierForm({
         </DialogContent>
       </Dialog>
 
+      {/* Dialog de confirmation suppression mandat */}
+      <Dialog open={showDeleteMandatConfirm} onOpenChange={setShowDeleteMandatConfirm}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-300 text-center">
+              Êtes-vous sûr de vouloir supprimer ce mandat ? Cette action est irréversible.
+            </p>
+            <div className="flex justify-center gap-3 pt-4">
+              <Button
+                type="button"
+                onClick={() => {
+                  removeMandat(mandatIndexToDelete);
+                  setActiveTabMandat(Math.max(0, mandatIndexToDelete - 1).toString());
+                  setShowDeleteMandatConfirm(false);
+                  setMandatIndexToDelete(null);
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+              >
+                Supprimer
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => {
+                  setShowDeleteMandatConfirm(false);
+                  setMandatIndexToDelete(null);
+                }}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+              >
+                Annuler
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {!editingDossier && (
         <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
           <Button type="button" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500/10" onClick={onCancel}>
