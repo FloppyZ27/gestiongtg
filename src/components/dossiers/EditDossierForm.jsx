@@ -1853,7 +1853,7 @@ export default function EditDossierForm({
                     {/* Liste des retours d'appel */}
                     {retoursAppel.length > 0 && (
                       <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table>
+                        <Table className="table-fixed w-full">
                           <TableHeader>
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                               <TableHead className="text-slate-300 text-xs w-1/4">Date</TableHead>
