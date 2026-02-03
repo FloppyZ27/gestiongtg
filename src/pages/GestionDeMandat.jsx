@@ -290,15 +290,6 @@ export default function GestionDeMandat() {
        return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
      };
 
-     const getAbbreviatedTache = (tache) => {
-       const abbreviations = {
-         "Décision/Calcul": "Déc/Calc",
-         "Mise en plan": "MEP",
-         "Vérification": "Vérif"
-       };
-       return abbreviations[tache] || tache;
-     };
-
   const getTacheHeaderColor = (tache) => {
     const colors = {
       "Ouverture": "from-blue-500 to-blue-600",
@@ -400,13 +391,13 @@ export default function GestionDeMandat() {
         )}
 
         {/* Tâche actuelle */}
-         {card.mandat.tache_actuelle && (
-           <div className="mb-1">
-             <Badge className={`${getTacheColor(card.mandat.tache_actuelle)} text-white text-xs`}>
-               {getAbbreviatedTache(card.mandat.tache_actuelle)}
-             </Badge>
-           </div>
-         )}
+        {card.mandat.tache_actuelle && (
+          <div className="mb-1">
+            <Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-xs">
+              {card.mandat.tache_actuelle}
+            </Badge>
+          </div>
+        )}
 
         {/* Date de livraison et utilisateur assigné en bas */}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
