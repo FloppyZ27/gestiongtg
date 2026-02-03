@@ -546,7 +546,7 @@ export default function Dossiers() {
   const getUserByEmail = useCallback((email) => users.find((u) => u.email === email), [users]);
   
   const getClientsNames = useCallback((clientIds) => {
-    if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) return "-";
+    if (!clientIds || clientIds.length === 0) return "-";
     return clientIds.map((id) => {
       const client = getClientById(id);
       return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
@@ -1641,7 +1641,7 @@ export default function Dossiers() {
     return dossiersWithMandats.filter((item) => {
       const searchLower = searchTerm.toLowerCase();
       const fullNumber = getArpenteurInitials(item.arpenteur_geometre) + item.numero_dossier;
-      const clientsNames = getClientsNames(item.clients_ids || []);
+      const clientsNames = getClientsNames(item.clients_ids);
       const matchesSearch =
         fullNumber.toLowerCase().includes(searchLower) ||
         item.numero_dossier?.toLowerCase().includes(searchLower) ||
@@ -1868,7 +1868,7 @@ export default function Dossiers() {
   const filteredDossiersForClosing = dossiersOuvertsForClosing.filter((dossier) => {
     const searchLower = closingDossierSearchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
-    const clientsNames = getClientsNames(dossier.clients_ids || []);
+    const clientsNames = getClientsNames(dossier.clients_ids);
 
     const matchesSearch =
       fullNumber.toLowerCase().includes(searchLower) ||
@@ -1891,7 +1891,7 @@ export default function Dossiers() {
   const filteredDossiersForFacturation = dossiersForFacturation.filter((dossier) => {
     const searchLower = facturationSearchTerm.toLowerCase();
     const fullNumber = getArpenteurInitials(dossier.arpenteur_geometre) + dossier.numero_dossier;
-    const clientsNames = getClientsNames(dossier.clients_ids || []);
+    const clientsNames = getClientsNames(dossier.clients_ids);
 
     const matchesSearch =
       fullNumber.toLowerCase().includes(searchLower) ||

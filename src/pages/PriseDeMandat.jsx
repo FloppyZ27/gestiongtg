@@ -1169,7 +1169,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
 
   // Helper function to get client names - MOVED UP BEFORE USE
   const getClientsNames = (clientIds) => {
-    if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) return "-";
+    if (!clientIds || clientIds.length === 0) return "-";
     const names = clientIds.map(id => {
       const client = getClientById(id);
       return client ? `${client.prenom} ${client.nom}` : "Client inconnu";
@@ -1371,7 +1371,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
       const searchLower = searchTerm.toLowerCase();
       const clientName = pm.client_info?.prenom || pm.client_info?.nom 
         ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim().toLowerCase()
-        : getClientsNames(pm.clients_ids || []).toLowerCase();
+        : getClientsNames(pm.clients_ids).toLowerCase();
       const matchesSearch = (
         pm.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
         clientName.includes(searchLower) ||
@@ -1401,7 +1401,7 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
   const filteredDossiersForReference = dossiers.filter(dossier => {
     const searchLower = dossierSearchForReference.toLowerCase();
     const fullNumber = (dossier.arpenteur_geometre ? getArpenteurInitials(dossier.arpenteur_geometre) : "") + (dossier.numero_dossier || "");
-    const clientsNames = getClientsNames(dossier.clients_ids || []);
+    const clientsNames = getClientsNames(dossier.clients_ids);
     return (
       fullNumber.toLowerCase().includes(searchLower) ||
       dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
@@ -3029,39 +3029,9 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                   </div>
                   </div>
 
-                  {/* Boutons - Annuler et Créer pour nouveau mandat */}
+                  {/* Boutons - Seulement bouton Créer pour nouveau mandat */}
                   {!editingPriseMandat && (
                     <div className="flex justify-end gap-3 p-4 bg-slate-900 border-t border-slate-800">
-                      <Button type="button" variant="outline" onClick={() => {
-                        const hasChanges = 
-                          formData.arpenteur_geometre ||
-                          formData.clients_ids.length > 0 ||
-                          formData.notaires_ids.length > 0 ||
-                          formData.courtiers_ids.length > 0 ||
-                          formData.compagnies_ids.length > 0 ||
-                          clientInfo.prenom ||
-                          clientInfo.nom ||
-                          clientInfo.telephone ||
-                          clientInfo.courriel ||
-                          professionnelInfo.notaire ||
-                          professionnelInfo.courtier ||
-                          professionnelInfo.compagnie ||
-                          workAddress.rue ||
-                          workAddress.ville ||
-                          workAddress.numeros_civiques?.[0] ||
-                          workAddress.numero_lot ||
-                          mandatsInfo.some(m => m.type_mandat) ||
-                          commentairesTemporaires.length > 0;
-                        
-                        if (hasChanges) {
-                          setShowCancelConfirm(true);
-                        } else {
-                          setIsDialogOpen(false);
-                          resetFullForm();
-                        }
-                      }} className="border-red-500 text-red-400 hover:bg-red-500/10">
-                        Annuler
-                      </Button>
                       <Button type="submit" form="dossier-form" className="bg-gradient-to-r from-emerald-500 to-teal-600">
                         Créer
                       </Button>

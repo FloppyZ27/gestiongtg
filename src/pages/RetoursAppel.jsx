@@ -316,7 +316,7 @@ const RetoursAppel = React.forwardRef((props, ref) => {
       const matchesSearch = (
         dossier.arpenteur_geometre?.toLowerCase().includes(searchLower) ||
         dossier.numero_dossier?.toLowerCase().includes(searchLower) ||
-        dossier.clients_ids?.some(id => {
+        dossier.clients_ids.some(id => {
           const client = getClientById(id);
           return client && `${client.prenom} ${client.nom}`.toLowerCase().includes(searchLower);
         }) ||
