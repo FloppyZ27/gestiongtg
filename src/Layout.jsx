@@ -326,16 +326,12 @@ function LayoutContent({ children, currentPageName }) {
 
   const handleDossierSelect = (dossierId) => {
     setSelectedDossierId(dossierId);
-    const dossier = dossiers.find(d => d.id === dossierId);
-    
-    // Auto-remplir le mandat, la tâche suivante et l'utilisateur assigné si disponibles
-    const premierMandat = dossier?.mandats?.[0];
     setEntreeForm({
       ...entreeForm,
       dossier_id: dossierId,
-      mandat: premierMandat?.type_mandat || "",
-      tache_suivante: premierMandat?.tache_actuelle || "",
-      utilisateur_assigne: premierMandat?.utilisateur_assigne || ""
+      mandat: "",
+      tache_suivante: "",
+      utilisateur_assigne: ""
     });
     setDossierSearchTerm("");
     setHasEntreeChanges(true);
