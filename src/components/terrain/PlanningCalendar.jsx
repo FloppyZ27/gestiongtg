@@ -730,6 +730,11 @@ export default function PlanningCalendar({
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4 no-print">
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
+            <div className="text-white font-bold text-lg">
+              {viewMode === "week" 
+                ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}`
+                : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+            </div>
             <div className="flex gap-2 items-center">
               <Button
                 size="sm"
