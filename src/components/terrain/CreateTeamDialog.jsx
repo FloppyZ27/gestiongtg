@@ -130,7 +130,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('techniciens')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-blue-900/40 transition-colors bg-blue-900/20">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-blue-900 transition-colors bg-blue-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-400" />
@@ -179,7 +179,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('vehicules')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-purple-900/40 transition-colors bg-purple-900/20">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-purple-900 transition-colors bg-purple-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-purple-400" />
@@ -228,7 +228,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('equipements')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-orange-900/40 transition-colors bg-orange-900/20">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-orange-900 transition-colors bg-orange-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Wrench className="w-4 h-4 text-orange-400" />
