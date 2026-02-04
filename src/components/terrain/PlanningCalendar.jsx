@@ -1167,14 +1167,14 @@ export default function PlanningCalendar({
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
-                    >
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
+                      >
                       <div className="mb-2">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''}`}>
-                          <div className={`text-xs font-semibold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                          <div className={`text-xs font-semibold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
                             {format(day, "EEEE", { locale: fr })}
                           </div>
-                          <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-white'}`}>
+                          <div className={`text-sm font-bold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-white'}`}>
                             {format(day, "d MMM", { locale: fr })}
                           </div>
                           {holiday && (
@@ -1404,14 +1404,14 @@ export default function PlanningCalendar({
                   return (
                     <Card 
                       key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
-                    >
+                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
+                      >
                       <div className="mb-2">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''}`}>
-                          <p className={`text-xs uppercase font-semibold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                          <p className={`text-xs uppercase font-semibold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
                             {format(day, "EEE", { locale: fr })}
                           </p>
-                          <p className={`text-lg font-bold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-white'}`}>
+                          <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-white'}`}>
                             {format(day, "d", { locale: fr })}
                           </p>
                           {holiday && (
