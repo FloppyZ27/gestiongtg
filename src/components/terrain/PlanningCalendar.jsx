@@ -562,29 +562,9 @@ export default function PlanningCalendar({
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
     const terrain = mandat?.terrain || {};
     
-    // Calculer la couleur en fonction de la date placée vs date limite
-    let colorClasses = "from-emerald-900/10 to-teal-900/10 border-emerald-500/30 hover:shadow-emerald-500/20";
-    
-    if (placedDate && terrain.date_limite_leve) {
-      const placed = new Date(placedDate);
-      const limite = new Date(terrain.date_limite_leve);
-      placed.setHours(0, 0, 0, 0);
-      limite.setHours(0, 0, 0, 0);
-      
-      const diffDays = Math.floor((limite - placed) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays < 1) {
-        // Moins de 1 jour avant ou après - ROUGE
-        colorClasses = "from-red-900/20 to-red-900/10 border-red-500/50 hover:shadow-red-500/20";
-      } else if (diffDays === 1) {
-        // 1 jour avant la date limite - ORANGE
-        colorClasses = "from-orange-900/20 to-orange-900/10 border-orange-500/50 hover:shadow-orange-500/20";
-      } else if (diffDays >= 2 && diffDays <= 4) {
-        // 2-4 jours avant - JAUNE
-        colorClasses = "from-yellow-900/20 to-yellow-900/10 border-yellow-500/50 hover:shadow-yellow-500/20";
-      }
-      // Sinon garde le vert par défaut (5+ jours avant)
-    }
+    // Couleur basée sur l'arpenteur
+    const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
+    const bgColorClass = arpenteurColor.split(' ')[0];
     
     return (
       <div 
@@ -592,19 +572,15 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(dossier);
         }}
-        className={`bg-gradient-to-br ${colorClasses} border-2 rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
+        className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
       >
-        {/* Type de mandat à gauche */}
-        <div className="mb-2">
-          <Badge className="bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
-            {mandat?.type_mandat || 'Mandat'}
-          </Badge>
-        </div>
-
-        {/* N° Dossier */}
-        <div className="mb-1">
-          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+        {/* Entête : N° Dossier et Type de mandat */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
             {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+          </Badge>
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs font-semibold flex-shrink-0">
+            {mandat?.type_mandat || 'Mandat'}
           </Badge>
         </div>
 
@@ -619,6 +595,15 @@ export default function PlanningCalendar({
           <div className="flex items-start gap-1 mb-1">
             <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
             <span className="text-xs text-slate-400 break-words">{formatAdresse(mandat.adresse_travaux)}</span>
+          </div>
+        )}
+
+        {/* Tâche actuelle */}
+        {mandat?.tache_actuelle && (
+          <div className="mb-1">
+            <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 border text-xs">
+              {mandat.tache_actuelle}
+            </Badge>
           </div>
         )}
 
