@@ -253,6 +253,12 @@ export default function GestionDeMandat() {
   const handleDragStart = (start) => {
     const card = filteredCards.find(c => c.id === start.draggableId);
     setDraggedCard(card);
+    
+    // Bloquer le défilement horizontal pendant le drag
+    const kanbanContainer = document.querySelector('.kanban-scroll-container');
+    if (kanbanContainer) {
+      kanbanContainer.style.overflowX = 'hidden';
+    }
   };
 
   const handleDragUpdate = (update) => {
@@ -262,6 +268,12 @@ export default function GestionDeMandat() {
 
   const handleDragEnd = (result) => {
     setDraggedCard(null);
+    
+    // Réactiver le défilement horizontal
+    const kanbanContainer = document.querySelector('.kanban-scroll-container');
+    if (kanbanContainer) {
+      kanbanContainer.style.overflowX = 'auto';
+    }
     
     if (!result.destination) return;
 
