@@ -1081,9 +1081,7 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
-               <div className="kanban-scrollbar-top" id="kanban-scrollbar-taches">
-                 <div className="kanban-scrollbar-content" style={{ width: 'max-content' }}></div>
-               </div>
+               <div className="kanban-scrollbar-top" id="kanban-scrollbar-taches"></div>
                <div 
                  className="kanban-scroll-container"
                  id="kanban-container-taches"
