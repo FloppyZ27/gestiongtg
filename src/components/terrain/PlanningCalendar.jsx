@@ -594,6 +594,21 @@ export default function PlanningCalendar({
   const getLotById = (id) => lots?.find(l => l.id === id);
   const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
+  const generateTeamDisplayName = (equipe) => {
+    if (equipe.techniciens.length === 0) {
+      return equipe.nom;
+    }
+    const initials = equipe.techniciens.map(techId => {
+      const tech = techniciens.find(t => t.id === techId);
+      return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+    }).filter(n => n).join('-');
+    
+    // Extraire le numéro d'équipe du nom
+    const match = equipe.nom.match(/Équipe (\d+)/);
+    const teamNumber = match ? match[1] : '';
+    return teamNumber ? `Équipe ${teamNumber} - ${initials}` : equipe.nom;
+  };
+
   const handleCardClick = (dossier) => {
     // Trouver l'index du mandat en Cédule
     const mandatIndex = dossier.mandats?.findIndex(m => m.tache_actuelle === "Cédule");

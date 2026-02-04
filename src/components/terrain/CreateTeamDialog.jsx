@@ -49,10 +49,22 @@ export default function CreateTeamDialog({
   const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id));
   const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id));
 
+  const generateTeamName = (techs) => {
+    const teamNumber = (equipes[dateStr]?.length || 0) + 1;
+    if (techs.length === 0) {
+      return `Équipe ${teamNumber}`;
+    }
+    const initials = techs.map(techId => {
+      const tech = techniciens.find(t => t.id === techId);
+      return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+    }).filter(n => n).join('-');
+    return `Équipe ${teamNumber} - ${initials}`;
+  };
+
   const handleCreateTeam = () => {
     const newTeam = {
       id: `eq${Date.now()}`,
-      nom: teamName || `Équipe ${(equipes[dateStr]?.length || 0) + 1}`,
+      nom: generateTeamName(selectedTechniciens),
       techniciens: selectedTechniciens,
       vehicules: selectedVehicules,
       equipements: selectedEquipements,
