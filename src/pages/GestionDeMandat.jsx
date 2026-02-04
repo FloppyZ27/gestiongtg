@@ -563,32 +563,33 @@ export default function GestionDeMandat() {
           transform: none !important;
         }
 
-        /* Portal drag overlay au-dessus de TOUT */
-        body > [data-rbd-droppable-context-id],
+        /* React-beautiful-dnd portal - DOIT être position fixed au-dessus de TOUT */
+        body > [data-rbd-droppable-context-id] {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+        }
+
+        /* Drag handle context */
         [data-rbd-drag-handle-context-id] {
-          position: fixed !important;
           z-index: 999999 !important;
-          pointer-events: none !important;
         }
 
-        /* Carte en cours de drag - centrage sous curseur */
-        [data-rbd-drag-handle-draggable-id] {
-          position: fixed !important;
-          z-index: 999999 !important;
-          pointer-events: none !important;
-        }
-
-        /* Centrer exactement sous le curseur */
+        /* Carte en drag - position fixed pour échapper au stacking context */
         div[data-rbd-draggable-id][data-is-dragging="true"] {
           position: fixed !important;
           z-index: 999999 !important;
           pointer-events: none !important;
-          margin: 0 !important;
+          will-change: transform !important;
         }
         
+        /* Centrer exactement sous le curseur avec translate -50%, -50% */
         div[data-rbd-draggable-id][data-is-dragging="true"] > div {
           transform: translate(-50%, -50%) !important;
-          transform-origin: center center !important;
         }
 
         /* Empêcher le scroll horizontal global */
@@ -596,22 +597,24 @@ export default function GestionDeMandat() {
           overflow-x: hidden !important;
         }
 
-        /* Conteneur Kanban avec scroll horizontal uniquement */
+        /* S'assurer qu'aucun parent n'a de transform qui casse le fixed positioning */
+        .kanban-scroll-container,
+        .kanban-scroll-container *:not([data-rbd-draggable-id][data-is-dragging="true"]) {
+          transform: none !important;
+        }
+
+        /* Conteneur Kanban avec scroll horizontal uniquement - PAS DE TRANSFORM pour préserver fixed positioning */
         .kanban-scroll-container {
           overflow-x: auto;
           overflow-y: hidden;
           width: 100%;
           -webkit-overflow-scrolling: touch;
-          transform: rotateX(180deg);
           cursor: grab;
+          /* PAS de transform ici - ça casse le position: fixed du drag overlay */
         }
 
         .kanban-scroll-container:active {
           cursor: grabbing;
-        }
-
-        .kanban-scroll-container > div {
-          transform: rotateX(180deg);
         }
 
         /* Personnaliser la scrollbar pour le Kanban */
@@ -634,23 +637,27 @@ export default function GestionDeMandat() {
           background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
         }
 
-        /* Colonnes avec largeur fixe - overflow visible pour drag */
+        /* Colonnes avec largeur fixe */
         .kanban-column {
           flex: 0 0 270px;
           min-width: 270px;
           max-width: 270px;
-          overflow: visible !important;
         }
 
+        /* Card dans colonne - overflow visible pour ne pas clip le drag */
         .kanban-column > * {
           overflow: visible !important;
         }
 
-        /* Contenu des colonnes avec hauteur fixe pour 4 cartes */
+        /* Contenu des colonnes avec hauteur fixe */
         .kanban-column .kanban-content {
           max-height: 700px;
           overflow-y: auto;
-          overflow-x: visible !important;
+        }
+        
+        /* Placeholder lors du drag - ne pas interférer */
+        .kanban-column .kanban-content [data-rbd-placeholder-context-id] {
+          pointer-events: none !important;
         }
 
         /* Scrollbar pour le contenu des colonnes */
