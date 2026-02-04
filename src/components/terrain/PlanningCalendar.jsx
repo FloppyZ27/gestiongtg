@@ -158,6 +158,7 @@ export default function PlanningCalendar({
   const [equipeActiveTabs, setEquipeActiveTabs] = useState({}); // { "equipeId": "techniciens" | "vehicules" | "equipements" }
   const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
   const [createTeamDateStr, setCreateTeamDateStr] = useState(null);
+  const [selectedResourceFilter, setSelectedResourceFilter] = useState(null); // null | "techniciens" | "vehicules" | "equipements"
 
   const handlePrint = () => {
     window.print();
@@ -800,14 +801,43 @@ export default function PlanningCalendar({
       
       {/* Header avec contrôles */}
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4 no-print">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
-            <div className="text-white font-bold text-lg">
-              {viewMode === "week" 
-                ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}`
-                : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
-            </div>
-            <div className="flex gap-2 items-center">
+         <CardContent className="p-4">
+           <div className="flex justify-between items-center gap-4">
+             <div className="text-white font-bold text-lg">
+               {viewMode === "week" 
+                 ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}`
+                 : format(currentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(currentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+             </div>
+
+             {/* Filtres de ressources */}
+             <div className="flex gap-2 items-center">
+               <Button
+                 size="sm"
+                 onClick={() => setSelectedResourceFilter(selectedResourceFilter === "techniciens" ? null : "techniciens")}
+                 className={selectedResourceFilter === "techniciens" ? "bg-blue-500/30 text-blue-400 border border-blue-500/30" : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"}
+               >
+                 <Users className="w-4 h-4 mr-1" />
+                 Techniciens
+               </Button>
+               <Button
+                 size="sm"
+                 onClick={() => setSelectedResourceFilter(selectedResourceFilter === "vehicules" ? null : "vehicules")}
+                 className={selectedResourceFilter === "vehicules" ? "bg-purple-500/30 text-purple-400 border border-purple-500/30" : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"}
+               >
+                 <Truck className="w-4 h-4 mr-1" />
+                 Véhicules
+               </Button>
+               <Button
+                 size="sm"
+                 onClick={() => setSelectedResourceFilter(selectedResourceFilter === "equipements" ? null : "equipements")}
+                 className={selectedResourceFilter === "equipements" ? "bg-orange-500/30 text-orange-400 border border-orange-500/30" : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"}
+               >
+                 <Wrench className="w-4 h-4 mr-1" />
+                 Équipements
+               </Button>
+             </div>
+
+             <div className="flex gap-2 items-center">
               <Button
                 size="sm"
                 variant="outline"
@@ -1223,29 +1253,32 @@ export default function PlanningCalendar({
 
                       <div className="space-y-2 flex-1 overflow-y-auto w-full">
                         {dayEquipes.map((equipe) => {
-                           const activeTab = getEquipeActiveTab(equipe.id);
+                           const displayedTab = selectedResourceFilter || getEquipeActiveTab(equipe.id);
                            const equipeNom = generateTeamDisplayName(equipe);
                            return (
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                                <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
-                                {/* Tabs et bouton supprimer */}
-                                <div className="flex items-center justify-between mb-1.5">
+                                {/* Nom de l'équipe */}
+                                <span className="text-white text-sm font-bold">{equipeNom}</span>
+
+                                {/* Tabs et bouton supprimer - toujours visibles pour interaction */}
+                                <div className="flex items-center justify-between mt-1.5 opacity-60 hover:opacity-100">
                                   <div className="flex items-center gap-1">
                                     <button
                                       onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                      className={`p-1 rounded transition-colors ${displayedTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
                                     >
                                       <Users className="w-3 h-3" />
                                     </button>
                                     <button
                                       onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                      className={`p-1 rounded transition-colors ${displayedTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
                                     >
                                       <Truck className="w-3 h-3" />
                                     </button>
                                     <button
                                       onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                      className={`p-1 rounded transition-colors ${displayedTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
                                     >
                                       <Wrench className="w-3 h-3" />
                                     </button>
@@ -1264,15 +1297,12 @@ export default function PlanningCalendar({
                                       <X className="w-3 h-3" />
                                     </button>
                                   </div>
-                                </div>
-                                    {/* Nom de l'équipe */}
-                                    <span className="text-white text-sm font-bold">{equipeNom}</span>
-                                    </div>
+                                  </div>
 
-                                    <div className="p-2">
+                                  <div className="p-2">
 
-                              {/* Contenu du tab actif */}
-                              {activeTab === "techniciens" && (
+                                  {/* Contenu du tab actif */}
+                                  {displayedTab === "techniciens" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
                                   {(provided, snapshot) => (
                                     <div
@@ -1455,29 +1485,32 @@ export default function PlanningCalendar({
 
                       <div className="space-y-2 flex-1 overflow-y-auto">
                         {dayEquipes.map((equipe) => {
-                           const activeTab = getEquipeActiveTab(equipe.id);
+                           const displayedTab = selectedResourceFilter || getEquipeActiveTab(equipe.id);
                            const equipeNom = generateTeamDisplayName(equipe);
                            return (
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded overflow-hidden text-xs">
                                <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
+                                 {/* Nom de l'équipe */}
+                                 <span className="text-white text-sm font-bold">{equipeNom}</span>
+
                                  {/* Tabs et bouton supprimer */}
-                                <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center justify-between mb-1 mt-1 opacity-60 hover:opacity-100">
                                 <div className="flex items-center gap-0.5">
                                   <button
                                     onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                    className={`p-0.5 rounded transition-colors ${displayedTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
                                   >
                                     <Users className="w-3 h-3" />
                                   </button>
                                   <button
                                     onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                    className={`p-0.5 rounded transition-colors ${displayedTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
                                   >
                                     <Truck className="w-3 h-3" />
                                   </button>
                                   <button
                                     onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                    className={`p-0.5 rounded transition-colors ${displayedTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
                                   >
                                     <Wrench className="w-3 h-3" />
                                   </button>
@@ -1497,14 +1530,12 @@ export default function PlanningCalendar({
                                   </button>
                                 </div>
                                 </div>
-                                  {/* Nom de l'équipe */}
-                                  <span className="text-white text-sm font-bold">{equipeNom}</span>
                                   </div>
 
                                   <div className="p-1">
 
-                              {/* Contenu du tab actif */}
-                              {activeTab === "techniciens" && (
+                                {/* Contenu du tab actif */}
+                                {displayedTab === "techniciens" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-blue-500/20 border border-blue-500' : 'border border-slate-700'}`}>
