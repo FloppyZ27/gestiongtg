@@ -48,7 +48,7 @@ export default function ActesList({ actes, isLoading, onSelectActe, onSort, sort
         {parties
           .filter(p => p.nom || p.prenom)
           .map((p, idx) => (
-            <div key={idx} className="text-sm">
+            <div key={`${p.nom}-${p.prenom}-${idx}`} className="text-sm">
               {`${p.prenom || ''} ${p.nom || ''}`.trim()}
             </div>
           ))
