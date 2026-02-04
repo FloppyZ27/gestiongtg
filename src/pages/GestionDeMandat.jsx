@@ -328,16 +328,30 @@ export default function GestionDeMandat() {
     let isDraggingCard = false;
     let kanbanContainer = document.querySelector('.kanban-scroll-container');
 
+    const preventHorizontalScroll = (e) => {
+      if (isDraggingCard && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+      }
+    };
+
     const handleDragStart = (e) => {
       if (e.target.closest('[data-rbd-draggable-id]')) {
         isDraggingCard = true;
         document.body.classList.add("dragging-card");
+        if (kanbanContainer) {
+          kanbanContainer.style.overflowX = 'hidden';
+        }
+        document.addEventListener('wheel', preventHorizontalScroll, { passive: false });
       }
     };
 
     const handleDragEnd = () => {
       isDraggingCard = false;
       document.body.classList.remove("dragging-card");
+      if (kanbanContainer) {
+        kanbanContainer.style.overflowX = 'auto';
+      }
+      document.removeEventListener('wheel', preventHorizontalScroll);
     };
 
     document.addEventListener('dragstart', handleDragStart);
@@ -346,6 +360,7 @@ export default function GestionDeMandat() {
     return () => {
       document.removeEventListener('dragstart', handleDragStart);
       document.removeEventListener('dragend', handleDragEnd);
+      document.removeEventListener('wheel', preventHorizontalScroll);
     };
   }, []);
 
