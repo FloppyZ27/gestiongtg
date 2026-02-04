@@ -325,28 +325,14 @@ export default function GestionDeMandat() {
 
   // Event listeners natifs pour bloquer le scroll horizontal pendant le drag
   React.useEffect(() => {
-    let isDraggingCard = false;
-
     const handleDragStart = (e) => {
       if (e.target.closest('[data-rbd-draggable-id]')) {
-        isDraggingCard = true;
-        const kanbanContainer = document.querySelector('.kanban-scroll-container');
-        if (kanbanContainer) {
-          kanbanContainer.style.overflowX = 'hidden';
-          kanbanContainer.style.cursor = 'grabbing';
-        }
+        document.body.classList.add("dragging-card");
       }
     };
 
     const handleDragEnd = () => {
-      if (isDraggingCard) {
-        isDraggingCard = false;
-        const kanbanContainer = document.querySelector('.kanban-scroll-container');
-        if (kanbanContainer) {
-          kanbanContainer.style.overflowX = 'auto';
-          kanbanContainer.style.cursor = 'grab';
-        }
-      }
+      document.body.classList.remove("dragging-card");
     };
 
     document.addEventListener('dragstart', handleDragStart);
@@ -622,6 +608,12 @@ export default function GestionDeMandat() {
 
         .kanban-scroll-container:active {
           cursor: grabbing;
+        }
+
+        /* Bloquer le scroll horizontal pendant le drag */
+        body.dragging-card .kanban-scroll-container {
+          overflow-x: hidden !important;
+          cursor: grabbing !important;
         }
 
         /* Cursors pour drag */
