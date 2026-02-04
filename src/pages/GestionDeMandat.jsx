@@ -688,10 +688,7 @@ export default function GestionDeMandat() {
           background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
         }
 
-        .kanban-scrollbar-content {
-          width: 3000px;
-          height: 1px;
-        }
+
 
         .kanban-scroll-container:active {
           cursor: grabbing;
