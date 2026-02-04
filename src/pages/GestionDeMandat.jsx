@@ -1210,19 +1210,34 @@ export default function GestionDeMandat() {
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
+              <div className="kanban-scrollbar-top" id="kanban-scrollbar-users">
+                <div className="kanban-scrollbar-content" style={{ width: 'max-content' }}></div>
+              </div>
               <div 
                 className="kanban-scroll-container"
+                id="kanban-container-users"
                 ref={(el) => {
                   if (el) {
                     const handleDown = (e) => handleMouseDown(e, { current: el });
                     const handleMove = (e) => handleMouseMove(e, { current: el });
                     const handleUp = () => handleMouseUp({ current: el });
                     const handleLeave = () => handleMouseLeave({ current: el });
-                    
+
                     el.onmousedown = handleDown;
                     el.onmousemove = handleMove;
                     el.onmouseup = handleUp;
                     el.onmouseleave = handleLeave;
+
+                    // Synchroniser la scrollbar du haut
+                    const topScrollbar = document.getElementById('kanban-scrollbar-users');
+                    if (topScrollbar) {
+                      el.addEventListener('scroll', () => {
+                        topScrollbar.scrollLeft = el.scrollLeft;
+                      });
+                      topScrollbar.addEventListener('scroll', () => {
+                        el.scrollLeft = topScrollbar.scrollLeft;
+                      });
+                    }
                   }
                 }}
               >
