@@ -1408,12 +1408,12 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                          <p className={`text-lg font-bold text-white`}>
-                            {format(day, "EEE", { locale: fr })}
-                          </p>
-                          <p className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                            {format(day, "d", { locale: fr })}
-                          </p>
+                           <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                             {format(day, "EEE", { locale: fr })}
+                           </p>
+                           <p className={`text-lg font-bold text-white`}>
+                             {format(day, "d", { locale: fr })}
+                           </p>
                           {holiday && (
                             <p className="text-xs text-red-400 mt-0.5">
                               {holiday.name}
