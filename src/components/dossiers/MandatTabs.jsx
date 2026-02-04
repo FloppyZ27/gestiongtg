@@ -165,7 +165,7 @@ export default function MandatTabs({
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 max-h-64">
                     <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                    {users?.map((user) => (
+                    {(users || []).map((user) => (
                       <SelectItem key={user.email} value={user.email} className="text-white">{user.full_name}</SelectItem>
                     ))}
                   </SelectContent>

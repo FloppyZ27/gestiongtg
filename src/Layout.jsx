@@ -1265,7 +1265,7 @@ function LayoutContent({ children, currentPageName }) {
                               <SelectValue placeholder="Sélectionner" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-700">
-                               {users.map((usr) => (
+                               {(users || []).map((usr) => (
                                 <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">
                                   {usr.full_name}
                                 </SelectItem>
