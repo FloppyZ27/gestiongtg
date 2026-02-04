@@ -351,6 +351,13 @@ export default function GestionDeMandat() {
       if (e.clientX > rect.right - edgeSize) {
         kanbanContainer.scrollLeft += scrollSpeed;
       }
+
+      // Mettre à jour la position du drag preview
+      const el = document.querySelector(".drag-preview");
+      if (el) {
+        el.style.left = e.clientX + "px";
+        el.style.top = e.clientY + "px";
+      }
     };
 
     const handleDragStart = (e) => {
