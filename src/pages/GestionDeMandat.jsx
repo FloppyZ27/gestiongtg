@@ -448,6 +448,7 @@ export default function GestionDeMandat() {
          className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${borderColorClass} ${
            snapshot?.isDragging ? `shadow-2xl ${shadowColor}` : ''
          }`}
+         style={snapshot?.isDragging ? { transform: 'translate(-50%, -50%)' } : {}}
        >
          {/* Entête : N° Dossier (gauche) et Type de mandat (droite) */}
          <div className="flex items-start justify-between gap-2 mb-2">
