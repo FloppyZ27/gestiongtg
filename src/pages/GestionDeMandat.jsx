@@ -541,7 +541,7 @@ export default function GestionDeMandat() {
      return (
        <div 
          onClick={() => !snapshot?.isDragging && handleCardClick(card)}
-         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${borderColorClass} ${
+         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
            snapshot?.isDragging ? `shadow-2xl ${shadowColor}` : ''
          }`}
        >
