@@ -1314,15 +1314,15 @@ export default function PlanningCalendar({
 
                                     <div className="p-2">
 
-                              {/* Contenu du tab actif */}
-                              {activeTab === "techniciens" && (
-                                <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.droppableProps}
-                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
-                                    >
+                              {/* Contenu du tab actif ou du mode global */}
+                               {(globalViewMode === "techniciens" || activeTab === "techniciens") && (
+                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                                   {(provided, snapshot) => (
+                                     <div
+                                       ref={provided.innerRef}
+                                       {...provided.droppableProps}
+                                       className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
+                                     >
                                       <div className="flex items-center gap-1 flex-wrap">
                                         <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
                                         {equipe.techniciens.map(techId => {
@@ -1350,7 +1350,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "vehicules" && (
+                              {(globalViewMode === "vehicules" || activeTab === "vehicules") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
                                   {(provided, snapshot) => (
                                     <div
@@ -1385,7 +1385,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "equipements" && (
+                              {(globalViewMode === "equipements" || activeTab === "equipements") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
                                   {(provided, snapshot) => (
                                     <div
