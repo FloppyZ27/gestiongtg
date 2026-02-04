@@ -58,6 +58,7 @@ import CommunicationClients from './pages/CommunicationClients';
 import Dashboard from './pages/Dashboard';
 import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
+import GestionDeMandat from './pages/GestionDeMandat';
 import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import Home from './pages/Home';
 import Lots from './pages/Lots';
@@ -68,7 +69,6 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import GestionDeMandat from './pages/GestionDeMandat';
 import __Layout from './Layout.jsx';
 
 
@@ -84,6 +84,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Dossiers": Dossiers,
     "EditerActe": EditerActe,
+    "GestionDeMandat": GestionDeMandat,
     "GestionEquipeTerrain": GestionEquipeTerrain,
     "Home": Home,
     "Lots": Lots,
@@ -94,7 +95,6 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "GestionDeMandat": GestionDeMandat,
 }
 
 export const pagesConfig = {

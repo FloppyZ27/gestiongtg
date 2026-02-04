@@ -399,12 +399,23 @@ export default function CeduleTerrain() {
   };
 
   const getClientsNames = (clientIds) => {
-    if (!clientIds || clientIds.length === 0) return "-";
-    return clientIds.map(id => {
-      const client = getClientById(id);
-      return client ? `${client.prenom} ${client.nom}` : "";
-    }).filter(name => name).join(", ");
-  };
+       if (!clientIds || clientIds.length === 0) return "-";
+       return clientIds.map(id => {
+         const client = getClientById(id);
+         return client ? `${client.prenom} ${client.nom}` : "";
+       }).filter(name => name).join(", ");
+     };
+
+     const getAbbreviatedMandatType = (type) => {
+       const abbreviations = {
+         "Certificat de localisation": "CL",
+         "Description Technique": "DT",
+         "Implantation": "Imp",
+         "Levé topographique": "Levé Topo",
+         "Piquetage": "Piq"
+       };
+       return abbreviations[type] || type;
+     };
 
   const handleViewDossier = (item) => {
     setViewingDossier(item.dossier);
