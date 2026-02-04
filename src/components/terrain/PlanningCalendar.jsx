@@ -1133,8 +1133,8 @@ export default function PlanningCalendar({
                       key={dateStr}
                       className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
                     >
-                      <div className="flex items-center justify-between mb-2 pb-2">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 flex-1 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''}`}>
+                      <div className="mb-2">
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''}`}>
                           <div className={`text-xs font-semibold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
                             {format(day, "EEEE", { locale: fr })}
                           </div>
@@ -1147,13 +1147,6 @@ export default function PlanningCalendar({
                             </div>
                           )}
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => addEquipe(dateStr)}
-                          className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-6 px-2"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
                       </div>
 
                       <div className="space-y-2">
