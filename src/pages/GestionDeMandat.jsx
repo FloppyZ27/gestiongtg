@@ -684,7 +684,7 @@ export default function GestionDeMandat() {
         }
 
         .kanban-scrollbar-content {
-          width: 100%;
+          width: 3000px;
           height: 1px;
         }
 
