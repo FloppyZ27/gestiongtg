@@ -68,10 +68,10 @@ const getUserInitials = (name) => {
 
 export default function GestionDeMandat() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterArpenteur, setFilterArpenteur] = useState("all");
-  const [filterTypeMandat, setFilterTypeMandat] = useState("all");
-  const [filterUtilisateur, setFilterUtilisateur] = useState("all");
-  const [filterVille, setFilterVille] = useState("all");
+  const [filterArpenteur, setFilterArpenteur] = useState([]);
+  const [filterTypeMandat, setFilterTypeMandat] = useState([]);
+  const [filterUtilisateur, setFilterUtilisateur] = useState([]);
+  const [filterVille, setFilterVille] = useState([]);
   const [viewingDossier, setViewingDossier] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
@@ -188,10 +188,10 @@ export default function GestionDeMandat() {
       card.mandat.type_mandat?.toLowerCase().includes(searchLower)
     );
 
-    const matchesArpenteur = filterArpenteur === "all" || card.dossier.arpenteur_geometre === filterArpenteur;
-    const matchesType = filterTypeMandat === "all" || card.mandat.type_mandat === filterTypeMandat;
-    const matchesUtilisateur = filterUtilisateur === "all" || card.mandat.utilisateur_assigne === filterUtilisateur;
-    const matchesVille = filterVille === "all" || card.mandat.adresse_travaux?.ville === filterVille;
+    const matchesArpenteur = filterArpenteur.length === 0 || filterArpenteur.includes(card.dossier.arpenteur_geometre);
+    const matchesType = filterTypeMandat.length === 0 || filterTypeMandat.includes(card.mandat.type_mandat);
+    const matchesUtilisateur = filterUtilisateur.length === 0 || filterUtilisateur.includes(card.mandat.utilisateur_assigne);
+    const matchesVille = filterVille.length === 0 || filterVille.includes(card.mandat.adresse_travaux?.ville);
 
     return matchesSearch && matchesArpenteur && matchesType && matchesUtilisateur && matchesVille;
   });
@@ -692,9 +692,9 @@ export default function GestionDeMandat() {
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   <span className="text-sm">Filtres</span>
-                  {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all" || filterVille !== "all") && (
+                  {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterUtilisateur.length > 0 || filterVille.length > 0) && (
                     <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {(filterArpenteur !== "all" ? 1 : 0) + (filterTypeMandat !== "all" ? 1 : 0) + (filterUtilisateur !== "all" ? 1 : 0) + (filterVille !== "all" ? 1 : 0)}
+                      {filterArpenteur.length + filterTypeMandat.length + filterUtilisateur.length + filterVille.length}
                     </Badge>
                   )}
                   {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -710,15 +710,15 @@ export default function GestionDeMandat() {
                           <Filter className="w-3 h-3 text-emerald-500" />
                           <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
                         </div>
-                        {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all" || filterVille !== "all") && (
+                        {(filterArpenteur.length > 0 || filterTypeMandat.length > 0 || filterUtilisateur.length > 0 || filterVille.length > 0) && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              setFilterArpenteur("all");
-                              setFilterTypeMandat("all");
-                              setFilterUtilisateur("all");
-                              setFilterVille("all");
+                              setFilterArpenteur([]);
+                              setFilterTypeMandat([]);
+                              setFilterUtilisateur([]);
+                              setFilterVille([]);
                             }}
                             className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
                           >
@@ -732,24 +732,21 @@ export default function GestionDeMandat() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Arpenteurs ({filterArpenteur === "all" ? 'Tous' : '1'})</span>
+                              <span className="truncate">Arpenteurs ({filterArpenteur.length > 0 ? `${filterArpenteur.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            <DropdownMenuCheckboxItem
-                              checked={filterArpenteur === "all"}
-                              onCheckedChange={() => setFilterArpenteur("all")}
-                              className="text-white"
-                            >
-                              Tous les arpenteurs
-                            </DropdownMenuCheckboxItem>
                             {ARPENTEURS.map((arp) => (
                               <DropdownMenuCheckboxItem
                                 key={arp}
-                                checked={filterArpenteur === arp}
+                                checked={filterArpenteur.includes(arp)}
                                 onCheckedChange={(checked) => {
-                                  setFilterArpenteur(checked ? arp : "all");
+                                  setFilterArpenteur(
+                                    checked
+                                      ? [...filterArpenteur, arp]
+                                      : filterArpenteur.filter((a) => a !== arp)
+                                  );
                                 }}
                                 className="text-white"
                               >
@@ -762,24 +759,21 @@ export default function GestionDeMandat() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Mandats ({filterTypeMandat === "all" ? 'Tous' : '1'})</span>
+                              <span className="truncate">Mandats ({filterTypeMandat.length > 0 ? `${filterTypeMandat.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            <DropdownMenuCheckboxItem
-                              checked={filterTypeMandat === "all"}
-                              onCheckedChange={() => setFilterTypeMandat("all")}
-                              className="text-white"
-                            >
-                              Tous les types
-                            </DropdownMenuCheckboxItem>
                             {TYPES_MANDATS.map((type) => (
                               <DropdownMenuCheckboxItem
                                 key={type}
-                                checked={filterTypeMandat === type}
+                                checked={filterTypeMandat.includes(type)}
                                 onCheckedChange={(checked) => {
-                                  setFilterTypeMandat(checked ? type : "all");
+                                  setFilterTypeMandat(
+                                    checked
+                                      ? [...filterTypeMandat, type]
+                                      : filterTypeMandat.filter((t) => t !== type)
+                                  );
                                 }}
                                 className="text-white"
                               >
@@ -792,24 +786,21 @@ export default function GestionDeMandat() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Utilisateurs ({filterUtilisateur === "all" ? 'Tous' : '1'})</span>
+                              <span className="truncate">Utilisateurs ({filterUtilisateur.length > 0 ? `${filterUtilisateur.length}` : 'Tous'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            <DropdownMenuCheckboxItem
-                              checked={filterUtilisateur === "all"}
-                              onCheckedChange={() => setFilterUtilisateur("all")}
-                              className="text-white"
-                            >
-                              Tous les utilisateurs
-                            </DropdownMenuCheckboxItem>
                             {users.map((usr) => (
                               <DropdownMenuCheckboxItem
                                 key={usr.email}
-                                checked={filterUtilisateur === usr.email}
+                                checked={filterUtilisateur.includes(usr.email)}
                                 onCheckedChange={(checked) => {
-                                  setFilterUtilisateur(checked ? usr.email : "all");
+                                  setFilterUtilisateur(
+                                    checked
+                                      ? [...filterUtilisateur, usr.email]
+                                      : filterUtilisateur.filter((u) => u !== usr.email)
+                                  );
                                 }}
                                 className="text-white"
                               >
@@ -822,24 +813,21 @@ export default function GestionDeMandat() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Villes ({filterVille === "all" ? 'Toutes' : '1'})</span>
+                              <span className="truncate">Villes ({filterVille.length > 0 ? `${filterVille.length}` : 'Toutes'})</span>
                               <ChevronDown className="w-3 h-3 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            <DropdownMenuCheckboxItem
-                              checked={filterVille === "all"}
-                              onCheckedChange={() => setFilterVille("all")}
-                              className="text-white"
-                            >
-                              Toutes les villes
-                            </DropdownMenuCheckboxItem>
                             {uniqueVilles.map((ville) => (
                               <DropdownMenuCheckboxItem
                                 key={ville}
-                                checked={filterVille === ville}
+                                checked={filterVille.includes(ville)}
                                 onCheckedChange={(checked) => {
-                                  setFilterVille(checked ? ville : "all");
+                                  setFilterVille(
+                                    checked
+                                      ? [...filterVille, ville]
+                                      : filterVille.filter((v) => v !== ville)
+                                  );
                                 }}
                                 className="text-white"
                               >
