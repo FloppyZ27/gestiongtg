@@ -1171,10 +1171,10 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                          <div className={`text-xs font-semibold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                          <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
                             {format(day, "EEEE", { locale: fr })}
                           </div>
-                          <div className={`text-sm font-bold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-white'}`}>
+                          <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
                             {format(day, "d MMM", { locale: fr })}
                           </div>
                           {holiday && (
@@ -1408,10 +1408,10 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                          <p className={`text-xs uppercase font-semibold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                          <p className={`text-lg font-bold text-white`}>
                             {format(day, "EEE", { locale: fr })}
                           </p>
-                          <p className={`text-lg font-bold ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-white'}`}>
+                          <p className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
                             {format(day, "d", { locale: fr })}
                           </p>
                           {holiday && (
