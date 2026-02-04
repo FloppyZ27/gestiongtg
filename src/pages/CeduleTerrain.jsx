@@ -492,7 +492,7 @@ export default function CeduleTerrain() {
     return (
       <Card 
         className={`border-slate-700 ${isDragging ? 'bg-slate-700' : 'bg-slate-800/80'} hover:bg-slate-800 transition-colors cursor-pointer`}
-        onClick={() => !isDragging && handleViewDossier(item)}
+        onClick={() => !isDragging && handleEdit(item.dossier)}
       >
         <CardContent className="p-3 space-y-2">
           <div className="text-center pb-2 border-b border-slate-700">
