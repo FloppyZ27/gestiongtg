@@ -2167,10 +2167,10 @@ export default function EditDossierForm({
 
                               return sortedRetoursAppel.map((retour) => (
                                 <TableRow key={retour.id} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell className="text-slate-300 text-xs w-1/4">
+                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
                                     {retour.date_appel ? format(new Date(retour.date_appel), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs w-1/4">
+                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
@@ -2186,7 +2186,7 @@ export default function EditDossierForm({
                                       </Tooltip>
                                     </TooltipProvider>
                                   </TableCell>
-                                  <TableCell className="text-xs w-1/4">
+                                  <TableCell className="text-xs w-[22.5%]">
                                     <Select 
                                       value={retour.statut}
                                       onValueChange={async (newStatut) => {
@@ -2216,7 +2216,7 @@ export default function EditDossierForm({
                                       </SelectContent>
                                     </Select>
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs w-1/5">
+                                  <TableCell className="text-slate-300 text-xs w-[22.5%]">
                                     <div className="flex items-center gap-1.5">
                                       <span>
                                         {getUserInitials(users.find(u => u.email === retour.utilisateur_assigne)?.full_name) || "-"}
@@ -2229,7 +2229,7 @@ export default function EditDossierForm({
                                       </Avatar>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-right">
+                                  <TableCell className="text-right w-[10%]">
                                     <button 
                                       type="button" 
                                       onClick={() => {
