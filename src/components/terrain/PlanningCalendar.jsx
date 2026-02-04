@@ -1523,15 +1523,23 @@ export default function PlanningCalendar({
                           </div>
                         );
                       })}
-                    </div>
-                  </Card>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      </DragDropContext>
+                      </div>
+                      <Button
+                      size="sm"
+                      onClick={() => addEquipe(dateStr)}
+                      className="w-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-5 mt-1 text-xs"
+                      >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Ajouter
+                      </Button>
+                      </Card>
+                      );
+                      })}
+                      </div>
+                      )}
+                      </div>
+                      </div>
+                      </DragDropContext>
 
       {/* Dialog de vue du dossier */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
