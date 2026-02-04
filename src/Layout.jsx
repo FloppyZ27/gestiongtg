@@ -1500,8 +1500,12 @@ function LayoutContent({ children, currentPageName }) {
 
         <main className="flex-1 flex flex-col overflow-hidden">
           <header className="fixed top-0 left-0 right-0 z-[1000] w-full bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0">
-            <div className="flex items-center gap-4 md:hidden">
-              <SidebarTrigger className="hover:bg-slate-800 p-2 rounded-lg transition-colors duration-200 text-white" />
+            <div className="flex items-center gap-3">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
+                alt="GTG Logo"
+                className="w-10 h-auto"
+              />
               <h1 className="text-xl font-bold text-white">GestionGTG</h1>
             </div>
 
