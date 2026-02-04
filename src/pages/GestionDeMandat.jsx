@@ -704,6 +704,12 @@ export default function GestionDeMandat() {
           rotate: 2deg;
         }
 
+        /* Drag over column styling */
+        .kanban-column.drag-over {
+          background: rgba(0, 121, 191, 0.15);
+          border: 2px dashed #0079bf;
+        }
+
         /* Personnaliser la scrollbar pour le Kanban */
         .kanban-scroll-container::-webkit-scrollbar {
           height: 12px;
