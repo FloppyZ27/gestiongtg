@@ -722,7 +722,7 @@ export default function CeduleTerrain() {
               <Button
                 size="sm"
                 onClick={(e) => handleEditTerrain(item, e)}
-                className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-xs h-8"
+                className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8"
               >
                 <Settings className="w-4 h-4 mr-1" />
                 Modifier terrain
@@ -959,9 +959,9 @@ export default function CeduleTerrain() {
                         <div className="space-y-2">
                           {equipes[jourKey]?.map((equipe) => (
                             <div key={equipe} className="bg-slate-800/50 rounded-lg border-2 border-slate-700">
-                              <div className="flex justify-between items-center px-3 py-2 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border-b-2 border-slate-700">
+                              <div className="flex justify-between items-center px-3 py-2 bg-gradient-to-r from-emerald-600/20 to-teal-600/20 border-b-2 border-slate-700">
                                 <div className="flex items-center gap-2 flex-1">
-                                  <Users className="w-4 h-4 text-cyan-400" />
+                                  <Users className="w-4 h-4 text-emerald-400" />
                                   {editingEquipe === `${jour}-${equipe}` ? (
                                     <Input
                                       value={newEquipeName}
@@ -980,7 +980,7 @@ export default function CeduleTerrain() {
                                     />
                                   ) : (
                                     <span 
-                                      className="text-sm font-bold text-cyan-300 cursor-pointer hover:text-cyan-200"
+                                      className="text-sm font-bold text-emerald-300 cursor-pointer hover:text-emerald-200"
                                       onClick={() => {
                                         setEditingEquipe(`${jour}-${equipe}`);
                                         setNewEquipeName(equipe);
