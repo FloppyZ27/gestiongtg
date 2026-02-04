@@ -534,43 +534,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50 pt-0 flex flex-col" style={{ marginTop: '20px', maxHeight: 'calc(100vh - 80px)' }} hideClose>
-           {/* Barre de progression du dossier */}
-           {dossier && dossier.mandats && dossier.mandats.length > 0 && (
-             <div className="px-6 py-3 bg-slate-900/80 border-b border-slate-800 flex-shrink-0">
-               <div className="flex items-center justify-between mb-2">
-                 <span className="text-sm font-medium text-slate-400">Progression du dossier</span>
-                 <span className="text-sm font-bold text-emerald-400">
-                   {(() => {
-                     const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                     const tacheIndex = TACHES.indexOf(dossier.mandats[0]?.tache_actuelle);
-                     let rawProgress = 0;
-                     if (tacheIndex >= 0 && TACHES.length > 1) {
-                       rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
-                     }
-                     return Math.round(rawProgress / 5) * 5;
-                   })()}%
-                 </span>
-               </div>
-               <div className="w-full bg-slate-900/50 h-2 rounded-full overflow-hidden border border-slate-700/50">
-                 <div 
-                   className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
-                   style={{ 
-                     width: `${(() => {
-                       const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                       const tacheIndex = TACHES.indexOf(dossier.mandats[0]?.tache_actuelle);
-                       let rawProgress = 0;
-                       if (tacheIndex >= 0 && TACHES.length > 1) {
-                         rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
-                       }
-                       return Math.round(rawProgress / 5) * 5;
-                     })()}%` 
-                   }}
-                 />
-               </div>
-             </div>
-           )}
-
-           <EditDossierForm
+          <EditDossierForm
             formData={formData}
             setFormData={setFormData}
             clients={clients}
