@@ -149,15 +149,36 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     }
   }, [dossier]);
 
-  // Détecter les changements
+  // Auto-sauvegarde avec debounce
+  const saveTimeoutRef = React.useRef(null);
+  
   useEffect(() => {
-    if (initialFormData) {
+    if (dossier && initialFormData) {
       const hasFormChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
       setHasChanges(hasFormChanges);
+      
+      // Auto-save après 300ms sans changement
+      if (hasFormChanges) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        
+        saveTimeoutRef.current = setTimeout(() => {
+          autoSaveMutation.mutate({ id: dossier.id, dossierData: formData });
+          setInitialFormData(JSON.parse(JSON.stringify(formData)));
+          setHasChanges(false);
+        }, 300);
+      }
     }
-  }, [formData, initialFormData]);
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, dossier, initialFormData]);
 
-  const updateDossierMutation = useMutation({
+  const autoSaveMutation = useMutation({
     mutationFn: async ({ id, dossierData }) => {
       const allDossiersCurrentState = queryClient.getQueryData(['dossiers']) || [];
       const oldDossier = allDossiersCurrentState.find(d => d.id === id);
@@ -209,9 +230,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      setHasChanges(false);
-      if (onSuccess) onSuccess();
-      onClose();
     }
   });
 
@@ -315,27 +333,10 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (formData.statut === "Ouvert") {
-      const dossierExistant = allDossiers.find(d => 
-        d.id !== dossier?.id &&
-        d.numero_dossier === formData.numero_dossier &&
-        d.arpenteur_geometre === formData.arpenteur_geometre
-      );
-
-      if (dossierExistant) {
-        alert(`Un dossier ${formData.numero_dossier} existe déjà pour ${formData.arpenteur_geometre}. Veuillez choisir un autre numéro.`);
-        return;
-      }
-
-      const mandatsSansUtilisateur = formData.mandats.filter(m => !m.utilisateur_assigne);
-      if (mandatsSansUtilisateur.length > 0) {
-        alert("Tous les mandats doivent avoir un utilisateur assigné.");
-        return;
-      }
-    }
-
+    // En mode édition, les modifications sont déjà sauvegardées automatiquement
     if (dossier) {
-      updateDossierMutation.mutate({ id: dossier.id, dossierData: formData });
+      onClose();
+      return;
     }
   };
 
