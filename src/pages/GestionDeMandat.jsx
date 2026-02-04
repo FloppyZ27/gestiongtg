@@ -542,15 +542,6 @@ export default function GestionDeMandat() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8 overflow-x-hidden">
       <style>{`
-        /* Cursors pour drag */
-        [data-rbd-draggable-context-id] {
-          cursor: grab !important;
-        }
-
-        [data-rbd-draggable-context-id]:active {
-          cursor: grabbing !important;
-        }
-
         /* Empêcher le scroll horizontal global */
         body, html, #root {
           overflow-x: hidden !important;
@@ -569,22 +560,24 @@ export default function GestionDeMandat() {
           cursor: grabbing;
         }
 
-        /* DRAG PREVIEW - Portal dans body avec position fixed */
-        body > [data-rbd-droppable-context-id] {
+        /* Cursors pour drag */
+        [data-rbd-draggable-context-id] {
+          cursor: grab !important;
+        }
+
+        [data-rbd-draggable-context-id]:active {
+          cursor: grabbing !important;
+        }
+
+        /* DRAG PREVIEW - FORCÉ position fixed avec z-index maximum */
+        [data-rbd-draggable-id][style*="position: fixed"] {
           position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
           z-index: 999999 !important;
           pointer-events: none !important;
         }
 
-        /* Carte en cours de drag - centrage sous curseur */
-        [data-rbd-drag-handle-draggable-id] {
-          position: fixed !important;
-          z-index: 999999 !important;
-          pointer-events: none !important;
-          left: 50% !important;
-          top: 50% !important;
+        /* Centrer la carte sous le curseur */
+        [data-rbd-draggable-id][style*="position: fixed"] > div {
           transform: translate(-50%, -50%) !important;
         }
 
