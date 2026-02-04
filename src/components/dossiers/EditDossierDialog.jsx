@@ -570,7 +570,6 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
              </div>
            )}
 
-           <div className="flex-1 overflow-hidden">
            <EditDossierForm
             formData={formData}
             setFormData={setFormData}
@@ -599,10 +598,9 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             setEditingLot={() => {}}
             setNewLotForm={() => {}}
             setLotActionLogs={() => {}}
-            />
-            </div>
-            </DialogContent>
-            </Dialog>
+          />
+         </DialogContent>
+       </Dialog>
 
       <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
