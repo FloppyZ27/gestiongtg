@@ -1523,10 +1523,10 @@ function LayoutContent({ children, currentPageName }) {
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden pt-[73px]">
             {children}
           </div>
-        </main>
+          </main>
       </div>
     </TooltipProvider>
   );
