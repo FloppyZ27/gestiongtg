@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReactDOM from "react-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,6 +86,8 @@ export default function GestionDeMandat() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [draggedCard, setDraggedCard] = useState(null);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
 
   const queryClient = useQueryClient();
 
@@ -247,7 +250,19 @@ export default function GestionDeMandat() {
     return weeks;
   };
 
+  const handleDragStart = (start) => {
+    const card = filteredCards.find(c => c.id === start.draggableId);
+    setDraggedCard(card);
+  };
+
+  const handleDragUpdate = (update) => {
+    // Suivre la position du curseur n'est pas directement disponible dans react-beautiful-dnd
+    // On va utiliser un event listener global à la place
+  };
+
   const handleDragEnd = (result) => {
+    setDraggedCard(null);
+    
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
@@ -293,6 +308,20 @@ export default function GestionDeMandat() {
       dossierData: { ...dossier, mandats: updatedMandats }
     });
   };
+
+  // Event listener pour suivre le curseur pendant le drag
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (draggedCard) {
+        setDragPosition({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    if (draggedCard) {
+      document.addEventListener("mousemove", handleMouseMove);
+      return () => document.removeEventListener("mousemove", handleMouseMove);
+    }
+  }, [draggedCard]);
 
   const getTacheColor = (tache) => {
        const colors = {
@@ -576,8 +605,16 @@ export default function GestionDeMandat() {
           pointer-events: none !important;
         }
 
-        /* Centrer la carte sous le curseur */
-        [data-rbd-draggable-id][style*="position: fixed"] > div {
+        /* Masquer la carte originale pendant le drag */
+        [data-rbd-draggable-id][data-is-dragging="true"] {
+          opacity: 0 !important;
+        }
+
+        /* Custom drag overlay */
+        .drag-overlay {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
           transform: translate(-50%, -50%) !important;
         }
 
@@ -861,9 +898,23 @@ export default function GestionDeMandat() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Custom Drag Overlay Portal */}
+          {draggedCard && ReactDOM.createPortal(
+            <div 
+              className="drag-overlay"
+              style={{
+                left: `${dragPosition.x}px`,
+                top: `${dragPosition.y}px`,
+              }}
+            >
+              {renderMandatCard(draggedCard, null, { isDragging: true })}
+            </div>,
+            document.body
+          )}
+
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
-             <DragDropContext onDragEnd={handleDragEnd}>
+             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
                <div 
                  className="kanban-scroll-container"
                  ref={(el) => {
@@ -982,7 +1033,7 @@ export default function GestionDeMandat() {
 
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
-            <DragDropContext onDragEnd={handleDragEnd}>
+            <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
               <div 
                 className="kanban-scroll-container"
                 ref={(el) => {
@@ -1185,7 +1236,7 @@ export default function GestionDeMandat() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <DragDropContext onDragEnd={handleDragEnd}>
+                <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
                   {calendarMode === "week" ? (
                     <div className="grid grid-cols-5 gap-3">
                       {[0, 1, 2, 3, 4].map((dayOffset) => {
