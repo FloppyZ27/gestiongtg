@@ -494,7 +494,7 @@ export default function GestionDeMandat() {
             };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8 overflow-x-hidden">
       <style>{`
         [data-rbd-draggable-context-id] {
           cursor: grab !important;
@@ -532,10 +532,48 @@ export default function GestionDeMandat() {
           z-index: 99999 !important;
         }
 
+        /* Empêcher le scroll horizontal global */
+        body, html, #root {
+          overflow-x: hidden !important;
+        }
 
+        /* Conteneur Kanban avec scroll horizontal uniquement */
+        .kanban-scroll-container {
+          overflow-x: auto;
+          overflow-y: hidden;
+          width: 100%;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Personnaliser la scrollbar pour le Kanban */
+        .kanban-scroll-container::-webkit-scrollbar {
+          height: 12px;
+        }
+
+        .kanban-scroll-container::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.8);
+          border-radius: 10px;
+        }
+
+        .kanban-scroll-container::-webkit-scrollbar-thumb {
+          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.8);
+        }
+
+        .kanban-scroll-container::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
+
+        /* Colonnes avec largeur fixe */
+        .kanban-column {
+          flex: 0 0 300px;
+          min-width: 300px;
+          max-width: 300px;
+        }
       `}</style>
       
-      <div className="w-full px-0">
+      <div className="w-full px-0 overflow-x-hidden">
         <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
@@ -646,8 +684,8 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragEnd={handleDragEnd}>
-               <div className="overflow-x-auto w-full">
-                 <div className="flex gap-4 p-4" style={{ width: 'max-content' }}>
+               <div className="kanban-scroll-container">
+                 <div className="flex gap-4 p-4" style={{ minWidth: 'max-content' }}>
 
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -655,10 +693,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                          key={tache} 
-                         className="flex-shrink-0 w-[18.14rem]"
-                         style={{ 
-                           zIndex: 1 
-                         }}
+                         className="kanban-column"
                       >
                         <Card 
                            className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
@@ -753,8 +788,8 @@ export default function GestionDeMandat() {
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="overflow-x-auto">
-                <div className="flex gap-4 p-4 min-w-max">
+              <div className="kanban-scroll-container">
+                <div className="flex gap-4 p-4" style={{ minWidth: 'max-content' }}>
               
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
@@ -764,10 +799,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                          key={user.email} 
-                         className="flex-shrink-0 w-[18.14rem]"
-                         style={{ 
-                           zIndex: 1 
-                         }}
+                         className="kanban-column"
                       >
                         <Card 
                            className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
