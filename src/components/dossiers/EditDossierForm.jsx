@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,7 +170,10 @@ export default function EditDossierForm({
 
   const queryClient = useQueryClient();
 
-  const { data: user } = base44.auth.me ? { data: null } : { data: null };
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
 
   // Auto-save mutation
   const autoSaveMutation = useMutation({
@@ -1888,7 +1891,7 @@ export default function EditDossierForm({
                                  heures: parseFloat(newEntreeTempsForm.heures),
                                  tache: newEntreeTempsForm.tache,
                                  description: newEntreeTempsForm.description || "",
-                                 utilisateur_email: ""
+                                 utilisateur_email: user?.email || ""
                                });
 
                                setEntreesTemps(prev => [createdEntree, ...prev]);
