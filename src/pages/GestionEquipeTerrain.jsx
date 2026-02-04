@@ -226,6 +226,16 @@ export default function GestionEquipeTerrain() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Cédule Terrain
+            </h1>
+            <CalendarDays className="w-6 h-6 text-cyan-400" />
+          </div>
+          <p className="text-slate-400">Planification des équipes de terrain</p>
+        </div>
+
         <PlanningCalendar 
           dossiers={dossiersCedule}
           techniciens={techniciensTerrain}
