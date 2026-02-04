@@ -143,9 +143,9 @@ export default function TarificationStepForm({
   const notes = mandatsWithType.length > 0 ? (mandats[0]?.notes || "") : "";
 
   const handleTaxesInclusesChange = (newValue) => {
-    const updatedMandats = mandats.map((m, i) => {
+    const updatedMandats = mandats.map((m) => {
       const copy = JSON.parse(JSON.stringify(m));
-      if (mandatsWithType.some(mt => mt.type_mandat && mandats.indexOf(mt) === i)) {
+      if (m.type_mandat) {
         copy.taxes_incluses = newValue;
       }
       return copy;
@@ -154,9 +154,9 @@ export default function TarificationStepForm({
   };
 
   const handlePrixConvenuChange = (newValue) => {
-    const updatedMandats = mandats.map((m, i) => {
+    const updatedMandats = mandats.map((m) => {
       const copy = JSON.parse(JSON.stringify(m));
-      if (mandatsWithType.some(mt => mt.type_mandat && mandats.indexOf(mt) === i)) {
+      if (m.type_mandat) {
         copy.prix_convenu = newValue;
       }
       return copy;
