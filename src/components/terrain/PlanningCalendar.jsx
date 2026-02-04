@@ -1149,18 +1149,18 @@ export default function PlanningCalendar({
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-2 flex-1 overflow-y-auto">
                         {dayEquipes.map((equipe) => {
-                          const activeTab = getEquipeActiveTab(equipe.id);
-                          const equipeNom = equipe.techniciens.length > 0
-                            ? equipe.techniciens.map(techId => {
-                                const tech = techniciens.find(t => t.id === techId);
-                                return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
-                              }).filter(n => n).join('-')
-                            : equipe.nom;
-                          return (
-                            <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
-                              <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
+                           const activeTab = getEquipeActiveTab(equipe.id);
+                           const equipeNom = equipe.techniciens.length > 0
+                             ? equipe.techniciens.map(techId => {
+                                 const tech = techniciens.find(t => t.id === techId);
+                                 return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+                               }).filter(n => n).join('-')
+                             : equipe.nom;
+                           return (
+                             <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
+                               <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                                 {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1.5">
                                   <div className="flex items-center gap-1">
