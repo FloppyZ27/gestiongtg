@@ -653,6 +653,11 @@ export default function GestionDeMandat() {
           scrollbar-gutter: stable;
         }
 
+        /* Masquer la scrollbar du bas */
+        .kanban-scroll-container::-webkit-scrollbar {
+          display: none;
+        }
+
         /* Scrollbar en haut */
         .kanban-scrollbar-top {
           width: 100%;
