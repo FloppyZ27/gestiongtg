@@ -1263,26 +1263,36 @@ export default function PlanningCalendar({
                                <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                                 {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1.5">
-                                  <div className="flex items-center gap-1">
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Users className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Truck className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                      className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                    >
-                                      <Wrench className="w-3 h-3" />
-                                    </button>
-                                  </div>
+                                   <div className="flex items-center gap-1">
+                                     {globalViewMode ? (
+                                       <>
+                                         {globalViewMode === "techniciens" && <Users className="w-3 h-3 text-blue-400" />}
+                                         {globalViewMode === "vehicules" && <Truck className="w-3 h-3 text-purple-400" />}
+                                         {globalViewMode === "equipements" && <Wrench className="w-3 h-3 text-orange-400" />}
+                                       </>
+                                     ) : (
+                                       <>
+                                         <button
+                                           onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                           className={`p-1 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                         >
+                                           <Users className="w-3 h-3" />
+                                         </button>
+                                         <button
+                                           onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                           className={`p-1 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                         >
+                                           <Truck className="w-3 h-3" />
+                                         </button>
+                                         <button
+                                           onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                           className={`p-1 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                         >
+                                           <Wrench className="w-3 h-3" />
+                                         </button>
+                                       </>
+                                     )}
+                                   </div>
                                   <div className="flex items-center gap-1">
                                     <button
                                       onClick={() => copyEquipe(dateStr, equipe.id)}
@@ -1496,24 +1506,34 @@ export default function PlanningCalendar({
                                  {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-0.5">
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Users className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Truck className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                    className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                  >
-                                    <Wrench className="w-3 h-3" />
-                                  </button>
+                                  {globalViewMode ? (
+                                    <>
+                                      {globalViewMode === "techniciens" && <Users className="w-3 h-3 text-blue-400" />}
+                                      {globalViewMode === "vehicules" && <Truck className="w-3 h-3 text-purple-400" />}
+                                      {globalViewMode === "equipements" && <Wrench className="w-3 h-3 text-orange-400" />}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                        className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                      >
+                                        <Users className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                        className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                      >
+                                        <Truck className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                        className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                      >
+                                        <Wrench className="w-3 h-3" />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-0.5">
                                   <button
@@ -1536,8 +1556,8 @@ export default function PlanningCalendar({
 
                                   <div className="p-1">
 
-                              {/* Contenu du tab actif */}
-                              {activeTab === "techniciens" && (
+                              {/* Contenu du tab actif ou du mode global */}
+                              {(globalViewMode === "techniciens" || activeTab === "techniciens") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-blue-500/20 border border-blue-500' : 'border border-slate-700'}`}>
@@ -1556,7 +1576,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "vehicules" && (
+                              {(globalViewMode === "vehicules" || activeTab === "vehicules") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-purple-500/20 border border-purple-500' : 'border border-slate-700'}`}>
@@ -1575,7 +1595,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "equipements" && (
+                              {(globalViewMode === "equipements" || activeTab === "equipements") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-orange-500/20 border border-orange-500' : 'border border-slate-700'}`}>
