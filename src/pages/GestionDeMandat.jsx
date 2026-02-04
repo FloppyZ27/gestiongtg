@@ -563,27 +563,32 @@ export default function GestionDeMandat() {
           transform: none !important;
         }
 
-        /* Carte en cours de drag au-dessus de tout */
-        div[data-rbd-draggable-id][data-is-dragging="true"] {
-          z-index: 99999 !important;
+        /* Portal drag overlay au-dessus de TOUT */
+        body > [data-rbd-droppable-context-id],
+        [data-rbd-drag-handle-context-id] {
+          position: fixed !important;
+          z-index: 999999 !important;
           pointer-events: none !important;
         }
-        
-        /* Forcer le preview à suivre le curseur centré */
-        div[data-rbd-draggable-id][data-is-dragging="true"] > div {
-          position: relative !important;
-          left: -50% !important;
-          top: -50% !important;
-        }
 
-        /* Portal de react-beautiful-dnd au-dessus de tout */
-        body > [data-rbd-droppable-context-id] {
-          z-index: 99999 !important;
-        }
-
-        /* S'assurer que le conteneur de drag est au-dessus */
+        /* Carte en cours de drag - centrage sous curseur */
         [data-rbd-drag-handle-draggable-id] {
-          z-index: 99999 !important;
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+        }
+
+        /* Centrer exactement sous le curseur */
+        div[data-rbd-draggable-id][data-is-dragging="true"] {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+          margin: 0 !important;
+        }
+        
+        div[data-rbd-draggable-id][data-is-dragging="true"] > div {
+          transform: translate(-50%, -50%) !important;
+          transform-origin: center center !important;
         }
 
         /* Empêcher le scroll horizontal global */
@@ -629,17 +634,23 @@ export default function GestionDeMandat() {
           background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
         }
 
-        /* Colonnes avec largeur fixe */
+        /* Colonnes avec largeur fixe - overflow visible pour drag */
         .kanban-column {
           flex: 0 0 270px;
           min-width: 270px;
           max-width: 270px;
+          overflow: visible !important;
+        }
+
+        .kanban-column > * {
+          overflow: visible !important;
         }
 
         /* Contenu des colonnes avec hauteur fixe pour 4 cartes */
         .kanban-column .kanban-content {
           max-height: 700px;
           overflow-y: auto;
+          overflow-x: visible !important;
         }
 
         /* Scrollbar pour le contenu des colonnes */
