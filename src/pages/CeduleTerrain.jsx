@@ -749,7 +749,7 @@ export default function CeduleTerrain() {
               </div>
             </div>
 
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+            <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl mb-6">
               <CardHeader className="border-b border-slate-800 pb-4">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="relative flex-1 min-w-[300px]">
@@ -899,7 +899,7 @@ export default function CeduleTerrain() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white">
