@@ -15,7 +15,7 @@ import { format, addDays, startOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import EditDossierDialog from "../components/dossiers/EditDossierDialog";
+import EditDossierForm from "../components/dossiers/EditDossierForm";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -67,6 +67,23 @@ export default function CeduleTerrain() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    numero_dossier: "",
+    arpenteur_geometre: "",
+    date_ouverture: new Date().toISOString().split('T')[0],
+    date_fermeture: "",
+    statut: "Ouvert",
+    ttl: "Non",
+    place_affaire: "",
+    clients_ids: [],
+    clients_texte: "",
+    notaires_ids: [],
+    notaires_texte: "",
+    courtiers_ids: [],
+    courtiers_texte: "",
+    mandats: [],
+    description: ""
+  });
   const [editingEquipe, setEditingEquipe] = useState(null);
   const [newEquipeName, setNewEquipeName] = useState("");
   const [editingTerrainItem, setEditingTerrainItem] = useState(null);
@@ -425,6 +442,56 @@ export default function CeduleTerrain() {
   const handleEdit = (dossier) => {
     setIsViewDialogOpen(false);
     setEditingDossier(dossier);
+    setFormData({
+      numero_dossier: dossier.numero_dossier || "",
+      arpenteur_geometre: dossier.arpenteur_geometre || "",
+      date_ouverture: dossier.date_ouverture || new Date().toISOString().split('T')[0],
+      date_fermeture: dossier.date_fermeture || "",
+      statut: dossier.statut || "Ouvert",
+      ttl: dossier.ttl || "Non",
+      place_affaire: dossier.place_affaire || "",
+      clients_ids: dossier.clients_ids || [],
+      clients_texte: dossier.clients_texte || "",
+      notaires_ids: dossier.notaires_ids || [],
+      notaires_texte: dossier.notaires_texte || "",
+      courtiers_ids: dossier.courtiers_ids || [],
+      courtiers_texte: dossier.courtiers_texte || "",
+      mandats: dossier.mandats?.map((m) => ({
+        ...m,
+        date_ouverture: m.date_ouverture || "",
+        minute: m.minute || "",
+        date_minute: m.date_minute || "",
+        type_minute: m.type_minute || "Initiale",
+        minutes_list: m.minutes_list || [],
+        tache_actuelle: m.tache_actuelle || "",
+        utilisateur_assigne: m.utilisateur_assigne || "",
+        statut_terrain: m.statut_terrain || "",
+        adresse_travaux: m.adresse_travaux ? typeof m.adresse_travaux === 'string' ? { rue: m.adresse_travaux, numeros_civiques: [], ville: "", code_postal: "", province: "" } : m.adresse_travaux : { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "" },
+        lots: m.lots || [],
+        lots_texte: m.lots_texte || "",
+        prix_estime: m.prix_estime !== undefined ? m.prix_estime : 0,
+        rabais: m.rabais !== undefined ? m.rabais : 0,
+        taxes_incluses: m.taxes_incluses !== undefined ? m.taxes_incluses : false,
+        date_livraison: m.date_livraison || "",
+        date_signature: m.date_signature || "",
+        date_debut_travaux: m.date_debut_travaux || "",
+        terrain: m.terrain || {
+          date_limite_leve: "",
+          instruments_requis: "",
+          a_rendez_vous: false,
+          date_rendez_vous: "",
+          heure_rendez_vous: "",
+          donneur: "",
+          technicien: "",
+          dossier_simultane: "",
+          temps_prevu: "",
+          notes: ""
+        },
+        factures: m.factures || [],
+        notes: m.notes || ""
+      })) || [],
+      description: dossier.description || ""
+    });
     setIsEditingDialogOpen(true);
   };
 
@@ -1376,26 +1443,98 @@ export default function CeduleTerrain() {
           </DialogContent>
         </Dialog>
 
-        <EditDossierDialog
-          isOpen={isEditingDialogOpen}
-          onClose={() => {
-            setIsEditingDialogOpen(false);
+        <Dialog open={isEditingDialogOpen} onOpenChange={(open) => {
+          setIsEditingDialogOpen(open);
+          if (!open) {
             setEditingDossier(null);
-          }}
-          dossier={editingDossier}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-            if (viewingDossier && editingDossier?.id === viewingDossier.id) {
-              const updatedDossier = queryClient.getQueryData(['dossiers'])?.find(d => d.id === editingDossier.id);
-              if (updatedDossier) {
-                setViewingDossier(updatedDossier);
-                setIsViewDialogOpen(true);
-              }
-            }
-          }}
-          clients={clients}
-          users={users}
-        />
+          }
+        }}>
+          <DialogContent className="backdrop-blur-[0.5px] border-2 border-white/30 text-white max-w-[75vw] w-[75vw] max-h-[90vh] p-0 gap-0 overflow-hidden shadow-2xl shadow-black/50" hideClose>
+            <EditDossierForm
+              formData={formData}
+              setFormData={setFormData}
+              clients={clients}
+              lots={lots}
+              users={users}
+              onSubmit={async (e) => {
+                e.preventDefault();
+                await updateDossierMutation.mutateAsync({ id: editingDossier.id, dossierData: formData });
+                queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+                setIsEditingDialogOpen(false);
+                setEditingDossier(null);
+              }}
+              onCancel={() => {
+                setIsEditingDialogOpen(false);
+                setEditingDossier(null);
+              }}
+              updateMandat={(index, field, value) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  mandats: prev.mandats.map((m, i) => i === index ? { ...m, [field]: value } : m)
+                }));
+              }}
+              addMandat={() => {
+                const newIndex = formData.mandats.length;
+                setFormData((prev) => ({
+                  ...prev,
+                  mandats: [...prev.mandats, {
+                    type_mandat: "",
+                    date_ouverture: "",
+                    minute: "",
+                    date_minute: "",
+                    type_minute: "Initiale",
+                    minutes_list: [],
+                    tache_actuelle: "Ouverture",
+                    statut_terrain: "",
+                    adresse_travaux: { ville: "", numeros_civiques: [""], rue: "", code_postal: "", province: "QC" },
+                    lots: [],
+                    lots_texte: "",
+                    prix_estime: 0,
+                    rabais: 0,
+                    taxes_incluses: false,
+                    date_livraison: "",
+                    date_signature: "",
+                    date_debut_travaux: "",
+                    terrain: { date_limite_leve: "", instruments_requis: "", a_rendez_vous: false, date_rendez_vous: "", heure_rendez_vous: "", donneur: "", technicien: "", dossier_simultane: "", temps_prevu: "", notes: "" },
+                    factures: [],
+                    notes: ""
+                  }]
+                }));
+              }}
+              removeMandat={(index) => {
+                if (confirm("Êtes-vous sûr de vouloir supprimer ce mandat ?")) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mandats: prev.mandats.filter((_, i) => i !== index)
+                  }));
+                }
+              }}
+              openLotSelector={(mandatIndex) => {
+                setCurrentMandatIndex(mandatIndex);
+                setIsLotSelectorOpen(true);
+              }}
+              removeLotFromMandat={(mandatIndex, lotId) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  mandats: prev.mandats.map((m, i) => i === mandatIndex ? { ...m, lots: m.lots.filter((id) => id !== lotId) } : m)
+                }));
+              }}
+              openAddMinuteDialog={() => {}}
+              removeMinuteFromMandat={() => {}}
+              getLotById={(id) => lots.find(l => l.id === id)}
+              setIsClientFormDialogOpen={() => {}}
+              setClientTypeForForm={() => {}}
+              setViewingClientDetails={() => {}}
+              calculerProchainNumeroDossier={() => ""}
+              editingDossier={editingDossier}
+              onOpenNewLotDialog={() => {}}
+              setEditingClient={() => {}}
+              setEditingLot={() => {}}
+              setNewLotForm={() => {}}
+              setLotActionLogs={() => {}}
+            />
+          </DialogContent>
+        </Dialog>
       </DragDropContext>
     </TooltipProvider>
   );
