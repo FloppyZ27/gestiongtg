@@ -71,6 +71,7 @@ export default function GestionDeMandat() {
   const [filterArpenteur, setFilterArpenteur] = useState("all");
   const [filterTypeMandat, setFilterTypeMandat] = useState("all");
   const [filterUtilisateur, setFilterUtilisateur] = useState("all");
+  const [filterVille, setFilterVille] = useState("all");
   const [viewingDossier, setViewingDossier] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
@@ -167,6 +168,13 @@ export default function GestionDeMandat() {
 
   const allCards = getMandatsCards();
 
+  // Extraire les villes uniques
+  const uniqueVilles = [...new Set(
+    allCards
+      .filter(card => card.mandat.adresse_travaux?.ville)
+      .map(card => card.mandat.adresse_travaux.ville)
+  )].sort();
+
   // Filtrer les cartes
   const filteredCards = allCards.filter(card => {
     const searchLower = searchTerm.toLowerCase();
@@ -183,8 +191,9 @@ export default function GestionDeMandat() {
     const matchesArpenteur = filterArpenteur === "all" || card.dossier.arpenteur_geometre === filterArpenteur;
     const matchesType = filterTypeMandat === "all" || card.mandat.type_mandat === filterTypeMandat;
     const matchesUtilisateur = filterUtilisateur === "all" || card.mandat.utilisateur_assigne === filterUtilisateur;
+    const matchesVille = filterVille === "all" || card.mandat.adresse_travaux?.ville === filterVille;
 
-    return matchesSearch && matchesArpenteur && matchesType && matchesUtilisateur;
+    return matchesSearch && matchesArpenteur && matchesType && matchesUtilisateur && matchesVille;
   });
 
   // Organiser les cartes par tâche avec tri
@@ -668,7 +677,7 @@ export default function GestionDeMandat() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                   <Input
-                    placeholder="Rechercher un dossier, client..."
+                    placeholder="Rechercher..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 bg-slate-800/50 border-slate-700 text-white"
@@ -683,9 +692,9 @@ export default function GestionDeMandat() {
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   <span className="text-sm">Filtres</span>
-                  {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all") && (
+                  {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all" || filterVille !== "all") && (
                     <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {(filterArpenteur !== "all" ? 1 : 0) + (filterTypeMandat !== "all" ? 1 : 0) + (filterUtilisateur !== "all" ? 1 : 0)}
+                      {(filterArpenteur !== "all" ? 1 : 0) + (filterTypeMandat !== "all" ? 1 : 0) + (filterUtilisateur !== "all" ? 1 : 0) + (filterVille !== "all" ? 1 : 0)}
                     </Badge>
                   )}
                   {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -701,7 +710,7 @@ export default function GestionDeMandat() {
                           <Filter className="w-3 h-3 text-emerald-500" />
                           <h4 className="text-xs font-semibold text-emerald-500">Filtrer</h4>
                         </div>
-                        {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all") && (
+                        {(filterArpenteur !== "all" || filterTypeMandat !== "all" || filterUtilisateur !== "all" || filterVille !== "all") && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -709,6 +718,7 @@ export default function GestionDeMandat() {
                               setFilterArpenteur("all");
                               setFilterTypeMandat("all");
                               setFilterUtilisateur("all");
+                              setFilterVille("all");
                             }}
                             className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
                           >
@@ -718,7 +728,7 @@ export default function GestionDeMandat() {
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-4 gap-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
@@ -808,6 +818,36 @@ export default function GestionDeMandat() {
                             ))}
                           </DropdownMenuContent>
                         </DropdownMenu>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
+                              <span className="truncate">Villes ({filterVille === "all" ? 'Toutes' : '1'})</span>
+                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
+                            <DropdownMenuCheckboxItem
+                              checked={filterVille === "all"}
+                              onCheckedChange={() => setFilterVille("all")}
+                              className="text-white"
+                            >
+                              Toutes les villes
+                            </DropdownMenuCheckboxItem>
+                            {uniqueVilles.map((ville) => (
+                              <DropdownMenuCheckboxItem
+                                key={ville}
+                                checked={filterVille === ville}
+                                onCheckedChange={(checked) => {
+                                  setFilterVille(checked ? ville : "all");
+                                }}
+                                className="text-white"
+                              >
+                                {ville}
+                              </DropdownMenuCheckboxItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
@@ -822,23 +862,23 @@ export default function GestionDeMandat() {
             <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
             <TabsTrigger
               value="taches"
-              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3 text-base"
+              className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-2 text-sm"
             >
-              <Kanban className="w-4 h-4 mr-2" />
+              <Kanban className="w-4 h-4 mr-1" />
               Par Tâches
             </TabsTrigger>
             <TabsTrigger
               value="utilisateurs"
-              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-3 text-base"
+              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 py-2 text-sm"
             >
-              <User className="w-4 h-4 mr-2" />
+              <User className="w-4 h-4 mr-1" />
               Par Utilisateur
             </TabsTrigger>
             <TabsTrigger
               value="calendrier"
-              className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-3 text-base"
+              className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400 py-2 text-sm"
             >
-              <Calendar className="w-4 h-4 mr-2" />
+              <Calendar className="w-4 h-4 mr-1" />
               Calendrier
             </TabsTrigger>
           </TabsList>
