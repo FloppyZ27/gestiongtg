@@ -642,7 +642,6 @@ export default function GestionDeMandat() {
               Calendrier
             </TabsTrigger>
           </TabsList>
-        </div>
 
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
@@ -1094,8 +1093,7 @@ export default function GestionDeMandat() {
             </Card>
           </TabsContent>
         </Tabs>
-
-
+        </div>
 
         {/* Dialog d'édition du dossier */}
         <EditDossierDialog
