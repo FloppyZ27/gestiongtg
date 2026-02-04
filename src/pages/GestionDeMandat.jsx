@@ -1078,7 +1078,9 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
-               <div className="kanban-scrollbar-top" id="kanban-scrollbar-taches"></div>
+               <div className="kanban-scrollbar-top" id="kanban-scrollbar-taches">
+                 <div style={{ height: '1px', minWidth: 'max-content' }}></div>
+               </div>
                <div 
                  className="kanban-scroll-container"
                  id="kanban-container-taches"
@@ -1097,6 +1099,13 @@ export default function GestionDeMandat() {
                      // Synchroniser la scrollbar du haut
                      const topScrollbar = document.getElementById('kanban-scrollbar-taches');
                      if (topScrollbar) {
+                       const updateScrollbarWidth = () => {
+                         const content = topScrollbar.querySelector('div');
+                         if (content) {
+                           content.style.width = el.scrollWidth + 'px';
+                         }
+                       };
+                       updateScrollbarWidth();
                        el.addEventListener('scroll', () => {
                          topScrollbar.scrollLeft = el.scrollLeft;
                        });
