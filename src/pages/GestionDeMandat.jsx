@@ -650,6 +650,42 @@ export default function GestionDeMandat() {
           width: 100%;
           -webkit-overflow-scrolling: touch;
           cursor: grab;
+          scrollbar-gutter: stable;
+        }
+
+        /* Scrollbar en haut */
+        .kanban-scrollbar-top {
+          width: 100%;
+          height: 12px;
+          background: rgba(15, 23, 42, 0.8);
+          border-radius: 10px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          margin-bottom: 8px;
+        }
+
+        .kanban-scrollbar-top::-webkit-scrollbar {
+          height: 12px;
+        }
+
+        .kanban-scrollbar-top::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.8);
+          border-radius: 10px;
+        }
+
+        .kanban-scrollbar-top::-webkit-scrollbar-thumb {
+          background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.8);
+        }
+
+        .kanban-scrollbar-top::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to right, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
+
+        .kanban-scrollbar-content {
+          width: 100%;
+          height: 1px;
         }
 
         .kanban-scroll-container:active {
