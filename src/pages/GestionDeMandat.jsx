@@ -645,8 +645,8 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragEnd={handleDragEnd}>
-               <div className="overflow-x-auto">
-                 <div className="flex gap-4 p-4 min-w-max">
+               <div className="overflow-x-auto w-full">
+                 <div className="flex gap-4 p-4" style={{ width: 'max-content' }}>
 
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
