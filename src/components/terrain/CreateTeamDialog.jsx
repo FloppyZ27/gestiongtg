@@ -46,7 +46,7 @@ export default function CreateTeamDialog({
       const initials = equipe.techniciens.map(techId => {
         const tech = techniciens.find(t => t.id === techId);
         return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
-      }).filter(n => n).join('-');
+      }).filter(n => n).join('/');
       return teamNumber ? `Équipe ${teamNumber} - ${initials}` : initials;
     }
     return equipe.nom;
@@ -65,7 +65,7 @@ export default function CreateTeamDialog({
     const initials = techs.map(techId => {
       const tech = techniciens.find(t => t.id === techId);
       return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
-    }).filter(n => n).join('-');
+    }).filter(n => n).join('/');
     return `Équipe ${teamNumber} - ${initials}`;
   };
 
