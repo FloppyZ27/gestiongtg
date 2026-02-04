@@ -599,9 +599,10 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             setEditingLot={() => {}}
             setNewLotForm={() => {}}
             setLotActionLogs={() => {}}
-          />
-        </DialogContent>
-      </Dialog>
+            />
+            </div>
+            </DialogContent>
+            </Dialog>
 
       <Dialog open={isAddMinuteDialogOpen} onOpenChange={setIsAddMinuteDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
