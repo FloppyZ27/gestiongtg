@@ -7155,51 +7155,51 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                 <TableHeader>
                   <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('arpenteur_geometre')}
                     >
                       {activeListTab === "ouvrir" ? "Dossier" : "Arpenteur-Géomètre"} {sortField === 'arpenteur_geometre' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('clients')}
                     >
                       Clients {sortField === 'clients' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('adresse_travaux')}
                     >
                       Adresse des travaux {sortField === 'adresse_travaux' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('ville')}
                     >
                       Ville {sortField === 'ville' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
-                    <TableHead className="text-slate-300">
+                    <TableHead className="text-slate-300 text-xs">
                       N° de téléphone
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('types_mandats')}
                     >
                       Types de mandats {sortField === 'types_mandats' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('created_date')}
                     >
                       Date {sortField === 'created_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
                     <TableHead
-                      className="text-slate-300 cursor-pointer hover:text-white"
+                      className="text-slate-300 text-xs cursor-pointer hover:text-white"
                       onClick={() => handleSort('urgence_percue')}
                     >
                       Urgence {sortField === 'urgence_percue' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
-                    <TableHead className="text-slate-300 text-right">Actions</TableHead>
+                    <TableHead className="text-slate-300 text-xs text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -7310,20 +7310,20 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
+                          <TableCell className="text-slate-300 text-xs max-w-xs truncate">
                             {pm.client_info?.prenom || pm.client_info?.nom 
                               ? `${pm.client_info.prenom || ''} ${pm.client_info.nom || ''}`.trim()
                               : getClientsNames(pm.clients_ids)}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm max-w-xs truncate">
+                          <TableCell className="text-slate-300 text-xs max-w-xs truncate">
                             {pm.adresse_travaux?.numeros_civiques?.[0] || pm.adresse_travaux?.rue
                               ? `${pm.adresse_travaux.numeros_civiques?.[0] || ''} ${pm.adresse_travaux.rue || ''}`.trim()
                               : '-'}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
+                          <TableCell className="text-slate-300 text-xs">
                             {pm.adresse_travaux?.ville || '-'}
                           </TableCell>
-                          <TableCell className="text-slate-300 text-sm">
+                          <TableCell className="text-slate-300 text-xs">
                             {(() => {
                               const telephone = pm.client_info?.telephone || 
                                 (pm.clients_ids?.length > 0 && (() => {
@@ -7363,7 +7363,8 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                               <span className="text-slate-600 text-xs">Aucun</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-slate-300">
+
+                          <TableCell className="text-slate-300 text-xs">
                             {pm.created_date ? format(new Date(pm.created_date), "dd MMM yyyy", { locale: fr }) : "-"}
                           </TableCell>
                           <TableCell>
