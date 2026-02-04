@@ -787,7 +787,7 @@ export default function GestionDeMandat() {
           </div>
 
         {/* Filtres et recherche */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+        <Card className="border-0 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardContent className="p-4">
             <div className="space-y-3">
               <div className="flex justify-between items-center gap-2">
