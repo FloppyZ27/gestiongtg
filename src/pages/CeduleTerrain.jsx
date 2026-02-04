@@ -1455,7 +1455,7 @@ export default function CeduleTerrain() {
               setFormData={setFormData}
               clients={clients}
               lots={lots}
-              users={users}
+              users={users || []}
               onSubmit={async (e) => {
                 e.preventDefault();
                 await updateDossierMutation.mutateAsync({ id: editingDossier.id, dossierData: formData });
