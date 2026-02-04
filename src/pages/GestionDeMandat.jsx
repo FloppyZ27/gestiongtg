@@ -78,6 +78,9 @@ export default function GestionDeMandat() {
   const [calendarMode, setCalendarMode] = useState("week"); // "week" or "month"
   const [sortTaches, setSortTaches] = useState({}); // { tache: "asc" | "desc" | null }
   const [sortUtilisateurs, setSortUtilisateurs] = useState({}); // { email: "asc" | "desc" | null }
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const queryClient = useQueryClient();
 
@@ -363,6 +366,37 @@ export default function GestionDeMandat() {
     setIsEditingDialogOpen(true);
   };
 
+  const handleMouseDown = (e, containerRef) => {
+    if (!containerRef.current) return;
+    if (e.target.closest('[data-rbd-draggable-id]')) return; // Ne pas interférer avec le drag des cartes
+    
+    setIsDragging(true);
+    setStartX(e.pageX - containerRef.current.offsetLeft);
+    setScrollLeft(containerRef.current.scrollLeft);
+    containerRef.current.style.cursor = 'grabbing';
+    containerRef.current.style.userSelect = 'none';
+  };
+
+  const handleMouseLeave = (containerRef) => {
+    if (!containerRef.current) return;
+    setIsDragging(false);
+    containerRef.current.style.cursor = 'grab';
+  };
+
+  const handleMouseUp = (containerRef) => {
+    if (!containerRef.current) return;
+    setIsDragging(false);
+    containerRef.current.style.cursor = 'grab';
+  };
+
+  const handleMouseMove = (e, containerRef) => {
+    if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Vitesse de défilement
+    containerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   const handleMonthChange = (monthValue) => {
     const newDate = new Date(currentMonthStart);
     newDate.setMonth(parseInt(monthValue));
@@ -544,6 +578,11 @@ export default function GestionDeMandat() {
           width: 100%;
           -webkit-overflow-scrolling: touch;
           transform: rotateX(180deg);
+          cursor: grab;
+        }
+
+        .kanban-scroll-container:active {
+          cursor: grabbing;
         }
 
         .kanban-scroll-container > div {
@@ -715,8 +754,23 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragEnd={handleDragEnd}>
-               <div className="kanban-scroll-container">
-                 <div className="flex gap-4 p-4" style={{ minWidth: 'max-content' }}>
+               <div 
+                 className="kanban-scroll-container"
+                 ref={(el) => {
+                   if (el) {
+                     const handleDown = (e) => handleMouseDown(e, { current: el });
+                     const handleMove = (e) => handleMouseMove(e, { current: el });
+                     const handleUp = () => handleMouseUp({ current: el });
+                     const handleLeave = () => handleMouseLeave({ current: el });
+                     
+                     el.onmousedown = handleDown;
+                     el.onmousemove = handleMove;
+                     el.onmouseup = handleUp;
+                     el.onmouseleave = handleLeave;
+                   }
+                 }}
+               >
+                 <div className="flex gap-8 p-4" style={{ minWidth: 'max-content' }}>
 
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -819,8 +873,23 @@ export default function GestionDeMandat() {
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="kanban-scroll-container">
-                <div className="flex gap-4 p-4" style={{ minWidth: 'max-content' }}>
+              <div 
+                className="kanban-scroll-container"
+                ref={(el) => {
+                  if (el) {
+                    const handleDown = (e) => handleMouseDown(e, { current: el });
+                    const handleMove = (e) => handleMouseMove(e, { current: el });
+                    const handleUp = () => handleMouseUp({ current: el });
+                    const handleLeave = () => handleMouseLeave({ current: el });
+                    
+                    el.onmousedown = handleDown;
+                    el.onmousemove = handleMove;
+                    el.onmouseup = handleUp;
+                    el.onmouseleave = handleLeave;
+                  }
+                }}
+              >
+                <div className="flex gap-8 p-4" style={{ minWidth: 'max-content' }}>
               
                   {usersList.map((user, userIndex) => {
                     const cardsInColumn = cardsByUtilisateur[user.email] || [];
