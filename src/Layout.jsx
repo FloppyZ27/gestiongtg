@@ -398,9 +398,8 @@ function LayoutContent({ children, currentPageName }) {
           box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
           position: fixed !important;
           left: 50% !important;
-          top: 50% !important;
+          top: 52% !important;
           transform: translate(-50%, -50%) !important;
-          margin-bottom: 80px !important;
           animation: dialogSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
         }
 
@@ -819,7 +818,7 @@ function LayoutContent({ children, currentPageName }) {
           setIsEntreeTempsOpen(open);
         }
       }}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[75vh] overflow-hidden flex flex-col p-0">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[75vw] w-[75vw] max-h-[65vh] overflow-hidden flex flex-col p-0">
           <div className="sticky top-0 z-10 bg-slate-900 py-6 pb-4 border-b border-slate-800 px-6">
             <h2 className="text-2xl font-bold text-white">Nouvelle entrée de temps</h2>
           </div>
