@@ -914,12 +914,12 @@ export default function CeduleTerrain() {
                       ← Précédent
                     </Button>
                     <Button
-                      size="sm"
-                      onClick={() => setSemaineCourante(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-                      className="bg-emerald-500/20 text-emerald-400"
-                    >
-                      Aujourd'hui
-                    </Button>
+                       size="sm"
+                       onClick={() => setSemaineCourante(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+                       className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50"
+                     >
+                       Aujourd'hui
+                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -940,19 +940,19 @@ export default function CeduleTerrain() {
                       <div key={jour} className="space-y-2">
                         <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
                           <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-white text-sm">{jour}</h3>
-                              <p className="text-xs text-slate-400">
-                                {format(dateJour, "d MMM", { locale: fr })}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={() => ajouterEquipe(jour)}
-                              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 h-7 w-7 p-0"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
+                          <div className="flex items-center gap-2">
+                           <h3 className="font-semibold text-white text-sm">{jour}</h3>
+                           <p className="text-xs text-slate-400">
+                             {format(dateJour, "d MMM", { locale: fr })}
+                           </p>
+                          </div>
+                          <Button
+                           size="sm"
+                           onClick={() => ajouterEquipe(jour)}
+                           className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-7 w-7 p-0 shadow-md"
+                          >
+                           <Plus className="w-3 h-3" />
+                          </Button>
                           </div>
                         </div>
 
