@@ -7324,12 +7324,26 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                             {pm.adresse_travaux?.ville || '-'}
                           </TableCell>
                           <TableCell className="text-slate-300 text-sm">
-                            {pm.client_info?.telephone || 
-                             (pm.clients_ids?.length > 0 && (() => {
-                               const client = getClientById(pm.clients_ids[0]);
-                               return client?.telephones?.find(t => t.actuel)?.telephone || client?.telephones?.[0]?.telephone || '-';
-                             })()) || 
-                             '-'}
+                            {(() => {
+                              const telephone = pm.client_info?.telephone || 
+                                (pm.clients_ids?.length > 0 && (() => {
+                                  const client = getClientById(pm.clients_ids[0]);
+                                  return client?.telephones?.find(t => t.actuel)?.telephone || client?.telephones?.[0]?.telephone || null;
+                                })());
+                              
+                              if (telephone) {
+                                return (
+                                  <a 
+                                    href={`tel:${telephone.replace(/\D/g, '')}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-blue-400 hover:text-blue-300 transition-colors cursor-pointer hover:underline"
+                                  >
+                                    {telephone}
+                                  </a>
+                                );
+                              }
+                              return '-';
+                            })()}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {pm.mandats && pm.mandats.length > 0 ? (
