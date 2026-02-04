@@ -543,6 +543,11 @@ export default function GestionDeMandat() {
           overflow-y: hidden;
           width: 100%;
           -webkit-overflow-scrolling: touch;
+          transform: rotateX(180deg);
+        }
+
+        .kanban-scroll-container > div {
+          transform: rotateX(180deg);
         }
 
         /* Personnaliser la scrollbar pour le Kanban */
