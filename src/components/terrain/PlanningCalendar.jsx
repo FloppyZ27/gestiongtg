@@ -1284,83 +1284,80 @@ export default function PlanningCalendar({
 
                                     {/* Techniciens - affichage selon globalViewMode */}
                                     {globalViewMode === "techniciens" && (
-                                    <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
-                                    {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.droppableProps}
-                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
-                                    >
-                                      <div className="flex items-center gap-1 flex-wrap">
-                                        <Users className="w-3 h-3 text-blue-400 flex-shrink-0" />
-                                        {equipe.techniciens.map(techId => {
-                                          const tech = techniciens.find(t => t.id === techId);
-                                          if (!tech) return null;
-                                          return (
-                                            <div key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1.5 py-0.5 flex items-center gap-1">
-                                              <span className="text-white text-xs">{tech.prenom} {tech.nom}</span>
+                                      <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`min-h-[24px] p-0.5 rounded ${snapshot.isDraggingOver ? 'bg-blue-500/20 border-2 border-blue-500' : 'border border-slate-700'}`}
+                                          >
+                                            <div className="flex items-center gap-0.5 flex-wrap">
+                                              {equipe.techniciens.map(techId => {
+                                                const tech = techniciens.find(t => t.id === techId);
+                                                if (!tech) return null;
+                                                return (
+                                                  <span key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                    {tech.prenom.charAt(0)}{tech.nom.charAt(0)}
+                                                  </span>
+                                                );
+                                              })}
                                             </div>
-                                          );
-                                        })}
-                                      </div>
-                                      {provided.placeholder}
-                                    </div>
-                                    )}
-                                    </Droppable>
+                                            {provided.placeholder}
+                                          </div>
+                                        )}
+                                      </Droppable>
                                     )}
 
                                     {/* Véhicules - affichage selon globalViewMode */}
                                     {globalViewMode === "vehicules" && (
-                                    <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
-                                    {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.droppableProps}
-                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-purple-500/20 border-2 border-purple-500' : 'border border-slate-700'}`}
-                                    >
-                                      <div className="flex items-center gap-1 flex-wrap">
-                                        <Truck className="w-3 h-3 text-purple-400 flex-shrink-0" />
-                                        {equipe.vehicules.map(vId => {
-                                          const v = vehicules.find(v => v.id === vId);
-                                          if (!v) return null;
-                                          return (
-                                            <div key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1.5 py-0.5 flex items-center gap-1">
-                                              <span className="text-white text-xs">{v.nom}</span>
+                                      <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`min-h-[24px] p-0.5 rounded ${snapshot.isDraggingOver ? 'bg-purple-500/20 border-2 border-purple-500' : 'border border-slate-700'}`}
+                                          >
+                                            <div className="flex items-center gap-0.5 flex-wrap">
+                                              {equipe.vehicules.map(vId => {
+                                                const v = vehicules.find(v => v.id === vId);
+                                                if (!v) return null;
+                                                return (
+                                                  <span key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                    {v.nom.substring(0, 3)}
+                                                  </span>
+                                                );
+                                              })}
                                             </div>
-                                          );
-                                        })}
-                                      </div>
-                                      {provided.placeholder}
-                                    </div>
-                                    )}
-                                    </Droppable>
+                                            {provided.placeholder}
+                                          </div>
+                                        )}
+                                      </Droppable>
                                     )}
 
                                     {/* Équipements - affichage selon globalViewMode */}
                                     {globalViewMode === "equipements" && (
-                                    <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
-                                    {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.droppableProps}
-                                      className={`min-h-[40px] mb-2 p-1 rounded ${snapshot.isDraggingOver ? 'bg-orange-500/20 border-2 border-orange-500' : 'border border-slate-700'}`}
-                                    >
-                                      <div className="flex items-center gap-1 flex-wrap">
-                                        <Wrench className="w-3 h-3 text-orange-400 flex-shrink-0" />
-                                        {equipe.equipements.map(eId => {
-                                          const e = equipements.find(e => e.id === eId);
-                                          if (!e) return null;
-                                          return (
-                                            <div key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1.5 py-0.5 flex items-center gap-1">
-                                              <span className="text-white text-xs">{e.nom}</span>
+                                      <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`min-h-[24px] p-0.5 rounded ${snapshot.isDraggingOver ? 'bg-orange-500/20 border-2 border-orange-500' : 'border border-slate-700'}`}
+                                          >
+                                            <div className="flex items-center gap-0.5 flex-wrap">
+                                              {equipe.equipements.map(eId => {
+                                                const e = equipements.find(e => e.id === eId);
+                                                if (!e) return null;
+                                                return (
+                                                  <span key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                    {e.nom.substring(0, 3)}
+                                                  </span>
+                                                );
+                                              })}
                                             </div>
-                                          );
-                                        })}
-                                      </div>
-                                      {provided.placeholder}
-                                    </div>
-                                    )}
-                                    </Droppable>
+                                            {provided.placeholder}
+                                          </div>
+                                        )}
+                                      </Droppable>
                                     )}
 
                                     {/* Mandats (toujours visibles) */}
