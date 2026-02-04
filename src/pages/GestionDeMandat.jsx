@@ -790,6 +790,18 @@ export default function GestionDeMandat() {
         [data-rbd-draggable-id] > div {
           border: none !important;
         }
+
+        /* Supprimer TOUTES les bordures de la page */
+        * {
+          border: none !important;
+        }
+
+        /* Sauf pour les séparateurs visuels explicites */
+        .border-b,
+        .divide-x,
+        .divide-y {
+          border-color: transparent !important;
+        }
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
