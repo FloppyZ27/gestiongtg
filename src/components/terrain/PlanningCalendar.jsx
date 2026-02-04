@@ -1133,10 +1133,13 @@ export default function PlanningCalendar({
                       key={dateStr}
                       className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-cyan-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
                     >
-                      <div className="text-center mb-2 pb-2 border-b border-slate-700 flex items-center justify-between">
-                        <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2 pb-2">
+                        <div className={`bg-slate-800/50 rounded-lg p-2 flex-1 text-center ${isToday ? 'ring-2 ring-cyan-500' : ''}`}>
+                          <div className={`text-xs font-semibold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                            {format(day, "EEEE", { locale: fr })}
+                          </div>
                           <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : holiday ? 'text-red-400' : 'text-white'}`}>
-                            {format(day, "EEEE d MMM", { locale: fr })}
+                            {format(day, "d MMM", { locale: fr })}
                           </div>
                           {holiday && (
                             <div className="text-xs text-red-400 mt-1">
