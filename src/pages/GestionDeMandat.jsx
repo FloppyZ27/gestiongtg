@@ -334,6 +334,25 @@ export default function GestionDeMandat() {
       }
     };
 
+    const handleDragOver = (e) => {
+      if (!isDraggingCard || !kanbanContainer) return;
+
+      const edgeSize = 150; // zone sensible
+      const scrollSpeed = 20;
+
+      const rect = kanbanContainer.getBoundingClientRect();
+
+      // Scroll gauche
+      if (e.clientX < rect.left + edgeSize) {
+        kanbanContainer.scrollLeft -= scrollSpeed;
+      }
+
+      // Scroll droite
+      if (e.clientX > rect.right - edgeSize) {
+        kanbanContainer.scrollLeft += scrollSpeed;
+      }
+    };
+
     const handleDragStart = (e) => {
       if (e.target.closest('[data-rbd-draggable-id]')) {
         isDraggingCard = true;
@@ -356,10 +375,12 @@ export default function GestionDeMandat() {
 
     document.addEventListener('dragstart', handleDragStart);
     document.addEventListener('dragend', handleDragEnd);
+    document.addEventListener('dragover', handleDragOver);
 
     return () => {
       document.removeEventListener('dragstart', handleDragStart);
       document.removeEventListener('dragend', handleDragEnd);
+      document.removeEventListener('dragover', handleDragOver);
       document.removeEventListener('wheel', preventHorizontalScroll);
     };
   }, []);
