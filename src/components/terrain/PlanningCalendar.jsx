@@ -158,6 +158,7 @@ export default function PlanningCalendar({
   const [equipeActiveTabs, setEquipeActiveTabs] = useState({}); // { "equipeId": "techniciens" | "vehicules" | "equipements" }
   const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
   const [createTeamDateStr, setCreateTeamDateStr] = useState(null);
+  const [globalViewMode, setGlobalViewMode] = useState(null); // null | "techniciens" | "vehicules" | "equipements"
 
   const handlePrint = () => {
     window.print();
@@ -800,8 +801,10 @@ export default function PlanningCalendar({
       
       {/* Header avec contrôles */}
       <Card className="bg-gradient-to-r from-slate-900/80 via-slate-800/80 to-slate-900/80 border-slate-700 backdrop-blur-sm shadow-xl mb-4 no-print">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center">
+         <CardContent className="p-4">
+           <div className="flex flex-col gap-4">
+             {/* Première ligne : titre et contrôles de navigation */}
+             <div className="flex justify-between items-center">
             <div className="text-white font-bold text-lg">
               {viewMode === "week" 
                 ? `Semaine du ${format(days[0], "d MMMM", { locale: fr })} au ${format(days[days.length - 1], "d MMMM yyyy", { locale: fr })}`
@@ -848,10 +851,40 @@ export default function PlanningCalendar({
                   Mois
                 </Button>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+              </div>
+
+              {/* Deuxième ligne : boutons de filtrage */}
+              <div className="flex gap-2 items-center">
+              <span className="text-white text-sm font-medium">Afficher :</span>
+              <Button
+                size="sm"
+                onClick={() => setGlobalViewMode(globalViewMode === "techniciens" ? null : "techniciens")}
+                className={globalViewMode === "techniciens" ? "bg-blue-500/30 text-blue-400 border border-blue-500" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
+              >
+                <Users className="w-3 h-3 mr-1" />
+                Techniciens
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setGlobalViewMode(globalViewMode === "vehicules" ? null : "vehicules")}
+                className={globalViewMode === "vehicules" ? "bg-purple-500/30 text-purple-400 border border-purple-500" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
+              >
+                <Truck className="w-3 h-3 mr-1" />
+                Véhicules
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setGlobalViewMode(globalViewMode === "equipements" ? null : "equipements")}
+                className={globalViewMode === "equipements" ? "bg-orange-500/30 text-orange-400 border border-orange-500" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700"}
+              >
+                <Wrench className="w-3 h-3 mr-1" />
+                Équipements
+              </Button>
+              </div>
+              </div>
+              </CardContent>
+              </Card>
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex gap-4" id="planning-print">
