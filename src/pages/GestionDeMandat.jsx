@@ -1127,7 +1127,7 @@ export default function GestionDeMandat() {
                          className="kanban-column"
                       >
                         <Card 
-                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
+                           className="!border-0 bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
                         >
                           <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between w-full">
@@ -1270,7 +1270,7 @@ export default function GestionDeMandat() {
                          className="kanban-column"
                       >
                         <Card 
-                           className="bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
+                           className="!border-0 bg-slate-800/40 backdrop-blur-xl shadow-xl flex flex-col"
                         >
                           <CardHeader className="pb-3 pt-3 border-b border-slate-700 bg-slate-700/30">
                             <div className="flex items-center justify-between w-full">
@@ -1371,7 +1371,7 @@ export default function GestionDeMandat() {
 
           {/* Vue Calendrier */}
           <TabsContent value="calendrier" className="mt-0">
-            <Card className="!border-0 bg-slate-900/50 backdrop-blur-xl shadow-xl">
+            <Card className="!border-0 !shadow-none bg-slate-900/50 backdrop-blur-xl">
               <CardHeader className="border-b border-slate-800">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white">
@@ -1516,7 +1516,7 @@ export default function GestionDeMandat() {
                           .filter(day => day.getDay() !== 0 && day.getDay() !== 6);
 
                         return (
-                          <Card key={weekIndex} className="!border-0 bg-slate-800/30">
+                          <Card key={weekIndex} className="!border-0 !shadow-none bg-slate-800/30">
                             <CardHeader className="pb-3 bg-slate-800/50 border-b border-slate-700">
                               <CardTitle className="text-sm text-slate-300">
                                 Semaine du {format(addDays(weekStart, 1), "d MMMM", { locale: fr })} au {format(addDays(weekStart, 5), "d MMMM", { locale: fr })}
