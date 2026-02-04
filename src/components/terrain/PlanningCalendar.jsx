@@ -547,8 +547,7 @@ export default function PlanningCalendar({
   const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   const handleCardClick = (dossier) => {
-    setViewingDossier(dossier);
-    setIsViewDialogOpen(true);
+    handleEdit(dossier);
   };
 
   const handleEdit = (dossier) => {
