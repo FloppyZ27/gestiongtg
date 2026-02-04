@@ -34,12 +34,16 @@ export default function CreateTeamDialog({
     const equipe = dayEquipes.find(eq => eq[resourceType]?.includes(resourceId));
     if (!equipe) return null;
     
-    // Générer le nom de l'équipe
+    // Extraire le numéro d'équipe et générer le format "Équipe X - Initiales"
+    const match = equipe.nom.match(/Équipe (\d+)/);
+    const teamNumber = match ? match[1] : '';
+    
     if (equipe.techniciens?.length > 0) {
-      return equipe.techniciens.map(techId => {
+      const initials = equipe.techniciens.map(techId => {
         const tech = techniciens.find(t => t.id === techId);
         return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
       }).filter(n => n).join('-');
+      return teamNumber ? `Équipe ${teamNumber} - ${initials}` : initials;
     }
     return equipe.nom;
   };
