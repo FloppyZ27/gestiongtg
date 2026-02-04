@@ -277,8 +277,45 @@ export default function EditDossierForm({
       transition={{ duration: 0.2 }}
     >
       {/* Header sur toute la largeur */}
-      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-slate-900 px-6 py-3 border-b border-slate-800 flex-shrink-0 flex items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-white">{editingDossier ? "Modifier le dossier" : "Nouveau dossier"}</h2>
+        
+        {/* Barre de progression du dossier */}
+        {editingDossier && formData.mandats && formData.mandats.length > 0 && (
+          <div className="w-[30%] flex-shrink-0 space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-slate-400">Progression</span>
+              <span className="text-xs font-bold text-emerald-400">
+                {(() => {
+                  const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+                  const tacheIndex = TACHES.indexOf(formData.mandats[0]?.tache_actuelle);
+                  let rawProgress = 0;
+                  if (tacheIndex >= 0 && TACHES.length > 1) {
+                    rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
+                  }
+                  return Math.round(rawProgress / 5) * 5;
+                })()}%
+              </span>
+            </div>
+            <div className="w-full bg-slate-900/50 h-1.5 rounded-full overflow-hidden border border-slate-700/50">
+              <div 
+                className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
+                style={{ 
+                  width: `${(() => {
+                    const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
+                    const tacheIndex = TACHES.indexOf(formData.mandats[0]?.tache_actuelle);
+                    let rawProgress = 0;
+                    if (tacheIndex >= 0 && TACHES.length > 1) {
+                      rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
+                    }
+                    return Math.round(rawProgress / 5) * 5;
+                  })()}%` 
+                }}
+              />
+            </div>
+          </div>
+        )}
+        
         {formData.numero_dossier && formData.arpenteur_geometre && (
           <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap ${
             formData.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
@@ -311,44 +348,6 @@ export default function EditDossierForm({
           </div>
         )}
       </div>
-
-      {/* Barre de progression du dossier */}
-      {editingDossier && formData.mandats && formData.mandats.length > 0 && (
-        <div className="px-6 py-3 bg-slate-900/80 border-b border-slate-800 flex-shrink-0 flex justify-center">
-          <div className="w-[30%] space-y-2">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-400">Progression du dossier</span>
-              <span className="text-sm font-bold text-emerald-400">
-                {(() => {
-                  const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                  const tacheIndex = TACHES.indexOf(formData.mandats[0]?.tache_actuelle);
-                  let rawProgress = 0;
-                  if (tacheIndex >= 0 && TACHES.length > 1) {
-                    rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
-                  }
-                  return Math.round(rawProgress / 5) * 5;
-                })()}%
-              </span>
-            </div>
-            <div className="w-full bg-slate-900/50 h-2 rounded-full overflow-hidden border border-slate-700/50">
-              <div 
-                className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500" 
-                style={{ 
-                  width: `${(() => {
-                    const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-                    const tacheIndex = TACHES.indexOf(formData.mandats[0]?.tache_actuelle);
-                    let rawProgress = 0;
-                    if (tacheIndex >= 0 && TACHES.length > 1) {
-                      rawProgress = (tacheIndex / (TACHES.length - 1)) * 95;
-                    }
-                    return Math.round(rawProgress / 5) * 5;
-                  })()}%` 
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Division 70%-30% pour Mandats et Sidebar */}
       <div className="flex-1 flex overflow-hidden">
