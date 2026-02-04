@@ -496,17 +496,17 @@ export default function CeduleTerrain() {
       >
         <CardContent className="p-3 space-y-2">
           <div className="text-center pb-2 border-b border-slate-700">
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-sm font-semibold">
-                {item.mandat.type_mandat}
-              </Badge>
-              {item.mandat.terrain?.a_rendez_vous && (
-                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border text-xs font-semibold">
-                  Rendez-vous
-                </Badge>
-              )}
-            </div>
-          </div>
+             <div className="flex items-center justify-center gap-2 flex-wrap">
+               <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs font-semibold">
+                 {getAbbreviatedMandatType(item.mandat.type_mandat)}
+               </Badge>
+               {item.mandat.terrain?.a_rendez_vous && (
+                 <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 border text-xs font-semibold">
+                   Rendez-vous
+                 </Badge>
+               )}
+             </div>
+           </div>
 
           <div className="space-y-1">
             <div>
