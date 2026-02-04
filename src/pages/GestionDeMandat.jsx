@@ -656,12 +656,12 @@ export default function GestionDeMandat() {
         /* Scrollbar en haut */
         .kanban-scrollbar-top {
           width: 100%;
-          height: 12px;
+          height: 16px;
           background: rgba(15, 23, 42, 0.8);
-          border-radius: 10px;
+          border-radius: 6px;
           overflow-x: auto;
           overflow-y: hidden;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
         }
 
         .kanban-scrollbar-top::-webkit-scrollbar {
@@ -670,12 +670,12 @@ export default function GestionDeMandat() {
 
         .kanban-scrollbar-top::-webkit-scrollbar-track {
           background: rgba(15, 23, 42, 0.8);
-          border-radius: 10px;
+          border-radius: 6px;
         }
 
         .kanban-scrollbar-top::-webkit-scrollbar-thumb {
           background: linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166));
-          border-radius: 10px;
+          border-radius: 6px;
           border: 2px solid rgba(15, 23, 42, 0.8);
         }
 
