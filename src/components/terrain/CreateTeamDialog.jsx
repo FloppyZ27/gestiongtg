@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users, Truck, Wrench, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Users, Truck, Wrench, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function CreateTeamDialog({
   isOpen,
@@ -18,10 +18,14 @@ export default function CreateTeamDialog({
   equipes,
   usedResources
 }) {
-  const [teamName, setTeamName] = useState("");
   const [selectedTechniciens, setSelectedTechniciens] = useState([]);
   const [selectedVehicules, setSelectedVehicules] = useState([]);
   const [selectedEquipements, setSelectedEquipements] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({
+    techniciens: true,
+    vehicules: true,
+    equipements: true
+  });
 
   // Ressources déjà utilisées ce jour-là
   const usedTechIds = usedResources?.techniciens || [];
@@ -79,11 +83,17 @@ export default function CreateTeamDialog({
   };
 
   const resetForm = () => {
-    setTeamName("");
     setSelectedTechniciens([]);
     setSelectedVehicules([]);
     setSelectedEquipements([]);
     onClose();
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const toggleTechnicien = (techId) => {
@@ -113,132 +123,153 @@ export default function CreateTeamDialog({
           <DialogTitle>Créer une nouvelle équipe</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Nom de l'équipe */}
-          <div className="space-y-2">
-            <Label htmlFor="team-name" className="text-slate-300">Nom de l'équipe (optionnel)</Label>
-            <Input
-              id="team-name"
-              placeholder="Ex: Équipe 1"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              className="bg-slate-800 border-slate-700"
-            />
-          </div>
-
+        <div className="space-y-4">
           {/* Techniciens */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
-              <Label className="text-slate-300 font-semibold">
-                Techniciens ({availableTechs.length} disponibles)
-              </Label>
-            </div>
-            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-              <div className="p-3 space-y-2">
-                {techniciens.map(tech => {
-                  const isAvailable = !usedTechIds.includes(tech.id);
-                  const assignedTeam = !isAvailable ? getTeamForResource(tech.id, 'techniciens') : null;
-                  return (
-                    <div
-                      key={tech.id}
-                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
-                    >
-                      <Checkbox
-                        id={`tech-${tech.id}`}
-                        checked={selectedTechniciens.includes(tech.id)}
-                        onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)}
-                        disabled={!isAvailable}
-                        className="border-slate-500"
-                      />
-                      <Label
-                        htmlFor={`tech-${tech.id}`}
-                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
-                      >
-                        {tech.prenom} {tech.nom} {!isAvailable && `(${assignedTeam})`}
-                      </Label>
-                    </div>
-                  );
-                })}
+          <Collapsible
+            open={expandedSections.techniciens}
+            onOpenChange={() => toggleSection('techniciens')}
+            className="border border-slate-700 bg-slate-800/30 rounded-lg"
+          >
+            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-400" />
+                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                    Techniciens ({availableTechs.length} disponibles)
+                  </Label>
+                </div>
+                {expandedSections.techniciens ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
               </div>
-            </ScrollArea>
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
+                <div className="p-3 space-y-2">
+                  {techniciens.map(tech => {
+                    const isAvailable = !usedTechIds.includes(tech.id);
+                    const assignedTeam = !isAvailable ? getTeamForResource(tech.id, 'techniciens') : null;
+                    return (
+                      <div
+                        key={tech.id}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                      >
+                        <Checkbox
+                          id={`tech-${tech.id}`}
+                          checked={selectedTechniciens.includes(tech.id)}
+                          onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)}
+                          disabled={!isAvailable}
+                          className="border-slate-500"
+                        />
+                        <Label
+                          htmlFor={`tech-${tech.id}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                        >
+                          {tech.prenom} {tech.nom} {!isAvailable && `(${assignedTeam})`}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Véhicules */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-purple-400" />
-              <Label className="text-slate-300 font-semibold">
-                Véhicules ({availableVehs.length} disponibles)
-              </Label>
-            </div>
-            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-              <div className="p-3 space-y-2">
-                {vehicules.map(veh => {
-                  const isAvailable = !usedVehIds.includes(veh.id);
-                  const assignedTeam = !isAvailable ? getTeamForResource(veh.id, 'vehicules') : null;
-                  return (
-                    <div
-                      key={veh.id}
-                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
-                    >
-                      <Checkbox
-                        id={`veh-${veh.id}`}
-                        checked={selectedVehicules.includes(veh.id)}
-                        onCheckedChange={() => isAvailable && toggleVehicule(veh.id)}
-                        disabled={!isAvailable}
-                        className="border-slate-500"
-                      />
-                      <Label
-                        htmlFor={`veh-${veh.id}`}
-                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
-                      >
-                        {veh.nom} {!isAvailable && `(${assignedTeam})`}
-                      </Label>
-                    </div>
-                  );
-                })}
+          <Collapsible
+            open={expandedSections.vehicules}
+            onOpenChange={() => toggleSection('vehicules')}
+            className="border border-slate-700 bg-slate-800/30 rounded-lg"
+          >
+            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-purple-400" />
+                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                    Véhicules ({availableVehs.length} disponibles)
+                  </Label>
+                </div>
+                {expandedSections.vehicules ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
               </div>
-            </ScrollArea>
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
+                <div className="p-3 space-y-2">
+                  {vehicules.map(veh => {
+                    const isAvailable = !usedVehIds.includes(veh.id);
+                    const assignedTeam = !isAvailable ? getTeamForResource(veh.id, 'vehicules') : null;
+                    return (
+                      <div
+                        key={veh.id}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                      >
+                        <Checkbox
+                          id={`veh-${veh.id}`}
+                          checked={selectedVehicules.includes(veh.id)}
+                          onCheckedChange={() => isAvailable && toggleVehicule(veh.id)}
+                          disabled={!isAvailable}
+                          className="border-slate-500"
+                        />
+                        <Label
+                          htmlFor={`veh-${veh.id}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                        >
+                          {veh.nom} {!isAvailable && `(${assignedTeam})`}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Équipements */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-orange-400" />
-              <Label className="text-slate-300 font-semibold">
-                Équipements ({availableEqs.length} disponibles)
-              </Label>
-            </div>
-            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-              <div className="p-3 space-y-2">
-                {equipements.map(eq => {
-                  const isAvailable = !usedEqIds.includes(eq.id);
-                  const assignedTeam = !isAvailable ? getTeamForResource(eq.id, 'equipements') : null;
-                  return (
-                    <div
-                      key={eq.id}
-                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
-                    >
-                      <Checkbox
-                        id={`eq-${eq.id}`}
-                        checked={selectedEquipements.includes(eq.id)}
-                        onCheckedChange={() => isAvailable && toggleEquipement(eq.id)}
-                        disabled={!isAvailable}
-                        className="border-slate-500"
-                      />
-                      <Label
-                        htmlFor={`eq-${eq.id}`}
-                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
-                      >
-                        {eq.nom} {!isAvailable && `(${assignedTeam})`}
-                      </Label>
-                    </div>
-                  );
-                })}
+          <Collapsible
+            open={expandedSections.equipements}
+            onOpenChange={() => toggleSection('equipements')}
+            className="border border-slate-700 bg-slate-800/30 rounded-lg"
+          >
+            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-orange-400" />
+                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                    Équipements ({availableEqs.length} disponibles)
+                  </Label>
+                </div>
+                {expandedSections.equipements ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
               </div>
-            </ScrollArea>
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
+                <div className="p-3 space-y-2">
+                  {equipements.map(eq => {
+                    const isAvailable = !usedEqIds.includes(eq.id);
+                    const assignedTeam = !isAvailable ? getTeamForResource(eq.id, 'equipements') : null;
+                    return (
+                      <div
+                        key={eq.id}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                      >
+                        <Checkbox
+                          id={`eq-${eq.id}`}
+                          checked={selectedEquipements.includes(eq.id)}
+                          onCheckedChange={() => isAvailable && toggleEquipement(eq.id)}
+                          disabled={!isAvailable}
+                          className="border-slate-500"
+                        />
+                        <Label
+                          htmlFor={`eq-${eq.id}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                        >
+                          {eq.nom} {!isAvailable && `(${assignedTeam})`}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Boutons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
