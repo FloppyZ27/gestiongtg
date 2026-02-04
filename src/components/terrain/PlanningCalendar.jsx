@@ -1439,20 +1439,20 @@ export default function PlanningCalendar({
                               </Droppable>
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                      <div className="px-2 pb-2">
-                        <Button
-                          size="sm"
-                          onClick={() => addEquipe(dateStr)}
-                          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-6 mt-2 shadow-md"
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Ajouter équipe
-                        </Button>
-                      </div>
-                      </Card>
+                            );
+                            })}
+                            </div>
+                            <div className="px-2 pb-2">
+                            <Button
+                            size="sm"
+                            onClick={() => addEquipe(dateStr)}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-6 mt-2 shadow-md"
+                            >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Ajouter équipe
+                            </Button>
+                            </div>
+                            </Card>
                   );
                 })}
               </div>
@@ -1615,27 +1615,26 @@ export default function PlanningCalendar({
                                 )}
                               </Droppable>
                             </div>
-                          </div>
-                        );
-                      })}
-                      </div>
-                      <div className="px-1 pb-1">
-                        <Button
-                          size="sm"
-                          onClick={() => addEquipe(dateStr)}
-                          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-5 mt-1 text-xs shadow-md"
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Ajouter
-                        </Button>
-                      </div>
-                      </Card>
-                      );
-                      })}
-                      </div>
-                      )}
-                      </div>
-                      </div>
+                            </div>
+                            );
+                            })}
+                            </div>
+                            <div className="px-1 pb-1">
+                            <Button
+                            size="sm"
+                            onClick={() => addEquipe(dateStr)}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-5 mt-1 text-xs shadow-md"
+                            >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Ajouter
+                            </Button>
+                            </div>
+                            </Card>
+                            );
+                            })}
+                            </div>
+                            )}
+                            </div>
                       </DragDropContext>
 
       {/* Dialog de vue du dossier */}
