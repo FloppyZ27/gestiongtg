@@ -574,7 +574,7 @@ export default function GestionDeMandat() {
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
-        <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4">
+        <div className="sticky top-0 z-[100] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4 pt-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
