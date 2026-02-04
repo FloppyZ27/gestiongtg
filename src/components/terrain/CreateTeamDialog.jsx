@@ -130,11 +130,11 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('techniciens')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-blue-900/40 transition-colors bg-blue-900/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-blue-400" />
-                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                  <Label className="text-blue-300 font-semibold cursor-pointer">
                     Techniciens ({availableTechs.length} disponibles)
                   </Label>
                 </div>
@@ -179,11 +179,11 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('vehicules')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-purple-900/40 transition-colors bg-purple-900/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-purple-400" />
-                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                  <Label className="text-purple-300 font-semibold cursor-pointer">
                     Véhicules ({availableVehs.length} disponibles)
                   </Label>
                 </div>
@@ -228,11 +228,11 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('equipements')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-slate-800/50 transition-colors">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-orange-900/40 transition-colors bg-orange-900/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Wrench className="w-4 h-4 text-orange-400" />
-                  <Label className="text-slate-300 font-semibold cursor-pointer">
+                  <Label className="text-orange-300 font-semibold cursor-pointer">
                     Équipements ({availableEqs.length} disponibles)
                   </Label>
                 </div>
