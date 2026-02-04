@@ -120,7 +120,7 @@ export default function CreateTeamDialog({
     }}>
       <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Créer une nouvelle équipe</DialogTitle>
+          <DialogTitle>Créer une nouvelle équipe{selectedTechniciens.length > 0 && ` - ${generateTeamName(selectedTechniciens)}`}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
