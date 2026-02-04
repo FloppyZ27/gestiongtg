@@ -603,12 +603,20 @@ export default function CeduleTerrain() {
             </div>
           )}
 
-          {showActions && item.mandat.terrain?.date_limite_leve && (
-            <div className="pt-1 border-t border-slate-700">
-              <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                <Calendar className="w-3 h-3 flex-shrink-0" />
-                <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
-              </div>
+          {showActions && (item.mandat.terrain?.date_limite_leve || item.mandat.date_livraison) && (
+            <div className="pt-1 border-t border-slate-700 space-y-1">
+              {item.mandat.terrain?.date_limite_leve && (
+                <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
+                </div>
+              )}
+              {item.mandat.date_livraison && (
+                <div className="flex items-center gap-1 text-xs text-cyan-400 font-medium">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span>Livraison: {format(new Date(item.mandat.date_livraison + "T00:00:00"), "dd MMM yyyy", { locale: fr })}</span>
+                </div>
+              )}
             </div>
           )}
 
