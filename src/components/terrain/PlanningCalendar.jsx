@@ -74,6 +74,7 @@ const isHoliday = (date) => {
 };
 import EditDossierDialog from "../dossiers/EditDossierDialog";
 import CommentairesSection from "../dossiers/CommentairesSection";
+import CreateTeamDialog from "./CreateTeamDialog";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -155,6 +156,8 @@ export default function PlanningCalendar({
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDialogOpen, setIsEditingDialogOpen] = useState(false);
   const [equipeActiveTabs, setEquipeActiveTabs] = useState({}); // { "equipeId": "techniciens" | "vehicules" | "equipements" }
+  const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
+  const [createTeamDateStr, setCreateTeamDateStr] = useState(null);
 
   const handlePrint = () => {
     window.print();
@@ -255,24 +258,40 @@ export default function PlanningCalendar({
   };
 
   const addEquipe = (dateStr) => {
+    setCreateTeamDateStr(dateStr);
+    setIsCreateTeamDialogOpen(true);
+  };
+
+  const handleCreateTeam = (newEquipe) => {
     const newEquipes = { ...equipes };
-    if (!newEquipes[dateStr]) {
-      newEquipes[dateStr] = [];
+    if (!newEquipes[createTeamDateStr]) {
+      newEquipes[createTeamDateStr] = [];
     }
     
-    // Créer une équipe vide
-    const newEquipe = {
-      id: `eq${Date.now()}`,
-      nom: `Équipe ${newEquipes[dateStr].length + 1}`,
-      techniciens: [],
-      vehicules: [],
-      equipements: [],
-      mandats: []
-    };
-    
-    newEquipes[dateStr].push(newEquipe);
+    newEquipes[createTeamDateStr].push(newEquipe);
     setEquipes(newEquipes);
     setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
+    setIsCreateTeamDialogOpen(false);
+  };
+
+  // Calculer les ressources utilisées pour une date
+  const getUsedResourcesForDate = (dateStr) => {
+    const dayEquipes = equipes[dateStr] || [];
+    const usedTechIds = new Set();
+    const usedVehIds = new Set();
+    const usedEqIds = new Set();
+
+    dayEquipes.forEach(eq => {
+      eq.techniciens.forEach(id => usedTechIds.add(id));
+      eq.vehicules.forEach(id => usedVehIds.add(id));
+      eq.equipements.forEach(id => usedEqIds.add(id));
+    });
+
+    return {
+      techniciens: Array.from(usedTechIds),
+      vehicules: Array.from(usedVehIds),
+      equipements: Array.from(usedEqIds)
+    };
   };
 
   const getEquipeActiveTab = (equipeId) => {
@@ -1711,6 +1730,19 @@ export default function PlanningCalendar({
         clients={clients}
         users={users}
       />
-    </div>
-  );
-}
+
+      {/* Dialog de création d'équipe */}
+      <CreateTeamDialog
+        isOpen={isCreateTeamDialogOpen}
+        onClose={() => setIsCreateTeamDialogOpen(false)}
+        onCreateTeam={handleCreateTeam}
+        dateStr={createTeamDateStr}
+        techniciens={techniciens}
+        vehicules={vehicules}
+        equipements={equipements}
+        equipes={equipes}
+        usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }}
+      />
+      </div>
+      );
+      }
