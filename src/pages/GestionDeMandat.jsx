@@ -686,6 +686,17 @@ export default function GestionDeMandat() {
           transform: translate(-50%, -50%) !important;
         }
 
+        /* Drag preview styling */
+        .drag-preview {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+          opacity: 0.95;
+          rotate: 2deg;
+        }
+
         /* Personnaliser la scrollbar pour le Kanban */
         .kanban-scroll-container::-webkit-scrollbar {
           height: 12px;
