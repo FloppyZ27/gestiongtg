@@ -137,9 +137,43 @@ export default function TarificationStepForm({
     onTarificationChange(updatedMandats);
   };
 
-  const [globalTaxesIncluses, setGlobalTaxesIncluses] = useState(false);
-  const [prixConvenu, setPrixConvenu] = useState(false);
-  const [notes, setNotes] = useState("");
+  // Initialiser depuis les mandats
+  const globalTaxesIncluses = mandatsWithType.some(m => m.taxes_incluses === true);
+  const prixConvenu = mandatsWithType.some(m => m.prix_convenu === true);
+  const notes = mandatsWithType.length > 0 ? (mandats[0]?.notes || "") : "";
+
+  const handleTaxesInclusesChange = (newValue) => {
+    const updatedMandats = mandats.map((m, i) => {
+      const copy = JSON.parse(JSON.stringify(m));
+      if (mandatsWithType.some(mt => mt.type_mandat && mandats.indexOf(mt) === i)) {
+        copy.taxes_incluses = newValue;
+      }
+      return copy;
+    });
+    onTarificationChange(updatedMandats);
+  };
+
+  const handlePrixConvenuChange = (newValue) => {
+    const updatedMandats = mandats.map((m, i) => {
+      const copy = JSON.parse(JSON.stringify(m));
+      if (mandatsWithType.some(mt => mt.type_mandat && mandats.indexOf(mt) === i)) {
+        copy.prix_convenu = newValue;
+      }
+      return copy;
+    });
+    onTarificationChange(updatedMandats);
+  };
+
+  const handleNotesChange = (newValue) => {
+    const updatedMandats = mandats.map((m, i) => {
+      const copy = JSON.parse(JSON.stringify(m));
+      if (i === 0) {
+        copy.notes = newValue;
+      }
+      return copy;
+    });
+    onTarificationChange(updatedMandats);
+  };
 
   const totalEstime = mandatsWithType.reduce((sum, m) => {
     const isMultiLot = m.type_mandat === "Description Technique" || m.type_mandat === "OCTR";
@@ -294,7 +328,7 @@ export default function TarificationStepForm({
                     <Label className="text-slate-300 text-xs">Taxes incluses</Label>
                     <button
                       type="button"
-                      onClick={() => setGlobalTaxesIncluses(!globalTaxesIncluses)}
+                      onClick={() => handleTaxesInclusesChange(!globalTaxesIncluses)}
                       disabled={disabled}
                       className="transition-colors border-0 bg-transparent shadow-none p-0 hover:bg-transparent"
                     >
@@ -310,7 +344,7 @@ export default function TarificationStepForm({
                     <Label className="text-slate-300 text-xs">Prix convenu avec le client</Label>
                     <button
                       type="button"
-                      onClick={() => setPrixConvenu(!prixConvenu)}
+                      onClick={() => handlePrixConvenuChange(!prixConvenu)}
                       disabled={disabled}
                       className="transition-colors border-0 bg-transparent shadow-none p-0 hover:bg-transparent"
                     >
@@ -324,14 +358,14 @@ export default function TarificationStepForm({
                 </div>
 
                 <div className="flex-1 px-2 pb-2">
-                  <Label className="text-slate-300 text-xs mb-1 block">Notes</Label>
-                  <Textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notes..."
-                    disabled={disabled}
-                    className="bg-slate-700 border-slate-600 text-white text-xs h-full resize-none"
-                  />
+                   <Label className="text-slate-300 text-xs mb-1 block">Notes</Label>
+                   <Textarea
+                     value={notes}
+                     onChange={(e) => handleNotesChange(e.target.value)}
+                     placeholder="Notes..."
+                     disabled={disabled}
+                     className="bg-slate-700 border-slate-600 text-white text-xs h-full resize-none"
+                   />
                 </div>
               </div>
             </div>
