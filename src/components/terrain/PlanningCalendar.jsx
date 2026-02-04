@@ -576,12 +576,14 @@ export default function PlanningCalendar({
   const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   const handleCardClick = (dossier) => {
-    handleEdit(dossier);
+    // Trouver l'index du mandat en Cédule
+    const mandatIndex = dossier.mandats?.findIndex(m => m.tache_actuelle === "Cédule");
+    handleEdit(dossier, mandatIndex >= 0 ? mandatIndex : 0);
   };
 
-  const handleEdit = (dossier) => {
+  const handleEdit = (dossier, mandatIndex = 0) => {
     setIsViewDialogOpen(false);
-    setEditingDossier(dossier);
+    setEditingDossier({ ...dossier, initialMandatIndex: mandatIndex });
     setIsEditingDialogOpen(true);
   };
 

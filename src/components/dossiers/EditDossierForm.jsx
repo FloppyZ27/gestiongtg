@@ -111,7 +111,13 @@ export default function EditDossierForm({
   setNewLotForm,
   setLotActionLogs
 }) {
-  const [activeTabMandat, setActiveTabMandat] = useState("0");
+  // Initialiser activeTabMandat avec l'index du mandat choisi
+  React.useEffect(() => {
+    if (editingDossier?.initialMandatIndex !== undefined) {
+      setActiveTabMandat(editingDossier.initialMandatIndex.toString());
+    }
+  }, [editingDossier?.initialMandatIndex]);
+  const [activeTabMandat, setActiveTabMandat] = useState((editingDossier?.initialMandatIndex || 0).toString());
   const [activeContactTab, setActiveContactTab] = useState("clients");
   const [contactsListCollapsed, setContactsListCollapsed] = useState(true);
   const [clientSearchTerm, setClientSearchTerm] = useState("");

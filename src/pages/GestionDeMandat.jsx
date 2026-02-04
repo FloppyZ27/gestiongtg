@@ -470,7 +470,7 @@ export default function GestionDeMandat() {
   };
 
   const handleCardClick = (card) => {
-    setEditingDossier(card.dossier);
+    setEditingDossier({ ...card.dossier, initialMandatIndex: card.mandatIndex });
     setIsEditingDialogOpen(true);
   };
 
