@@ -535,23 +535,25 @@ export default function GestionDeMandat() {
 
       `}</style>
       
-      <div className="w-full px-0 overflow-x-hidden">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Gestion de Mandat
-              </h1>
-              <Kanban className="w-6 h-6 text-emerald-400" />
+      <div className="w-full px-0">
+        <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pb-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                  Gestion de Mandat
+                </h1>
+                <Kanban className="w-6 h-6 text-emerald-400" />
+              </div>
+              <p className="text-slate-400">Vue Kanban de vos mandats</p>
             </div>
-            <p className="text-slate-400">Vue Kanban de vos mandats</p>
-            </div>
-        </div>
+          </div>
 
         {/* Filtres et recherche */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-3">
+
               <div className="relative flex-1 min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <Input
@@ -615,9 +617,9 @@ export default function GestionDeMandat() {
           </CardContent>
         </Card>
 
-        {/* Tabs pour les différentes vues */}
-        <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-          <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
+          {/* Tabs pour les différentes vues */}
+          <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+            <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
             <TabsTrigger
               value="taches"
               className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 py-3 text-base"
@@ -640,6 +642,7 @@ export default function GestionDeMandat() {
               Calendrier
             </TabsTrigger>
           </TabsList>
+        </div>
 
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
