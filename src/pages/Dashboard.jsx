@@ -138,9 +138,9 @@ export default function Dashboard() {
         return acteDate.getMonth() === now.getMonth() && acteDate.getFullYear() === now.getFullYear();
       }).length,
       icon: Calendar,
-      gradient: "from-cyan-500 to-blue-600",
-      iconBg: "bg-cyan-500/20",
-      iconColor: "text-cyan-400",
+      gradient: "from-emerald-500 to-teal-600",
+      iconBg: "bg-emerald-500/20",
+      iconColor: "text-emerald-400",
     },
     {
       title: "Types d'actes",
@@ -206,7 +206,7 @@ export default function Dashboard() {
           <div className="flex gap-3">
             <Button
               onClick={handleExportCSV}
-              className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg">
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-200 border-0">
               <Download className="w-4 h-4 mr-2" />
               Extraction CSV
             </Button>
