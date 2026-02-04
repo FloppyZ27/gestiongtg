@@ -794,13 +794,16 @@ export default function GestionDeMandat() {
         /* Supprimer TOUTES les bordures de la page */
         * {
           border: none !important;
+          outline: none !important;
         }
 
-        /* Sauf pour les séparateurs visuels explicites */
-        .border-b,
-        .divide-x,
-        .divide-y {
-          border-color: transparent !important;
+        /* Supprimer les box-shadows qui créent des bordures */
+        [class*="border"],
+        [class*="shadow"],
+        [class*="outline"] {
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
         }
       `}</style>
       
