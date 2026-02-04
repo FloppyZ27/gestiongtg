@@ -325,13 +325,18 @@ export default function GestionDeMandat() {
 
   // Event listeners natifs pour bloquer le scroll horizontal pendant le drag
   React.useEffect(() => {
+    let isDraggingCard = false;
+    let kanbanContainer = document.querySelector('.kanban-scroll-container');
+
     const handleDragStart = (e) => {
       if (e.target.closest('[data-rbd-draggable-id]')) {
+        isDraggingCard = true;
         document.body.classList.add("dragging-card");
       }
     };
 
     const handleDragEnd = () => {
+      isDraggingCard = false;
       document.body.classList.remove("dragging-card");
     };
 
