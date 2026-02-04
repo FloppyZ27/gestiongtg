@@ -570,6 +570,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
              </div>
            )}
 
+           <div className="flex-1 overflow-hidden">
            <EditDossierForm
             formData={formData}
             setFormData={setFormData}
