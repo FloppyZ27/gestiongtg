@@ -542,6 +542,7 @@ export default function GestionDeMandat() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 md:p-8 overflow-x-hidden">
       <style>{`
+        /* Cursors pour drag */
         [data-rbd-draggable-context-id] {
           cursor: grab !important;
         }
@@ -550,71 +551,41 @@ export default function GestionDeMandat() {
           cursor: grabbing !important;
         }
 
-        [data-rbd-drag-handle-context-id] {
-          cursor: grab !important;
-        }
-
-        div[data-rbd-draggable-id] {
-          transition: none !important;
-        }
-
-        /* Préserver la position de la carte lors du drag */
-        div[data-rbd-draggable-id][data-is-dragging="false"] {
-          transform: none !important;
-        }
-
-        /* React-beautiful-dnd portal - DOIT être position fixed au-dessus de TOUT */
-        body > [data-rbd-droppable-context-id] {
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          width: 100% !important;
-          height: 100% !important;
-          z-index: 999999 !important;
-          pointer-events: none !important;
-        }
-
-        /* Drag handle context */
-        [data-rbd-drag-handle-context-id] {
-          z-index: 999999 !important;
-        }
-
-        /* Carte en drag - position fixed pour échapper au stacking context */
-        div[data-rbd-draggable-id][data-is-dragging="true"] {
-          position: fixed !important;
-          z-index: 999999 !important;
-          pointer-events: none !important;
-          will-change: transform !important;
-        }
-        
-        /* Centrer exactement sous le curseur avec translate -50%, -50% */
-        div[data-rbd-draggable-id][data-is-dragging="true"] > div {
-          transform: translate(-50%, -50%) !important;
-        }
-
         /* Empêcher le scroll horizontal global */
         body, html, #root {
           overflow-x: hidden !important;
         }
 
-        /* S'assurer qu'aucun parent n'a de transform qui casse le fixed positioning */
-        .kanban-scroll-container,
-        .kanban-scroll-container *:not([data-rbd-draggable-id][data-is-dragging="true"]) {
-          transform: none !important;
-        }
-
-        /* Conteneur Kanban avec scroll horizontal uniquement - PAS DE TRANSFORM pour préserver fixed positioning */
+        /* Conteneur Kanban avec scroll horizontal */
         .kanban-scroll-container {
           overflow-x: auto;
           overflow-y: hidden;
           width: 100%;
           -webkit-overflow-scrolling: touch;
           cursor: grab;
-          /* PAS de transform ici - ça casse le position: fixed du drag overlay */
         }
 
         .kanban-scroll-container:active {
           cursor: grabbing;
+        }
+
+        /* DRAG PREVIEW - Portal dans body avec position fixed */
+        body > [data-rbd-droppable-context-id] {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+        }
+
+        /* Carte en cours de drag - centrage sous curseur */
+        [data-rbd-drag-handle-draggable-id] {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+          left: 50% !important;
+          top: 50% !important;
+          transform: translate(-50%, -50%) !important;
         }
 
         /* Personnaliser la scrollbar pour le Kanban */
