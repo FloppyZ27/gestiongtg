@@ -99,35 +99,36 @@ export default function CreateTeamDialog({
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-blue-400" />
               <Label className="text-slate-300 font-semibold">
-                Techniciens disponibles ({availableTechs.length})
+                Techniciens ({availableTechs.length} disponibles)
               </Label>
             </div>
-            {availableTechs.length > 0 ? (
-              <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-                <div className="p-3 space-y-2">
-                  {availableTechs.map(tech => (
-                    <div key={tech.id} className="flex items-center gap-2">
+            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
+              <div className="p-3 space-y-2">
+                {techniciens.map(tech => {
+                  const isAvailable = !usedTechIds.includes(tech.id);
+                  return (
+                    <div
+                      key={tech.id}
+                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                    >
                       <Checkbox
                         id={`tech-${tech.id}`}
                         checked={selectedTechniciens.includes(tech.id)}
-                        onCheckedChange={() => toggleTechnicien(tech.id)}
+                        onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)}
+                        disabled={!isAvailable}
                         className="border-slate-500"
                       />
                       <Label
                         htmlFor={`tech-${tech.id}`}
-                        className="text-slate-300 cursor-pointer flex-1"
+                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                       >
-                        {tech.prenom} {tech.nom}
+                        {tech.prenom} {tech.nom} {!isAvailable && '(déjà utilisé)'}
                       </Label>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="text-slate-400 text-sm p-3 bg-slate-800/30 rounded-lg">
-                Aucun technicien disponible pour cette journée
+                  );
+                })}
               </div>
-            )}
+            </ScrollArea>
           </div>
 
           {/* Véhicules */}
@@ -135,35 +136,36 @@ export default function CreateTeamDialog({
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-purple-400" />
               <Label className="text-slate-300 font-semibold">
-                Véhicules disponibles ({availableVehs.length})
+                Véhicules ({availableVehs.length} disponibles)
               </Label>
             </div>
-            {availableVehs.length > 0 ? (
-              <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-                <div className="p-3 space-y-2">
-                  {availableVehs.map(veh => (
-                    <div key={veh.id} className="flex items-center gap-2">
+            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
+              <div className="p-3 space-y-2">
+                {vehicules.map(veh => {
+                  const isAvailable = !usedVehIds.includes(veh.id);
+                  return (
+                    <div
+                      key={veh.id}
+                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                    >
                       <Checkbox
                         id={`veh-${veh.id}`}
                         checked={selectedVehicules.includes(veh.id)}
-                        onCheckedChange={() => toggleVehicule(veh.id)}
+                        onCheckedChange={() => isAvailable && toggleVehicule(veh.id)}
+                        disabled={!isAvailable}
                         className="border-slate-500"
                       />
                       <Label
                         htmlFor={`veh-${veh.id}`}
-                        className="text-slate-300 cursor-pointer flex-1"
+                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                       >
-                        {veh.nom}
+                        {veh.nom} {!isAvailable && '(déjà utilisé)'}
                       </Label>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="text-slate-400 text-sm p-3 bg-slate-800/30 rounded-lg">
-                Aucun véhicule disponible pour cette journée
+                  );
+                })}
               </div>
-            )}
+            </ScrollArea>
           </div>
 
           {/* Équipements */}
@@ -171,35 +173,36 @@ export default function CreateTeamDialog({
             <div className="flex items-center gap-2">
               <Wrench className="w-4 h-4 text-orange-400" />
               <Label className="text-slate-300 font-semibold">
-                Équipements disponibles ({availableEqs.length})
+                Équipements ({availableEqs.length} disponibles)
               </Label>
             </div>
-            {availableEqs.length > 0 ? (
-              <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
-                <div className="p-3 space-y-2">
-                  {availableEqs.map(eq => (
-                    <div key={eq.id} className="flex items-center gap-2">
+            <ScrollArea className="border border-slate-700 rounded-lg bg-slate-800/30 h-32">
+              <div className="p-3 space-y-2">
+                {equipements.map(eq => {
+                  const isAvailable = !usedEqIds.includes(eq.id);
+                  return (
+                    <div
+                      key={eq.id}
+                      className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
+                    >
                       <Checkbox
                         id={`eq-${eq.id}`}
                         checked={selectedEquipements.includes(eq.id)}
-                        onCheckedChange={() => toggleEquipement(eq.id)}
+                        onCheckedChange={() => isAvailable && toggleEquipement(eq.id)}
+                        disabled={!isAvailable}
                         className="border-slate-500"
                       />
                       <Label
                         htmlFor={`eq-${eq.id}`}
-                        className="text-slate-300 cursor-pointer flex-1"
+                        className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                       >
-                        {eq.nom}
+                        {eq.nom} {!isAvailable && '(déjà utilisé)'}
                       </Label>
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="text-slate-400 text-sm p-3 bg-slate-800/30 rounded-lg">
-                Aucun équipement disponible pour cette journée
+                  );
+                })}
               </div>
-            )}
+            </ScrollArea>
           </div>
 
           {/* Boutons */}
