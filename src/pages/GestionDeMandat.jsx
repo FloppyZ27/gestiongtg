@@ -576,6 +576,32 @@ export default function GestionDeMandat() {
           min-width: 300px;
           max-width: 300px;
         }
+
+        /* Contenu des colonnes avec hauteur fixe pour 4 cartes */
+        .kanban-column .kanban-content {
+          max-height: 700px;
+          overflow-y: auto;
+        }
+
+        /* Scrollbar pour le contenu des colonnes */
+        .kanban-column .kanban-content::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .kanban-column .kanban-content::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+        }
+
+        .kanban-column .kanban-content::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, rgb(16, 185, 129), rgb(20, 184, 166));
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+        }
+
+        .kanban-column .kanban-content::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
+        }
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
@@ -755,7 +781,7 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className="p-3 space-y-3"
+                                className="p-3 space-y-3 kanban-content"
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
@@ -871,7 +897,7 @@ export default function GestionDeMandat() {
                               <CardContent
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className="p-3 space-y-3"
+                                className="p-3 space-y-3 kanban-content"
                               >
                                 {cardsInColumn.map((card, index) => (
                                   <Draggable key={card.id} draggableId={card.id} index={index}>
