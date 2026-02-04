@@ -775,6 +775,16 @@ export default function GestionDeMandat() {
         .kanban-column .kanban-content [role="presentation"] {
           border: none !important;
         }
+
+        /* Force border-0 sur les Card Kanban */
+        .kanban-column > * {
+          border: none !important;
+        }
+
+        /* Supprimer bordure calendar */
+        [role="tabpanel"] [class*="Card"] {
+          border: none !important;
+        }
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
