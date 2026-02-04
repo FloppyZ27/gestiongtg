@@ -616,7 +616,6 @@ export default function GestionDeMandat() {
         </Card>
 
         {/* Tabs pour les différentes vues */}
-        <div className="w-full overflow-x-auto">
         <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
           <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 h-auto mb-6">
             <TabsTrigger
@@ -1092,7 +1091,6 @@ export default function GestionDeMandat() {
             </Card>
           </TabsContent>
         </Tabs>
-        </div>
 
 
 
