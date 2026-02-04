@@ -2330,7 +2330,7 @@ export default function Dossiers() {
                 </TableHeader>
                 <TableBody>
                   {importedData.map((row, index) => (
-                    <TableRow key={index} className="border-slate-800">
+                    <TableRow key={`import-row-${index}-${row['N° dossier']}`} className="border-slate-800">
                       <TableCell className="text-white">{row['N° dossier'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['Arpenteur-Géomètre'] || row['Arpenteur-Géomètres'] || '-'}</TableCell>
                       <TableCell className="text-white">{row['TTL'] || 'Non'}</TableCell>
