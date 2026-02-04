@@ -1213,9 +1213,7 @@ export default function GestionDeMandat() {
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
-              <div className="kanban-scrollbar-top" id="kanban-scrollbar-users">
-                <div className="kanban-scrollbar-content" style={{ width: 'max-content' }}></div>
-              </div>
+              <div className="kanban-scrollbar-top" id="kanban-scrollbar-users"></div>
               <div 
                 className="kanban-scroll-container"
                 id="kanban-container-users"
