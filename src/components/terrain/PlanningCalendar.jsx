@@ -709,6 +709,19 @@ export default function PlanningCalendar({
             }
           }
         }
+        
+        /* Supprimer les bordures */
+        * {
+          border: none !important;
+          outline: none !important;
+        }
+        [class*="border"],
+        [class*="shadow"],
+        [class*="outline"] {
+          border: none !important;
+          box-shadow: none !important;
+          outline: none !important;
+        }
       `}</style>
       
 
