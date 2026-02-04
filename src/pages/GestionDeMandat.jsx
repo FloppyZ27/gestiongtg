@@ -327,6 +327,7 @@ export default function GestionDeMandat() {
   React.useEffect(() => {
     let isDraggingCard = false;
     let kanbanContainer = document.querySelector('.kanban-scroll-container');
+    let scrollInterval;
 
     const preventHorizontalScroll = (e) => {
       if (isDraggingCard && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -337,19 +338,14 @@ export default function GestionDeMandat() {
     const handleDragOver = (e) => {
       if (!isDraggingCard || !kanbanContainer) return;
 
-      const edgeSize = 150; // zone sensible
-      const scrollSpeed = 20;
-
       const rect = kanbanContainer.getBoundingClientRect();
+      clearInterval(scrollInterval);
 
-      // Scroll gauche
-      if (e.clientX < rect.left + edgeSize) {
-        kanbanContainer.scrollLeft -= scrollSpeed;
-      }
-
-      // Scroll droite
-      if (e.clientX > rect.right - edgeSize) {
-        kanbanContainer.scrollLeft += scrollSpeed;
+      if (e.clientX < rect.left + 100) {
+        scrollInterval = setInterval(() => kanbanContainer.scrollLeft -= 15, 16);
+      } 
+      else if (e.clientX > rect.right - 100) {
+        scrollInterval = setInterval(() => kanbanContainer.scrollLeft += 15, 16);
       }
 
       // Mettre à jour la position du drag preview
@@ -374,6 +370,7 @@ export default function GestionDeMandat() {
     const handleDragEnd = () => {
       isDraggingCard = false;
       document.body.classList.remove("dragging-card");
+      clearInterval(scrollInterval);
       if (kanbanContainer) {
         kanbanContainer.style.overflowX = 'auto';
       }
@@ -385,6 +382,7 @@ export default function GestionDeMandat() {
     document.addEventListener('dragover', handleDragOver);
 
     return () => {
+      clearInterval(scrollInterval);
       document.removeEventListener('dragstart', handleDragStart);
       document.removeEventListener('dragend', handleDragEnd);
       document.removeEventListener('dragover', handleDragOver);
