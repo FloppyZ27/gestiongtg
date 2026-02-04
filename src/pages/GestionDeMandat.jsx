@@ -770,6 +770,11 @@ export default function GestionDeMandat() {
         .kanban-column .kanban-content::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(to bottom, rgb(5, 150, 105), rgb(13, 148, 136));
         }
+
+        /* Supprimer les bordures des Card */
+        .kanban-column .kanban-content [role="presentation"] {
+          border: none !important;
+        }
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
