@@ -563,14 +563,17 @@ export default function GestionDeMandat() {
           transform: none !important;
         }
 
-        /* Carte en cours de drag au-dessus de tout et centrée */
+        /* Carte en cours de drag au-dessus de tout */
         div[data-rbd-draggable-id][data-is-dragging="true"] {
           z-index: 99999 !important;
+          pointer-events: none !important;
         }
         
-        /* Centrer la carte sous le curseur pendant le drag */
+        /* Forcer le preview à suivre le curseur centré */
         div[data-rbd-draggable-id][data-is-dragging="true"] > div {
-          transform: translate(-50%, -50%) !important;
+          position: relative !important;
+          left: -50% !important;
+          top: -50% !important;
         }
 
         /* Portal de react-beautiful-dnd au-dessus de tout */
@@ -1239,29 +1242,17 @@ export default function GestionDeMandat() {
                                 >
                                   {cardsForDay.map((card, index) => (
                                     <Draggable key={card.id} draggableId={card.id} index={index}>
-                                      {(provided, snapshot) => {
-                                        const style = {
-                                          ...provided.draggableProps.style,
-                                        };
-
-                                        // Centrer la carte pendant le drag
-                                        if (snapshot.isDragging && style.transform) {
-                                          const transform = style.transform;
-                                          style.transform = `${transform} translate(-50%, -50%)`;
-                                        }
-
-                                        return (
-                                          <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            data-is-dragging={snapshot.isDragging}
-                                            style={style}
-                                          >
-                                            {renderMandatCard(card, provided, snapshot)}
-                                          </div>
-                                        );
-                                      }}
+                                      {(provided, snapshot) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                          data-is-dragging={snapshot.isDragging}
+                                          style={provided.draggableProps.style}
+                                        >
+                                          {renderMandatCard(card, provided, snapshot)}
+                                        </div>
+                                      )}
                                     </Draggable>
                                   ))}
                                   {provided.placeholder}
@@ -1325,29 +1316,17 @@ export default function GestionDeMandat() {
                                           >
                                             {cardsForDay.map((card, index) => (
                                               <Draggable key={card.id} draggableId={card.id} index={index}>
-                                                {(provided, snapshot) => {
-                                                  const style = {
-                                                    ...provided.draggableProps.style,
-                                                  };
-
-                                                  // Centrer la carte pendant le drag
-                                                  if (snapshot.isDragging && style.transform) {
-                                                    const transform = style.transform;
-                                                    style.transform = `${transform} translate(-50%, -50%)`;
-                                                  }
-
-                                                  return (
-                                                    <div
-                                                      ref={provided.innerRef}
-                                                      {...provided.draggableProps}
-                                                      {...provided.dragHandleProps}
-                                                      data-is-dragging={snapshot.isDragging}
-                                                      style={style}
-                                                    >
-                                                      {renderMandatCard(card, provided, snapshot)}
-                                                    </div>
-                                                  );
-                                                }}
+                                                {(provided, snapshot) => (
+                                                  <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    data-is-dragging={snapshot.isDragging}
+                                                    style={provided.draggableProps.style}
+                                                  >
+                                                    {renderMandatCard(card, provided, snapshot)}
+                                                  </div>
+                                                )}
                                               </Draggable>
                                             ))}
                                             {provided.placeholder}
