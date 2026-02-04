@@ -1345,6 +1345,14 @@ export default function PlanningCalendar({
                           );
                         })}
                       </div>
+                      <Button
+                        size="sm"
+                        onClick={() => addEquipe(dateStr)}
+                        className="w-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 h-6 mt-2"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Ajouter équipe
+                      </Button>
                     </Card>
                   );
                 })}
