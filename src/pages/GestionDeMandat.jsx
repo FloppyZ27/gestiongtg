@@ -86,7 +86,8 @@ export default function GestionDeMandat() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-
+  const [draggedCard, setDraggedCard] = useState(null);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
 
   const queryClient = useQueryClient();
 
@@ -249,7 +250,19 @@ export default function GestionDeMandat() {
     return weeks;
   };
 
+  const handleDragStart = (start) => {
+    const card = filteredCards.find(c => c.id === start.draggableId);
+    setDraggedCard(card);
+  };
+
+  const handleDragUpdate = (update) => {
+    // Suivre la position du curseur n'est pas directement disponible dans react-beautiful-dnd
+    // On va utiliser un event listener global à la place
+  };
+
   const handleDragEnd = (result) => {
+    setDraggedCard(null);
+    
     if (!result.destination) return;
 
     const { source, destination, draggableId } = result;
@@ -296,7 +309,86 @@ export default function GestionDeMandat() {
     });
   };
 
+  // Event listener pour suivre le curseur pendant le drag
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (draggedCard) {
+        setDragPosition({ x: e.clientX, y: e.clientY });
+      }
+    };
 
+    if (draggedCard) {
+      document.addEventListener("mousemove", handleMouseMove);
+      return () => document.removeEventListener("mousemove", handleMouseMove);
+    }
+  }, [draggedCard]);
+
+  // Event listeners natifs pour bloquer le scroll horizontal pendant le drag
+  React.useEffect(() => {
+    let isDraggingCard = false;
+    let kanbanContainer = document.querySelector('.kanban-scroll-container');
+    let scrollInterval;
+
+    const preventHorizontalScroll = (e) => {
+      if (isDraggingCard && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+      }
+    };
+
+    const handleDragOver = (e) => {
+      if (!isDraggingCard || !kanbanContainer) return;
+
+      const rect = kanbanContainer.getBoundingClientRect();
+      clearInterval(scrollInterval);
+
+      if (e.clientX < rect.left + 100) {
+        scrollInterval = setInterval(() => kanbanContainer.scrollLeft -= 15, 16);
+      } 
+      else if (e.clientX > rect.right - 100) {
+        scrollInterval = setInterval(() => kanbanContainer.scrollLeft += 15, 16);
+      }
+
+      // Mettre à jour la position du drag preview
+      const el = document.querySelector(".drag-preview");
+      if (el) {
+        el.style.left = e.clientX + "px";
+        el.style.top = e.clientY + "px";
+      }
+    };
+
+    const handleDragStart = (e) => {
+      if (e.target.closest('[data-rbd-draggable-id]')) {
+        isDraggingCard = true;
+        document.body.classList.add("dragging-card");
+        if (kanbanContainer) {
+          kanbanContainer.style.overflowX = 'hidden';
+        }
+        document.addEventListener('wheel', preventHorizontalScroll, { passive: false });
+      }
+    };
+
+    const handleDragEnd = () => {
+      isDraggingCard = false;
+      document.body.classList.remove("dragging-card");
+      clearInterval(scrollInterval);
+      if (kanbanContainer) {
+        kanbanContainer.style.overflowX = 'auto';
+      }
+      document.removeEventListener('wheel', preventHorizontalScroll);
+    };
+
+    document.addEventListener('dragstart', handleDragStart);
+    document.addEventListener('dragend', handleDragEnd);
+    document.addEventListener('dragover', handleDragOver);
+
+    return () => {
+      clearInterval(scrollInterval);
+      document.removeEventListener('dragstart', handleDragStart);
+      document.removeEventListener('dragend', handleDragEnd);
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('wheel', preventHorizontalScroll);
+    };
+  }, []);
 
   const getTacheColor = (tache) => {
        const colors = {
@@ -564,7 +656,57 @@ export default function GestionDeMandat() {
           cursor: grabbing;
         }
 
+        /* Bloquer le scroll horizontal pendant le drag */
+        body.dragging-card .kanban-scroll-container {
+          overflow-x: hidden !important;
+          cursor: grabbing !important;
+        }
 
+        /* Cursors pour drag */
+        [data-rbd-draggable-context-id] {
+          cursor: grab !important;
+        }
+
+        [data-rbd-draggable-context-id]:active {
+          cursor: grabbing !important;
+        }
+
+        /* DRAG PREVIEW - FORCÉ position fixed avec z-index maximum */
+        [data-rbd-draggable-id][style*="position: fixed"] {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+        }
+
+        /* Masquer la carte originale pendant le drag */
+        [data-rbd-draggable-id][data-is-dragging="true"] {
+          opacity: 0 !important;
+        }
+
+        /* Custom drag overlay */
+        .drag-overlay {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none !important;
+          transform: translate(-50%, -50%) !important;
+        }
+
+        /* Drag preview styling */
+        .drag-preview {
+          position: fixed !important;
+          z-index: 999999 !important;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+          opacity: 0.95;
+          rotate: 2deg;
+        }
+
+        /* Drag over column styling */
+        .kanban-column.drag-over {
+          background: rgba(0, 121, 191, 0.15);
+          border: 2px dashed #0079bf;
+        }
 
         /* Personnaliser la scrollbar pour le Kanban */
         .kanban-scroll-container::-webkit-scrollbar {
@@ -846,9 +988,23 @@ export default function GestionDeMandat() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Custom Drag Overlay Portal */}
+          {draggedCard && ReactDOM.createPortal(
+            <div 
+              className="drag-overlay"
+              style={{
+                left: `${dragPosition.x}px`,
+                top: `${dragPosition.y}px`,
+              }}
+            >
+              {renderMandatCard(draggedCard, null, { isDragging: true })}
+            </div>,
+            document.body
+          )}
+
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
-             <DragDropContext onDragEnd={handleDragEnd}>
+             <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
                <div 
                  className="kanban-scroll-container"
                  ref={(el) => {
@@ -967,7 +1123,7 @@ export default function GestionDeMandat() {
 
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
-            <DragDropContext onDragEnd={handleDragEnd}>
+            <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
               <div 
                 className="kanban-scroll-container"
                 ref={(el) => {
@@ -1170,7 +1326,7 @@ export default function GestionDeMandat() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <DragDropContext onDragEnd={handleDragEnd}>
+                <DragDropContext onDragStart={handleDragStart} onDragUpdate={handleDragUpdate} onDragEnd={handleDragEnd}>
                   {calendarMode === "week" ? (
                     <div className="grid grid-cols-5 gap-3">
                       {[0, 1, 2, 3, 4].map((dayOffset) => {
