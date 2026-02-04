@@ -7178,6 +7178,9 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     >
                       Ville {sortField === 'ville' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </TableHead>
+                    <TableHead className="text-slate-300">
+                      N° de téléphone
+                    </TableHead>
                     <TableHead
                       className="text-slate-300 cursor-pointer hover:text-white"
                       onClick={() => handleSort('types_mandats')}
@@ -7320,6 +7323,14 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                           <TableCell className="text-slate-300 text-sm">
                             {pm.adresse_travaux?.ville || '-'}
                           </TableCell>
+                          <TableCell className="text-slate-300 text-sm">
+                            {pm.client_info?.telephone || 
+                             (pm.clients_ids?.length > 0 && (() => {
+                               const client = getClientById(pm.clients_ids[0]);
+                               return client?.telephones?.find(t => t.actuel)?.telephone || client?.telephones?.[0]?.telephone || '-';
+                             })()) || 
+                             '-'}
+                          </TableCell>
                           <TableCell className="text-slate-300">
                             {pm.mandats && pm.mandats.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
@@ -7377,7 +7388,7 @@ Veuillez agréer, ${nomClient}, nos salutations distinguées.`;
                     return pm.statut === tabStatut;
                   }).length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12 text-slate-500">
+                      <TableCell colSpan={9} className="text-center py-12 text-slate-500">
                         Aucune prise de mandat dans cette catégorie
                       </TableCell>
                     </TableRow>
