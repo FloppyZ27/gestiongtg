@@ -1337,7 +1337,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "vehicules" && (
+                              {displayedTab === "vehicules" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
                                   {(provided, snapshot) => (
                                     <div
@@ -1372,7 +1372,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "equipements" && (
+                              {displayedTab === "equipements" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
                                   {(provided, snapshot) => (
                                     <div
@@ -1554,7 +1554,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "vehicules" && (
+                              {displayedTab === "vehicules" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-vehicules`} type="VEHICULE">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-purple-500/20 border border-purple-500' : 'border border-slate-700'}`}>
@@ -1573,7 +1573,7 @@ export default function PlanningCalendar({
                                 </Droppable>
                               )}
 
-                              {activeTab === "equipements" && (
+                              {displayedTab === "equipements" && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-equipements`} type="EQUIPEMENT">
                                   {(provided, snapshot) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className={`mb-1 p-1 rounded min-h-[24px] ${snapshot.isDraggingOver ? 'bg-orange-500/20 border border-orange-500' : 'border border-slate-700'}`}>
