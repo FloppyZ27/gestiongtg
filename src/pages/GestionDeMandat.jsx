@@ -785,6 +785,11 @@ export default function GestionDeMandat() {
         [role="tabpanel"] [class*="Card"] {
           border: none !important;
         }
+
+        /* Supprimer bordure des cartes mandats */
+        [data-rbd-draggable-id] > div {
+          border: none !important;
+        }
       `}</style>
       
       <div className="w-full px-0 overflow-x-hidden">
