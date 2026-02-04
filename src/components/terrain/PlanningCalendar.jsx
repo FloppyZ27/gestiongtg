@@ -1159,18 +1159,18 @@ export default function PlanningCalendar({
             {viewMode === "week" ? (
               <div className="grid grid-cols-5" style={{ gap: '5px' }}>
                 {days.map((day) => {
-                  const dateStr = format(day, "yyyy-MM-dd");
-                  const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                  const dayEquipes = equipes[dateStr] || [];
+                   const dateStr = format(day, "yyyy-MM-dd");
+                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
+                   const dayEquipes = equipes[dateStr] || [];
 
-                  const holiday = isHoliday(day);
-                  return (
-                    <Card 
-                      key={dateStr}
-                      className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''}`}
-                      >
-                      <div className="mb-2">
-                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
+                   const holiday = isHoliday(day);
+                   return (
+                     <Card 
+                       key={dateStr}
+                       className={`bg-slate-900/50 border-slate-800 p-2 ${isToday ? 'ring-2 ring-emerald-500' : ''} ${holiday ? 'bg-red-900/20 border-red-500/30' : ''} w-full`}
+                       >
+                      <div className="mb-2 w-full">
+                        <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
                           <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
                             {format(day, "EEEE", { locale: fr })}
                           </div>
@@ -1185,7 +1185,7 @@ export default function PlanningCalendar({
                         </div>
                       </div>
 
-                      <div className="space-y-2 flex-1 overflow-y-auto">
+                      <div className="space-y-2 flex-1 overflow-y-auto w-full">
                         {dayEquipes.map((equipe) => {
                            const activeTab = getEquipeActiveTab(equipe.id);
                            const equipeNom = equipe.techniciens.length > 0
