@@ -572,9 +572,9 @@ export default function GestionDeMandat() {
 
         /* Colonnes avec largeur fixe */
         .kanban-column {
-          flex: 0 0 300px;
-          min-width: 300px;
-          max-width: 300px;
+          flex: 0 0 270px;
+          min-width: 270px;
+          max-width: 270px;
         }
 
         /* Contenu des colonnes avec hauteur fixe pour 4 cartes */
