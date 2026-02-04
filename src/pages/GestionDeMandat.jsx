@@ -645,7 +645,8 @@ export default function GestionDeMandat() {
           {/* Vue par Tâches */}
            <TabsContent value="taches" className="mt-0">
              <DragDropContext onDragEnd={handleDragEnd}>
-               <div className="flex gap-4 p-4" style={{ width: '100%' }}>
+               <div className="overflow-x-auto">
+                 <div className="flex gap-4 p-4 min-w-max">
 
                       {TACHES.map(tache => {
                     const cardsInColumn = cardsByTache[tache] || [];
@@ -653,7 +654,7 @@ export default function GestionDeMandat() {
                     return (
                       <div 
                          key={tache} 
-                         className="flex-1 min-w-0"
+                         className="flex-shrink-0 w-[18.14rem]"
                          style={{ 
                            zIndex: 1 
                          }}
@@ -742,10 +743,11 @@ export default function GestionDeMandat() {
                         </Card>
                       </div>
                     );
-                  })}
-               </div>
-           </DragDropContext>
-          </TabsContent>
+                    })}
+                    </div>
+                    </div>
+                    </DragDropContext>
+                    </TabsContent>
 
           {/* Vue par Utilisateur */}
           <TabsContent value="utilisateurs" className="mt-0">
