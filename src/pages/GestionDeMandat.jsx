@@ -253,12 +253,6 @@ export default function GestionDeMandat() {
   const handleDragStart = (start) => {
     const card = filteredCards.find(c => c.id === start.draggableId);
     setDraggedCard(card);
-    
-    // Bloquer le défilement horizontal pendant le drag
-    const kanbanContainer = document.querySelector('.kanban-scroll-container');
-    if (kanbanContainer) {
-      kanbanContainer.style.overflowX = 'hidden';
-    }
   };
 
   const handleDragUpdate = (update) => {
@@ -268,12 +262,6 @@ export default function GestionDeMandat() {
 
   const handleDragEnd = (result) => {
     setDraggedCard(null);
-    
-    // Réactiver le défilement horizontal
-    const kanbanContainer = document.querySelector('.kanban-scroll-container');
-    if (kanbanContainer) {
-      kanbanContainer.style.overflowX = 'auto';
-    }
     
     if (!result.destination) return;
 
@@ -334,6 +322,41 @@ export default function GestionDeMandat() {
       return () => document.removeEventListener("mousemove", handleMouseMove);
     }
   }, [draggedCard]);
+
+  // Event listeners natifs pour bloquer le scroll horizontal pendant le drag
+  React.useEffect(() => {
+    let isDraggingCard = false;
+
+    const handleDragStart = (e) => {
+      if (e.target.closest('[data-rbd-draggable-id]')) {
+        isDraggingCard = true;
+        const kanbanContainer = document.querySelector('.kanban-scroll-container');
+        if (kanbanContainer) {
+          kanbanContainer.style.overflowX = 'hidden';
+          kanbanContainer.style.cursor = 'grabbing';
+        }
+      }
+    };
+
+    const handleDragEnd = () => {
+      if (isDraggingCard) {
+        isDraggingCard = false;
+        const kanbanContainer = document.querySelector('.kanban-scroll-container');
+        if (kanbanContainer) {
+          kanbanContainer.style.overflowX = 'auto';
+          kanbanContainer.style.cursor = 'grab';
+        }
+      }
+    };
+
+    document.addEventListener('dragstart', handleDragStart);
+    document.addEventListener('dragend', handleDragEnd);
+
+    return () => {
+      document.removeEventListener('dragstart', handleDragStart);
+      document.removeEventListener('dragend', handleDragEnd);
+    };
+  }, []);
 
   const getTacheColor = (tache) => {
        const colors = {
