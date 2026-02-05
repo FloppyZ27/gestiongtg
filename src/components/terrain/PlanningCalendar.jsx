@@ -687,10 +687,9 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
-  const DossierCard = ({ dossier, placedDate }) => {
-    const mandat = dossier.mandats?.find(m => m.tache_actuelle === "Cédule");
+  const DossierCard = ({ card, placedDate }) => {
+    const { dossier, mandat, terrain } = card;
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
-    const terrain = mandat?.terrain || {};
     
     // Couleur basée sur l'arpenteur
     const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
