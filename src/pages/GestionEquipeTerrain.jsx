@@ -201,8 +201,12 @@ export default function GestionEquipeTerrain() {
 
   const updateDossierMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Dossier.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+    onSuccess: (updatedDossier, { id, data }) => {
+      // Mettre à jour le cache directement avec les nouvelles données
+      queryClient.setQueryData(['dossiers'], (oldDossiers) => {
+        if (!oldDossiers) return [updatedDossier];
+        return oldDossiers.map(d => d.id === id ? { ...d, ...data } : d);
+      });
     },
   });
 
