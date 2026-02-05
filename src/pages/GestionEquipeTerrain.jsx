@@ -237,7 +237,7 @@ export default function GestionEquipeTerrain() {
         </div>
 
         <PlanningCalendar 
-          dossiers={dossiersCedule}
+          dossiers={dossiers}
           techniciens={techniciensTerrain}
           vehicules={vehicules}
           equipements={equipements}
