@@ -648,6 +648,27 @@ export default function PlanningCalendar({
 
   const terrainCards = generateTerrainCards();
 
+  // Nettoyer les cartes supprimées des équipes
+  useEffect(() => {
+    const validCardIds = new Set(terrainCards.map(c => c.id));
+    let needsCleanup = false;
+    
+    const cleanedEquipes = { ...equipes };
+    Object.keys(cleanedEquipes).forEach(dateStr => {
+      cleanedEquipes[dateStr].forEach(equipe => {
+        const originalLength = equipe.mandats.length;
+        equipe.mandats = equipe.mandats.filter(cardId => validCardIds.has(cardId));
+        if (equipe.mandats.length !== originalLength) {
+          needsCleanup = true;
+        }
+      });
+    });
+    
+    if (needsCleanup) {
+      setEquipes(cleanedEquipes);
+    }
+  }, [dossiers]);
+
   const unassignedCards = terrainCards.filter(card => {
     const isAssignedInEquipe = Object.values(equipes).some(dayEquipes => 
       dayEquipes.some(equipe => equipe.mandats.includes(card.id))
