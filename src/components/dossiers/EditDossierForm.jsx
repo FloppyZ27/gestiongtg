@@ -1599,7 +1599,7 @@ export default function EditDossierForm({
                               </Select>
                             </div>
                           </div>
-                          <div className="grid grid-cols-1 gap-3 mt-3">
+                          <div className="grid grid-cols-2 gap-3 mt-3">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Temps prévu</Label>
                               <Input 
@@ -1609,7 +1609,40 @@ export default function EditDossierForm({
                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                               />
                             </div>
+                            <div className="space-y-1 flex items-end">
+                              <div className="flex items-center gap-2 h-8">
+                                <Switch 
+                                  checked={newTerrainForm.a_rendez_vous || false}
+                                  onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
+                                />
+                                <Label className="text-slate-400 text-xs">Rendez-vous</Label>
+                              </div>
+                            </div>
                           </div>
+                          
+                          {newTerrainForm.a_rendez_vous && (
+                            <div className="grid grid-cols-2 gap-3 mt-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                                <Input 
+                                  type="date"
+                                  value={newTerrainForm.date_rendez_vous || ""}
+                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, date_rendez_vous: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                                <Input 
+                                  type="time"
+                                  value={newTerrainForm.heure_rendez_vous || ""}
+                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, heure_rendez_vous: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
                           <Button 
                             type="button"
                             size="sm"
