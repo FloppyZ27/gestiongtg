@@ -1325,7 +1325,8 @@ export default function PlanningCalendar({
                                                 const tech = techniciens.find(t => t.id === techId);
                                                 if (!tech) return null;
                                                 return (
-                                                  <span key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                  <span key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 py-0 text-white text-xs leading-tight flex items-center gap-1">
+                                                    <Users className="w-3 h-3 text-blue-400" />
                                                     {tech.prenom} {tech.nom}
                                                   </span>
                                                 );
@@ -1351,7 +1352,8 @@ export default function PlanningCalendar({
                                                 const v = vehicules.find(v => v.id === vId);
                                                 if (!v) return null;
                                                 return (
-                                                  <span key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                  <span key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 py-0 text-white text-xs leading-tight flex items-center gap-1">
+                                                    <Truck className="w-3 h-3 text-purple-400" />
                                                     {v.nom}
                                                   </span>
                                                 );
@@ -1377,7 +1379,8 @@ export default function PlanningCalendar({
                                                 const e = equipements.find(e => e.id === eId);
                                                 if (!e) return null;
                                                 return (
-                                                  <span key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
+                                                  <span key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 py-0 text-white text-xs leading-tight flex items-center gap-1">
+                                                    <Wrench className="w-3 h-3 text-orange-400" />
                                                     {e.nom}
                                                   </span>
                                                 );
