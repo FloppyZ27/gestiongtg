@@ -610,8 +610,7 @@ export default function PlanningCalendar({
         sourceEquipe.mandats = sourceEquipe.mandats.filter(id => id !== draggableId);
       }
     } else if (sourceId === "unassigned") {
-      // Si provient de unassigned, on retire juste de là
-      equipe.mandats = equipe.mandats.filter(id => id !== draggableId);
+      // Si provient de unassigned, on ne fait rien - pas à retirer
     }
 
     // Ajouter à la destination à l'index spécifié
