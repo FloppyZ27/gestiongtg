@@ -628,18 +628,8 @@ export default function PlanningCalendar({
               terrainIndex: terrainIndex
             });
           });
-        } else if (mandat.terrain && Object.keys(mandat.terrain).some(key => mandat.terrain[key] !== null && mandat.terrain[key] !== undefined && mandat.terrain[key] !== "")) {
-          // Rétrocompatibilité : si pas de terrains_list mais un terrain principal avec des données valides
-          cards.push({
-            id: `${dossier.id}-${mandatIndex}-legacy`,
-            dossierId: dossier.id,
-            dossier: dossier,
-            mandat: mandat,
-            terrain: mandat.terrain,
-            mandatIndex: mandatIndex,
-            terrainIndex: null
-          });
         }
+        // Ne plus utiliser mandat.terrain pour la rétrocompatibilité - seulement terrains_list
       });
     });
     
