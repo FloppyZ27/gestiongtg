@@ -595,12 +595,15 @@ export default function PlanningCalendar({
       const updatedMandats = card.dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
           // Mettre à jour le terrain spécifique dans terrains_list
-          const updatedTerrainsList = m.terrains_list ? m.terrains_list.map((t, tIdx) => {
-            if (tIdx === card.terrainIndex) {
-              return { ...t, date_cedulee: dest.dateStr, equipe_assignee: equipeNom };
-            }
-            return t;
-          }) : m.terrains_list;
+          let updatedTerrainsList = m.terrains_list || [];
+          if (updatedTerrainsList.length > 0) {
+            updatedTerrainsList = updatedTerrainsList.map((t, tIdx) => {
+              if (tIdx === card.terrainIndex) {
+                return { ...t, date_cedulee: dest.dateStr, equipe_assignee: equipeNom };
+              }
+              return t;
+            });
+          }
           
           return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom, terrains_list: updatedTerrainsList };
         }
