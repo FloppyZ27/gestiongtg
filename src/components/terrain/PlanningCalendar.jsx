@@ -1326,7 +1326,7 @@ export default function PlanningCalendar({
                                                 if (!tech) return null;
                                                 return (
                                                   <span key={techId} className="bg-blue-500/20 border border-blue-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
-                                                    {tech.prenom.charAt(0)}{tech.nom.charAt(0)}
+                                                    {tech.prenom} {tech.nom}
                                                   </span>
                                                 );
                                               })}
@@ -1352,7 +1352,7 @@ export default function PlanningCalendar({
                                                 if (!v) return null;
                                                 return (
                                                   <span key={vId} className="bg-purple-500/20 border border-purple-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
-                                                    {v.nom.substring(0, 3)}
+                                                    {v.nom}
                                                   </span>
                                                 );
                                               })}
@@ -1378,7 +1378,7 @@ export default function PlanningCalendar({
                                                 if (!e) return null;
                                                 return (
                                                   <span key={eId} className="bg-orange-500/20 border border-orange-500/30 rounded px-1 py-0 text-white text-xs leading-tight">
-                                                    {e.nom.substring(0, 3)}
+                                                    {e.nom}
                                                   </span>
                                                 );
                                               })}
