@@ -1439,12 +1439,17 @@ export default function PlanningCalendar({
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                                <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span 
-                                    className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors"
-                                    onClick={() => handleEditTeam(dateStr, equipe)}
-                                  >
-                                    {equipeNom}
-                                  </span>
+                                  <div>
+                                    <span 
+                                      className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors block"
+                                      onClick={() => handleEditTeam(dateStr, equipe)}
+                                    >
+                                      {equipeNom}
+                                    </span>
+                                    <span className="text-emerald-300 text-xs">
+                                      {calculateEquipeTimings(equipe, dateStr).totalTime}h - {equipe.mandats?.length || 0} mandats
+                                    </span>
+                                  </div>
                                   <div className="flex items-center gap-1">
                                     <button
                                       onClick={() => copyEquipe(dateStr, equipe.id)}
