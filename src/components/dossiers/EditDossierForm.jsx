@@ -1795,9 +1795,9 @@ export default function EditDossierForm({
                                     {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs">
-                                    {mandat.date_terrain ? format(new Date(mandat.date_terrain), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    {terrain.date_cedulee ? format(new Date(terrain.date_cedulee), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{mandat.equipe_assignee || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{terrain.equipe_assignee || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.instruments_requis || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.donneur || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
