@@ -1768,6 +1768,8 @@ export default function EditDossierForm({
                             <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
                               <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
                               <TableHead className="text-slate-300 text-xs">Date limite cédule</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Date cédulé</TableHead>
+                              <TableHead className="text-slate-300 text-xs">Équipe</TableHead>
                               <TableHead className="text-slate-300 text-xs">Instruments</TableHead>
                               <TableHead className="text-slate-300 text-xs">Donneur</TableHead>
                               <TableHead className="text-slate-300 text-xs">Technicien</TableHead>
@@ -1790,6 +1792,10 @@ export default function EditDossierForm({
                                   <TableCell className="text-slate-300 text-xs">
                                     {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">
+                                    {mandat.date_terrain ? format(new Date(mandat.date_terrain), "dd MMM yyyy", { locale: fr }) : "-"}
+                                  </TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{mandat.equipe_assignee || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.instruments_requis || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.donneur || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
