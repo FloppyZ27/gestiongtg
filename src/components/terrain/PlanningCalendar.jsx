@@ -421,6 +421,40 @@ export default function PlanningCalendar({
       });
     };
 
+    // Drag & drop vers "À planifier" - réinitialiser les données de terrain
+    if (destId === "unassigned") {
+      // Retirer des équipes et réinitialiser la date terrain et équipe
+      const newEquipes = { ...equipes };
+      Object.keys(newEquipes).forEach(dateStr => {
+        newEquipes[dateStr].forEach(equipe => {
+          equipe.mandats = equipe.mandats.filter(id => id !== draggableId);
+        });
+      });
+      setEquipes(newEquipes);
+
+      // Réinitialiser date_terrain et equipe_assignee
+      const card = terrainCards.find(c => c.id === draggableId);
+      if (card && onUpdateDossier) {
+        const updatedMandats = card.dossier.mandats.map((m, idx) => {
+          if (idx === card.mandatIndex) {
+            // Vider les données de terrain aussi
+            let updatedTerrainsList = [...(m.terrains_list || [])];
+            if (updatedTerrainsList[card.terrainIndex]) {
+              updatedTerrainsList[card.terrainIndex] = {
+                ...updatedTerrainsList[card.terrainIndex],
+                date_cedulee: null,
+                equipe_assignee: null
+              };
+            }
+            return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: updatedTerrainsList };
+          }
+          return m;
+        });
+        onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
+      }
+      return;
+    }
+
     // Drag & drop de technicien
     if (type === "TECHNICIEN") {
       const dest = parseEquipeDroppableId(destId);
