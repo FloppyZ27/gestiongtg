@@ -1761,7 +1761,7 @@ export default function EditDossierForm({
                     </div>
 
                     {/* Liste des terrains par mandat */}
-                    {formData.mandats.some(m => m.terrain && (m.terrain.date_limite_leve || m.terrain.instruments_requis || m.terrain.donneur || m.terrain.technicien || m.terrain.temps_prevu)) && (
+                    {formData.mandats.some(m => m.terrains_list && m.terrains_list.length > 0) && (
                       <div className="border border-slate-700 rounded-lg overflow-hidden">
                         <Table>
                           <TableHeader>
@@ -1772,30 +1772,44 @@ export default function EditDossierForm({
                               <TableHead className="text-slate-300 text-xs">Donneur</TableHead>
                               <TableHead className="text-slate-300 text-xs">Technicien</TableHead>
                               <TableHead className="text-slate-300 text-xs">Temps prévu</TableHead>
+                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {formData.mandats.map((mandat, mandatIndex) => {
-                              if (!mandat.terrain || (!mandat.terrain.date_limite_leve && !mandat.terrain.instruments_requis && !mandat.terrain.donneur && !mandat.terrain.technicien && !mandat.terrain.temps_prevu)) {
-                                return null;
+                            {formData.mandats.flatMap((mandat, mandatIndex) => {
+                              if (!mandat.terrains_list || mandat.terrains_list.length === 0) {
+                                return [];
                               }
-                              return (
-                                <TableRow key={mandatIndex} className="hover:bg-slate-800/30 border-slate-800">
+                              return mandat.terrains_list.map((terrain, terrainIndex) => (
+                                <TableRow key={`${mandatIndex}-${terrainIndex}`} className="hover:bg-slate-800/30 border-slate-800">
                                   <TableCell>
                                     <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
                                       {getAbbreviatedMandatType(mandat.type_mandat) || `Mandat ${mandatIndex + 1}`}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-slate-300 text-xs">
-                                    {mandat.terrain.date_limite_leve ? format(new Date(mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
                                   </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{mandat.terrain.instruments_requis || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{mandat.terrain.donneur || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{mandat.terrain.technicien || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{mandat.terrain.temps_prevu || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{terrain.instruments_requis || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{terrain.donneur || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
+                                  <TableCell className="text-slate-300 text-xs">{terrain.temps_prevu || "-"}</TableCell>
+                                  <TableCell className="text-right">
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updatedMandats = [...formData.mandats];
+                                        updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
+                                        setFormData({...formData, mandats: updatedMandats});
+                                      }}
+                                      className="text-slate-400 hover:text-red-400 transition-colors"
+                                    >
+                                      <Trash className="w-4 h-4" />
+                                    </button>
+                                  </TableCell>
                                 </TableRow>
-                              );
-                            }).filter(Boolean)}
+                              ));
+                            })}
                           </TableBody>
                         </Table>
                       </div>
