@@ -1723,8 +1723,8 @@ export default function EditDossierForm({
                                 dossier_simultane: newTerrainForm.dossier_simultane || ""
                               };
                               
-                              // Mettre automatiquement le statut_terrain à "a_ceduler"
-                              updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "a_ceduler";
+                              // Mettre automatiquement le statut_terrain à "en_verification"
+                              updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "en_verification";
 
                               setFormData({...formData, mandats: updatedMandats});
                               setNewTerrainForm({});
