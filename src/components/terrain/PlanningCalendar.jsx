@@ -697,7 +697,7 @@ export default function PlanningCalendar({
       <div 
         onClick={(e) => {
           e.stopPropagation();
-          handleCardClick(dossier);
+          handleCardClick(card);
         }}
         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
       >
