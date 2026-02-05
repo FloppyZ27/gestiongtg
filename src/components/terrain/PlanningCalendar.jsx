@@ -1692,10 +1692,11 @@ export default function PlanningCalendar({
                                   </button>
                                 </div>
                                 </div>
+                                </div>
 
                                   <div className="p-1">
 
-                              {/* Contenu du tab actif ou du mode global */}
+                                {/* Contenu du tab actif ou du mode global */}
                               {(globalViewMode === "techniciens" || activeTab === "techniciens") && (
                                 <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-techniciens`} type="TECHNICIEN">
                                   {(provided, snapshot) => (
