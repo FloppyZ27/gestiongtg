@@ -1490,7 +1490,7 @@ export default function EditDossierForm({
             {formData.mandats.length > 0 && (
               <Card className="border-slate-700 bg-slate-800/30">
                 <CardHeader 
-                  className="cursor-pointer hover:bg-purple-900/40 transition-colors rounded-t-lg py-1.5 bg-purple-900/20"
+                  className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
                   onClick={() => {
                     const newState = !terrainCollapsed;
                     setTerrainCollapsed(newState);
@@ -1498,10 +1498,10 @@ export default function EditDossierForm({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-purple-500/30 flex items-center justify-center">
-                        <MapPin className="w-3.5 h-3.5 text-purple-400" />
+                      <div className="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center">
+                        <MapPin className="w-3.5 h-3.5 text-amber-400" />
                       </div>
-                      <CardTitle className="text-purple-300 text-base">Terrain</CardTitle>
+                      <CardTitle className="text-amber-300 text-base">Terrain</CardTitle>
                     </div>
                     {terrainCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                   </div>
@@ -1510,16 +1510,16 @@ export default function EditDossierForm({
                 {!terrainCollapsed && (
                   <CardContent className="pt-2 pb-3">
                     {/* Formulaire d'ajout de terrain - en haut et collapsable */}
-                    <div className="border-2 border-purple-500/30 rounded-lg mb-4 bg-purple-900/10">
+                    <div className="border-2 border-amber-500/30 rounded-lg mb-4 bg-amber-900/10">
                       <div 
-                        className="cursor-pointer hover:bg-purple-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                        className="cursor-pointer hover:bg-amber-900/40 transition-colors px-4 py-2 flex items-center justify-between"
                         onClick={() => setNewTerrainFormCollapsed(!newTerrainFormCollapsed)}
                       >
                         <div className="flex items-center gap-2">
-                          <Plus className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs font-semibold text-purple-400">Ajouter un terrain</span>
+                          <Plus className="w-4 h-4 text-amber-400" />
+                          <span className="text-xs font-semibold text-amber-400">Ajouter un terrain</span>
                         </div>
-                        {newTerrainFormCollapsed ? <ChevronDown className="w-4 h-4 text-purple-400" /> : <ChevronUp className="w-4 h-4 text-purple-400" />}
+                        {newTerrainFormCollapsed ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronUp className="w-4 h-4 text-amber-400" />}
                       </div>
 
                       {!newTerrainFormCollapsed && (
@@ -1632,7 +1632,7 @@ export default function EditDossierForm({
                               setNewTerrainForm({});
                               setNewTerrainFormCollapsed(true);
                             }}
-                            className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 h-8 text-xs mt-3 w-full border border-purple-500/30"
+                            className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 h-8 text-xs mt-3 w-full border border-amber-500/30"
                           >
                             <Plus className="w-3 h-3 mr-1" />
                             Ajouter le terrain
