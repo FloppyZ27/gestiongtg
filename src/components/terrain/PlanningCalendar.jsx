@@ -675,10 +675,8 @@ export default function PlanningCalendar({
     return teamNumber ? `Équipe ${teamNumber} - ${initials}` : equipe.nom;
   };
 
-  const handleCardClick = (dossier) => {
-    // Trouver l'index du mandat en Cédule
-    const mandatIndex = dossier.mandats?.findIndex(m => m.tache_actuelle === "Cédule");
-    handleEdit(dossier, mandatIndex >= 0 ? mandatIndex : 0);
+  const handleCardClick = (card) => {
+    handleEdit(card.dossier, card.mandatIndex);
   };
 
   const handleEdit = (dossier, mandatIndex = 0) => {
