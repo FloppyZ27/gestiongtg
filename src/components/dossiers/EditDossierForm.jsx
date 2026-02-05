@@ -1710,6 +1710,26 @@ export default function EditDossierForm({
                               }
 
                               const updatedMandats = [...formData.mandats];
+                              
+                              // Initialiser terrains_list si inexistant
+                              if (!updatedMandats[newTerrainForm.mandatIndex].terrains_list) {
+                                updatedMandats[newTerrainForm.mandatIndex].terrains_list = [];
+                              }
+                              
+                              // Ajouter le nouveau terrain à la liste
+                              updatedMandats[newTerrainForm.mandatIndex].terrains_list.push({
+                                date_limite_leve: newTerrainForm.date_limite_leve || "",
+                                instruments_requis: newTerrainForm.instruments_requis || "",
+                                donneur: newTerrainForm.donneur || "",
+                                technicien: newTerrainForm.technicien || "",
+                                temps_prevu: newTerrainForm.temps_prevu || "",
+                                a_rendez_vous: newTerrainForm.a_rendez_vous || false,
+                                date_rendez_vous: newTerrainForm.date_rendez_vous || "",
+                                heure_rendez_vous: newTerrainForm.heure_rendez_vous || "",
+                                dossier_simultane: newTerrainForm.dossier_simultane || ""
+                              });
+                              
+                              // Conserver aussi dans terrain pour rétrocompatibilité (dernier ajouté)
                               updatedMandats[newTerrainForm.mandatIndex].terrain = {
                                 ...updatedMandats[newTerrainForm.mandatIndex].terrain,
                                 date_limite_leve: newTerrainForm.date_limite_leve || "",
@@ -1721,7 +1741,7 @@ export default function EditDossierForm({
                                 date_rendez_vous: newTerrainForm.date_rendez_vous || "",
                                 heure_rendez_vous: newTerrainForm.heure_rendez_vous || "",
                                 dossier_simultane: newTerrainForm.dossier_simultane || ""
-                              };
+              };
                               
                               // Mettre automatiquement le statut_terrain à "en_verification" et la tâche à "Cédule"
                               updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "en_verification";
