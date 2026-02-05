@@ -780,6 +780,29 @@ export default function PlanningCalendar({
     return teamNumber ? `Équipe ${teamNumber} - ${initials}` : equipe.nom;
   };
 
+  const parseTimeString = (timeStr) => {
+    if (!timeStr) return 0;
+    const match = timeStr.match(/(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[0]) : 0;
+  };
+
+  const calculateEquipeTimings = (equipe, dateStr) => {
+    let totalTime = 0;
+    const cardIds = equipe.mandats || [];
+    
+    cardIds.forEach((cardId) => {
+      const card = terrainCards.find(c => c.id === cardId);
+      if (card && card.terrain?.temps_prevu) {
+        totalTime += parseTimeString(card.terrain.temps_prevu);
+      }
+    });
+    
+    return {
+      totalTime: totalTime.toFixed(1),
+      cardCount: cardIds.length
+    };
+  };
+
   const handleCardClick = (card) => {
     handleEdit(card.dossier, card.mandatIndex);
   };
