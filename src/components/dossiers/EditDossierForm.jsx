@@ -1760,58 +1760,92 @@ export default function EditDossierForm({
                       )}
                     </div>
 
-                    {/* Liste des terrains par mandat */}
+                    {/* Liste des terrains par mandat - Cartes individuelles */}
                     {formData.mandats.some(m => m.terrains_list && m.terrains_list.length > 0) && (
-                      <div className="border border-slate-700 rounded-lg overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
-                              <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Date limite cédule</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Instruments</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Donneur</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Technicien</TableHead>
-                              <TableHead className="text-slate-300 text-xs">Temps prévu</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {formData.mandats.flatMap((mandat, mandatIndex) => {
-                              if (!mandat.terrains_list || mandat.terrains_list.length === 0) {
-                                return [];
-                              }
-                              return mandat.terrains_list.map((terrain, terrainIndex) => (
-                                <TableRow key={`${mandatIndex}-${terrainIndex}`} className="hover:bg-slate-800/30 border-slate-800">
-                                  <TableCell>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {formData.mandats.flatMap((mandat, mandatIndex) => {
+                          if (!mandat.terrains_list || mandat.terrains_list.length === 0) {
+                            return [];
+                          }
+                          return mandat.terrains_list.map((terrain, terrainIndex) => (
+                            <Card key={`${mandatIndex}-${terrainIndex}`} className="border-amber-500/30 bg-amber-900/10 hover:bg-amber-900/20 transition-colors">
+                              <CardHeader className="pb-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
                                     <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
                                       {getAbbreviatedMandatType(mandat.type_mandat) || `Mandat ${mandatIndex + 1}`}
                                     </Badge>
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">
-                                    {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
-                                  </TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{terrain.instruments_requis || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{terrain.donneur || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
-                                  <TableCell className="text-slate-300 text-xs">{terrain.temps_prevu || "-"}</TableCell>
-                                  <TableCell className="text-right">
-                                    <button 
-                                      type="button" 
-                                      onClick={() => {
-                                        const updatedMandats = [...formData.mandats];
-                                        updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
-                                        setFormData({...formData, mandats: updatedMandats});
-                                      }}
-                                      className="text-slate-400 hover:text-red-400 transition-colors"
-                                    >
-                                      <Trash className="w-4 h-4" />
-                                    </button>
-                                  </TableCell>
-                                </TableRow>
-                              ));
-                            })}
-                          </TableBody>
-                        </Table>
+                                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                                      Terrain #{terrainIndex + 1}
+                                    </Badge>
+                                  </div>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      const updatedMandats = [...formData.mandats];
+                                      updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
+                                      setFormData({...formData, mandats: updatedMandats});
+                                    }}
+                                    className="text-slate-400 hover:text-red-400 transition-colors"
+                                  >
+                                    <Trash className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="space-y-2">
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div>
+                                    <span className="text-slate-500">Date limite:</span>
+                                    <p className="text-slate-300 font-medium">
+                                      {terrain.date_limite_leve ? format(new Date(terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-500">Temps prévu:</span>
+                                    <p className="text-slate-300 font-medium">{terrain.temps_prevu || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-500">Donneur:</span>
+                                    <p className="text-slate-300 font-medium">{terrain.donneur || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-500">Technicien:</span>
+                                    <p className="text-slate-300 font-medium">{terrain.technicien || "-"}</p>
+                                  </div>
+                                </div>
+                                {terrain.instruments_requis && (
+                                  <div className="text-xs">
+                                    <span className="text-slate-500">Instruments:</span>
+                                    <p className="text-slate-300">{terrain.instruments_requis}</p>
+                                  </div>
+                                )}
+                                {terrain.a_rendez_vous && (
+                                  <div className="flex items-center gap-1 text-xs bg-amber-500/10 border border-amber-500/30 rounded px-2 py-1">
+                                    <Clock className="w-3 h-3 text-amber-400" />
+                                    <span className="text-amber-400">
+                                      RDV: {terrain.date_rendez_vous ? format(new Date(terrain.date_rendez_vous), "dd MMM", { locale: fr }) : "-"}
+                                      {terrain.heure_rendez_vous && ` à ${terrain.heure_rendez_vous}`}
+                                    </span>
+                                  </div>
+                                )}
+                                {terrain.dossier_simultane && (
+                                  <div className="text-xs bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1">
+                                    <span className="text-slate-500">Dossier simultané:</span>
+                                    <p className="text-blue-400 font-medium">
+                                      {(() => {
+                                        const dossierSimultane = allDossiers?.find(d => d.id === terrain.dossier_simultane);
+                                        if (dossierSimultane) {
+                                          return `${getArpenteurInitials(dossierSimultane.arpenteur_geometre)}${dossierSimultane.numero_dossier}`;
+                                        }
+                                        return terrain.dossier_simultane;
+                                      })()}
+                                    </p>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ));
+                        })}
                       </div>
                     )}
                   </CardContent>
