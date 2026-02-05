@@ -125,6 +125,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
           date_livraison: m.date_livraison || "",
           date_signature: m.date_signature || "",
           date_debut_travaux: m.date_debut_travaux || "",
+          terrains_list: m.terrains_list || [],
           terrain: m.terrain || {
             date_limite_leve: "",
             instruments_requis: "",
