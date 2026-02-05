@@ -1723,8 +1723,9 @@ export default function EditDossierForm({
                                 dossier_simultane: newTerrainForm.dossier_simultane || ""
                               };
                               
-                              // Mettre automatiquement le statut_terrain à "en_verification"
+                              // Mettre automatiquement le statut_terrain à "en_verification" et la tâche à "Cédule"
                               updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "en_verification";
+                              updatedMandats[newTerrainForm.mandatIndex].tache_actuelle = "Cédule";
 
                               setFormData({...formData, mandats: updatedMandats});
                               setNewTerrainForm({});
