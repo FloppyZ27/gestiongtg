@@ -587,14 +587,22 @@ export default function PlanningCalendar({
 
     setEquipes(newEquipes);
 
-    // Mettre à jour la date_terrain et equipe_assignee du mandat
+    // Mettre à jour la date_terrain et equipe_assignee du mandat et du terrain spécifique
     const card = terrainCards.find(c => c.id === draggableId);
     if (card && onUpdateDossier) {
       const equipeNom = generateTeamDisplayName(equipe);
 
       const updatedMandats = card.dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
-          return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom };
+          // Mettre à jour le terrain spécifique dans terrains_list
+          const updatedTerrainsList = m.terrains_list ? m.terrains_list.map((t, tIdx) => {
+            if (tIdx === card.terrainIndex) {
+              return { ...t, date_cedulee: dest.dateStr, equipe_assignee: equipeNom };
+            }
+            return t;
+          }) : m.terrains_list;
+          
+          return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom, terrains_list: updatedTerrainsList };
         }
         return m;
       });
