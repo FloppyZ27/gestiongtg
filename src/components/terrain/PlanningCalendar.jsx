@@ -590,12 +590,7 @@ export default function PlanningCalendar({
     // Mettre à jour la date_terrain et equipe_assignee du mandat
     const card = terrainCards.find(c => c.id === draggableId);
     if (card && onUpdateDossier) {
-      const equipeNom = equipe.techniciens.length > 0
-        ? equipe.techniciens.map(techId => {
-            const tech = techniciens.find(t => t.id === techId);
-            return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
-          }).filter(n => n).join('-')
-        : equipe.nom;
+      const equipeNom = generateTeamDisplayName(equipe);
 
       const updatedMandats = card.dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
