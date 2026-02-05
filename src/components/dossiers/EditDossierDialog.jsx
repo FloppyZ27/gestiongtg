@@ -563,6 +563,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
             setEditingLot={() => {}}
             setNewLotForm={() => {}}
             setLotActionLogs={() => {}}
+            allDossiers={allDossiers}
           />
          </DialogContent>
        </Dialog>

@@ -110,7 +110,8 @@ export default function EditDossierForm({
   setEditingClient,
   setEditingLot,
   setNewLotForm,
-  setLotActionLogs
+  setLotActionLogs,
+  allDossiers
 }) {
   // Initialiser activeTabMandat avec l'index du mandat choisi
   React.useEffect(() => {
@@ -1599,49 +1600,105 @@ export default function EditDossierForm({
                               </Select>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-3 mt-3">
-                            <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Temps prévu</Label>
-                              <Input 
-                                placeholder="Ex: 2h30"
-                                value={newTerrainForm.temps_prevu || ""}
-                                onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})}
-                                className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                              />
-                            </div>
+                          <div className="space-y-1">
+                            <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                            <Input 
+                              placeholder="Ex: 2h30"
+                              value={newTerrainForm.temps_prevu || ""}
+                              onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})}
+                              className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                            />
+                          </div>
+
+                          {/* Ligne Rendez-vous */}
+                          <div className="grid grid-cols-3 gap-3 mt-3">
                             <div className="space-y-1 flex items-end">
                               <div className="flex items-center gap-2 h-8">
                                 <Switch 
                                   checked={newTerrainForm.a_rendez_vous || false}
                                   onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
+                                  className="data-[state=checked]:bg-amber-500"
                                 />
                                 <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                               </div>
                             </div>
+                            {newTerrainForm.a_rendez_vous && (
+                              <>
+                                <div className="space-y-1">
+                                  <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                                  <Input 
+                                    type="date"
+                                    value={newTerrainForm.date_rendez_vous || ""}
+                                    onChange={(e) => setNewTerrainForm({...newTerrainForm, date_rendez_vous: e.target.value})}
+                                    className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                                  <Input 
+                                    type="time"
+                                    value={newTerrainForm.heure_rendez_vous || ""}
+                                    onChange={(e) => setNewTerrainForm({...newTerrainForm, heure_rendez_vous: e.target.value})}
+                                    className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
-                          
-                          {newTerrainForm.a_rendez_vous && (
-                            <div className="grid grid-cols-2 gap-3 mt-3">
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
-                                <Input 
-                                  type="date"
-                                  value={newTerrainForm.date_rendez_vous || ""}
-                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, date_rendez_vous: e.target.value})}
-                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+
+                          {/* Ligne Dossier simultané */}
+                          <div className="grid grid-cols-2 gap-3 mt-3">
+                            <div className="space-y-1 flex items-end">
+                              <div className="flex items-center gap-2 h-8">
+                                <Switch 
+                                  checked={newTerrainForm.a_dossier_simultane || false}
+                                  onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_dossier_simultane: checked, dossier_simultane: checked ? newTerrainForm.dossier_simultane : ""})}
+                                  className="data-[state=checked]:bg-amber-500"
                                 />
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
-                                <Input 
-                                  type="time"
-                                  value={newTerrainForm.heure_rendez_vous || ""}
-                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, heure_rendez_vous: e.target.value})}
-                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                                />
+                                <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
                               </div>
                             </div>
-                          )}
+                            {newTerrainForm.a_dossier_simultane && (
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Dossier simultané</Label>
+                                <Select 
+                                  value={newTerrainForm.dossier_simultane || ""}
+                                  onValueChange={(value) => setNewTerrainForm({...newTerrainForm, dossier_simultane: value})}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    {(allDossiers || []).filter(d => {
+                                      // Ne pas afficher le dossier actuel
+                                      if (d.id === editingDossier?.id) return false;
+                                      
+                                      // Vérifier si le dossier a au moins un mandat avec terrain
+                                      const hasTerrainMandat = d.mandats?.some(m => {
+                                        // Pas de date terrain OU date terrain future/aujourd'hui
+                                        if (!m.date_terrain) return true;
+                                        const dateTerrain = new Date(m.date_terrain);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        dateTerrain.setHours(0, 0, 0, 0);
+                                        return dateTerrain >= today;
+                                      });
+                                      
+                                      return hasTerrainMandat;
+                                    }).map((d) => (
+                                      <SelectItem key={d.id} value={d.id} className="text-white text-xs">
+                                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
+                                        {d.clients_ids && d.clients_ids.length > 0 && ` - ${d.clients_ids.map(cid => {
+                                          const client = clients.find(c => c.id === cid);
+                                          return client ? `${client.prenom} ${client.nom}` : "";
+                                        }).filter(n => n).join(", ")}`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                          </div>
                           
                           <Button 
                             type="button"
@@ -1662,7 +1719,8 @@ export default function EditDossierForm({
                                 temps_prevu: newTerrainForm.temps_prevu || "",
                                 a_rendez_vous: newTerrainForm.a_rendez_vous || false,
                                 date_rendez_vous: newTerrainForm.date_rendez_vous || "",
-                                heure_rendez_vous: newTerrainForm.heure_rendez_vous || ""
+                                heure_rendez_vous: newTerrainForm.heure_rendez_vous || "",
+                                dossier_simultane: newTerrainForm.dossier_simultane || ""
                               };
 
                               setFormData({...formData, mandats: updatedMandats});
