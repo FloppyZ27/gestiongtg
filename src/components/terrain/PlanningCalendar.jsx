@@ -589,8 +589,8 @@ export default function PlanningCalendar({
     setEquipes(newEquipes);
 
     // Mettre à jour la date_terrain et equipe_assignee du mandat
-    const dossier = dossiers.find(d => d.id === draggableId);
-    if (dossier && onUpdateDossier) {
+    const card = terrainCards.find(c => c.id === draggableId);
+    if (card && onUpdateDossier) {
       const equipeNom = equipe.techniciens.length > 0
         ? equipe.techniciens.map(techId => {
             const tech = techniciens.find(t => t.id === techId);
@@ -598,13 +598,13 @@ export default function PlanningCalendar({
           }).filter(n => n).join('-')
         : equipe.nom;
 
-      const updatedMandats = dossier.mandats.map(m => {
-        if (m.tache_actuelle === "Cédule") {
+      const updatedMandats = card.dossier.mandats.map((m, idx) => {
+        if (idx === card.mandatIndex) {
           return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom };
         }
         return m;
       });
-      onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+      onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
     }
   };
 
