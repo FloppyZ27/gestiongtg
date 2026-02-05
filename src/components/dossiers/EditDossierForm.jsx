@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
@@ -1625,7 +1626,10 @@ export default function EditDossierForm({
                                 instruments_requis: newTerrainForm.instruments_requis || "",
                                 donneur: newTerrainForm.donneur || "",
                                 technicien: newTerrainForm.technicien || "",
-                                temps_prevu: newTerrainForm.temps_prevu || ""
+                                temps_prevu: newTerrainForm.temps_prevu || "",
+                                a_rendez_vous: newTerrainForm.a_rendez_vous || false,
+                                date_rendez_vous: newTerrainForm.date_rendez_vous || "",
+                                heure_rendez_vous: newTerrainForm.heure_rendez_vous || ""
                               };
 
                               setFormData({...formData, mandats: updatedMandats});
