@@ -1719,7 +1719,6 @@ export default function EditDossierForm({
                         )}
                       </div>
 
-                      {/* Affichage des informations terrain par mandat */}
                       {formData.mandats.some(m => m.terrain && Object.values(m.terrain).some(v => v)) && (
                         <div className="border border-slate-700 rounded-lg overflow-hidden">
                           <Table>
