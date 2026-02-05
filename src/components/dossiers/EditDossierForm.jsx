@@ -172,6 +172,9 @@ export default function EditDossierForm({
   });
   const [showDeleteMinuteConfirm, setShowDeleteMinuteConfirm] = useState(false);
   const [minuteToDeleteInfo, setMinuteToDeleteInfo] = useState(null);
+  const [terrainCollapsed, setTerrainCollapsed] = useState(true);
+  const [newTerrainFormCollapsed, setNewTerrainFormCollapsed] = useState(true);
+  const [newTerrainForm, setNewTerrainForm] = useState({});
   const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -1468,6 +1471,343 @@ export default function EditDossierForm({
                 </CardContent>
               )}
             </Card>
+
+            {/* Section Terrain */}
+            {formData.mandats.length > 0 && (
+              <Card className="border-slate-700 bg-slate-800/30">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-green-900/40 transition-colors rounded-t-lg py-1.5 bg-green-900/20"
+                  onClick={() => setTerrainCollapsed(!terrainCollapsed)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-green-500/30 flex items-center justify-center">
+                        <MapPin className="w-3.5 h-3.5 text-green-400" />
+                      </div>
+                      <CardTitle className="text-green-300 text-base">Terrain</CardTitle>
+                    </div>
+                    {terrainCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+                  </div>
+                </CardHeader>
+
+                {!terrainCollapsed && (
+                  <CardContent className="pt-2 pb-3">
+                    <div className="border-2 border-green-500/30 rounded-lg mb-4 bg-green-900/10">
+                      <div 
+                        className="cursor-pointer hover:bg-green-900/40 transition-colors px-4 py-2 flex items-center justify-between"
+                        onClick={() => setNewTerrainFormCollapsed(!newTerrainFormCollapsed)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-4 h-4 text-green-400" />
+                          <span className="text-xs font-semibold text-green-400">Ajouter un terrain</span>
+                        </div>
+                        {newTerrainFormCollapsed ? <ChevronDown className="w-4 h-4 text-green-400" /> : <ChevronUp className="w-4 h-4 text-green-400" />}
+                      </div>
+
+                      {!newTerrainFormCollapsed && (
+                        <div className="p-4 border-t border-green-500/30">
+                          <div className="space-y-3">
+                            {/* Première ligne: Mandat + Date limite */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
+                                <Select 
+                                  value={newTerrainForm.mandatIndex?.toString() || ""}
+                                  onValueChange={(value) => {
+                                    const idx = parseInt(value);
+                                    setNewTerrainForm({
+                                      ...newTerrainForm, 
+                                      mandatIndex: idx,
+                                      ...formData.mandats[idx]?.terrain
+                                    });
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    {formData.mandats.map((mandat, index) => (
+                                      <SelectItem key={index} value={index.toString()} className="text-white text-xs">
+                                        {mandat.type_mandat || `Mandat ${index + 1}`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Date limite cédule</Label>
+                                <Input 
+                                  type="date"
+                                  value={newTerrainForm.date_limite_leve || ""}
+                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, date_limite_leve: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Deuxième ligne: Rendez-vous + Instruments */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    id="a_rendez_vous"
+                                    checked={newTerrainForm.a_rendez_vous || false}
+                                    onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
+                                  />
+                                  <Label htmlFor="a_rendez_vous" className="text-slate-400 text-xs cursor-pointer">Rendez-vous</Label>
+                                </div>
+                                {newTerrainForm.a_rendez_vous && (
+                                  <div className="grid grid-cols-2 gap-2 ml-6">
+                                    <div className="space-y-1">
+                                      <Label className="text-slate-400 text-xs">Date</Label>
+                                      <Input 
+                                        type="date"
+                                        value={newTerrainForm.date_rendez_vous || ""}
+                                        onChange={(e) => setNewTerrainForm({...newTerrainForm, date_rendez_vous: e.target.value})}
+                                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-slate-400 text-xs">Heure</Label>
+                                      <Input 
+                                        type="time"
+                                        value={newTerrainForm.heure_rendez_vous || ""}
+                                        onChange={(e) => setNewTerrainForm({...newTerrainForm, heure_rendez_vous: e.target.value})}
+                                        className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Instruments</Label>
+                                <Input 
+                                  placeholder="GPS, Théodolite..."
+                                  value={newTerrainForm.instruments_requis || ""}
+                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, instruments_requis: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Troisième ligne: Donneur + Technicien */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Donneur</Label>
+                                <Select 
+                                  value={newTerrainForm.donneur || ""}
+                                  onValueChange={(value) => setNewTerrainForm({...newTerrainForm, donneur: value})}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    {users.map((u) => (
+                                      <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Technicien</Label>
+                                <Select 
+                                  value={newTerrainForm.technicien || ""}
+                                  onValueChange={(value) => setNewTerrainForm({...newTerrainForm, technicien: value})}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                    <SelectValue placeholder="Sélectionner" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-slate-700">
+                                    {users.map((u) => (
+                                      <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">{u.full_name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            {/* Quatrième ligne: Faire en même temps + Temps */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Checkbox
+                                    id="faire_simultane"
+                                    checked={!!newTerrainForm.dossier_simultane}
+                                    onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, dossier_simultane: checked ? "" : null})}
+                                  />
+                                  <Label htmlFor="faire_simultane" className="text-slate-400 text-xs cursor-pointer">Faire en même temps</Label>
+                                </div>
+                                {newTerrainForm.dossier_simultane !== null && newTerrainForm.dossier_simultane !== undefined && (
+                                  <div className="ml-6">
+                                    <Select 
+                                      value={newTerrainForm.dossier_simultane}
+                                      onValueChange={(value) => setNewTerrainForm({...newTerrainForm, dossier_simultane: value})}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                        <SelectValue placeholder="Sélectionner un dossier" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-800 border-slate-700">
+                                        {(() => {
+                                          const allDossiers = queryClient.getQueryData(['dossiers']) || [];
+                                          return allDossiers
+                                            .filter(d => d.id !== editingDossier?.id)
+                                            .map((dossier) => (
+                                              <SelectItem key={dossier.id} value={dossier.id} className="text-white text-xs">
+                                                {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier} - {getClientsNames(dossier.clients_ids)}
+                                              </SelectItem>
+                                            ));
+                                        })()}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-slate-400 text-xs">Temps prévu</Label>
+                                <Input 
+                                  placeholder="Ex: 2h"
+                                  value={newTerrainForm.temps_prevu || ""}
+                                  onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})}
+                                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Cinquième ligne: Notes */}
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Notes</Label>
+                              <textarea 
+                                placeholder="Notes concernant le terrain..."
+                                value={newTerrainForm.notes || ""}
+                                onChange={(e) => setNewTerrainForm({...newTerrainForm, notes: e.target.value})}
+                                className="bg-slate-700 border border-slate-600 text-white text-xs p-2 rounded resize-none h-16 w-full"
+                              />
+                            </div>
+
+                            <Button 
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                if (newTerrainForm.mandatIndex === undefined || newTerrainForm.mandatIndex === null) {
+                                  alert("Veuillez sélectionner un mandat");
+                                  return;
+                                }
+
+                                const terrainData = {
+                                  date_limite_leve: newTerrainForm.date_limite_leve || "",
+                                  instruments_requis: newTerrainForm.instruments_requis || "",
+                                  a_rendez_vous: newTerrainForm.a_rendez_vous || false,
+                                  date_rendez_vous: newTerrainForm.date_rendez_vous || "",
+                                  heure_rendez_vous: newTerrainForm.heure_rendez_vous || "",
+                                  donneur: newTerrainForm.donneur || "",
+                                  technicien: newTerrainForm.technicien || "",
+                                  dossier_simultane: newTerrainForm.dossier_simultane || "",
+                                  temps_prevu: newTerrainForm.temps_prevu || "",
+                                  notes: newTerrainForm.notes || ""
+                                };
+
+                                updateMandat(newTerrainForm.mandatIndex, 'terrain', terrainData);
+                                setNewTerrainForm({});
+                                setNewTerrainFormCollapsed(true);
+                              }}
+                              className="bg-green-500/20 hover:bg-green-500/30 text-green-400 h-8 text-xs mt-3 w-full border border-green-500/30"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Enregistrer les informations terrain
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Affichage des informations terrain par mandat */}
+                      {formData.mandats.some(m => m.terrain && Object.values(m.terrain).some(v => v)) && (
+                        <div className="border border-slate-700 rounded-lg overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-slate-800/50 hover:bg-slate-800/50 border-slate-700">
+                                <TableHead className="text-slate-300 text-xs">Mandat</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Date limite</TableHead>
+                                <TableHead className="text-slate-300 text-xs">RDV</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Instruments</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Donneur</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Technicien</TableHead>
+                                <TableHead className="text-slate-300 text-xs">Temps</TableHead>
+                                <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {formData.mandats.map((mandat, idx) => {
+                                if (!mandat.terrain || !Object.values(mandat.terrain).some(v => v)) return null;
+                                return (
+                                  <TableRow key={idx} className="hover:bg-slate-800/30 border-slate-800">
+                                    <TableCell>
+                                      <Badge className={`${getMandatColor(mandat.type_mandat)} border text-xs`}>
+                                        {getAbbreviatedMandatType(mandat.type_mandat) || `Mandat ${idx + 1}`}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {mandat.terrain.date_limite_leve ? format(new Date(mandat.terrain.date_limite_leve), "dd MMM yyyy", { locale: fr }) : "-"}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      {mandat.terrain.a_rendez_vous ? (
+                                        <div>
+                                          <CheckCircle2 className="w-4 h-4 text-green-400 inline mr-1" />
+                                          {mandat.terrain.date_rendez_vous && (
+                                            <span className="text-[10px]">{format(new Date(mandat.terrain.date_rendez_vous), "dd/MM", { locale: fr })}</span>
+                                          )}
+                                          {mandat.terrain.heure_rendez_vous && (
+                                            <span className="text-[10px] ml-1">{mandat.terrain.heure_rendez_vous}</span>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <XCircle className="w-4 h-4 text-slate-600 inline" />
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="truncate cursor-help max-w-[100px]">
+                                              {mandat.terrain.instruments_requis || "-"}
+                                            </div>
+                                          </TooltipTrigger>
+                                          {mandat.terrain.instruments_requis && (
+                                            <TooltipContent className="bg-slate-800 border-slate-700 text-white max-w-sm">
+                                              {mandat.terrain.instruments_requis}
+                                            </TooltipContent>
+                                          )}
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </TableCell>
+                                    <TableCell className="text-slate-300 text-xs">{mandat.terrain.donneur || "-"}</TableCell>
+                                    <TableCell className="text-slate-300 text-xs">{mandat.terrain.technicien || "-"}</TableCell>
+                                    <TableCell className="text-slate-300 text-xs">{mandat.terrain.temps_prevu || "-"}</TableCell>
+                                    <TableCell className="text-right">
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          setNewTerrainForm({
+                                            mandatIndex: idx,
+                                            ...mandat.terrain
+                                          });
+                                          setNewTerrainFormCollapsed(false);
+                                        }}
+                                        className="text-slate-400 hover:text-green-400 transition-colors"
+                                      >
+                                        <MapPin className="w-4 h-4" />
+                                      </button>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                  </CardContent>
+                )}
+              </Card>
+            )}
 
             {/* Section Tarification */}
             <TarificationStepForm
