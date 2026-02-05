@@ -981,31 +981,29 @@ export default function PlanningCalendar({
 
                   <TabsContent value="verification" className="mt-0">
                     <h3 className="text-white font-semibold mb-3 text-sm">
-                      En vérification ({unassignedDossiers.filter(d => {
-                        const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-                        return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
+                      En vérification ({unassignedCards.filter(card => {
+                        return !card.mandat?.statut_terrain || card.mandat?.statut_terrain === "en_verification";
                       }).length})
                     </h3>
                     <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-                      {unassignedDossiers
-                          .filter(d => {
-                            const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-                            return !mandat?.statut_terrain || mandat?.statut_terrain === "en_verification";
+                      {unassignedCards
+                          .filter(card => {
+                            return !card.mandat?.statut_terrain || card.mandat?.statut_terrain === "en_verification";
                           })
-                          .map((dossier) => (
-                            <div key={dossier.id} className="mb-2">
-                              <DossierCard dossier={dossier} />
+                          .map((card) => (
+                            <div key={card.id} className="mb-2">
+                              <DossierCard card={card} />
                               <div className="flex gap-2 mt-2">
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    const updatedMandats = dossier.mandats.map(m => {
-                                      if (m.tache_actuelle === "Cédule") {
+                                    const updatedMandats = card.dossier.mandats.map((m, idx) => {
+                                      if (idx === card.mandatIndex) {
                                         return { ...m, statut_terrain: "a_ceduler" };
                                       }
                                       return m;
                                     });
-                                    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                    onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
                                   }}
                                   className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
                                 >
@@ -1014,13 +1012,13 @@ export default function PlanningCalendar({
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    const updatedMandats = dossier.mandats.map(m => {
-                                      if (m.tache_actuelle === "Cédule") {
+                                    const updatedMandats = card.dossier.mandats.map((m, idx) => {
+                                      if (idx === card.mandatIndex) {
                                         return { ...m, statut_terrain: "pas_de_terrain" };
                                       }
                                       return m;
                                     });
-                                    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+                                    onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
                                   }}
                                   className="flex-1 bg-slate-600/20 hover:bg-slate-600/30 text-slate-400 text-xs h-7"
                                 >
