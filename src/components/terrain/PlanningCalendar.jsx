@@ -537,15 +537,15 @@ export default function PlanningCalendar({
         setEquipes(newEquipes);
 
         // Réinitialiser date_terrain et equipe_assignee
-        const dossier = dossiers.find(d => d.id === draggableId);
-        if (dossier && onUpdateDossier) {
-          const updatedMandats = dossier.mandats.map(m => {
-            if (m.tache_actuelle === "Cédule") {
+        const card = terrainCards.find(c => c.id === draggableId);
+        if (card && onUpdateDossier) {
+          const updatedMandats = card.dossier.mandats.map((m, idx) => {
+            if (idx === card.mandatIndex) {
               return { ...m, date_terrain: null, equipe_assignee: null };
             }
             return m;
           });
-          onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
         }
       }
       return;
