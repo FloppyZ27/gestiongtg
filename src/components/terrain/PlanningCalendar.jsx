@@ -1633,6 +1633,18 @@ export default function PlanningCalendar({
                            return (
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded overflow-hidden text-xs">
                                <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
+                                 {/* Nom équipe et timings */}
+                                 <div className="mb-1">
+                                   <span 
+                                     className="text-white text-xs font-bold cursor-pointer hover:text-emerald-400 transition-colors block"
+                                     onClick={() => handleEditTeam(dateStr, equipe)}
+                                   >
+                                     {equipeNom}
+                                   </span>
+                                   <span className="text-emerald-300 text-xs block">
+                                     {calculateEquipeTimings(equipe, dateStr).totalTime}h - {equipe.mandats?.length || 0} mandats
+                                   </span>
+                                 </div>
                                  {/* Tabs et bouton supprimer */}
                                 <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-0.5">
