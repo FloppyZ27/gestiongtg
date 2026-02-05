@@ -75,6 +75,7 @@ const isHoliday = (date) => {
 import EditDossierDialog from "../dossiers/EditDossierDialog";
 import CommentairesSection from "../dossiers/CommentairesSection";
 import CreateTeamDialog from "./CreateTeamDialog";
+import EditTeamDialog from "./EditTeamDialog";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -159,6 +160,9 @@ export default function PlanningCalendar({
   const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
   const [createTeamDateStr, setCreateTeamDateStr] = useState(null);
   const [globalViewMode, setGlobalViewMode] = useState(null); // null | "techniciens" | "vehicules" | "equipements"
+  const [editingTeam, setEditingTeam] = useState(null);
+  const [editTeamDateStr, setEditTeamDateStr] = useState(null);
+  const [isEditTeamDialogOpen, setIsEditTeamDialogOpen] = useState(false);
 
   const handlePrint = () => {
     window.print();
@@ -273,6 +277,26 @@ export default function PlanningCalendar({
     setEquipes(newEquipes);
     setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
     setIsCreateTeamDialogOpen(false);
+  };
+
+  const handleEditTeam = (dateStr, equipe) => {
+    setEditingTeam(equipe);
+    setEditTeamDateStr(dateStr);
+    setIsEditTeamDialogOpen(true);
+  };
+
+  const handleUpdateTeam = (updatedTeam) => {
+    const newEquipes = { ...equipes };
+    if (newEquipes[editTeamDateStr]) {
+      const index = newEquipes[editTeamDateStr].findIndex(eq => eq.id === updatedTeam.id);
+      if (index !== -1) {
+        newEquipes[editTeamDateStr][index] = updatedTeam;
+        setEquipes(newEquipes);
+      }
+    }
+    setIsEditTeamDialogOpen(false);
+    setEditingTeam(null);
+    setEditTeamDateStr(null);
   };
 
   // Calculer les ressources utilisées pour une date
@@ -1262,7 +1286,12 @@ export default function PlanningCalendar({
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                                <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className="text-white text-sm font-bold">{equipeNom}</span>
+                                  <span 
+                                    className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors"
+                                    onClick={() => handleEditTeam(dateStr, equipe)}
+                                  >
+                                    {equipeNom}
+                                  </span>
                                   <div className="flex items-center gap-1">
                                     <button
                                       onClick={() => copyEquipe(dateStr, equipe.id)}
@@ -1491,7 +1520,12 @@ export default function PlanningCalendar({
                                 </div>
                                 </div>
                                   {/* Nom de l'équipe */}
-                                  <span className="text-white text-sm font-bold">{equipeNom}</span>
+                                  <span 
+                                    className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors"
+                                    onClick={() => handleEditTeam(dateStr, equipe)}
+                                  >
+                                    {equipeNom}
+                                  </span>
                                   </div>
 
                                   <div className="p-1">
@@ -1740,6 +1774,23 @@ export default function PlanningCalendar({
         equipements={equipements}
         equipes={equipes}
         usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }}
+      />
+
+      {/* Dialog de modification d'équipe */}
+      <EditTeamDialog
+        isOpen={isEditTeamDialogOpen}
+        onClose={() => {
+          setIsEditTeamDialogOpen(false);
+          setEditingTeam(null);
+          setEditTeamDateStr(null);
+        }}
+        onUpdateTeam={handleUpdateTeam}
+        dateStr={editTeamDateStr}
+        equipe={editingTeam}
+        techniciens={techniciens}
+        vehicules={vehicules}
+        equipements={equipements}
+        equipes={equipes}
       />
       </div>
       );
