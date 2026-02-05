@@ -594,21 +594,32 @@ export default function PlanningCalendar({
 
       const updatedMandats = card.dossier.mandats.map((m, idx) => {
         if (idx === card.mandatIndex) {
-          // Mettre à jour le terrain spécifique dans terrains_list
-          let updatedTerrainsList = m.terrains_list || [];
-          if (updatedTerrainsList.length > 0) {
-            updatedTerrainsList = updatedTerrainsList.map((t, tIdx) => {
-              if (tIdx === card.terrainIndex) {
-                return { ...t, date_cedulee: dest.dateStr, equipe_assignee: equipeNom };
-              }
-              return t;
-            });
+          // S'assurer que terrains_list existe et contient le terrain
+          let updatedTerrainsList = [...(m.terrains_list || [])];
+          
+          // Si terrains_list est vide ou le terrain n'existe pas, le créer
+          if (updatedTerrainsList.length === 0 || !updatedTerrainsList[card.terrainIndex]) {
+            // Créer un nouveau terrain avec les données existantes ou un objet vide
+            updatedTerrainsList[card.terrainIndex] = { ...(card.terrain || {}) };
           }
           
-          return { ...m, date_terrain: dest.dateStr, equipe_assignee: equipeNom, terrains_list: updatedTerrainsList };
+          // Mettre à jour le terrain spécifique
+          updatedTerrainsList[card.terrainIndex] = {
+            ...updatedTerrainsList[card.terrainIndex],
+            date_cedulee: dest.dateStr,
+            equipe_assignee: equipeNom
+          };
+          
+          return { 
+            ...m, 
+            date_terrain: dest.dateStr, 
+            equipe_assignee: equipeNom, 
+            terrains_list: updatedTerrainsList 
+          };
         }
         return m;
       });
+      
       onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
     }
   };
