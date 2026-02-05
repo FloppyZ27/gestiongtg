@@ -1806,6 +1806,14 @@ export default function EditDossierForm({
                                       onClick={() => {
                                         const updatedMandats = [...formData.mandats];
                                         updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
+                                        
+                                        // Si on supprime le dernier terrain, réinitialiser les champs
+                                        if (updatedMandats[mandatIndex].terrains_list.length === 0) {
+                                          updatedMandats[mandatIndex].statut_terrain = null;
+                                          updatedMandats[mandatIndex].date_terrain = null;
+                                          updatedMandats[mandatIndex].equipe_assignee = null;
+                                        }
+                                        
                                         setFormData({...formData, mandats: updatedMandats});
                                       }}
                                       className="text-slate-400 hover:text-red-400 transition-colors"
