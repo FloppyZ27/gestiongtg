@@ -638,24 +638,67 @@ export default function PlanningCalendar({
 
   const terrainCards = generateTerrainCards();
 
-  // Nettoyer les cartes supprimées des équipes
+  // Nettoyer les cartes supprimées et synchroniser les mandats avec date/équipe
   useEffect(() => {
     const validCardIds = new Set(terrainCards.map(c => c.id));
-    let needsCleanup = false;
+    let needsUpdate = false;
     
-    const cleanedEquipes = { ...equipes };
-    Object.keys(cleanedEquipes).forEach(dateStr => {
-      cleanedEquipes[dateStr].forEach(equipe => {
+    const updatedEquipes = { ...equipes };
+    
+    // 1. Nettoyer les cartes supprimées
+    Object.keys(updatedEquipes).forEach(dateStr => {
+      updatedEquipes[dateStr].forEach(equipe => {
         const originalLength = equipe.mandats.length;
         equipe.mandats = equipe.mandats.filter(cardId => validCardIds.has(cardId));
         if (equipe.mandats.length !== originalLength) {
-          needsCleanup = true;
+          needsUpdate = true;
         }
       });
     });
     
-    if (needsCleanup) {
-      setEquipes(cleanedEquipes);
+    // 2. Synchroniser les mandats qui ont date_terrain et equipe_assignee
+    terrainCards.forEach(card => {
+      if (card.mandat?.date_terrain && card.mandat?.equipe_assignee) {
+        const dateStr = card.mandat.date_terrain;
+        const equipeNom = card.mandat.equipe_assignee;
+        
+        // Vérifier si la carte est déjà dans une équipe
+        const isAlreadyAssigned = Object.values(updatedEquipes).some(dayEquipes =>
+          dayEquipes.some(eq => eq.mandats.includes(card.id))
+        );
+        
+        if (!isAlreadyAssigned) {
+          // Créer ou trouver l'équipe pour cette date
+          if (!updatedEquipes[dateStr]) {
+            updatedEquipes[dateStr] = [];
+          }
+          
+          let equipe = updatedEquipes[dateStr].find(eq => generateTeamDisplayName(eq) === equipeNom);
+          
+          if (!equipe) {
+            // Créer une nouvelle équipe
+            equipe = {
+              id: `eq${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              nom: equipeNom,
+              techniciens: [],
+              vehicules: [],
+              equipements: [],
+              mandats: []
+            };
+            updatedEquipes[dateStr].push(equipe);
+          }
+          
+          // Ajouter le mandat à l'équipe
+          if (!equipe.mandats.includes(card.id)) {
+            equipe.mandats.push(card.id);
+            needsUpdate = true;
+          }
+        }
+      }
+    });
+    
+    if (needsUpdate) {
+      setEquipes(updatedEquipes);
     }
   }, [dossiers]);
 
@@ -663,7 +706,9 @@ export default function PlanningCalendar({
     const isAssignedInEquipe = Object.values(equipes).some(dayEquipes => 
       dayEquipes.some(equipe => equipe.mandats.includes(card.id))
     );
-    return !isAssignedInEquipe;
+    // Exclure aussi les cartes qui ont déjà une date_terrain et equipe_assignee
+    const hasScheduledData = card.mandat?.date_terrain && card.mandat?.equipe_assignee;
+    return !isAssignedInEquipe && !hasScheduledData;
   });
 
   const getClientById = (id) => clients.find(c => c.id === id);
