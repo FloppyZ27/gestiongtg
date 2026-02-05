@@ -608,9 +608,50 @@ export default function PlanningCalendar({
     }
   };
 
-  const unassignedDossiers = dossiers.filter(d => {
+  // Générer une liste de cartes uniques par terrain
+  const generateTerrainCards = () => {
+    const cards = [];
+    
+    dossiers.forEach(dossier => {
+      const mandatsCedule = dossier.mandats?.filter(m => m.tache_actuelle === "Cédule") || [];
+      
+      mandatsCedule.forEach((mandat, mandatIndex) => {
+        // Si le mandat a terrains_list, créer une carte par terrain
+        if (mandat.terrains_list && mandat.terrains_list.length > 0) {
+          mandat.terrains_list.forEach((terrain, terrainIndex) => {
+            cards.push({
+              id: `${dossier.id}-${mandatIndex}-${terrainIndex}`,
+              dossierId: dossier.id,
+              dossier: dossier,
+              mandat: mandat,
+              terrain: terrain,
+              mandatIndex: mandatIndex,
+              terrainIndex: terrainIndex
+            });
+          });
+        } else if (mandat.terrain && Object.keys(mandat.terrain).some(key => mandat.terrain[key])) {
+          // Rétrocompatibilité : si pas de terrains_list mais un terrain principal
+          cards.push({
+            id: `${dossier.id}-${mandatIndex}-legacy`,
+            dossierId: dossier.id,
+            dossier: dossier,
+            mandat: mandat,
+            terrain: mandat.terrain,
+            mandatIndex: mandatIndex,
+            terrainIndex: null
+          });
+        }
+      });
+    });
+    
+    return cards;
+  };
+
+  const terrainCards = generateTerrainCards();
+
+  const unassignedCards = terrainCards.filter(card => {
     const isAssignedInEquipe = Object.values(equipes).some(dayEquipes => 
-      dayEquipes.some(equipe => equipe.mandats.includes(d.id))
+      dayEquipes.some(equipe => equipe.mandats.includes(card.id))
     );
     return !isAssignedInEquipe;
   });
