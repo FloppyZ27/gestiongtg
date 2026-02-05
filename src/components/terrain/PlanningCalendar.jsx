@@ -1628,13 +1628,13 @@ export default function PlanningCalendar({
                               <Droppable droppableId={`equipe-${dateStr}-${equipe.id}-mandats`}>
                                 {(provided) => (
                                   <div ref={provided.innerRef} {...provided.droppableProps} className="min-h-[30px] -mx-1">
-                                    {equipe.mandats.map((dId, idx) => {
-                                      const d = dossiers.find(d => d.id === dId);
-                                      return d ? (
-                                        <Draggable key={dId} draggableId={dId} index={idx}>
+                                    {equipe.mandats.map((cardId, idx) => {
+                                      const card = terrainCards.find(c => c.id === cardId);
+                                      return card ? (
+                                        <Draggable key={cardId} draggableId={cardId} index={idx}>
                                           {(provided) => (
                                             <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                                              <DossierCard dossier={d} placedDate={dateStr} />
+                                              <DossierCard card={card} placedDate={dateStr} />
                                             </div>
                                           )}
                                         </Draggable>
