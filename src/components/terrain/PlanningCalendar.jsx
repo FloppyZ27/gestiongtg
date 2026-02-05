@@ -830,15 +830,6 @@ export default function PlanningCalendar({
           </div>
         )}
 
-        {/* Tâche actuelle */}
-        {mandat?.tache_actuelle && (
-          <div className="mb-1">
-            <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 border text-xs">
-              {mandat.tache_actuelle}
-            </Badge>
-          </div>
-        )}
-
         {/* Date de livraison */}
         {mandat?.date_livraison && (
           <div className="flex items-center gap-1 mb-1">
