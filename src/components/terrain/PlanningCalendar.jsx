@@ -1692,14 +1692,6 @@ export default function PlanningCalendar({
                                   </button>
                                 </div>
                                 </div>
-                                  {/* Nom de l'équipe */}
-                                  <span 
-                                    className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors"
-                                    onClick={() => handleEditTeam(dateStr, equipe)}
-                                  >
-                                    {equipeNom}
-                                  </span>
-                                  </div>
 
                                   <div className="p-1">
 
