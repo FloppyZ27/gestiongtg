@@ -1433,11 +1433,11 @@ export default function PlanningCalendar({
                                     {...provided.droppableProps}
                                     className={`min-h-[50px] -mx-2 ${snapshot.isDraggingOver ? 'bg-cyan-500/10' : ''}`}
                                   >
-                                    {equipe.mandats.map((dossierId, index) => {
-                                      const dossier = dossiers.find(d => d.id === dossierId);
-                                      if (!dossier) return null;
+                                    {equipe.mandats.map((cardId, index) => {
+                                      const card = terrainCards.find(c => c.id === cardId);
+                                      if (!card) return null;
                                       return (
-                                        <Draggable key={dossierId} draggableId={dossierId} index={index}>
+                                        <Draggable key={cardId} draggableId={cardId} index={index}>
                                           {(provided, snapshot) => (
                                             <div
                                               ref={provided.innerRef}
@@ -1445,7 +1445,7 @@ export default function PlanningCalendar({
                                               {...provided.dragHandleProps}
                                               className={snapshot.isDragging ? 'opacity-50' : ''}
                                             >
-                                              <DossierCard dossier={dossier} placedDate={dateStr} />
+                                              <DossierCard card={card} placedDate={dateStr} />
                                             </div>
                                           )}
                                         </Draggable>
