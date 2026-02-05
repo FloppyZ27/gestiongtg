@@ -1428,13 +1428,13 @@ export default function PlanningCalendar({
                         })}
                       </div>
                       <Button
-                         size="sm"
-                         onClick={() => addEquipe(dateStr)}
-                         className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-6 mt-2 shadow-md"
-                       >
-                         <Plus className="w-3 h-3 mr-1" />
-                         Ajouter équipe
-                       </Button>
+                        size="sm"
+                        onClick={() => addEquipe(dateStr)}
+                        className="w-full border-2 border-slate-600 bg-transparent hover:bg-slate-800 text-slate-300 h-6 mt-2"
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Ajouter équipe
+                      </Button>
                     </Card>
                   );
                 })}
@@ -1619,7 +1619,7 @@ export default function PlanningCalendar({
                       <Button
                       size="sm"
                       onClick={() => addEquipe(dateStr)}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white h-5 mt-1 text-xs shadow-md"
+                      className="w-full border-2 border-slate-600 bg-transparent hover:bg-slate-800 text-slate-300 h-5 mt-1 text-xs"
                       >
                       <Plus className="w-3 h-3 mr-1" />
                       Ajouter
