@@ -148,7 +148,7 @@ export default function EditDossierDialog({ isOpen, onClose, dossier, onSuccess,
       setActiveTabMandat((dossier.initialMandatIndex || 0).toString());
       setHasChanges(false);
     }
-  }, [dossier]);
+  }, [dossier, dossier?.id, JSON.stringify(dossier?.mandats)]);
 
   // Auto-sauvegarde avec debounce
   const saveTimeoutRef = React.useRef(null);
