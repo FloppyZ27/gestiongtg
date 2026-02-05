@@ -1032,9 +1032,8 @@ export default function PlanningCalendar({
 
                   <TabsContent value="planifier" className="mt-0">
                     <h3 className="text-white font-semibold mb-3 text-sm">
-                      À planifier ({unassignedDossiers.filter(d => {
-                        const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-                        return mandat?.statut_terrain === "a_ceduler";
+                      À planifier ({unassignedCards.filter(card => {
+                        return card.mandat?.statut_terrain === "a_ceduler";
                       }).length})
                     </h3>
                     <Droppable droppableId="unassigned">
@@ -1044,13 +1043,12 @@ export default function PlanningCalendar({
                           {...provided.droppableProps}
                           className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2 ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
                         >
-                          {unassignedDossiers
-                            .filter(d => {
-                              const mandat = d.mandats?.find(m => m.tache_actuelle === "Cédule");
-                              return mandat?.statut_terrain === "a_ceduler";
+                          {unassignedCards
+                            .filter(card => {
+                              return card.mandat?.statut_terrain === "a_ceduler";
                             })
-                            .map((dossier, index) => (
-                              <Draggable key={dossier.id} draggableId={dossier.id} index={index}>
+                            .map((card, index) => (
+                              <Draggable key={card.id} draggableId={card.id} index={index}>
                                 {(provided, snapshot) => (
                                   <div
                                     ref={provided.innerRef}
@@ -1058,7 +1056,7 @@ export default function PlanningCalendar({
                                     {...provided.dragHandleProps}
                                     className={snapshot.isDragging ? 'opacity-50' : ''}
                                   >
-                                    <DossierCard dossier={dossier} />
+                                    <DossierCard card={card} />
                                   </div>
                                 )}
                               </Draggable>
