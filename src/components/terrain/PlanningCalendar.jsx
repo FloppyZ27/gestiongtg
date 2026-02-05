@@ -551,13 +551,12 @@ export default function PlanningCalendar({
       return;
     }
 
-    // Vérifier si le mandat a un rendez-vous et si on le déplace vers une autre date
+    // Vérifier si le terrain a un rendez-vous et si on le déplace vers une autre date
     const sourceParsed = parseEquipeDroppableId(sourceId);
     if (sourceParsed && sourceParsed.dateStr !== dest.dateStr) {
-      const dossier = dossiers.find(d => d.id === draggableId);
-      const mandat = dossier?.mandats?.find(m => m.tache_actuelle === "Cédule");
-      if (mandat?.terrain?.a_rendez_vous && mandat?.terrain?.date_rendez_vous) {
-        if (!confirm(`Ce mandat a un rendez-vous le ${format(new Date(mandat.terrain.date_rendez_vous + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}. Voulez-vous vraiment le déplacer vers le ${format(new Date(dest.dateStr + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })} ?`)) {
+      const card = terrainCards.find(c => c.id === draggableId);
+      if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous) {
+        if (!confirm(`Ce terrain a un rendez-vous le ${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}. Voulez-vous vraiment le déplacer vers le ${format(new Date(dest.dateStr + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })} ?`)) {
           return;
         }
       }
