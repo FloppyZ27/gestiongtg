@@ -1526,7 +1526,7 @@ export default function EditDossierForm({
 
                       {!newTerrainFormCollapsed && (
                         <div className="p-4 border-t border-purple-500/30">
-                          <div className="grid grid-cols-5 gap-3">
+                          <div className="grid grid-cols-4 gap-3">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                               <Select 
@@ -1555,11 +1555,11 @@ export default function EditDossierForm({
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Instruments</Label>
+                              <Label className="text-slate-400 text-xs">Temps prévu</Label>
                               <Input 
-                                placeholder="GPS, Station totale..."
-                                value={newTerrainForm.instruments_requis || ""}
-                                onChange={(e) => setNewTerrainForm({...newTerrainForm, instruments_requis: e.target.value})}
+                                placeholder="Ex: 2h30"
+                                value={newTerrainForm.temps_prevu || ""}
+                                onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})}
                                 className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                               />
                             </div>
@@ -1581,6 +1581,17 @@ export default function EditDossierForm({
                                 </SelectContent>
                               </Select>
                             </div>
+                          </div>
+                          <div className="grid grid-cols-4 gap-3 mt-3">
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Instruments</Label>
+                              <Input 
+                                placeholder="GPS, Station totale..."
+                                value={newTerrainForm.instruments_requis || ""}
+                                onChange={(e) => setNewTerrainForm({...newTerrainForm, instruments_requis: e.target.value})}
+                                className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                              />
+                            </div>
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Technicien</Label>
                               <Select 
@@ -1599,15 +1610,6 @@ export default function EditDossierForm({
                                 </SelectContent>
                               </Select>
                             </div>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-slate-400 text-xs">Temps prévu</Label>
-                            <Input 
-                              placeholder="Ex: 2h30"
-                              value={newTerrainForm.temps_prevu || ""}
-                              onChange={(e) => setNewTerrainForm({...newTerrainForm, temps_prevu: e.target.value})}
-                              className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                            />
                           </div>
 
                           {/* Ligne Rendez-vous */}
