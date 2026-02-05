@@ -1617,7 +1617,7 @@ export default function EditDossierForm({
                                 <Switch 
                                   checked={newTerrainForm.a_rendez_vous || false}
                                   onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_rendez_vous: checked})}
-                                  className="data-[state=checked]:bg-amber-500"
+                                  className="data-[state=checked]:bg-amber-400"
                                 />
                                 <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                               </div>
@@ -1653,7 +1653,7 @@ export default function EditDossierForm({
                                 <Switch 
                                   checked={newTerrainForm.a_dossier_simultane || false}
                                   onCheckedChange={(checked) => setNewTerrainForm({...newTerrainForm, a_dossier_simultane: checked, dossier_simultane: checked ? newTerrainForm.dossier_simultane : ""})}
-                                  className="data-[state=checked]:bg-amber-500"
+                                  className="data-[state=checked]:bg-amber-400"
                                 />
                                 <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
                               </div>
