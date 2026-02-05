@@ -1722,6 +1722,9 @@ export default function EditDossierForm({
                                 heure_rendez_vous: newTerrainForm.heure_rendez_vous || "",
                                 dossier_simultane: newTerrainForm.dossier_simultane || ""
                               };
+                              
+                              // Mettre automatiquement le statut_terrain à "a_ceduler"
+                              updatedMandats[newTerrainForm.mandatIndex].statut_terrain = "a_ceduler";
 
                               setFormData({...formData, mandats: updatedMandats});
                               setNewTerrainForm({});
