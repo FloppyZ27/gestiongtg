@@ -1849,7 +1849,7 @@ export default function PlanningCalendar({
                            return (
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                                <div className="bg-blue-600/40 px-2 py-2 border-b-2 border-blue-500/50">
-                                <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-start justify-between gap-2">
                                   <div>
                                     <span 
                                       className="text-white text-sm font-bold cursor-pointer hover:text-emerald-400 transition-colors block"
@@ -1861,7 +1861,7 @@ export default function PlanningCalendar({
                                       {calculateEquipeTimings(equipe, dateStr).totalTime}h
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-start gap-1">
                                    <button
                                      onClick={() => copyEquipe(dateStr, equipe.id)}
                                      className="text-cyan-400 hover:text-cyan-300"
