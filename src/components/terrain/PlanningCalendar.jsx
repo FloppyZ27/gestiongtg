@@ -77,7 +77,6 @@ import EditDossierDialog from "../dossiers/EditDossierDialog";
 import CommentairesSection from "../dossiers/CommentairesSection";
 import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
-import MapView from "./MapView";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -769,6 +768,21 @@ export default function PlanningCalendar({
   const getLotById = (id) => lots?.find(l => l.id === id);
   const getUserInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
+  const generateTeamDisplayName = (equipe) => {
+    if (equipe.techniciens.length === 0) {
+      return equipe.nom;
+    }
+    const initials = equipe.techniciens.map(techId => {
+      const tech = techniciens.find(t => t.id === techId);
+      return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
+    }).filter(n => n).join('-');
+    
+    // Extraire le numéro d'équipe du nom
+    const match = equipe.nom.match(/Équipe (\d+)/);
+    const teamNumber = match ? match[1] : '';
+    return teamNumber ? `Équipe ${teamNumber} - ${initials}` : equipe.nom;
+  };
+
   const parseTimeString = (timeStr) => {
     if (!timeStr) return 0;
     const match = timeStr.match(/(\d+(?:\.\d+)?)/);
@@ -945,24 +959,60 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
-  const openGoogleMapsForDay = (dateStr) => {
+  const [mapUrl, setMapUrl] = useState(null);
+  const [loadingMapUrl, setLoadingMapUrl] = useState(false);
+
+  const openGoogleMapsForDay = async (dateStr) => {
     setSelectedMapDate(dateStr);
     setShowMapDialog(true);
-  };
-
-  const generateTeamDisplayName = (equipe) => {
-    if (equipe.techniciens.length === 0) {
-      return equipe.nom;
-    }
-    const initials = equipe.techniciens.map(techId => {
-      const tech = techniciens.find(t => t.id === techId);
-      return tech ? tech.prenom.charAt(0) + tech.nom.charAt(0) : '';
-    }).filter(n => n).join('-');
+    setLoadingMapUrl(true);
     
-    // Extraire le numéro d'équipe du nom
-    const match = equipe.nom.match(/Équipe (\d+)/);
-    const teamNumber = match ? match[1] : '';
-    return teamNumber ? `Équipe ${teamNumber} - ${initials}` : equipe.nom;
+    const bureauAddress = "11 rue melancon est, Alma";
+    const dayEquipes = equipes[dateStr] || [];
+    
+    if (dayEquipes.length === 0) {
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
+    }
+
+    // Construire la liste des waypoints
+    let allWaypoints = [];
+    
+    dayEquipes.forEach((equipe) => {
+      const cardIds = equipe.mandats || [];
+      cardIds.forEach((cardId) => {
+        const card = terrainCards.find(c => c.id === cardId);
+        if (card?.mandat?.adresse_travaux) {
+          const address = formatAdresse(card.mandat.adresse_travaux);
+          if (address) {
+            allWaypoints.push(address);
+          }
+        }
+      });
+    });
+
+    if (allWaypoints.length === 0) {
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
+    }
+
+    // Appeler la fonction backend pour obtenir l'URL embed
+    try {
+      const response = await base44.functions.invoke('getGoogleMapsEmbedUrl', {
+        origin: bureauAddress,
+        destination: bureauAddress,
+        waypoints: allWaypoints
+      });
+      
+      setMapUrl(response.data.url);
+    } catch (error) {
+      console.error('Erreur lors de la génération de l\'URL Google Maps:', error);
+      setMapUrl(null);
+    } finally {
+      setLoadingMapUrl(false);
+    }
   };
 
   const DossierCard = ({ card, placedDate }) => {
@@ -2142,16 +2192,25 @@ export default function PlanningCalendar({
             <DialogTitle className="text-xl font-bold text-white">
               Trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
             </DialogTitle>
-            <p className="sr-only">Visualisation des trajets des équipes sur Google Maps</p>
           </DialogHeader>
-          <div className="flex-1 w-full h-full" style={{ height: 'calc(90vh - 80px)' }}>
-            {selectedMapDate && (
-              <MapView
-                dateStr={selectedMapDate}
-                equipes={equipes[selectedMapDate] || []}
-                terrainCards={terrainCards}
-                formatAdresse={formatAdresse}
+          <div className="flex-1 w-full h-full">
+            {loadingMapUrl ? (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Chargement de la carte...
+              </div>
+            ) : mapUrl ? (
+              <iframe
+                src={mapUrl}
+                className="w-full h-full"
+                style={{ border: 0, height: 'calc(90vh - 80px)' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Aucun trajet disponible pour cette journée
+              </div>
             )}
           </div>
         </DialogContent>
