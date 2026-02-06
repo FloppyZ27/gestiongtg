@@ -2396,6 +2396,132 @@ export default function PlanningCalendar({
         equipes={equipes}
       />
 
+      {/* Dialog d'édition du terrain */}
+      <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Date limite levé terrain</Label>
+                <Input
+                  type="date"
+                  value={terrainForm.date_limite_leve}
+                  onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Instruments requis</Label>
+                <Input
+                  value={terrainForm.instruments_requis}
+                  onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
+                  placeholder="Ex: GPS, Total Station"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={terrainForm.a_rendez_vous}
+                  onChange={(e) => setTerrainForm({...terrainForm, a_rendez_vous: e.target.checked})}
+                  className="w-4 h-4 rounded bg-slate-800 border-slate-700"
+                />
+                <Label>Rendez-vous nécessaire</Label>
+              </div>
+              {terrainForm.a_rendez_vous && (
+                <div className="grid grid-cols-2 gap-3 ml-7">
+                  <div className="space-y-2">
+                    <Label>Date du rendez-vous</Label>
+                    <Input
+                      type="date"
+                      value={terrainForm.date_rendez_vous}
+                      onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Heure du rendez-vous</Label>
+                    <Input
+                      type="time"
+                      value={terrainForm.heure_rendez_vous}
+                      onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Donneur</Label>
+                <Input
+                  value={terrainForm.donneur}
+                  onChange={(e) => setTerrainForm({...terrainForm, donneur: e.target.value})}
+                  placeholder="Nom du donneur"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Technicien à prioriser</Label>
+                <Input
+                  value={terrainForm.technicien}
+                  onChange={(e) => setTerrainForm({...terrainForm, technicien: e.target.value})}
+                  placeholder="Nom du technicien"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Dossier à faire en même temps</Label>
+                <Input
+                  value={terrainForm.dossier_simultane}
+                  onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value})}
+                  placeholder="N° de dossier"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Temps prévu</Label>
+                <Input
+                  value={terrainForm.temps_prevu}
+                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
+                  placeholder="Ex: 2h30"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notes terrain</Label>
+              <Textarea
+                value={terrainForm.notes}
+                onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
+                placeholder="Notes concernant le terrain..."
+                className="bg-slate-800 border-slate-700 text-white h-24"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <Button variant="outline" onClick={() => setIsTerrainDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSaveTerrain} className="bg-gradient-to-r from-emerald-500 to-teal-600">
+              Enregistrer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog de carte Google Maps */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
