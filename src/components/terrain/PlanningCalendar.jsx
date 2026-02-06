@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer, Globe } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer } from "lucide-react";
+import EarthIcon from "../icons/EarthIcon";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -1753,7 +1754,7 @@ export default function PlanningCalendar({
                                 className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                 title="Voir tous les trajets de la journée"
                               >
-                                <Globe className="w-3 h-3" />
+                                <EarthIcon className="w-3 h-3" />
                               </Button>
                             )}
                           </div>
@@ -1791,7 +1792,7 @@ export default function PlanningCalendar({
                                       className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                       title="Voir les trajets sur Google Maps"
                                     >
-                                      <Globe className="w-3 h-3" />
+                                      <EarthIcon className="w-3 h-3" />
                                     </Button>
                                     <button
                                       onClick={() => copyEquipe(dateStr, equipe.id)}
@@ -1970,7 +1971,7 @@ export default function PlanningCalendar({
                                 className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                 title="Voir tous les trajets de la journée"
                               >
-                                <Globe className="w-3 h-3" />
+                                <EarthIcon className="w-3 h-3" />
                               </Button>
                             )}
                           </div>
@@ -2040,7 +2041,7 @@ export default function PlanningCalendar({
                                      className="h-5 w-5 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                      title="Voir les trajets sur Google Maps"
                                    >
-                                     <Globe className="w-2.5 h-2.5" />
+                                     <EarthIcon className="w-2.5 h-2.5" />
                                    </Button>
                                    <button
                                      onClick={() => copyEquipe(dateStr, equipe.id)}
