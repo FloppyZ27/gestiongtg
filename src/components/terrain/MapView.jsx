@@ -38,7 +38,13 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
         setLoading(true);
         setError(null);
 
-        // Vérifier que le ref est disponible
+        // Attendre que le ref soit disponible (max 20 tentatives = 2 secondes)
+        let attempts = 0;
+        while (!mapRef.current && attempts < 20) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+
         if (!mapRef.current) {
           setError('Élément de carte non disponible');
           setLoading(false);
