@@ -994,7 +994,7 @@ export default function PlanningCalendar({
 
     // Créer l'URL Google Maps avec origin (bureau), waypoints et destination (bureau)
     const waypointsParam = allWaypoints.join('|');
-    const url = `https://www.google.com/maps/embed/v1/directions?key=${Deno.env.get('GOOGLE_MAPS_API_KEY')}&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&mode=driving`;
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&travelmode=driving`;
     
     return url;
   };
