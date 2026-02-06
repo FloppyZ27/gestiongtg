@@ -961,35 +961,34 @@ export default function PlanningCalendar({
 
   const [mapUrl, setMapUrl] = useState(null);
   const [loadingMapUrl, setLoadingMapUrl] = useState(false);
+  const [selectedEquipe, setSelectedEquipe] = useState(null);
 
-  const openGoogleMapsForDay = async (dateStr) => {
+  const openGoogleMapsForEquipe = async (dateStr, equipe) => {
     setSelectedMapDate(dateStr);
+    setSelectedEquipe(equipe);
     setShowMapDialog(true);
     setLoadingMapUrl(true);
     
     const bureauAddress = "11 rue melancon est, Alma";
-    const dayEquipes = equipes[dateStr] || [];
+    const cardIds = equipe.mandats || [];
     
-    if (dayEquipes.length === 0) {
+    if (cardIds.length === 0) {
       setMapUrl(null);
       setLoadingMapUrl(false);
       return;
     }
 
-    // Construire la liste des waypoints
+    // Construire la liste des waypoints pour cette équipe
     let allWaypoints = [];
     
-    dayEquipes.forEach((equipe) => {
-      const cardIds = equipe.mandats || [];
-      cardIds.forEach((cardId) => {
-        const card = terrainCards.find(c => c.id === cardId);
-        if (card?.mandat?.adresse_travaux) {
-          const address = formatAdresse(card.mandat.adresse_travaux);
-          if (address) {
-            allWaypoints.push(address);
-          }
+    cardIds.forEach((cardId) => {
+      const card = terrainCards.find(c => c.id === cardId);
+      if (card?.mandat?.adresse_travaux) {
+        const address = formatAdresse(card.mandat.adresse_travaux);
+        if (address) {
+          allWaypoints.push(address);
         }
-      });
+      }
     });
 
     if (allWaypoints.length === 0) {
@@ -1655,7 +1654,7 @@ export default function PlanningCalendar({
                                   <div className="flex items-center gap-1">
                                     <Button
                                       size="sm"
-                                      onClick={() => openGoogleMapsForDay(dateStr)}
+                                      onClick={() => openGoogleMapsForEquipe(dateStr, equipe)}
                                       className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                       title="Voir les trajets sur Google Maps"
                                     >
@@ -1890,7 +1889,7 @@ export default function PlanningCalendar({
                                  <div className="flex items-center gap-0.5">
                                    <Button
                                      size="sm"
-                                     onClick={() => openGoogleMapsForDay(dateStr)}
+                                     onClick={() => openGoogleMapsForEquipe(dateStr, equipe)}
                                      className="h-5 w-5 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
                                      title="Voir les trajets sur Google Maps"
                                    >
@@ -2182,7 +2181,7 @@ export default function PlanningCalendar({
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
           <DialogHeader className="p-4 border-b border-slate-800">
             <DialogTitle className="text-xl font-bold text-white">
-              Trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+              Trajets - {selectedEquipe && generateTeamDisplayName(selectedEquipe)} - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 w-full h-full">
