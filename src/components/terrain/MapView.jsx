@@ -17,25 +17,23 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
   const mapInstanceRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Attendre que le composant soit monté
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
-    if (!dateStr || !equipes || equipes.length === 0) {
-      setLoading(false);
+    if (!mounted || !dateStr || !equipes || equipes.length === 0) {
+      if (mounted) setLoading(false);
       return;
     }
 
     const loadMap = async () => {
-      // Attendre que le DOM soit prêt (le dialog prend du temps à s'ouvrir)
-      for (let i = 0; i < 10; i++) {
-        if (mapRef.current) break;
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      if (!mapRef.current) {
-        setLoading(false);
-        setError('Impossible de charger la carte');
-        return;
-      }
       try {
         setLoading(true);
         setError(null);
@@ -145,7 +143,7 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
     };
 
     loadMap();
-  }, [dateStr, equipes, terrainCards, formatAdresse]);
+  }, [mounted, dateStr, equipes, terrainCards, formatAdresse]);
 
   if (loading) {
     return (
