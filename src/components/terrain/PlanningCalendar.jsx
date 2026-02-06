@@ -960,12 +960,16 @@ export default function PlanningCalendar({
   };
 
   const openGoogleMapsForDay = (dateStr) => {
+    setSelectedMapDate(dateStr);
+    setShowMapDialog(true);
+  };
+
+  const getGoogleMapsUrlForDay = (dateStr) => {
     const bureauAddress = "11 rue melancon est, Alma";
     const dayEquipes = equipes[dateStr] || [];
     
     if (dayEquipes.length === 0) {
-      alert("Aucune équipe planifiée pour cette journée.");
-      return;
+      return null;
     }
 
     // Construire l'URL Google Maps avec tous les waypoints pour toutes les équipes
@@ -985,15 +989,14 @@ export default function PlanningCalendar({
     });
 
     if (allWaypoints.length === 0) {
-      alert("Aucune adresse disponible pour cette journée.");
-      return;
+      return null;
     }
 
     // Créer l'URL Google Maps avec origin (bureau), waypoints et destination (bureau)
     const waypointsParam = allWaypoints.join('|');
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&travelmode=driving`;
+    const url = `https://www.google.com/maps/embed/v1/directions?key=${Deno.env.get('GOOGLE_MAPS_API_KEY')}&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&mode=driving`;
     
-    window.open(url, '_blank');
+    return url;
   };
 
   const DossierCard = ({ card, placedDate }) => {
@@ -2165,6 +2168,33 @@ export default function PlanningCalendar({
         equipements={equipements}
         equipes={equipes}
       />
+
+      {/* Dialog de carte Google Maps */}
+      <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
+          <DialogHeader className="p-4 border-b border-slate-800">
+            <DialogTitle className="text-xl font-bold text-white">
+              Trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 w-full h-full">
+            {selectedMapDate && getGoogleMapsUrlForDay(selectedMapDate) ? (
+              <iframe
+                src={getGoogleMapsUrlForDay(selectedMapDate)}
+                className="w-full h-full"
+                style={{ border: 0, height: 'calc(90vh - 80px)' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Aucun trajet disponible pour cette journée
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
       );
       }
