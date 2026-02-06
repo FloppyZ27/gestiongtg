@@ -23,7 +23,7 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
-    }, 300);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -38,14 +38,20 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
         setLoading(true);
         setError(null);
 
-        // Attendre que le ref soit disponible (max 20 tentatives = 2 secondes)
+        // Attendre que le ref soit disponible avec des dimensions valides
         let attempts = 0;
-        while (!mapRef.current && attempts < 20) {
+        while (attempts < 30) {
+          if (mapRef.current) {
+            const rect = mapRef.current.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              break; // Element est prêt
+            }
+          }
           await new Promise(resolve => setTimeout(resolve, 100));
           attempts++;
         }
 
-        if (!mapRef.current) {
+        if (!mapRef.current || mapRef.current.getBoundingClientRect().width === 0) {
           setError('Élément de carte non disponible');
           setLoading(false);
           return;
