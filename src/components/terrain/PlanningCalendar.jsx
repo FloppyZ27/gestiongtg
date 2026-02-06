@@ -1275,35 +1275,47 @@ export default function PlanningCalendar({
         )}
 
         {/* Temps prévu + Utilisateur assigné */}
-        <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
-          <div className="flex items-center gap-2">
-            {terrain.temps_prevu && (
-              <div className="flex items-center gap-1">
-                <Timer className="w-3 h-3 text-emerald-400" />
-                <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
-              </div>
-            )}
-          </div>
+         <div className="flex items-center justify-between mt-2 pt-1 border-t border-emerald-500/30">
+           <div className="flex items-center gap-2">
+             {terrain.temps_prevu && (
+               <div className="flex items-center gap-1">
+                 <Timer className="w-3 h-3 text-emerald-400" />
+                 <span className="text-xs text-emerald-300">{terrain.temps_prevu}</span>
+               </div>
+             )}
+           </div>
 
-          {assignedUser ? (
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
-              <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-                <AvatarImage src={assignedUser.photo_url} />
-                <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                  {getUserInitials(assignedUser.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          ) : (
-            <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
-              <User className="w-3 h-3 text-emerald-500" />
-            </div>
-          )}
+           {assignedUser ? (
+             <div className="flex items-center gap-1">
+               <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
+               <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
+                 <AvatarImage src={assignedUser.photo_url} />
+                 <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                   {getUserInitials(assignedUser.full_name)}
+                 </AvatarFallback>
+               </Avatar>
+             </div>
+           ) : (
+             <div className="w-6 h-6 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-500/30">
+               <User className="w-3 h-3 text-emerald-500" />
+             </div>
+           )}
+         </div>
+
+         <Button
+           size="sm"
+           onClick={(e) => {
+             e.stopPropagation();
+             handleEditTerrain(card);
+           }}
+           className="w-full mt-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-xs h-7"
+         >
+           <Edit className="w-3 h-3 mr-1" />
+           Modifier terrain
+         </Button>
         </div>
-      </div>
-    );
-  };
+        );
+        };
 
   return (
     <div className="space-y-4">
