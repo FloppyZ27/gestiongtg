@@ -1012,6 +1012,7 @@ export default function PlanningCalendar({
     dayEquipes.forEach((equipe, index) => {
       const cardIds = equipe.mandats || [];
       const waypoints = [];
+      const dossiersInfo = [];
       
       cardIds.forEach((cardId) => {
         const card = terrainCards.find(c => c.id === cardId);
@@ -1019,6 +1020,30 @@ export default function PlanningCalendar({
           const address = formatAdresse(card.mandat.adresse_travaux);
           if (address) {
             waypoints.push(address);
+            
+            // Préparer les informations du dossier pour l'InfoWindow
+            const clientsNames = getClientsNames(card.dossier.clients_ids);
+            const lotsDisplay = card.mandat.lots?.map(lotId => {
+              const lot = lots?.find(l => l.id === lotId);
+              return lot ? lot.numero_lot : lotId;
+            }).join(', ') || '-';
+            
+            let rendezVousText = null;
+            if (card.terrain?.a_rendez_vous && card.terrain?.date_rendez_vous) {
+              rendezVousText = `${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMM", { locale: fr })}`;
+              if (card.terrain.heure_rendez_vous) {
+                rendezVousText += ` à ${card.terrain.heure_rendez_vous}`;
+              }
+            }
+            
+            dossiersInfo.push({
+              numero: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`,
+              clients: clientsNames,
+              mandat: getAbbreviatedMandatType(card.mandat.type_mandat),
+              adresse: address,
+              lot: lotsDisplay,
+              rendezVous: rendezVousText
+            });
           }
         }
       });
@@ -1029,7 +1054,8 @@ export default function PlanningCalendar({
           destination: bureauAddress,
           waypoints: waypoints,
           color: COLORS[index % COLORS.length],
-          label: generateTeamDisplayName(equipe)
+          label: generateTeamDisplayName(equipe),
+          dossiers: dossiersInfo
         });
       }
     });
