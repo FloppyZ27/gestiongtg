@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer, Map } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -164,6 +164,8 @@ export default function PlanningCalendar({
   const [editingTeam, setEditingTeam] = useState(null);
   const [editTeamDateStr, setEditTeamDateStr] = useState(null);
   const [isEditTeamDialogOpen, setIsEditTeamDialogOpen] = useState(false);
+  const [showMapDialog, setShowMapDialog] = useState(false);
+  const [selectedMapDate, setSelectedMapDate] = useState(null);
 
   const handlePrint = () => {
     window.print();
@@ -957,6 +959,43 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
+  const openGoogleMapsForDay = (dateStr) => {
+    const bureauAddress = "11 rue melancon est, Alma";
+    const dayEquipes = equipes[dateStr] || [];
+    
+    if (dayEquipes.length === 0) {
+      alert("Aucune équipe planifiée pour cette journée.");
+      return;
+    }
+
+    // Construire l'URL Google Maps avec tous les waypoints pour toutes les équipes
+    let allWaypoints = [];
+    
+    dayEquipes.forEach((equipe) => {
+      const cardIds = equipe.mandats || [];
+      cardIds.forEach((cardId) => {
+        const card = terrainCards.find(c => c.id === cardId);
+        if (card?.mandat?.adresse_travaux) {
+          const address = formatAdresse(card.mandat.adresse_travaux);
+          if (address) {
+            allWaypoints.push(address);
+          }
+        }
+      });
+    });
+
+    if (allWaypoints.length === 0) {
+      alert("Aucune adresse disponible pour cette journée.");
+      return;
+    }
+
+    // Créer l'URL Google Maps avec origin (bureau), waypoints et destination (bureau)
+    const waypointsParam = allWaypoints.join('|');
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&travelmode=driving`;
+    
+    window.open(url, '_blank');
+  };
+
   const DossierCard = ({ card, placedDate }) => {
     const { dossier, mandat, terrain } = card;
     const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
@@ -1561,11 +1600,23 @@ export default function PlanningCalendar({
                        >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
-                            {format(day, "EEEE", { locale: fr })}
-                          </div>
-                          <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                            {format(day, "d MMM", { locale: fr })}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex-1">
+                              <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                                {format(day, "EEEE", { locale: fr })}
+                              </div>
+                              <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                                {format(day, "d MMM", { locale: fr })}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => openGoogleMapsForDay(dateStr)}
+                              className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                              title="Voir les trajets sur Google Maps"
+                            >
+                              <Map className="w-3 h-3" />
+                            </Button>
                           </div>
                           {holiday && (
                             <div className="text-xs text-red-400 mt-1">
@@ -1756,12 +1807,24 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                           <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                             {format(day, "EEE", { locale: fr })}
-                           </p>
-                           <p className={`text-lg font-bold text-white`}>
-                             {format(day, "d", { locale: fr })}
-                           </p>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex-1">
+                              <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                                {format(day, "EEE", { locale: fr })}
+                              </p>
+                              <p className={`text-lg font-bold text-white`}>
+                                {format(day, "d", { locale: fr })}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => openGoogleMapsForDay(dateStr)}
+                              className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                              title="Voir les trajets sur Google Maps"
+                            >
+                              <Map className="w-3 h-3" />
+                            </Button>
+                          </div>
                           {holiday && (
                             <p className="text-xs text-red-400 mt-0.5">
                               {holiday.name}
