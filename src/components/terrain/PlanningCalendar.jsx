@@ -786,10 +786,19 @@ export default function PlanningCalendar({
     return match ? parseFloat(match[0]) : 0;
   };
 
+  const calculateTravelTime = (address1, address2) => {
+    // Estimation simple: 30 minutes entre chaque site
+    // TODO: Intégrer avec Google Maps API pour un calcul précis
+    if (!address1 || !address2) return 0;
+    return 0.5; // 30 minutes en heures
+  };
+
   const calculateEquipeTimings = (equipe, dateStr) => {
     let totalTime = 0;
+    let travelTime = 0;
     const cardIds = equipe.mandats || [];
     
+    // Calculer le temps des mandats
     cardIds.forEach((cardId) => {
       const card = terrainCards.find(c => c.id === cardId);
       if (card && card.terrain?.temps_prevu) {
@@ -797,8 +806,25 @@ export default function PlanningCalendar({
       }
     });
     
+    // Calculer le temps de trajet entre les sites
+    if (cardIds.length > 1) {
+      for (let i = 0; i < cardIds.length - 1; i++) {
+        const currentCard = terrainCards.find(c => c.id === cardIds[i]);
+        const nextCard = terrainCards.find(c => c.id === cardIds[i + 1]);
+        
+        if (currentCard?.mandat?.adresse_travaux && nextCard?.mandat?.adresse_travaux) {
+          travelTime += calculateTravelTime(
+            currentCard.mandat.adresse_travaux,
+            nextCard.mandat.adresse_travaux
+          );
+        }
+      }
+    }
+    
     return {
-      totalTime: totalTime.toFixed(1),
+      totalTime: (totalTime + travelTime).toFixed(1),
+      workTime: totalTime.toFixed(1),
+      travelTime: travelTime.toFixed(1),
       cardCount: cardIds.length
     };
   };
