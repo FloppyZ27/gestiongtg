@@ -2281,7 +2281,7 @@ export default function PlanningCalendar({
 
       {/* Dialog de carte Google Maps */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[98vw] w-[98vw] h-[98vh] p-0 gap-0">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
           <DialogHeader className="p-4 border-b border-slate-800 flex flex-row items-center justify-between">
             <DialogTitle className="text-xl font-bold text-white">
               {selectedEquipe ? (
@@ -2331,7 +2331,7 @@ export default function PlanningCalendar({
                 <iframe
                   src={mapUrl}
                   className="w-full h-full"
-                  style={{ border: 0, height: 'calc(98vh - 80px)' }}
+                  style={{ border: 0, height: 'calc(90vh - 80px)' }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
@@ -2351,10 +2351,12 @@ export default function PlanningCalendar({
               </div>
             ) : (
               // Affichage pour toutes les équipes (nouveau système multi-routes)
-              <MultiRouteMap 
-                routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} 
-                apiKey={googleMapsApiKey} 
-              />
+              <div style={{ height: 'calc(90vh - 80px)', width: '100%' }}>
+                <MultiRouteMap 
+                  routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} 
+                  apiKey={googleMapsApiKey} 
+                />
+              </div>
             )}
           </div>
         </DialogContent>
