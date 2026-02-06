@@ -1202,14 +1202,26 @@ export default function PlanningCalendar({
         className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
       >
         {/* Entête : N° Dossier et Type de mandat */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
-            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-          </Badge>
-          <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
-            {getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}
-          </Badge>
-        </div>
+         <div className="flex items-start justify-between gap-2 mb-2">
+           <div className="flex gap-2">
+             <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs flex-shrink-0`}>
+               {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
+             </Badge>
+             <Badge className={`${getMandatColor(mandat?.type_mandat)} border text-xs font-semibold flex-shrink-0`}>
+               {getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}
+             </Badge>
+           </div>
+           <Button
+             size="sm"
+             onClick={(e) => {
+               e.stopPropagation();
+               handleEditTerrain(card);
+             }}
+             className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"
+           >
+             <Edit className="w-3 h-3" />
+           </Button>
+         </div>
 
         {/* Clients */}
         <div className="flex items-center gap-1 mb-1">
