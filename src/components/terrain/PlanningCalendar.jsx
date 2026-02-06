@@ -1447,7 +1447,7 @@ export default function PlanningCalendar({
                                       {equipeNom}
                                     </span>
                                     <span className="text-emerald-300 text-xs">
-                                      {calculateEquipeTimings(equipe, dateStr).totalTime}h - {equipe.mandats?.length || 0} mandats
+                                      {calculateEquipeTimings(equipe, dateStr).totalTime}h
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -1642,7 +1642,7 @@ export default function PlanningCalendar({
                                      {equipeNom}
                                    </span>
                                    <span className="text-emerald-300 text-xs block">
-                                     {calculateEquipeTimings(equipe, dateStr).totalTime}h - {equipe.mandats?.length || 0} mandats
+                                     {calculateEquipeTimings(equipe, dateStr).totalTime}h
                                    </span>
                                  </div>
                                  {/* Tabs et bouton supprimer */}
