@@ -19,7 +19,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
   const googleMapRef = useRef(null);
   const directionsRenderersRef = useRef([]);
   const markersRef = useRef([]);
-  const infoWindowRef = useRef(null);
+  const [hoveredDossier, setHoveredDossier] = useState(null);
 
   useEffect(() => {
     if (!apiKey || !routes || routes.length === 0) {
@@ -63,10 +63,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
         directionsRenderersRef.current = [];
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
-        if (infoWindowRef.current) {
-          infoWindowRef.current.close();
-        }
-        infoWindowRef.current = new window.google.maps.InfoWindow();
+        setHoveredDossier(null);
 
         const bounds = new window.google.maps.LatLngBounds();
         const directionsService = new window.google.maps.DirectionsService();
@@ -154,38 +151,14 @@ export default function MultiRouteMap({ routes, apiKey }) {
                   // Ajouter l'événement de survol pour afficher les informations
                   marker.addListener('mouseover', () => {
                     const teamColor = color || COLORS[index % COLORS.length];
-                    const contentString = `
-                      <div style="
-                        background: ${teamColor}; 
-                        color: white; 
-                        padding: 12px; 
-                        min-width: 220px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                      ">
-                        <h3 style="font-weight: bold; margin: 0 0 8px 0; color: white; font-size: 16px;">
-                          ${dossier.numero}
-                        </h3>
-                        ${dossier.clients ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Clients:</strong> ${dossier.clients}</p>` : ''}
-                        ${dossier.mandat ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Mandat:</strong> ${dossier.mandat}</p>` : ''}
-                        ${dossier.adresse ? `<p style="margin: 4px 0; font-size: 13px;"><strong>Adresse:</strong> ${dossier.adresse}</p>` : ''}
-                        ${dossier.lot ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Lot:</strong> ${dossier.lot}</p>` : ''}
-                        ${dossier.rendezVous ? `<p style="margin: 4px 0; font-size: 14px; color: #fbbf24;"><strong>RDV:</strong> ${dossier.rendezVous}</p>` : ''}
-                      </div>
-                    `;
-                    infoWindowRef.current.setContent(contentString);
-                    infoWindowRef.current.setOptions({
-                      pixelOffset: new window.google.maps.Size(0, -10)
-                    });
-                    infoWindowRef.current.open({
-                      anchor: marker,
-                      map,
-                      shouldFocus: false
+                    setHoveredDossier({
+                      ...dossier,
+                      color: teamColor
                     });
                   });
 
                   marker.addListener('mouseout', () => {
-                    infoWindowRef.current.close();
+                    setHoveredDossier(null);
                   });
 
                   markersRef.current.push(marker);
@@ -226,9 +199,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
       directionsRenderersRef.current = [];
       markersRef.current.forEach(marker => marker.setMap(null));
       markersRef.current = [];
-      if (infoWindowRef.current) {
-        infoWindowRef.current.close();
-      }
+      setHoveredDossier(null);
     };
   }, [apiKey, routes]);
 
