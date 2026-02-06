@@ -178,6 +178,20 @@ export default function PlanningCalendar({
   const [isEditTeamDialogOpen, setIsEditTeamDialogOpen] = useState(false);
   const [showMapDialog, setShowMapDialog] = useState(false);
   const [selectedMapDate, setSelectedMapDate] = useState(null);
+  const [editingTerrainCard, setEditingTerrainCard] = useState(null);
+  const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
+  const [terrainForm, setTerrainForm] = useState({
+    date_limite_leve: "",
+    instruments_requis: "",
+    a_rendez_vous: false,
+    date_rendez_vous: "",
+    heure_rendez_vous: "",
+    donneur: "",
+    technicien: "",
+    dossier_simultane: "",
+    temps_prevu: "",
+    notes: ""
+  });
 
   const handlePrint = () => {
     window.print();
