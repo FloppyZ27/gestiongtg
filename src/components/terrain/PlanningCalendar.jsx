@@ -1546,7 +1546,7 @@ export default function PlanningCalendar({
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2 ${snapshot.isDraggingOver ? 'bg-slate-800/50 rounded-lg' : ''}`}
+                          className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2"
                         >
                           {unassignedCards
                             .filter(card => {
