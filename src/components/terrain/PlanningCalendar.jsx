@@ -824,6 +824,15 @@ export default function PlanningCalendar({
       }
     }
     
+    // Ajouter le trajet de retour depuis le dernier site vers le bureau
+    if (cardIds.length > 0) {
+      const lastCard = terrainCards.find(c => c.id === cardIds[cardIds.length - 1]);
+      if (lastCard?.mandat?.adresse_travaux) {
+        const travelKey = `${cardIds[cardIds.length - 1]}-bureau`;
+        travelTime += travelTimes[travelKey] || 0.5; // Défaut 30 min si pas encore calculé
+      }
+    }
+    
     return {
       totalTime: (totalTime + travelTime).toFixed(1),
       workTime: totalTime.toFixed(1),
@@ -897,6 +906,32 @@ export default function PlanningCalendar({
                     console.error('Erreur calcul temps de trajet:', error);
                     newTravelTimes[travelKey] = 0.5; // Défaut 30 min
                   }
+                }
+              }
+            }
+          }
+          
+          // Calculer le trajet de retour depuis le dernier site vers le bureau
+          if (cardIds.length > 0) {
+            const lastCard = terrainCards.find(c => c.id === cardIds[cardIds.length - 1]);
+            if (lastCard?.mandat?.adresse_travaux) {
+              const travelKey = `${cardIds[cardIds.length - 1]}-bureau`;
+              
+              if (!travelTimes[travelKey]) {
+                const origin = formatAdresse(lastCard.mandat.adresse_travaux);
+                
+                try {
+                  const response = await base44.functions.invoke('calculateTravelTime', {
+                    origin,
+                    destination: bureauAddress
+                  });
+                  
+                  if (response.data?.durationHours) {
+                    newTravelTimes[travelKey] = response.data.durationHours;
+                  }
+                } catch (error) {
+                  console.error('Erreur calcul temps de trajet retour bureau:', error);
+                  newTravelTimes[travelKey] = 0.5; // Défaut 30 min
                 }
               }
             }
