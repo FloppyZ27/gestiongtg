@@ -2142,6 +2142,7 @@ export default function PlanningCalendar({
             <DialogTitle className="text-xl font-bold text-white">
               Trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
             </DialogTitle>
+            <p className="sr-only">Visualisation des trajets des équipes sur Google Maps</p>
           </DialogHeader>
           <div className="flex-1 w-full h-full" style={{ height: 'calc(90vh - 80px)' }}>
             {selectedMapDate && (

@@ -19,20 +19,15 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('MapView useEffect triggered:', { dateStr, equipesCount: equipes?.length, terrainCardsCount: terrainCards?.length });
-    
     if (!dateStr || !equipes || equipes.length === 0) {
-      console.log('No data, setting loading to false');
       setLoading(false);
       return;
     }
 
-    if (!mapRef.current) {
-      console.log('Map ref not ready');
-      return;
-    }
-
     const loadMap = async () => {
+      if (!mapRef.current) {
+        return;
+      }
       try {
         setLoading(true);
         setError(null);
