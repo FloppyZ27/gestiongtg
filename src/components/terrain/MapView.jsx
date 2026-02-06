@@ -37,6 +37,13 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
       try {
         setLoading(true);
         setError(null);
+
+        // Vérifier que le ref est disponible
+        if (!mapRef.current) {
+          setError('Élément de carte non disponible');
+          setLoading(false);
+          return;
+        }
         
         // Charger Google Maps API
         if (!window.google) {
