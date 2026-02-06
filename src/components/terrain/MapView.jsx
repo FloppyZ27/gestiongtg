@@ -136,7 +136,7 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
       }
     };
 
-    loadMap();
+    return () => clearTimeout(timer);
   }, [dateStr, equipes, terrainCards, formatAdresse]);
 
   if (loading) {
