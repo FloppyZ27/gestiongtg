@@ -24,6 +24,10 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
       return;
     }
 
+    if (!mapRef.current) {
+      return;
+    }
+
     const loadMap = async () => {
       try {
         setLoading(true);
