@@ -218,6 +218,60 @@ export default function MultiRouteMap({ routes, apiKey }) {
           <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
         </div>
       )}
+      
+      {/* Infobulle dans le coin supérieur droit */}
+      {hoveredDossier && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          background: hoveredDossier.color,
+          color: 'white',
+          padding: '16px',
+          minWidth: '280px',
+          borderRadius: '12px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          zIndex: 1000,
+          pointerEvents: 'none'
+        }}>
+          <h3 style={{ 
+            fontWeight: 'bold', 
+            margin: '0 0 12px 0', 
+            color: 'white', 
+            fontSize: '18px',
+            borderBottom: '2px solid rgba(255,255,255,0.3)',
+            paddingBottom: '8px'
+          }}>
+            {hoveredDossier.numero}
+          </h3>
+          {hoveredDossier.clients && (
+            <p style={{ margin: '6px 0', fontSize: '14px' }}>
+              <strong>Clients:</strong> {hoveredDossier.clients}
+            </p>
+          )}
+          {hoveredDossier.mandat && (
+            <p style={{ margin: '6px 0', fontSize: '14px' }}>
+              <strong>Mandat:</strong> {hoveredDossier.mandat}
+            </p>
+          )}
+          {hoveredDossier.adresse && (
+            <p style={{ margin: '6px 0', fontSize: '13px' }}>
+              <strong>Adresse:</strong> {hoveredDossier.adresse}
+            </p>
+          )}
+          {hoveredDossier.lot && (
+            <p style={{ margin: '6px 0', fontSize: '14px' }}>
+              <strong>Lot:</strong> {hoveredDossier.lot}
+            </p>
+          )}
+          {hoveredDossier.rendezVous && (
+            <p style={{ margin: '6px 0', fontSize: '14px', color: '#fbbf24' }}>
+              <strong>RDV:</strong> {hoveredDossier.rendezVous}
+            </p>
+          )}
+        </div>
+      )}
+      
       <div ref={mapRef} className="w-full h-full" />
     </div>
   );
