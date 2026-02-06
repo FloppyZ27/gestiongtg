@@ -85,11 +85,64 @@ export default function MultiRouteMap({ routes, apiKey }) {
                   strokeWeight: 4,
                   strokeOpacity: 0.8,
                 },
-                suppressMarkers: false,
+                suppressMarkers: true,
                 preserveViewport: true,
               });
 
               directionsRenderersRef.current.push(directionsRenderer);
+
+              // Créer des marqueurs personnalisés pour le départ et l'arrivée
+              const route = result.routes[0];
+              const startLocation = route.legs[0].start_location;
+              const endLocation = route.legs[route.legs.length - 1].end_location;
+
+              // Marqueur de départ
+              new window.google.maps.Marker({
+                position: startLocation,
+                map: map,
+                label: {
+                  text: `${index + 1}`,
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                },
+                icon: {
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 12,
+                  fillColor: color || COLORS[index % COLORS.length],
+                  fillOpacity: 1,
+                  strokeColor: 'white',
+                  strokeWeight: 2,
+                },
+                title: `${label} - Départ`,
+                zIndex: 1000 + index,
+              });
+
+              // Marqueurs pour chaque waypoint
+              route.legs.forEach((leg, legIndex) => {
+                if (legIndex > 0) {
+                  new window.google.maps.Marker({
+                    position: leg.start_location,
+                    map: map,
+                    label: {
+                      text: String.fromCharCode(65 + legIndex), // A, B, C...
+                      color: 'white',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    },
+                    icon: {
+                      path: window.google.maps.SymbolPath.CIRCLE,
+                      scale: 10,
+                      fillColor: color || COLORS[index % COLORS.length],
+                      fillOpacity: 0.9,
+                      strokeColor: 'white',
+                      strokeWeight: 2,
+                    },
+                    title: `${label} - Arrêt ${legIndex}`,
+                    zIndex: 1000 + index,
+                  });
+                }
+              });
 
               // Ajouter les points au bounds
               result.routes[0].legs.forEach(leg => {
