@@ -1619,23 +1619,11 @@ export default function PlanningCalendar({
                        >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex-1">
-                              <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
-                                {format(day, "EEEE", { locale: fr })}
-                              </div>
-                              <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                                {format(day, "d MMM", { locale: fr })}
-                              </div>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={() => openGoogleMapsForDay(dateStr)}
-                              className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                              title="Voir les trajets sur Google Maps"
-                            >
-                              <Map className="w-3 h-3" />
-                            </Button>
+                          <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                            {format(day, "EEEE", { locale: fr })}
+                          </div>
+                          <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                            {format(day, "d MMM", { locale: fr })}
                           </div>
                           {holiday && (
                             <div className="text-xs text-red-400 mt-1">
@@ -1665,6 +1653,14 @@ export default function PlanningCalendar({
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-1">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => openGoogleMapsForDay(dateStr)}
+                                      className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                                      title="Voir les trajets sur Google Maps"
+                                    >
+                                      <Map className="w-3 h-3" />
+                                    </Button>
                                     <button
                                       onClick={() => copyEquipe(dateStr, equipe.id)}
                                       className="text-cyan-400 hover:text-cyan-300"
@@ -1826,24 +1822,12 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex-1">
-                              <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                                {format(day, "EEE", { locale: fr })}
-                              </p>
-                              <p className={`text-lg font-bold text-white`}>
-                                {format(day, "d", { locale: fr })}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={() => openGoogleMapsForDay(dateStr)}
-                              className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                              title="Voir les trajets sur Google Maps"
-                            >
-                              <Map className="w-3 h-3" />
-                            </Button>
-                          </div>
+                          <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                            {format(day, "EEE", { locale: fr })}
+                          </p>
+                          <p className={`text-lg font-bold text-white`}>
+                            {format(day, "d", { locale: fr })}
+                          </p>
                           {holiday && (
                             <p className="text-xs text-red-400 mt-0.5">
                               {holiday.name}
@@ -1858,67 +1842,75 @@ export default function PlanningCalendar({
                            const equipeNom = generateTeamDisplayName(equipe);
                            return (
                              <div key={equipe.id} className="bg-slate-800/50 border border-slate-700 rounded overflow-hidden text-xs">
-                               <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
-                                 {/* Nom équipe et timings */}
-                                 <div className="mb-1">
-                                   <span 
-                                     className="text-white text-xs font-bold cursor-pointer hover:text-emerald-400 transition-colors block"
-                                     onClick={() => handleEditTeam(dateStr, equipe)}
-                                   >
-                                     {equipeNom}
-                                   </span>
-                                   <span className="text-emerald-300 text-xs block">
-                                     {calculateEquipeTimings(equipe, dateStr).totalTime}h
-                                   </span>
+                                <div className="bg-blue-600/40 px-1 py-1 border-b-2 border-blue-500/50">
+                                  {/* Nom équipe et timings */}
+                                  <div className="mb-1">
+                                    <span 
+                                      className="text-white text-xs font-bold cursor-pointer hover:text-emerald-400 transition-colors block"
+                                      onClick={() => handleEditTeam(dateStr, equipe)}
+                                    >
+                                      {equipeNom}
+                                    </span>
+                                    <span className="text-emerald-300 text-xs block">
+                                      {calculateEquipeTimings(equipe, dateStr).totalTime}h
+                                    </span>
+                                  </div>
+                                  {/* Tabs et boutons */}
+                                 <div className="flex items-center justify-between mb-1">
+                                 <div className="flex items-center gap-0.5">
+                                   {globalViewMode ? (
+                                     <>
+                                       {globalViewMode === "techniciens" && <Users className="w-3 h-3 text-blue-400" />}
+                                       {globalViewMode === "vehicules" && <Truck className="w-3 h-3 text-purple-400" />}
+                                       {globalViewMode === "equipements" && <Wrench className="w-3 h-3 text-orange-400" />}
+                                     </>
+                                   ) : (
+                                     <>
+                                       <button
+                                         onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
+                                         className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
+                                       >
+                                         <Users className="w-3 h-3" />
+                                       </button>
+                                       <button
+                                         onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
+                                         className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
+                                       >
+                                         <Truck className="w-3 h-3" />
+                                       </button>
+                                       <button
+                                         onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
+                                         className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
+                                       >
+                                         <Wrench className="w-3 h-3" />
+                                       </button>
+                                     </>
+                                   )}
                                  </div>
-                                 {/* Tabs et bouton supprimer */}
-                                <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-0.5">
-                                  {globalViewMode ? (
-                                    <>
-                                      {globalViewMode === "techniciens" && <Users className="w-3 h-3 text-blue-400" />}
-                                      {globalViewMode === "vehicules" && <Truck className="w-3 h-3 text-purple-400" />}
-                                      {globalViewMode === "equipements" && <Wrench className="w-3 h-3 text-orange-400" />}
-                                    </>
-                                  ) : (
-                                    <>
-                                      <button
-                                        onClick={() => setEquipeActiveTab(equipe.id, "techniciens")}
-                                        className={`p-0.5 rounded transition-colors ${activeTab === "techniciens" ? 'bg-blue-500/30 text-blue-400' : 'text-slate-400 hover:text-white'}`}
-                                      >
-                                        <Users className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => setEquipeActiveTab(equipe.id, "vehicules")}
-                                        className={`p-0.5 rounded transition-colors ${activeTab === "vehicules" ? 'bg-purple-500/30 text-purple-400' : 'text-slate-400 hover:text-white'}`}
-                                      >
-                                        <Truck className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => setEquipeActiveTab(equipe.id, "equipements")}
-                                        className={`p-0.5 rounded transition-colors ${activeTab === "equipements" ? 'bg-orange-500/30 text-orange-400' : 'text-slate-400 hover:text-white'}`}
-                                      >
-                                        <Wrench className="w-3 h-3" />
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-0.5">
-                                  <button
-                                    onClick={() => copyEquipe(dateStr, equipe.id)}
-                                    className="text-cyan-400 hover:text-cyan-300"
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => removeEquipe(dateStr, equipe.id)}
-                                    className="text-red-400 hover:text-red-300"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </div>
-                                </div>
-                                </div>
+                                 <div className="flex items-center gap-0.5">
+                                   <Button
+                                     size="sm"
+                                     onClick={() => openGoogleMapsForDay(dateStr)}
+                                     className="h-5 w-5 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                                     title="Voir les trajets sur Google Maps"
+                                   >
+                                     <Map className="w-2.5 h-2.5" />
+                                   </Button>
+                                   <button
+                                     onClick={() => copyEquipe(dateStr, equipe.id)}
+                                     className="text-cyan-400 hover:text-cyan-300"
+                                   >
+                                     <Copy className="w-3 h-3" />
+                                   </button>
+                                   <button
+                                     onClick={() => removeEquipe(dateStr, equipe.id)}
+                                     className="text-red-400 hover:text-red-300"
+                                   >
+                                     <X className="w-3 h-3" />
+                                   </button>
+                                 </div>
+                                 </div>
+                                 </div>
 
                                   <div className="p-1">
 
