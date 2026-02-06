@@ -1862,26 +1862,18 @@ export default function PlanningCalendar({
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-1">
-                                    <Button
-                                      size="sm"
-                                      onClick={() => openGoogleMapsForEquipe(dateStr, equipe)}
-                                      className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                                      title="Voir les trajets sur Google Maps"
-                                    >
-                                      <MapPin className="w-3 h-3" />
-                                    </Button>
-                                    <button
-                                      onClick={() => copyEquipe(dateStr, equipe.id)}
-                                      className="text-cyan-400 hover:text-cyan-300"
-                                    >
-                                      <Copy className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={() => removeEquipe(dateStr, equipe.id)}
-                                      className="text-red-400 hover:text-red-300"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
+                                   <button
+                                     onClick={() => copyEquipe(dateStr, equipe.id)}
+                                     className="text-cyan-400 hover:text-cyan-300"
+                                   >
+                                     <Copy className="w-3 h-3" />
+                                   </button>
+                                   <button
+                                     onClick={() => removeEquipe(dateStr, equipe.id)}
+                                     className="text-red-400 hover:text-red-300"
+                                   >
+                                     <X className="w-3 h-3" />
+                                   </button>
                                   </div>
                                 </div>
                                     </div>
