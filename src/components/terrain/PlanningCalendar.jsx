@@ -2310,15 +2310,17 @@ export default function PlanningCalendar({
                   Aucun trajet disponible
                 </div>
               )
+            ) : !googleMapsApiKey ? (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Chargement de la clé API...
+              </div>
+            ) : mapRoutes.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Aucun trajet disponible pour cette journée
+              </div>
             ) : (
               // Affichage pour toutes les équipes (nouveau système multi-routes)
-              mapRoutes.length > 0 && googleMapsApiKey ? (
-                <MultiRouteMap routes={mapRoutes} apiKey={googleMapsApiKey} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  Aucun trajet disponible pour cette journée
-                </div>
-              )
+              <MultiRouteMap routes={mapRoutes} apiKey={googleMapsApiKey} />
             )}
           </div>
         </DialogContent>
