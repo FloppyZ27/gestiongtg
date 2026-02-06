@@ -24,12 +24,10 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
       return;
     }
 
-    // Attendre que le DOM soit prêt
-    const timer = setTimeout(() => {
-      loadMap();
-    }, 100);
-
     const loadMap = async () => {
+      // Attendre que le DOM soit prêt
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       if (!mapRef.current) {
         setLoading(false);
         setError('Impossible de charger la carte');
@@ -143,7 +141,7 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
       }
     };
 
-    return () => clearTimeout(timer);
+    loadMap();
   }, [dateStr, equipes, terrainCards, formatAdresse]);
 
   if (loading) {
