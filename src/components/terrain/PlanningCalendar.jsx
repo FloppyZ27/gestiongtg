@@ -1561,9 +1561,7 @@ export default function PlanningCalendar({
                                     {...provided.dragHandleProps}
                                     className={snapshot.isDragging ? 'opacity-50' : ''}
                                   >
-                                    <div className="mb-2">
-                                      <DossierCard card={card} />
-                                    </div>
+                                    <DossierCard card={card} />
                                   </div>
                                 )}
                               </Draggable>
