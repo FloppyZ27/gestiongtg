@@ -1435,6 +1435,17 @@ export default function PlanningCalendar({
                               <div className="flex gap-2 mt-2">
                                 <Button
                                   size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(card.dossier, card.mandatIndex);
+                                  }}
+                                  className="flex-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-xs h-7"
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Modifier
+                                </Button>
+                                <Button
+                                  size="sm"
                                   onClick={() => {
                                     const updatedMandats = card.dossier.mandats.map((m, idx) => {
                                       if (idx === card.mandatIndex) {
@@ -1446,7 +1457,7 @@ export default function PlanningCalendar({
                                   }}
                                   className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
                                 >
-                                  Oui, terrain requis
+                                  Oui
                                 </Button>
                                 <Button
                                   size="sm"
