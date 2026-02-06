@@ -18,6 +18,8 @@ export default function MultiRouteMap({ routes, apiKey }) {
   const [error, setError] = useState(null);
   const googleMapRef = useRef(null);
   const directionsRenderersRef = useRef([]);
+  const markersRef = useRef([]);
+  const infoWindowRef = useRef(null);
 
   useEffect(() => {
     if (!apiKey || !routes || routes.length === 0) {
@@ -56,9 +58,15 @@ export default function MultiRouteMap({ routes, apiKey }) {
 
         googleMapRef.current = map;
 
-        // Nettoyer les anciens renderers
+        // Nettoyer les anciens renderers et marqueurs
         directionsRenderersRef.current.forEach(renderer => renderer.setMap(null));
         directionsRenderersRef.current = [];
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+        if (infoWindowRef.current) {
+          infoWindowRef.current.close();
+        }
+        infoWindowRef.current = new window.google.maps.InfoWindow();
 
         const bounds = new window.google.maps.LatLngBounds();
         const directionsService = new window.google.maps.DirectionsService();
@@ -66,7 +74,7 @@ export default function MultiRouteMap({ routes, apiKey }) {
         let completedRoutes = 0;
 
         routes.forEach((route, index) => {
-          const { origin, destination, waypoints, color, label } = route;
+          const { origin, destination, waypoints, color, label, dossiers } = route;
 
           const request = {
             origin,
@@ -118,14 +126,15 @@ export default function MultiRouteMap({ routes, apiKey }) {
                 zIndex: 1000 + index,
               });
 
-              // Marqueurs pour chaque waypoint
+              // Marqueurs pour chaque waypoint avec informations des dossiers
               route.legs.forEach((leg, legIndex) => {
-                if (legIndex > 0) {
-                  new window.google.maps.Marker({
+                if (legIndex > 0 && dossiers && dossiers[legIndex - 1]) {
+                  const dossier = dossiers[legIndex - 1];
+                  const marker = new window.google.maps.Marker({
                     position: leg.start_location,
                     map: map,
                     label: {
-                      text: String.fromCharCode(65 + legIndex), // A, B, C...
+                      text: String.fromCharCode(65 + legIndex - 1), // A, B, C...
                       color: 'white',
                       fontSize: '12px',
                       fontWeight: 'bold'
@@ -138,9 +147,33 @@ export default function MultiRouteMap({ routes, apiKey }) {
                       strokeColor: 'white',
                       strokeWeight: 2,
                     },
-                    title: `${label} - Arrêt ${legIndex}`,
+                    title: `${label} - ${dossier.numero}`,
                     zIndex: 1000 + index,
                   });
+
+                  // Ajouter l'événement de survol pour afficher les informations
+                  marker.addListener('mouseover', () => {
+                    const contentString = `
+                      <div style="color: #000; padding: 8px; min-width: 200px;">
+                        <h3 style="font-weight: bold; margin-bottom: 8px; color: ${color || COLORS[index % COLORS.length]};">
+                          ${dossier.numero}
+                        </h3>
+                        ${dossier.clients ? `<p style="margin: 4px 0;"><strong>Clients:</strong> ${dossier.clients}</p>` : ''}
+                        ${dossier.mandat ? `<p style="margin: 4px 0;"><strong>Mandat:</strong> ${dossier.mandat}</p>` : ''}
+                        ${dossier.adresse ? `<p style="margin: 4px 0;"><strong>Adresse:</strong> ${dossier.adresse}</p>` : ''}
+                        ${dossier.lot ? `<p style="margin: 4px 0;"><strong>Lot:</strong> ${dossier.lot}</p>` : ''}
+                        ${dossier.rendezVous ? `<p style="margin: 4px 0; color: #d97706;"><strong>RDV:</strong> ${dossier.rendezVous}</p>` : ''}
+                      </div>
+                    `;
+                    infoWindowRef.current.setContent(contentString);
+                    infoWindowRef.current.open(map, marker);
+                  });
+
+                  marker.addListener('mouseout', () => {
+                    infoWindowRef.current.close();
+                  });
+
+                  markersRef.current.push(marker);
                 }
               });
 
@@ -176,6 +209,11 @@ export default function MultiRouteMap({ routes, apiKey }) {
       // Cleanup
       directionsRenderersRef.current.forEach(renderer => renderer.setMap(null));
       directionsRenderersRef.current = [];
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+      }
     };
   }, [apiKey, routes]);
 
