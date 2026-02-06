@@ -976,6 +976,7 @@ export default function PlanningCalendar({
   const [selectedEquipe, setSelectedEquipe] = useState(null);
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
+  const [selectedRoutes, setSelectedRoutes] = useState([]);
 
   // Charger la clé API au démarrage
   useEffect(() => {
@@ -1034,6 +1035,7 @@ export default function PlanningCalendar({
     });
 
     setMapRoutes(routes);
+    setSelectedRoutes(routes.map((_, i) => i)); // Sélectionner toutes les routes par défaut
   };
 
   const openGoogleMapsForEquipe = async (dateStr, equipe) => {
@@ -2279,8 +2281,8 @@ export default function PlanningCalendar({
 
       {/* Dialog de carte Google Maps */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
-          <DialogHeader className="p-4 border-b border-slate-800">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[98vw] w-[98vw] h-[98vh] p-0 gap-0">
+          <DialogHeader className="p-4 border-b border-slate-800 flex flex-row items-center justify-between">
             <DialogTitle className="text-xl font-bold text-white">
               {selectedEquipe ? (
                 <>Trajets - {generateTeamDisplayName(selectedEquipe)} - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</>
@@ -2288,6 +2290,35 @@ export default function PlanningCalendar({
                 <>Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</>
               )}
             </DialogTitle>
+            
+            {!selectedEquipe && mapRoutes.length > 0 && (
+              <div className="flex gap-3 items-center bg-slate-800/50 rounded-lg px-4 py-2 border border-slate-700">
+                <span className="text-sm text-slate-300 font-medium">Équipes:</span>
+                {mapRoutes.map((route, index) => (
+                  <label key={index} className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 px-2 py-1 rounded transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedRoutes.includes(index)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedRoutes([...selectedRoutes, index]);
+                        } else {
+                          setSelectedRoutes(selectedRoutes.filter(i => i !== index));
+                        }
+                      }}
+                      className="w-4 h-4 rounded"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-4 rounded-full border-2 border-white" 
+                        style={{ backgroundColor: route.color }}
+                      />
+                      <span className="text-sm text-white font-medium">{route.label}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
           </DialogHeader>
           <div className="flex-1 w-full h-full">
             {selectedEquipe ? (
@@ -2300,7 +2331,7 @@ export default function PlanningCalendar({
                 <iframe
                   src={mapUrl}
                   className="w-full h-full"
-                  style={{ border: 0, height: 'calc(90vh - 80px)' }}
+                  style={{ border: 0, height: 'calc(98vh - 80px)' }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
@@ -2320,7 +2351,10 @@ export default function PlanningCalendar({
               </div>
             ) : (
               // Affichage pour toutes les équipes (nouveau système multi-routes)
-              <MultiRouteMap routes={mapRoutes} apiKey={googleMapsApiKey} />
+              <MultiRouteMap 
+                routes={mapRoutes.filter((_, i) => selectedRoutes.includes(i))} 
+                apiKey={googleMapsApiKey} 
+              />
             )}
           </div>
         </DialogContent>
