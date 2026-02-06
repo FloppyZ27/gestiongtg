@@ -77,6 +77,7 @@ import EditDossierDialog from "../dossiers/EditDossierDialog";
 import CommentairesSection from "../dossiers/CommentairesSection";
 import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
+import MultiRouteMap from "./MultiRouteMap";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -88,6 +89,17 @@ const getArpenteurInitials = (arpenteur) => {
   };
   return mapping[arpenteur] || "";
 };
+
+const COLORS = [
+  '#10b981', // emerald
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#14b8a6', // teal
+  '#f97316', // orange
+  '#06b6d4', // cyan
+];
 
 const getArpenteurColor = (arpenteur) => {
   const colors = {
@@ -962,59 +974,66 @@ export default function PlanningCalendar({
   const [mapUrl, setMapUrl] = useState(null);
   const [loadingMapUrl, setLoadingMapUrl] = useState(false);
   const [selectedEquipe, setSelectedEquipe] = useState(null);
+  const [mapRoutes, setMapRoutes] = useState([]);
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
+
+  // Charger la clé API au démarrage
+  useEffect(() => {
+    const loadApiKey = async () => {
+      try {
+        const response = await base44.functions.invoke('getGoogleMapsApiKey');
+        if (response.data?.apiKey) {
+          setGoogleMapsApiKey(response.data.apiKey);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération de la clé API:', error);
+      }
+    };
+    loadApiKey();
+  }, []);
 
   const openGoogleMapsForDay = async (dateStr) => {
     setSelectedMapDate(dateStr);
     setSelectedEquipe(null);
     setShowMapDialog(true);
-    setLoadingMapUrl(true);
     
     const bureauAddress = "11 rue melancon est, Alma";
     const dayEquipes = equipes[dateStr] || [];
     
     if (dayEquipes.length === 0) {
-      setMapUrl(null);
-      setLoadingMapUrl(false);
+      setMapRoutes([]);
       return;
     }
 
-    // Construire la liste des waypoints pour toutes les équipes de la journée
-    let allWaypoints = [];
+    // Créer un trajet distinct pour chaque équipe
+    const routes = [];
     
-    dayEquipes.forEach((equipe) => {
+    dayEquipes.forEach((equipe, index) => {
       const cardIds = equipe.mandats || [];
+      const waypoints = [];
+      
       cardIds.forEach((cardId) => {
         const card = terrainCards.find(c => c.id === cardId);
         if (card?.mandat?.adresse_travaux) {
           const address = formatAdresse(card.mandat.adresse_travaux);
           if (address) {
-            allWaypoints.push(address);
+            waypoints.push(address);
           }
         }
       });
+
+      if (waypoints.length > 0) {
+        routes.push({
+          origin: bureauAddress,
+          destination: bureauAddress,
+          waypoints: waypoints,
+          color: COLORS[index % COLORS.length],
+          label: generateTeamDisplayName(equipe)
+        });
+      }
     });
 
-    if (allWaypoints.length === 0) {
-      setMapUrl(null);
-      setLoadingMapUrl(false);
-      return;
-    }
-
-    // Appeler la fonction backend pour obtenir l'URL embed
-    try {
-      const response = await base44.functions.invoke('getGoogleMapsEmbedUrl', {
-        origin: bureauAddress,
-        destination: bureauAddress,
-        waypoints: allWaypoints
-      });
-      
-      setMapUrl(response.data.url);
-    } catch (error) {
-      console.error('Erreur lors de la génération de l\'URL Google Maps:', error);
-      setMapUrl(null);
-    } finally {
-      setLoadingMapUrl(false);
-    }
+    setMapRoutes(routes);
   };
 
   const openGoogleMapsForEquipe = async (dateStr, equipe) => {
@@ -2271,23 +2290,35 @@ export default function PlanningCalendar({
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 w-full h-full">
-            {loadingMapUrl ? (
-              <div className="flex items-center justify-center h-full text-slate-400">
-                Chargement de la carte...
-              </div>
-            ) : mapUrl ? (
-              <iframe
-                src={mapUrl}
-                className="w-full h-full"
-                style={{ border: 0, height: 'calc(90vh - 80px)' }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+            {selectedEquipe ? (
+              // Affichage pour une équipe spécifique (ancien système)
+              loadingMapUrl ? (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Chargement de la carte...
+                </div>
+              ) : mapUrl ? (
+                <iframe
+                  src={mapUrl}
+                  className="w-full h-full"
+                  style={{ border: 0, height: 'calc(90vh - 80px)' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Aucun trajet disponible
+                </div>
+              )
             ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
-                Aucun trajet disponible pour cette journée
-              </div>
+              // Affichage pour toutes les équipes (nouveau système multi-routes)
+              mapRoutes.length > 0 && googleMapsApiKey ? (
+                <MultiRouteMap routes={mapRoutes} apiKey={googleMapsApiKey} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Aucun trajet disponible pour cette journée
+                </div>
+              )
             )}
           </div>
         </DialogContent>
