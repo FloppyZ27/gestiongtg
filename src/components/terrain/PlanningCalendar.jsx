@@ -1316,17 +1316,7 @@ export default function PlanningCalendar({
            )}
          </div>
 
-         <Button
-           size="sm"
-           onClick={(e) => {
-             e.stopPropagation();
-             handleEditTerrain(card);
-           }}
-           className="w-full mt-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-xs h-7"
-         >
-           <Edit className="w-3 h-3 mr-1" />
-           Modifier terrain
-         </Button>
+
         </div>
         );
         };
