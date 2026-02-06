@@ -1036,13 +1036,31 @@ export default function PlanningCalendar({
               }
             }
             
+            let dateLivraisonText = null;
+            if (card.mandat.date_livraison) {
+              dateLivraisonText = format(new Date(card.mandat.date_livraison + 'T00:00:00'), "dd MMM", { locale: fr });
+            }
+            
+            let dateLimiteText = null;
+            if (card.terrain?.date_limite_leve) {
+              dateLimiteText = format(new Date(card.terrain.date_limite_leve + 'T00:00:00'), "dd MMM", { locale: fr });
+            }
+            
             dossiersInfo.push({
               numero: `${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`,
               clients: clientsNames,
               mandat: getAbbreviatedMandatType(card.mandat.type_mandat),
+              mandatType: card.mandat.type_mandat,
               adresse: address,
               lot: lotsDisplay,
-              rendezVous: rendezVousText
+              rendezVous: rendezVousText,
+              arpenteur: card.dossier.arpenteur_geometre,
+              dateLivraison: dateLivraisonText,
+              dateLimite: dateLimiteText,
+              instrumentsRequis: card.terrain?.instruments_requis,
+              technicien: card.terrain?.technicien,
+              dossierSimultane: card.terrain?.dossier_simultane,
+              tempsPrevu: card.terrain?.temps_prevu
             });
           }
         }
