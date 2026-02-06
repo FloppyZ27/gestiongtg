@@ -963,6 +963,60 @@ export default function PlanningCalendar({
   const [loadingMapUrl, setLoadingMapUrl] = useState(false);
   const [selectedEquipe, setSelectedEquipe] = useState(null);
 
+  const openGoogleMapsForDay = async (dateStr) => {
+    setSelectedMapDate(dateStr);
+    setSelectedEquipe(null);
+    setShowMapDialog(true);
+    setLoadingMapUrl(true);
+    
+    const bureauAddress = "11 rue melancon est, Alma";
+    const dayEquipes = equipes[dateStr] || [];
+    
+    if (dayEquipes.length === 0) {
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
+    }
+
+    // Construire la liste des waypoints pour toutes les équipes de la journée
+    let allWaypoints = [];
+    
+    dayEquipes.forEach((equipe) => {
+      const cardIds = equipe.mandats || [];
+      cardIds.forEach((cardId) => {
+        const card = terrainCards.find(c => c.id === cardId);
+        if (card?.mandat?.adresse_travaux) {
+          const address = formatAdresse(card.mandat.adresse_travaux);
+          if (address) {
+            allWaypoints.push(address);
+          }
+        }
+      });
+    });
+
+    if (allWaypoints.length === 0) {
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
+    }
+
+    // Appeler la fonction backend pour obtenir l'URL embed
+    try {
+      const response = await base44.functions.invoke('getGoogleMapsEmbedUrl', {
+        origin: bureauAddress,
+        destination: bureauAddress,
+        waypoints: allWaypoints
+      });
+      
+      setMapUrl(response.data.url);
+    } catch (error) {
+      console.error('Erreur lors de la génération de l\'URL Google Maps:', error);
+      setMapUrl(null);
+    } finally {
+      setLoadingMapUrl(false);
+    }
+  };
+
   const openGoogleMapsForEquipe = async (dateStr, equipe) => {
     setSelectedMapDate(dateStr);
     setSelectedEquipe(equipe);
@@ -1618,11 +1672,25 @@ export default function PlanningCalendar({
                        >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
-                            {format(day, "EEEE", { locale: fr })}
-                          </div>
-                          <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                            {format(day, "d MMM", { locale: fr })}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex-1">
+                              <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                                {format(day, "EEEE", { locale: fr })}
+                              </div>
+                              <div className={`text-xs ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                                {format(day, "d MMM", { locale: fr })}
+                              </div>
+                            </div>
+                            {dayEquipes.length > 0 && (
+                              <Button
+                                size="sm"
+                                onClick={() => openGoogleMapsForDay(dateStr)}
+                                className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                                title="Voir tous les trajets de la journée"
+                              >
+                                <Map className="w-3 h-3" />
+                              </Button>
+                            )}
                           </div>
                           {holiday && (
                             <div className="text-xs text-red-400 mt-1">
@@ -1821,12 +1889,26 @@ export default function PlanningCalendar({
                       >
                       <div className="mb-2 w-full">
                         <div className={`bg-slate-800/50 rounded-lg p-2 text-center ${isToday ? 'ring-2 ring-emerald-500' : ''} w-full`}>
-                          <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
-                            {format(day, "EEE", { locale: fr })}
-                          </p>
-                          <p className={`text-lg font-bold text-white`}>
-                            {format(day, "d", { locale: fr })}
-                          </p>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex-1">
+                              <p className={`text-xs uppercase ${isToday ? 'text-emerald-400' : holiday ? 'text-red-400' : 'text-slate-400'}`}>
+                                {format(day, "EEE", { locale: fr })}
+                              </p>
+                              <p className={`text-lg font-bold text-white`}>
+                                {format(day, "d", { locale: fr })}
+                              </p>
+                            </div>
+                            {dayEquipes.length > 0 && (
+                              <Button
+                                size="sm"
+                                onClick={() => openGoogleMapsForDay(dateStr)}
+                                className="h-6 w-6 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
+                                title="Voir tous les trajets de la journée"
+                              >
+                                <Map className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
                           {holiday && (
                             <p className="text-xs text-red-400 mt-0.5">
                               {holiday.name}
@@ -2181,7 +2263,11 @@ export default function PlanningCalendar({
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0">
           <DialogHeader className="p-4 border-b border-slate-800">
             <DialogTitle className="text-xl font-bold text-white">
-              Trajets - {selectedEquipe && generateTeamDisplayName(selectedEquipe)} - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+              {selectedEquipe ? (
+                <>Trajets - {generateTeamDisplayName(selectedEquipe)} - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</>
+              ) : (
+                <>Tous les trajets - {selectedMapDate && format(new Date(selectedMapDate + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}</>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 w-full h-full">
