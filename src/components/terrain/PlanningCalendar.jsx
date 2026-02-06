@@ -1199,7 +1199,7 @@ export default function PlanningCalendar({
           e.stopPropagation();
           handleCardClick(card);
         }}
-        className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer`}
+        className={`${bgColorClass} rounded-lg p-2 mb-2 hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer border-none`}
       >
         {/* Entête : N° Dossier et Type de mandat */}
          <div className="flex items-start justify-between gap-2 mb-2">
