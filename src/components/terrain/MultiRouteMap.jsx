@@ -14,13 +14,13 @@ const COLORS = [
 
 const getArpenteurBgColor = (arpenteur) => {
   const colors = {
-    "Samuel Guay": "rgba(239, 68, 68, 0.2)",
-    "Pierre-Luc Pilote": "rgba(100, 116, 139, 0.2)",
-    "Frédéric Gilbert": "rgba(249, 115, 22, 0.2)",
-    "Dany Gaboury": "rgba(234, 179, 8, 0.2)",
-    "Benjamin Larouche": "rgba(34, 211, 238, 0.2)"
+    "Samuel Guay": "#991b1b",
+    "Pierre-Luc Pilote": "#475569",
+    "Frédéric Gilbert": "#9a3412",
+    "Dany Gaboury": "#854d0e",
+    "Benjamin Larouche": "#155e75"
   };
-  return colors[arpenteur] || "rgba(16, 185, 129, 0.2)";
+  return colors[arpenteur] || "#065f46";
 };
 
 const getMandatBgColor = (typeMandat) => {
