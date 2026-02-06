@@ -1512,7 +1512,7 @@ export default function PlanningCalendar({
                                   }}
                                   className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-7"
                                 >
-                                  Oui
+                                  Terrain requis
                                 </Button>
                                 <Button
                                   size="sm"
@@ -1527,7 +1527,7 @@ export default function PlanningCalendar({
                                   }}
                                   className="flex-1 bg-slate-600/20 hover:bg-slate-600/30 text-slate-400 text-xs h-7"
                                 >
-                                  Non
+                                  Annuler
                                 </Button>
                               </div>
                             </div>
