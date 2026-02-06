@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -786,12 +787,7 @@ export default function PlanningCalendar({
     return match ? parseFloat(match[0]) : 0;
   };
 
-  const calculateTravelTime = (address1, address2) => {
-    // Estimation simple: 30 minutes entre chaque site
-    // TODO: Intégrer avec Google Maps API pour un calcul précis
-    if (!address1 || !address2) return 0;
-    return 0.5; // 30 minutes en heures
-  };
+  const [travelTimes, setTravelTimes] = useState({});
 
   const calculateEquipeTimings = (equipe, dateStr) => {
     let totalTime = 0;
@@ -813,10 +809,8 @@ export default function PlanningCalendar({
         const nextCard = terrainCards.find(c => c.id === cardIds[i + 1]);
         
         if (currentCard?.mandat?.adresse_travaux && nextCard?.mandat?.adresse_travaux) {
-          travelTime += calculateTravelTime(
-            currentCard.mandat.adresse_travaux,
-            nextCard.mandat.adresse_travaux
-          );
+          const travelKey = `${cardIds[i]}-${cardIds[i + 1]}`;
+          travelTime += travelTimes[travelKey] || 0.5; // Défaut 30 min si pas encore calculé
         }
       }
     }
@@ -828,6 +822,58 @@ export default function PlanningCalendar({
       cardCount: cardIds.length
     };
   };
+
+  // Calculer les temps de trajet via Google Maps
+  useEffect(() => {
+    const calculateAllTravelTimes = async () => {
+      const newTravelTimes = {};
+      
+      for (const dateStr of Object.keys(equipes)) {
+        const dayEquipes = equipes[dateStr];
+        
+        for (const equipe of dayEquipes) {
+          const cardIds = equipe.mandats || [];
+          
+          if (cardIds.length > 1) {
+            for (let i = 0; i < cardIds.length - 1; i++) {
+              const currentCard = terrainCards.find(c => c.id === cardIds[i]);
+              const nextCard = terrainCards.find(c => c.id === cardIds[i + 1]);
+              
+              if (currentCard?.mandat?.adresse_travaux && nextCard?.mandat?.adresse_travaux) {
+                const travelKey = `${cardIds[i]}-${cardIds[i + 1]}`;
+                
+                // Ne calculer que si pas déjà dans le cache
+                if (!travelTimes[travelKey]) {
+                  const origin = formatAdresse(currentCard.mandat.adresse_travaux);
+                  const destination = formatAdresse(nextCard.mandat.adresse_travaux);
+                  
+                  try {
+                    const response = await base44.functions.invoke('calculateTravelTime', {
+                      origin,
+                      destination
+                    });
+                    
+                    if (response.data?.durationHours) {
+                      newTravelTimes[travelKey] = response.data.durationHours;
+                    }
+                  } catch (error) {
+                    console.error('Erreur calcul temps de trajet:', error);
+                    newTravelTimes[travelKey] = 0.5; // Défaut 30 min
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (Object.keys(newTravelTimes).length > 0) {
+        setTravelTimes(prev => ({ ...prev, ...newTravelTimes }));
+      }
+    };
+    
+    calculateAllTravelTimes();
+  }, [equipes, terrainCards.length]);
 
   const handleCardClick = (card) => {
     handleEdit(card.dossier, card.mandatIndex);
