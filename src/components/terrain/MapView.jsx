@@ -25,8 +25,11 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
     }
 
     const loadMap = async () => {
-      // Attendre que le DOM soit prêt
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Attendre que le DOM soit prêt (le dialog prend du temps à s'ouvrir)
+      for (let i = 0; i < 10; i++) {
+        if (mapRef.current) break;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
       if (!mapRef.current) {
         setLoading(false);
