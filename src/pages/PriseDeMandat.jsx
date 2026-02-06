@@ -3345,6 +3345,35 @@ const PriseDeMandat = React.forwardRef((props, ref) => {
                         commentairesToCreate: commentairesFinaux
                       });
                       
+                      // Ajouter une entrée terrain pour chaque mandat
+                      const terrainsListPromises = mandatsAvecCedule.map((mandat, idx) => {
+                        const terrain = mandat.terrain || {};
+                        return {
+                          date_limite_leve: terrain.date_limite_leve || mandat.date_livraison || "",
+                          instruments_requis: terrain.instruments_requis || "",
+                          a_rendez_vous: terrain.a_rendez_vous || false,
+                          date_rendez_vous: terrain.date_rendez_vous || "",
+                          heure_rendez_vous: terrain.heure_rendez_vous || "",
+                          donneur: terrain.donneur || "",
+                          technicien: terrain.technicien || "",
+                          dossier_simultane: terrain.dossier_simultane || "",
+                          temps_prevu: terrain.temps_prevu || "",
+                          notes: terrain.notes || ""
+                        };
+                      });
+
+                      // Mettre à jour le dossier avec les terrains_list pour chaque mandat
+                      const updatedMandats = mandatsAvecCedule.map((mandat, idx) => ({
+                        ...mandat,
+                        statut_terrain: "en_verification",
+                        terrains_list: [terrainsListPromises[idx]]
+                      }));
+
+                      await base44.entities.Dossier.update(newDossier.id, {
+                        ...dossierDataAvecCedule,
+                        mandats: updatedMandats
+                      });
+                      
                       // Créer des notifications pour chaque utilisateur assigné à un mandat
                       const notificationPromises = mandatsAvecCedule
                         .filter(m => m.utilisateur_assigne)
