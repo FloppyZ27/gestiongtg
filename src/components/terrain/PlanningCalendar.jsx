@@ -959,20 +959,24 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
-  const openGoogleMapsForDay = (dateStr) => {
+  const [mapUrl, setMapUrl] = useState(null);
+  const [loadingMapUrl, setLoadingMapUrl] = useState(false);
+
+  const openGoogleMapsForDay = async (dateStr) => {
     setSelectedMapDate(dateStr);
     setShowMapDialog(true);
-  };
-
-  const getGoogleMapsUrlForDay = (dateStr) => {
+    setLoadingMapUrl(true);
+    
     const bureauAddress = "11 rue melancon est, Alma";
     const dayEquipes = equipes[dateStr] || [];
     
     if (dayEquipes.length === 0) {
-      return null;
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
     }
 
-    // Construire l'URL Google Maps avec tous les waypoints pour toutes les équipes
+    // Construire la liste des waypoints
     let allWaypoints = [];
     
     dayEquipes.forEach((equipe) => {
@@ -989,14 +993,26 @@ export default function PlanningCalendar({
     });
 
     if (allWaypoints.length === 0) {
-      return null;
+      setMapUrl(null);
+      setLoadingMapUrl(false);
+      return;
     }
 
-    // Créer l'URL Google Maps avec origin (bureau), waypoints et destination (bureau)
-    const waypointsParam = allWaypoints.join('|');
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(bureauAddress)}&destination=${encodeURIComponent(bureauAddress)}&waypoints=${encodeURIComponent(waypointsParam)}&travelmode=driving`;
-    
-    return url;
+    // Appeler la fonction backend pour obtenir l'URL embed
+    try {
+      const response = await base44.functions.invoke('getGoogleMapsEmbedUrl', {
+        origin: bureauAddress,
+        destination: bureauAddress,
+        waypoints: allWaypoints
+      });
+      
+      setMapUrl(response.data.url);
+    } catch (error) {
+      console.error('Erreur lors de la génération de l\'URL Google Maps:', error);
+      setMapUrl(null);
+    } finally {
+      setLoadingMapUrl(false);
+    }
   };
 
   const DossierCard = ({ card, placedDate }) => {
@@ -2178,9 +2194,13 @@ export default function PlanningCalendar({
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 w-full h-full">
-            {selectedMapDate && getGoogleMapsUrlForDay(selectedMapDate) ? (
+            {loadingMapUrl ? (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Chargement de la carte...
+              </div>
+            ) : mapUrl ? (
               <iframe
-                src={getGoogleMapsUrlForDay(selectedMapDate)}
+                src={mapUrl}
                 className="w-full h-full"
                 style={{ border: 0, height: 'calc(90vh - 80px)' }}
                 allowFullScreen
