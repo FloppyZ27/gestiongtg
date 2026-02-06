@@ -802,6 +802,15 @@ export default function PlanningCalendar({
       }
     });
     
+    // Ajouter le trajet depuis le bureau vers le premier site
+    if (cardIds.length > 0) {
+      const firstCard = terrainCards.find(c => c.id === cardIds[0]);
+      if (firstCard?.mandat?.adresse_travaux) {
+        const travelKey = `bureau-${cardIds[0]}`;
+        travelTime += travelTimes[travelKey] || 0.5; // Défaut 30 min si pas encore calculé
+      }
+    }
+    
     // Calculer le temps de trajet entre les sites
     if (cardIds.length > 1) {
       for (let i = 0; i < cardIds.length - 1; i++) {
@@ -827,6 +836,7 @@ export default function PlanningCalendar({
   useEffect(() => {
     const calculateAllTravelTimes = async () => {
       const newTravelTimes = {};
+      const bureauAddress = "11 rue melancon est, Alma";
       
       for (const dateStr of Object.keys(equipes)) {
         const dayEquipes = equipes[dateStr];
@@ -834,6 +844,33 @@ export default function PlanningCalendar({
         for (const equipe of dayEquipes) {
           const cardIds = equipe.mandats || [];
           
+          // Calculer le trajet depuis le bureau vers le premier site
+          if (cardIds.length > 0) {
+            const firstCard = terrainCards.find(c => c.id === cardIds[0]);
+            if (firstCard?.mandat?.adresse_travaux) {
+              const travelKey = `bureau-${cardIds[0]}`;
+              
+              if (!travelTimes[travelKey]) {
+                const destination = formatAdresse(firstCard.mandat.adresse_travaux);
+                
+                try {
+                  const response = await base44.functions.invoke('calculateTravelTime', {
+                    origin: bureauAddress,
+                    destination
+                  });
+                  
+                  if (response.data?.durationHours) {
+                    newTravelTimes[travelKey] = response.data.durationHours;
+                  }
+                } catch (error) {
+                  console.error('Erreur calcul temps de trajet depuis bureau:', error);
+                  newTravelTimes[travelKey] = 0.5; // Défaut 30 min
+                }
+              }
+            }
+          }
+          
+          // Calculer les trajets entre les sites
           if (cardIds.length > 1) {
             for (let i = 0; i < cardIds.length - 1; i++) {
               const currentCard = terrainCards.find(c => c.id === cardIds[i]);
