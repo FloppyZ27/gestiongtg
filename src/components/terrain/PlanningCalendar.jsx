@@ -2103,14 +2103,6 @@ export default function PlanningCalendar({
                                    )}
                                  </div>
                                  <div className="flex items-center gap-0.5">
-                                   <Button
-                                     size="sm"
-                                     onClick={() => openGoogleMapsForEquipe(dateStr, equipe)}
-                                     className="h-5 w-5 p-0 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                                     title="Voir les trajets sur Google Maps"
-                                   >
-                                     <MapPin className="w-2.5 h-2.5" />
-                                   </Button>
                                    <button
                                      onClick={() => copyEquipe(dateStr, equipe.id)}
                                      className="text-cyan-400 hover:text-cyan-300"
