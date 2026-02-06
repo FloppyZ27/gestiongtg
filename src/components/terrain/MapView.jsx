@@ -31,20 +31,19 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
     const loadMap = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         // Charger Google Maps API
         if (!window.google) {
-          const script = document.createElement('script');
           const response = await base44.functions.invoke('getGoogleMapsApiKey');
           const apiKey = response.data.apiKey;
           
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
-          script.async = true;
-          script.defer = true;
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
           
           await new Promise((resolve, reject) => {
             script.onload = resolve;
-            script.onerror = reject;
+            script.onerror = () => reject(new Error('Échec du chargement de Google Maps'));
             document.head.appendChild(script);
           });
         }
@@ -52,7 +51,7 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
         // Initialiser la carte
         const map = new window.google.maps.Map(mapRef.current, {
           zoom: 10,
-          center: { lat: 48.5, lng: -71.5 }, // Alma approximatif
+          center: { lat: 48.5, lng: -71.5 },
           mapTypeId: 'roadmap',
         });
 
@@ -61,16 +60,15 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
         const directionsService = new window.google.maps.DirectionsService();
         const bounds = new window.google.maps.LatLngBounds();
         const bureauAddress = "11 rue melancon est, Alma";
+        let routesDrawn = 0;
 
         // Tracer chaque équipe avec une couleur différente
-        for (let i = 0; i < equipes.length; i++) {
-          const equipe = equipes[i];
+        const promises = equipes.map(async (equipe, i) => {
           const color = TEAM_COLORS[i % TEAM_COLORS.length];
-          
           const cardIds = equipe.mandats || [];
-          if (cardIds.length === 0) continue;
+          
+          if (cardIds.length === 0) return;
 
-          // Construire les waypoints pour cette équipe
           const waypoints = [];
           cardIds.forEach((cardId) => {
             const card = terrainCards.find(c => c.id === cardId);
@@ -85,18 +83,24 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
             }
           });
 
-          if (waypoints.length === 0) continue;
+          if (waypoints.length === 0) return;
 
-          // Tracer le trajet pour cette équipe
           try {
-            const result = await directionsService.route({
-              origin: bureauAddress,
-              destination: bureauAddress,
-              waypoints: waypoints,
-              travelMode: window.google.maps.TravelMode.DRIVING,
+            const result = await new Promise((resolve, reject) => {
+              directionsService.route({
+                origin: bureauAddress,
+                destination: bureauAddress,
+                waypoints: waypoints,
+                travelMode: window.google.maps.TravelMode.DRIVING,
+              }, (response, status) => {
+                if (status === 'OK') {
+                  resolve(response);
+                } else {
+                  reject(new Error(`Directions failed: ${status}`));
+                }
+              });
             });
 
-            // Créer le renderer avec la couleur de l'équipe
             const directionsRenderer = new window.google.maps.DirectionsRenderer({
               map: map,
               directions: result,
@@ -106,30 +110,25 @@ export default function MapView({ dateStr, equipes, terrainCards, formatAdresse 
                 strokeOpacity: 0.8,
                 strokeWeight: 5,
               },
-              markerOptions: {
-                icon: {
-                  path: window.google.maps.SymbolPath.CIRCLE,
-                  scale: 8,
-                  fillColor: color,
-                  fillOpacity: 1,
-                  strokeColor: '#fff',
-                  strokeWeight: 2,
-                }
-              }
             });
 
-            // Étendre les limites pour inclure ce trajet
             const route = result.routes[0];
             route.overview_path.forEach(point => {
               bounds.extend(point);
             });
+            
+            routesDrawn++;
           } catch (err) {
             console.error(`Erreur trajet équipe ${equipe.nom}:`, err);
           }
-        }
+        });
 
-        // Ajuster la vue pour inclure tous les trajets
-        map.fitBounds(bounds);
+        await Promise.all(promises);
+
+        if (routesDrawn > 0) {
+          map.fitBounds(bounds);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Erreur chargement carte:', err);
