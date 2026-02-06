@@ -985,6 +985,42 @@ export default function PlanningCalendar({
     setIsEditingDialogOpen(true);
   };
 
+  const handleEditTerrain = (card) => {
+    setEditingTerrainCard(card);
+    setTerrainForm({
+      date_limite_leve: card.terrain?.date_limite_leve || "",
+      instruments_requis: card.terrain?.instruments_requis || "",
+      a_rendez_vous: card.terrain?.a_rendez_vous || false,
+      date_rendez_vous: card.terrain?.date_rendez_vous || "",
+      heure_rendez_vous: card.terrain?.heure_rendez_vous || "",
+      donneur: card.terrain?.donneur || "",
+      technicien: card.terrain?.technicien || "",
+      dossier_simultane: card.terrain?.dossier_simultane || "",
+      temps_prevu: card.terrain?.temps_prevu || "",
+      notes: card.terrain?.notes || ""
+    });
+    setIsTerrainDialogOpen(true);
+  };
+
+  const handleSaveTerrain = () => {
+    if (!editingTerrainCard) return;
+
+    const dossier = editingTerrainCard.dossier;
+    const updatedMandats = [...dossier.mandats];
+    const currentMandat = updatedMandats[editingTerrainCard.mandatIndex];
+    
+    updatedMandats[editingTerrainCard.mandatIndex] = {
+      ...currentMandat,
+      terrain: terrainForm,
+      statut_terrain: currentMandat.statut_terrain === "en_verification" ? "a_ceduler" : currentMandat.statut_terrain
+    };
+
+    onUpdateDossier(dossier.id, { ...dossier, mandats: updatedMandats });
+
+    setIsTerrainDialogOpen(false);
+    setEditingTerrainCard(null);
+  };
+
   const [mapUrl, setMapUrl] = useState(null);
   const [loadingMapUrl, setLoadingMapUrl] = useState(false);
   const [selectedEquipe, setSelectedEquipe] = useState(null);
