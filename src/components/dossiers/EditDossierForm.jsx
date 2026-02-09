@@ -1520,18 +1520,20 @@ export default function EditDossierForm({
             </Card>
 
             {/* Section Tarification */}
-            <TarificationStepForm
-              disabled={false}
-              mandats={formData.mandats}
-              onTarificationChange={(updatedMandats) => {
-                setFormData(prev => ({
-                  ...prev,
-                  mandats: updatedMandats
-                }));
-              }}
-              isCollapsed={tarificationStepCollapsed}
-              onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
-            />
+            <div data-section="tarification">
+              <TarificationStepForm
+                disabled={false}
+                mandats={formData.mandats}
+                onTarificationChange={(updatedMandats) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    mandats: updatedMandats
+                  }));
+                }}
+                isCollapsed={tarificationStepCollapsed}
+                onToggleCollapse={() => setTarificationStepCollapsed(!tarificationStepCollapsed)}
+              />
+            </div>
 
             {/* Section Terrain */}
             {formData.mandats.length > 0 && (
