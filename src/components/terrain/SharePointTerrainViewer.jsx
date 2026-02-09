@@ -247,7 +247,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           </p>
         </div>
         <div className="flex items-center gap-1">
-          {activeTab === "in" && (
+          {activeTab === "in" && !currentSubPath && (
             <Button
               type="button"
               variant="ghost"
