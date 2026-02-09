@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List } from "lucide-react";
+import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List, Folder, ArrowLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -133,25 +133,30 @@ export default function DocumentsStepForm({
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("intrants");
+  const [currentSubPath, setCurrentSubPath] = useState("");
+  const [folderToDelete, setFolderToDelete] = useState(null);
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   
-  // Construire le chemin selon l'onglet actif
-  let folderPath;
+  // Construire le chemin de base selon l'onglet actif
+  let baseFolderPath;
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
-    folderPath = activeTab === "intrants" 
+    baseFolderPath = activeTab === "intrants" 
       ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`
       : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/TERRAIN`;
   } else {
-    folderPath = activeTab === "intrants"
+    baseFolderPath = activeTab === "intrants"
       ? `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`
       : `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
   }
+  
+  // Ajouter le sous-chemin s'il existe
+  const folderPath = currentSubPath ? `${baseFolderPath}/${currentSubPath}` : baseFolderPath;
 
   // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, activeTab],
+    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, activeTab, currentSubPath],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -164,13 +169,20 @@ export default function DocumentsStepForm({
   });
 
   const files = filesData?.files || [];
+  const folders = files.filter(f => f.type === 'folder');
+  const filesList = files.filter(f => f.type === 'file');
 
   // Notifier le parent quand le nombre de fichiers change
   React.useEffect(() => {
     if (onDocumentsChange) {
-      onDocumentsChange(files.length > 0);
+      onDocumentsChange(filesList.length > 0);
     }
-  }, [files.length, onDocumentsChange]);
+  }, [filesList.length, onDocumentsChange]);
+  
+  // Réinitialiser le sous-chemin quand on change d'onglet
+  React.useEffect(() => {
+    setCurrentSubPath("");
+  }, [activeTab]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -339,6 +351,32 @@ export default function DocumentsStepForm({
     }
   };
 
+  const handleFolderClick = (folder) => {
+    const newSubPath = currentSubPath ? `${currentSubPath}/${folder.name}` : folder.name;
+    setCurrentSubPath(newSubPath);
+  };
+
+  const handleGoBack = () => {
+    if (!currentSubPath) return;
+    const pathParts = currentSubPath.split('/');
+    pathParts.pop();
+    setCurrentSubPath(pathParts.join('/'));
+  };
+
+  const handleDeleteFolder = async (folder) => {
+    try {
+      await base44.functions.invoke('sharepoint', {
+        action: 'delete',
+        fileId: folder.id
+      });
+      setFolderToDelete(null);
+      refetch();
+    } catch (error) {
+      console.error("Erreur suppression dossier:", error);
+      alert("Erreur lors de la suppression du dossier");
+    }
+  };
+
 
 
   return (
@@ -358,9 +396,9 @@ export default function DocumentsStepForm({
               <FolderOpen className="w-3.5 h-3.5 text-yellow-400" />
             </div>
             <CardTitle className="text-yellow-300 text-base">Documents</CardTitle>
-            {files.length > 0 && (
+            {filesList.length > 0 && (
               <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
-                {files.length} fichier{files.length > 1 ? 's' : ''}
+                {filesList.length} fichier{filesList.length > 1 ? 's' : ''}
               </Badge>
             )}
           </div>
@@ -375,18 +413,18 @@ export default function DocumentsStepForm({
               <TabsTrigger value="intrants" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
                 <FolderOpen className="w-3 h-3 mr-1" />
                 INTRANTS
-                {activeTab === "intrants" && files.length > 0 && (
+                {activeTab === "intrants" && filesList.length > 0 && (
                   <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
-                    {files.length}
+                    {filesList.length}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="terrain" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
                 <FolderOpen className="w-3 h-3 mr-1" />
                 TERRAIN
-                {activeTab === "terrain" && files.length > 0 && (
+                {activeTab === "terrain" && filesList.length > 0 && (
                   <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
-                    {files.length}
+                    {filesList.length}
                   </Badge>
                 )}
               </TabsTrigger>
@@ -412,9 +450,23 @@ export default function DocumentsStepForm({
               {/* Chemin et refresh */}
               {!isDragOver && !isUploading && (
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-slate-500 text-xs truncate flex-1">
-                    📁 {folderPath}
-                  </p>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {currentSubPath && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleGoBack}
+                        className="text-slate-400 hover:text-white h-6 px-2 flex-shrink-0"
+                        title="Retour"
+                      >
+                        <ArrowLeft className="w-3 h-3" />
+                      </Button>
+                    )}
+                    <p className="text-slate-500 text-xs truncate">
+                      📁 {folderPath}
+                    </p>
+                  </div>
                   <div className="flex items-center gap-1">
                     <Button
                       type="button"
@@ -458,10 +510,34 @@ export default function DocumentsStepForm({
                     <div className="flex items-center justify-center py-4">
                       <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
                     </div>
-                  ) : files.length > 0 ? (
+                  ) : (folders.length > 0 || filesList.length > 0) ? (
                     viewMode === "list" ? (
                       <div className="max-h-40 overflow-y-auto space-y-1">
-                        {files.map((file) => (
+                        {folders.map((folder) => (
+                          <div
+                            key={folder.id}
+                            className="flex items-center justify-between px-2 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded hover:bg-blue-500/20 transition-colors group cursor-pointer"
+                            onClick={() => handleFolderClick(folder)}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Folder className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                              <span className="text-blue-300 text-sm font-medium truncate">{folder.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); setFolderToDelete(folder); }}
+                                className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                title="Supprimer le dossier"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {filesList.map((file) => (
                           <div
                             key={file.id}
                             className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
@@ -509,7 +585,33 @@ export default function DocumentsStepForm({
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
-                        {files.map((file) => (
+                        {folders.map((folder) => (
+                          <div
+                            key={folder.id}
+                            className="relative bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden hover:bg-blue-500/20 transition-colors group cursor-pointer"
+                            onClick={() => handleFolderClick(folder)}
+                          >
+                            <div className="aspect-square flex items-center justify-center bg-blue-500/5">
+                              <Folder className="w-12 h-12 text-blue-400" />
+                            </div>
+                            <div className="p-2 bg-blue-500/10">
+                              <p className="text-blue-300 text-xs truncate font-medium" title={folder.name}>{folder.name}</p>
+                            </div>
+                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); setFolderToDelete(folder); }}
+                                className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                title="Supprimer le dossier"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {filesList.map((file) => (
                           <FileGridItem 
                             key={file.id}
                             file={file}
@@ -619,6 +721,48 @@ export default function DocumentsStepForm({
                   className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
                 >
                   Confirmer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de confirmation de suppression dossier */}
+        <Dialog open={!!folderToDelete} onOpenChange={(open) => !open && setFolderToDelete(null)}>
+          <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+            <DialogHeader>
+              <DialogTitle className="text-xl text-red-400 flex items-center justify-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                Confirmer la suppression
+                <span className="text-2xl">⚠️</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Êtes-vous sûr de vouloir supprimer ce dossier et tout son contenu ?
+              </p>
+              {folderToDelete && (
+                <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30 flex items-center gap-2">
+                  <Folder className="w-5 h-5 text-blue-400" />
+                  <span className="text-blue-300 text-sm font-medium truncate flex-1">{folderToDelete.name}</span>
+                </div>
+              )}
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => setFolderToDelete(null)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleDeleteFolder(folderToDelete);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Supprimer
                 </Button>
               </div>
             </div>
