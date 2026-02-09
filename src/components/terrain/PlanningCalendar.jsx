@@ -1214,7 +1214,9 @@ export default function PlanningCalendar({
 
   const DossierCard = ({ card, placedDate }) => {
     const { dossier, mandat, terrain } = card;
-    const assignedUser = users?.find(u => u.email === mandat?.utilisateur_assigne);
+    const donneurUser = terrain?.donneur 
+      ? users?.find(u => u.full_name === terrain.donneur)
+      : null;
     
     // Couleur basée sur l'arpenteur
     const arpenteurColor = getArpenteurColor(dossier.arpenteur_geometre);
@@ -1339,13 +1341,13 @@ export default function PlanningCalendar({
              )}
            </div>
 
-           {assignedUser ? (
+           {donneurUser ? (
              <div className="flex items-center gap-1">
-               <span className="text-xs text-emerald-300 font-medium">{getUserInitials(assignedUser.full_name)}</span>
+               <span className="text-xs text-emerald-300 font-medium">{getUserInitials(donneurUser.full_name)}</span>
                <Avatar className="w-6 h-6 border-2 border-emerald-500/50">
-                 <AvatarImage src={assignedUser.photo_url} />
+                 <AvatarImage src={donneurUser.photo_url} />
                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                   {getUserInitials(assignedUser.full_name)}
+                   {getUserInitials(donneurUser.full_name)}
                  </AvatarFallback>
                </Avatar>
              </div>

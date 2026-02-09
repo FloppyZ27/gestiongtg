@@ -548,9 +548,9 @@ export default function CeduleTerrain() {
   const mandatsCedules = getMandatsCedules();
 
   const MandatCard = ({ item, showActions = true, isDragging = false, currentUser }) => {
-    // Chercher l'utilisateur assigné parmi les utilisateurs
-    const assignedUser = item.mandat.utilisateur_assigne 
-      ? users.find(u => u.email === item.mandat.utilisateur_assigne)
+    // Chercher le donneur parmi les utilisateurs
+    const donneurUser = item.mandat.terrain?.donneur 
+      ? users.find(u => u.full_name === item.mandat.terrain.donneur)
       : null;
     
     // Vérifier si l'utilisateur courant est assigné à ce mandat
@@ -654,11 +654,11 @@ export default function CeduleTerrain() {
                 )}
               </div>
 
-              {assignedUser ? (
+              {donneurUser ? (
                 <Avatar className="w-7 h-7 border-2 border-slate-600">
-                  <AvatarImage src={assignedUser.photo_url} />
+                  <AvatarImage src={donneurUser.photo_url} />
                   <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                    {getUserInitials(assignedUser.full_name)}
+                    {getUserInitials(donneurUser.full_name)}
                   </AvatarFallback>
                 </Avatar>
               ) : (
