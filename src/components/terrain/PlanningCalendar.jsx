@@ -2652,19 +2652,19 @@ export default function PlanningCalendar({
               <div className="space-y-1 flex items-end">
                 <div className="flex items-center gap-2 h-8">
                   <Switch 
-                    checked={!!terrainForm.dossier_simultane}
-                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, dossier_simultane: checked ? terrainForm.dossier_simultane || "" : ""})}
+                    checked={terrainForm.dossier_simultane !== ""}
+                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, dossier_simultane: checked ? " " : ""})}
                     className="data-[state=checked]:bg-amber-400"
                   />
                   <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
                 </div>
               </div>
-              {terrainForm.dossier_simultane && (
+              {terrainForm.dossier_simultane !== "" && (
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Dossier simultané</Label>
                   <Input 
-                    value={terrainForm.dossier_simultane}
-                    onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value})}
+                    value={terrainForm.dossier_simultane.trim()}
+                    onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value || " "})}
                     placeholder="N° de dossier"
                     className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
                   />
