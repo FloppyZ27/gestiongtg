@@ -2405,16 +2405,27 @@ export default function PlanningCalendar({
           <DialogHeader>
             <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
             {editingTerrainCard && (
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-700">
-                <Badge variant="outline" className={`${getArpenteurColor(editingTerrainCard.dossier.arpenteur_geometre)} border`}>
+              <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
+                editingTerrainCard.dossier.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                editingTerrainCard.dossier.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                editingTerrainCard.dossier.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                editingTerrainCard.dossier.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                editingTerrainCard.dossier.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                "text-emerald-400"
+              }`}>
+                <span>
                   {getArpenteurInitials(editingTerrainCard.dossier.arpenteur_geometre)}{editingTerrainCard.dossier.numero_dossier}
-                </Badge>
-                <span className="text-slate-400 text-sm">-</span>
-                <span className="text-slate-300 text-sm">{getClientsNames(editingTerrainCard.dossier.clients_ids)}</span>
-                <span className="text-slate-400 text-sm">-</span>
-                <Badge className={`${getMandatColor(editingTerrainCard.mandat?.type_mandat)} border text-xs`}>
-                  {getAbbreviatedMandatType(editingTerrainCard.mandat?.type_mandat)}
-                </Badge>
+                  {editingTerrainCard.dossier.clients_ids.length > 0 && getClientsNames(editingTerrainCard.dossier.clients_ids) !== "-" && (
+                    <span> - {getClientsNames(editingTerrainCard.dossier.clients_ids)}</span>
+                  )}
+                </span>
+                {editingTerrainCard.mandat && (
+                  <span className="flex gap-1">
+                    <Badge className={`${getMandatColor(editingTerrainCard.mandat.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(editingTerrainCard.mandat.type_mandat)}
+                    </Badge>
+                  </span>
+                )}
               </div>
             )}
           </DialogHeader>
