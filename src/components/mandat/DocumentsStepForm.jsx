@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, FolderOpen, Upload, File, FileText, Image, FileSpreadsheet, Loader2, RefreshCw, Download, ExternalLink, Eye, Trash2, Grid3x3, List } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -131,21 +132,26 @@ export default function DocumentsStepForm({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [viewMode, setViewMode] = useState("list");
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState("intrants");
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   
-  // Construire le chemin selon si c'est temporaire ou non
+  // Construire le chemin selon l'onglet actif
   let folderPath;
   if (isTemporaire && clientInfo) {
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
-    folderPath = `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`;
+    folderPath = activeTab === "intrants" 
+      ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`
+      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/TERRAIN`;
   } else {
-    folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`;
+    folderPath = activeTab === "intrants"
+      ? `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`
+      : `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
   }
 
   // Fetch files from SharePoint - dossier spécifique
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-intrant', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom],
+    queryKey: ['sharepoint-documents', arpenteurGeometre, numeroDossier, isTemporaire, clientInfo?.prenom, clientInfo?.nom, activeTab],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -364,143 +370,168 @@ export default function DocumentsStepForm({
 
       {!isCollapsed && (
         <CardContent className="pt-1 pb-2">
-          {/* Message si drag over */}
-          {isDragOver && (
-            <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Déposez les fichiers ici
-            </div>
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 h-8 mb-3">
+              <TabsTrigger value="intrants" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
+                <FolderOpen className="w-3 h-3 mr-1" />
+                INTRANTS
+                {activeTab === "intrants" && files.length > 0 && (
+                  <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
+                    {files.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="terrain" className="text-xs data-[state=active]:bg-yellow-500/30 data-[state=active]:text-yellow-400 data-[state=active]:border-b-2 data-[state=active]:border-yellow-400">
+                <FolderOpen className="w-3 h-3 mr-1" />
+                TERRAIN
+                {activeTab === "terrain" && files.length > 0 && (
+                  <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] h-4">
+                    {files.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Message de progression */}
-          {isUploading && (
-            <div className="flex items-center gap-2 py-2 text-teal-400 text-sm">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {uploadProgress}
-            </div>
-          )}
-
-          {/* Chemin et refresh */}
-          {!isDragOver && !isUploading && (
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-slate-500 text-xs truncate flex-1">
-                📁 {folderPath}
-              </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); setViewMode(viewMode === "list" ? "grid" : "list"); }}
-                  className="text-slate-400 hover:text-white h-6 px-2"
-                  title={viewMode === "list" ? "Vue grille" : "Vue liste"}
-                >
-                  {viewMode === "list" ? <Grid3x3 className="w-3 h-3" /> : <List className="w-3 h-3" />}
-                </Button>
-                <label onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <span className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
-                    <Upload className="w-3 h-3" />
-                    Ajouter
-                  </span>
-                </label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); refetch(); }}
-                  className="text-slate-400 hover:text-white h-6 px-2"
-                >
-                  <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Liste des fichiers */}
-          {!isDragOver && !isUploading && (
-            <>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+            <TabsContent value={activeTab} className="mt-0">
+              {/* Message si drag over */}
+              {isDragOver && (
+                <div className="flex items-center justify-center py-4 text-teal-400 text-sm">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Déposez les fichiers ici
                 </div>
-              ) : files.length > 0 ? (
-                viewMode === "list" ? (
-                  <div className="max-h-40 overflow-y-auto space-y-1">
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
-                        onClick={() => handlePreview(file)}
-                      >
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {getFileIcon(file.name)}
-                          <span className="text-slate-300 text-sm truncate">{file.name}</span>
-                          <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
-                            className="h-6 px-2 text-slate-400 hover:text-white"
-                            title="Visualiser"
-                          >
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
-                            className="h-6 px-2 text-slate-400 hover:text-white"
-                            title="Télécharger"
-                          >
-                            <Download className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
-                            className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
-                    {files.map((file) => (
-                      <FileGridItem 
-                        key={file.id}
-                        file={file}
-                        onPreview={handlePreview}
-                        onDownload={handleDownload}
-                        onDelete={setFileToDelete}
-                        getFileIcon={getFileIcon}
-                        formatFileSize={formatFileSize}
-                        isImageFile={isImageFile}
-                      />
-                    ))}
-                  </div>
-                )
-              ) : (
-                <p className="text-slate-500 text-xs text-center py-3">
-                  Aucun fichier • Glissez des fichiers ici ou cliquez sur Ajouter
-                </p>
               )}
-            </>
-          )}
+
+              {/* Message de progression */}
+              {isUploading && (
+                <div className="flex items-center gap-2 py-2 text-teal-400 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {uploadProgress}
+                </div>
+              )}
+
+              {/* Chemin et refresh */}
+              {!isDragOver && !isUploading && (
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-slate-500 text-xs truncate flex-1">
+                    📁 {folderPath}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); setViewMode(viewMode === "list" ? "grid" : "list"); }}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                      title={viewMode === "list" ? "Vue grille" : "Vue liste"}
+                    >
+                      {viewMode === "list" ? <Grid3x3 className="w-3 h-3" /> : <List className="w-3 h-3" />}
+                    </Button>
+                    <label onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <span className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs rounded cursor-pointer transition-colors flex items-center gap-1">
+                        <Upload className="w-3 h-3" />
+                        Ajouter
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); refetch(); }}
+                      className="text-slate-400 hover:text-white h-6 px-2"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Liste des fichiers */}
+              {!isDragOver && !isUploading && (
+                <>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                    </div>
+                  ) : files.length > 0 ? (
+                    viewMode === "list" ? (
+                      <div className="max-h-40 overflow-y-auto space-y-1">
+                        {files.map((file) => (
+                          <div
+                            key={file.id}
+                            className="flex items-center justify-between px-2 py-1.5 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
+                            onClick={() => handlePreview(file)}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              {getFileIcon(file.name)}
+                              <span className="text-slate-300 text-sm truncate">{file.name}</span>
+                              <span className="text-slate-500 text-xs">{formatFileSize(file.size)}</span>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); handlePreview(file); }}
+                                className="h-6 px-2 text-slate-400 hover:text-white"
+                                title="Visualiser"
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); handleDownload(file); }}
+                                className="h-6 px-2 text-slate-400 hover:text-white"
+                                title="Télécharger"
+                              >
+                                <Download className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); setFileToDelete(file); }}
+                                className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
+                        {files.map((file) => (
+                          <FileGridItem 
+                            key={file.id}
+                            file={file}
+                            onPreview={handlePreview}
+                            onDownload={handleDownload}
+                            onDelete={setFileToDelete}
+                            getFileIcon={getFileIcon}
+                            formatFileSize={formatFileSize}
+                            isImageFile={isImageFile}
+                          />
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    <p className="text-slate-500 text-xs text-center py-3">
+                      Aucun fichier • Glissez des fichiers ici ou cliquez sur Ajouter
+                    </p>
+                  )}
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       )}
 
