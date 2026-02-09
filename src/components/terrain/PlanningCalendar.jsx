@@ -1117,9 +1117,13 @@ export default function PlanningCalendar({
     const updatedMandats = [...dossier.mandats];
     const currentMandat = updatedMandats[editingTerrainCard.mandatIndex];
     
+    // Mettre à jour le terrain spécifique dans terrains_list
+    let updatedTerrainsList = [...(currentMandat.terrains_list || [])];
+    updatedTerrainsList[editingTerrainCard.terrainIndex] = terrainForm;
+    
     updatedMandats[editingTerrainCard.mandatIndex] = {
       ...currentMandat,
-      terrain: terrainForm,
+      terrains_list: updatedTerrainsList,
       statut_terrain: currentMandat.statut_terrain === "en_verification" ? "a_ceduler" : currentMandat.statut_terrain
     };
 
