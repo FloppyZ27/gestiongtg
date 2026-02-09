@@ -1371,14 +1371,14 @@ function LayoutContent({ children, currentPageName }) {
       </Dialog>
       
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950 w-12">
-          <SidebarHeader className="border-b border-slate-900 p-2 bg-slate-950">
+        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
+          <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-12 h-auto"
+                  className="w-16 h-auto"
                 />
                 <div>
                   <h2 className="font-bold text-white text-2xl">GestionGTG</h2>
@@ -1389,16 +1389,16 @@ function LayoutContent({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-6 h-auto"
+                  className="w-8 h-auto"
                 />
               </div>
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-1 bg-slate-950">
+          <SidebarContent className="p-1.5 bg-slate-950">
             <SidebarGroup>
               {!isCollapsed && (
-                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 py-2">
+                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
                   Navigation
                 </SidebarGroupLabel>
               )}
@@ -1411,16 +1411,16 @@ function LayoutContent({ children, currentPageName }) {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <SidebarMenuButton 
-                              asChild 
-                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                              location.pathname === item.url 
-                                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                              }`}
+                                asChild 
+                                className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
+                                  location.pathname === item.url 
+                                    ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                }`}
                               >
-                              <Link to={item.url} className="flex items-center justify-center p-2">
-                              <item.icon className="w-4 h-4" />
-                              </Link>
+                                <Link to={item.url} className="flex items-center justify-center p-2.5">
+                                  <item.icon className="w-5 h-5" />
+                                </Link>
                               </SidebarMenuButton>
                             </TooltipTrigger>
                             <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
