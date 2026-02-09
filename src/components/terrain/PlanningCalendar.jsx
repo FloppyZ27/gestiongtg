@@ -830,6 +830,7 @@ export default function PlanningCalendar({
   };
 
   const [travelTimes, setTravelTimes] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
   const calculateEquipeTimings = (equipe, dateStr) => {
     let totalTime = 0;
