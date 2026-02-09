@@ -2532,16 +2532,8 @@ export default function PlanningCalendar({
             )}
           </DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            {/* Première ligne : Temps prévu, Donneur, Instruments, Technicien */}
             <div className="grid grid-cols-4 gap-3">
-              <div className="space-y-1">
-                <Label className="text-slate-400 text-xs">Date limite cédule</Label>
-                <Input 
-                  type="date"
-                  value={terrainForm.date_limite_leve}
-                  onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
-                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                />
-              </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Temps prévu</Label>
                 <Input 
@@ -2590,9 +2582,6 @@ export default function PlanningCalendar({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Technicien</Label>
                 <Select 
@@ -2613,8 +2602,17 @@ export default function PlanningCalendar({
               </div>
             </div>
 
-            {/* Ligne Rendez-vous */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Deuxième ligne : Date limite cédule, Toggle rendez-vous, Date et heure rendez-vous */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-400 text-xs">Date limite cédule</Label>
+                <Input 
+                  type="date"
+                  value={terrainForm.date_limite_leve}
+                  onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
+                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                />
+              </div>
               <div className="space-y-1 flex items-end">
                 <div className="flex items-center gap-2 h-8">
                   <Switch 
@@ -2628,7 +2626,7 @@ export default function PlanningCalendar({
               {terrainForm.a_rendez_vous && (
                 <>
                   <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                    <Label className="text-slate-400 text-xs">Date RDV</Label>
                     <Input 
                       type="date"
                       value={terrainForm.date_rendez_vous}
@@ -2637,7 +2635,7 @@ export default function PlanningCalendar({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                    <Label className="text-slate-400 text-xs">Heure RDV</Label>
                     <Input 
                       type="time"
                       value={terrainForm.heure_rendez_vous}
