@@ -1238,16 +1238,29 @@ export default function PlanningCalendar({
                {getAbbreviatedMandatType(mandat?.type_mandat) || 'Mandat'}
              </Badge>
            </div>
-           <Button
-             size="sm"
-             onClick={(e) => {
-               e.stopPropagation();
-               handleEditTerrain(card);
-             }}
-             className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"
-           >
-             <Edit className="w-3 h-3" />
-           </Button>
+           <div className="flex gap-1">
+             <Button
+               size="sm"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setSharePointDossier(dossier);
+                 setIsSharePointDialogOpen(true);
+               }}
+               className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 h-6 w-6 p-0 flex-shrink-0"
+             >
+               <Folder className="w-3 h-3" />
+             </Button>
+             <Button
+               size="sm"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 handleEditTerrain(card);
+               }}
+               className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 h-6 w-6 p-0 flex-shrink-0"
+             >
+               <Edit className="w-3 h-3" />
+             </Button>
+           </div>
          </div>
 
         {/* Clients */}
@@ -1343,25 +1356,9 @@ export default function PlanningCalendar({
            )}
          </div>
 
-         {/* Bouton fichiers SharePoint */}
-         <div className="mt-2 pt-1 border-t border-emerald-500/30">
-           <Button
-             size="sm"
-             onClick={(e) => {
-               e.stopPropagation();
-               setSharePointDossier(dossier);
-               setIsSharePointDialogOpen(true);
-             }}
-             className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-6"
-           >
-             <Folder className="w-3 h-3 mr-1" />
-             Fichiers terrain
-           </Button>
          </div>
-
-        </div>
-        );
-        };
+         );
+         };
 
   return (
     <div className="space-y-4">
