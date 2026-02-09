@@ -800,11 +800,11 @@ export default function PlanningCalendar({
       });
     });
     
-    // 2. Synchroniser les mandats qui ont date_terrain et equipe_assignee
+    // 2. Synchroniser les mandats qui ont date_cedulee et equipe_assignee au niveau terrain
     terrainCards.forEach(card => {
-      if (card.mandat?.date_terrain && card.mandat?.equipe_assignee) {
-        const dateStr = card.mandat.date_terrain;
-        const equipeNom = card.mandat.equipe_assignee;
+      if (card.terrain?.date_cedulee && card.terrain?.equipe_assignee) {
+        const dateStr = card.terrain.date_cedulee;
+        const equipeNom = card.terrain.equipe_assignee;
         
         // Vérifier si la carte est déjà dans une équipe
         const isAlreadyAssigned = Object.values(updatedEquipes).some(dayEquipes =>
@@ -850,8 +850,8 @@ export default function PlanningCalendar({
     const isAssignedInEquipe = Object.values(equipes).some(dayEquipes => 
       dayEquipes.some(equipe => equipe.mandats.includes(card.id))
     );
-    // Exclure aussi les cartes qui ont déjà une date_terrain et equipe_assignee
-    const hasScheduledData = card.mandat?.date_terrain && card.mandat?.equipe_assignee;
+    // Exclure aussi les cartes qui ont déjà une date_cedulee et equipe_assignee au niveau terrain
+    const hasScheduledData = card.terrain?.date_cedulee && card.terrain?.equipe_assignee;
     return !isAssignedInEquipe && !hasScheduledData;
   });
 
