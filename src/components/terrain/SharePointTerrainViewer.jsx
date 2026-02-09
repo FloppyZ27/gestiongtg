@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Grid3x3, List } from "lucide-react";
+import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Grid3x3, List, FolderPlus } from "lucide-react";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -40,6 +40,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const [previewFile, setPreviewFile] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("in");
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   const folderPathIN = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/IN`;
@@ -146,6 +147,43 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
     }
   };
 
+  const handleCreateTIFolder = async () => {
+    if (activeTab !== "in") return;
+    
+    setIsCreatingFolder(true);
+    try {
+      // Trouver le prochain numéro TI disponible
+      const tiFiles = files.filter(f => f.name.includes('_TI'));
+      const tiNumbers = tiFiles.map(f => {
+        const match = f.name.match(/_TI(\d+)_/);
+        return match ? parseInt(match[1]) : 0;
+      });
+      const nextTiNumber = tiNumbers.length > 0 ? Math.max(...tiNumbers) + 1 : 1;
+      
+      // Format de la date AAAAMMJJ
+      const today = new Date();
+      const dateStr = today.getFullYear() + 
+                      String(today.getMonth() + 1).padStart(2, '0') + 
+                      String(today.getDate()).padStart(2, '0');
+      
+      // Nom du dossier: SG-123_TI1_20260209
+      const folderName = `${initials}-${numeroDossier}_TI${nextTiNumber}_${dateStr}`;
+      
+      await base44.functions.invoke('sharepoint', {
+        action: 'createFolder',
+        parentFolderPath: folderPathIN,
+        folderName: folderName
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error("Erreur création dossier:", error);
+      alert("Erreur lors de la création du dossier");
+    } finally {
+      setIsCreatingFolder(false);
+    }
+  };
+
   return (
     <div className="space-y-3">
       {/* Tabs IN / OUT */}
@@ -166,6 +204,26 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           📁 {currentFolderPath}
         </p>
         <div className="flex items-center gap-1">
+          {activeTab === "in" && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleCreateTIFolder}
+              disabled={isCreatingFolder}
+              className="text-emerald-400 hover:text-emerald-300 h-6 px-2"
+              title="Créer un nouveau dossier TI"
+            >
+              {isCreatingFolder ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <>
+                  <FolderPlus className="w-3 h-3 mr-1" />
+                  <span className="text-xs">Nouveau</span>
+                </>
+              )}
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"

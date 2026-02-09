@@ -179,6 +179,48 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === 'createFolder') {
+      // Créer un sous-dossier
+      const parentFolderPath = body.parentFolderPath;
+      const folderName = body.folderName;
+
+      if (!parentFolderPath || !folderName) {
+        return Response.json({ error: 'parentFolderPath et folderName requis' }, { status: 400 });
+      }
+
+      const encodedPath = encodeURIComponent(parentFolderPath).replace(/%2F/g, '/');
+      const endpoint = `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${encodedPath}:/children`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: folderName,
+          folder: {},
+          '@microsoft.graph.conflictBehavior': 'rename'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error("Create folder error:", JSON.stringify(data));
+        throw new Error(data.error?.message || 'Erreur lors de la création du dossier');
+      }
+
+      return Response.json({ 
+        success: true, 
+        folder: {
+          id: data.id,
+          name: data.name,
+          webUrl: data.webUrl
+        }
+      });
+    }
+
     if (action === 'delete') {
       // Supprimer un fichier définitivement
       if (!fileId) {
