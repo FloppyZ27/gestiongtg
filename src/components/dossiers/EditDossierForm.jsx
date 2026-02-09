@@ -346,10 +346,31 @@ export default function EditDossierForm({
         )}
       </div>
 
-      {/* Division 70%-30% pour Mandats et Sidebar */}
+      {/* Division avec sidebar de navigation */}
       <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar de navigation - Icons only */}
+        <div className="w-16 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
+          <TooltipProvider>
+            {sections.map((section) => (
+              <Tooltip key={section.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => scrollToSection(section.id)}
+                    className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors group relative"
+                  >
+                    <section.icon className={`w-6 h-6 ${section.color}`} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white text-sm">
+                  {section.label}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
+        </div>
+
         {/* Main content - 70% */}
-        <div className="flex-[0_0_70%] flex flex-col overflow-hidden border-r border-slate-800">
+        <div className="flex-[0_0_calc(70%-64px)] flex flex-col overflow-hidden border-r border-slate-800">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
