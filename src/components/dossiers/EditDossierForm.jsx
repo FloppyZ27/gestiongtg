@@ -2914,9 +2914,9 @@ export default function EditDossierForm({
           </DialogHeader>
 
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>Date limite levé terrain</Label>
+                <Label>Date limite cédule</Label>
                 <Input
                   type="date"
                   value={terrainForm.date_limite_leve || ""}
@@ -2925,13 +2925,56 @@ export default function EditDossierForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Instruments requis</Label>
+                <Label>Temps prévu</Label>
+                <Input
+                  value={terrainForm.temps_prevu || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
+                  placeholder="Ex: 2h30"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Donneur</Label>
+                <Select value={terrainForm.donneur || ""} onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Instruments</Label>
                 <Input
                   value={terrainForm.instruments_requis || ""}
                   onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
-                  placeholder="Ex: GPS, Total Station"
+                  placeholder="GPS, Station totale.."
                   className="bg-slate-800 border-slate-700 text-white"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Technicien</Label>
+                <Select 
+                  value={terrainForm.technicien || ""}
+                  onValueChange={(value) => setTerrainForm({...terrainForm, technicien: value})}
+                >
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -2942,7 +2985,7 @@ export default function EditDossierForm({
                   onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
                   className="data-[state=checked]:bg-amber-400"
                 />
-                <Label>Rendez-vous nécessaire</Label>
+                <Label>Rendez-vous</Label>
               </div>
               {terrainForm.a_rendez_vous && (
                 <div className="grid grid-cols-2 gap-3 ml-7">
@@ -2968,61 +3011,38 @@ export default function EditDossierForm({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Donneur</Label>
-                <Select value={terrainForm.donneur || ""} onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Sélectionner un donneur" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                    {users.map((u) => (
-                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Technicien à prioriser</Label>
-                <Input
-                  value={terrainForm.technicien || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, technicien: e.target.value})}
-                  placeholder="Nom du technicien"
-                  className="bg-slate-800 border-slate-700 text-white"
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={terrainForm.dossier_simultane ? true : false}
+                  onCheckedChange={(checked) => setTerrainForm({...terrainForm, dossier_simultane: checked ? terrainForm.dossier_simultane : ""})}
+                  className="data-[state=checked]:bg-amber-400"
                 />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
                 <Label>Dossier à faire en même temps</Label>
-                <Input
-                  value={terrainForm.dossier_simultane || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value})}
-                  placeholder="N° de dossier"
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
               </div>
-              <div className="space-y-2">
-                <Label>Temps prévu</Label>
-                <Input
-                  value={terrainForm.temps_prevu || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
-                  placeholder="Ex: 2h30"
-                  className="bg-slate-800 border-slate-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notes terrain</Label>
-              <Textarea
-                value={terrainForm.notes || ""}
-                onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
-                placeholder="Notes concernant le terrain..."
-                className="bg-slate-800 border-slate-700 text-white h-24"
-              />
+              {terrainForm.dossier_simultane && (
+                <div className="grid grid-cols-2 gap-4 ml-7">
+                  <div className="space-y-2">
+                    <Label>Dossier simultané</Label>
+                    <Select 
+                      value={terrainForm.dossier_simultane || ""}
+                      onValueChange={(value) => setTerrainForm({...terrainForm, dossier_simultane: value})}
+                    >
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        {(allDossiers || []).filter(d => d.id !== editingDossier?.id).map((d) => (
+                          <SelectItem key={d.id} value={d.id} className="text-white">
+                            {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
+                            {d.clients_ids && d.clients_ids.length > 0 && ` - ${getClientsNames(d.clients_ids)}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
