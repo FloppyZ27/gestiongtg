@@ -2477,8 +2477,8 @@ export default function EditDossierForm({
             )}
 
             {/* Section Retour d'appel */}
-            {editingDossier && (
-              <Card className="border-slate-700 bg-slate-800/30">
+             {editingDossier && (
+               <Card className="border-slate-700 bg-slate-800/30" data-section="retour-appel">
                 <CardHeader 
                   className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                   onClick={() => setRetourAppelCollapsed(!retourAppelCollapsed)}
