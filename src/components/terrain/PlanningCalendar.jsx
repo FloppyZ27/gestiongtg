@@ -306,6 +306,16 @@ export default function PlanningCalendar({
       newEquipes[createTeamDateStr] = [];
     }
     
+    // Vérifier si une équipe avec le même nom existe déjà pour cette date
+    const existingEquipe = newEquipes[createTeamDateStr].find(eq => 
+      generateTeamDisplayName(eq) === generateTeamDisplayName(newEquipe)
+    );
+    
+    if (existingEquipe) {
+      alert('Une équipe avec ce nom existe déjà pour cette date.');
+      return;
+    }
+    
     newEquipes[createTeamDateStr].push(newEquipe);
     setEquipes(newEquipes);
     setEquipeActiveTabs({ ...equipeActiveTabs, [newEquipe.id]: null });
