@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer, Folder } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -81,6 +81,7 @@ import CommentairesSection from "../dossiers/CommentairesSection";
 import CreateTeamDialog from "./CreateTeamDialog";
 import EditTeamDialog from "./EditTeamDialog";
 import MultiRouteMap from "./MultiRouteMap";
+import SharePointTerrainViewer from "./SharePointTerrainViewer";
 
 const getArpenteurInitials = (arpenteur) => {
   const mapping = {
@@ -1053,6 +1054,8 @@ export default function PlanningCalendar({
   const [mapRoutes, setMapRoutes] = useState([]);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
+  const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
+  const [sharePointDossier, setSharePointDossier] = useState(null);
 
   // Charger la clé API au démarrage
   useEffect(() => {
@@ -1340,6 +1343,21 @@ export default function PlanningCalendar({
            )}
          </div>
 
+         {/* Bouton fichiers SharePoint */}
+         <div className="mt-2 pt-1 border-t border-emerald-500/30">
+           <Button
+             size="sm"
+             onClick={(e) => {
+               e.stopPropagation();
+               setSharePointDossier(dossier);
+               setIsSharePointDialogOpen(true);
+             }}
+             className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-6"
+           >
+             <Folder className="w-3 h-3 mr-1" />
+             Fichiers terrain
+           </Button>
+         </div>
 
         </div>
         );
@@ -2569,6 +2587,21 @@ export default function PlanningCalendar({
               Enregistrer
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog SharePoint Terrain */}
+      <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Documents Terrain - {sharePointDossier && `${getArpenteurInitials(sharePointDossier.arpenteur_geometre)}${sharePointDossier.numero_dossier}`}</DialogTitle>
+          </DialogHeader>
+          {sharePointDossier && (
+            <SharePointTerrainViewer 
+              arpenteurGeometre={sharePointDossier.arpenteur_geometre}
+              numeroDossier={sharePointDossier.numero_dossier}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
