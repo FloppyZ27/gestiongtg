@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { ChevronLeft, ChevronRight, Users, Truck, Wrench, FolderOpen, Plus, Edit, Trash2, X, MapPin, Calendar, User, Clock, UserCheck, Link2, Timer, AlertCircle, Copy, Printer } from "lucide-react";
-import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from "date-fns";
+import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
 // Congés fériés canadiens et québécois
@@ -990,8 +990,31 @@ export default function PlanningCalendar({
 
   const handleEditTerrain = (card) => {
     setEditingTerrainCard(card);
+    
+    // Calculer la date limite par défaut si elle n'existe pas
+    let defaultDateLimite = card.terrain?.date_limite_leve || "";
+    if (!defaultDateLimite) {
+      const mandat = card.mandat;
+      let baseDate = null;
+      
+      // Prendre la première date disponible parmi livraison, signature, début travaux
+      if (mandat.date_livraison) {
+        baseDate = new Date(mandat.date_livraison + 'T00:00:00');
+      } else if (mandat.date_signature) {
+        baseDate = new Date(mandat.date_signature + 'T00:00:00');
+      } else if (mandat.date_debut_travaux) {
+        baseDate = new Date(mandat.date_debut_travaux + 'T00:00:00');
+      }
+      
+      // Soustraire 2 semaines
+      if (baseDate) {
+        baseDate.setDate(baseDate.getDate() - 14);
+        defaultDateLimite = format(baseDate, "yyyy-MM-dd");
+      }
+    }
+    
     setTerrainForm({
-      date_limite_leve: card.terrain?.date_limite_leve || "",
+      date_limite_leve: defaultDateLimite,
       instruments_requis: card.terrain?.instruments_requis || "",
       a_rendez_vous: card.terrain?.a_rendez_vous || false,
       date_rendez_vous: card.terrain?.date_rendez_vous || "",
@@ -2381,6 +2404,19 @@ export default function PlanningCalendar({
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
+            {editingTerrainCard && (
+              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-700">
+                <Badge variant="outline" className={`${getArpenteurColor(editingTerrainCard.dossier.arpenteur_geometre)} border`}>
+                  {getArpenteurInitials(editingTerrainCard.dossier.arpenteur_geometre)}{editingTerrainCard.dossier.numero_dossier}
+                </Badge>
+                <span className="text-slate-400 text-sm">-</span>
+                <span className="text-slate-300 text-sm">{getClientsNames(editingTerrainCard.dossier.clients_ids)}</span>
+                <span className="text-slate-400 text-sm">-</span>
+                <Badge className={`${getMandatColor(editingTerrainCard.mandat?.type_mandat)} border text-xs`}>
+                  {getAbbreviatedMandatType(editingTerrainCard.mandat?.type_mandat)}
+                </Badge>
+              </div>
+            )}
           </DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
             <div className="grid grid-cols-4 gap-3">
