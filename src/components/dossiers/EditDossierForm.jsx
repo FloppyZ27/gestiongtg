@@ -283,6 +283,24 @@ export default function EditDossierForm({
     `${c.prenom} ${c.nom}`.toLowerCase().includes(courtierSearchTerm.toLowerCase())
   );
 
+  const sections = [
+    { id: "infos", label: "Informations", icon: FolderOpen, color: "text-blue-400" },
+    { id: "mandats", label: "Mandats", icon: FileText, color: "text-orange-400" },
+    { id: "tarification", label: "Tarification", icon: Grid3x3, color: "text-green-400" },
+    { id: "terrain", label: "Terrain", icon: MapPin, color: "text-amber-400" },
+    { id: "minutes", label: "Minutes", icon: FileText, color: "text-cyan-400" },
+    { id: "entree-temps", label: "Entrée de temps", icon: Clock, color: "text-lime-400" },
+    { id: "retour-appel", label: "Retour d'appel", icon: Phone, color: "text-blue-400" },
+    { id: "documents", label: "Documents", icon: FileUp, color: "text-purple-400" }
+  ];
+
+  const scrollToSection = (sectionId) => {
+    const element = document.querySelector(`[data-section="${sectionId}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <motion.div 
       className="flex flex-col h-[90vh]"
