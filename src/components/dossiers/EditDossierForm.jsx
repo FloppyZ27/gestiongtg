@@ -1531,8 +1531,9 @@ export default function EditDossierForm({
                       </div>
 
                       {!newTerrainFormCollapsed && (
-                        <div className="p-4 border-t border-purple-500/30">
-                          <div className="grid grid-cols-4 gap-3">
+                        <div className="p-4 border-t border-purple-500/30 space-y-3">
+                          {/* Première ligne : Mandat, Temps prévu, Donneur, Instruments, Technicien */}
+                          <div className="grid grid-cols-5 gap-3">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Mandat <span className="text-red-400">*</span></Label>
                               <Select 
@@ -1550,15 +1551,6 @@ export default function EditDossierForm({
                                   ))}
                                 </SelectContent>
                               </Select>
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-slate-400 text-xs">Date limite cédule</Label>
-                              <Input 
-                                type="date"
-                                value={newTerrainForm.date_limite_leve || ""}
-                                onChange={(e) => setNewTerrainForm({...newTerrainForm, date_limite_leve: e.target.value})}
-                                className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                              />
                             </div>
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Temps prévu</Label>
@@ -1579,7 +1571,7 @@ export default function EditDossierForm({
                                   <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
-                                  {users.map((u) => (
+                                  {users.filter(u => u.statut === 'Actif' || !u.statut).map((u) => (
                                     <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">
                                       {u.full_name}
                                     </SelectItem>
@@ -1587,16 +1579,26 @@ export default function EditDossierForm({
                                 </SelectContent>
                               </Select>
                             </div>
-                          </div>
-                          <div className="grid grid-cols-4 gap-3 mt-3">
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Instruments</Label>
-                              <Input 
-                                placeholder="GPS, Station totale..."
+                              <Select 
                                 value={newTerrainForm.instruments_requis || ""}
-                                onChange={(e) => setNewTerrainForm({...newTerrainForm, instruments_requis: e.target.value})}
-                                className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                              />
+                                onValueChange={(value) => setNewTerrainForm({...newTerrainForm, instruments_requis: value})}
+                              >
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                                  <SelectValue placeholder="Sélectionner" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-800 border-slate-700">
+                                  <SelectItem value="Can-Net" className="text-white text-xs">Can-Net</SelectItem>
+                                  <SelectItem value="RTK" className="text-white text-xs">RTK</SelectItem>
+                                  <SelectItem value="CONV" className="text-white text-xs">CONV</SelectItem>
+                                  <SelectItem value="3 GPS" className="text-white text-xs">3 GPS</SelectItem>
+                                  <SelectItem value="Chaine" className="text-white text-xs">Chaine</SelectItem>
+                                  <SelectItem value="SX10" className="text-white text-xs">SX10</SelectItem>
+                                  <SelectItem value="NAVIS" className="text-white text-xs">NAVIS</SelectItem>
+                                  <SelectItem value="Drône" className="text-white text-xs">Drône</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div className="space-y-1">
                               <Label className="text-slate-400 text-xs">Technicien</Label>
@@ -1609,7 +1611,7 @@ export default function EditDossierForm({
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-slate-700">
                                   {users.map((u) => (
-                                    <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">
+                                    <SelectItem key={u.email} value={`${u.prenom || ''} ${u.nom || ''}`.trim() || u.full_name} className="text-white text-xs">
                                       {u.full_name}
                                     </SelectItem>
                                   ))}
@@ -1618,8 +1620,17 @@ export default function EditDossierForm({
                             </div>
                           </div>
 
-                          {/* Ligne Rendez-vous */}
-                          <div className="grid grid-cols-3 gap-3 mt-3">
+                          {/* Deuxième ligne : Date limite cédule, Toggle rendez-vous, Date et heure rendez-vous */}
+                          <div className="grid grid-cols-4 gap-3">
+                            <div className="space-y-1">
+                              <Label className="text-slate-400 text-xs">Date limite cédule</Label>
+                              <Input 
+                                type="date"
+                                value={newTerrainForm.date_limite_leve || ""}
+                                onChange={(e) => setNewTerrainForm({...newTerrainForm, date_limite_leve: e.target.value})}
+                                className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                              />
+                            </div>
                             <div className="space-y-1 flex items-end">
                               <div className="flex items-center gap-2 h-8">
                                 <Switch 
@@ -1633,7 +1644,7 @@ export default function EditDossierForm({
                             {newTerrainForm.a_rendez_vous && (
                               <>
                                 <div className="space-y-1">
-                                  <Label className="text-slate-400 text-xs">Date du rendez-vous</Label>
+                                  <Label className="text-slate-400 text-xs">Date RDV</Label>
                                   <Input 
                                     type="date"
                                     value={newTerrainForm.date_rendez_vous || ""}
@@ -1642,7 +1653,7 @@ export default function EditDossierForm({
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-slate-400 text-xs">Heure du rendez-vous</Label>
+                                  <Label className="text-slate-400 text-xs">Heure RDV</Label>
                                   <Input 
                                     type="time"
                                     value={newTerrainForm.heure_rendez_vous || ""}
@@ -1655,7 +1666,7 @@ export default function EditDossierForm({
                           </div>
 
                           {/* Ligne Dossier simultané */}
-                          <div className="grid grid-cols-2 gap-3 mt-3">
+                          <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1 flex items-end">
                               <div className="flex items-center gap-2 h-8">
                                 <Switch 
@@ -1678,28 +1689,25 @@ export default function EditDossierForm({
                                   </SelectTrigger>
                                   <SelectContent className="bg-slate-800 border-slate-700">
                                     {(allDossiers || []).filter(d => {
-                                      // Ne pas afficher le dossier actuel
                                       if (d.id === editingDossier?.id) return false;
-                                      
-                                      // Vérifier si le dossier a au moins un mandat avec terrain
+                                      const today = new Date();
+                                      today.setHours(0, 0, 0, 0);
                                       const hasTerrainMandat = d.mandats?.some(m => {
-                                        // Pas de date terrain OU date terrain future/aujourd'hui
                                         if (!m.date_terrain) return true;
                                         const dateTerrain = new Date(m.date_terrain);
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
                                         dateTerrain.setHours(0, 0, 0, 0);
                                         return dateTerrain >= today;
                                       });
-                                      
                                       return hasTerrainMandat;
                                     }).map((d) => (
-                                      <SelectItem key={d.id} value={d.id} className="text-white text-xs">
-                                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                                        {d.clients_ids && d.clients_ids.length > 0 && ` - ${d.clients_ids.map(cid => {
-                                          const client = clients.find(c => c.id === cid);
-                                          return client ? `${client.prenom} ${client.nom}` : "";
-                                        }).filter(n => n).join(", ")}`}
+                                      <SelectItem key={d.id} value={`${getArpenteurInitials(d.arpenteur_geometre)}${d.numero_dossier}`} className="text-white text-xs">
+                                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier} - {(() => {
+                                          const clientsNames = d.clients_ids?.map(cid => {
+                                            const client = clients.find(c => c.id === cid);
+                                            return client ? `${client.prenom} ${client.nom}` : "";
+                                          }).filter(n => n).join(", ");
+                                          return clientsNames || "Sans client";
+                                        })()} ({d.mandats?.map(m => getAbbreviatedMandatType(m.type_mandat)).join(', ')})
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
