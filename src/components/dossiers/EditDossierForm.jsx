@@ -1916,7 +1916,7 @@ export default function EditDossierForm({
 
             {/* Section Minutes */}
             {formData.mandats.length > 0 && (
-              <Card className="border-slate-700 bg-slate-800/30">
+              <Card className="border-slate-700 bg-slate-800/30" data-section="minutes">
                 <CardHeader 
                   className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-1.5 bg-cyan-900/20"
                   onClick={() => setMinutesCollapsed(!minutesCollapsed)}
