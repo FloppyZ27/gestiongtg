@@ -1537,7 +1537,7 @@ export default function EditDossierForm({
 
             {/* Section Terrain */}
             {formData.mandats.length > 0 && (
-              <Card className="border-slate-700 bg-slate-800/30">
+              <Card className="border-slate-700 bg-slate-800/30" data-section="terrain">
                 <CardHeader 
                   className="cursor-pointer hover:bg-amber-900/40 transition-colors rounded-t-lg py-1.5 bg-amber-900/20"
                   onClick={() => {
