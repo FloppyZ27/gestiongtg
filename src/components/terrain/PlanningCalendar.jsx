@@ -2455,11 +2455,10 @@ export default function PlanningCalendar({
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1 flex items-end">
                 <div className="flex items-center gap-2 h-8">
-                  <input
-                    type="checkbox"
-                    checked={terrainForm.a_rendez_vous}
-                    onChange={(e) => setTerrainForm({...terrainForm, a_rendez_vous: e.target.checked})}
-                    className="w-4 h-4 rounded bg-slate-800 border-slate-700"
+                  <Switch 
+                    checked={terrainForm.a_rendez_vous || false}
+                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
+                    className="data-[state=checked]:bg-amber-400"
                   />
                   <Label className="text-slate-400 text-xs">Rendez-vous</Label>
                 </div>
@@ -2492,16 +2491,15 @@ export default function PlanningCalendar({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1 flex items-end">
                 <div className="flex items-center gap-2 h-8">
-                  <input
-                    type="checkbox"
-                    checked={terrainForm.dossier_simultane !== ""}
-                    onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.checked ? terrainForm.dossier_simultane : ""})}
-                    className="w-4 h-4 rounded bg-slate-800 border-slate-700"
+                  <Switch 
+                    checked={!!terrainForm.dossier_simultane}
+                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, dossier_simultane: checked ? terrainForm.dossier_simultane || "" : ""})}
+                    className="data-[state=checked]:bg-amber-400"
                   />
                   <Label className="text-slate-400 text-xs">Dossier à faire en même temps</Label>
                 </div>
               </div>
-              {terrainForm.dossier_simultane !== "" && (
+              {terrainForm.dossier_simultane && (
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Dossier simultané</Label>
                   <Input 
