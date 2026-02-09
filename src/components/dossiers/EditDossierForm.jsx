@@ -385,7 +385,9 @@ export default function EditDossierForm({
                           </div>
                           <div className="space-y-1">
                             <Label className="text-slate-400 text-xs">Place d'affaire</Label>
-                            <Select value={formData.place_affaire || ""} onValueChange={(value) => setFormData({...formData, place_affaire: value})}>
+                            <Select value={formData.place_affaire || ""} onValueChange={(value) => {
+                              setFormData(prev => ({...prev, place_affaire: value}));
+                            }}>
                               <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-7 text-sm">
                                 <SelectValue placeholder="Sélectionner" />
                               </SelectTrigger>
