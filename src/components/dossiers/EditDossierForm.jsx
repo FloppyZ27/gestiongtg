@@ -2224,8 +2224,8 @@ export default function EditDossierForm({
             )}
 
             {/* Section Entrée de temps */}
-             {editingDossier && (
-               <Card className="border-slate-700 bg-slate-800/30">
+              {editingDossier && (
+                <Card className="border-slate-700 bg-slate-800/30" data-section="entree-temps">
                  <CardHeader 
                    className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-1.5 bg-lime-900/20"
                    onClick={() => setEntreeTempsCollapsed(!entreeTempsCollapsed)}
