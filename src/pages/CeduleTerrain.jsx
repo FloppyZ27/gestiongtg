@@ -89,6 +89,11 @@ export default function CeduleTerrain() {
   });
 
   const techniciensTerrain = employes.filter(e => e.poste === "Technicien Terrain" && e.statut === "Actif");
+  
+  // Filtrer les ressources par place d'affaire
+  const techniciensByPlace = techniciensTerrain; // TODO: ajouter place_affaire à Employe si nécessaire
+  const vehiculesByPlace = vehicules;
+  const equipementsByPlace = equipements;
 
   const dossiersCedule = dossiers.filter(d => 
     d.statut === "Ouvert" && 
