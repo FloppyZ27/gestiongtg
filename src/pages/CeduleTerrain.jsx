@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter, Search, User, Edit, Settings } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, X, Plus, Trash2, Users, Eye, Filter, Search, User, Edit, Settings, FolderOpen } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, addDays, startOfWeek } from "date-fns";
@@ -18,6 +18,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import EditDossierForm from "../components/dossiers/EditDossierForm";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 import { Textarea } from "@/components/ui/textarea";
+import SharePointTerrainViewer from "../components/terrain/SharePointTerrainViewer";
 
 const JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
@@ -100,6 +101,8 @@ export default function CeduleTerrain() {
     temps_prevu: "",
     notes: ""
   });
+  const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
+  const [sharePointDossier, setSharePointDossier] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -715,15 +718,29 @@ export default function CeduleTerrain() {
           )}
 
           {!showActions && (
-            <div className="pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
-              <Button
-                size="sm"
-                onClick={(e) => handleEditTerrain(item, e)}
-                className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8"
-              >
-                <Settings className="w-4 h-4 mr-1" />
-                Modifier terrain
-              </Button>
+            <div className="pt-2 border-t border-slate-700 space-y-1" onClick={(e) => e.stopPropagation()}>
+              <div className="grid grid-cols-2 gap-1">
+                <Button
+                  size="sm"
+                  onClick={(e) => handleEditTerrain(item, e)}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs h-8"
+                >
+                  <Settings className="w-4 h-4 mr-1" />
+                  Modifier
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSharePointDossier(item.dossier);
+                    setIsSharePointDialogOpen(true);
+                  }}
+                  className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-8"
+                >
+                  <FolderOpen className="w-4 h-4 mr-1" />
+                  Fichiers
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
@@ -1164,6 +1181,20 @@ export default function CeduleTerrain() {
                 Enregistrer
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Documents Terrain - {sharePointDossier && `${getArpenteurInitials(sharePointDossier.arpenteur_geometre)}${sharePointDossier.numero_dossier}`}</DialogTitle>
+            </DialogHeader>
+            {sharePointDossier && (
+              <SharePointTerrainViewer 
+                arpenteurGeometre={sharePointDossier.arpenteur_geometre}
+                numeroDossier={sharePointDossier.numero_dossier}
+              />
+            )}
           </DialogContent>
         </Dialog>
 
