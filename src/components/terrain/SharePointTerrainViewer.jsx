@@ -44,9 +44,15 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [currentSubPath, setCurrentSubPath] = useState("");
 
+  // Réinitialiser le sous-chemin quand on change d'onglet
+  React.useEffect(() => {
+    setCurrentSubPath("");
+  }, [activeTab]);
+
   const initials = getArpenteurInitials(arpenteurGeometre);
-  const folderPathIN = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/IN`;
-  const folderPathOUT = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/OUT`;
+  const terrainBasePath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
+  const folderPathIN = `${terrainBasePath}/IN`;
+  const folderPathOUT = `${terrainBasePath}/OUT`;
   
   const baseFolderPath = activeTab === "in" ? folderPathIN : folderPathOUT;
   const currentFolderPath = currentSubPath ? `${baseFolderPath}/${currentSubPath}` : baseFolderPath;
@@ -242,7 +248,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="mt-3" onSelect={() => setCurrentSubPath("")}>
+        <TabsContent value={activeTab} className="mt-3">
       {/* Chemin et actions */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
