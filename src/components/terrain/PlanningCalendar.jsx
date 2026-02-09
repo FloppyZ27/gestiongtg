@@ -596,8 +596,8 @@ export default function PlanningCalendar({
 
     // Drag & drop de technicien
     if (type === "TECHNICIEN") {
-      const dest = parseEquipeDroppableId(destId);
-      if (!dest || destId === "techniciens-list") return;
+      const destTech = parseEquipeDroppableId(destId);
+      if (!destTech || destId === "techniciens-list") return;
 
       // Vérifier si le technicien est déjà utilisé dans une autre équipe de la même journée
       if (isResourceUsedInDay(dest.dateStr, draggableId, 'techniciens', dest.equipeId)) {
