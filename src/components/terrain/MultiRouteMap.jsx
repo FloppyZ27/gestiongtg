@@ -388,24 +388,32 @@ export default function MultiRouteMap({ routes, apiKey }) {
             </div>
           )}
 
-          {/* Temps prévu */}
-          {hoveredDossier.tempsPrevu && (
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'flex-start',
-              marginTop: '8px', 
-              paddingTop: '4px', 
-              borderTop: '1px solid rgba(16, 185, 129, 0.3)' 
-            }}>
+          {/* Footer avec Temps prévu et Donneur */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            marginTop: '8px', 
+            paddingTop: '8px', 
+            borderTop: '1px solid rgba(16, 185, 129, 0.3)' 
+          }}>
+            {hoveredDossier.tempsPrevu && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <svg style={{ width: '12px', height: '12px', color: '#34d399' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span style={{ fontSize: '12px', color: '#6ee7b7' }}>{hoveredDossier.tempsPrevu}</span>
               </div>
-            </div>
-          )}
+            )}
+            {hoveredDossier.donneur && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
+                <svg style={{ width: '12px', height: '12px', color: '#a78bfa' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span style={{ fontSize: '12px', color: '#c4b5fd', fontWeight: '500' }}>{hoveredDossier.donneur}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
       
