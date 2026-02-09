@@ -173,11 +173,24 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
       // Nom du dossier: SG-123_TI1_20260209
       const folderName = `${initials}-${numeroDossier}_TI${nextTiNumber}_${dateStr}`;
       
+      // Créer le dossier principal
       await base44.functions.invoke('sharepoint', {
         action: 'createFolder',
         parentFolderPath: currentFolderPath,
         folderName: folderName
       });
+      
+      // Créer les 4 sous-dossiers
+      const subFolders = ['CARNET', 'FICHIERS', 'PHOTOS', 'TRAITEMENT'];
+      const newFolderPath = `${currentFolderPath}/${folderName}`;
+      
+      for (const subFolder of subFolders) {
+        await base44.functions.invoke('sharepoint', {
+          action: 'createFolder',
+          parentFolderPath: newFolderPath,
+          folderName: subFolder
+        });
+      }
       
       refetch();
     } catch (error) {
