@@ -246,55 +246,69 @@ export default function CeduleTerrain() {
           <p className="text-slate-400">Planification des équipes de terrain</p>
         </div>
 
-        <PlanningCalendar 
-          dossiers={dossiers}
-          techniciens={techniciensTerrain}
-          vehicules={vehicules}
-          equipements={equipements}
-          clients={clients}
-          users={users}
-          lots={[]}
-          onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
-          onAddTechnicien={() => {
-            setEditingEmploye(null);
-            setIsEmployeDialogOpen(true);
-          }}
-          onAddVehicule={() => {
-            setEditingVehicule(null);
-            setIsVehiculeDialogOpen(true);
-          }}
-          onAddEquipement={() => {
-            setEditingEquipement(null);
-            setIsEquipementDialogOpen(true);
-          }}
-          onEditTechnicien={(tech) => {
-            setEditingEmploye(tech);
-            setIsEmployeDialogOpen(true);
-          }}
-          onDeleteTechnicien={(id) => {
-            if (confirm('Supprimer ce technicien ?')) {
-              deleteEmployeMutation.mutate(id);
-            }
-          }}
-          onEditVehicule={(vehicule) => {
-            setEditingVehicule(vehicule);
-            setIsVehiculeDialogOpen(true);
-          }}
-          onDeleteVehicule={(id) => {
-            if (confirm('Supprimer ce véhicule ?')) {
-              deleteVehiculeMutation.mutate(id);
-            }
-          }}
-          onEditEquipement={(equipement) => {
-            setEditingEquipement(equipement);
-            setIsEquipementDialogOpen(true);
-          }}
-          onDeleteEquipement={(id) => {
-            if (confirm('Supprimer cet équipement ?')) {
-              deleteEquipementMutation.mutate(id);
-            }
-          }}
-        />
+        <Tabs value={activePlace} onValueChange={setActivePlace} className="w-full">
+          <TabsList className="grid grid-cols-2 w-64 mb-6 bg-slate-800/50 border border-slate-700">
+            <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700">
+              📍 Alma
+            </TabsTrigger>
+            <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700">
+              📍 Saguenay
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activePlace} className="mt-0">
+            <PlanningCalendar 
+              dossiers={dossiers}
+              techniciens={techniciensByPlace}
+              vehicules={vehiculesByPlace}
+              equipements={equipementsByPlace}
+              clients={clients}
+              users={users}
+              lots={[]}
+              placeAffaire={activePlace}
+              onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
+              onAddTechnicien={() => {
+                setEditingEmploye(null);
+                setIsEmployeDialogOpen(true);
+              }}
+              onAddVehicule={() => {
+                setEditingVehicule(null);
+                setIsVehiculeDialogOpen(true);
+              }}
+              onAddEquipement={() => {
+                setEditingEquipement(null);
+                setIsEquipementDialogOpen(true);
+              }}
+              onEditTechnicien={(tech) => {
+                setEditingEmploye(tech);
+                setIsEmployeDialogOpen(true);
+              }}
+              onDeleteTechnicien={(id) => {
+                if (confirm('Supprimer ce technicien ?')) {
+                  deleteEmployeMutation.mutate(id);
+                }
+              }}
+              onEditVehicule={(vehicule) => {
+                setEditingVehicule(vehicule);
+                setIsVehiculeDialogOpen(true);
+              }}
+              onDeleteVehicule={(id) => {
+                if (confirm('Supprimer ce véhicule ?')) {
+                  deleteVehiculeMutation.mutate(id);
+                }
+              }}
+              onEditEquipement={(equipement) => {
+                setEditingEquipement(equipement);
+                setIsEquipementDialogOpen(true);
+              }}
+              onDeleteEquipement={(id) => {
+                if (confirm('Supprimer cet équipement ?')) {
+                  deleteEquipementMutation.mutate(id);
+                }
+              }}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Dialogs cachés - conservés mais hors des tabs */}
         <div style={{ display: 'none' }}>
