@@ -536,6 +536,32 @@ export default function PlanningCalendar({
       });
     };
 
+    // Drag & drop de mandat
+    const dest = parseEquipeDroppableId(destId);
+    
+    // Vérifier si le terrain a un rendez-vous et si on le déplace vers une autre date (depuis unassigned ou depuis une équipe)
+    if (dest) {
+      const card = terrainCards.find(c => c.id === draggableId);
+      if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous) {
+        const sourceParsed = parseEquipeDroppableId(sourceId);
+        // Vérifier si on change de date (depuis unassigned ou depuis une autre équipe)
+        if (sourceId === "unassigned" || (sourceParsed && sourceParsed.dateStr !== dest.dateStr)) {
+          setRendezVousWarning({
+            card,
+            currentDateStr: sourceParsed?.dateStr || "non céedulé",
+            newDateStr: dest.dateStr
+          });
+          setPendingDragDrop({
+            source,
+            destination,
+            draggableId,
+            type
+          });
+          return;
+        }
+      }
+    }
+
     // Drag & drop vers "À planifier" - réinitialiser les données de terrain
     if (destId === "unassigned") {
       // Retirer des équipes et réinitialiser la date terrain et équipe
