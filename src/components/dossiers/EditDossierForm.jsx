@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle, Edit } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -177,6 +177,9 @@ export default function EditDossierForm({
   });
   const [showDeleteMinuteConfirm, setShowDeleteMinuteConfirm] = useState(false);
   const [minuteToDeleteInfo, setMinuteToDeleteInfo] = useState(null);
+  const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
+  const [editingTerrainInfo, setEditingTerrainInfo] = useState(null);
+  const [terrainForm, setTerrainForm] = useState({});
   const saveTimeoutRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -1776,11 +1779,11 @@ export default function EditDossierForm({
                               <TableHead className="text-slate-300 text-xs">Donneur</TableHead>
                               <TableHead className="text-slate-300 text-xs">Technicien</TableHead>
                               <TableHead className="text-slate-300 text-xs">Temps prévu</TableHead>
-                              <TableHead className="text-slate-300 text-xs w-12">Action</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {formData.mandats.flatMap((mandat, mandatIndex) => {
+                              <TableHead className="text-slate-300 text-xs w-20">Actions</TableHead>
+                              </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                              {formData.mandats.flatMap((mandat, mandatIndex) => {
                               if (!mandat.terrains_list || mandat.terrains_list.length === 0) {
                                 return [];
                               }
@@ -1803,29 +1806,53 @@ export default function EditDossierForm({
                                   <TableCell className="text-slate-300 text-xs">{terrain.technicien || "-"}</TableCell>
                                   <TableCell className="text-slate-300 text-xs">{terrain.temps_prevu || "-"}</TableCell>
                                   <TableCell className="text-right">
-                                    <button 
-                                      type="button" 
-                                      onClick={() => {
-                                        const updatedMandats = [...formData.mandats];
-                                        updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
-                                        
-                                        // Si on supprime le dernier terrain, réinitialiser les champs
-                                        if (updatedMandats[mandatIndex].terrains_list.length === 0) {
-                                          updatedMandats[mandatIndex].statut_terrain = null;
-                                          updatedMandats[mandatIndex].date_terrain = null;
-                                          updatedMandats[mandatIndex].equipe_assignee = null;
-                                        }
-                                        
-                                        setFormData({...formData, mandats: updatedMandats});
-                                      }}
-                                      className="text-slate-400 hover:text-red-400 transition-colors"
-                                    >
-                                      <Trash className="w-4 h-4" />
-                                    </button>
+                                    <div className="flex items-center justify-end gap-1">
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          setEditingTerrainInfo({ mandatIndex, terrainIndex, terrain, mandat });
+                                          setTerrainForm({
+                                            date_limite_leve: terrain.date_limite_leve || "",
+                                            instruments_requis: terrain.instruments_requis || "",
+                                            a_rendez_vous: terrain.a_rendez_vous || false,
+                                            date_rendez_vous: terrain.date_rendez_vous || "",
+                                            heure_rendez_vous: terrain.heure_rendez_vous || "",
+                                            donneur: terrain.donneur || "",
+                                            technicien: terrain.technicien || "",
+                                            dossier_simultane: terrain.dossier_simultane || "",
+                                            temps_prevu: terrain.temps_prevu || "",
+                                            notes: terrain.notes || ""
+                                          });
+                                          setIsTerrainDialogOpen(true);
+                                        }}
+                                        className="text-slate-400 hover:text-emerald-400 transition-colors"
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </button>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          const updatedMandats = [...formData.mandats];
+                                          updatedMandats[mandatIndex].terrains_list = updatedMandats[mandatIndex].terrains_list.filter((_, idx) => idx !== terrainIndex);
+
+                                          // Si on supprime le dernier terrain, réinitialiser les champs
+                                          if (updatedMandats[mandatIndex].terrains_list.length === 0) {
+                                            updatedMandats[mandatIndex].statut_terrain = null;
+                                            updatedMandats[mandatIndex].date_terrain = null;
+                                            updatedMandats[mandatIndex].equipe_assignee = null;
+                                          }
+
+                                          setFormData({...formData, mandats: updatedMandats});
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 transition-colors"
+                                      >
+                                        <Trash className="w-4 h-4" />
+                                      </button>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ));
-                            })}
+                              })}
                           </TableBody>
                         </Table>
                       </div>
@@ -2851,6 +2878,205 @@ export default function EditDossierForm({
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog d'édition du terrain */}
+      <Dialog open={isTerrainDialogOpen} onOpenChange={setIsTerrainDialogOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
+            {editingTerrainInfo && (
+              <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
+                formData.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                formData.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                formData.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                formData.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                formData.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                "text-emerald-400"
+              }`}>
+                <span>
+                  {getArpenteurInitials(formData.arpenteur_geometre)}{formData.numero_dossier}
+                  {formData.clients_ids.length > 0 && getClientsNames(formData.clients_ids) !== "-" && (
+                    <span> - {getClientsNames(formData.clients_ids)}</span>
+                  )}
+                </span>
+                {editingTerrainInfo.mandat && (
+                  <span className="flex gap-1">
+                    <Badge className={`${getMandatColor(editingTerrainInfo.mandat.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(editingTerrainInfo.mandat.type_mandat)}
+                    </Badge>
+                  </span>
+                )}
+              </div>
+            )}
+          </DialogHeader>
+
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (editingTerrainInfo) {
+              const updatedMandats = [...formData.mandats];
+              updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex] = {
+                ...updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex],
+                ...terrainForm
+              };
+              setFormData({...formData, mandats: updatedMandats});
+              setIsTerrainDialogOpen(false);
+            }
+          }}>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-slate-400">Date limite cédule</Label>
+                  <Input 
+                    type="date"
+                    value={terrainForm.date_limite_leve || ""}
+                    onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400">Instruments requis</Label>
+                  <Input 
+                    placeholder="GPS, Station totale..."
+                    value={terrainForm.instruments_requis || ""}
+                    onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-slate-400">Donneur</Label>
+                  <Select 
+                    value={terrainForm.donneur || ""}
+                    onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {users.map((u) => (
+                        <SelectItem key={u.email} value={u.full_name} className="text-white">
+                          {u.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400">Technicien</Label>
+                  <Select 
+                    value={terrainForm.technicien || ""}
+                    onValueChange={(value) => setTerrainForm({...terrainForm, technicien: value})}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {users.map((u) => (
+                        <SelectItem key={u.email} value={u.full_name} className="text-white">
+                          {u.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-400">Temps prévu</Label>
+                <Input 
+                  placeholder="Ex: 2h30"
+                  value={terrainForm.temps_prevu || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+              </div>
+
+              <div className="space-y-3 border-t border-slate-700 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={terrainForm.a_rendez_vous || false}
+                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
+                    className="data-[state=checked]:bg-amber-400"
+                  />
+                  <Label className="text-slate-400">Rendez-vous requis</Label>
+                </div>
+
+                {terrainForm.a_rendez_vous && (
+                  <div className="grid grid-cols-2 gap-4 pl-8">
+                    <div className="space-y-2">
+                      <Label className="text-slate-400">Date du rendez-vous</Label>
+                      <Input 
+                        type="date"
+                        value={terrainForm.date_rendez_vous || ""}
+                        onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-slate-400">Heure du rendez-vous</Label>
+                      <Input 
+                        type="time"
+                        value={terrainForm.heure_rendez_vous || ""}
+                        onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-400">Dossier simultané</Label>
+                <Select 
+                  value={terrainForm.dossier_simultane || ""}
+                  onValueChange={(value) => setTerrainForm({...terrainForm, dossier_simultane: value})}
+                >
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    {(allDossiers || []).filter(d => d.id !== editingDossier?.id).map((d) => (
+                      <SelectItem key={d.id} value={d.id} className="text-white">
+                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
+                        {d.clients_ids && d.clients_ids.length > 0 && ` - ${getClientsNames(d.clients_ids)}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-400">Notes</Label>
+                <textarea
+                  value={terrainForm.notes || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
+                  placeholder="Notes supplémentaires..."
+                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-md p-2 min-h-[80px] resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-700">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="border-red-500 text-red-400 hover:bg-red-500/10"
+                onClick={() => setIsTerrainDialogOpen(false)}
+              >
+                Annuler
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
 
