@@ -162,7 +162,8 @@ export default function PlanningCalendar({
   onEditEquipement,
   onDeleteEquipement,
   users,
-  lots
+  lots,
+  placeAffaire
 }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("week"); // week or month
@@ -844,7 +845,16 @@ export default function PlanningCalendar({
   const generateTerrainCards = () => {
     const cards = [];
     
-    dossiers.forEach(dossier => {
+    // Filtrer les dossiers par place d'affaire si spécifié
+    const filteredDossiers = placeAffaire 
+      ? dossiers.filter(d => {
+          const placeAffaireNormalized = d.place_affaire?.toLowerCase();
+          const targetPlace = placeAffaire.toLowerCase();
+          return placeAffaireNormalized === targetPlace;
+        })
+      : dossiers;
+    
+    filteredDossiers.forEach(dossier => {
       const mandatsCedule = dossier.mandats?.filter(m => m.tache_actuelle === "Cédule") || [];
       
       mandatsCedule.forEach((mandat, mandatIndex) => {
