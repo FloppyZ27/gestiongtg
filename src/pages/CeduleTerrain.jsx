@@ -39,7 +39,7 @@ const getArpenteurColor = (arpenteur) => {
   return colors[arpenteur] || "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
 };
 
-export default function GestionEquipeTerrain() {
+export default function CeduleTerrain() {
 
   const [isEmployeDialogOpen, setIsEmployeDialogOpen] = useState(false);
   const [isVehiculeDialogOpen, setIsVehiculeDialogOpen] = useState(false);

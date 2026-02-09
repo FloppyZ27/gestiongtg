@@ -69,7 +69,7 @@ const navigationItems = [
   },
   {
     title: "Cédule Terrain",
-    url: createPageUrl("GestionEquipeTerrain"),
+    url: createPageUrl("CeduleTerrain"),
     icon: CalendarDays,
   },
   {

@@ -58,7 +58,6 @@ import Dashboard from './pages/Dashboard';
 import Dossiers from './pages/Dossiers';
 import EditerActe from './pages/EditerActe';
 import GestionDeMandat from './pages/GestionDeMandat';
-import GestionEquipeTerrain from './pages/GestionEquipeTerrain';
 import Home from './pages/Home';
 import Lots from './pages/Lots';
 import Notaires from './pages/Notaires';
@@ -68,6 +67,7 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
+import CeduleTerrain from './pages/CeduleTerrain';
 import __Layout from './Layout.jsx';
 
 
@@ -83,7 +83,6 @@ export const PAGES = {
     "Dossiers": Dossiers,
     "EditerActe": EditerActe,
     "GestionDeMandat": GestionDeMandat,
-    "GestionEquipeTerrain": GestionEquipeTerrain,
     "Home": Home,
     "Lots": Lots,
     "Notaires": Notaires,
@@ -93,6 +92,7 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
+    "CeduleTerrain": CeduleTerrain,
 }
 
 export const pagesConfig = {
