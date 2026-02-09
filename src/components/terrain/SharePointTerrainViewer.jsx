@@ -39,6 +39,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const [uploadProgress, setUploadProgress] = useState("");
   const [previewFile, setPreviewFile] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [folderToDelete, setFolderToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("in");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [currentSubPath, setCurrentSubPath] = useState("");
@@ -134,6 +135,20 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
     } catch (error) {
       console.error("Erreur suppression:", error);
       alert("Erreur lors de la suppression du fichier");
+    }
+  };
+
+  const handleDeleteFolder = async (folder) => {
+    try {
+      await base44.functions.invoke('sharepoint', {
+        action: 'delete',
+        fileId: folder.id
+      });
+      setFolderToDelete(null);
+      refetch();
+    } catch (error) {
+      console.error("Erreur suppression dossier:", error);
+      alert("Erreur lors de la suppression du dossier");
     }
   };
 
@@ -329,6 +344,18 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
                       <Folder className="w-4 h-4 text-blue-400 flex-shrink-0" />
                       <span className="text-blue-300 text-sm font-medium truncate">{folder.name}</span>
                     </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); setFolderToDelete(folder); }}
+                        className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        title="Supprimer le dossier"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
                 {filesList.map((file) => (
@@ -382,7 +409,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
                 {folders.map((folder) => (
                   <div
                     key={folder.id}
-                    className="relative bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden hover:bg-blue-500/20 transition-colors cursor-pointer"
+                    className="relative bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden hover:bg-blue-500/20 transition-colors group cursor-pointer"
                     onClick={() => handleFolderClick(folder)}
                   >
                     <div className="aspect-square flex items-center justify-center bg-blue-500/5">
@@ -390,6 +417,18 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
                     </div>
                     <div className="p-2 bg-blue-500/10">
                       <p className="text-blue-300 text-xs truncate font-medium" title={folder.name}>{folder.name}</p>
+                    </div>
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); setFolderToDelete(folder); }}
+                        className="h-6 w-6 p-0 bg-slate-900/90 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        title="Supprimer le dossier"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -445,7 +484,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
         </TabsContent>
       </Tabs>
 
-      {/* Dialog de confirmation de suppression */}
+      {/* Dialog de confirmation de suppression fichier */}
       {fileToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setFileToDelete(null)}>
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
@@ -469,6 +508,39 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               <Button
                 type="button"
                 onClick={() => handleDelete(fileToDelete)}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog de confirmation de suppression dossier */}
+      {folderToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setFolderToDelete(null)}>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-red-400 mb-4">⚠️ Confirmer la suppression</h3>
+            <p className="text-slate-300 mb-4">
+              Êtes-vous sûr de vouloir supprimer ce dossier et tout son contenu ?
+            </p>
+            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30 flex items-center gap-2 mb-4">
+              <Folder className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-300 text-sm font-medium truncate flex-1">{folderToDelete.name}</span>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFolderToDelete(null)}
+                className="border-slate-600 text-slate-400 hover:bg-slate-700"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleDeleteFolder(folderToDelete)}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 Supprimer

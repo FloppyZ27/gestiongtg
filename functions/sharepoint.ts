@@ -222,12 +222,12 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'delete') {
-      // Supprimer un fichier définitivement
+      // Supprimer un fichier ou dossier définitivement
       if (!fileId) {
         return Response.json({ error: 'fileId requis pour la suppression' }, { status: 400 });
       }
 
-      console.log("Deleting file:", fileId);
+      console.log("Deleting item:", fileId);
 
       const response = await fetch(
         `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/items/${fileId}`,
@@ -240,10 +240,10 @@ Deno.serve(async (req) => {
       if (!response.ok && response.status !== 204) {
         const data = await response.json().catch(() => ({}));
         console.error("Delete error:", JSON.stringify(data));
-        throw new Error(data.error?.message || 'Erreur lors de la suppression du fichier');
+        throw new Error(data.error?.message || 'Erreur lors de la suppression');
       }
 
-      return Response.json({ success: true, message: 'Fichier supprimé' });
+      return Response.json({ success: true, message: 'Élément supprimé' });
     }
 
     if (action === 'getThumbnail') {
