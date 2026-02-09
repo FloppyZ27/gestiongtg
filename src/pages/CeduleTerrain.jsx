@@ -25,6 +25,24 @@ const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjami
 const TYPES_MANDATS = ["Certificat de localisation", "Implantation", "Piquetage", "OCTR", "Projet de lotissement"];
 const DONNEURS = ["Dave Vallée", "Julie Abud", "André Guérin"];
 
+const getMandatColor = (typeMandat) => {
+  const colors = {
+    "Bornage": "bg-red-500/20 text-red-400 border-red-500/30",
+    "Certificat de localisation": "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    "CPTAQ": "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    "Description Technique": "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "Dérogation mineure": "bg-violet-500/20 text-violet-400 border-violet-500/30",
+    "Implantation": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+    "Levé topographique": "bg-lime-500/20 text-lime-400 border-lime-500/30",
+    "OCTR": "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    "Piquetage": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    "Plan montrant": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    "Projet de lotissement": "bg-teal-500/20 text-teal-400 border-teal-500/30",
+    "Recherches": "bg-purple-500/20 text-purple-400 border-purple-500/30"
+  };
+  return colors[typeMandat] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+};
+
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
   const mapping = {
@@ -1072,6 +1090,21 @@ export default function CeduleTerrain() {
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-xl">Modifier les informations terrain</DialogTitle>
+              {editingTerrainItem && (
+                <div className="pt-2 pb-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={`${getArpenteurColor(editingTerrainItem.dossier.arpenteur_geometre)} border text-xs`}>
+                      {getArpenteurInitials(editingTerrainItem.dossier.arpenteur_geometre)}{editingTerrainItem.dossier.numero_dossier}
+                    </Badge>
+                    <span className="text-slate-400 text-sm">•</span>
+                    <span className="text-slate-300 text-sm">{getClientsNames(editingTerrainItem.dossier.clients_ids)}</span>
+                    <span className="text-slate-400 text-sm">•</span>
+                    <Badge className={`${getMandatColor(editingTerrainItem.mandat.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(editingTerrainItem.mandat.type_mandat)}
+                    </Badge>
+                  </div>
+                </div>
+              )}
             </DialogHeader>
             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
               <div className="grid grid-cols-2 gap-4">
@@ -1201,7 +1234,18 @@ export default function CeduleTerrain() {
         <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
             <DialogHeader>
-              <DialogTitle className="text-xl">Documents Terrain - {sharePointDossier && `${getArpenteurInitials(sharePointDossier.arpenteur_geometre)}${sharePointDossier.numero_dossier}`}</DialogTitle>
+              <DialogTitle className="text-xl">Documents Terrain</DialogTitle>
+              {sharePointDossier && (
+                <div className="pt-2 pb-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={`${getArpenteurColor(sharePointDossier.arpenteur_geometre)} border text-xs`}>
+                      {getArpenteurInitials(sharePointDossier.arpenteur_geometre)}{sharePointDossier.numero_dossier}
+                    </Badge>
+                    <span className="text-slate-400 text-sm">•</span>
+                    <span className="text-slate-300 text-sm">{getClientsNames(sharePointDossier.clients_ids)}</span>
+                  </div>
+                </div>
+              )}
             </DialogHeader>
             {sharePointDossier && (
               <SharePointTerrainViewer 
