@@ -244,12 +244,12 @@ export default function CeduleTerrain() {
               </h1>
               <CalendarDays className="w-6 h-6 text-cyan-400" />
             </div>
-            <Tabs value={activePlace} onValueChange={setActivePlace}>
-              <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700">
-                <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700">
+            <Tabs value={activePlace} onValueChange={setActivePlace} style={{ transform: 'translate(-25px, 25px)' }}>
+              <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700 h-12">
+                <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
                   Alma
                 </TabsTrigger>
-                <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700">
+                <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
                   Saguenay
                 </TabsTrigger>
               </TabsList>
