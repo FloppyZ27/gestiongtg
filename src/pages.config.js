@@ -50,7 +50,6 @@
 import Administration from './pages/Administration';
 import AjouterActe from './pages/AjouterActe';
 import Calendrier from './pages/Calendrier';
-import CeduleTerrain from './pages/CeduleTerrain';
 import ChaineDeTitre from './pages/ChaineDeTitre';
 import Clavardage from './pages/Clavardage';
 import Clients from './pages/Clients';
@@ -76,7 +75,6 @@ export const PAGES = {
     "Administration": Administration,
     "AjouterActe": AjouterActe,
     "Calendrier": Calendrier,
-    "CeduleTerrain": CeduleTerrain,
     "ChaineDeTitre": ChaineDeTitre,
     "Clavardage": Clavardage,
     "Clients": Clients,
