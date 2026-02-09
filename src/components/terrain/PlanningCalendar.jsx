@@ -201,16 +201,35 @@ export default function PlanningCalendar({
     window.print();
   };
 
-  // Charger les équipes depuis localStorage au démarrage
+  // Charger les équipes depuis la BD au démarrage
   useEffect(() => {
-    const savedEquipes = localStorage.getItem('planning_equipes');
-    if (savedEquipes) {
+    const loadEquipes = async () => {
       try {
-        setEquipes(JSON.parse(savedEquipes));
+        const equipesBD = await base44.entities.EquipeTerrain.list();
+        const equipesGroupedByDate = {};
+        
+        equipesBD.forEach(equipe => {
+          const dateStr = equipe.date_terrain;
+          if (!equipesGroupedByDate[dateStr]) {
+            equipesGroupedByDate[dateStr] = [];
+          }
+          equipesGroupedByDate[dateStr].push({
+            id: equipe.id,
+            nom: equipe.nom,
+            techniciens: equipe.techniciens || [],
+            vehicules: equipe.vehicules || [],
+            equipements: equipe.equipements || [],
+            mandats: equipe.mandats || []
+          });
+        });
+        
+        setEquipes(equipesGroupedByDate);
       } catch (e) {
-        console.error('Erreur lors du chargement des équipes:', e);
+        console.error('Erreur lors du chargement des équipes depuis la BD:', e);
       }
-    }
+    };
+    
+    loadEquipes();
   }, []);
 
   // Sauvegarder les équipes dans la BD à chaque modification
