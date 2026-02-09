@@ -1055,7 +1055,7 @@ export default function PlanningCalendar({
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState(null);
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
-  const [sharePointDossier, setSharePointDossier] = useState(null);
+  const [sharePointItem, setSharePointItem] = useState(null);
 
   // Charger la clé API au démarrage
   useEffect(() => {
@@ -1245,7 +1245,7 @@ export default function PlanningCalendar({
                size="sm"
                onClick={(e) => {
                  e.stopPropagation();
-                 setSharePointDossier(dossier);
+                 setSharePointItem(card);
                  setIsSharePointDialogOpen(true);
                }}
                className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 h-6 w-6 p-0 flex-shrink-0"
@@ -2593,12 +2593,36 @@ export default function PlanningCalendar({
       <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle className="text-xl">Documents Terrain - {sharePointDossier && `${getArpenteurInitials(sharePointDossier.arpenteur_geometre)}${sharePointDossier.numero_dossier}`}</DialogTitle>
+            <DialogTitle className="text-xl">Documents Terrain</DialogTitle>
+            {sharePointItem && (
+              <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
+                sharePointItem.dossier.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                sharePointItem.dossier.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                sharePointItem.dossier.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                sharePointItem.dossier.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                sharePointItem.dossier.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                "text-emerald-400"
+              }`}>
+                <span>
+                  {getArpenteurInitials(sharePointItem.dossier.arpenteur_geometre)}{sharePointItem.dossier.numero_dossier}
+                  {sharePointItem.dossier.clients_ids.length > 0 && getClientsNames(sharePointItem.dossier.clients_ids) !== "-" && (
+                    <span> - {getClientsNames(sharePointItem.dossier.clients_ids)}</span>
+                  )}
+                </span>
+                {sharePointItem.mandat && (
+                  <span className="flex gap-1">
+                    <Badge className={`${getMandatColor(sharePointItem.mandat.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(sharePointItem.mandat.type_mandat)}
+                    </Badge>
+                  </span>
+                )}
+              </div>
+            )}
           </DialogHeader>
-          {sharePointDossier && (
+          {sharePointItem && (
             <SharePointTerrainViewer 
-              arpenteurGeometre={sharePointDossier.arpenteur_geometre}
-              numeroDossier={sharePointDossier.numero_dossier}
+              arpenteurGeometre={sharePointItem.dossier.arpenteur_geometre}
+              numeroDossier={sharePointItem.dossier.numero_dossier}
             />
           )}
         </DialogContent>
