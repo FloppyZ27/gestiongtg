@@ -705,9 +705,18 @@ export default function PlanningCalendar({
     if (sourceParsed && sourceParsed.dateStr !== dest.dateStr) {
       const card = terrainCards.find(c => c.id === draggableId);
       if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous) {
-        if (!confirm(`Ce terrain a un rendez-vous le ${format(new Date(card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}. Voulez-vous vraiment le déplacer vers le ${format(new Date(dest.dateStr + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })} ?`)) {
-          return;
-        }
+        setRendezVousWarning({
+          card,
+          currentDateStr: sourceParsed.dateStr,
+          newDateStr: dest.dateStr
+        });
+        setPendingDragDrop({
+          source,
+          destination,
+          draggableId,
+          type
+        });
+        return;
       }
     }
 
