@@ -697,6 +697,39 @@ export default function PlanningCalendar({
       return;
     }
 
+    // Drag & drop d'équipement OLD
+    if (type === "EQUIPEMENT_OLD") {
+      const dest = parseEquipeDroppableId(destId);
+      if (!dest || destId === "equipements-list") return;
+
+      // Vérifier si l'équipement est déjà utilisé dans une autre équipe de la même journée
+      if (isResourceUsedInDay(dest.dateStr, draggableId, 'equipements', dest.equipeId)) {
+        alert('Cet équipement est déjà assigné à une autre équipe ce jour-là.');
+        return;
+      }
+
+      const newEquipes = { ...equipes };
+      if (!newEquipes[dest.dateStr]) return;
+      
+      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      if (!equipe) return;
+
+      const sourceEquipement = parseEquipeDroppableId(sourceId);
+      if (sourceEquipement && sourceId !== "equipements-list") {
+        const sourceEquipe = newEquipes[sourceEquipement.dateStr]?.find(e => e.id === sourceEquipement.equipeId);
+        if (sourceEquipe) {
+          sourceEquipe.equipements = sourceEquipe.equipements.filter(id => id !== draggableId);
+        }
+      }
+
+      if (!equipe.equipements.includes(draggableId)) {
+        equipe.equipements.push(draggableId);
+      }
+
+      setEquipes(newEquipes);
+      return;
+    }
+
     // Drag & drop de mandat
     const dest = parseEquipeDroppableId(destId);
     if (!dest) {
