@@ -2746,8 +2746,8 @@ export default function EditDossierForm({
           </div>
         </div>
 
-        {/* Sidebar - 30% */}
-        <div className="flex-[0_0_30%] flex flex-col overflow-hidden">
+        {/* Sidebar - 30% (ajusté pour la largeur) */}
+        <div className="flex-[0_0_calc(30%-16px)] flex flex-col overflow-hidden">
           {/* Section Carte */}
           {formData.mandats.length > 0 && formData.mandats[activeTabMandat]?.adresse_travaux && (
             formData.mandats[activeTabMandat].adresse_travaux.rue || formData.mandats[activeTabMandat].adresse_travaux.ville
