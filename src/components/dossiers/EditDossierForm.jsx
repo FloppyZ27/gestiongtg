@@ -390,16 +390,16 @@ export default function EditDossierForm({
       {/* Division avec sidebar de navigation */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar de navigation - Icons only */}
-        <div className="w-16 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
+        <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-4 gap-2 flex-shrink-0 overflow-y-auto">
           <TooltipProvider>
             {sections.map((section) => (
               <Tooltip key={section.id}>
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => scrollToSection(section.id)}
-                    className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors group relative"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors group relative"
                   >
-                    <section.icon className={`w-6 h-6 ${section.color}`} />
+                    <section.icon className={`w-5 h-5 ${section.color}`} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white text-sm">
