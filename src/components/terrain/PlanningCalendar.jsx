@@ -2567,12 +2567,24 @@ export default function PlanningCalendar({
               </div>
               <div className="space-y-1">
                 <Label className="text-slate-400 text-xs">Instruments</Label>
-                <Input 
-                  placeholder="GPS, Station totale..."
-                  value={terrainForm.instruments_requis}
-                  onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
-                  className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                />
+                <Select 
+                  value={terrainForm.instruments_requis || ""}
+                  onValueChange={(value) => setTerrainForm({...terrainForm, instruments_requis: value})}
+                >
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="Can-Net" className="text-white text-xs">Can-Net</SelectItem>
+                    <SelectItem value="RTK" className="text-white text-xs">RTK</SelectItem>
+                    <SelectItem value="CONV" className="text-white text-xs">CONV</SelectItem>
+                    <SelectItem value="3 GPS" className="text-white text-xs">3 GPS</SelectItem>
+                    <SelectItem value="Chaine" className="text-white text-xs">Chaine</SelectItem>
+                    <SelectItem value="SX10" className="text-white text-xs">SX10</SelectItem>
+                    <SelectItem value="NAVIS" className="text-white text-xs">NAVIS</SelectItem>
+                    <SelectItem value="Drône" className="text-white text-xs">Drône</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
