@@ -545,6 +545,7 @@ export default function CeduleTerrain() {
   const mandatsCedules = getMandatsCedules();
 
   const MandatCard = ({ item, showActions = true, isDragging = false, currentUser }) => {
+    // Chercher le donneur parmi les utilisateurs
     const donneurUser = item.mandat.terrain?.donneur 
       ? users.find(u => u.full_name === item.mandat.terrain.donneur)
       : null;
