@@ -144,11 +144,11 @@ export default function DocumentsStepForm({
     const clientName = `${clientInfo.prenom || ''} ${clientInfo.nom || ''}`.trim() || "Client";
     baseFolderPath = activeTab === "intrants" 
       ? `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/INTRANTS`
-      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/TERRAIN`;
+      : `ARPENTEUR/${initials}/DOSSIER/TEMPORAIRE/${initials}-${clientName}/IN`;
   } else {
     baseFolderPath = activeTab === "intrants"
       ? `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/INTRANTS`
-      : `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
+      : `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/IN`;
   }
   
   // Ajouter le sous-chemin s'il existe
