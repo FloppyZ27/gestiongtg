@@ -1106,8 +1106,8 @@ export default function CeduleTerrain() {
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-700">
                       <SelectItem value={null} className="text-white">Aucun</SelectItem>
-                      {DONNEURS.map((donneur) => (
-                        <SelectItem key={donneur} value={donneur} className="text-white">{donneur}</SelectItem>
+                      {users.map((user) => (
+                        <SelectItem key={user.email} value={user.full_name} className="text-white">{user.full_name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
