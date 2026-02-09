@@ -50,6 +50,7 @@
 import Administration from './pages/Administration';
 import AjouterActe from './pages/AjouterActe';
 import Calendrier from './pages/Calendrier';
+import CeduleTerrain from './pages/CeduleTerrain';
 import ChaineDeTitre from './pages/ChaineDeTitre';
 import Clavardage from './pages/Clavardage';
 import Clients from './pages/Clients';
@@ -67,7 +68,6 @@ import Recherches from './pages/Recherches';
 import RetoursAppel from './pages/RetoursAppel';
 import SharePoint from './pages/SharePoint';
 import TableauDeBord from './pages/TableauDeBord';
-import CeduleTerrain from './pages/CeduleTerrain';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "Administration": Administration,
     "AjouterActe": AjouterActe,
     "Calendrier": Calendrier,
+    "CeduleTerrain": CeduleTerrain,
     "ChaineDeTitre": ChaineDeTitre,
     "Clavardage": Clavardage,
     "Clients": Clients,
@@ -92,7 +93,6 @@ export const PAGES = {
     "RetoursAppel": RetoursAppel,
     "SharePoint": SharePoint,
     "TableauDeBord": TableauDeBord,
-    "CeduleTerrain": CeduleTerrain,
 }
 
 export const pagesConfig = {

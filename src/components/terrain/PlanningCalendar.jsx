@@ -306,16 +306,13 @@ export default function PlanningCalendar({
       newEquipes[createTeamDateStr] = [];
     }
     
-    // Vérifier si une équipe avec les mêmes ressources existe déjà pour cette date
-    const hasSameResources = newEquipes[createTeamDateStr].find(eq => {
-      const sameTechniciens = JSON.stringify([...eq.techniciens].sort()) === JSON.stringify([...newEquipe.techniciens].sort());
-      const sameVehicules = JSON.stringify([...eq.vehicules].sort()) === JSON.stringify([...newEquipe.vehicules].sort());
-      const sameEquipements = JSON.stringify([...eq.equipements].sort()) === JSON.stringify([...newEquipe.equipements].sort());
-      return sameTechniciens && sameVehicules && sameEquipements;
-    });
+    // Vérifier si une équipe avec le même nom existe déjà pour cette date
+    const existingEquipe = newEquipes[createTeamDateStr].find(eq => 
+      generateTeamDisplayName(eq) === generateTeamDisplayName(newEquipe)
+    );
     
-    if (hasSameResources) {
-      alert('Une équipe identique avec les mêmes ressources existe déjà pour cette date.');
+    if (existingEquipe) {
+      alert('Une équipe avec ce nom existe déjà pour cette date.');
       return;
     }
     
