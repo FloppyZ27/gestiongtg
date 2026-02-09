@@ -2912,171 +2912,145 @@ export default function EditDossierForm({
             )}
           </DialogHeader>
 
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (editingTerrainInfo) {
-              const updatedMandats = [...formData.mandats];
-              updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex] = {
-                ...updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex],
-                ...terrainForm
-              };
-              setFormData({...formData, mandats: updatedMandats});
-              setIsTerrainDialogOpen(false);
-            }
-          }}>
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-400">Date limite cédule</Label>
-                  <Input 
-                    type="date"
-                    value={terrainForm.date_limite_leve || ""}
-                    onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-400">Instruments requis</Label>
-                  <Input 
-                    placeholder="GPS, Station totale..."
-                    value={terrainForm.instruments_requis || ""}
-                    onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-400">Donneur</Label>
-                  <Select 
-                    value={terrainForm.donneur || ""}
-                    onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}
-                  >
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {users.map((u) => (
-                        <SelectItem key={u.email} value={u.full_name} className="text-white">
-                          {u.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-400">Technicien</Label>
-                  <Select 
-                    value={terrainForm.technicien || ""}
-                    onValueChange={(value) => setTerrainForm({...terrainForm, technicien: value})}
-                  >
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
-                      {users.map((u) => (
-                        <SelectItem key={u.email} value={u.full_name} className="text-white">
-                          {u.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-slate-400">Temps prévu</Label>
-                <Input 
-                  placeholder="Ex: 2h30"
-                  value={terrainForm.temps_prevu || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
-                  className="bg-slate-700 border-slate-600 text-white"
+                <Label>Date limite levé terrain</Label>
+                <Input
+                  type="date"
+                  value={terrainForm.date_limite_leve || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, date_limite_leve: e.target.value})}
+                  className="bg-slate-800 border-slate-700 text-white"
                 />
               </div>
-
-              <div className="space-y-3 border-t border-slate-700 pt-4">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={terrainForm.a_rendez_vous || false}
-                    onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
-                    className="data-[state=checked]:bg-amber-400"
-                  />
-                  <Label className="text-slate-400">Rendez-vous requis</Label>
-                </div>
-
-                {terrainForm.a_rendez_vous && (
-                  <div className="grid grid-cols-2 gap-4 pl-8">
-                    <div className="space-y-2">
-                      <Label className="text-slate-400">Date du rendez-vous</Label>
-                      <Input 
-                        type="date"
-                        value={terrainForm.date_rendez_vous || ""}
-                        onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-slate-400">Heure du rendez-vous</Label>
-                      <Input 
-                        type="time"
-                        value={terrainForm.heure_rendez_vous || ""}
-                        onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
               <div className="space-y-2">
-                <Label className="text-slate-400">Dossier simultané</Label>
-                <Select 
-                  value={terrainForm.dossier_simultane || ""}
-                  onValueChange={(value) => setTerrainForm({...terrainForm, dossier_simultane: value})}
-                >
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                    <SelectValue placeholder="Sélectionner" />
+                <Label>Instruments requis</Label>
+                <Input
+                  value={terrainForm.instruments_requis || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, instruments_requis: e.target.value})}
+                  placeholder="Ex: GPS, Total Station"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Switch 
+                  checked={terrainForm.a_rendez_vous || false}
+                  onCheckedChange={(checked) => setTerrainForm({...terrainForm, a_rendez_vous: checked})}
+                  className="data-[state=checked]:bg-amber-400"
+                />
+                <Label>Rendez-vous nécessaire</Label>
+              </div>
+              {terrainForm.a_rendez_vous && (
+                <div className="grid grid-cols-2 gap-3 ml-7">
+                  <div className="space-y-2">
+                    <Label>Date du rendez-vous</Label>
+                    <Input
+                      type="date"
+                      value={terrainForm.date_rendez_vous || ""}
+                      onChange={(e) => setTerrainForm({...terrainForm, date_rendez_vous: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Heure du rendez-vous</Label>
+                    <Input
+                      type="time"
+                      value={terrainForm.heure_rendez_vous || ""}
+                      onChange={(e) => setTerrainForm({...terrainForm, heure_rendez_vous: e.target.value})}
+                      className="bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Donneur</Label>
+                <Select value={terrainForm.donneur || ""} onValueChange={(value) => setTerrainForm({...terrainForm, donneur: value})}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Sélectionner un donneur" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {(allDossiers || []).filter(d => d.id !== editingDossier?.id).map((d) => (
-                      <SelectItem key={d.id} value={d.id} className="text-white">
-                        {getArpenteurInitials(d.arpenteur_geometre)}{d.numero_dossier}
-                        {d.clients_ids && d.clients_ids.length > 0 && ` - ${getClientsNames(d.clients_ids)}`}
-                      </SelectItem>
+                    <SelectItem value={null} className="text-white">Aucun</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.email} value={u.full_name} className="text-white">{u.full_name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
-                <Label className="text-slate-400">Notes</Label>
-                <textarea
-                  value={terrainForm.notes || ""}
-                  onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
-                  placeholder="Notes supplémentaires..."
-                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-md p-2 min-h-[80px] resize-none"
+                <Label>Technicien à prioriser</Label>
+                <Input
+                  value={terrainForm.technicien || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, technicien: e.target.value})}
+                  placeholder="Nom du technicien"
+                  className="bg-slate-800 border-slate-700 text-white"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-700">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="border-red-500 text-red-400 hover:bg-red-500/10"
-                onClick={() => setIsTerrainDialogOpen(false)}
-              >
-                Annuler
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-gradient-to-r from-emerald-500 to-teal-600"
-              >
-                Enregistrer
-              </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Dossier à faire en même temps</Label>
+                <Input
+                  value={terrainForm.dossier_simultane || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value})}
+                  placeholder="N° de dossier"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Temps prévu</Label>
+                <Input
+                  value={terrainForm.temps_prevu || ""}
+                  onChange={(e) => setTerrainForm({...terrainForm, temps_prevu: e.target.value})}
+                  placeholder="Ex: 2h30"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
             </div>
-          </form>
+
+            <div className="space-y-2">
+              <Label>Notes terrain</Label>
+              <Textarea
+                value={terrainForm.notes || ""}
+                onChange={(e) => setTerrainForm({...terrainForm, notes: e.target.value})}
+                placeholder="Notes concernant le terrain..."
+                className="bg-slate-800 border-slate-700 text-white h-24"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setIsTerrainDialogOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="button"
+              onClick={() => {
+                if (editingTerrainInfo) {
+                  const updatedMandats = [...formData.mandats];
+                  updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex] = {
+                    ...updatedMandats[editingTerrainInfo.mandatIndex].terrains_list[editingTerrainInfo.terrainIndex],
+                    ...terrainForm
+                  };
+                  setFormData({...formData, mandats: updatedMandats});
+                  setIsTerrainDialogOpen(false);
+                }
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600"
+            >
+              Enregistrer
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
