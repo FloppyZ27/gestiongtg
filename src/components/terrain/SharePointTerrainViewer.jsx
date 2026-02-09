@@ -166,18 +166,17 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
     }
   };
 
-  const handleCreateTIFolder = async () => {
-    if (activeTab !== "in") return;
-    
+  const handleCreateFolder = async () => {
     setIsCreatingFolder(true);
     try {
-      // Trouver le prochain numéro TI disponible
-      const tiFiles = files.filter(f => f.name.includes('_TI'));
-      const tiNumbers = tiFiles.map(f => {
-        const match = f.name.match(/_TI(\d+)_/);
+      // Trouver le prochain numéro TI ou TO disponible
+      const prefix = activeTab === "in" ? '_TI' : '_TO';
+      const folderFiles = files.filter(f => f.name.includes(prefix));
+      const folderNumbers = folderFiles.map(f => {
+        const match = f.name.match(activeTab === "in" ? /_TI(\d+)_/ : /_TO(\d+)_/);
         return match ? parseInt(match[1]) : 0;
       });
-      const nextTiNumber = tiNumbers.length > 0 ? Math.max(...tiNumbers) + 1 : 1;
+      const nextNumber = folderNumbers.length > 0 ? Math.max(...folderNumbers) + 1 : 1;
       
       // Format de la date AAAAMMJJ
       const today = new Date();
@@ -185,8 +184,8 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
                       String(today.getMonth() + 1).padStart(2, '0') + 
                       String(today.getDate()).padStart(2, '0');
       
-      // Nom du dossier: SG-123_TI1_20260209
-      const folderName = `${initials}-${numeroDossier}_TI${nextTiNumber}_${dateStr}`;
+      // Nom du dossier: SG-123_TI1_20260209 ou SG-123_TO1_20260209
+      const folderName = `${initials}-${numeroDossier}${prefix}${nextNumber}_${dateStr}`;
       
       // Créer le dossier principal
       await base44.functions.invoke('sharepoint', {
@@ -195,8 +194,10 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
         folderName: folderName
       });
       
-      // Créer les 4 sous-dossiers
-      const subFolders = ['CARNET', 'FICHIERS', 'PHOTOS', 'TRAITEMENT'];
+      // Créer les sous-dossiers selon l'onglet
+      const subFolders = activeTab === "in" 
+        ? ['CARNET', 'FICHIERS', 'PHOTOS', 'TRAITEMENT']
+        : ['FICHIERS', 'PRINT'];
       const newFolderPath = `${currentFolderPath}/${folderName}`;
       
       for (const subFolder of subFolders) {
