@@ -2803,15 +2803,15 @@ export default function PlanningCalendar({
               </p>
               <div className="flex justify-center gap-3 pt-4">
                 <Button
-                  type="button"
-                  onClick={() => {
-                    setRendezVousWarning(null);
-                    setPendingDragDrop(null);
-                  }}
-                  className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 border-none"
-                >
-                  Annuler
-                </Button>
+                   type="button"
+                   onClick={() => {
+                     setRendezVousWarning(null);
+                     setPendingDragDrop(null);
+                   }}
+                   className="border border-red-500 text-red-400 hover:bg-red-500/10 bg-transparent"
+                 >
+                   Annuler
+                 </Button>
                 <Button 
                   type="button" 
                   onClick={() => {
