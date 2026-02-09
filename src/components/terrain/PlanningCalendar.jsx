@@ -600,15 +600,15 @@ export default function PlanningCalendar({
       if (!destTech || destId === "techniciens-list") return;
 
       // Vérifier si le technicien est déjà utilisé dans une autre équipe de la même journée
-      if (isResourceUsedInDay(dest.dateStr, draggableId, 'techniciens', dest.equipeId)) {
+      if (isResourceUsedInDay(destTech.dateStr, draggableId, 'techniciens', destTech.equipeId)) {
         alert('Ce technicien est déjà assigné à une autre équipe ce jour-là.');
         return;
       }
 
       const newEquipes = { ...equipes };
-      if (!newEquipes[dest.dateStr]) return;
+      if (!newEquipes[destTech.dateStr]) return;
       
-      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      const equipe = newEquipes[destTech.dateStr].find(e => e.id === destTech.equipeId);
       if (!equipe) return;
 
       // Retirer du source si applicable
@@ -631,19 +631,19 @@ export default function PlanningCalendar({
     
     // Drag & drop de véhicule
     if (type === "VEHICULE") {
-      const dest = parseEquipeDroppableId(destId);
-      if (!dest || destId === "vehicules-list") return;
+      const destVeh = parseEquipeDroppableId(destId);
+      if (!destVeh || destId === "vehicules-list") return;
 
       // Vérifier si le véhicule est déjà utilisé dans une autre équipe de la même journée
-      if (isResourceUsedInDay(dest.dateStr, draggableId, 'vehicules', dest.equipeId)) {
+      if (isResourceUsedInDay(destVeh.dateStr, draggableId, 'vehicules', destVeh.equipeId)) {
         alert('Ce véhicule est déjà assigné à une autre équipe ce jour-là.');
         return;
       }
 
       const newEquipes = { ...equipes };
-      if (!newEquipes[dest.dateStr]) return;
+      if (!newEquipes[destVeh.dateStr]) return;
       
-      const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+      const equipe = newEquipes[destVeh.dateStr].find(e => e.id === destVeh.equipeId);
       if (!equipe) return;
 
       const sourceVehicule = parseEquipeDroppableId(sourceId);
