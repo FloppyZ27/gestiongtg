@@ -1371,14 +1371,14 @@ function LayoutContent({ children, currentPageName }) {
       </Dialog>
       
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950">
-          <SidebarHeader className="border-b border-slate-900 p-3 bg-slate-950">
+        <Sidebar collapsible="icon" className="border-r border-slate-950 bg-slate-950 w-12">
+          <SidebarHeader className="border-b border-slate-900 p-2 bg-slate-950">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-16 h-auto"
+                  className="w-12 h-auto"
                 />
                 <div>
                   <h2 className="font-bold text-white text-2xl">GestionGTG</h2>
@@ -1389,16 +1389,16 @@ function LayoutContent({ children, currentPageName }) {
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69033e618d595dd20c703c3b/511fe556f_11_GTG_refonte_logo_GTG-ETOILE-RVB-VF.png"
                   alt="GTG Logo"
-                  className="w-8 h-auto"
+                  className="w-6 h-auto"
                 />
               </div>
             )}
           </SidebarHeader>
           
-          <SidebarContent className="p-1.5 bg-slate-950">
+          <SidebarContent className="p-1 bg-slate-950">
             <SidebarGroup>
               {!isCollapsed && (
-                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
+                <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 py-2">
                   Navigation
                 </SidebarGroupLabel>
               )}
