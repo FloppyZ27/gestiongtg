@@ -120,7 +120,7 @@ export default function CeduleTerrain() {
     notes: ""
   });
   const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
-  const [sharePointDossier, setSharePointDossier] = useState(null);
+  const [sharePointItem, setSharePointItem] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -738,7 +738,7 @@ export default function CeduleTerrain() {
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSharePointDossier(item.dossier);
+                  setSharePointItem(item);
                   setIsSharePointDialogOpen(true);
                 }}
                 className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-7"
@@ -764,7 +764,7 @@ export default function CeduleTerrain() {
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSharePointDossier(item.dossier);
+                    setSharePointItem(item);
                     setIsSharePointDialogOpen(true);
                   }}
                   className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-8"
@@ -1235,22 +1235,26 @@ export default function CeduleTerrain() {
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
             <DialogHeader>
               <DialogTitle className="text-xl">Documents Terrain</DialogTitle>
-              {sharePointDossier && (
+              {sharePointItem && (
                 <div className="pt-2 pb-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className={`${getArpenteurColor(sharePointDossier.arpenteur_geometre)} border text-xs`}>
-                      {getArpenteurInitials(sharePointDossier.arpenteur_geometre)}{sharePointDossier.numero_dossier}
+                    <Badge variant="outline" className={`${getArpenteurColor(sharePointItem.dossier.arpenteur_geometre)} border text-xs`}>
+                      {getArpenteurInitials(sharePointItem.dossier.arpenteur_geometre)}{sharePointItem.dossier.numero_dossier}
                     </Badge>
                     <span className="text-slate-400 text-sm">•</span>
-                    <span className="text-slate-300 text-sm">{getClientsNames(sharePointDossier.clients_ids)}</span>
+                    <span className="text-slate-300 text-sm">{getClientsNames(sharePointItem.dossier.clients_ids)}</span>
+                    <span className="text-slate-400 text-sm">•</span>
+                    <Badge className={`${getMandatColor(sharePointItem.mandat.type_mandat)} border text-xs`}>
+                      {getAbbreviatedMandatType(sharePointItem.mandat.type_mandat)}
+                    </Badge>
                   </div>
                 </div>
               )}
             </DialogHeader>
-            {sharePointDossier && (
+            {sharePointItem && (
               <SharePointTerrainViewer 
-                arpenteurGeometre={sharePointDossier.arpenteur_geometre}
-                numeroDossier={sharePointDossier.numero_dossier}
+                arpenteurGeometre={sharePointItem.dossier.arpenteur_geometre}
+                numeroDossier={sharePointItem.dossier.numero_dossier}
               />
             )}
           </DialogContent>
