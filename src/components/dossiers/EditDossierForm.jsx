@@ -812,7 +812,6 @@ export default function EditDossierForm({
             </form>
 
             {/* Section Mandats */}
-            <div className="space-y-3">
             <Card className="border-slate-700 bg-slate-800/30" data-section="mandats">
               <CardHeader 
                 className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-1.5 bg-orange-900/20"
