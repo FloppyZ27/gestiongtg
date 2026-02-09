@@ -2599,9 +2599,9 @@ export default function PlanningCalendar({
                     <SelectValue placeholder="Sélectionner" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {users?.map((u) => (
-                      <SelectItem key={u.email} value={u.full_name} className="text-white text-xs">
-                        {u.full_name}
+                    {techniciens?.map((t) => (
+                      <SelectItem key={t.id} value={`${t.prenom} ${t.nom}`} className="text-white text-xs">
+                        {t.prenom} {t.nom}
                       </SelectItem>
                     ))}
                   </SelectContent>
