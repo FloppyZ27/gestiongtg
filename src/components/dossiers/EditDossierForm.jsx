@@ -380,7 +380,7 @@ export default function EditDossierForm({
                 e.preventDefault();
               }
             }}>
-              <Card className="border-slate-700 bg-slate-800/30 mb-3">
+              <Card className="border-slate-700 bg-slate-800/30 mb-3" data-section="infos">
                   <CardHeader 
                     className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-1.5 bg-blue-900/20"
                     onClick={() => setInfoDossierCollapsed(!infoDossierCollapsed)}
