@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle, Edit } from "lucide-react";
+import { X, User, FileText, Briefcase, Plus, Search, Check, ChevronDown, ChevronUp, Trash2, FolderOpen, MapPin, MessageSquare, Clock, Loader2, Grid3x3, ArrowUp, ArrowDown, Trash, Phone, FileUp, CheckCircle2, XCircle, Edit, Receipt } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -286,12 +286,12 @@ export default function EditDossierForm({
   const sections = [
     { id: "infos", label: "Informations", icon: FolderOpen, color: "text-blue-400" },
     { id: "mandats", label: "Mandats", icon: FileText, color: "text-orange-400" },
-    { id: "tarification", label: "Tarification", icon: Grid3x3, color: "text-green-400" },
+    { id: "tarification", label: "Tarification", icon: Receipt, color: "text-purple-400" },
     { id: "terrain", label: "Terrain", icon: MapPin, color: "text-amber-400" },
     { id: "minutes", label: "Minutes", icon: FileText, color: "text-cyan-400" },
     { id: "entree-temps", label: "Entrée de temps", icon: Clock, color: "text-lime-400" },
     { id: "retour-appel", label: "Retour d'appel", icon: Phone, color: "text-blue-400" },
-    { id: "documents", label: "Documents", icon: FileUp, color: "text-purple-400" }
+    { id: "documents", label: "Documents", icon: FolderOpen, color: "text-yellow-400" }
   ];
 
   const scrollToSection = (sectionId) => {
