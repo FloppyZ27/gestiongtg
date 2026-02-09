@@ -410,8 +410,8 @@ export default function EditDossierForm({
           </TooltipProvider>
         </div>
 
-        {/* Main content - 70% */}
-        <div className="flex-[0_0_calc(70%-64px)] flex flex-col overflow-hidden border-r border-slate-800">
+        {/* Main content - 75% */}
+        <div className="flex-[0_0_calc(75%-48px)] flex flex-col overflow-hidden border-r border-slate-800">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Section Informations du dossier */}
             <form id="edit-dossier-form" onSubmit={(e) => {
