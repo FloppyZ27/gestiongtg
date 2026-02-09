@@ -1411,16 +1411,16 @@ function LayoutContent({ children, currentPageName }) {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <SidebarMenuButton 
-                                asChild 
-                                className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
-                                  location.pathname === item.url 
-                                    ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                                }`}
+                              asChild 
+                              className={`transition-all duration-200 rounded-lg mb-0.5 justify-center ${
+                              location.pathname === item.url 
+                                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/20' 
+                                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                              }`}
                               >
-                                <Link to={item.url} className="flex items-center justify-center p-2.5">
-                                  <item.icon className="w-5 h-5" />
-                                </Link>
+                              <Link to={item.url} className="flex items-center justify-center p-2">
+                              <item.icon className="w-4 h-4" />
+                              </Link>
                               </SidebarMenuButton>
                             </TooltipTrigger>
                             <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
