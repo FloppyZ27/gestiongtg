@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Grid3x3, List, FolderPlus } from "lucide-react";
+import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Grid3x3, List, FolderPlus, Folder, ArrowLeft } from "lucide-react";
 
 const getArpenteurInitials = (arpenteur) => {
   if (!arpenteur) return "";
@@ -41,15 +41,17 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const [fileToDelete, setFileToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("in");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [currentSubPath, setCurrentSubPath] = useState("");
 
   const initials = getArpenteurInitials(arpenteurGeometre);
   const folderPathIN = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/IN`;
   const folderPathOUT = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/OUT`;
   
-  const currentFolderPath = activeTab === "in" ? folderPathIN : folderPathOUT;
+  const baseFolderPath = activeTab === "in" ? folderPathIN : folderPathOUT;
+  const currentFolderPath = currentSubPath ? `${baseFolderPath}/${currentSubPath}` : baseFolderPath;
 
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-terrain', arpenteurGeometre, numeroDossier, activeTab],
+    queryKey: ['sharepoint-terrain', arpenteurGeometre, numeroDossier, activeTab, currentSubPath],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
@@ -62,6 +64,8 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   });
 
   const files = filesData?.files || [];
+  const folders = files.filter(f => f.type === 'folder');
+  const filesList = files.filter(f => f.type === 'file');
 
   const uploadFile = async (file) => {
     return new Promise((resolve, reject) => {
@@ -171,7 +175,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
       
       await base44.functions.invoke('sharepoint', {
         action: 'createFolder',
-        parentFolderPath: folderPathIN,
+        parentFolderPath: currentFolderPath,
         folderName: folderName
       });
       
@@ -182,6 +186,18 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
     } finally {
       setIsCreatingFolder(false);
     }
+  };
+
+  const handleFolderClick = (folder) => {
+    const newSubPath = currentSubPath ? `${currentSubPath}/${folder.name}` : folder.name;
+    setCurrentSubPath(newSubPath);
+  };
+
+  const handleGoBack = () => {
+    if (!currentSubPath) return;
+    const pathParts = currentSubPath.split('/');
+    pathParts.pop();
+    setCurrentSubPath(pathParts.join('/'));
   };
 
   return (
@@ -197,12 +213,26 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="mt-3">
+        <TabsContent value={activeTab} className="mt-3" onSelect={() => setCurrentSubPath("")}>
       {/* Chemin et actions */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-slate-500 text-xs truncate flex-1">
-          📁 {currentFolderPath}
-        </p>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {currentSubPath && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleGoBack}
+              className="text-slate-400 hover:text-white h-6 px-2 flex-shrink-0"
+              title="Retour"
+            >
+              <ArrowLeft className="w-3 h-3" />
+            </Button>
+          )}
+          <p className="text-slate-500 text-xs truncate">
+            📁 {currentFolderPath}
+          </p>
+        </div>
         <div className="flex items-center gap-1">
           {activeTab === "in" && (
             <Button
@@ -273,10 +303,22 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
             </div>
-          ) : files.length > 0 ? (
+          ) : (folders.length > 0 || filesList.length > 0) ? (
             viewMode === "list" ? (
               <div className="max-h-[400px] overflow-y-auto space-y-1">
-                {files.map((file) => (
+                {folders.map((folder) => (
+                  <div
+                    key={folder.id}
+                    className="flex items-center justify-between px-3 py-2 bg-blue-500/10 border border-blue-500/30 rounded hover:bg-blue-500/20 transition-colors group cursor-pointer"
+                    onClick={() => handleFolderClick(folder)}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <Folder className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <span className="text-blue-300 text-sm font-medium truncate">{folder.name}</span>
+                    </div>
+                  </div>
+                ))}
+                {filesList.map((file) => (
                   <div
                     key={file.id}
                     className="flex items-center justify-between px-3 py-2 bg-slate-700/50 rounded hover:bg-slate-700 transition-colors group cursor-pointer"
@@ -324,7 +366,21 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto p-1">
-                {files.map((file) => (
+                {folders.map((folder) => (
+                  <div
+                    key={folder.id}
+                    className="relative bg-blue-500/10 border border-blue-500/30 rounded-lg overflow-hidden hover:bg-blue-500/20 transition-colors cursor-pointer"
+                    onClick={() => handleFolderClick(folder)}
+                  >
+                    <div className="aspect-square flex items-center justify-center bg-blue-500/5">
+                      <Folder className="w-12 h-12 text-blue-400" />
+                    </div>
+                    <div className="p-2 bg-blue-500/10">
+                      <p className="text-blue-300 text-xs truncate font-medium" title={folder.name}>{folder.name}</p>
+                    </div>
+                  </div>
+                ))}
+                {filesList.map((file) => (
                   <div
                     key={file.id}
                     className="relative bg-slate-700/50 rounded-lg overflow-hidden hover:bg-slate-700 transition-colors group cursor-pointer border border-slate-600"
