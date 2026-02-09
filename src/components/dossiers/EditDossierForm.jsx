@@ -2733,7 +2733,7 @@ export default function EditDossierForm({
             {/* Section Documents - Visible uniquement si arpenteur et numéro de dossier sont définis */}
             {formData.numero_dossier && formData.arpenteur_geometre && (
               <div data-section="documents">
-                  <DocumentsStepForm
+                <DocumentsStepForm
                   arpenteurGeometre={formData.arpenteur_geometre}
                   numeroDossier={formData.numero_dossier}
                   isCollapsed={documentsCollapsed}
@@ -2742,7 +2742,6 @@ export default function EditDossierForm({
                 />
               </div>
             )}
-            </div>
           </div>
         </div>
 
