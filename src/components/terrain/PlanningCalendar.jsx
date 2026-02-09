@@ -2662,12 +2662,41 @@ export default function PlanningCalendar({
               {terrainForm.dossier_simultane !== "" && (
                 <div className="space-y-1">
                   <Label className="text-slate-400 text-xs">Dossier simultané</Label>
-                  <Input 
-                    value={terrainForm.dossier_simultane.trim()}
-                    onChange={(e) => setTerrainForm({...terrainForm, dossier_simultane: e.target.value || " "})}
-                    placeholder="N° de dossier"
-                    className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
-                  />
+                  <Select 
+                    value={terrainForm.dossier_simultane || ""}
+                    onValueChange={(value) => setTerrainForm({...terrainForm, dossier_simultane: value})}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                      <SelectValue placeholder="Sélectionner" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {(() => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        const availableTerrains = terrainCards.filter(card => {
+                          // Exclure le terrain actuel
+                          if (card.id === editingTerrainCard?.id) return false;
+                          
+                          // Inclure si pas de date_cedulee OU si date_cedulee >= aujourd'hui
+                          if (!card.terrain?.date_cedulee) return true;
+                          
+                          const terrainDate = new Date(card.terrain.date_cedulee + 'T00:00:00');
+                          return terrainDate >= today;
+                        });
+                        
+                        return availableTerrains.map((card) => (
+                          <SelectItem 
+                            key={card.id} 
+                            value={`${getArpenteurInitials(card.dossier.arpenteur_geometre)}${card.dossier.numero_dossier}`}
+                            className="text-white text-xs"
+                          >
+                            {getArpenteurInitials(card.dossier.arpenteur_geometre)}{card.dossier.numero_dossier} - {getClientsNames(card.dossier.clients_ids)} ({getAbbreviatedMandatType(card.mandat.type_mandat)})
+                          </SelectItem>
+                        ));
+                      })()}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>
