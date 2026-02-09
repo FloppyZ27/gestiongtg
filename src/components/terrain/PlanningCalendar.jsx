@@ -543,7 +543,8 @@ export default function PlanningCalendar({
       if (card?.terrain?.a_rendez_vous && card?.terrain?.date_rendez_vous) {
         const sourceParsed = parseEquipeDroppableId(sourceId);
         // Vérifier si on change de date (depuis unassigned ou depuis une autre équipe)
-        if (sourceId === "unassigned" || (sourceParsed && sourceParsed.dateStr !== destParsed.dateStr)) {
+        // BUT: si la date du RDV = nouvelle date, ne pas afficher l'avertissement
+        if (card.terrain.date_rendez_vous !== destParsed.dateStr && (sourceId === "unassigned" || (sourceParsed && sourceParsed.dateStr !== destParsed.dateStr))) {
           setRendezVousWarning({
             card,
             currentDateStr: sourceParsed?.dateStr || "non céedulé",
