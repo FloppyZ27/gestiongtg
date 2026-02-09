@@ -41,6 +41,7 @@ const getArpenteurColor = (arpenteur) => {
 
 export default function CeduleTerrain() {
 
+  const [activePlace, setActivePlace] = useState("alma");
   const [isEmployeDialogOpen, setIsEmployeDialogOpen] = useState(false);
   const [isVehiculeDialogOpen, setIsVehiculeDialogOpen] = useState(false);
   const [isEquipementDialogOpen, setIsEquipementDialogOpen] = useState(false);
