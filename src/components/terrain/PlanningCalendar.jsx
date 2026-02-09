@@ -217,7 +217,6 @@ export default function PlanningCalendar({
   useEffect(() => {
     const saveEquipes = async () => {
       if (Object.keys(equipes).length === 0) return;
-      if (isSaving) return;
       
       setIsSaving(true);
       try {
@@ -270,7 +269,7 @@ export default function PlanningCalendar({
     // Débounce pour éviter trop de requêtes
     const timeoutId = setTimeout(saveEquipes, 1000);
     return () => clearTimeout(timeoutId);
-  }, [equipes, isSaving]);
+  }, [equipes]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
