@@ -2724,6 +2724,104 @@ export default function PlanningCalendar({
         </DialogContent>
       </Dialog>
 
+      {/* Dialog d'avertissement RDV */}
+      <Dialog open={!!rendezVousWarning} onOpenChange={() => setRendezVousWarning(null)}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          {rendezVousWarning && (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Ce terrain a un rendez-vous le <span className="text-emerald-400 font-semibold">{format(new Date(rendezVousWarning.card.terrain.date_rendez_vous + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span>.
+              </p>
+              <p className="text-slate-300 text-center">
+                Voulez-vous vraiment le déplacer vers le <span className="text-emerald-400 font-semibold">{format(new Date(rendezVousWarning.newDateStr + 'T00:00:00'), "dd MMMM yyyy", { locale: fr })}</span> ?
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setRendezVousWarning(null);
+                    setPendingDragDrop(null);
+                  }}
+                  className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 border-none"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    // Exécuter le drag & drop
+                    if (pendingDragDrop) {
+                      const { source, destination, draggableId, type } = pendingDragDrop;
+                      const dest = parseEquipeDroppableId(destination.droppableId);
+                      
+                      if (dest) {
+                        const newEquipes = { ...equipes };
+                        if (!newEquipes[dest.dateStr]) return;
+                        
+                        const equipe = newEquipes[dest.dateStr].find(e => e.id === dest.equipeId);
+                        if (!equipe) return;
+
+                        const sourceMandat = parseEquipeDroppableId(source.droppableId);
+                        if (sourceMandat && source.droppableId !== "unassigned") {
+                          const sourceEquipe = newEquipes[sourceMandat.dateStr]?.find(e => e.id === sourceMandat.equipeId);
+                          if (sourceEquipe) {
+                            sourceEquipe.mandats = sourceEquipe.mandats.filter(id => id !== draggableId);
+                          }
+                        }
+
+                        if (!equipe.mandats.includes(draggableId)) {
+                          equipe.mandats.splice(destination.index, 0, draggableId);
+                        }
+
+                        setEquipes(newEquipes);
+
+                        const card = terrainCards.find(c => c.id === draggableId);
+                        if (card && onUpdateDossier) {
+                          const equipeNom = generateTeamDisplayName(equipe);
+                          const updatedMandats = card.dossier.mandats.map((m, idx) => {
+                            if (idx === card.mandatIndex) {
+                              let updatedTerrainsList = [...(m.terrains_list || [])];
+                              if (updatedTerrainsList.length === 0 || !updatedTerrainsList[card.terrainIndex]) {
+                                updatedTerrainsList[card.terrainIndex] = { ...(card.terrain || {}) };
+                              }
+                              updatedTerrainsList[card.terrainIndex] = {
+                                ...updatedTerrainsList[card.terrainIndex],
+                                date_cedulee: dest.dateStr,
+                                equipe_assignee: equipeNom
+                              };
+                              return { 
+                                ...m, 
+                                date_terrain: dest.dateStr, 
+                                equipe_assignee: equipeNom, 
+                                terrains_list: updatedTerrainsList 
+                              };
+                            }
+                            return m;
+                          });
+                          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
+                        }
+                      }
+                    }
+                    setRendezVousWarning(null);
+                    setPendingDragDrop(null);
+                  }}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Continuer
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog SharePoint Terrain */}
       <Dialog open={isSharePointDialogOpen} onOpenChange={setIsSharePointDialogOpen}>
         <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[80vh]">
