@@ -688,31 +688,45 @@ export default function CeduleTerrain() {
           )}
 
           {showActions && (
-            <div className="flex gap-2 pt-2 border-t border-slate-700" onClick={(e) => e.stopPropagation()}>
-              <Button
-                size="sm"
-                onClick={(e) => handleEditTerrain(item, e)}
-                className="flex-1 text-xs h-8 p-0 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
-                title="Oui, terrain requis"
-              >
-                <CheckCircle className="w-4 h-4" />
-              </Button>
-              
+            <div className="pt-2 border-t border-slate-700 space-y-1" onClick={(e) => e.stopPropagation()}>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={(e) => handleEditTerrain(item, e)}
+                  className="flex-1 text-xs h-8 p-0 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                  title="Oui, terrain requis"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                </Button>
+                
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain");
+                  }}
+                  disabled={!isAssignedToCurrentUser}
+                  className={`flex-1 text-xs h-8 p-0 ${
+                    isAssignedToCurrentUser 
+                      ? 'bg-slate-600 hover:bg-slate-500 text-white' 
+                      : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  }`}
+                  title={isAssignedToCurrentUser ? "Pas de terrain" : "Vous devez être assigné à ce mandat"}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
               <Button
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  updateMandatStatut(item.dossier.id, item.mandatIndex, "pas_de_terrain");
+                  setSharePointDossier(item.dossier);
+                  setIsSharePointDialogOpen(true);
                 }}
-                disabled={!isAssignedToCurrentUser}
-                className={`flex-1 text-xs h-8 p-0 ${
-                  isAssignedToCurrentUser 
-                    ? 'bg-slate-600 hover:bg-slate-500 text-white' 
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                }`}
-                title={isAssignedToCurrentUser ? "Pas de terrain" : "Vous devez être assigné à ce mandat"}
+                className="w-full bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 text-xs h-7"
               >
-                <X className="w-4 h-4" />
+                <FolderOpen className="w-3 h-3 mr-1" />
+                Fichiers terrain
               </Button>
             </div>
           )}
