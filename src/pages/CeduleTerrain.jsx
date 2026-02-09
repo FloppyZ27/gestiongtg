@@ -545,13 +545,9 @@ export default function CeduleTerrain() {
   const mandatsCedules = getMandatsCedules();
 
   const MandatCard = ({ item, showActions = true, isDragging = false, currentUser }) => {
-    const assignedUser = users.find(u => u.email === item.mandat.utilisateur_assigne);
-    
     const donneurUser = item.mandat.terrain?.donneur 
       ? users.find(u => u.full_name === item.mandat.terrain.donneur)
       : null;
-    
-    const displayUser = donneurUser || assignedUser;
     
     // Vérifier si l'utilisateur courant est assigné à ce mandat
     const isAssignedToCurrentUser = currentUser && item.mandat.utilisateur_assigne === currentUser.email;
@@ -645,27 +641,27 @@ export default function CeduleTerrain() {
               )}
               
               <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  {item.mandat.terrain?.date_limite_leve && (
-                    <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                      <Calendar className="w-3 h-3 flex-shrink-0" />
-                      <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
-                    </div>
-                  )}
-                </div>
-                
-                {displayUser ? (
-                  <Avatar className="w-7 h-7 border-2 border-slate-600">
-                    <AvatarImage src={displayUser.photo_url} />
-                    <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                      {getUserInitials(displayUser.full_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
-                    <User className="w-4 h-4 text-slate-500" />
+              <div className="flex-1">
+                {item.mandat.terrain?.date_limite_leve && (
+                  <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                    <Calendar className="w-3 h-3 flex-shrink-0" />
+                    <span>Limite: {format(addDays(new Date(item.mandat.terrain.date_limite_leve), 1), "dd MMM yyyy", { locale: fr })}</span>
                   </div>
                 )}
+              </div>
+
+              {donneurUser ? (
+                <Avatar className="w-7 h-7 border-2 border-slate-600">
+                  <AvatarImage src={donneurUser.photo_url} />
+                  <AvatarFallback className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                    {getUserInitials(donneurUser.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                  <User className="w-4 h-4 text-slate-500" />
+                </div>
+              )}
               </div>
             </div>
           )}
