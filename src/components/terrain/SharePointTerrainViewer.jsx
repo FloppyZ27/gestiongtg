@@ -160,8 +160,8 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-3">
-      {/* Header avec actions */}
-      <div className="flex items-center justify-between">
+      {/* Chemin et actions */}
+      <div className="flex items-center justify-between mb-2">
         <p className="text-slate-500 text-xs truncate flex-1">
           📁 {currentFolderPath}
         </p>
