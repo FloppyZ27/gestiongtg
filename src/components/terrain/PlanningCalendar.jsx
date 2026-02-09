@@ -213,12 +213,64 @@ export default function PlanningCalendar({
     }
   }, []);
 
-  // Sauvegarder les équipes dans localStorage à chaque modification
+  // Sauvegarder les équipes dans la BD à chaque modification
   useEffect(() => {
-    if (Object.keys(equipes).length > 0) {
-      localStorage.setItem('planning_equipes', JSON.stringify(equipes));
-    }
-  }, [equipes]);
+    const saveEquipes = async () => {
+      if (Object.keys(equipes).length === 0) return;
+      if (isSaving) return;
+      
+      setIsSaving(true);
+      try {
+        const existingEquipes = await base44.entities.EquipeTerrain.list();
+        const existingIds = new Set(existingEquipes.map(eq => eq.id));
+        const currentIds = new Set();
+        
+        // Créer ou mettre à jour les équipes
+        for (const [dateStr, dayEquipes] of Object.entries(equipes)) {
+          for (const equipe of dayEquipes) {
+            currentIds.add(equipe.id);
+            
+            if (existingIds.has(equipe.id)) {
+              // Mettre à jour si elle existe
+              await base44.entities.EquipeTerrain.update(equipe.id, {
+                date_terrain: dateStr,
+                nom: equipe.nom,
+                techniciens: equipe.techniciens || [],
+                vehicules: equipe.vehicules || [],
+                equipements: equipe.equipements || [],
+                mandats: equipe.mandats || []
+              });
+            } else {
+              // Créer si elle n'existe pas
+              await base44.entities.EquipeTerrain.create({
+                date_terrain: dateStr,
+                nom: equipe.nom,
+                techniciens: equipe.techniciens || [],
+                vehicules: equipe.vehicules || [],
+                equipements: equipe.equipements || [],
+                mandats: equipe.mandats || []
+              });
+            }
+          }
+        }
+        
+        // Supprimer les équipes qui n'existent plus
+        for (const eq of existingEquipes) {
+          if (!currentIds.has(eq.id)) {
+            await base44.entities.EquipeTerrain.delete(eq.id);
+          }
+        }
+      } catch (e) {
+        console.error('Erreur lors de la sauvegarde des équipes:', e);
+      } finally {
+        setIsSaving(false);
+      }
+    };
+    
+    // Débounce pour éviter trop de requêtes
+    const timeoutId = setTimeout(saveEquipes, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [equipes, isSaving]);
 
   const getClientsNames = (clientIds) => {
     if (!clientIds || clientIds.length === 0) return "-";
