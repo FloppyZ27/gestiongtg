@@ -295,10 +295,51 @@ export default function EditDossierForm({
   ];
 
   const scrollToSection = (sectionId) => {
-    const element = document.querySelector(`[data-section="${sectionId}"]`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    // Fermer toutes les sections
+    setInfoDossierCollapsed(true);
+    setMandatStepCollapsed(true);
+    setTarificationStepCollapsed(true);
+    setTerrainCollapsed(true);
+    setMinutesCollapsed(true);
+    setEntreeTempsCollapsed(true);
+    setRetourAppelCollapsed(true);
+    setDocumentsCollapsed(true);
+
+    // Ouvrir la section cliquée
+    setTimeout(() => {
+      switch (sectionId) {
+        case "infos":
+          setInfoDossierCollapsed(false);
+          break;
+        case "mandats":
+          setMandatStepCollapsed(false);
+          break;
+        case "tarification":
+          setTarificationStepCollapsed(false);
+          break;
+        case "terrain":
+          setTerrainCollapsed(false);
+          break;
+        case "minutes":
+          setMinutesCollapsed(false);
+          break;
+        case "entree-temps":
+          setEntreeTempsCollapsed(false);
+          break;
+        case "retour-appel":
+          setRetourAppelCollapsed(false);
+          break;
+        case "documents":
+          setDocumentsCollapsed(false);
+          break;
+      }
+
+      // Scroll vers l'élément
+      const element = document.querySelector(`[data-section="${sectionId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 0);
   };
 
   return (
