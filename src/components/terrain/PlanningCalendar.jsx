@@ -507,6 +507,18 @@ export default function PlanningCalendar({
     setEquipes(newEquipes);
   };
 
+  // Format: "equipe-dateStr-equipeId-type"
+  const parseEquipeDroppableId = (id) => {
+    if (!id.startsWith('equipe-')) return null;
+    const parts = id.split('-');
+    // equipe-yyyy-MM-dd-equipeId-type
+    return {
+      dateStr: `${parts[1]}-${parts[2]}-${parts[3]}`,
+      equipeId: parts[4],
+      type: parts[5]
+    };
+  };
+
   const onDragEnd = (result) => {
     const { source, destination, draggableId, type } = result;
 
@@ -514,18 +526,6 @@ export default function PlanningCalendar({
 
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
-
-    // Format: "equipe-dateStr-equipeId-type"
-    const parseEquipeDroppableId = (id) => {
-      if (!id.startsWith('equipe-')) return null;
-      const parts = id.split('-');
-      // equipe-yyyy-MM-dd-equipeId-type
-      return {
-        dateStr: `${parts[1]}-${parts[2]}-${parts[3]}`,
-        equipeId: parts[4],
-        type: parts[5]
-      };
-    };
 
     // Vérifier si une ressource est déjà utilisée dans une autre équipe de la même journée
     const isResourceUsedInDay = (dateStr, resourceId, resourceType, excludeEquipeId) => {
