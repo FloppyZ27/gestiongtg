@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, RefreshCw, Download, Eye, Trash2, Upload, FileText, Image, FileSpreadsheet, File, Grid3x3, List } from "lucide-react";
 
 const getArpenteurInitials = (arpenteur) => {
@@ -38,16 +39,20 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
   const [uploadProgress, setUploadProgress] = useState("");
   const [previewFile, setPreviewFile] = useState(null);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState("in");
 
   const initials = getArpenteurInitials(arpenteurGeometre);
-  const folderPath = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/TERRAIN`;
+  const folderPathIN = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/IN`;
+  const folderPathOUT = `ARPENTEUR/${initials}/DOSSIER/${initials}-${numeroDossier}/OUT`;
+  
+  const currentFolderPath = activeTab === "in" ? folderPathIN : folderPathOUT;
 
   const { data: filesData, isLoading, refetch } = useQuery({
-    queryKey: ['sharepoint-terrain', arpenteurGeometre, numeroDossier],
+    queryKey: ['sharepoint-terrain', arpenteurGeometre, numeroDossier, activeTab],
     queryFn: async () => {
       const response = await base44.functions.invoke('sharepoint', {
         action: 'list',
-        folderPath: folderPath
+        folderPath: currentFolderPath
       });
       return response.data;
     },
@@ -64,7 +69,7 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
         try {
           const base64 = reader.result.split(',')[1];
           const response = await base44.functions.invoke('uploadToSharePoint', {
-            folderPath: folderPath,
+            folderPath: currentFolderPath,
             fileName: file.name,
             fileContent: base64,
             contentType: file.type
@@ -143,10 +148,22 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
 
   return (
     <div className="space-y-3">
+      {/* Tabs IN / OUT */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+          <TabsTrigger value="in" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
+            IN
+          </TabsTrigger>
+          <TabsTrigger value="out" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
+            OUT
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="mt-3">
       {/* Header avec actions */}
       <div className="flex items-center justify-between">
         <p className="text-slate-500 text-xs truncate flex-1">
-          📁 {folderPath}
+          📁 {currentFolderPath}
         </p>
         <div className="flex items-center gap-1">
           <Button
@@ -292,12 +309,14 @@ export default function SharePointTerrainViewer({ arpenteurGeometre, numeroDossi
             )
           ) : (
             <div className="text-center py-8 text-slate-500">
-              <p className="text-sm">Aucun fichier dans le dossier TERRAIN</p>
+              <p className="text-sm">Aucun fichier dans le dossier {activeTab.toUpperCase()}</p>
               <p className="text-xs mt-1">Cliquez sur "Ajouter" pour téléverser des fichiers</p>
             </div>
           )}
         </>
       )}
+        </TabsContent>
+      </Tabs>
 
       {/* Dialog de confirmation de suppression */}
       {fileToDelete && (
