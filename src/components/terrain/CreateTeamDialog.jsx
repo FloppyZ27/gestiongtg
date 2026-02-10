@@ -53,10 +53,25 @@ export default function CreateTeamDialog({
     return equipe.nom;
   };
 
+  // Vérifier si une ressource est assignée à une autre place d'affaire (toutes les équipes, pas seulement ce jour)
+  const isResourceInOtherPlace = (resourceId, resourceType) => {
+    for (const dateKey in equipes) {
+      const dayEquipes = equipes[dateKey] || [];
+      for (const eq of dayEquipes) {
+        if (eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
+          if (eq[resourceType]?.includes(resourceId)) {
+            return eq.place_affaire;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
   // Ressources disponibles
-  const availableTechs = techniciens.filter(t => !usedTechIds.includes(t.id));
-  const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id));
-  const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id));
+  const availableTechs = techniciens.filter(t => !usedTechIds.includes(t.id) && !isResourceInOtherPlace(t.id, 'techniciens'));
+  const availableVehs = vehicules.filter(v => !usedVehIds.includes(v.id) && !isResourceInOtherPlace(v.id, 'vehicules'));
+  const availableEqs = equipements.filter(e => !usedEqIds.includes(e.id) && !isResourceInOtherPlace(e.id, 'equipements'));
 
   const generateTeamName = (techs) => {
     const teamNumber = (equipes[dateStr]?.length || 0) + 1;
@@ -149,8 +164,10 @@ export default function CreateTeamDialog({
               <div className="pt-2 pb-2 px-3">
                 <div className="max-h-32 overflow-y-auto space-y-2">
                   {techniciens.map(tech => {
-                    const isAvailable = !usedTechIds.includes(tech.id);
-                    const assignedTeam = !isAvailable ? getTeamForResource(tech.id, 'techniciens') : null;
+                    const isUsedToday = usedTechIds.includes(tech.id);
+                    const otherPlace = isResourceInOtherPlace(tech.id, 'techniciens');
+                    const isAvailable = !isUsedToday && !otherPlace;
+                    const assignedTeam = isUsedToday ? getTeamForResource(tech.id, 'techniciens') : null;
                     return (
                       <div
                         key={tech.id}
@@ -167,7 +184,7 @@ export default function CreateTeamDialog({
                           htmlFor={`tech-${tech.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {tech.prenom} {tech.nom} {!isAvailable && `(${assignedTeam})`}
+                          {tech.prenom} {tech.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );
@@ -200,8 +217,10 @@ export default function CreateTeamDialog({
               <div className="pt-2 pb-2 px-3">
                 <div className="max-h-32 overflow-y-auto space-y-2">
                   {vehicules.map(veh => {
-                    const isAvailable = !usedVehIds.includes(veh.id);
-                    const assignedTeam = !isAvailable ? getTeamForResource(veh.id, 'vehicules') : null;
+                    const isUsedToday = usedVehIds.includes(veh.id);
+                    const otherPlace = isResourceInOtherPlace(veh.id, 'vehicules');
+                    const isAvailable = !isUsedToday && !otherPlace;
+                    const assignedTeam = isUsedToday ? getTeamForResource(veh.id, 'vehicules') : null;
                     return (
                       <div
                         key={veh.id}
@@ -218,7 +237,7 @@ export default function CreateTeamDialog({
                           htmlFor={`veh-${veh.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {veh.nom} {!isAvailable && `(${assignedTeam})`}
+                          {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );
@@ -251,8 +270,10 @@ export default function CreateTeamDialog({
               <div className="pt-2 pb-2 px-3">
                 <div className="max-h-32 overflow-y-auto space-y-2">
                   {equipements.map(eq => {
-                    const isAvailable = !usedEqIds.includes(eq.id);
-                    const assignedTeam = !isAvailable ? getTeamForResource(eq.id, 'equipements') : null;
+                    const isUsedToday = usedEqIds.includes(eq.id);
+                    const otherPlace = isResourceInOtherPlace(eq.id, 'equipements');
+                    const isAvailable = !isUsedToday && !otherPlace;
+                    const assignedTeam = isUsedToday ? getTeamForResource(eq.id, 'equipements') : null;
                     return (
                       <div
                         key={eq.id}
@@ -269,7 +290,7 @@ export default function CreateTeamDialog({
                           htmlFor={`eq-${eq.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {eq.nom} {!isAvailable && `(${assignedTeam})`}
+                          {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );

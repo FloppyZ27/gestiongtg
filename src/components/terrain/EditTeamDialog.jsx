@@ -80,6 +80,21 @@ export default function EditTeamDialog({
     return foundEquipe.nom;
   };
 
+  // Vérifier si une ressource est assignée à une autre place d'affaire (toutes les équipes, pas seulement ce jour)
+  const isResourceInOtherPlace = (resourceId, resourceType) => {
+    for (const dateKey in equipes) {
+      const dayEquipes = equipes[dateKey] || [];
+      for (const eq of dayEquipes) {
+        if (eq.id !== equipe?.id && eq.place_affaire && eq.place_affaire.toLowerCase() !== placeAffaire?.toLowerCase()) {
+          if (eq[resourceType]?.includes(resourceId)) {
+            return eq.place_affaire;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
   const generateTeamName = (techs) => {
     const match = equipe?.nom.match(/Équipe (\d+)/);
     const teamNumber = match ? match[1] : '';
@@ -164,24 +179,26 @@ export default function EditTeamDialog({
                 <div className="p-3 space-y-2">
                   {techniciens.map(tech => {
                     const isUsedByOther = usedResources.techniciens.includes(tech.id);
+                    const otherPlace = isResourceInOtherPlace(tech.id, 'techniciens');
+                    const isAvailable = !isUsedByOther && !otherPlace;
                     const assignedTeam = isUsedByOther ? getTeamForResource(tech.id, 'techniciens') : null;
                     return (
                       <div
                         key={tech.id}
-                        className={`flex items-center gap-2 ${isUsedByOther ? 'opacity-50' : ''}`}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
                       >
                         <Checkbox
                           id={`tech-${tech.id}`}
                           checked={selectedTechniciens.includes(tech.id)}
-                          onCheckedChange={() => !isUsedByOther && toggleTechnicien(tech.id)}
-                          disabled={isUsedByOther}
+                          onCheckedChange={() => isAvailable && toggleTechnicien(tech.id)}
+                          disabled={!isAvailable}
                           className="border-slate-500"
                         />
                         <Label
                           htmlFor={`tech-${tech.id}`}
-                          className={`flex-1 ${!isUsedByOther ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {tech.prenom} {tech.nom} {isUsedByOther && `(${assignedTeam})`}
+                          {tech.prenom} {tech.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );
@@ -213,24 +230,26 @@ export default function EditTeamDialog({
                 <div className="p-3 space-y-2">
                   {vehicules.map(veh => {
                     const isUsedByOther = usedResources.vehicules.includes(veh.id);
+                    const otherPlace = isResourceInOtherPlace(veh.id, 'vehicules');
+                    const isAvailable = !isUsedByOther && !otherPlace;
                     const assignedTeam = isUsedByOther ? getTeamForResource(veh.id, 'vehicules') : null;
                     return (
                       <div
                         key={veh.id}
-                        className={`flex items-center gap-2 ${isUsedByOther ? 'opacity-50' : ''}`}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
                       >
                         <Checkbox
                           id={`veh-${veh.id}`}
                           checked={selectedVehicules.includes(veh.id)}
-                          onCheckedChange={() => !isUsedByOther && toggleVehicule(veh.id)}
-                          disabled={isUsedByOther}
+                          onCheckedChange={() => isAvailable && toggleVehicule(veh.id)}
+                          disabled={!isAvailable}
                           className="border-slate-500"
                         />
                         <Label
                           htmlFor={`veh-${veh.id}`}
-                          className={`flex-1 ${!isUsedByOther ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {veh.nom} {isUsedByOther && `(${assignedTeam})`}
+                          {veh.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );
@@ -262,24 +281,26 @@ export default function EditTeamDialog({
                 <div className="p-3 space-y-2">
                   {equipements.map(eq => {
                     const isUsedByOther = usedResources.equipements.includes(eq.id);
+                    const otherPlace = isResourceInOtherPlace(eq.id, 'equipements');
+                    const isAvailable = !isUsedByOther && !otherPlace;
                     const assignedTeam = isUsedByOther ? getTeamForResource(eq.id, 'equipements') : null;
                     return (
                       <div
                         key={eq.id}
-                        className={`flex items-center gap-2 ${isUsedByOther ? 'opacity-50' : ''}`}
+                        className={`flex items-center gap-2 ${!isAvailable ? 'opacity-50' : ''}`}
                       >
                         <Checkbox
                           id={`eq-${eq.id}`}
                           checked={selectedEquipements.includes(eq.id)}
-                          onCheckedChange={() => !isUsedByOther && toggleEquipement(eq.id)}
-                          disabled={isUsedByOther}
+                          onCheckedChange={() => isAvailable && toggleEquipement(eq.id)}
+                          disabled={!isAvailable}
                           className="border-slate-500"
                         />
                         <Label
                           htmlFor={`eq-${eq.id}`}
-                          className={`flex-1 ${!isUsedByOther ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {eq.nom} {isUsedByOther && `(${assignedTeam})`}
+                          {eq.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
                         </Label>
                       </div>
                     );
