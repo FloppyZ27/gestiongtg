@@ -181,6 +181,10 @@ export default function Profil() {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
       setIsEditingProfile(false);
     },
+    onError: (error) => {
+      console.error('Erreur lors de la mise à jour:', error);
+      alert('Erreur lors de la mise à jour du profil');
+    },
   });
 
   const uploadPhotoMutation = useMutation({
@@ -1461,11 +1465,11 @@ export default function Profil() {
                 )}
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)} disabled={updateProfileMutation.isPending}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600">
-                  Enregistrer
+                <Button type="submit" className="bg-gradient-to-r from-emerald-500 to-teal-600" disabled={updateProfileMutation.isPending}>
+                  {updateProfileMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
             </form>
