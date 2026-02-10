@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import {
   Sidebar,
@@ -1492,6 +1492,32 @@ function LayoutContent({ children, currentPageName }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-900 p-2.5 bg-slate-950 space-y-2.5">
+            {isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => base44.auth.logout()}
+                    variant="ghost"
+                    size="icon"
+                    className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-slate-800 border-slate-700 text-white">
+                  <p>Déconnexion</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button
+                onClick={() => base44.auth.logout()}
+                variant="ghost"
+                className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400 justify-start"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Déconnexion
+              </Button>
+            )}
             <Button
               onClick={() => setOpen(!open)}
               variant="ghost"
