@@ -41,7 +41,7 @@ const getArpenteurColor = (arpenteur) => {
 
 export default function CeduleTerrain() {
 
-  const [activePlace, setActivePlace] = useState("alma");
+
   const [isEmployeDialogOpen, setIsEmployeDialogOpen] = useState(false);
   const [isVehiculeDialogOpen, setIsVehiculeDialogOpen] = useState(false);
   const [isEquipementDialogOpen, setIsEquipementDialogOpen] = useState(false);
@@ -244,24 +244,12 @@ export default function CeduleTerrain() {
               </h1>
               <CalendarDays className="w-6 h-6 text-cyan-400" />
             </div>
-            <Tabs value={activePlace} onValueChange={setActivePlace} style={{ transform: 'translate(-25px, 25px)' }}>
-              <TabsList className="grid grid-cols-2 bg-slate-800/50 border border-slate-700 h-12">
-                <TabsTrigger value="alma" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
-                  Alma
-                </TabsTrigger>
-                <TabsTrigger value="saguenay" className="data-[state=active]:bg-slate-700 text-base px-6 py-3">
-                  Saguenay
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+
           </div>
           <p className="text-slate-400">Planification des équipes de terrain</p>
         </div>
 
-        <Tabs value={activePlace} onValueChange={setActivePlace} className="w-full">
-
-          <TabsContent value={activePlace} className="mt-0">
-            <PlanningCalendar 
+        <PlanningCalendar 
               dossiers={dossiers}
               techniciens={techniciensByPlace}
               vehicules={vehiculesByPlace}
@@ -310,9 +298,7 @@ export default function CeduleTerrain() {
                   deleteEquipementMutation.mutate(id);
                 }
               }}
-            />
-          </TabsContent>
-        </Tabs>
+          />
 
         {/* Dialogs cachés - conservés mais hors des tabs */}
         <div style={{ display: 'none' }}>
