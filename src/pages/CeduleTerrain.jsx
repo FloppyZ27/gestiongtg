@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Truck, Wrench, Edit, Trash2, Calendar, FolderOpen, Search, CalendarDays } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { createPageUrl } from "@/utils";
@@ -257,7 +258,7 @@ export default function CeduleTerrain() {
               clients={clients}
               users={users}
               lots={[]}
-              placeAffaire={null}
+              placeAffaire={activePlace}
               onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
               onAddTechnicien={() => {
                 setEditingEmploye(null);
