@@ -198,7 +198,7 @@ export default function EditTeamDialog({
                           htmlFor={`tech-${tech.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {tech.prenom} {tech.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {tech.prenom} {tech.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );
@@ -249,7 +249,7 @@ export default function EditTeamDialog({
                           htmlFor={`veh-${veh.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {veh.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {veh.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );
@@ -300,7 +300,7 @@ export default function EditTeamDialog({
                           htmlFor={`eq-${eq.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
                         >
-                          {eq.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {eq.nom} {isUsedByOther && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );

@@ -184,7 +184,7 @@ export default function CreateTeamDialog({
                           htmlFor={`tech-${tech.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {tech.prenom} {tech.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {tech.prenom} {tech.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );
@@ -237,7 +237,7 @@ export default function CreateTeamDialog({
                           htmlFor={`veh-${veh.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {veh.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );
@@ -290,7 +290,7 @@ export default function CreateTeamDialog({
                           htmlFor={`eq-${eq.id}`}
                           className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
-                          {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace})`}
+                          {eq.nom} {isUsedToday && `(${assignedTeam})`} {otherPlace && `(${otherPlace.charAt(0).toUpperCase() + otherPlace.slice(1)})`}
                         </Label>
                       </div>
                     );
