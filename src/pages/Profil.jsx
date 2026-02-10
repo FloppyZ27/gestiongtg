@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
