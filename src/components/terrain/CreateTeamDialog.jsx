@@ -130,7 +130,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('techniciens')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full py-2 px-3 hover:bg-blue-700 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(37, 99, 235)' }}>
+            <CollapsibleTrigger className="w-full py-2 px-3 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(37, 99, 235)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-blue-400/50 flex items-center justify-center">
@@ -181,7 +181,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('vehicules')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full py-2 px-3 hover:bg-purple-700 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(147, 51, 234)' }}>
+            <CollapsibleTrigger className="w-full py-2 px-3 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(147, 51, 234)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-purple-400/50 flex items-center justify-center">
@@ -232,7 +232,7 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('equipements')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full py-2 px-3 hover:bg-orange-700 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(234, 88, 12)' }}>
+            <CollapsibleTrigger className="w-full py-2 px-3 transition-colors rounded-t-lg" style={{ backgroundColor: 'rgb(234, 88, 12)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-orange-400/50 flex items-center justify-center">
