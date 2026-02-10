@@ -257,7 +257,7 @@ export default function CeduleTerrain() {
               clients={clients}
               users={users}
               lots={[]}
-              placeAffaire={activePlace}
+              placeAffaire={null}
               onUpdateDossier={(id, data) => updateDossierMutation.mutate({ id, data })}
               onAddTechnicien={() => {
                 setEditingEmploye(null);
