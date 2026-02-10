@@ -1321,32 +1321,13 @@ export default function Profil() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Poste</Label>
+                <Label>Date de naissance</Label>
                 <Input
-                  value={profileForm.poste}
-                  onChange={(e) => setProfileForm({...profileForm, poste: e.target.value})}
+                  type="date"
+                  value={profileForm.date_naissance}
+                  onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
                   className="bg-slate-800 border-slate-700"
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Date de naissance</Label>
-                  <Input
-                    type="date"
-                    value={profileForm.date_naissance}
-                    onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Date d'embauche</Label>
-                  <Input
-                    type="date"
-                    value={profileForm.date_embauche}
-                    onChange={(e) => setProfileForm({...profileForm, date_embauche: e.target.value})}
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
               </div>
               <div className="space-y-2">
                 <Label>Téléphone</Label>
