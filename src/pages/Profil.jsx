@@ -243,9 +243,17 @@ export default function Profil() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Ajuster la date d'anniversaire pour compenser le décalage de timezone
+      let adjustedDateNaissance = profileForm.date_naissance;
+      if (adjustedDateNaissance) {
+        const date = new Date(adjustedDateNaissance);
+        date.setDate(date.getDate() + 1);
+        adjustedDateNaissance = date.toISOString().split('T')[0];
+      }
+
       await updateProfileMutation.mutateAsync({
         full_name: profileForm.full_name,
-        date_naissance: profileForm.date_naissance,
+        date_naissance: adjustedDateNaissance,
         telephone: profileForm.telephone,
         adresse: profileForm.adresse
       });
