@@ -75,6 +75,7 @@ export default function Profil() {
   const [viewMode, setViewMode] = useState('month');
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
+  const [infoPersonnellesCollapsed, setInfoPersonnellesCollapsed] = useState(false);
 
   // États pour les retours d'appel
   const [searchRetours, setSearchRetours] = useState("");
@@ -678,119 +679,123 @@ export default function Profil() {
 
         {/* Personal Information Card */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
-          <CardHeader className="border-b border-slate-800">
-            <CardTitle className="text-white flex items-center gap-2">
-              <User className="w-5 h-5 text-emerald-400" />
-              Informations personnelles
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              {/* Photo avec bouton en dessous */}
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-32 h-32 border-4 border-emerald-500/50">
-                    <AvatarImage src={user?.photo_url} />
-                    <AvatarFallback className="text-2xl bg-gradient-to-r from-emerald-500 to-teal-500">
-                      {getInitials(user?.full_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <label htmlFor="photo-upload" className="absolute bottom-0 right-0 p-2 bg-emerald-500 rounded-full cursor-pointer hover:bg-emerald-600 transition-colors shadow-lg">
-                    <Upload className="w-4 h-4 text-white" />
-                    <input
-                      id="photo-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handlePhotoUpload}
-                      disabled={uploadingPhoto}
-                    />
-                  </label>
+          <div 
+            className="cursor-pointer hover:bg-blue-900/40 transition-colors rounded-t-lg py-4 px-6 bg-blue-900/20 border-b border-slate-800"
+            onClick={() => setInfoPersonnellesCollapsed(!infoPersonnellesCollapsed)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center">
+                  <User className="w-5 h-5 text-blue-400" />
                 </div>
-                {uploadingPhoto && (
-                  <p className="text-xs text-slate-400">Téléchargement...</p>
-                )}
-                <Button
-                  size="sm"
-                  onClick={() => setIsEditingProfile(true)}
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Modifier
-                </Button>
+                <h3 className="text-blue-300 text-lg font-semibold">Informations personnelles</h3>
               </div>
+              {infoPersonnellesCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+            </div>
+          </div>
 
-              {/* Information grid - 3 lignes */}
-              <div className="flex-1 space-y-3">
-                {/* Ligne 1: Nom, Courriel, Poste */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
-                  <div>
-                    <Label className="text-slate-400 text-xs">Nom complet</Label>
-                    <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+          {!infoPersonnellesCollapsed && (
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                {/* Photo avec bouton en dessous */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative">
+                    <Avatar className="w-32 h-32 border-4 border-emerald-500/50">
+                      <AvatarImage src={user?.photo_url} />
+                      <AvatarFallback className="text-2xl bg-gradient-to-r from-emerald-500 to-teal-500">
+                        {getInitials(user?.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <label htmlFor="photo-upload" className="absolute bottom-0 right-0 p-2 bg-emerald-500 rounded-full cursor-pointer hover:bg-emerald-600 transition-colors shadow-lg">
+                      <Upload className="w-4 h-4 text-white" />
+                      <input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                        disabled={uploadingPhoto}
+                      />
+                    </label>
                   </div>
-                  <div>
-                    <Label className="text-slate-400 text-xs">Adresse courriel</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-2">
-                      <Mail className="w-3 h-3 text-slate-500" />
-                      <span className="truncate">{user?.email}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-xs">Poste</Label>
-                    <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
-                  </div>
+                  {uploadingPhoto && (
+                    <p className="text-xs text-slate-400">Téléchargement...</p>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => setIsEditingProfile(true)}
+                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </Button>
                 </div>
 
-                {/* Ligne 2: Adresse, Téléphone, Ancienneté */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
-                  <div>
-                    <Label className="text-slate-400 text-xs">Adresse</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-slate-500" />
-                      <span className="truncate">{user?.adresse || "-"}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-xs">Téléphone</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-slate-500" />
-                      {user?.telephone || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-xs">Ancienneté</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Briefcase className="w-3 h-3 text-slate-500" />
-                      {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
-                      {user?.date_embauche && <span className="text-slate-400">({calculateSeniority()})</span>}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Ligne 3: Date anniversaire et Rôle */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2">
-                  <div>
-                    <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-1">
-                      <Cake className="w-3 h-3 text-slate-500" />
-                      {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-slate-400 text-xs">Rôle</Label>
-                    <div className="mt-1">
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                        {user?.role}
-                      </Badge>
+                {/* Information grid - 2 lignes de 4 champs */}
+                <div className="flex-1 space-y-3">
+                  {/* Ligne 1: Nom, Courriel, Téléphone, Adresse */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
+                    <div>
+                      <Label className="text-slate-400 text-xs">Nom</Label>
+                      <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Adresse courriel</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-2">
+                        <Mail className="w-3 h-3 text-slate-500" />
+                        <span className="truncate">{user?.email}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Téléphone</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-slate-500" />
+                        {user?.telephone || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Adresse civique</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-2">
+                        <MapPin className="w-3 h-3 text-slate-500" />
+                        <span className="truncate">{user?.adresse || "-"}</span>
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    {/* Colonne vide pour l'alignement */}
+
+                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Rôle */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
+                    <div>
+                      <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Cake className="w-3 h-3 text-slate-500" />
+                        {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Date d'embauche</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-slate-500" />
+                        {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {user?.date_embauche && <span className="text-slate-400 text-xs">({calculateSeniority()})</span>}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Poste</Label>
+                      <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Rôle</Label>
+                      <div className="mt-1">
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                          {user?.role}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Tabs pour les 3 tableaux */}
