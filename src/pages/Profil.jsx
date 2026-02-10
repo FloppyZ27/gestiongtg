@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -16,7 +16,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPageUrl } from "@/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AddressInput from "@/components/shared/AddressInput";
 
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 
@@ -77,6 +76,8 @@ export default function Profil() {
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
   const [infoPersonnellesCollapsed, setInfoPersonnellesCollapsed] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [loadingAddress, setLoadingAddress] = useState(false);
 
   // États pour les retours d'appel
   const [searchRetours, setSearchRetours] = useState("");
@@ -238,6 +239,29 @@ export default function Profil() {
   const handleProfileSubmit = (e) => {
     e.preventDefault();
     updateProfileMutation.mutate(profileForm);
+  };
+
+  const searchAddress = async (query) => {
+    if (!query || query.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+    
+    setLoadingAddress(true);
+    try {
+      const response = await base44.functions.invoke('searchAddressGoogleMaps', { query });
+      setAddressSuggestions(response.data.predictions || []);
+    } catch (error) {
+      console.error('Erreur lors de la recherche d\'adresse:', error);
+      setAddressSuggestions([]);
+    } finally {
+      setLoadingAddress(false);
+    }
+  };
+
+  const selectAddress = (suggestion) => {
+    setProfileForm({...profileForm, adresse: suggestion.description});
+    setAddressSuggestions([]);
   };
 
   const handleRendezVousSubmit = (e) => {
@@ -1342,24 +1366,35 @@ export default function Profil() {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <AddressInput
-                  addresses={profileForm.adresse_obj ? [profileForm.adresse_obj] : [{
-                    ville: "",
-                    numeros_civiques: [""],
-                    rue: "",
-                    code_postal: "",
-                    province: "QC"
-                  }]}
-                  onChange={(addresses) => setProfileForm({
-                    ...profileForm, 
-                    adresse_obj: addresses[0],
-                    adresse: `${addresses[0].numeros_civiques?.filter(n => n).join(', ')} ${addresses[0].rue}, ${addresses[0].ville}`.trim()
-                  })}
-                  singleAddress={true}
-                  showActuelle={false}
-                  label="Adresse"
-                />
+              <div className="space-y-2 relative">
+                <Label>Adresse</Label>
+                <div className="relative">
+                  <Input
+                    value={profileForm.adresse}
+                    onChange={(e) => {
+                      setProfileForm({...profileForm, adresse: e.target.value});
+                      searchAddress(e.target.value);
+                    }}
+                    placeholder="Rechercher une adresse..."
+                    className="bg-slate-800 border-slate-700"
+                  />
+                  {loadingAddress && (
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                  )}
+                </div>
+                {addressSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {addressSuggestions.map((suggestion, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => selectAddress(suggestion)}
+                        className="px-4 py-2 hover:bg-slate-700 cursor-pointer text-white text-sm"
+                      >
+                        {suggestion.description}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)}>
