@@ -169,7 +169,7 @@ export default function PlanningCalendar({
   const [viewMode, setViewMode] = useState("week"); // week or month
   const [assignments, setAssignments] = useState({});
   const [equipes, setEquipes] = useState({}); // { "date": [{ id, nom, techniciens: [], vehicules: [], equipements: [], mandats: [] }] }
-  const [activeResourceTab, setActiveResourceTab] = useState("mandats");
+
   const [viewingDossier, setViewingDossier] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingDossier, setEditingDossier] = useState(null);
@@ -1663,36 +1663,22 @@ export default function PlanningCalendar({
         <div className="flex gap-4" id="planning-print">
           {/* Colonne gauche - Ressources avec tabs */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start no-print" style={{ maxHeight: 'calc(100vh - 88px)' }}>
-            <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 mb-4">
-                <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
-                  <FolderOpen className="w-4 h-4" />
+            <Tabs defaultValue="verification" className="w-full">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3">
+                <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700">
+                  En vérification
                 </TabsTrigger>
-                <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700">
-                  <Truck className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="equipements" className="data-[state=active]:bg-slate-700">
-                  <Wrench className="w-4 h-4" />
+                <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700">
+                  À planifier
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="mandats" className="mt-0">
-                <Tabs defaultValue="verification" className="w-full">
-                  <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-2 mb-3">
-                    <TabsTrigger value="verification" className="data-[state=active]:bg-slate-700">
-                      En vérification
-                    </TabsTrigger>
-                    <TabsTrigger value="planifier" className="data-[state=active]:bg-slate-700">
-                      À planifier
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="verification" className="mt-0">
-                    <h3 className="text-white font-semibold mb-3 text-sm">
-                      En vérification ({unassignedCards.filter(card => {
-                        return !card.mandat?.statut_terrain || card.mandat?.statut_terrain === "en_verification";
-                      }).length})
-                    </h3>
+              <TabsContent value="verification" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  En vérification ({unassignedCards.filter(card => {
+                    return !card.mandat?.statut_terrain || card.mandat?.statut_terrain === "en_verification";
+                  }).length})
+                </h3>
                     <div className="min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
                       {unassignedCards
                           .filter(card => {
@@ -1735,15 +1721,15 @@ export default function PlanningCalendar({
                               </div>
                             </div>
                           ))}
-                    </div>
-                  </TabsContent>
+                </div>
+              </TabsContent>
 
-                  <TabsContent value="planifier" className="mt-0">
-                    <h3 className="text-white font-semibold mb-3 text-sm">
-                      À planifier ({unassignedCards.filter(card => {
-                        return card.mandat?.statut_terrain === "a_ceduler";
-                      }).length})
-                    </h3>
+              <TabsContent value="planifier" className="mt-0">
+                <h3 className="text-white font-semibold mb-3 text-sm">
+                  À planifier ({unassignedCards.filter(card => {
+                    return card.mandat?.statut_terrain === "a_ceduler";
+                  }).length})
+                </h3>
                     <Droppable droppableId="unassigned">
                       {(provided, snapshot) => (
                         <div
@@ -1774,12 +1760,10 @@ export default function PlanningCalendar({
                           {provided.placeholder}
                         </div>
                       )}
-                    </Droppable>
-                  </TabsContent>
-                </Tabs>
+                </Droppable>
               </TabsContent>
-
-<TabsContent value="vehicules" className="mt-0">
+            </Tabs>
+          </Card>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-white font-semibold text-sm">
                     Véhicules ({vehicules.length})
@@ -1846,80 +1830,7 @@ export default function PlanningCalendar({
                       {provided.placeholder}
                     </div>
                   )}
-                </Droppable>
-              </TabsContent>
 
-              <TabsContent value="equipements" className="mt-0">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-white font-semibold text-sm">
-                    Équipements ({equipements.length})
-                  </h3>
-                  <Button 
-                    onClick={onAddEquipement} 
-                    size="sm" 
-                    className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Ajouter
-                  </Button>
-                </div>
-                <Droppable droppableId="equipements-list" type="EQUIPEMENT" isDropDisabled={true}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="space-y-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto"
-                    >
-                      {equipements.map((equipement, index) => (
-                        <Draggable key={equipement.id} draggableId={equipement.id} index={index} type="EQUIPEMENT">
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={snapshot.isDragging ? 'opacity-50' : ''}
-                            >
-                              <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2 hover:bg-orange-500/30 transition-colors group">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2 cursor-move flex-1">
-                                    <Wrench className="w-4 h-4 text-orange-400" />
-                                    <span className="text-white text-sm font-medium">
-                                      {equipement.nom}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEditEquipement(equipement);
-                                      }}
-                                      className="text-cyan-400 hover:text-cyan-300 p-1"
-                                    >
-                                      <Edit className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteEquipement(equipement.id);
-                                      }}
-                                      className="text-red-400 hover:text-red-300 p-1"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </TabsContent>
-            </Tabs>
-          </Card>
 
           {/* Grille calendrier */}
            <div className="flex-1 space-y-4 w-full">
