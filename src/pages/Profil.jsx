@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPageUrl } from "@/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AddressInput from "@/components/shared/AddressInput";
 
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 
@@ -145,6 +146,7 @@ export default function Profil() {
     full_name: "",
     telephone: "",
     adresse: "",
+    adresse_obj: null,
     poste: "",
     date_naissance: "",
     date_embauche: "",
@@ -164,6 +166,7 @@ export default function Profil() {
         full_name: user.full_name || "",
         telephone: user.telephone || "",
         adresse: user.adresse || "",
+        adresse_obj: user.adresse_obj || null,
         poste: user.poste || "",
         date_naissance: user.date_naissance || "",
         date_embauche: user.date_embauche || "",
