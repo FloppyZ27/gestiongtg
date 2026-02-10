@@ -837,15 +837,11 @@ export default function Profil() {
 
                 {/* Information grid - 2 lignes de 4 champs */}
                 <div className="flex-1 space-y-3">
-                  {/* Ligne 1: Prénom, Nom, Courriel, Téléphone */}
+                  {/* Ligne 1: Nom complet, Courriel, Téléphone */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
-                      <Label className="text-slate-400 text-xs">Prénom</Label>
-                      <p className="text-white font-medium text-sm">{user?.prenom || "-"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-slate-400 text-xs">Nom</Label>
-                      <p className="text-white font-medium text-sm">{user?.nom || "-"}</p>
+                      <Label className="text-slate-400 text-xs">Nom complet</Label>
+                      <p className="text-white font-medium text-sm">{user?.prenom && user?.nom ? `${user.prenom} ${user.nom}` : (user?.prenom || user?.nom || "-")}</p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-xs">Adresse courriel</Label>
