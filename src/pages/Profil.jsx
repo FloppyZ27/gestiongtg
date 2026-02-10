@@ -144,7 +144,8 @@ export default function Profil() {
   });
 
   const [profileForm, setProfileForm] = useState({
-    full_name: "",
+    prenom: "",
+    nom: "",
     telephone: "",
     adresse: "",
     adresse_obj: null,
@@ -164,7 +165,8 @@ export default function Profil() {
   useEffect(() => {
     if (user) {
       setProfileForm({
-        full_name: user.full_name || "",
+        prenom: user.prenom || "",
+        nom: user.nom || "",
         telephone: user.telephone || "",
         adresse: user.adresse || "",
         adresse_obj: user.adresse_obj || null,
@@ -252,7 +254,8 @@ export default function Profil() {
       }
 
       await updateProfileMutation.mutateAsync({
-        full_name: profileForm.full_name,
+        prenom: profileForm.prenom,
+        nom: profileForm.nom,
         date_naissance: adjustedDateNaissance,
         telephone: profileForm.telephone,
         adresse: profileForm.adresse
@@ -834,11 +837,15 @@ export default function Profil() {
 
                 {/* Information grid - 2 lignes de 4 champs */}
                 <div className="flex-1 space-y-3">
-                  {/* Ligne 1: Nom, Courriel, Téléphone, Adresse */}
+                  {/* Ligne 1: Prénom, Nom, Courriel, Téléphone */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
+                      <Label className="text-slate-400 text-xs">Prénom</Label>
+                      <p className="text-white font-medium text-sm">{user?.prenom || "-"}</p>
+                    </div>
+                    <div>
                       <Label className="text-slate-400 text-xs">Nom</Label>
-                      <p className="text-white font-medium text-sm">{user?.full_name || "-"}</p>
+                      <p className="text-white font-medium text-sm">{user?.nom || "-"}</p>
                     </div>
                     <div>
                       <Label className="text-slate-400 text-xs">Adresse courriel</Label>
@@ -854,6 +861,10 @@ export default function Profil() {
                         {user?.telephone || "-"}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Ligne 2: Adresse, Date anniversaire, Date embauche, Poste */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Adresse civique</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-2">
@@ -861,10 +872,6 @@ export default function Profil() {
                         <span className="truncate">{user?.adresse || "-"}</span>
                       </p>
                     </div>
-                  </div>
-
-                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Rôle */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-1">
@@ -884,6 +891,10 @@ export default function Profil() {
                       <Label className="text-slate-400 text-xs">Poste</Label>
                       <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
                     </div>
+                  </div>
+
+                  {/* Ligne 3: Rôle */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Rôle</Label>
                       <div className="mt-1">
@@ -1413,12 +1424,20 @@ export default function Profil() {
               <DialogTitle className="text-2xl">Modifier mon profil</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label>Nom complet</Label>
+                  <Label>Prénom</Label>
                   <Input
-                    value={profileForm.full_name}
-                    onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
+                    value={profileForm.prenom}
+                    onChange={(e) => setProfileForm({...profileForm, prenom: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nom</Label>
+                  <Input
+                    value={profileForm.nom}
+                    onChange={(e) => setProfileForm({...profileForm, nom: e.target.value})}
                     className="bg-slate-800 border-slate-700"
                   />
                 </div>
