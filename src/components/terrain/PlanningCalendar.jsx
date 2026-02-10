@@ -1776,7 +1776,10 @@ export default function PlanningCalendar({
                 {days.map((day) => {
                    const dateStr = format(day, "yyyy-MM-dd");
                    const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                   const dayEquipes = equipes[dateStr] || [];
+                   const allDayEquipes = equipes[dateStr] || [];
+                   const dayEquipes = allDayEquipes.filter(eq => 
+                     !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
+                   );
 
                    const holiday = isHoliday(day);
                    return (
@@ -1982,10 +1985,13 @@ export default function PlanningCalendar({
               </div>
             ) : (
                <div className="grid grid-cols-5 w-full" style={{ gap: '2px' }}>
-                {days.map((day) => {
+               {days.map((day) => {
                   const dateStr = format(day, "yyyy-MM-dd");
                   const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                  const dayEquipes = equipes[dateStr] || [];
+                  const allDayEquipes = equipes[dateStr] || [];
+                  const dayEquipes = allDayEquipes.filter(eq => 
+                    !placeAffaire || eq.place_affaire?.toLowerCase() === placeAffaire.toLowerCase()
+                  );
 
                   const holiday = isHoliday(day);
                   return (
