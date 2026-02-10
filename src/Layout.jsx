@@ -454,8 +454,8 @@ function LayoutContent({ children, currentPageName }) {
         }
 
         /* Style minimaliste pour les autres boutons - contour coloré */
-        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button),
-        [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button) {
+        button:not([class*="size-icon"]):not([class*="hover:bg-slate"]):not([class*="bg-slate-8"]):not([class*="bg-slate-9"]):not(.h-10.w-10):not(.h-9.w-9):not(.h-8.w-8):not(td button):not(th button):not(.text-right button):not(table button):not([class*="border-b-"]):not(.border-b button):not([data-radix-collapsible-trigger]),
+        [role="button"]:not([class*="size-icon"]):not(td button):not(th button):not(.text-right button):not(.border-b button):not([data-radix-collapsible-trigger]) {
           background: transparent !important;
           background-color: transparent !important;
           background-image: none !important;
