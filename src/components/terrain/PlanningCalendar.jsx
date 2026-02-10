@@ -204,7 +204,7 @@ export default function PlanningCalendar({
     window.print();
   };
 
-  // Charger les équipes depuis la BD au démarrage
+  // Charger TOUTES les équipes depuis la BD au démarrage (sans filtre)
   useEffect(() => {
     const loadEquipes = async () => {
       try {
@@ -212,25 +212,19 @@ export default function PlanningCalendar({
         const equipesGroupedByDate = {};
         
         equipesBD.forEach(equipe => {
-          // Filtrer par place d'affaire
-          const placeAffaireMatch = !placeAffaire || 
-            equipe.place_affaire?.toLowerCase() === placeAffaire.toLowerCase();
-          
-          if (placeAffaireMatch) {
-            const dateStr = equipe.date_terrain;
-            if (!equipesGroupedByDate[dateStr]) {
-              equipesGroupedByDate[dateStr] = [];
-            }
-            equipesGroupedByDate[dateStr].push({
-              id: equipe.id,
-              nom: equipe.nom,
-              place_affaire: equipe.place_affaire,
-              techniciens: equipe.techniciens || [],
-              vehicules: equipe.vehicules || [],
-              equipements: equipe.equipements || [],
-              mandats: equipe.mandats || []
-            });
+          const dateStr = equipe.date_terrain;
+          if (!equipesGroupedByDate[dateStr]) {
+            equipesGroupedByDate[dateStr] = [];
           }
+          equipesGroupedByDate[dateStr].push({
+            id: equipe.id,
+            nom: equipe.nom,
+            place_affaire: equipe.place_affaire,
+            techniciens: equipe.techniciens || [],
+            vehicules: equipe.vehicules || [],
+            equipements: equipe.equipements || [],
+            mandats: equipe.mandats || []
+          });
         });
         
         setEquipes(equipesGroupedByDate);
@@ -240,7 +234,7 @@ export default function PlanningCalendar({
     };
     
     loadEquipes();
-  }, [placeAffaire]);
+  }, []);
 
   // Sauvegarder les équipes dans la BD à chaque modification
   useEffect(() => {
