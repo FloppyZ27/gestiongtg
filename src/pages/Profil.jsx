@@ -871,22 +871,24 @@ export default function Profil() {
                   {uploadingPhoto && (
                     <p className="text-xs text-slate-400">Téléchargement...</p>
                   )}
-                  <Button
-                    size="sm"
-                    onClick={() => setIsEditingProfile(true)}
-                    className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsChangingPassword(true)}
-                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Modifier Mot de Passe
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => setIsEditingProfile(true)}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsChangingPassword(true)}
+                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 flex-1"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Modifier Mot de Passe
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Information grid - 2 lignes de 4 champs */}
