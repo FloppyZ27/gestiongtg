@@ -1312,7 +1312,7 @@ export default function Profil() {
               <DialogTitle className="text-2xl">Modifier mon profil</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Nom complet</Label>
                   <Input
@@ -1338,14 +1338,25 @@ export default function Profil() {
                     className="bg-slate-800 border-slate-700"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Adresse</Label>
-                  <Input
-                    value={profileForm.adresse}
-                    onChange={(e) => setProfileForm({...profileForm, adresse: e.target.value})}
-                    className="bg-slate-800 border-slate-700"
-                  />
-                </div>
+              </div>
+              <div className="space-y-2">
+                <AddressInput
+                  addresses={profileForm.adresse_obj ? [profileForm.adresse_obj] : [{
+                    ville: "",
+                    numeros_civiques: [""],
+                    rue: "",
+                    code_postal: "",
+                    province: "QC"
+                  }]}
+                  onChange={(addresses) => setProfileForm({
+                    ...profileForm, 
+                    adresse_obj: addresses[0],
+                    adresse: `${addresses[0].numeros_civiques?.filter(n => n).join(', ')} ${addresses[0].rue}, ${addresses[0].ville}`.trim()
+                  })}
+                  singleAddress={true}
+                  showActuelle={false}
+                  label="Adresse"
+                />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)}>
