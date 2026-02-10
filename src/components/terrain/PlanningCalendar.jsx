@@ -187,6 +187,7 @@ export default function PlanningCalendar({
   const [isTerrainDialogOpen, setIsTerrainDialogOpen] = useState(false);
   const [rendezVousWarning, setRendezVousWarning] = useState(null);
   const [pendingDragDrop, setPendingDragDrop] = useState(null);
+  const [deleteEquipeWarning, setDeleteEquipeWarning] = useState(null);
   const [terrainForm, setTerrainForm] = useState({
     date_limite_leve: "",
     instruments_requis: "",
