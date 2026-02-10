@@ -1312,38 +1312,40 @@ export default function Profil() {
               <DialogTitle className="text-2xl">Modifier mon profil</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Nom complet</Label>
-                <Input
-                  value={profileForm.full_name}
-                  onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Date de naissance</Label>
-                <Input
-                  type="date"
-                  value={profileForm.date_naissance}
-                  onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Téléphone</Label>
-                <Input
-                  value={profileForm.telephone}
-                  onChange={(e) => setProfileForm({...profileForm, telephone: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Adresse</Label>
-                <Input
-                  value={profileForm.adresse}
-                  onChange={(e) => setProfileForm({...profileForm, adresse: e.target.value})}
-                  className="bg-slate-800 border-slate-700"
-                />
+              <div className="grid grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Nom complet</Label>
+                  <Input
+                    value={profileForm.full_name}
+                    onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date de naissance</Label>
+                  <Input
+                    type="date"
+                    value={profileForm.date_naissance}
+                    onChange={(e) => setProfileForm({...profileForm, date_naissance: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Téléphone</Label>
+                  <Input
+                    value={profileForm.telephone}
+                    onChange={(e) => setProfileForm({...profileForm, telephone: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Adresse</Label>
+                  <Input
+                    value={profileForm.adresse}
+                    onChange={(e) => setProfileForm({...profileForm, adresse: e.target.value})}
+                    className="bg-slate-800 border-slate-700"
+                  />
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)}>
