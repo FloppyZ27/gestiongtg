@@ -249,8 +249,60 @@ export default function Profil() {
     
     setLoadingAddress(true);
     try {
-      const response = await base44.functions.invoke('searchAddressGoogleMaps', { query });
-      setAddressSuggestions(response.data.predictions || []);
+      const searchQuery = query.toLowerCase().includes('alma') ? query : `${query}, Alma, Québec`;
+      const encodedQuery = encodeURIComponent(searchQuery);
+
+      const response = await fetch(
+        `https://servicescarto.mern.gouv.qc.ca/pes/rest/services/Territoire/AdressesQuebec_Geocodage/GeocodeServer/findAddressCandidates?SingleLine=${encodedQuery}&f=json&outFields=*&maxLocations=10`
+      );
+      const data = await response.json();
+
+      if (data.candidates && data.candidates.length > 0) {
+        const formattedAddresses = data.candidates.map(candidate => {
+          const attrs = candidate.attributes || {};
+          const fullAddr = candidate.address || attrs.Match_addr || "";
+
+          let numero_civique = attrs.AddNum || "";
+          let rue = attrs.StName || "";
+          let ville = attrs.City || attrs.Municipalit || "";
+          let code_postal = attrs.Postal || "";
+
+          if (!numero_civique || !rue) {
+            const parts = fullAddr.split(',');
+            if (parts.length > 0) {
+              const streetPart = parts[0].trim();
+              const numMatch = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
+              if (numMatch) {
+                numero_civique = numMatch[1];
+                rue = numMatch[2];
+              } else {
+                rue = streetPart;
+              }
+            }
+            if (parts.length > 1 && !ville) {
+              ville = parts[1].trim();
+            }
+            if (!code_postal) {
+              const postalMatch = fullAddr.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+              if (postalMatch) {
+                code_postal = postalMatch[1].toUpperCase();
+              }
+            }
+          }
+
+          return {
+            numero_civique,
+            rue,
+            ville,
+            province: "QC",
+            code_postal,
+            full_address: fullAddr
+          };
+        });
+        setAddressSuggestions(formattedAddresses);
+      } else {
+        setAddressSuggestions([]);
+      }
     } catch (error) {
       console.error('Erreur lors de la recherche d\'adresse:', error);
       setAddressSuggestions([]);
@@ -260,7 +312,8 @@ export default function Profil() {
   };
 
   const selectAddress = (suggestion) => {
-    setProfileForm({...profileForm, adresse: suggestion.description});
+    const fullAddress = `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`.trim();
+    setProfileForm({...profileForm, adresse: fullAddress});
     setAddressSuggestions([]);
   };
 
@@ -1369,6 +1422,7 @@ export default function Profil() {
               <div className="space-y-2 relative">
                 <Label>Adresse</Label>
                 <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4 z-10" />
                   <Input
                     value={profileForm.adresse}
                     onChange={(e) => {
@@ -1376,21 +1430,22 @@ export default function Profil() {
                       searchAddress(e.target.value);
                     }}
                     placeholder="Rechercher une adresse..."
-                    className="bg-slate-800 border-slate-700"
+                    className="bg-slate-800 border-slate-700 pl-10"
                   />
                   {loadingAddress && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-3 top-1/2 -translate-y-1/2" />
                   )}
                 </div>
                 {addressSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                     {addressSuggestions.map((suggestion, idx) => (
                       <div
                         key={idx}
                         onClick={() => selectAddress(suggestion)}
-                        className="px-4 py-2 hover:bg-slate-700 cursor-pointer text-white text-sm"
+                        className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
                       >
-                        {suggestion.description}
+                        <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                        <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
                       </div>
                     ))}
                   </div>
