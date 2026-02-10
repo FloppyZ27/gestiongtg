@@ -1664,12 +1664,9 @@ export default function PlanningCalendar({
           {/* Colonne gauche - Ressources avec tabs */}
           <Card className="bg-slate-900/50 border-slate-800 p-4 flex flex-col overflow-hidden w-[240px] flex-shrink-0 sticky top-[84px] self-start no-print" style={{ maxHeight: 'calc(100vh - 88px)' }}>
             <Tabs value={activeResourceTab} onValueChange={setActiveResourceTab}>
-              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-4 mb-4">
+              <TabsList className="bg-slate-800/50 border border-slate-700 w-full grid grid-cols-3 mb-4">
                 <TabsTrigger value="mandats" className="data-[state=active]:bg-slate-700">
                   <FolderOpen className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="techniciens" className="data-[state=active]:bg-slate-700">
-                  <Users className="w-4 h-4" />
                 </TabsTrigger>
                 <TabsTrigger value="vehicules" className="data-[state=active]:bg-slate-700">
                   <Truck className="w-4 h-4" />
@@ -1782,77 +1779,7 @@ export default function PlanningCalendar({
                 </Tabs>
               </TabsContent>
 
-              <TabsContent value="techniciens" className="mt-0">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-white font-semibold text-sm">
-                    Techniciens ({techniciens.length})
-                  </h3>
-                  <Button 
-                    onClick={onAddTechnicien} 
-                    size="sm" 
-                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Ajouter
-                  </Button>
-                </div>
-                <Droppable droppableId="techniciens-list" type="TECHNICIEN" isDropDisabled={true}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="space-y-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto"
-                    >
-                      {techniciens.map((tech, index) => (
-                        <Draggable key={tech.id} draggableId={tech.id} index={index} type="TECHNICIEN">
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={snapshot.isDragging ? 'opacity-50' : ''}
-                            >
-                              <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2 hover:bg-blue-500/30 transition-colors group">
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2 cursor-move flex-1">
-                                    <Users className="w-4 h-4 text-blue-400" />
-                                    <span className="text-white text-sm font-medium">
-                                      {tech.prenom} {tech.nom}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEditTechnicien(tech);
-                                      }}
-                                      className="text-cyan-400 hover:text-cyan-300 p-1"
-                                    >
-                                      <Edit className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteTechnicien(tech.id);
-                                      }}
-                                      className="text-red-400 hover:text-red-300 p-1"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </TabsContent>
-
-              <TabsContent value="vehicules" className="mt-0">
+<TabsContent value="vehicules" className="mt-0">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-white font-semibold text-sm">
                     Véhicules ({vehicules.length})
