@@ -238,8 +238,12 @@ export default function Profil() {
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
-    const { adresse_obj, ...dataToUpdate } = profileForm;
-    updateProfileMutation.mutate(dataToUpdate);
+    updateProfileMutation.mutate({
+      full_name: profileForm.full_name,
+      date_naissance: profileForm.date_naissance,
+      telephone: profileForm.telephone,
+      adresse: profileForm.adresse
+    });
   };
 
   const searchAddress = async (query) => {
