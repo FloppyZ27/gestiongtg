@@ -1512,7 +1512,7 @@ function LayoutContent({ children, currentPageName }) {
               <Button
                 onClick={() => base44.auth.logout()}
                 variant="ghost"
-                className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400 justify-start"
+                className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400 justify-center"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
