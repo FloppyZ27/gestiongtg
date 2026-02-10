@@ -68,6 +68,7 @@ const CommentairesSection = ({ dossierId, dossierTemporaire }) => {
 
 export default function Profil() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isRendezVousDialogOpen, setIsRendezVousDialogOpen] = useState(false);
   const [editingRendezVous, setEditingRendezVous] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -78,6 +79,12 @@ export default function Profil() {
   const [infoPersonnellesCollapsed, setInfoPersonnellesCollapsed] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [loadingAddress, setLoadingAddress] = useState(false);
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
 
   // États pour les retours d'appel
   const [searchRetours, setSearchRetours] = useState("");
@@ -189,6 +196,22 @@ export default function Profil() {
     },
   });
 
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data) => {
+      // Using Base44 auth to change password
+      return base44.auth.updateMe({ password: data.newPassword });
+    },
+    onSuccess: () => {
+      alert('Mot de passe modifié avec succès');
+      setIsChangingPassword(false);
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    },
+    onError: (error) => {
+      console.error('Erreur lors du changement de mot de passe:', error);
+      alert('Erreur lors du changement de mot de passe');
+    },
+  });
+
   const uploadPhotoMutation = useMutation({
     mutationFn: async (file) => {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -262,6 +285,29 @@ export default function Profil() {
       });
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      alert('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    try {
+      await changePasswordMutation.mutateAsync({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+    } catch (error) {
+      console.error('Erreur lors du changement de mot de passe:', error);
     }
   };
 
@@ -832,6 +878,14 @@ export default function Profil() {
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsChangingPassword(true)}
+                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Modifier Mot de Passe
                   </Button>
                 </div>
 
@@ -1408,6 +1462,65 @@ export default function Profil() {
             </TabsContent>
           </Tabs>
         </Card>
+
+        {/* Change Password Dialog */}
+        <Dialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Modifier le mot de passe</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Mot de passe actuel</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Nouveau mot de passe</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Confirmer le mot de passe</Label>
+                <Input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                  className="bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsChangingPassword(false)} 
+                  disabled={changePasswordMutation.isPending}
+                  className="border-red-500 text-red-400 hover:bg-red-500/10"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600" 
+                  disabled={changePasswordMutation.isPending}
+                >
+                  {changePasswordMutation.isPending ? 'Modification...' : 'Modifier'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Profile Dialog */}
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
