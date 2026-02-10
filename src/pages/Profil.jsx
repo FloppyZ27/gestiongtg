@@ -837,7 +837,7 @@ export default function Profil() {
 
                 {/* Information grid - 2 lignes de 4 champs */}
                 <div className="flex-1 space-y-3">
-                  {/* Ligne 1: Nom complet, Courriel, Téléphone */}
+                  {/* Ligne 1: Nom complet, Courriel, Téléphone, Adresse civique */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Nom complet</Label>
@@ -857,10 +857,6 @@ export default function Profil() {
                         {user?.telephone || "-"}
                       </p>
                     </div>
-                  </div>
-
-                  {/* Ligne 2: Adresse, Date anniversaire, Date embauche, Poste */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Adresse civique</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-2">
@@ -868,6 +864,10 @@ export default function Profil() {
                         <span className="truncate">{user?.adresse || "-"}</span>
                       </p>
                     </div>
+                  </div>
+
+                  {/* Ligne 2: Date anniversaire, Date embauche, Poste */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
                       <p className="text-white font-medium text-sm flex items-center gap-1">
