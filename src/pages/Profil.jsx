@@ -847,8 +847,8 @@ export default function Profil() {
           {!infoPersonnellesCollapsed && (
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-6 items-start">
-                {/* Photo avec bouton en dessous */}
-                <div className="flex flex-col items-center gap-3">
+                {/* Photo le plus à gauche */}
+                <div className="flex flex-col items-start gap-3">
                   <div className="relative">
                     <Avatar className="w-32 h-32 border-4 border-emerald-500/50">
                       <AvatarImage src={user?.photo_url} />
@@ -878,7 +878,7 @@ export default function Profil() {
                       className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 flex-1"
                     >
                       <Edit className="w-4 h-4 mr-2" />
-                      Modifier
+                      Modifier le Profil
                     </Button>
                     <Button
                       size="sm"
