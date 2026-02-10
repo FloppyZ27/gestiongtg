@@ -236,14 +236,18 @@ export default function Profil() {
     }
   };
 
-  const handleProfileSubmit = (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    updateProfileMutation.mutate({
-      full_name: profileForm.full_name,
-      date_naissance: profileForm.date_naissance,
-      telephone: profileForm.telephone,
-      adresse: profileForm.adresse
-    });
+    try {
+      await updateProfileMutation.mutateAsync({
+        full_name: profileForm.full_name,
+        date_naissance: profileForm.date_naissance,
+        telephone: profileForm.telephone,
+        adresse: profileForm.adresse
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du profil:', error);
+    }
   };
 
   const searchAddress = async (query) => {
