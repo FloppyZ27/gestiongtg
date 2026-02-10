@@ -484,20 +484,52 @@ export default function PlanningCalendar({
   };
 
   const removeEquipe = (dateStr, equipeId) => {
+    const equipe = equipes[dateStr]?.find(e => e.id === equipeId);
+    if (equipe && equipe.mandats && equipe.mandats.length > 0) {
+      setDeleteEquipeWarning({ dateStr, equipeId, equipe });
+    } else {
+      confirmRemoveEquipe(dateStr, equipeId);
+    }
+  };
+
+  const confirmRemoveEquipe = (dateStr, equipeId) => {
+    const equipe = equipes[dateStr]?.find(e => e.id === equipeId);
+    
+    // Réinitialiser les cartes avant de supprimer l'équipe
+    if (equipe && equipe.mandats && equipe.mandats.length > 0) {
+      equipe.mandats.forEach(cardId => {
+        const card = terrainCards.find(c => c.id === cardId);
+        if (card && onUpdateDossier) {
+          const updatedMandats = card.dossier.mandats.map((m, idx) => {
+            if (idx === card.mandatIndex) {
+              // Vider les données de terrain
+              let updatedTerrainsList = [...(m.terrains_list || [])];
+              if (updatedTerrainsList[card.terrainIndex]) {
+                updatedTerrainsList[card.terrainIndex] = {
+                  ...updatedTerrainsList[card.terrainIndex],
+                  date_cedulee: null,
+                  equipe_assignee: null
+                };
+              }
+              return { ...m, date_terrain: null, equipe_assignee: null, terrains_list: updatedTerrainsList };
+            }
+            return m;
+          });
+          onUpdateDossier(card.dossier.id, { ...card.dossier, mandats: updatedMandats });
+        }
+      });
+    }
+
+    // Supprimer l'équipe
     const newEquipes = { ...equipes };
     if (newEquipes[dateStr]) {
-      const equipe = newEquipes[dateStr].find(e => e.id === equipeId);
-      if (equipe && equipe.mandats && equipe.mandats.length > 0) {
-        if (!confirm(`Cette équipe contient ${equipe.mandats.length} mandat(s). Voulez-vous vraiment la supprimer ? Les mandats seront replacés dans "À planifier".`)) {
-          return;
-        }
-      }
       newEquipes[dateStr] = newEquipes[dateStr].filter(e => e.id !== equipeId);
       if (newEquipes[dateStr].length === 0) {
         delete newEquipes[dateStr];
       }
     }
     setEquipes(newEquipes);
+    setDeleteEquipeWarning(null);
   };
 
   const removeFromEquipe = (dateStr, equipeId, type, itemId) => {
@@ -2709,6 +2741,45 @@ export default function PlanningCalendar({
               arpenteurGeometre={sharePointItem.dossier.arpenteur_geometre}
               numeroDossier={sharePointItem.dossier.numero_dossier}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de suppression d'équipe */}
+      <Dialog open={!!deleteEquipeWarning} onOpenChange={() => setDeleteEquipeWarning(null)}>
+        <DialogContent className="border-none text-white max-w-md shadow-2xl shadow-black/50" style={{ background: 'none' }}>
+          <DialogHeader>
+            <DialogTitle className="text-xl text-yellow-400 flex items-center justify-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              Attention
+              <span className="text-2xl">⚠️</span>
+            </DialogTitle>
+          </DialogHeader>
+          {deleteEquipeWarning && (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-center">
+                Cette équipe contient <span className="text-emerald-400 font-semibold">{deleteEquipeWarning.equipe.mandats.length} mandat(s)</span>.
+              </p>
+              <p className="text-slate-300 text-center">
+                Voulez-vous vraiment la supprimer ? Les mandats seront replacés dans "À planifier".
+              </p>
+              <div className="flex justify-center gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => setDeleteEquipeWarning(null)}
+                  className="border border-red-500 text-red-400 hover:bg-red-500/10 bg-transparent"
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => confirmRemoveEquipe(deleteEquipeWarning.dateStr, deleteEquipeWarning.equipeId)}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-none"
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
