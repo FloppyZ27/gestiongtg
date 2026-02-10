@@ -212,18 +212,25 @@ export default function PlanningCalendar({
         const equipesGroupedByDate = {};
         
         equipesBD.forEach(equipe => {
-          const dateStr = equipe.date_terrain;
-          if (!equipesGroupedByDate[dateStr]) {
-            equipesGroupedByDate[dateStr] = [];
+          // Filtrer par place d'affaire
+          const placeAffaireMatch = !placeAffaire || 
+            equipe.place_affaire?.toLowerCase() === placeAffaire.toLowerCase();
+          
+          if (placeAffaireMatch) {
+            const dateStr = equipe.date_terrain;
+            if (!equipesGroupedByDate[dateStr]) {
+              equipesGroupedByDate[dateStr] = [];
+            }
+            equipesGroupedByDate[dateStr].push({
+              id: equipe.id,
+              nom: equipe.nom,
+              place_affaire: equipe.place_affaire,
+              techniciens: equipe.techniciens || [],
+              vehicules: equipe.vehicules || [],
+              equipements: equipe.equipements || [],
+              mandats: equipe.mandats || []
+            });
           }
-          equipesGroupedByDate[dateStr].push({
-            id: equipe.id,
-            nom: equipe.nom,
-            techniciens: equipe.techniciens || [],
-            vehicules: equipe.vehicules || [],
-            equipements: equipe.equipements || [],
-            mandats: equipe.mandats || []
-          });
         });
         
         setEquipes(equipesGroupedByDate);
@@ -233,7 +240,7 @@ export default function PlanningCalendar({
     };
     
     loadEquipes();
-  }, []);
+  }, [placeAffaire]);
 
   // Sauvegarder les équipes dans la BD à chaque modification
   useEffect(() => {
@@ -256,6 +263,7 @@ export default function PlanningCalendar({
               await base44.entities.EquipeTerrain.update(equipe.id, {
                 date_terrain: dateStr,
                 nom: equipe.nom,
+                place_affaire: equipe.place_affaire || placeAffaire,
                 techniciens: equipe.techniciens || [],
                 vehicules: equipe.vehicules || [],
                 equipements: equipe.equipements || [],
@@ -266,6 +274,7 @@ export default function PlanningCalendar({
               await base44.entities.EquipeTerrain.create({
                 date_terrain: dateStr,
                 nom: equipe.nom,
+                place_affaire: equipe.place_affaire || placeAffaire,
                 techniciens: equipe.techniciens || [],
                 vehicules: equipe.vehicules || [],
                 equipements: equipe.equipements || [],
@@ -923,6 +932,7 @@ export default function PlanningCalendar({
             equipe = {
               id: `eq${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               nom: equipeNom,
+              place_affaire: placeAffaire,
               techniciens: [],
               vehicules: [],
               equipements: [],
@@ -2333,6 +2343,7 @@ export default function PlanningCalendar({
         equipements={equipements}
         equipes={equipes}
         usedResources={createTeamDateStr ? getUsedResourcesForDate(createTeamDateStr) : { techniciens: [], vehicules: [], equipements: [] }}
+        placeAffaire={placeAffaire}
       />
 
       {/* Dialog de modification d'équipe */}
@@ -2350,6 +2361,7 @@ export default function PlanningCalendar({
         vehicules={vehicules}
         equipements={equipements}
         equipes={equipes}
+        placeAffaire={placeAffaire}
       />
 
       {/* Dialog d'édition du terrain */}

@@ -16,7 +16,8 @@ export default function EditTeamDialog({
   techniciens,
   vehicules,
   equipements,
-  equipes
+  equipes,
+  placeAffaire
 }) {
   const [selectedTechniciens, setSelectedTechniciens] = useState([]);
   const [selectedVehicules, setSelectedVehicules] = useState([]);
@@ -97,6 +98,7 @@ export default function EditTeamDialog({
     const updatedTeam = {
       ...equipe,
       nom: generateTeamName(selectedTechniciens),
+      place_affaire: placeAffaire,
       techniciens: selectedTechniciens,
       vehicules: selectedVehicules,
       equipements: selectedEquipements

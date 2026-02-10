@@ -16,7 +16,8 @@ export default function CreateTeamDialog({
   vehicules,
   equipements,
   equipes,
-  usedResources
+  usedResources,
+  placeAffaire
 }) {
   const [selectedTechniciens, setSelectedTechniciens] = useState([]);
   const [selectedVehicules, setSelectedVehicules] = useState([]);
@@ -73,6 +74,7 @@ export default function CreateTeamDialog({
     const newTeam = {
       id: `eq${Date.now()}`,
       nom: generateTeamName(selectedTechniciens),
+      place_affaire: placeAffaire,
       techniciens: selectedTechniciens,
       vehicules: selectedVehicules,
       equipements: selectedEquipements,
