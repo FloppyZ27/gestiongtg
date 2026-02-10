@@ -866,7 +866,7 @@ export default function Profil() {
                     </div>
                   </div>
 
-                  {/* Ligne 2: Date anniversaire, Date embauche, Poste */}
+                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Rôle */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
@@ -887,14 +887,10 @@ export default function Profil() {
                       <Label className="text-slate-400 text-xs">Poste</Label>
                       <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
                     </div>
-                  </div>
-
-                  {/* Ligne 3: Rôle */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
                     <div>
                       <Label className="text-slate-400 text-xs">Rôle</Label>
                       <div className="mt-1">
-                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 uppercase">
                           {user?.role}
                         </Badge>
                       </div>
