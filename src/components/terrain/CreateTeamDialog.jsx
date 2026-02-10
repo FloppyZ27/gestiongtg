@@ -130,11 +130,13 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('techniciens')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-blue-900 transition-colors bg-blue-900">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-blue-900/40 transition-colors bg-blue-900/20 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-400" />
-                  <Label className="text-blue-300 font-semibold cursor-pointer">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/30 flex items-center justify-center">
+                    <Users className="w-3 h-3 text-blue-400" />
+                  </div>
+                  <Label className="text-blue-300 font-semibold cursor-pointer text-sm">
                     Techniciens ({availableTechs.length} disponibles)
                   </Label>
                 </div>
@@ -142,8 +144,8 @@ export default function CreateTeamDialog({
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
-                <div className="p-3 space-y-2">
+              <div className="pt-2 pb-2 px-3">
+                <div className="max-h-32 overflow-y-auto space-y-2">
                   {techniciens.map(tech => {
                     const isAvailable = !usedTechIds.includes(tech.id);
                     const assignedTeam = !isAvailable ? getTeamForResource(tech.id, 'techniciens') : null;
@@ -161,7 +163,7 @@ export default function CreateTeamDialog({
                         />
                         <Label
                           htmlFor={`tech-${tech.id}`}
-                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
                           {tech.prenom} {tech.nom} {!isAvailable && `(${assignedTeam})`}
                         </Label>
@@ -169,7 +171,7 @@ export default function CreateTeamDialog({
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             </CollapsibleContent>
           </Collapsible>
 
@@ -179,11 +181,13 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('vehicules')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-purple-900 transition-colors bg-purple-900">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-purple-900/40 transition-colors bg-purple-900/20 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-purple-400" />
-                  <Label className="text-purple-300 font-semibold cursor-pointer">
+                  <div className="w-5 h-5 rounded-full bg-purple-500/30 flex items-center justify-center">
+                    <Truck className="w-3 h-3 text-purple-400" />
+                  </div>
+                  <Label className="text-purple-300 font-semibold cursor-pointer text-sm">
                     Véhicules ({availableVehs.length} disponibles)
                   </Label>
                 </div>
@@ -191,8 +195,8 @@ export default function CreateTeamDialog({
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
-                <div className="p-3 space-y-2">
+              <div className="pt-2 pb-2 px-3">
+                <div className="max-h-32 overflow-y-auto space-y-2">
                   {vehicules.map(veh => {
                     const isAvailable = !usedVehIds.includes(veh.id);
                     const assignedTeam = !isAvailable ? getTeamForResource(veh.id, 'vehicules') : null;
@@ -210,7 +214,7 @@ export default function CreateTeamDialog({
                         />
                         <Label
                           htmlFor={`veh-${veh.id}`}
-                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
                           {veh.nom} {!isAvailable && `(${assignedTeam})`}
                         </Label>
@@ -218,7 +222,7 @@ export default function CreateTeamDialog({
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             </CollapsibleContent>
           </Collapsible>
 
@@ -228,11 +232,13 @@ export default function CreateTeamDialog({
             onOpenChange={() => toggleSection('equipements')}
             className="border border-slate-700 bg-slate-800/30 rounded-lg"
           >
-            <CollapsibleTrigger className="w-full p-3 hover:bg-orange-900 transition-colors bg-orange-900">
+            <CollapsibleTrigger className="w-full p-3 hover:bg-orange-900/40 transition-colors bg-orange-900/20 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Wrench className="w-4 h-4 text-orange-400" />
-                  <Label className="text-orange-300 font-semibold cursor-pointer">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
+                    <Wrench className="w-3 h-3 text-orange-400" />
+                  </div>
+                  <Label className="text-orange-300 font-semibold cursor-pointer text-sm">
                     Équipements ({availableEqs.length} disponibles)
                   </Label>
                 </div>
@@ -240,8 +246,8 @@ export default function CreateTeamDialog({
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <ScrollArea className="bg-slate-800/50 h-32 border-t border-slate-700">
-                <div className="p-3 space-y-2">
+              <div className="pt-2 pb-2 px-3">
+                <div className="max-h-32 overflow-y-auto space-y-2">
                   {equipements.map(eq => {
                     const isAvailable = !usedEqIds.includes(eq.id);
                     const assignedTeam = !isAvailable ? getTeamForResource(eq.id, 'equipements') : null;
@@ -259,7 +265,7 @@ export default function CreateTeamDialog({
                         />
                         <Label
                           htmlFor={`eq-${eq.id}`}
-                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'}`}
+                          className={`flex-1 ${isAvailable ? 'text-slate-300 cursor-pointer' : 'text-slate-500 cursor-not-allowed'} text-xs`}
                         >
                           {eq.nom} {!isAvailable && `(${assignedTeam})`}
                         </Label>
@@ -267,7 +273,7 @@ export default function CreateTeamDialog({
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             </CollapsibleContent>
           </Collapsible>
 
