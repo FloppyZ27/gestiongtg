@@ -1636,11 +1636,10 @@ function LayoutContent({ children, currentPageName }) {
               <div className="flex flex-col items-center gap-0">
                 <Button
                   onClick={() => setShowPunchControls(!showPunchControls)}
-                  size="icon"
                   variant="ghost"
-                  className="text-slate-400 hover:text-white hover:bg-slate-800/50 relative"
+                  className="h-7 w-7 p-0 text-slate-400 hover:text-white hover:bg-slate-800/50 relative"
                 >
-                  <div className="relative w-5 h-5 flex items-center justify-center">
+                  <div className="relative w-4 h-4 flex items-center justify-center">
                     {pointageEnCours ? (
                       <>
                         <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
