@@ -832,8 +832,9 @@ export default function Profil() {
                                        title={p.description || "Cliquer pour éditer"}
                                      >
                                        {isModified && <div className="text-[12px] font-bold mb-1">MODIFIÉ</div>}
+                                       {p.confirme && !isModified && <div className="text-[12px] font-bold mb-1">CONFIRMÉ</div>}
                                        <div className="text-[11px] leading-tight">
-                                         <div className="opacity-50 text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                         <div className={p.confirme ? "opacity-90 text-green-400" : "opacity-50 text-slate-300"}>Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
                                          {isModified && (
                                            <div className="opacity-90 mt-1 text-orange-400">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                          )}
