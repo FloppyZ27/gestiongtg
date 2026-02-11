@@ -117,6 +117,16 @@ export default function Profil() {
     enabled: !!user,
   });
 
+  const { data: microsoftEvents = [] } = useQuery({
+    queryKey: ['microsoftCalendarEvents', user?.email],
+    queryFn: async () => {
+      const response = await base44.functions.invoke('getMicrosoftCalendarEvents', {});
+      return response.data?.events || [];
+    },
+    initialData: [],
+    enabled: !!user,
+  });
+
 
 
   const [profileForm, setProfileForm] = useState({
