@@ -612,12 +612,19 @@ export default function Profil() {
                                        })}
                                        {dayPointages.map(p => {
                                          const startTime = new Date(p.heure_debut);
-                                         const durationMinutes = p.duree_heures * 60;
-                                         let heightClass = 'h-6';
+                                         const endTime = new Date(p.heure_fin);
+                                         const hourStart = new Date(startTime);
+                                         hourStart.setMinutes(0, 0, 0);
+                                         const hourEnd = new Date(hourStart);
+                                         hourEnd.setHours(hourEnd.getHours() + 1);
                                          
-                                         if (durationMinutes >= 60) {
+                                         const minutesInThisHour = Math.min(endTime.getTime(), hourEnd.getTime()) - Math.max(startTime.getTime(), hourStart.getTime());
+                                         const minutesDuration = minutesInThisHour / (1000 * 60);
+                                         
+                                         let heightClass = 'h-3';
+                                         if (minutesDuration >= 60) {
                                            heightClass = 'h-[60px]';
-                                         } else if (durationMinutes >= 30) {
+                                         } else if (minutesDuration >= 30) {
                                            heightClass = 'h-6';
                                          }
 
