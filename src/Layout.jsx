@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, Clock, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut, Play, Square } from "lucide-react";
 import { format } from "date-fns";
 import {
   Sidebar,
@@ -165,8 +165,26 @@ function LayoutContent({ children, currentPageName }) {
   const [entreeTempsFilterMandat, setEntreeTempsFilterMandat] = useState([]);
   const [entreeTempsFilterTache, setEntreeTempsFilterTache] = useState([]);
   const [entreeTempsFilterVille, setEntreeTempsFilterVille] = useState([]);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
+
+  // Calculer le temps écoulé du pointage en cours
+  useEffect(() => {
+    if (!pointageEnCours) {
+      setElapsedTime(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      const debut = new Date(pointageEnCours.heure_debut).getTime();
+      const now = new Date().getTime();
+      const elapsed = Math.floor((now - debut) / 1000);
+      setElapsedTime(elapsed);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [pointageEnCours]);
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -202,6 +220,15 @@ function LayoutContent({ children, currentPageName }) {
     queryFn: () => base44.entities.Lot.list(),
     initialData: [],
   });
+
+  const { data: pointages = [] } = useQuery({
+    queryKey: ['pointages', user?.email],
+    queryFn: () => base44.entities.Pointage.filter({ utilisateur_email: user?.email }, '-date', 50),
+    initialData: [],
+    enabled: !!user,
+  });
+
+  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -324,6 +351,41 @@ function LayoutContent({ children, currentPageName }) {
 
   const selectedDossier = dossiers.find(d => d.id === selectedDossierId);
   const availableMandats = selectedDossier?.mandats || [];
+
+  const handlePunchIn = () => {
+    const now = new Date();
+    createPointageMutation.mutate({
+      utilisateur_email: user?.email,
+      date: now.toISOString().split('T')[0],
+      heure_debut: now.toISOString(),
+      statut: 'en_cours'
+    });
+  };
+
+  const handlePunchOut = () => {
+    if (!pointageEnCours) return;
+    
+    const now = new Date();
+    const debut = new Date(pointageEnCours.heure_debut);
+    const dureeHeures = (now.getTime() - debut.getTime()) / 1000 / 60 / 60;
+    
+    updatePointageMutation.mutate({
+      id: pointageEnCours.id,
+      data: {
+        ...pointageEnCours,
+        heure_fin: now.toISOString(),
+        duree_heures: parseFloat(dureeHeures.toFixed(2)),
+        statut: 'termine'
+      }
+    });
+  };
+
+  const formatElapsedTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const handleDossierSelect = (dossierId) => {
     const dossier = dossiers.find(d => d.id === dossierId);
@@ -1536,8 +1598,49 @@ function LayoutContent({ children, currentPageName }) {
               <DossierSearchBar dossiers={dossiers} clients={clients} />
             </div>
 
-            {/* Boutons à droite - Entrée de temps et Notification */}
-            <div className="flex items-center gap-2">
+            {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
+            <div className="flex items-center gap-3">
+              {/* Chronomètre avec lumière */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
+                {/* Lumière indicatrice */}
+                <div className="relative">
+                  {pointageEnCours ? (
+                    <>
+                      <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <div className="absolute inset-0 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
+                    </>
+                  ) : (
+                    <div className="w-2.5 h-2.5 bg-slate-600 rounded-full"></div>
+                  )}
+                </div>
+                
+                {/* Chronomètre */}
+                <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
+                  {formatElapsedTime(elapsedTime)}
+                </span>
+              </div>
+
+              {/* Bouton Punch In/Out */}
+              {!pointageEnCours ? (
+                <Button
+                  onClick={handlePunchIn}
+                  size="sm"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
+                >
+                  <Play className="w-4 h-4 mr-1" />
+                  Punch In
+                </Button>
+              ) : (
+                <Button
+                  onClick={handlePunchOut}
+                  size="sm"
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
+                >
+                  <Square className="w-4 h-4 mr-1" />
+                  Punch Out
+                </Button>
+              )}
+
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
                 size="icon"
