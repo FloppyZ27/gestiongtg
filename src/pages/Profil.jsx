@@ -573,8 +573,60 @@ export default function Profil() {
 
           {!pointageCollapsed && (
             <CardContent className="p-6">
+              {/* Header avec navigation et contrôles */}
+              <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-slate-700">
+                <div className="flex justify-between items-center">
+                  <div className="text-white font-semibold text-lg">
+                    {viewMode === "week" 
+                      ? `Semaine du ${format(getPointageWeekDays()[0], "d MMMM", { locale: fr })} au ${format(getPointageWeekDays()[6], "d MMMM yyyy", { locale: fr })}`
+                      : format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(pointageCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={goToPointagePrevious}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                    >
+                      ← Précédent
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={goToPointageToday}
+                      className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
+                    >
+                      Aujourd'hui
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={goToPointageNext}
+                      className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"
+                    >
+                      Suivant →
+                    </Button>
+                    <div className="h-6 w-px bg-slate-700 mx-1"></div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        onClick={() => setViewMode("week")}
+                        className={viewMode === "week" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Semaine
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setViewMode("month")}
+                        className={viewMode === "month" ? "bg-emerald-500/20 text-emerald-400 h-8" : "bg-slate-800 border-slate-700 text-white hover:bg-slate-700 h-8"}
+                      >
+                        Mois
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <Tabs value={viewMode} onValueChange={setViewMode}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-2 mb-6" style={{ display: 'none' }}>
                   <TabsTrigger value="week" className="text-cyan-300">
                     <CalendarDays className="w-4 h-4 mr-2" />
                     Semaine
