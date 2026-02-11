@@ -621,11 +621,11 @@ export default function Profil() {
                                          const minutesInThisHour = Math.min(endTime.getTime(), hourEnd.getTime()) - Math.max(startTime.getTime(), hourStart.getTime());
                                          const minutesDuration = minutesInThisHour / (1000 * 60);
                                          
-                                         let heightClass = 'h-3';
+                                         let heightClass = 'h-[30px]';
                                          if (minutesDuration >= 60) {
                                            heightClass = 'h-[60px]';
-                                         } else if (minutesDuration >= 30) {
-                                           heightClass = 'h-6';
+                                         } else if (minutesDuration < 30) {
+                                           heightClass = 'h-[30px]';
                                          }
 
                                          return (
