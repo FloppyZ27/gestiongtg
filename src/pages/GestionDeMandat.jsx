@@ -1526,16 +1526,31 @@ export default function GestionDeMandat() {
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">Nouvelle entrée de temps</DialogTitle>
-              {entreeTempsCardInfo && (
-                <div className="text-sm text-slate-400 mt-2">
-                  Dossier: <span className="text-white font-semibold">
-                    {(() => {
-                      const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
-                      return dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
-                    })()}
-                  </span> • Mandat: <span className="text-white font-semibold">{entreeTempsCardInfo.mandatType}</span>
-                </div>
-              )}
+              {entreeTempsCardInfo && (() => {
+                const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                return (
+                  <div className={`text-lg font-semibold flex items-center gap-2 flex-wrap mt-2 pt-2 border-t border-slate-700 ${
+                    dossier?.arpenteur_geometre === "Samuel Guay" ? "text-red-400" :
+                    dossier?.arpenteur_geometre === "Pierre-Luc Pilote" ? "text-slate-400" :
+                    dossier?.arpenteur_geometre === "Frédéric Gilbert" ? "text-orange-400" :
+                    dossier?.arpenteur_geometre === "Dany Gaboury" ? "text-yellow-400" :
+                    dossier?.arpenteur_geometre === "Benjamin Larouche" ? "text-cyan-400" :
+                    "text-emerald-400"
+                  }`}>
+                    <span>
+                      {dossier && getArpenteurInitials(dossier.arpenteur_geometre)}{dossier?.numero_dossier}
+                      {dossier?.clients_ids?.length > 0 && getClientsNames(dossier.clients_ids) !== "-" && (
+                        <span> - {getClientsNames(dossier.clients_ids)}</span>
+                      )}
+                    </span>
+                    <span className="flex gap-1">
+                      <Badge className={`${getMandatColor(entreeTempsCardInfo.mandatType)} border text-xs`}>
+                        {getAbbreviatedMandatType(entreeTempsCardInfo.mandatType)}
+                      </Badge>
+                    </span>
+                  </div>
+                );
+              })()}
             </DialogHeader>
 
             <div className="space-y-4">
