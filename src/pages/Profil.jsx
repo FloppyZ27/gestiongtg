@@ -336,6 +336,14 @@ export default function Profil() {
     return dayPointages.reduce((sum, p) => sum + (p.duree_heures || 0), 0);
   };
 
+  const getEventsForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return microsoftEvents.filter(event => {
+      const eventDate = new Date(event.start.dateTime).toISOString().split('T')[0];
+      return eventDate === dateStr;
+    });
+  };
+
   // Calculer le total des heures par jour
   const calculateTotalHours = (date) => {
     const entries = groupedEntrees[date] || [];
