@@ -287,12 +287,24 @@ export default function Profil() {
   };
 
   const handleOpenEditPointage = (pointage) => {
-    const debut = new Date(pointage.heure_debut);
-    const fin = new Date(pointage.heure_fin);
+    const hasModification = pointage.heure_debut_modifiee && pointage.heure_fin_modifiee;
+    
+    let heureDebut = "";
+    let heureFin = "";
+    let date = "";
+    
+    if (hasModification) {
+      const debutMod = new Date(pointage.heure_debut_modifiee);
+      const finMod = new Date(pointage.heure_fin_modifiee);
+      heureDebut = debutMod.toTimeString().slice(0, 5);
+      heureFin = finMod.toTimeString().slice(0, 5);
+      date = pointage.date;
+    }
+    
     setEditPointageForm({
-      date: pointage.date,
-      heure_debut: debut.toTimeString().slice(0, 5),
-      heure_fin: fin.toTimeString().slice(0, 5),
+      date: date,
+      heure_debut: heureDebut,
+      heure_fin: heureFin,
       description: pointage.description || ""
     });
     setEditingPointage(pointage);
