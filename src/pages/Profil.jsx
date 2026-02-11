@@ -538,7 +538,7 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '850px' }}>
+                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '865px' }}>
                     {/* En-tête avec navigation */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900 flex-shrink-0">
                       <h3 className="text-sm font-semibold text-slate-300">
@@ -552,16 +552,19 @@ export default function Profil() {
                         {/* En-têtes des jours - sticky */}
                         <div className="flex border-b border-slate-700 flex-shrink-0">
                           <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
-                          {getCurrentWeekDays().map((day, idx) => (
-                            <div key={idx} className="flex-1 text-center py-3 border-r border-slate-700 bg-slate-900/50">
-                              <div className="text-xs text-slate-400 mb-1">
+                          {getCurrentWeekDays().map((day, idx) => {
+                            const isToday = day.toDateString() === new Date().toDateString();
+                            return (
+                            <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-slate-900/50'}`}>
+                              <div className={`text-xs mb-1 ${isToday ? 'text-cyan-400' : 'text-slate-400'}`}>
                                 {format(day, "EEE", { locale: fr })}
                               </div>
-                              <div className="text-lg font-bold text-white">
+                              <div className={`text-lg font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
                                 {format(day, "d", { locale: fr })}
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
@@ -573,34 +576,58 @@ export default function Profil() {
                                   {hour.toString().padStart(2, '0')}:00
                                 </div>
                                 {getCurrentWeekDays().map((day, dayIdx) => {
-                                  const dayEvents = getEventsForDate(day).filter(event => {
-                                    const eventHour = new Date(event.start.dateTime).getHours();
-                                    return eventHour === hour;
-                                  });
+                                   const isToday = day.toDateString() === new Date().toDateString();
+                                   const dayEvents = getEventsForDate(day).filter(event => {
+                                     const eventHour = new Date(event.start.dateTime).getHours();
+                                     return eventHour === hour;
+                                   });
 
-                                  return (
-                                    <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/20 min-h-[60px] p-1">
-                                      {dayEvents.map(event => {
-                                        const startTime = new Date(event.start.dateTime);
-                                        const endTime = new Date(event.end.dateTime);
-                                        const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+                                   const dayPointages = getPointageForDate(day).filter(p => {
+                                     const startHour = new Date(p.heure_debut).getHours();
+                                     return startHour === hour;
+                                   });
 
-                                        return (
-                                          <div
-                                            key={event.id}
-                                            className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
-                                            style={{
-                                              minHeight: `${Math.max(20, durationHours * 60)}px`
-                                            }}
-                                          >
-                                            <div className="truncate">{format(startTime, "HH:mm")}</div>
-                                            <div className="truncate text-[9px] opacity-90">{event.subject}</div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                })}
+                                   return (
+                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative min-h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
+                                       {dayEvents.map(event => {
+                                         const startTime = new Date(event.start.dateTime);
+                                         const endTime = new Date(event.end.dateTime);
+                                         const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+                                         return (
+                                           <div
+                                             key={event.id}
+                                             className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
+                                             style={{
+                                               minHeight: `${Math.max(20, durationHours * 60)}px`
+                                             }}
+                                           >
+                                             <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                             <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                           </div>
+                                         );
+                                       })}
+                                       {dayPointages.map(p => {
+                                         const startTime = new Date(p.heure_debut);
+                                         const endTime = new Date(p.heure_fin);
+                                         const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+                                         return (
+                                           <div
+                                             key={p.id}
+                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1"
+                                             style={{
+                                               minHeight: `${Math.max(20, durationHours * 60)}px`
+                                             }}
+                                           >
+                                             <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                             <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
+                                           </div>
+                                         );
+                                       })}
+                                     </div>
+                                   );
+                                 })}
                               </div>
                             ))}
                           </div>
