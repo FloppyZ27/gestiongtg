@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer, UserCircle, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -73,9 +74,9 @@ export default function Profil() {
     confirmPassword: ""
   });
 
-  // États pour punch in/out
-  const [elapsedTime, setElapsedTime] = useState(0);
+  // États pour pointage
   const [pointageCollapsed, setPointageCollapsed] = useState(false);
+  const [viewMode, setViewMode] = useState("week"); // "week" ou "month"
 
   const queryClient = useQueryClient();
 
@@ -116,25 +117,7 @@ export default function Profil() {
     enabled: !!user,
   });
 
-  // Vérifier s'il y a un pointage en cours
-  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
 
-  // Calculer le temps écoulé depuis punch in
-  useEffect(() => {
-    if (!pointageEnCours) {
-      setElapsedTime(0);
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      const debut = new Date(pointageEnCours.heure_debut).getTime();
-      const now = new Date().getTime();
-      const elapsed = Math.floor((now - debut) / 1000); // en secondes
-      setElapsedTime(elapsed);
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [pointageEnCours]);
 
   const [profileForm, setProfileForm] = useState({
     prenom: "",
@@ -197,19 +180,7 @@ export default function Profil() {
 
 
 
-  const createPointageMutation = useMutation({
-    mutationFn: (data) => base44.entities.Pointage.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pointages'] });
-    },
-  });
 
-  const updatePointageMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pointages'] });
-    },
-  });
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -267,40 +238,7 @@ export default function Profil() {
 
 
 
-  const handlePunchIn = () => {
-    const now = new Date();
-    createPointageMutation.mutate({
-      utilisateur_email: user?.email,
-      date: now.toISOString().split('T')[0],
-      heure_debut: now.toISOString(),
-      statut: 'en_cours'
-    });
-  };
 
-  const handlePunchOut = () => {
-    if (!pointageEnCours) return;
-    
-    const now = new Date();
-    const debut = new Date(pointageEnCours.heure_debut);
-    const dureeHeures = (now.getTime() - debut.getTime()) / 1000 / 60 / 60;
-    
-    updatePointageMutation.mutate({
-      id: pointageEnCours.id,
-      data: {
-        ...pointageEnCours,
-        heure_fin: now.toISOString(),
-        duree_heures: parseFloat(dureeHeures.toFixed(2)),
-        statut: 'termine'
-      }
-    });
-  };
-
-  const formatElapsedTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const getInitials = (name) => {
     return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
@@ -347,6 +285,46 @@ export default function Profil() {
   }, {});
 
   const sortedDates = Object.keys(groupedEntrees).sort((a, b) => new Date(b) - new Date(a));
+
+  // Fonctions pour générer les jours de la semaine et du mois
+  const getCurrentWeekDays = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const getCurrentMonthDays = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const days = [];
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+    return days;
+  };
+
+  const getPointageForDate = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return pointages.filter(p => p.date === dateStr && p.statut === 'termine');
+  };
+
+  const getDayTotalHours = (date) => {
+    const dayPointages = getPointageForDate(date);
+    return dayPointages.reduce((sum, p) => sum + (p.duree_heures || 0), 0);
+  };
 
   // Calculer le total des heures par jour
   const calculateTotalHours = (date) => {
@@ -509,11 +487,9 @@ export default function Profil() {
                   <Timer className="w-4 h-4 text-cyan-400" />
                 </div>
                 <h3 className="text-cyan-300 text-lg font-semibold">Pointage</h3>
-                {pointageEnCours && (
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                    En cours
-                  </Badge>
-                )}
+                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                  {pointages.filter(p => p.statut === 'termine').length} entrées
+                </Badge>
               </div>
               {pointageCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
             </div>
@@ -521,88 +497,118 @@ export default function Profil() {
 
           {!pointageCollapsed && (
             <CardContent className="p-6">
-              {/* Punch In/Out Section */}
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 border border-slate-700 rounded-lg p-6 mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {pointageEnCours ? (
-                      <>
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
-                            <div className="absolute inset-0 w-4 h-4 bg-emerald-500 rounded-full animate-ping"></div>
+              <Tabs value={viewMode} onValueChange={setViewMode}>
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="week" className="text-cyan-300">
+                    <CalendarDays className="w-4 h-4 mr-2" />
+                    Semaine
+                  </TabsTrigger>
+                  <TabsTrigger value="month" className="text-cyan-300">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Mois
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="week" className="space-y-3">
+                  <div className="grid grid-cols-7 gap-2">
+                    {getCurrentWeekDays().map((day, index) => {
+                      const dayPointages = getPointageForDate(day);
+                      const totalHours = getDayTotalHours(day);
+                      const isToday = day.toDateString() === new Date().toDateString();
+
+                      return (
+                        <div
+                          key={index}
+                          className={`border rounded-lg p-3 ${
+                            isToday 
+                              ? 'border-cyan-500 bg-cyan-500/10' 
+                              : 'border-slate-700 bg-slate-800/30'
+                          }`}
+                        >
+                          <div className="text-center mb-2">
+                            <div className="text-xs text-slate-400">
+                              {format(day, "EEE", { locale: fr })}
+                            </div>
+                            <div className={`text-lg font-semibold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                              {format(day, "d", { locale: fr })}
+                            </div>
                           </div>
-                          <span className="text-emerald-400 font-semibold text-lg">En cours</span>
+                          {dayPointages.length > 0 ? (
+                            <div className="space-y-1">
+                              {dayPointages.map(p => (
+                                <div key={p.id} className="bg-slate-700/50 rounded p-1 text-xs">
+                                  <div className="text-cyan-400 font-semibold">
+                                    {p.duree_heures?.toFixed(2)}h
+                                  </div>
+                                  <div className="text-slate-400 text-[10px]">
+                                    {format(new Date(p.heure_debut), "HH:mm")}
+                                  </div>
+                                </div>
+                              ))}
+                              <div className="text-xs text-cyan-400 font-bold pt-1 border-t border-slate-600">
+                                Total: {totalHours.toFixed(2)}h
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-center text-slate-600 text-xs">-</div>
+                          )}
                         </div>
-                        <div className="h-8 w-px bg-slate-700"></div>
-                        <div className="flex items-center gap-2">
-                          <Timer className="w-5 h-5 text-slate-400" />
-                          <span className="text-white font-mono text-2xl font-bold tabular-nums">
-                            {formatElapsedTime(elapsedTime)}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-slate-600 rounded-full"></div>
-                        <span className="text-slate-400 font-semibold text-lg">Hors service</span>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
+                </TabsContent>
 
-                  <div className="flex gap-3">
-                    {!pointageEnCours ? (
-                      <Button
-                        onClick={handlePunchIn}
-                        className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
-                      >
-                        <Play className="w-5 h-5 mr-2" />
-                        Punch In
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handlePunchOut}
-                        className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
-                      >
-                        <Square className="w-5 h-5 mr-2" />
-                        Punch Out
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Historique des pointages */}
-              <div className="space-y-3">
-                <h4 className="text-slate-300 font-semibold text-sm">Historique</h4>
-                {pointages.filter(p => p.statut === 'termine').slice(0, 10).map(pointage => (
-                  <div key={pointage.id} className="border border-slate-700 rounded-lg p-3 hover:bg-slate-800/30 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-4 h-4 text-cyan-400" />
-                        <span className="text-white text-sm">
-                          {format(new Date(pointage.date + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
-                        </span>
+                <TabsContent value="month" className="space-y-3">
+                  <div className="grid grid-cols-7 gap-2">
+                    {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
+                      <div key={day} className="text-center text-xs font-semibold text-slate-400 pb-2">
+                        {day}
                       </div>
-                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
-                        {pointage.duree_heures?.toFixed(2)}h
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                      <span>Début: {format(new Date(pointage.heure_debut), "HH:mm", { locale: fr })}</span>
-                      {pointage.heure_fin && (
-                        <span>Fin: {format(new Date(pointage.heure_fin), "HH:mm", { locale: fr })}</span>
-                      )}
-                    </div>
+                    ))}
+                    {(() => {
+                      const monthDays = getCurrentMonthDays();
+                      const firstDayOfWeek = monthDays[0].getDay();
+                      const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+                      const emptyDays = Array(offset).fill(null);
+
+                      return [...emptyDays, ...monthDays].map((day, index) => {
+                        if (!day) {
+                          return <div key={`empty-${index}`} className="border border-transparent"></div>;
+                        }
+
+                        const dayPointages = getPointageForDate(day);
+                        const totalHours = getDayTotalHours(day);
+                        const isToday = day.toDateString() === new Date().toDateString();
+
+                        return (
+                          <div
+                            key={index}
+                            className={`border rounded-lg p-2 min-h-[80px] ${
+                              isToday 
+                                ? 'border-cyan-500 bg-cyan-500/10' 
+                                : 'border-slate-700 bg-slate-800/30'
+                            }`}
+                          >
+                            <div className={`text-xs font-semibold mb-1 ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                              {format(day, "d")}
+                            </div>
+                            {dayPointages.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="text-[10px] text-cyan-400 font-bold">
+                                  {totalHours.toFixed(1)}h
+                                </div>
+                                <div className="text-[9px] text-slate-500">
+                                  {dayPointages.length} entrée{dayPointages.length > 1 ? 's' : ''}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
-                ))}
-                {pointages.filter(p => p.statut === 'termine').length === 0 && (
-                  <div className="text-center py-8 text-slate-500">
-                    <Timer className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                    <p className="text-sm">Aucun pointage enregistré</p>
-                  </div>
-                )}
-              </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           )}
         </Card>
