@@ -544,8 +544,7 @@ export default function Profil() {
                       {/* Colonnes des jours */}
                       <div className="flex-1 grid grid-cols-7 gap-2">
                         {getCurrentWeekDays().map((day, index) => {
-                          const dayPointages = getPointageForDate(day);
-                          const totalHours = getDayTotalHours(day);
+                          const dayEvents = getEventsForDate(day);
 
                           return (
                             <div key={index} className="flex flex-col">
@@ -557,14 +556,14 @@ export default function Profil() {
                                 <div className="text-lg font-semibold text-white">
                                   {format(day, "d", { locale: fr })}
                                 </div>
-                                {totalHours > 0 && (
-                                  <div className="text-xs text-cyan-400 font-bold">
-                                    {totalHours.toFixed(1)}h
+                                {dayEvents.length > 0 && (
+                                  <div className="text-xs text-emerald-400 font-bold">
+                                    {dayEvents.length} événement{dayEvents.length > 1 ? 's' : ''}
                                   </div>
                                 )}
                               </div>
 
-                              {/* Timeline avec les pointages */}
+                              {/* Timeline avec les événements Microsoft */}
                               <div className="relative border rounded-lg flex-1 border-slate-700 bg-slate-800/20" style={{ height: '2448px' }}>
                                 {/* Lignes horaires */}
                                 {Array.from({ length: 24 }, (_, i) => (
@@ -575,37 +574,33 @@ export default function Profil() {
                                   />
                                 ))}
 
-                                {/* Pointages positionnés */}
-                                {dayPointages.map(p => {
-                                  const startTime = new Date(p.heure_debut);
-                                  const endTime = p.heure_fin ? new Date(p.heure_fin) : new Date();
+                                {/* Événements Microsoft positionnés */}
+                                {dayEvents.map(event => {
+                                  const startTime = new Date(event.start.dateTime);
+                                  const endTime = new Date(event.end.dateTime);
 
                                   const startHour = startTime.getHours() + startTime.getMinutes() / 60;
                                   const endHour = endTime.getHours() + endTime.getMinutes() / 60;
 
-                                  // Position relative à 0h (début de la timeline)
                                   const topPosition = (startHour * 102);
-                                  // Hauteur basée sur la différence entre début et fin
                                   const height = ((endHour - startHour) * 102);
 
                                   return (
                                     <div
-                                      key={p.id}
+                                      key={event.id}
                                       className="absolute w-full px-1"
                                       style={{
                                         top: `${Math.max(0, topPosition)}px`,
                                         height: `${Math.max(16, height)}px`
                                       }}
                                     >
-                                      <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
-                                        <div className="text-[10px] font-bold text-cyan-100">
+                                      <div className="h-full bg-gradient-to-br from-emerald-500/40 to-teal-500/40 border border-emerald-500/50 rounded px-1 py-1 overflow-hidden">
+                                        <div className="text-[10px] font-bold text-emerald-100">
                                           {format(startTime, "HH:mm")}
                                         </div>
-                                        {p.heure_fin && (
-                                          <div className="text-[9px] text-cyan-200">
-                                            {p.duree_heures.toFixed(1)}h
-                                          </div>
-                                        )}
+                                        <div className="text-[9px] text-emerald-200 truncate">
+                                          {event.subject}
+                                        </div>
                                       </div>
                                     </div>
                                   );
