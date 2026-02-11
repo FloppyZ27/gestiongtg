@@ -565,7 +565,7 @@ export default function Profil() {
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
-                        <div className="overflow-y-auto flex-1">
+                        <div className="overflow-y-auto flex-1" ref={weekScrollRef}>
                           <div className="relative">
                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
                               <div key={hour} className="flex border-b border-slate-700/50">
