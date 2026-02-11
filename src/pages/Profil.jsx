@@ -799,21 +799,32 @@ export default function Profil() {
                                    return (
                                      <div
                                        key={`display-${p.id}`}
-                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity ${
+                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-20 hover:opacity-90 transition-opacity group flex flex-col ${
                                          p.confirme 
                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
                                        }`}
-                                       onClick={() => handleOpenEditPointage(p)}
                                        style={{
                                          height: `${totalMinutes}px`,
                                          top: `${topPx}px`
                                        }}
-                                       title={p.description || "Cliquer pour éditer"}
                                      >
-                                       <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                       <div className="truncate cursor-pointer hover:underline" onClick={() => handleOpenEditPointage(p)} title={p.description || "Cliquer pour éditer"}>
+                                         {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}
+                                       </div>
                                        <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
                                        {p.description && <div className="truncate text-[9px] opacity-75">{p.description}</div>}
+                                       {!p.confirme && (
+                                         <button
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             handleConfirmPointage(p);
+                                           }}
+                                           className="mt-auto text-[9px] px-1 py-0.5 bg-white/20 hover:bg-white/40 rounded transition-colors"
+                                         >
+                                           Confirmer
+                                         </button>
+                                       )}
                                      </div>
                                    );
                                  })}
