@@ -23,6 +23,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1658,41 +1659,51 @@ function LayoutContent({ children, currentPageName }) {
               </div>
 
               {/* Chronomètre et boutons Punch (cachés par défaut) */}
-              {showPunchControls && (
-                <div 
-                  className="flex items-center gap-3"
-                  onMouseEnter={() => setIsHoveringPunch(true)}
-                  onMouseLeave={() => setIsHoveringPunch(false)}
-                >
-                  {/* Chronomètre */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-                    <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
-                      {formatElapsedTime(elapsedTime)}
-                    </span>
-                  </div>
+              <AnimatePresence>
+                {showPunchControls && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div 
+                      className="flex items-center gap-3"
+                      onMouseEnter={() => setIsHoveringPunch(true)}
+                      onMouseLeave={() => setIsHoveringPunch(false)}
+                    >
+                      {/* Chronomètre */}
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
+                        <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
+                          {formatElapsedTime(elapsedTime)}
+                        </span>
+                      </div>
 
-                  {/* Bouton Punch In/Out */}
-                  {!pointageEnCours ? (
-                    <Button
-                      onClick={handlePunchIn}
-                      size="sm"
-                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
-                    >
-                      <Play className="w-4 h-4 mr-1" />
-                      Punch In
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handlePunchOut}
-                      size="sm"
-                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
-                    >
-                      <Square className="w-4 h-4 mr-1" />
-                      Punch Out
-                    </Button>
-                  )}
-                </div>
-              )}
+                      {/* Bouton Punch In/Out */}
+                      {!pointageEnCours ? (
+                        <Button
+                          onClick={handlePunchIn}
+                          size="sm"
+                          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
+                        >
+                          <Play className="w-4 h-4 mr-1" />
+                          Punch In
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handlePunchOut}
+                          size="sm"
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
+                        >
+                          <Square className="w-4 h-4 mr-1" />
+                          Punch Out
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <Button
                 onClick={() => setIsEntreeTempsOpen(true)}
