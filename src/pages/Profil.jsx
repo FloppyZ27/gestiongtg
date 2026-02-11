@@ -315,16 +315,16 @@ export default function Profil() {
     const fin = new Date(editPointageForm.date);
     fin.setHours(parseInt(heureF), parseInt(minF), 0);
     
-    const dureeHeures = (fin - debut) / (1000 * 60 * 60);
+    const dureeHeuresModifiee = (fin - debut) / (1000 * 60 * 60);
 
     updatePointageMutation.mutate({
       id: editingPointage.id,
       data: {
         ...editingPointage,
         date: editPointageForm.date,
-        heure_debut: debut.toISOString(),
-        heure_fin: fin.toISOString(),
-        duree_heures: parseFloat(dureeHeures.toFixed(2)),
+        heure_debut_modifiee: debut.toISOString(),
+        heure_fin_modifiee: fin.toISOString(),
+        duree_heures_modifiee: parseFloat(dureeHeuresModifiee.toFixed(2)),
         description: editPointageForm.description,
         confirme: true
       }
