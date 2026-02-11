@@ -1633,25 +1633,30 @@ function LayoutContent({ children, currentPageName }) {
             {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
             <div className="flex items-center gap-3">
               {/* Voyant lumineux pour afficher/masquer les contrôles de pointage */}
-              <Button
-                onClick={() => setShowPunchControls(!showPunchControls)}
-                size="icon"
-                variant="ghost"
-                className="text-slate-400 hover:text-white hover:bg-slate-800/50 relative"
-              >
-                <div className="relative w-5 h-5 flex items-center justify-center">
-                  {pointageEnCours ? (
-                    <>
-                      <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
-                  )}
-                </div>
-              </Button>
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  onClick={() => setShowPunchControls(!showPunchControls)}
+                  size="icon"
+                  variant="ghost"
+                  className="text-slate-400 hover:text-white hover:bg-slate-800/50 relative"
+                >
+                  <div className="relative w-5 h-5 flex items-center justify-center">
+                    {pointageEnCours ? (
+                      <>
+                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-3 h-3 bg-slate-600 rounded-full"></div>
+                    )}
+                  </div>
+                </Button>
+                <span className="text-[9px] text-slate-400 whitespace-nowrap">
+                  {pointageEnCours ? "En travail" : "Hors travail"}
+                </span>
+              </div>
 
               {/* Chronomètre et boutons Punch (cachés par défaut) */}
               {showPunchControls && (
@@ -1660,21 +1665,8 @@ function LayoutContent({ children, currentPageName }) {
                   onMouseEnter={() => setIsHoveringPunch(true)}
                   onMouseLeave={() => setIsHoveringPunch(false)}
                 >
-                  {/* Chronomètre avec lumière */}
+                  {/* Chronomètre */}
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-                    {/* Lumière indicatrice */}
-                    <div className="relative">
-                      {pointageEnCours ? (
-                        <>
-                          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                          <div className="absolute inset-0 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
-                        </>
-                      ) : (
-                        <div className="w-2.5 h-2.5 bg-slate-600 rounded-full"></div>
-                      )}
-                    </div>
-                    
-                    {/* Chronomètre */}
                     <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
                       {formatElapsedTime(elapsedTime)}
                     </span>
