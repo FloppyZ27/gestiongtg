@@ -1033,6 +1033,75 @@ export default function Profil() {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Pointage Dialog */}
+        <Dialog open={!!editingPointage} onOpenChange={(open) => !open && setEditingPointage(null)}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Modifier l'entrée de pointage</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmitEditPointage} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-slate-400 text-sm">Date</Label>
+                <Input
+                  type="date"
+                  value={editPointageForm.date}
+                  onChange={(e) => setEditPointageForm({...editPointageForm, date: e.target.value})}
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Heure de départ</Label>
+                  <Input
+                    type="time"
+                    value={editPointageForm.heure_debut}
+                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400 text-sm">Heure de fin</Label>
+                  <Input
+                    type="time"
+                    value={editPointageForm.heure_fin}
+                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-slate-400 text-sm">Description <span className="text-red-400">*</span></Label>
+                <textarea
+                  value={editPointageForm.description}
+                  onChange={(e) => setEditPointageForm({...editPointageForm, description: e.target.value})}
+                  placeholder="Description de l'activité..."
+                  className="bg-slate-800 border border-slate-700 text-white rounded px-3 py-2 w-full text-sm"
+                  rows="3"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingPointage(null)}
+                  disabled={updatePointageMutation.isPending}
+                  className="border-red-500 text-red-400 hover:bg-red-500/10"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                  disabled={updatePointageMutation.isPending}
+                >
+                  {updatePointageMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {/* Edit Profile Dialog */}
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
