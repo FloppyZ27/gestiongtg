@@ -621,17 +621,13 @@ export default function Profil() {
                                          const minutesInThisHour = Math.min(endTime.getTime(), hourEnd.getTime()) - Math.max(startTime.getTime(), hourStart.getTime());
                                          const minutesDuration = minutesInThisHour / (1000 * 60);
                                          
-                                         let heightClass = 'h-[30px]';
-                                         if (minutesDuration >= 60) {
-                                           heightClass = 'h-[60px]';
-                                         } else if (minutesDuration < 30) {
-                                           heightClass = 'h-[30px]';
-                                         }
+                                         const heightPx = Math.max(30, Math.round((minutesDuration / 30) * 30));
 
                                          return (
                                            <div
                                              key={p.id}
-                                             className={`bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1 ${heightClass}`}
+                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1"
+                                             style={{ height: `${heightPx}px` }}
                                            >
                                              <div className="truncate">{format(startTime, "HH:mm")}</div>
                                              <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
