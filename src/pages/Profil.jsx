@@ -323,6 +323,33 @@ export default function Profil() {
     return days;
   };
 
+  const getPointageWeekDays = () => {
+    const dayOfWeek = pointageCurrentDate.getDay();
+    const monday = new Date(pointageCurrentDate);
+    monday.setDate(pointageCurrentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
+  const getPointageMonthDays = () => {
+    const year = pointageCurrentDate.getFullYear();
+    const month = pointageCurrentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const days = [];
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+    return days;
+  };
+
   const getCurrentMonthDays = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -335,6 +362,26 @@ export default function Profil() {
       days.push(new Date(d));
     }
     return days;
+  };
+
+  const goToPointagePrevious = () => {
+    if (viewMode === "week") {
+      setPointageCurrentDate(new Date(pointageCurrentDate.getFullYear(), pointageCurrentDate.getMonth(), pointageCurrentDate.getDate() - 7));
+    } else {
+      setPointageCurrentDate(new Date(pointageCurrentDate.getFullYear(), pointageCurrentDate.getMonth() - 1, 1));
+    }
+  };
+
+  const goToPointageNext = () => {
+    if (viewMode === "week") {
+      setPointageCurrentDate(new Date(pointageCurrentDate.getFullYear(), pointageCurrentDate.getMonth(), pointageCurrentDate.getDate() + 7));
+    } else {
+      setPointageCurrentDate(new Date(pointageCurrentDate.getFullYear(), pointageCurrentDate.getMonth() + 1, 1));
+    }
+  };
+
+  const goToPointageToday = () => {
+    setPointageCurrentDate(new Date());
   };
 
   const getPointageForDate = (date) => {
