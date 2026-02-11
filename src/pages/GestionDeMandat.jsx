@@ -13,10 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Kanban, MapPin, Calendar, Edit, FileText, User, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Filter, X, ChevronDown, ChevronUp, Timer, Clock } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { format, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfWeek, isSameDay, addDays, startOfMonth, endOfMonth, eachWeekOfInterval, addMonths, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Textarea } from "@/components/ui/textarea";
 import EditDossierDialog from "../components/dossiers/EditDossierDialog";
 import CommentairesSection from "../components/dossiers/CommentairesSection";
 
@@ -85,6 +86,15 @@ export default function GestionDeMandat() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isEntreeTempsDialogOpen, setIsEntreeTempsDialogOpen] = useState(false);
+  const [entreeTempsCardInfo, setEntreeTempsCardInfo] = useState(null);
+  const [entreeTempsForm, setEntreeTempsForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    heures: "",
+    tache: "",
+    tache_suivante: "",
+    utilisateur_assigne: ""
+  });
 
   const queryClient = useQueryClient();
 
@@ -110,6 +120,11 @@ export default function GestionDeMandat() {
     queryKey: ['lots'],
     queryFn: () => base44.entities.Lot.list(),
     initialData: [],
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
   });
 
   const updateDossierMutation = useMutation({
@@ -277,6 +292,31 @@ export default function GestionDeMandat() {
         }
         return m;
       });
+
+      // Ouvrir le dialog d'entrée de temps après le déplacement
+      updateDossierMutation.mutate({
+        id: dossier.id,
+        dossierData: { ...dossier, mandats: updatedMandats }
+      }, {
+        onSuccess: () => {
+          // Ouvrir le dialog d'entrée de temps
+          setEntreeTempsCardInfo({
+            dossierId: dossier.id,
+            mandatType: card.mandat.type_mandat,
+            nouvelleTache: nouvelleTache,
+            ancienneTache: source.droppableId
+          });
+          setEntreeTempsForm({
+            date: new Date().toISOString().split('T')[0],
+            heures: "",
+            tache: source.droppableId,
+            tache_suivante: nouvelleTache,
+            utilisateur_assigne: card.mandat.utilisateur_assigne || ""
+          });
+          setIsEntreeTempsDialogOpen(true);
+        }
+      });
+      return;
     } else if (activeView === "utilisateurs") {
       const nouvelUtilisateur = destination.droppableId === "non-assigne" ? "" : destination.droppableId;
       updatedMandats = dossier.mandats.map((m, idx) => {
@@ -1480,6 +1520,219 @@ export default function GestionDeMandat() {
           clients={clients}
           users={users}
         />
+
+        {/* Dialog d'entrée de temps après drag & drop */}
+        <Dialog open={isEntreeTempsDialogOpen} onOpenChange={setIsEntreeTempsDialogOpen}>
+          <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">Nouvelle entrée de temps</DialogTitle>
+              {entreeTempsCardInfo && (
+                <div className="text-sm text-slate-400 mt-2">
+                  Dossier: <span className="text-white font-semibold">
+                    {(() => {
+                      const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                      return dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
+                    })()}
+                  </span> • Mandat: <span className="text-white font-semibold">{entreeTempsCardInfo.mandatType}</span>
+                </div>
+              )}
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* Section Détails de l'entrée */}
+              <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
+                <div className="py-2 px-3 bg-lime-900/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-lime-500/30 flex items-center justify-center">
+                      <Timer className="w-3 h-3 text-lime-400" />
+                    </div>
+                    <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
+                  </div>
+                </div>
+
+                <div className="pt-2 pb-2 px-3">
+                  <div className="rounded-lg p-3">
+                    <div className="grid grid-cols-5 gap-2">
+                      <div className="space-y-0.5">
+                        <Label className="text-slate-400 text-xs">Date <span className="text-red-400">*</span></Label>
+                        <Input
+                          type="date"
+                          value={entreeTempsForm.date}
+                          onChange={(e) => setEntreeTempsForm({...entreeTempsForm, date: e.target.value})}
+                          required
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Temps <span className="text-red-400">*</span></Label>
+                        <Input
+                          type="number"
+                          step="0.25"
+                          min="0"
+                          value={entreeTempsForm.heures}
+                          onChange={(e) => setEntreeTempsForm({...entreeTempsForm, heures: e.target.value})}
+                          required
+                          placeholder="Ex: 2.5"
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-xs"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Tâche accomplie <span className="text-red-400">*</span></Label>
+                        <Select value={entreeTempsForm.tache} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, tache: value})}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {TACHES.map((tache) => (
+                              <SelectItem key={tache} value={tache} className="text-white text-xs">
+                                {tache}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Tâche suivante</Label>
+                        <Select value={entreeTempsForm.tache_suivante} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, tache_suivante: value})}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {TACHES.map((tache) => (
+                              <SelectItem key={tache} value={tache} className="text-white text-xs">
+                                {tache}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-slate-400 text-xs">Utilisateur assigné</Label>
+                        <Select value={entreeTempsForm.utilisateur_assigne} onValueChange={(value) => setEntreeTempsForm({...entreeTempsForm, utilisateur_assigne: value})}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-700">
+                            {users.map((usr) => (
+                              <SelectItem key={usr.email} value={usr.email} className="text-white text-xs">
+                                {usr.full_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="border-red-500 text-red-400 hover:bg-red-500/10"
+                onClick={() => {
+                  setIsEntreeTempsDialogOpen(false);
+                  setEntreeTempsCardInfo(null);
+                  setEntreeTempsForm({
+                    date: new Date().toISOString().split('T')[0],
+                    heures: "",
+                    tache: "",
+                    tache_suivante: "",
+                    utilisateur_assigne: ""
+                  });
+                }}
+              >
+                Annuler
+              </Button>
+              <Button 
+                type="button" 
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                onClick={async () => {
+                  if (!entreeTempsForm.heures || !entreeTempsForm.tache) {
+                    alert("Veuillez remplir tous les champs obligatoires");
+                    return;
+                  }
+
+                  const heures = parseFloat(entreeTempsForm.heures);
+                  if (isNaN(heures) || heures <= 0) {
+                    alert("Veuillez entrer un nombre d'heures valide");
+                    return;
+                  }
+
+                  // Créer l'entrée de temps
+                  await base44.entities.EntreeTemps.create({
+                    date: entreeTempsForm.date,
+                    heures: heures,
+                    dossier_id: entreeTempsCardInfo.dossierId,
+                    mandat: entreeTempsCardInfo.mandatType,
+                    tache: entreeTempsForm.tache,
+                    utilisateur_email: currentUser?.email
+                  });
+
+                  // Mettre à jour le dossier si tâche suivante ou utilisateur assigné sont renseignés
+                  if (entreeTempsForm.tache_suivante || entreeTempsForm.utilisateur_assigne) {
+                    const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                    if (dossier && dossier.mandats) {
+                      const updatedMandats = dossier.mandats.map(mandat => {
+                        if (mandat.type_mandat === entreeTempsCardInfo.mandatType) {
+                          return {
+                            ...mandat,
+                            tache_actuelle: entreeTempsForm.tache_suivante || mandat.tache_actuelle,
+                            utilisateur_assigne: entreeTempsForm.utilisateur_assigne || mandat.utilisateur_assigne
+                          };
+                        }
+                        return mandat;
+                      });
+
+                      await base44.entities.Dossier.update(dossier.id, {
+                        ...dossier,
+                        mandats: updatedMandats
+                      });
+                    }
+                  }
+
+                  // Créer une notification si un utilisateur est assigné
+                  if (entreeTempsForm.utilisateur_assigne && entreeTempsForm.tache_suivante) {
+                    const dossier = dossiers.find(d => d.id === entreeTempsCardInfo.dossierId);
+                    const clientsNames = getClientsNames(dossier?.clients_ids);
+                    const numeroDossier = dossier ? `${getArpenteurInitials(dossier.arpenteur_geometre)}${dossier.numero_dossier}` : '';
+                    
+                    await base44.entities.Notification.create({
+                      utilisateur_email: entreeTempsForm.utilisateur_assigne,
+                      titre: "Nouvelle tâche assignée",
+                      message: `${currentUser?.full_name} vous a assigné la tâche "${entreeTempsForm.tache_suivante}"${numeroDossier ? ` pour le dossier ${numeroDossier}` : ''}${clientsNames ? ` - ${clientsNames}` : ''}.`,
+                      type: "dossier",
+                      dossier_id: entreeTempsCardInfo.dossierId,
+                      lue: false
+                    });
+                  }
+
+                  queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+                  queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
+                  queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+                  setIsEntreeTempsDialogOpen(false);
+                  setEntreeTempsCardInfo(null);
+                  setEntreeTempsForm({
+                    date: new Date().toISOString().split('T')[0],
+                    heures: "",
+                    tache: "",
+                    tache_suivante: "",
+                    utilisateur_assigne: ""
+                  });
+                }}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
