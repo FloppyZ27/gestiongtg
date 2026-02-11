@@ -610,26 +610,23 @@ export default function Profil() {
                                            </div>
                                          );
                                        })}
-                                       {dayPointages.map(p => {
+                                       {dayPointages.filter(p => {
+                                         const startTime = new Date(p.heure_debut);
+                                         return hour === startTime.getHours();
+                                       }).map(p => {
                                          const startTime = new Date(p.heure_debut);
                                          const endTime = new Date(p.heure_fin);
-                                         const hourStart = new Date(startTime);
-                                         hourStart.setMinutes(0, 0, 0);
-                                         const hourEnd = new Date(hourStart);
-                                         hourEnd.setHours(hourEnd.getHours() + 1);
                                          
-                                         const minutesInThisHour = Math.min(endTime.getTime(), hourEnd.getTime()) - Math.max(startTime.getTime(), hourStart.getTime());
-                                         const minutesDuration = minutesInThisHour / (1000 * 60);
-                                         
-                                         const heightPx = minutesDuration;
+                                         const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                         const heightPx = totalMinutes;
 
                                          return (
                                            <div
                                              key={p.id}
-                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1"
+                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold"
                                              style={{ height: `${heightPx}px` }}
                                            >
-                                             <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                             <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                              <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
                                            </div>
                                          );
