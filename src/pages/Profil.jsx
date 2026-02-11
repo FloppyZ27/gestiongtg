@@ -514,9 +514,9 @@ export default function Profil() {
                     {/* Conteneur avec scroll */}
                     <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '768px' }}>
                       {/* Colonne des heures */}
-                      <div className="flex flex-col pt-10 w-12 flex-shrink-0">
+                      <div className="flex flex-col w-12 flex-shrink-0" style={{ paddingTop: '82px' }}>
                         {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                          <div key={hour} className="text-xs text-slate-500 text-right pr-2" style={{ height: '102px' }}>
+                          <div key={hour} className="text-xs text-slate-500 text-right pr-2 flex items-start justify-end" style={{ height: '102px' }}>
                             {hour}h
                           </div>
                         ))}
@@ -531,7 +531,7 @@ export default function Profil() {
                           return (
                             <div key={index} className="flex flex-col">
                               {/* En-tête du jour - sticky */}
-                              <div className="sticky top-0 z-10 bg-slate-900 text-center mb-2 pb-2 border-b border-slate-700">
+                              <div className="sticky top-0 z-10 bg-slate-900 text-center border-b border-slate-700" style={{ height: '82px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                 <div className="text-xs text-slate-400">
                                   {format(day, "EEE", { locale: fr })}
                                 </div>
