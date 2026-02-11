@@ -799,14 +799,21 @@ export default function Profil() {
                                    return (
                                      <div
                                        key={p.id}
-                                       className="absolute left-1 right-1 bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold z-20"
+                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity ${
+                                         p.confirme 
+                                           ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
+                                           : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
+                                       }`}
+                                       onClick={() => handleOpenEditPointage(p)}
                                        style={{
                                          height: `${totalMinutes}px`,
                                          top: `${topPx}px`
                                        }}
+                                       title={p.description || "Cliquer pour éditer"}
                                      >
                                        <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
                                        <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
+                                       {p.description && <div className="truncate text-[9px] opacity-75">{p.description}</div>}
                                      </div>
                                    );
                                  })}
