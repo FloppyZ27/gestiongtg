@@ -516,8 +516,9 @@ export default function Profil() {
                       {/* Colonne des heures */}
                       <div className="flex flex-col w-12 flex-shrink-0" style={{ paddingTop: '82px' }}>
                         {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                          <div key={hour} className="text-xs text-slate-500 text-right pr-2 flex items-start justify-end" style={{ height: '102px' }}>
-                            {hour}h
+                          <div key={hour} className="text-xs text-slate-500 text-right pr-2 flex flex-col justify-between relative" style={{ height: '102px' }}>
+                            <span>{hour}h</span>
+                            <span>{hour + 1}h</span>
                           </div>
                         ))}
                       </div>
