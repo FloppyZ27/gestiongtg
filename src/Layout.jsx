@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut, Play, Square, Fingerprint } from "lucide-react";
+import { FileText, User, Link2, MapPin, Compass, Calendar, UserCircle, BarChart3, FolderOpen, Grid3x3, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Phone, Search, MessageCircle, Plus, Kanban, Shield, Users, CalendarDays, FilePlus, Cloud, Timer, Filter, X, LogOut, Play, Square, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import {
   Sidebar,
@@ -1622,7 +1622,7 @@ function LayoutContent({ children, currentPageName }) {
                 variant="ghost"
                 className="text-slate-400 hover:text-white hover:bg-slate-800/50"
               >
-                <Fingerprint className="w-5 h-5" />
+                <ClipboardClock className="w-5 h-5" />
               </Button>
 
               {/* Chronomètre et boutons Punch (cachés par défaut) */}
