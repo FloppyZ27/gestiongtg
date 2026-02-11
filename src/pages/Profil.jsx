@@ -516,7 +516,7 @@ export default function Profil() {
                       {/* Colonne des heures */}
                       <div className="flex flex-col pt-10 w-12 flex-shrink-0">
                         {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                          <div key={hour} className="text-xs text-slate-500 text-right pr-2" style={{ height: '256px' }}>
+                          <div key={hour} className="text-xs text-slate-500 text-right pr-2" style={{ height: '102px' }}>
                             {hour}h
                           </div>
                         ))}
@@ -546,13 +546,13 @@ export default function Profil() {
                               </div>
 
                               {/* Timeline avec les pointages */}
-                              <div className="relative border rounded-lg flex-1 border-slate-700 bg-slate-800/20" style={{ height: '6144px' }}>
+                              <div className="relative border rounded-lg flex-1 border-slate-700 bg-slate-800/20" style={{ height: '2448px' }}>
                                 {/* Lignes horaires */}
                                 {Array.from({ length: 24 }, (_, i) => (
                                   <div 
                                     key={i} 
                                     className="absolute w-full border-t border-slate-700/50"
-                                    style={{ top: `${i * 256}px` }}
+                                    style={{ top: `${i * 102}px` }}
                                   />
                                 ))}
 
@@ -565,9 +565,9 @@ export default function Profil() {
                                   const endHour = endTime.getHours() + endTime.getMinutes() / 60;
 
                                   // Position relative à 0h (début de la timeline)
-                                  const topPosition = (startHour * 256);
+                                  const topPosition = (startHour * 102);
                                   // Hauteur basée sur la différence entre début et fin
-                                  const height = ((endHour - startHour) * 256);
+                                  const height = ((endHour - startHour) * 102);
 
                                   return (
                                     <div
