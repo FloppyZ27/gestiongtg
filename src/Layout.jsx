@@ -1633,7 +1633,7 @@ function LayoutContent({ children, currentPageName }) {
             {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
             <div className="flex items-center gap-3">
               {/* Voyant lumineux pour afficher/masquer les contrôles de pointage */}
-              <div className="flex flex-col items-center gap-0.5">
+              <div className="flex flex-col items-center gap-0">
                 <Button
                   onClick={() => setShowPunchControls(!showPunchControls)}
                   size="icon"
