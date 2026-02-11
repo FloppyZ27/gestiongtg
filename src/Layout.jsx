@@ -167,6 +167,8 @@ function LayoutContent({ children, currentPageName }) {
   const [entreeTempsFilterVille, setEntreeTempsFilterVille] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showPunchControls, setShowPunchControls] = useState(false);
+  const [isHoveringPunch, setIsHoveringPunch] = useState(false);
+  const punchTimerRef = React.useRef(null);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -230,6 +232,21 @@ function LayoutContent({ children, currentPageName }) {
     
     return () => clearInterval(interval);
   }, [pointageEnCours]);
+
+  // Gérer la fermeture automatique après 3 secondes
+  useEffect(() => {
+    if (showPunchControls && !isHoveringPunch) {
+      punchTimerRef.current = setTimeout(() => {
+        setShowPunchControls(false);
+      }, 3000);
+    }
+    
+    return () => {
+      if (punchTimerRef.current) {
+        clearTimeout(punchTimerRef.current);
+      }
+    };
+  }, [showPunchControls, isHoveringPunch]);
 
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -1627,7 +1644,11 @@ function LayoutContent({ children, currentPageName }) {
 
               {/* Chronomètre et boutons Punch (cachés par défaut) */}
               {showPunchControls && (
-                <>
+                <div 
+                  className="flex items-center gap-3"
+                  onMouseEnter={() => setIsHoveringPunch(true)}
+                  onMouseLeave={() => setIsHoveringPunch(false)}
+                >
                   {/* Chronomètre avec lumière */}
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
                     {/* Lumière indicatrice */}
@@ -1668,7 +1689,7 @@ function LayoutContent({ children, currentPageName }) {
                       Punch Out
                     </Button>
                   )}
-                </>
+                </div>
               )}
 
               <Button
