@@ -891,24 +891,65 @@ export default function Profil() {
                   </div>
                 </div>
 
-                {/* Information grid - 2 lignes prenant toute la largeur */}
-                <div className="flex-1 w-full space-y-3">
-                  {/* Ligne 1: Adresse civique */}
-                  <div className="w-full">
-                    <Label className="text-slate-400 text-xs">Adresse civique</Label>
-                    <p className="text-white font-medium text-sm flex items-center gap-2">
-                      <MapPin className="w-3 h-3 text-slate-500" />
-                      <span className="truncate">{user?.adresse || "-"}</span>
-                    </p>
+                {/* Information grid - 2 lignes de 4 champs */}
+                <div className="flex-1 space-y-3">
+                  {/* Ligne 1: Nom complet, Courriel, Téléphone, Adresse civique */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
+                    <div>
+                      <Label className="text-slate-400 text-xs">Nom complet</Label>
+                      <p className="text-white font-medium text-sm">{user?.prenom && user?.nom ? `${user.prenom} ${user.nom}` : (user?.prenom || user?.nom || "-")}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Adresse courriel</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-2">
+                        <Mail className="w-3 h-3 text-slate-500" />
+                        <span className="truncate">{user?.email}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Téléphone</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-slate-500" />
+                        {user?.telephone || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Adresse civique</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-2">
+                        <MapPin className="w-3 h-3 text-slate-500" />
+                        <span className="truncate">{user?.adresse || "-"}</span>
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Ligne 2: Rôle */}
-                  <div className="w-full">
-                    <Label className="text-slate-400 text-xs">Rôle</Label>
-                    <div className="mt-1">
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 uppercase">
-                        {user?.role}
-                      </Badge>
+                  {/* Ligne 2: Date anniversaire, Date embauche, Poste, Rôle */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-2">
+                    <div>
+                      <Label className="text-slate-400 text-xs">Date d'anniversaire</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Cake className="w-3 h-3 text-slate-500" />
+                        {user?.date_naissance ? format(new Date(user.date_naissance), "dd MMM yyyy", { locale: fr }) : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Date d'embauche</Label>
+                      <p className="text-white font-medium text-sm flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-slate-500" />
+                        {user?.date_embauche ? format(new Date(user.date_embauche), "dd MMM yyyy", { locale: fr }) : "-"}
+                        {user?.date_embauche && <span className="text-slate-400 text-xs">({calculateSeniority()})</span>}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Poste</Label>
+                      <p className="text-white font-medium text-sm">{user?.poste || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-slate-400 text-xs">Rôle</Label>
+                      <div className="mt-1">
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 uppercase">
+                          {user?.role}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
