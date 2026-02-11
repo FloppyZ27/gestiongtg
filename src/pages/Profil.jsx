@@ -652,7 +652,7 @@ export default function Profil() {
                         {/* En-têtes des jours - sticky */}
                         <div className="flex border-b border-slate-700 flex-shrink-0">
                           <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
-                          {getCurrentWeekDays().map((day, idx) => {
+                          {getPointageWeekDays().map((day, idx) => {
                             const isToday = day.toDateString() === new Date().toDateString();
                             return (
                             <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-emerald-500 ring-inset' : 'bg-slate-900/50'}`}>
