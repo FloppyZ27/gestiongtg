@@ -797,8 +797,83 @@ export default function Profil() {
                                    const topPx = startHour * 60 + startMin;
 
                                    return (
+                                     <dialog key={p.id} open={editingPointage?.id === p.id} className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30" onClick={(e) => {
+                                       if (e.target === e.currentTarget) setEditingPointage(null);
+                                     }}>
+                                       <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl p-6 w-96 max-h-[90vh] overflow-y-auto">
+                                         <h3 className="text-lg font-bold text-white mb-4">Modifier l'entrée de pointage</h3>
+                                         <form onSubmit={handleSubmitEditPointage} className="space-y-3">
+                                           <div>
+                                             <Label className="text-slate-400 text-xs">Date</Label>
+                                             <Input
+                                               type="date"
+                                               value={editPointageForm.date}
+                                               onChange={(e) => setEditPointageForm({...editPointageForm, date: e.target.value})}
+                                               className="bg-slate-800 border-slate-700 text-white h-8"
+                                             />
+                                           </div>
+                                           <div className="grid grid-cols-2 gap-2">
+                                             <div>
+                                               <Label className="text-slate-400 text-xs">Heure de départ</Label>
+                                               <Input
+                                                 type="time"
+                                                 value={editPointageForm.heure_debut}
+                                                 onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
+                                                 className="bg-slate-800 border-slate-700 text-white h-8"
+                                               />
+                                             </div>
+                                             <div>
+                                               <Label className="text-slate-400 text-xs">Heure de fin</Label>
+                                               <Input
+                                                 type="time"
+                                                 value={editPointageForm.heure_fin}
+                                                 onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
+                                                 className="bg-slate-800 border-slate-700 text-white h-8"
+                                               />
+                                             </div>
+                                           </div>
+                                           <div>
+                                             <Label className="text-slate-400 text-xs">Description <span className="text-red-400">*</span></Label>
+                                             <textarea
+                                               value={editPointageForm.description}
+                                               onChange={(e) => setEditPointageForm({...editPointageForm, description: e.target.value})}
+                                               placeholder="Description de l'activité..."
+                                               className="bg-slate-800 border border-slate-700 text-white rounded px-2 py-2 w-full text-xs"
+                                               rows="3"
+                                             />
+                                           </div>
+                                           <div className="flex justify-end gap-2 pt-3">
+                                             <Button
+                                               type="button"
+                                               onClick={() => setEditingPointage(null)}
+                                               className="bg-slate-800 text-slate-300 hover:bg-slate-700 h-8"
+                                             >
+                                               Annuler
+                                             </Button>
+                                             <Button
+                                               type="submit"
+                                               className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 h-8"
+                                             >
+                                               Enregistrer
+                                             </Button>
+                                           </div>
+                                         </form>
+                                       </div>
+                                     </dialog>
+                                   );
+                                 })}
+
+                                 {dayPointages.map(p => {
+                                   const startTime = new Date(p.heure_debut);
+                                   const endTime = new Date(p.heure_fin);
+                                   const startHour = startTime.getHours();
+                                   const startMin = startTime.getMinutes();
+                                   const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                   const topPx = startHour * 60 + startMin;
+
+                                   return (
                                      <div
-                                       key={p.id}
+                                       key={`display-${p.id}`}
                                        className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity ${
                                          p.confirme 
                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
