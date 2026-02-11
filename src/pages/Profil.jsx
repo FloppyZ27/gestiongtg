@@ -871,24 +871,6 @@ export default function Profil() {
                   {uploadingPhoto && (
                     <p className="text-xs text-slate-400">Téléchargement...</p>
                   )}
-                  <div className="flex flex-col gap-2 w-full">
-                    <Button
-                      size="sm"
-                      onClick={() => setIsEditingProfile(true)}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Modifier le Profil
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setIsChangingPassword(true)}
-                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Modifier Mot de Passe
-                    </Button>
-                  </div>
                 </div>
 
                 {/* Information grid - 2 lignes de 4 champs */}
@@ -951,6 +933,26 @@ export default function Profil() {
                         </Badge>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Boutons en dessous */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      onClick={() => setIsEditingProfile(true)}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier le Profil
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsChangingPassword(true)}
+                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Modifier Mot de Passe
+                    </Button>
                   </div>
                 </div>
               </div>
