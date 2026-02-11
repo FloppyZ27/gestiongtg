@@ -1068,8 +1068,8 @@ export default function Profil() {
                   <Input
                     type="time"
                     value={editPointageForm.heure_debut}
-                    disabled
-                    className="bg-slate-700 border-slate-700 text-slate-400 cursor-not-allowed"
+                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_debut: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -1077,8 +1077,8 @@ export default function Profil() {
                   <Input
                     type="time"
                     value={editPointageForm.heure_fin}
-                    disabled
-                    className="bg-slate-700 border-slate-700 text-slate-400 cursor-not-allowed"
+                    onChange={(e) => setEditPointageForm({...editPointageForm, heure_fin: e.target.value})}
+                    className="bg-slate-800 border-slate-700 text-white"
                   />
                 </div>
               </div>
