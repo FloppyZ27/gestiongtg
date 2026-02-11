@@ -789,17 +789,23 @@ export default function Profil() {
 
                                  {/* Pointages */}
                                  {dayPointages.map(p => {
-                                   const startTime = new Date(p.heure_debut);
-                                   const endTime = new Date(p.heure_fin);
+                                   const isModified = p.heure_debut_modifiee && p.heure_fin_modifiee;
+                                   
+                                   const startTime = isModified ? new Date(p.heure_debut_modifiee) : new Date(p.heure_debut);
+                                   const endTime = isModified ? new Date(p.heure_fin_modifiee) : new Date(p.heure_fin);
                                    const startHour = startTime.getHours();
                                    const startMin = startTime.getMinutes();
                                    const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
                                    const topPx = startHour * 60 + startMin;
+                                   
+                                   const initialStart = new Date(p.heure_debut);
+                                   const initialEnd = new Date(p.heure_fin);
+                                   const initialDuration = (initialEnd.getTime() - initialStart.getTime()) / (1000 * 60 * 60);
 
                                    return (
                                      <div
                                        key={`display-${p.id}`}
-                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[10px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col justify-between ${
+                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[9px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col justify-between ${
                                          p.confirme 
                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
@@ -811,10 +817,13 @@ export default function Profil() {
                                        }}
                                        title={p.description || "Cliquer pour éditer"}
                                      >
+                                       {isModified && <div className="text-[8px] font-bold text-yellow-200 mb-0.5">MODIFIÉ</div>}
                                        <div>
-                                         <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
-                                         <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
-                                         {p.description && <div className="truncate text-[9px] opacity-75 line-clamp-1">{p.description}</div>}
+                                         <div className="text-[8px] opacity-75">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                         {isModified && (
+                                           <div className="text-[8px] opacity-90 mt-0.5">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                         )}
+                                         {p.description && <div className="truncate text-[8px] opacity-75 mt-0.5 line-clamp-1">{p.description}</div>}
                                        </div>
                                        {!p.confirme && (
                                          <button
@@ -822,7 +831,7 @@ export default function Profil() {
                                              e.stopPropagation();
                                              handleConfirmPointage(p);
                                            }}
-                                           className="text-[8px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-0.5 leading-none"
+                                           className="text-[7px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-0.5 leading-none"
                                          >
                                            Confirmer
                                          </button>
