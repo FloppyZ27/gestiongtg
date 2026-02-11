@@ -935,8 +935,8 @@ export default function Profil() {
                     </div>
                   </div>
 
-                  {/* Boutons en dessous */}
-                  <div className="flex gap-2 pt-2">
+                  {/* Boutons en dessous alignés à gauche */}
+                  <div className="flex gap-2 pt-2 justify-start">
                     <Button
                       size="sm"
                       onClick={() => setIsEditingProfile(true)}
