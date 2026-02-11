@@ -528,19 +528,19 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30">
+                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '600px' }}>
                     {/* En-tête avec navigation */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900 flex-shrink-0">
                       <h3 className="text-sm font-semibold text-slate-300">
                         {format(getCurrentWeekDays()[0], "MMMM dd", { locale: fr })} - {format(getCurrentWeekDays()[6], "dd", { locale: fr })}
                       </h3>
                     </div>
 
-                    {/* Grille calendaire */}
-                    <div className="overflow-x-auto">
-                      <div className="inline-block min-w-full">
-                        {/* En-têtes des jours */}
-                        <div className="flex border-b border-slate-700">
+                    {/* Grille calendaire avec scroll */}
+                    <div className="overflow-x-auto flex-1 flex flex-col">
+                      <div className="inline-block min-w-full h-full flex flex-col">
+                        {/* En-têtes des jours - sticky */}
+                        <div className="flex border-b border-slate-700 flex-shrink-0">
                           <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
                           {getCurrentWeekDays().map((day, idx) => (
                             <div key={idx} className="flex-1 text-center py-3 border-r border-slate-700 bg-slate-900/50">
@@ -554,44 +554,46 @@ export default function Profil() {
                           ))}
                         </div>
 
-                        {/* Grille horaire */}
-                        <div className="relative">
-                          {Array.from({ length: 24 }, (_, i) => 6 + i).map((hour) => (
-                            <div key={hour} className="flex border-b border-slate-700/50">
-                              <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right">
-                                {hour.toString().padStart(2, '0')}:00
+                        {/* Grille horaire avec scroll vertical */}
+                        <div className="overflow-y-auto flex-1">
+                          <div className="relative">
+                            {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                              <div key={hour} className="flex border-b border-slate-700/50">
+                                <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right sticky left-0">
+                                  {hour.toString().padStart(2, '0')}:00
+                                </div>
+                                {getCurrentWeekDays().map((day, dayIdx) => {
+                                  const dayEvents = getEventsForDate(day).filter(event => {
+                                    const eventHour = new Date(event.start.dateTime).getHours();
+                                    return eventHour === hour;
+                                  });
+
+                                  return (
+                                    <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/20 min-h-[60px] p-1">
+                                      {dayEvents.map(event => {
+                                        const startTime = new Date(event.start.dateTime);
+                                        const endTime = new Date(event.end.dateTime);
+                                        const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+                                        return (
+                                          <div
+                                            key={event.id}
+                                            className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
+                                            style={{
+                                              minHeight: `${Math.max(20, durationHours * 60)}px`
+                                            }}
+                                          >
+                                            <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                            <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                              {getCurrentWeekDays().map((day, dayIdx) => {
-                                const dayEvents = getEventsForDate(day).filter(event => {
-                                  const eventHour = new Date(event.start.dateTime).getHours();
-                                  return eventHour === hour;
-                                });
-
-                                return (
-                                  <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/20 min-h-[60px] p-1">
-                                    {dayEvents.map(event => {
-                                      const startTime = new Date(event.start.dateTime);
-                                      const endTime = new Date(event.end.dateTime);
-                                      const durationHours = (endTime - startTime) / (1000 * 60 * 60);
-
-                                      return (
-                                        <div
-                                          key={event.id}
-                                          className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
-                                          style={{
-                                            minHeight: `${Math.max(20, durationHours * 60)}px`
-                                          }}
-                                        >
-                                          <div className="truncate">{format(startTime, "HH:mm")}</div>
-                                          <div className="truncate text-[9px] opacity-90">{event.subject}</div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
