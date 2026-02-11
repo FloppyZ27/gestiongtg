@@ -78,6 +78,13 @@ export default function Profil() {
   const [pointageCollapsed, setPointageCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState("week"); // "week" ou "month"
   const [pointageCurrentDate, setPointageCurrentDate] = useState(new Date());
+  const [editingPointage, setEditingPointage] = useState(null);
+  const [editPointageForm, setEditPointageForm] = useState({
+    date: "",
+    heure_debut: "",
+    heure_fin: "",
+    description: ""
+  });
   const weekScrollRef = React.useRef(null);
 
   const queryClient = useQueryClient();
