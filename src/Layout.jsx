@@ -251,6 +251,20 @@ function LayoutContent({ children, currentPageName }) {
     },
   });
 
+  const createPointageMutation = useMutation({
+    mutationFn: (data) => base44.entities.Pointage.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+    },
+  });
+
+  const updatePointageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+    },
+  });
+
   const resetForm = () => {
     setEntreeForm({
       date: new Date().toISOString().split('T')[0],
