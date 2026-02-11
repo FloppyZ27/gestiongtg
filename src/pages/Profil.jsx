@@ -568,9 +568,9 @@ export default function Profil() {
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
-                        <div className="overflow-y-auto flex-1" ref={weekScrollRef}>
-                          <div className="relative">
-                            {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                        <div className="overflow-y-auto flex-1 relative" ref={weekScrollRef}>
+                         <div className="relative" style={{ minHeight: '1440px' }}>
+                           {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
                               <div key={hour} className="flex border-b border-slate-700/50">
                                 <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right sticky left-0">
                                   {hour.toString().padStart(2, '0')}:00
