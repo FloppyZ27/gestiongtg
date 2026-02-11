@@ -837,7 +837,7 @@ export default function Profil() {
                                          {isModified && (
                                            <div className="opacity-90 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                          )}
-                                         {p.description && <div className="truncate opacity-85 mt-1"><span className="opacity-75">Raison:</span> {p.description}</div>}
+                                         {p.description && <div className="opacity-85 mt-1 text-wrap break-words"><span className="opacity-75">Raison:</span> {p.description}</div>}
                                        </div>
                                        {!p.confirme && (
                                          <button
