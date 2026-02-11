@@ -641,20 +641,15 @@ export default function Profil() {
                                      </div>
                                    );
                                  })}
-                               </div>
-                             );
-                           })}
-                                     </div>
-                                   );
+                                 </div>
+                                 );
                                  })}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </div>
+                                 </TabsContent>
 
                 <TabsContent value="month" className="space-y-3">
                   <div className="grid grid-cols-7 gap-2">
