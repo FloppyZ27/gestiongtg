@@ -582,16 +582,8 @@ export default function Profil() {
                                      return eventHour === hour;
                                    });
 
-                                   const dayPointages = getPointageForDate(day).filter(p => {
-                                     const startTime = new Date(p.heure_debut);
-                                     const endTime = new Date(p.heure_fin);
-                                     const startHour = startTime.getHours();
-                                     const endHour = endTime.getHours();
-                                     return hour >= startHour && hour <= endHour;
-                                   });
-
                                    return (
-                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative min-h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
+                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
                                        {dayEvents.map(event => {
                                          const startTime = new Date(event.start.dateTime);
                                          const endTime = new Date(event.end.dateTime);
