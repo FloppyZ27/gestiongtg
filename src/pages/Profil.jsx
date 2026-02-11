@@ -846,9 +846,9 @@ export default function Profil() {
 
           {!infoPersonnellesCollapsed && (
             <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="flex gap-6 items-start">
                 {/* Photo le plus à gauche */}
-                <div className="flex flex-col items-start gap-3">
+                <div className="flex flex-col items-start gap-3 flex-shrink-0">
                   <div className="relative">
                     <Avatar className="w-32 h-32 border-4 border-emerald-500/50">
                       <AvatarImage src={user?.photo_url} />
@@ -871,11 +871,11 @@ export default function Profil() {
                   {uploadingPhoto && (
                     <p className="text-xs text-slate-400">Téléchargement...</p>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 w-full">
                     <Button
                       size="sm"
                       onClick={() => setIsEditingProfile(true)}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 flex-1"
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier le Profil
@@ -883,7 +883,7 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsChangingPassword(true)}
-                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 flex-1"
+                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full"
                     >
                       <User className="w-4 h-4 mr-2" />
                       Modifier Mot de Passe
@@ -892,7 +892,7 @@ export default function Profil() {
                 </div>
 
                 {/* Information grid - 2 lignes de 4 champs */}
-                <div className="flex-1 space-y-3 w-full">
+                <div className="flex-1 space-y-3">
                   {/* Ligne 1: Nom complet, Courriel, Téléphone, Adresse civique */}
                   <div className="grid grid-cols-4 gap-x-6 gap-y-2">
                     <div>
