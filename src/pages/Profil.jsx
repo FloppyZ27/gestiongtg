@@ -568,19 +568,26 @@ export default function Profil() {
                         </div>
 
                         {/* Grille horaire avec scroll vertical */}
-                         <div className="overflow-y-auto flex-1" ref={weekScrollRef}>
-                           <div className="relative">
-                             {/* Heures et événements Microsoft */}
-                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                               <div key={hour} className="flex">
-                                 <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right sticky left-0">
-                                   {hour.toString().padStart(2, '0')}:00
-                                 </div>
-                                 {getCurrentWeekDays().map((day, dayIdx) => {
+                        <div className="overflow-y-auto flex-1" ref={weekScrollRef}>
+                          <div className="relative">
+                            {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                              <div key={hour} className="flex border-b border-slate-700/50">
+                                <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right sticky left-0">
+                                  {hour.toString().padStart(2, '0')}:00
+                                </div>
+                                {getCurrentWeekDays().map((day, dayIdx) => {
                                    const isToday = day.toDateString() === new Date().toDateString();
                                    const dayEvents = getEventsForDate(day).filter(event => {
                                      const eventHour = new Date(event.start.dateTime).getHours();
                                      return eventHour === hour;
+                                   });
+
+                                   const dayPointages = getPointageForDate(day).filter(p => {
+                                     const startTime = new Date(p.heure_debut);
+                                     const endTime = new Date(p.heure_fin);
+                                     const startHour = startTime.getHours();
+                                     const endHour = endTime.getHours();
+                                     return hour >= startHour && hour < endHour;
                                    });
 
                                    return (
@@ -593,7 +600,7 @@ export default function Profil() {
                                          return (
                                            <div
                                              key={event.id}
-                                             className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold"
+                                             className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
                                              style={{
                                                minHeight: `${Math.max(20, durationHours * 60)}px`
                                              }}
@@ -603,48 +610,31 @@ export default function Profil() {
                                            </div>
                                          );
                                        })}
+                                       {dayPointages.map(p => {
+                                         const startTime = new Date(p.heure_debut);
+                                         const endTime = new Date(p.heure_fin);
+                                         const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+                                         return (
+                                           <div
+                                             key={p.id}
+                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1"
+                                             style={{
+                                               minHeight: `${Math.max(20, durationHours * 60)}px`
+                                             }}
+                                           >
+                                             <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                             <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
+                                           </div>
+                                         );
+                                       })}
                                      </div>
                                    );
                                  })}
-                               </div>
-                             ))}
-
-                             {/* Pointages en superposition */}
-                             <div className="absolute inset-0 pointer-events-none">
-                               {getCurrentWeekDays().map((day, dayIdx) => {
-                                 const dayPointages = getPointageForDate(day);
-                                 const colWidth = 100 / 7;
-
-                                 return (
-                                   <div key={dayIdx} className="absolute h-full" style={{ left: `calc(${16 * 4 + dayIdx * colWidth}% + 1rem)`, width: `calc(${colWidth}% - 2px)` }}>
-                                     {dayPointages.map(p => {
-                                       const startTime = new Date(p.heure_debut);
-                                       const endTime = new Date(p.heure_fin);
-                                       const startHour = startTime.getHours();
-                                       const startMinutes = startTime.getMinutes();
-                                       const durationHours = (endTime - startTime) / (1000 * 60 * 60);
-                                       const topOffset = (startHour + startMinutes / 60) * 60;
-
-                                       return (
-                                         <div
-                                           key={p.id}
-                                           className="absolute bg-gradient-to-r from-blue-500/70 to-indigo-500/70 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold w-full pointer-events-auto"
-                                           style={{
-                                             top: `${topOffset}px`,
-                                             height: `${Math.max(18, durationHours * 60)}px`
-                                           }}
-                                         >
-                                           <div className="truncate">{format(startTime, "HH:mm")}</div>
-                                           <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
-                                         </div>
-                                       );
-                                     })}
-                                   </div>
-                                 );
-                               })}
-                             </div>
-                           </div>
-                         </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
