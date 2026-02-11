@@ -510,51 +510,92 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="grid grid-cols-7 gap-2">
-                    {getCurrentWeekDays().map((day, index) => {
-                      const dayPointages = getPointageForDate(day);
-                      const totalHours = getDayTotalHours(day);
-                      const isToday = day.toDateString() === new Date().toDateString();
+                  <div className="flex gap-2">
+                    {/* Colonne des heures */}
+                    <div className="flex flex-col pt-10 w-12">
+                      {Array.from({ length: 13 }, (_, i) => i + 7).map((hour) => (
+                        <div key={hour} className="h-16 text-xs text-slate-500 text-right pr-2">
+                          {hour}h
+                        </div>
+                      ))}
+                    </div>
 
-                      return (
-                        <div
-                          key={index}
-                          className={`border rounded-lg p-3 ${
-                            isToday 
-                              ? 'border-cyan-500 bg-cyan-500/10' 
-                              : 'border-slate-700 bg-slate-800/30'
-                          }`}
-                        >
-                          <div className="text-center mb-2">
-                            <div className="text-xs text-slate-400">
-                              {format(day, "EEE", { locale: fr })}
+                    {/* Colonnes des jours */}
+                    <div className="flex-1 grid grid-cols-7 gap-2">
+                      {getCurrentWeekDays().map((day, index) => {
+                        const dayPointages = getPointageForDate(day);
+                        const totalHours = getDayTotalHours(day);
+                        const isToday = day.toDateString() === new Date().toDateString();
+
+                        return (
+                          <div key={index} className="flex flex-col">
+                            {/* En-tête du jour */}
+                            <div className={`text-center mb-2 pb-2 border-b ${
+                              isToday ? 'border-cyan-500' : 'border-slate-700'
+                            }`}>
+                              <div className="text-xs text-slate-400">
+                                {format(day, "EEE", { locale: fr })}
+                              </div>
+                              <div className={`text-lg font-semibold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                                {format(day, "d", { locale: fr })}
+                              </div>
+                              {totalHours > 0 && (
+                                <div className="text-xs text-cyan-400 font-bold">
+                                  {totalHours.toFixed(1)}h
+                                </div>
+                              )}
                             </div>
-                            <div className={`text-lg font-semibold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
-                              {format(day, "d", { locale: fr })}
+
+                            {/* Timeline avec les pointages */}
+                            <div className={`relative border rounded-lg flex-1 ${
+                              isToday 
+                                ? 'border-cyan-500 bg-cyan-500/5' 
+                                : 'border-slate-700 bg-slate-800/20'
+                            }`} style={{ height: '832px' }}>
+                              {/* Lignes horaires */}
+                              {Array.from({ length: 13 }, (_, i) => (
+                                <div 
+                                  key={i} 
+                                  className="absolute w-full border-t border-slate-700/50"
+                                  style={{ top: `${i * 64}px` }}
+                                />
+                              ))}
+
+                              {/* Pointages positionnés */}
+                              {dayPointages.map(p => {
+                                const startTime = new Date(p.heure_debut);
+                                const startHour = startTime.getHours() + startTime.getMinutes() / 60;
+                                const duration = p.duree_heures || 0;
+                                
+                                // Position relative à 7h (début de la timeline)
+                                const topPosition = ((startHour - 7) * 64);
+                                const height = duration * 64;
+
+                                return (
+                                  <div
+                                    key={p.id}
+                                    className="absolute w-full px-1"
+                                    style={{
+                                      top: `${Math.max(0, topPosition)}px`,
+                                      height: `${Math.max(16, height)}px`
+                                    }}
+                                  >
+                                    <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
+                                      <div className="text-[10px] font-bold text-cyan-100">
+                                        {format(startTime, "HH:mm")}
+                                      </div>
+                                      <div className="text-[9px] text-cyan-200">
+                                        {duration.toFixed(1)}h
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
-                          {dayPointages.length > 0 ? (
-                            <div className="space-y-1">
-                              {dayPointages.map(p => (
-                                <div key={p.id} className="bg-slate-700/50 rounded p-1 text-xs">
-                                  <div className="text-cyan-400 font-semibold">
-                                    {p.duree_heures?.toFixed(2)}h
-                                  </div>
-                                  <div className="text-slate-400 text-[10px]">
-                                    {format(new Date(p.heure_debut), "HH:mm")}
-                                  </div>
-                                </div>
-                              ))}
-                              <div className="text-xs text-cyan-400 font-bold pt-1 border-t border-slate-600">
-                                Total: {totalHours.toFixed(2)}h
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-center text-slate-600 text-xs">-</div>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </TabsContent>
 
