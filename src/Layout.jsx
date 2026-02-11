@@ -166,6 +166,7 @@ function LayoutContent({ children, currentPageName }) {
   const [entreeTempsFilterTache, setEntreeTempsFilterTache] = useState([]);
   const [entreeTempsFilterVille, setEntreeTempsFilterVille] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [showPunchControls, setShowPunchControls] = useState(false);
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
@@ -1614,45 +1615,60 @@ function LayoutContent({ children, currentPageName }) {
 
             {/* Boutons à droite - Chronomètre, Punch In/Out, Entrée de temps et Notification */}
             <div className="flex items-center gap-3">
-              {/* Chronomètre avec lumière */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-                {/* Lumière indicatrice */}
-                <div className="relative">
-                  {pointageEnCours ? (
-                    <>
-                      <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                      <div className="absolute inset-0 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
-                    </>
-                  ) : (
-                    <div className="w-2.5 h-2.5 bg-slate-600 rounded-full"></div>
-                  )}
-                </div>
-                
-                {/* Chronomètre */}
-                <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
-                  {formatElapsedTime(elapsedTime)}
-                </span>
-              </div>
+              {/* Bouton pour afficher/masquer les contrôles de pointage */}
+              <Button
+                onClick={() => setShowPunchControls(!showPunchControls)}
+                size="sm"
+                variant="ghost"
+                className="text-slate-400 hover:text-white hover:bg-slate-800/50"
+              >
+                <Clock className="w-5 h-5" />
+              </Button>
 
-              {/* Bouton Punch In/Out */}
-              {!pointageEnCours ? (
-                <Button
-                  onClick={handlePunchIn}
-                  size="sm"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
-                >
-                  <Play className="w-4 h-4 mr-1" />
-                  Punch In
-                </Button>
-              ) : (
-                <Button
-                  onClick={handlePunchOut}
-                  size="sm"
-                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
-                >
-                  <Square className="w-4 h-4 mr-1" />
-                  Punch Out
-                </Button>
+              {/* Chronomètre et boutons Punch (cachés par défaut) */}
+              {showPunchControls && (
+                <>
+                  {/* Chronomètre avec lumière */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
+                    {/* Lumière indicatrice */}
+                    <div className="relative">
+                      {pointageEnCours ? (
+                        <>
+                          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                          <div className="absolute inset-0 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
+                        </>
+                      ) : (
+                        <div className="w-2.5 h-2.5 bg-slate-600 rounded-full"></div>
+                      )}
+                    </div>
+                    
+                    {/* Chronomètre */}
+                    <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
+                      {formatElapsedTime(elapsedTime)}
+                    </span>
+                  </div>
+
+                  {/* Bouton Punch In/Out */}
+                  {!pointageEnCours ? (
+                    <Button
+                      onClick={handlePunchIn}
+                      size="sm"
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
+                    >
+                      <Play className="w-4 h-4 mr-1" />
+                      Punch In
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handlePunchOut}
+                      size="sm"
+                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg h-8"
+                    >
+                      <Square className="w-4 h-4 mr-1" />
+                      Punch Out
+                    </Button>
+                  )}
+                </>
               )}
 
               <Button
