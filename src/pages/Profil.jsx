@@ -331,12 +331,6 @@ export default function Profil() {
     return entries.reduce((sum, e) => sum + (e.heures || 0), 0);
   };
 
-  // Calculer le total des heures par jour et par semaine
-  const calculateTotalHours = (date) => {
-    const entries = groupedEntrees[date] || [];
-    return entries.reduce((sum, e) => sum + (e.heures || 0), 0);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
       <div className="w-full">
