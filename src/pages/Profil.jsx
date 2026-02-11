@@ -583,8 +583,11 @@ export default function Profil() {
                                    });
 
                                    const dayPointages = getPointageForDate(day).filter(p => {
-                                     const startHour = new Date(p.heure_debut).getHours();
-                                     return startHour === hour;
+                                     const startTime = new Date(p.heure_debut);
+                                     const endTime = new Date(p.heure_fin);
+                                     const startHour = startTime.getHours();
+                                     const endHour = endTime.getHours();
+                                     return hour >= startHour && hour < endHour;
                                    });
 
                                    return (
