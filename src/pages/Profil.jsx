@@ -528,87 +528,71 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="flex gap-2 w-full">
-                    {/* Conteneur avec scroll */}
-                    <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '768px' }}>
-                      {/* Colonne des heures */}
-                      <div className="flex flex-col w-12 flex-shrink-0" style={{ paddingTop: '82px' }}>
-                        {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                          <div key={hour} className="text-xs text-slate-500 text-right pr-2 flex flex-col justify-between relative" style={{ height: '102px' }}>
-                            <span>{hour}h</span>
-                            <span>{hour + 1}h</span>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30">
+                    {/* En-tête avec navigation */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900">
+                      <h3 className="text-sm font-semibold text-slate-300">
+                        {format(getCurrentWeekDays()[0], "MMMM dd", { locale: fr })} - {format(getCurrentWeekDays()[6], "dd", { locale: fr })}
+                      </h3>
+                    </div>
 
-                      {/* Colonnes des jours */}
-                      <div className="flex-1 grid grid-cols-7 gap-2">
-                        {getCurrentWeekDays().map((day, index) => {
-                          const dayEvents = getEventsForDate(day);
-
-                          return (
-                            <div key={index} className="flex flex-col">
-                              {/* En-tête du jour - sticky */}
-                              <div className="sticky top-0 z-10 bg-slate-900 text-center border-b border-slate-700" style={{ height: '82px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <div className="text-xs text-slate-400">
-                                  {format(day, "EEE", { locale: fr })}
-                                </div>
-                                <div className="text-lg font-semibold text-white">
-                                  {format(day, "d", { locale: fr })}
-                                </div>
-                                {dayEvents.length > 0 && (
-                                  <div className="text-xs text-emerald-400 font-bold">
-                                    {dayEvents.length} événement{dayEvents.length > 1 ? 's' : ''}
-                                  </div>
-                                )}
+                    {/* Grille calendaire */}
+                    <div className="overflow-x-auto">
+                      <div className="inline-block min-w-full">
+                        {/* En-têtes des jours */}
+                        <div className="flex border-b border-slate-700">
+                          <div className="w-16 flex-shrink-0 border-r border-slate-700 bg-slate-900/50"></div>
+                          {getCurrentWeekDays().map((day, idx) => (
+                            <div key={idx} className="flex-1 text-center py-3 border-r border-slate-700 bg-slate-900/50">
+                              <div className="text-xs text-slate-400 mb-1">
+                                {format(day, "EEE", { locale: fr })}
                               </div>
-
-                              {/* Timeline avec les événements Microsoft */}
-                              <div className="relative border rounded-lg flex-1 border-slate-700 bg-slate-800/20" style={{ height: '2448px' }}>
-                                {/* Lignes horaires */}
-                                {Array.from({ length: 24 }, (_, i) => (
-                                  <div 
-                                    key={i} 
-                                    className="absolute w-full border-t border-slate-700/50"
-                                    style={{ top: `${i * 102}px` }}
-                                  />
-                                ))}
-
-                                {/* Événements Microsoft positionnés */}
-                                {dayEvents.map(event => {
-                                  const startTime = new Date(event.start.dateTime);
-                                  const endTime = new Date(event.end.dateTime);
-
-                                  const startHour = startTime.getHours() + startTime.getMinutes() / 60;
-                                  const endHour = endTime.getHours() + endTime.getMinutes() / 60;
-
-                                  const topPosition = (startHour * 102);
-                                  const height = ((endHour - startHour) * 102);
-
-                                  return (
-                                    <div
-                                      key={event.id}
-                                      className="absolute w-full px-1"
-                                      style={{
-                                        top: `${Math.max(0, topPosition)}px`,
-                                        height: `${Math.max(16, height)}px`
-                                      }}
-                                    >
-                                      <div className="h-full bg-gradient-to-br from-emerald-500/40 to-teal-500/40 border border-emerald-500/50 rounded px-1 py-1 overflow-hidden">
-                                        <div className="text-[10px] font-bold text-emerald-100">
-                                          {format(startTime, "HH:mm")}
-                                        </div>
-                                        <div className="text-[9px] text-emerald-200 truncate">
-                                          {event.subject}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
+                              <div className="text-lg font-bold text-white">
+                                {format(day, "d", { locale: fr })}
                               </div>
                             </div>
-                          );
-                        })}
+                          ))}
+                        </div>
+
+                        {/* Grille horaire */}
+                        <div className="relative">
+                          {Array.from({ length: 24 }, (_, i) => 6 + i).map((hour) => (
+                            <div key={hour} className="flex border-b border-slate-700/50">
+                              <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right">
+                                {hour.toString().padStart(2, '0')}:00
+                              </div>
+                              {getCurrentWeekDays().map((day, dayIdx) => {
+                                const dayEvents = getEventsForDate(day).filter(event => {
+                                  const eventHour = new Date(event.start.dateTime).getHours();
+                                  return eventHour === hour;
+                                });
+
+                                return (
+                                  <div key={dayIdx} className="flex-1 border-r border-slate-700 relative bg-slate-800/20 min-h-[60px] p-1">
+                                    {dayEvents.map(event => {
+                                      const startTime = new Date(event.start.dateTime);
+                                      const endTime = new Date(event.end.dateTime);
+                                      const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+                                      return (
+                                        <div
+                                          key={event.id}
+                                          className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
+                                          style={{
+                                            minHeight: `${Math.max(20, durationHours * 60)}px`
+                                          }}
+                                        >
+                                          <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                          <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
