@@ -515,7 +515,7 @@ export default function Profil() {
                     <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '768px' }}>
                       {/* Colonne des heures */}
                       <div className="flex flex-col pt-10 w-12 flex-shrink-0">
-                        {Array.from({ length: 13 }, (_, i) => i + 7).map((hour) => (
+                        {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
                           <div key={hour} className="text-xs text-slate-500 text-right pr-2" style={{ height: '128px' }}>
                             {hour}h
                           </div>
@@ -527,18 +527,15 @@ export default function Profil() {
                         {getCurrentWeekDays().map((day, index) => {
                           const dayPointages = getPointageForDate(day);
                           const totalHours = getDayTotalHours(day);
-                          const isToday = day.toDateString() === new Date().toDateString();
 
                           return (
                             <div key={index} className="flex flex-col">
                               {/* En-tête du jour - sticky */}
-                              <div className={`sticky top-0 z-10 bg-slate-900 text-center mb-2 pb-2 border-b ${
-                                isToday ? 'border-cyan-500' : 'border-slate-700'
-                              }`}>
+                              <div className="sticky top-0 z-10 bg-slate-900 text-center mb-2 pb-2 border-b border-slate-700">
                                 <div className="text-xs text-slate-400">
                                   {format(day, "EEE", { locale: fr })}
                                 </div>
-                                <div className={`text-lg font-semibold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                                <div className="text-lg font-semibold text-white">
                                   {format(day, "d", { locale: fr })}
                                 </div>
                                 {totalHours > 0 && (
@@ -549,13 +546,9 @@ export default function Profil() {
                               </div>
 
                               {/* Timeline avec les pointages */}
-                              <div className={`relative border rounded-lg flex-1 ${
-                                isToday 
-                                  ? 'border-cyan-500 bg-cyan-500/5' 
-                                  : 'border-slate-700 bg-slate-800/20'
-                              }`} style={{ height: '1664px' }}>
+                              <div className="relative border rounded-lg flex-1 border-slate-700 bg-slate-800/20" style={{ height: '3072px' }}>
                                 {/* Lignes horaires */}
-                                {Array.from({ length: 13 }, (_, i) => (
+                                {Array.from({ length: 24 }, (_, i) => (
                                   <div 
                                     key={i} 
                                     className="absolute w-full border-t border-slate-700/50"
@@ -565,38 +558,38 @@ export default function Profil() {
 
                                 {/* Pointages positionnés */}
                                 {dayPointages.map(p => {
-                                 const startTime = new Date(p.heure_debut);
-                                 const endTime = p.heure_fin ? new Date(p.heure_fin) : new Date();
+                                  const startTime = new Date(p.heure_debut);
+                                  const endTime = p.heure_fin ? new Date(p.heure_fin) : new Date();
 
-                                 const startHour = startTime.getHours() + startTime.getMinutes() / 60;
-                                 const endHour = endTime.getHours() + endTime.getMinutes() / 60;
+                                  const startHour = startTime.getHours() + startTime.getMinutes() / 60;
+                                  const endHour = endTime.getHours() + endTime.getMinutes() / 60;
 
-                                 // Position relative à 7h (début de la timeline) - ligne horaire de départ
-                                 const topPosition = ((startHour - 7) * 128);
-                                 // Hauteur basée sur la différence entre début et fin
-                                 const height = ((endHour - startHour) * 128);
+                                  // Position relative à 0h (début de la timeline)
+                                  const topPosition = (startHour * 128);
+                                  // Hauteur basée sur la différence entre début et fin
+                                  const height = ((endHour - startHour) * 128);
 
-                                 return (
-                                   <div
-                                     key={p.id}
-                                     className="absolute w-full px-1"
-                                     style={{
-                                       top: `${Math.max(0, topPosition)}px`,
-                                       height: `${Math.max(16, height)}px`
-                                     }}
-                                   >
-                                     <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
-                                       <div className="text-[10px] font-bold text-cyan-100">
-                                         {format(startTime, "HH:mm")}
-                                       </div>
-                                       {p.heure_fin && (
-                                         <div className="text-[9px] text-cyan-200">
-                                           {p.duree_heures.toFixed(1)}h
-                                         </div>
-                                       )}
-                                     </div>
-                                   </div>
-                                 );
+                                  return (
+                                    <div
+                                      key={p.id}
+                                      className="absolute w-full px-1"
+                                      style={{
+                                        top: `${Math.max(0, topPosition)}px`,
+                                        height: `${Math.max(16, height)}px`
+                                      }}
+                                    >
+                                      <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
+                                        <div className="text-[10px] font-bold text-cyan-100">
+                                          {format(startTime, "HH:mm")}
+                                        </div>
+                                        {p.heure_fin && (
+                                          <div className="text-[9px] text-cyan-200">
+                                            {p.duree_heures.toFixed(1)}h
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
                                 })}
                               </div>
                             </div>
