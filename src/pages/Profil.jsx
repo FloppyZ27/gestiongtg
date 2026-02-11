@@ -587,7 +587,7 @@ export default function Profil() {
                                      const endTime = new Date(p.heure_fin);
                                      const startHour = startTime.getHours();
                                      const endHour = endTime.getHours();
-                                     return hour >= startHour && hour < endHour;
+                                     return hour >= startHour && hour <= endHour;
                                    });
 
                                    return (
