@@ -512,11 +512,11 @@ export default function Profil() {
                 <TabsContent value="week" className="space-y-3">
                   <div className="flex gap-2 w-full">
                     {/* Conteneur avec scroll */}
-                    <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '464px' }}>
+                    <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '768px' }}>
                       {/* Colonne des heures */}
                       <div className="flex flex-col pt-10 w-12 flex-shrink-0">
                         {Array.from({ length: 13 }, (_, i) => i + 7).map((hour) => (
-                          <div key={hour} className="h-16 text-xs text-slate-500 text-right pr-2">
+                          <div key={hour} className="text-xs text-slate-500 text-right pr-2" style={{ height: '128px' }}>
                             {hour}h
                           </div>
                         ))}
@@ -553,13 +553,13 @@ export default function Profil() {
                                 isToday 
                                   ? 'border-cyan-500 bg-cyan-500/5' 
                                   : 'border-slate-700 bg-slate-800/20'
-                              }`} style={{ height: '832px' }}>
+                              }`} style={{ height: '1664px' }}>
                                 {/* Lignes horaires */}
                                 {Array.from({ length: 13 }, (_, i) => (
                                   <div 
                                     key={i} 
                                     className="absolute w-full border-t border-slate-700/50"
-                                    style={{ top: `${i * 64}px` }}
+                                    style={{ top: `${i * 128}px` }}
                                   />
                                 ))}
 
@@ -570,8 +570,8 @@ export default function Profil() {
                                   const duration = p.duree_heures || 0;
                                   
                                   // Position relative à 7h (début de la timeline)
-                                  const topPosition = ((startHour - 7) * 64);
-                                  const height = duration * 64;
+                                  const topPosition = ((startHour - 7) * 128);
+                                  const height = duration * 128;
 
                                   return (
                                     <div
