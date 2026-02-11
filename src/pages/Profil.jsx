@@ -538,7 +538,7 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '600px' }}>
+                  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/30 flex flex-col" style={{ height: '700px' }}>
                     {/* En-tête avec navigation */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900 flex-shrink-0">
                       <h3 className="text-sm font-semibold text-slate-300">
