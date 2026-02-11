@@ -77,6 +77,7 @@ export default function Profil() {
   // États pour pointage
   const [pointageCollapsed, setPointageCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState("week"); // "week" ou "month"
+  const weekScrollRef = React.useRef(null);
 
   const queryClient = useQueryClient();
 
