@@ -873,11 +873,11 @@ export default function Profil() {
                   )}
                   
                   {/* Boutons sous la photo */}
-                  <div className="flex flex-col gap-2 w-full">
+                  <div className="flex gap-2 w-full">
                     <Button
                       size="sm"
                       onClick={() => setIsEditingProfile(true)}
-                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 w-full"
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400"
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier le Profil
@@ -885,7 +885,7 @@ export default function Profil() {
                     <Button
                       size="sm"
                       onClick={() => setIsChangingPassword(true)}
-                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 w-full"
+                      className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400"
                     >
                       <User className="w-4 h-4 mr-2" />
                       Modifier Mot de Passe
