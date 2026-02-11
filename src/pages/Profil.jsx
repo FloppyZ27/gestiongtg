@@ -612,16 +612,11 @@ export default function Profil() {
                                        })}
                                        {dayPointages.map(p => {
                                          const startTime = new Date(p.heure_debut);
-                                         const endTime = new Date(p.heure_fin);
-                                         const durationHours = (endTime - startTime) / (1000 * 60 * 60);
 
                                          return (
                                            <div
                                              key={p.id}
-                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1"
-                                             style={{
-                                               minHeight: `${Math.max(20, durationHours * 60)}px`
-                                             }}
+                                             className="bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold mb-1 h-6"
                                            >
                                              <div className="truncate">{format(startTime, "HH:mm")}</div>
                                              <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
