@@ -5,19 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Plus, ChevronLeft, ChevronRight, Edit, Cake, Trash2, X, Search, UserPlus, UserCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronUp, ChevronDown, Loader2 } from "lucide-react";
+import { Calendar, Clock, User, Mail, Phone, MapPin, Briefcase, Upload, Edit, Cake, ChevronUp, ChevronDown, Loader2, Play, Square, Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { createPageUrl } from "@/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import EditDossierDialog from "../components/dossiers/EditDossierDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const ARPENTEURS = ["Samuel Guay", "Dany Gaboury", "Pierre-Luc Pilote", "Benjamin Larouche", "Frédéric Gilbert"];
 const TYPES_MANDATS = ["Bornage", "Certificat de localisation", "CPTAQ", "Description Technique", "Dérogation mineure", "Implantation", "Levé topographique", "OCTR", "Piquetage", "Plan montrant", "Projet de lotissement", "Recherches"];
@@ -77,8 +71,7 @@ export default function Profil() {
   const [editingDossier, setEditingDossier] = useState(null);
   const [isEditingDossierDialogOpen, setIsEditingDossierDialogOpen] = useState(false);
   const [infoPersonnellesCollapsed, setInfoPersonnellesCollapsed] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
-  const [loadingAddress, setLoadingAddress] = useState(false);
+  const [feuilleTempsCollapsed, setFeuilleTempsCollapsed] = useState(false);
   
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -86,30 +79,12 @@ export default function Profil() {
     confirmPassword: ""
   });
 
-  // États pour les retours d'appel
-  const [searchRetours, setSearchRetours] = useState("");
-  const [filterArpenteurRetours, setFilterArpenteurRetours] = useState("all");
-  const [filterVilleRetours, setFilterVilleRetours] = useState("all");
-  const [filterMandatRetours, setFilterMandatRetours] = useState("all");
-  const [sortFieldRetours, setSortFieldRetours] = useState(null);
-  const [sortDirectionRetours, setSortDirectionRetours] = useState("asc");
-
-  // États pour les mandats assignés
-  const [searchMandats, setSearchMandats] = useState("");
-  const [filterArpenteurMandats, setFilterArpenteurMandats] = useState("all");
-  const [filterVilleMandats, setFilterVilleMandats] = useState("all");
-  const [filterTypeMandats, setFilterTypeMandats] = useState("all");
-  const [filterTacheMandats, setFilterTacheMandats] = useState("all");
-  const [sortFieldMandats, setSortFieldMandats] = useState(null);
-  const [sortDirectionMandats, setSortDirectionMandats] = useState("asc");
-
-  // États pour les entrées de temps
-  const [searchEntrees, setSearchEntrees] = useState("");
-  const [filterArpenteurEntrees, setFilterArpenteurEntrees] = useState("all");
-  const [filterMandatEntrees, setFilterMandatEntrees] = useState("all");
-  const [filterTacheEntrees, setFilterTacheEntrees] = useState("all");
-  const [sortFieldEntrees, setSortFieldEntrees] = useState(null);
-  const [sortDirectionEntrees, setSortDirectionEntrees] = useState("asc");
+  // États pour punch in/out
+  const [isPunchedIn, setIsPunchedIn] = useState(false);
+  const [punchInTime, setPunchInTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [loadingAddress, setLoadingAddress] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -143,12 +118,18 @@ export default function Profil() {
     enabled: !!user,
   });
 
-  const { data: rendezVous = [] } = useQuery({
-    queryKey: ['rendezVous', user?.email],
-    queryFn: () => base44.entities.RendezVous.filter({ utilisateur_email: user?.email }, '-date_debut'),
-    initialData: [],
-    enabled: !!user,
-  });
+  // Calculer le temps écoulé depuis punch in
+  useEffect(() => {
+    if (!isPunchedIn || !punchInTime) return;
+    
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const elapsed = Math.floor((now - punchInTime) / 1000); // en secondes
+      setElapsedTime(elapsed);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isPunchedIn, punchInTime]);
 
   const [profileForm, setProfileForm] = useState({
     prenom: "",
@@ -250,10 +231,10 @@ export default function Profil() {
     },
   });
 
-  const deleteDossierMutation = useMutation({
-    mutationFn: (id) => base44.entities.Dossier.delete(id),
+  const createEntreeTempsMutation = useMutation({
+    mutationFn: (data) => base44.entities.EntreeTemps.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
     },
   });
 
@@ -396,38 +377,36 @@ export default function Profil() {
     }
   };
 
-  const handleDeleteDossier = (id) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce dossier ?")) {
-      deleteDossierMutation.mutate(id);
-    }
+  const handlePunchIn = () => {
+    setIsPunchedIn(true);
+    setPunchInTime(new Date().getTime());
+    setElapsedTime(0);
   };
 
-  const resetRendezVousForm = () => {
-    setRendezVousForm({
-      titre: "",
-      description: "",
-      date_debut: "",
-      date_fin: "",
-      type: "rendez-vous"
+  const handlePunchOut = () => {
+    if (!punchInTime) return;
+    
+    const now = new Date().getTime();
+    const elapsed = (now - punchInTime) / 1000 / 60 / 60; // heures décimales
+    
+    // Créer une entrée de temps
+    createEntreeTempsMutation.mutate({
+      date: new Date().toISOString().split('T')[0],
+      heures: parseFloat(elapsed.toFixed(2)),
+      tache: "Temps tracé",
+      utilisateur_email: user?.email
     });
-    setEditingRendezVous(null);
+    
+    setIsPunchedIn(false);
+    setPunchInTime(null);
+    setElapsedTime(0);
   };
 
-  const handleEditRendezVous = (rdv) => {
-    setEditingRendezVous(rdv);
-    setRendezVousForm({
-      titre: rdv.titre,
-      description: rdv.description || "",
-      date_debut: rdv.date_debut,
-      date_fin: rdv.date_fin || "",
-      type: rdv.type
-    });
-    setIsRendezVousDialogOpen(true);
-  };
-
-  const handleEditDossier = (dossier) => {
-    setEditingDossier(dossier);
-    setIsEditingDossierDialogOpen(true);
+  const formatElapsedTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getInitials = (name) => {
@@ -462,9 +441,7 @@ export default function Profil() {
     return formatAdresse(mandats[0].adresse_travaux);
   };
 
-  const retoursAppel = dossiers
-    .filter(d => d.statut === "Retour d'appel" && d.utilisateur_assigne === user?.email)
-    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
 
   const calculateSeniority = () => {
     if (!user?.date_embauche) return "N/A";
@@ -728,93 +705,10 @@ export default function Profil() {
     }
   });
 
-  const getHolidays = (year) => {
-    return [
-      { date: `${year}-01-01`, name: "Jour de l'an" },
-      { date: `${year}-04-18`, name: "Vendredi saint" },
-      { date: `${year}-05-19`, name: "Fête de la Reine" },
-      { date: `${year}-06-24`, name: "Fête nationale du Québec" },
-      { date: `${year}-07-01`, name: "Fête du Canada" },
-      { date: `${year}-09-01`, name: "Fête du Travail" },
-      { date: `${year}-10-13`, name: "Action de grâce" },
-      { date: `${year}-12-25`, name: "Noël" },
-      { date: `${year}-12-26`, name: "Lendemain de Noël" },
-    ];
-  };
-
-  // Calendar logic
-  let startDate, endDate, daysInView;
-
-  if (viewMode === 'month') {
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    startDate = startOfWeek(monthStart, { locale: fr });
-    endDate = endOfWeek(monthEnd, { locale: fr });
-    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
-  } else {
-    startDate = startOfWeek(currentDate, { locale: fr });
-    endDate = endOfWeek(currentDate, { locale: fr });
-    daysInView = eachDayOfInterval({ start: startDate, end: endDate });
-  }
-
-  const getEventsForDay = (day) => {
-    const events = rendezVous.filter(rdv => {
-      const rdvDate = new Date(rdv.date_debut);
-      return isSameDay(rdvDate, day);
-    });
-
-    const dayStr = format(day, 'yyyy-MM-dd');
-    const currentYear = day.getFullYear();
-    const holidays = getHolidays(currentYear);
-    const holiday = holidays.find(h => h.date === dayStr);
-    if (holiday) {
-      events.push({
-        id: `holiday-${dayStr}`,
-        titre: holiday.name,
-        type: 'holiday',
-        date_debut: dayStr
-      });
-    }
-
-    if (user?.date_naissance) {
-      const birthDate = new Date(user.date_naissance);
-      if (birthDate.getMonth() === day.getMonth() && birthDate.getDate() === day.getDate()) {
-        events.push({
-          id: `birthday-${user.email}`,
-          titre: `🎂 Mon anniversaire`,
-          type: 'birthday',
-          date_debut: dayStr
-        });
-      }
-    }
-
-    return events;
-  };
-
-  const previousPeriod = () => {
-    if (viewMode === 'month') {
-      setCurrentDate(subMonths(currentDate, 1));
-    } else {
-      setCurrentDate(subWeeks(currentDate, 1));
-    }
-  };
-
-  const nextPeriod = () => {
-    if (viewMode === 'month') {
-      setCurrentDate(addMonths(currentDate, 1));
-    } else {
-      setCurrentDate(addWeeks(currentDate, 1));
-    }
-  };
-
-  const getPeriodLabel = () => {
-    if (viewMode === 'month') {
-      return format(currentDate, "MMMM yyyy", { locale: fr });
-    } else {
-      const weekStart = startOfWeek(currentDate, { locale: fr });
-      const weekEnd = endOfWeek(currentDate, { locale: fr });
-      return `${format(weekStart, "d MMM", { locale: fr })} - ${format(weekEnd, "d MMM yyyy", { locale: fr })}`;
-    }
+  // Calculer le total des heures par jour et par semaine
+  const calculateTotalHours = (date) => {
+    const entries = groupedEntrees[date] || [];
+    return entries.reduce((sum, e) => sum + (e.heures || 0), 0);
   };
 
   return (
@@ -1570,35 +1464,12 @@ export default function Profil() {
               </div>
               <div className="space-y-2 relative">
                 <Label>Adresse</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4 z-10" />
-                  <Input
-                    value={profileForm.adresse}
-                    onChange={(e) => {
-                      setProfileForm({...profileForm, adresse: e.target.value});
-                      searchAddress(e.target.value);
-                    }}
-                    placeholder="Rechercher une adresse..."
-                    className="bg-slate-800 border-slate-700 pl-10"
-                  />
-                  {loadingAddress && (
-                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400 absolute right-3 top-1/2 -translate-y-1/2" />
-                  )}
-                </div>
-                {addressSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                    {addressSuggestions.map((suggestion, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => selectAddress(suggestion)}
-                        className="px-3 py-2 cursor-pointer hover:bg-slate-700 text-sm text-slate-300 flex items-center gap-2 border-b border-slate-700 last:border-b-0"
-                      >
-                        <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                        <span>{suggestion.full_address || `${suggestion.numero_civique} ${suggestion.rue}, ${suggestion.ville}`}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <Input
+                  value={profileForm.adresse}
+                  onChange={(e) => setProfileForm({...profileForm, adresse: e.target.value})}
+                  placeholder="Adresse civique..."
+                  className="bg-slate-800 border-slate-700"
+                />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)} disabled={updateProfileMutation.isPending}>
@@ -1611,21 +1482,6 @@ export default function Profil() {
             </form>
           </DialogContent>
         </Dialog>
-
-        {/* Edit Dossier Dialog */}
-        <EditDossierDialog
-          isOpen={isEditingDossierDialogOpen}
-          onClose={() => {
-            setIsEditingDossierDialogOpen(false);
-            setEditingDossier(null);
-          }}
-          dossier={editingDossier}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['dossiers'] });
-          }}
-          clients={clients}
-          users={users}
-        />
       </div>
     </div>
   );
