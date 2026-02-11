@@ -805,8 +805,10 @@ export default function Profil() {
                                    return (
                                      <div
                                        key={`display-${p.id}`}
-                                       className={`absolute left-1 right-1 rounded px-2 py-1 text-[9px] font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col justify-between ${
-                                         p.confirme 
+                                       className={`absolute left-1 right-1 rounded px-2 py-2 font-semibold z-20 cursor-pointer hover:opacity-90 transition-opacity overflow-hidden flex flex-col ${
+                                         isModified
+                                           ? 'bg-gradient-to-r from-orange-500/60 to-amber-500/60 border border-orange-500 text-orange-50'
+                                           : p.confirme 
                                            ? 'bg-gradient-to-r from-green-500/60 to-emerald-500/60 border border-green-500 text-green-50'
                                            : 'bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 text-blue-50'
                                        }`}
@@ -817,13 +819,13 @@ export default function Profil() {
                                        }}
                                        title={p.description || "Cliquer pour éditer"}
                                      >
-                                       {isModified && <div className="text-[8px] font-bold text-yellow-200 mb-0.5">MODIFIÉ</div>}
-                                       <div>
-                                         <div className="text-[8px] opacity-75">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                       {isModified && <div className="text-[10px] font-bold mb-1">MODIFIÉ</div>}
+                                       <div className="text-[11px] leading-tight">
+                                         <div className="opacity-90">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
                                          {isModified && (
-                                           <div className="text-[8px] opacity-90 mt-0.5">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
+                                           <div className="opacity-90 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                          )}
-                                         {p.description && <div className="truncate text-[8px] opacity-75 mt-0.5 line-clamp-1">{p.description}</div>}
+                                         {p.description && <div className="truncate opacity-85 mt-1">{p.description}</div>}
                                        </div>
                                        {!p.confirme && (
                                          <button
@@ -831,7 +833,7 @@ export default function Profil() {
                                              e.stopPropagation();
                                              handleConfirmPointage(p);
                                            }}
-                                           className="text-[7px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-0.5 leading-none"
+                                           className="text-[9px] px-1 py-0.5 bg-white/30 hover:bg-white/50 rounded transition-colors mt-1 leading-none"
                                          >
                                            Confirmer
                                          </button>
