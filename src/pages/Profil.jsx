@@ -569,65 +569,81 @@ export default function Profil() {
 
                         {/* Grille horaire avec scroll vertical */}
                         <div className="overflow-y-auto flex-1 relative" ref={weekScrollRef}>
-                         <div className="relative" style={{ minHeight: '1440px' }}>
-                           {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                              <div key={hour} className="flex border-b border-slate-700/50">
-                                <div className="w-16 flex-shrink-0 border-r border-slate-700 px-2 py-2 text-xs text-slate-500 bg-slate-900/30 text-right sticky left-0">
-                                  {hour.toString().padStart(2, '0')}:00
-                                </div>
-                                {getCurrentWeekDays().map((day, dayIdx) => {
-                                   const isToday = day.toDateString() === new Date().toDateString();
-                                   const dayEvents = getEventsForDate(day).filter(event => {
-                                     const eventHour = new Date(event.start.dateTime).getHours();
-                                     return eventHour === hour;
-                                   });
+                         <div className="flex relative" style={{ minHeight: '1440px' }}>
+                           {/* Colonne des heures */}
+                           <div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-slate-900/30">
+                             {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                               <div key={hour} className="h-[60px] border-b border-slate-700/50 flex items-start">
+                                 <div className="w-full border-r border-slate-700 px-2 py-2 text-xs text-slate-500 text-right">
+                                   {hour.toString().padStart(2, '0')}:00
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+
+                           {/* Colonnes des jours */}
+                           {getCurrentWeekDays().map((day, dayIdx) => {
+                             const isToday = day.toDateString() === new Date().toDateString();
+                             const dayEvents = getEventsForDate(day);
+                             const dayPointages = getPointageForDate(day);
+
+                             return (
+                               <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
+                                 {/* Grille des heures de fond */}
+                                 {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                                   <div key={hour} className="h-[60px] border-b border-slate-700/50"></div>
+                                 ))}
+
+                                 {/* Événements */}
+                                 {dayEvents.map(event => {
+                                   const startTime = new Date(event.start.dateTime);
+                                   const endTime = new Date(event.end.dateTime);
+                                   const startHour = startTime.getHours();
+                                   const startMin = startTime.getMinutes();
+                                   const durationMinutes = (endTime - startTime) / (1000 * 60);
+                                   const topPx = startHour * 60 + startMin;
 
                                    return (
-                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
-                                       {dayEvents.map(event => {
-                                         const startTime = new Date(event.start.dateTime);
-                                         const endTime = new Date(event.end.dateTime);
-                                         const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+                                     <div
+                                       key={event.id}
+                                       className="absolute left-1 right-1 bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold z-10"
+                                       style={{
+                                         height: `${Math.max(20, durationMinutes)}px`,
+                                         top: `${topPx}px`
+                                       }}
+                                     >
+                                       <div className="truncate">{format(startTime, "HH:mm")}</div>
+                                       <div className="truncate text-[9px] opacity-90">{event.subject}</div>
+                                     </div>
+                                   );
+                                 })}
 
-                                         return (
-                                           <div
-                                             key={event.id}
-                                             className="bg-gradient-to-r from-emerald-500/60 to-teal-500/60 border border-emerald-500 rounded px-2 py-1 text-[10px] text-emerald-50 font-semibold mb-1"
-                                             style={{
-                                               minHeight: `${Math.max(20, durationHours * 60)}px`
-                                             }}
-                                           >
-                                             <div className="truncate">{format(startTime, "HH:mm")}</div>
-                                             <div className="truncate text-[9px] opacity-90">{event.subject}</div>
-                                           </div>
-                                         );
-                                       })}
-                                       {getPointageForDate(day).filter(p => {
-                                         const startTime = new Date(p.heure_debut);
-                                         return hour === startTime.getHours();
-                                       }).map(p => {
-                                         const startTime = new Date(p.heure_debut);
-                                         const endTime = new Date(p.heure_fin);
+                                 {/* Pointages */}
+                                 {dayPointages.map(p => {
+                                   const startTime = new Date(p.heure_debut);
+                                   const endTime = new Date(p.heure_fin);
+                                   const startHour = startTime.getHours();
+                                   const startMin = startTime.getMinutes();
+                                   const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+                                   const topPx = startHour * 60 + startMin;
 
-                                         const totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-                                         const startHour = startTime.getHours();
-                                         const startMin = startTime.getMinutes();
-                                         const topPx = startHour * 60 + startMin;
-
-                                         return (
-                                           <div
-                                             key={p.id}
-                                             className="absolute left-1 right-1 bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold z-10"
-                                             style={{ 
-                                               height: `${totalMinutes}px`,
-                                               top: `${topPx}px`
-                                             }}
-                                           >
-                                             <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
-                                             <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
-                                           </div>
-                                         );
-                                       })}
+                                   return (
+                                     <div
+                                       key={p.id}
+                                       className="absolute left-1 right-1 bg-gradient-to-r from-blue-500/60 to-indigo-500/60 border border-blue-500 rounded px-2 py-1 text-[10px] text-blue-50 font-semibold z-20"
+                                       style={{
+                                         height: `${totalMinutes}px`,
+                                         top: `${topPx}px`
+                                       }}
+                                     >
+                                       <div className="truncate">{format(startTime, "HH:mm")} - {format(endTime, "HH:mm")}</div>
+                                       <div className="truncate text-[9px] opacity-90">{p.duree_heures}h</div>
+                                     </div>
+                                   );
+                                 })}
+                               </div>
+                             );
+                           })}
                                      </div>
                                    );
                                  })}
