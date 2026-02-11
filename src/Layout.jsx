@@ -1177,15 +1177,15 @@ function LayoutContent({ children, currentPageName }) {
                     {selectedDossierId && (
                     <div className="border border-slate-700 bg-slate-800/30 rounded-lg">
                     <div 
-                    className="cursor-pointer hover:bg-orange-900/40 transition-colors rounded-t-lg py-2 px-3 bg-orange-900/20"
+                    className="cursor-pointer hover:bg-lime-900/40 transition-colors rounded-t-lg py-2 px-3 bg-lime-900/20"
                     onClick={() => setDetailsCollapsed(!detailsCollapsed)}
                     >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-orange-500/30 flex items-center justify-center">
-                          <Timer className="w-3 h-3 text-orange-400" />
+                        <div className="w-5 h-5 rounded-full bg-lime-500/30 flex items-center justify-center">
+                          <Timer className="w-3 h-3 text-lime-400" />
                         </div>
-                        <h3 className="text-orange-300 text-sm font-semibold">Détails de l'entrée</h3>
+                        <h3 className="text-lime-300 text-sm font-semibold">Détails de l'entrée</h3>
                       </div>
                       {detailsCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
                     </div>
@@ -1282,19 +1282,6 @@ function LayoutContent({ children, currentPageName }) {
                             </SelectContent>
                           </Select>
                         </div>
-                      </div>
-
-                      <div className="mt-2 space-y-0.5">
-                        <Label className="text-slate-400 text-xs">Description</Label>
-                        <Textarea
-                          value={entreeForm.description}
-                          onChange={(e) => {
-                            setEntreeForm({...entreeForm, description: e.target.value});
-                            setHasEntreeChanges(true);
-                          }}
-                          placeholder="Détails supplémentaires..."
-                          className="bg-slate-700 border-slate-600 text-white h-20 text-xs"
-                        />
                       </div>
                     </div>
                     </div>
