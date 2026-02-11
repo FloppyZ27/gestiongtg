@@ -682,7 +682,7 @@ export default function Profil() {
                            </div>
 
                            {/* Colonnes des jours */}
-                           {getCurrentWeekDays().map((day, dayIdx) => {
+                            {getPointageWeekDays().map((day, dayIdx) => {
                              const isToday = day.toDateString() === new Date().toDateString();
                              const dayEvents = getEventsForDate(day);
                              const dayPointages = getPointageForDate(day);
