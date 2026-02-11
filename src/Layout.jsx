@@ -169,23 +169,6 @@ function LayoutContent({ children, currentPageName }) {
   const { state, open, setOpen, openMobile, setOpenMobile } = useSidebar();
   const queryClient = useQueryClient();
 
-  // Calculer le temps écoulé du pointage en cours
-  useEffect(() => {
-    if (!pointageEnCours) {
-      setElapsedTime(0);
-      return;
-    }
-    
-    const interval = setInterval(() => {
-      const debut = new Date(pointageEnCours.heure_debut).getTime();
-      const now = new Date().getTime();
-      const elapsed = Math.floor((now - debut) / 1000);
-      setElapsedTime(elapsed);
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [pointageEnCours]);
-
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -229,6 +212,23 @@ function LayoutContent({ children, currentPageName }) {
   });
 
   const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
+
+  // Calculer le temps écoulé du pointage en cours
+  useEffect(() => {
+    if (!pointageEnCours) {
+      setElapsedTime(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      const debut = new Date(pointageEnCours.heure_debut).getTime();
+      const now = new Date().getTime();
+      const elapsed = Math.floor((now - debut) / 1000);
+      setElapsedTime(elapsed);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [pointageEnCours]);
 
   const [entreeForm, setEntreeForm] = useState({
     date: new Date().toISOString().split('T')[0],
