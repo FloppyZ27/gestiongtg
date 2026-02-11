@@ -206,6 +206,21 @@ export default function Profil() {
     },
   });
 
+  const confirmPointageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+    },
+  });
+
+  const updatePointageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages', user?.email] });
+      setEditingPointage(null);
+    },
+  });
+
 
 
 
