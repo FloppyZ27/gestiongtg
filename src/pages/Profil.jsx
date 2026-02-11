@@ -555,7 +555,7 @@ export default function Profil() {
                           {getCurrentWeekDays().map((day, idx) => {
                             const isToday = day.toDateString() === new Date().toDateString();
                             return (
-                            <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'ring-2 ring-emerald-500 bg-slate-900/50' : 'bg-slate-900/50'}`}>
+                            <div key={idx} className={`flex-1 text-center py-3 border-r border-slate-700 ${isToday ? 'bg-slate-900/50 ring-2 ring-emerald-500 ring-inset' : 'bg-slate-900/50'}`}>
                               <div className={`text-xs uppercase ${isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
                                 {format(day, "EEE", { locale: fr })}
                               </div>
