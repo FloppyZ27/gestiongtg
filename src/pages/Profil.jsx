@@ -591,7 +591,7 @@ export default function Profil() {
                                    });
 
                                    return (
-                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative min-h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
+                                     <div key={dayIdx} className={`flex-1 border-r border-slate-700 relative h-[60px] p-1 ${isToday ? 'bg-cyan-500/10' : 'bg-slate-800/20'}`}>
                                        {dayEvents.map(event => {
                                          const startTime = new Date(event.start.dateTime);
                                          const endTime = new Date(event.end.dateTime);
