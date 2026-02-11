@@ -74,9 +74,8 @@ export default function Profil() {
   });
 
   // États pour punch in/out
-  const [isPunchedIn, setIsPunchedIn] = useState(false);
-  const [punchInTime, setPunchInTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [pointageCollapsed, setPointageCollapsed] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -110,18 +109,32 @@ export default function Profil() {
     enabled: !!user,
   });
 
+  const { data: pointages = [] } = useQuery({
+    queryKey: ['pointages', user?.email],
+    queryFn: () => base44.entities.Pointage.filter({ utilisateur_email: user?.email }, '-date', 50),
+    initialData: [],
+    enabled: !!user,
+  });
+
+  // Vérifier s'il y a un pointage en cours
+  const pointageEnCours = pointages.find(p => p.statut === 'en_cours');
+
   // Calculer le temps écoulé depuis punch in
   useEffect(() => {
-    if (!isPunchedIn || !punchInTime) return;
+    if (!pointageEnCours) {
+      setElapsedTime(0);
+      return;
+    }
     
     const interval = setInterval(() => {
+      const debut = new Date(pointageEnCours.heure_debut).getTime();
       const now = new Date().getTime();
-      const elapsed = Math.floor((now - punchInTime) / 1000); // en secondes
+      const elapsed = Math.floor((now - debut) / 1000); // en secondes
       setElapsedTime(elapsed);
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [isPunchedIn, punchInTime]);
+  }, [pointageEnCours]);
 
   const [profileForm, setProfileForm] = useState({
     prenom: "",
@@ -184,10 +197,17 @@ export default function Profil() {
 
 
 
-  const createEntreeTempsMutation = useMutation({
-    mutationFn: (data) => base44.entities.EntreeTemps.create(data),
+  const createPointageMutation = useMutation({
+    mutationFn: (data) => base44.entities.Pointage.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['entreeTemps'] });
+      queryClient.invalidateQueries({ queryKey: ['pointages'] });
+    },
+  });
+
+  const updatePointageMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Pointage.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pointages'] });
     },
   });
 
@@ -248,28 +268,31 @@ export default function Profil() {
 
 
   const handlePunchIn = () => {
-    setIsPunchedIn(true);
-    setPunchInTime(new Date().getTime());
-    setElapsedTime(0);
+    const now = new Date();
+    createPointageMutation.mutate({
+      utilisateur_email: user?.email,
+      date: now.toISOString().split('T')[0],
+      heure_debut: now.toISOString(),
+      statut: 'en_cours'
+    });
   };
 
   const handlePunchOut = () => {
-    if (!punchInTime) return;
+    if (!pointageEnCours) return;
     
-    const now = new Date().getTime();
-    const elapsed = (now - punchInTime) / 1000 / 60 / 60; // heures décimales
+    const now = new Date();
+    const debut = new Date(pointageEnCours.heure_debut);
+    const dureeHeures = (now.getTime() - debut.getTime()) / 1000 / 60 / 60;
     
-    // Créer une entrée de temps
-    createEntreeTempsMutation.mutate({
-      date: new Date().toISOString().split('T')[0],
-      heures: parseFloat(elapsed.toFixed(2)),
-      tache: "Temps tracé",
-      utilisateur_email: user?.email
+    updatePointageMutation.mutate({
+      id: pointageEnCours.id,
+      data: {
+        ...pointageEnCours,
+        heure_fin: now.toISOString(),
+        duree_heures: parseFloat(dureeHeures.toFixed(2)),
+        statut: 'termine'
+      }
     });
-    
-    setIsPunchedIn(false);
-    setPunchInTime(null);
-    setElapsedTime(0);
   };
 
   const formatElapsedTime = (seconds) => {
@@ -474,33 +497,35 @@ export default function Profil() {
           )}
         </Card>
 
-        {/* Section Feuille de temps avec Punch In/Out */}
+        {/* Section Pointage (Punch In/Out) */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <div 
-            className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20 border-b border-slate-800"
-            onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}
+            className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-3 px-4 bg-cyan-900/20 border-b border-slate-800"
+            onClick={() => setPointageCollapsed(!pointageCollapsed)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-emerald-400" />
+                <div className="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                  <Timer className="w-4 h-4 text-cyan-400" />
                 </div>
-                <h3 className="text-emerald-300 text-lg font-semibold">Feuille de temps</h3>
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  {entreeTemps.length} entrées
-                </Badge>
+                <h3 className="text-cyan-300 text-lg font-semibold">Pointage</h3>
+                {pointageEnCours && (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                    En cours
+                  </Badge>
+                )}
               </div>
-              {feuilleTempsCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+              {pointageCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
             </div>
           </div>
 
-          {!feuilleTempsCollapsed && (
+          {!pointageCollapsed && (
             <CardContent className="p-6">
               {/* Punch In/Out Section */}
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 border border-slate-700 rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    {isPunchedIn ? (
+                    {pointageEnCours ? (
                       <>
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -526,7 +551,7 @@ export default function Profil() {
                   </div>
 
                   <div className="flex gap-3">
-                    {!isPunchedIn ? (
+                    {!pointageEnCours ? (
                       <Button
                         onClick={handlePunchIn}
                         className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
@@ -547,6 +572,63 @@ export default function Profil() {
                 </div>
               </div>
 
+              {/* Historique des pointages */}
+              <div className="space-y-3">
+                <h4 className="text-slate-300 font-semibold text-sm">Historique</h4>
+                {pointages.filter(p => p.statut === 'termine').slice(0, 10).map(pointage => (
+                  <div key={pointage.id} className="border border-slate-700 rounded-lg p-3 hover:bg-slate-800/30 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-4 h-4 text-cyan-400" />
+                        <span className="text-white text-sm">
+                          {format(new Date(pointage.date + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                        </span>
+                      </div>
+                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                        {pointage.duree_heures?.toFixed(2)}h
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                      <span>Début: {format(new Date(pointage.heure_debut), "HH:mm", { locale: fr })}</span>
+                      {pointage.heure_fin && (
+                        <span>Fin: {format(new Date(pointage.heure_fin), "HH:mm", { locale: fr })}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {pointages.filter(p => p.statut === 'termine').length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    <Timer className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+                    <p className="text-sm">Aucun pointage enregistré</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
+        {/* Section Feuille de temps */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
+          <div 
+            className="cursor-pointer hover:bg-emerald-900/40 transition-colors rounded-t-lg py-3 px-4 bg-emerald-900/20 border-b border-slate-800"
+            onClick={() => setFeuilleTempsCollapsed(!feuilleTempsCollapsed)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-emerald-400" />
+                </div>
+                <h3 className="text-emerald-300 text-lg font-semibold">Feuille de temps</h3>
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+                  {entreeTemps.length} entrées
+                </Badge>
+              </div>
+              {feuilleTempsCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+            </div>
+          </div>
+
+          {!feuilleTempsCollapsed && (
+            <CardContent className="p-6">
               {/* Feuille de temps par jour */}
               <div className="space-y-4">
                 {sortedDates.map(date => {
