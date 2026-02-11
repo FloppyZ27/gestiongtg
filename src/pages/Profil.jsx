@@ -279,6 +279,58 @@ export default function Profil() {
     }
   };
 
+  const handleConfirmPointage = (pointage) => {
+    confirmPointageMutation.mutate({
+      id: pointage.id,
+      data: { ...pointage, confirme: true }
+    });
+  };
+
+  const handleOpenEditPointage = (pointage) => {
+    const debut = new Date(pointage.heure_debut);
+    const fin = new Date(pointage.heure_fin);
+    setEditPointageForm({
+      date: pointage.date,
+      heure_debut: debut.toTimeString().slice(0, 5),
+      heure_fin: fin.toTimeString().slice(0, 5),
+      description: pointage.description || ""
+    });
+    setEditingPointage(pointage);
+  };
+
+  const handleSubmitEditPointage = async (e) => {
+    e.preventDefault();
+    
+    if (!editPointageForm.description.trim()) {
+      alert('La description est obligatoire');
+      return;
+    }
+
+    const [heureD, minD] = editPointageForm.heure_debut.split(':');
+    const [heureF, minF] = editPointageForm.heure_fin.split(':');
+    
+    const debut = new Date(editPointageForm.date);
+    debut.setHours(parseInt(heureD), parseInt(minD), 0);
+    
+    const fin = new Date(editPointageForm.date);
+    fin.setHours(parseInt(heureF), parseInt(minF), 0);
+    
+    const dureeHeures = (fin - debut) / (1000 * 60 * 60);
+
+    updatePointageMutation.mutate({
+      id: editingPointage.id,
+      data: {
+        ...editingPointage,
+        date: editPointageForm.date,
+        heure_debut: debut.toISOString(),
+        heure_fin: fin.toISOString(),
+        duree_heures: parseFloat(dureeHeures.toFixed(2)),
+        description: editPointageForm.description,
+        confirme: true
+      }
+    });
+  };
+
 
 
 
