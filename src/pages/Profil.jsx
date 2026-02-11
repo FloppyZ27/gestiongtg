@@ -510,9 +510,9 @@ export default function Profil() {
                 </TabsList>
 
                 <TabsContent value="week" className="space-y-3">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full">
                     {/* Conteneur avec scroll */}
-                    <div className="flex gap-2 overflow-y-auto" style={{ maxHeight: '464px' }}>
+                    <div className="flex gap-2 overflow-y-auto w-full" style={{ maxHeight: '464px' }}>
                       {/* Colonne des heures */}
                       <div className="flex flex-col pt-10 w-12 flex-shrink-0">
                         {Array.from({ length: 13 }, (_, i) => i + 7).map((hour) => (
