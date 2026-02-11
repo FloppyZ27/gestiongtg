@@ -1643,9 +1643,9 @@ function LayoutContent({ children, currentPageName }) {
                   <div className="relative w-4 h-4 flex items-center justify-center">
                     {pointageEnCours ? (
                       <>
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                          <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
                         </div>
                       </>
                     ) : (
@@ -1685,7 +1685,7 @@ function LayoutContent({ children, currentPageName }) {
                         <Button
                           onClick={handlePunchIn}
                           size="sm"
-                          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg h-8"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg h-8"
                         >
                           <Play className="w-4 h-4 mr-1" />
                           Punch In
