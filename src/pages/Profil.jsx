@@ -759,7 +759,7 @@ export default function Profil() {
                       </div>
                     ))}
                     {(() => {
-                      const monthDays = getCurrentMonthDays();
+                      const monthDays = getPointageMonthDays();
                       const firstDayOfWeek = monthDays[0].getDay();
                       const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
                       const emptyDays = Array(offset).fill(null);
