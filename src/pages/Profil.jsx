@@ -475,23 +475,23 @@ export default function Profil() {
           )}
         </Card>
 
-        {/* Section Pointage (Punch In/Out) */}
+        {/* Section Feuille de temps (Pointage) */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-xl mb-6">
           <div 
-            className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-3 px-4 bg-cyan-900/20 border-b border-slate-800"
+            className="cursor-pointer hover:bg-cyan-900/40 transition-colors rounded-t-lg py-2 px-3 bg-cyan-900/20 border-b border-slate-800"
             onClick={() => setPointageCollapsed(!pointageCollapsed)}
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center">
-                  <Timer className="w-4 h-4 text-cyan-400" />
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center">
+                  <Timer className="w-3 h-3 text-cyan-400" />
                 </div>
-                <h3 className="text-cyan-300 text-lg font-semibold">Pointage</h3>
-                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                <h3 className="text-cyan-300 text-sm font-semibold">Feuille de temps</h3>
+                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
                   {pointages.filter(p => p.statut === 'termine').length} entrées
                 </Badge>
               </div>
-              {pointageCollapsed ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronUp className="w-5 h-5 text-slate-400" />}
+              {pointageCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
             </div>
           </div>
 
@@ -565,33 +565,38 @@ export default function Profil() {
 
                                 {/* Pointages positionnés */}
                                 {dayPointages.map(p => {
-                                  const startTime = new Date(p.heure_debut);
-                                  const startHour = startTime.getHours() + startTime.getMinutes() / 60;
-                                  const duration = p.duree_heures || 0;
-                                  
-                                  // Position relative à 7h (début de la timeline)
-                                  const topPosition = ((startHour - 7) * 128);
-                                  const height = duration * 128;
+                                 const startTime = new Date(p.heure_debut);
+                                 const endTime = p.heure_fin ? new Date(p.heure_fin) : new Date();
 
-                                  return (
-                                    <div
-                                      key={p.id}
-                                      className="absolute w-full px-1"
-                                      style={{
-                                        top: `${Math.max(0, topPosition)}px`,
-                                        height: `${Math.max(16, height)}px`
-                                      }}
-                                    >
-                                      <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
-                                        <div className="text-[10px] font-bold text-cyan-100">
-                                          {format(startTime, "HH:mm")}
-                                        </div>
-                                        <div className="text-[9px] text-cyan-200">
-                                          {duration.toFixed(1)}h
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
+                                 const startHour = startTime.getHours() + startTime.getMinutes() / 60;
+                                 const endHour = endTime.getHours() + endTime.getMinutes() / 60;
+
+                                 // Position relative à 7h (début de la timeline) - ligne horaire de départ
+                                 const topPosition = ((startHour - 7) * 128);
+                                 // Hauteur basée sur la différence entre début et fin
+                                 const height = ((endHour - startHour) * 128);
+
+                                 return (
+                                   <div
+                                     key={p.id}
+                                     className="absolute w-full px-1"
+                                     style={{
+                                       top: `${Math.max(0, topPosition)}px`,
+                                       height: `${Math.max(16, height)}px`
+                                     }}
+                                   >
+                                     <div className="h-full bg-gradient-to-br from-cyan-500/40 to-blue-500/40 border border-cyan-500/50 rounded px-1 py-1 overflow-hidden">
+                                       <div className="text-[10px] font-bold text-cyan-100">
+                                         {format(startTime, "HH:mm")}
+                                       </div>
+                                       {p.heure_fin && (
+                                         <div className="text-[9px] text-cyan-200">
+                                           {p.duree_heures.toFixed(1)}h
+                                         </div>
+                                       )}
+                                     </div>
+                                   </div>
+                                 );
                                 })}
                               </div>
                             </div>
