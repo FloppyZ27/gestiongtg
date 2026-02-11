@@ -821,11 +821,11 @@ export default function Profil() {
                                      >
                                        {isModified && <div className="text-[10px] font-bold mb-1">MODIFIÉ</div>}
                                        <div className="text-[11px] leading-tight">
-                                         <div className="opacity-90">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
+                                         <div className="opacity-50 text-slate-300">Initial: {format(initialStart, "HH:mm")} - {format(initialEnd, "HH:mm")} ({initialDuration.toFixed(1)}h)</div>
                                          {isModified && (
                                            <div className="opacity-90 mt-1">Modifié: {format(startTime, "HH:mm")} - {format(endTime, "HH:mm")} ({p.duree_heures_modifiee?.toFixed(1)}h)</div>
                                          )}
-                                         {p.description && <div className="truncate opacity-85 mt-1">{p.description}</div>}
+                                         {p.description && <div className="truncate opacity-85 mt-1"><span className="opacity-75">Raison:</span> {p.description}</div>}
                                        </div>
                                        {!p.confirme && (
                                          <button
