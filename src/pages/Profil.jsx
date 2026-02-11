@@ -621,7 +621,7 @@ export default function Profil() {
                                          const minutesInThisHour = Math.min(endTime.getTime(), hourEnd.getTime()) - Math.max(startTime.getTime(), hourStart.getTime());
                                          const minutesDuration = minutesInThisHour / (1000 * 60);
                                          
-                                         const heightPx = Math.max(30, Math.round((minutesDuration / 30) * 30));
+                                         const heightPx = Math.max(20, minutesDuration);
 
                                          return (
                                            <div
