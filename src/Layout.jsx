@@ -1622,7 +1622,7 @@ function LayoutContent({ children, currentPageName }) {
                 variant="ghost"
                 className="text-slate-400 hover:text-white hover:bg-slate-800/50"
               >
-                <ClipboardClock className="w-5 h-5" />
+                <ClipboardList className="w-5 h-5" />
               </Button>
 
               {/* Chronomètre et boutons Punch (cachés par défaut) */}
