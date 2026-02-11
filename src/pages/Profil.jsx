@@ -150,6 +150,15 @@ export default function Profil() {
     }
   }, [user]);
 
+  // Scroll à 8h au chargement de la vue semaine
+  useEffect(() => {
+    if (viewMode === "week" && weekScrollRef.current) {
+      setTimeout(() => {
+        weekScrollRef.current.scrollTop = 8 * 60; // 8 heures * 60px par heure
+      }, 0);
+    }
+  }, [viewMode]);
+
   const updateProfileMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => {
