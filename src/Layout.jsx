@@ -1675,7 +1675,7 @@ function LayoutContent({ children, currentPageName }) {
                     >
                       {/* Chronomètre */}
                       <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-                        <span className="text-white font-mono text-sm font-bold tabular-nums min-w-[70px]">
+                        <span className="text-white text-sm font-bold tabular-nums min-w-[70px]">
                           {formatElapsedTime(elapsedTime)}
                         </span>
                       </div>
