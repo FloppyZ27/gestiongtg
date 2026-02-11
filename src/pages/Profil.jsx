@@ -313,6 +313,24 @@ export default function Profil() {
     return `${displayYears} an${displayYears > 1 ? 's' : ''} et ${displayMonths} mois`;
   };
 
+  // Grouper les entrées par date pour affichage feuille de temps
+  const groupedEntrees = entreeTemps.reduce((acc, entree) => {
+    const date = entree.date;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(entree);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedEntrees).sort((a, b) => new Date(b) - new Date(a));
+
+  // Calculer le total des heures par jour
+  const calculateTotalHours = (date) => {
+    const entries = groupedEntrees[date] || [];
+    return entries.reduce((sum, e) => sum + (e.heures || 0), 0);
+  };
+
   // Calculer le total des heures par jour et par semaine
   const calculateTotalHours = (date) => {
     const entries = groupedEntrees[date] || [];
