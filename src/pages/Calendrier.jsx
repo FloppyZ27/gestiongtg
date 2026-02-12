@@ -19,7 +19,6 @@ export default function Calendrier() {
   const [viewMode, setViewMode] = useState('month');
   const [selectedUser, setSelectedUser] = useState([]);
   const [selectedType, setSelectedType] = useState([]);
-  const [selectedTacheStatus, setSelectedTacheStatus] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -82,8 +81,6 @@ export default function Calendrier() {
     return mapping[arpenteur] || "";
   };
 
-  const TACHES = ["Ouverture", "Cédule", "Montage", "Terrain", "Compilation", "Reliage", "Décision/Calcul", "Mise en plan", "Analyse", "Rapport", "Vérification", "Facturer"];
-
   // Filter events
   // This filter applies only to 'rendez-vous' and 'absence' entities from allRendezVous
   const filteredRendezVous = allRendezVous.filter(rdv => {
@@ -139,10 +136,6 @@ export default function Calendrier() {
       if (dossier.statut === "Rejeté") return;
       
       dossier.mandats?.forEach((mandat, mandatIdx) => {
-        // Filter by task status
-        const tacheMatch = selectedTacheStatus.length === 0 || selectedTacheStatus.includes(mandat.tache_actuelle);
-        if (!tacheMatch) return;
-
         // Filter by user
         const userMatch = selectedUser.length === 0 || selectedUser.includes(mandat.utilisateur_assigne);
         if (!userMatch) return;
@@ -348,9 +341,9 @@ export default function Calendrier() {
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   <span className="text-sm">Filtres</span>
-                  {(selectedUser.length > 0 || selectedType.length > 0 || selectedTacheStatus.length > 0) && (
+                  {(selectedUser.length > 0 || selectedType.length > 0) && (
                     <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                      {selectedUser.length + selectedType.length + selectedTacheStatus.length}
+                      {selectedUser.length + selectedType.length}
                     </Badge>
                   )}
                   {isFiltersOpen ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -366,14 +359,13 @@ export default function Calendrier() {
                           <Filter className="w-3 h-3 text-emerald-500" />
                           <h4 className="text-xs font-semibold text-emerald-500">Filtrer les événements</h4>
                         </div>
-                        {(selectedUser.length > 0 || selectedType.length > 0 || selectedTacheStatus.length > 0) && (
+                        {(selectedUser.length > 0 || selectedType.length > 0) && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => {
                               setSelectedUser([]);
                               setSelectedType([]);
-                              setSelectedTacheStatus([]);
                             }}
                             className="h-6 text-xs text-emerald-500 hover:text-emerald-400 px-2"
                           >
@@ -383,7 +375,7 @@ export default function Calendrier() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
@@ -419,7 +411,7 @@ export default function Calendrier() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700">
-                            {['rendez-vous', 'absence', 'livraison', 'terrain', 'signature', 'rdv_terrain', 'limite_leve'].map((type) => (
+                            {['rendez-vous', 'absence', 'anniversaire', 'jour_ferie'].map((type) => (
                               <DropdownMenuCheckboxItem
                                 key={type}
                                 checked={selectedType.includes(type)}
@@ -434,120 +426,19 @@ export default function Calendrier() {
                               >
                                 {type === 'rendez-vous' ? 'Rendez-vous' :
                                  type === 'absence' ? 'Absence' :
-                                 type === 'livraison' ? 'Livraison' :
-                                 type === 'terrain' ? 'Visite terrain' :
-                                 type === 'signature' ? 'Signature' :
-                                 type === 'rdv_terrain' ? 'RDV terrain' :
-                                 'Limite levé'}
+                                 type === 'anniversaire' ? 'Anniversaire' :
+                                 'Jour férié'}
                               </DropdownMenuCheckboxItem>
                             ))}
                           </DropdownMenuContent>
                         </DropdownMenu>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full text-emerald-500 justify-between h-8 text-xs px-2 bg-transparent border-0 hover:bg-emerald-500/10">
-                              <span className="truncate">Tâches ({selectedTacheStatus.length > 0 ? `${selectedTacheStatus.length}` : 'Toutes'})</span>
-                              <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56 bg-slate-800 border-slate-700 max-h-64 overflow-y-auto">
-                            {TACHES.map((tache) => (
-                              <DropdownMenuCheckboxItem
-                                key={tache}
-                                checked={selectedTacheStatus.includes(tache)}
-                                onCheckedChange={(checked) => {
-                                  setSelectedTacheStatus(
-                                    checked
-                                      ? [...selectedTacheStatus, tache]
-                                      : selectedTacheStatus.filter((t) => t !== tache)
-                                  );
-                                }}
-                                className="text-white text-xs"
-                              >
-                                {tache}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <div className="pt-2 border-t border-emerald-500/30">
-                        <h4 className="text-xs font-semibold text-slate-400 mb-2">Légende</h4>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/30"></div>
-                            <span className="text-xs text-slate-300">Rendez-vous</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30"></div>
-                            <span className="text-xs text-slate-300">Absence</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/30"></div>
-                            <span className="text-xs text-slate-300">Livraison</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-yellow-500/20 border border-yellow-500/30"></div>
-                            <span className="text-xs text-slate-300">Visite terrain</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-cyan-500/20 border border-cyan-500/30"></div>
-                            <span className="text-xs text-slate-300">Signature</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/30"></div>
-                            <span className="text-xs text-slate-300">Jour férié</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/30"></div>
-                            <span className="text-xs text-slate-300">Anniversaire</span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Statistiques toujours visibles */}
-              <div className="pt-3 border-t border-slate-800">
-                <h4 className="text-xs font-semibold text-slate-400 mb-2">Statistiques de la période</h4>
-                <div className="grid grid-cols-4 gap-3 text-xs">
-                  <div className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg">
-                    <span className="text-slate-400">Total</span>
-                    <span className="text-white font-semibold text-base">{totalOverallEvents}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-emerald-500/10 rounded-lg">
-                    <span className="text-slate-400">RDV</span>
-                    <span className="text-emerald-400 font-semibold text-base">{totalRdv}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-red-500/10 rounded-lg">
-                    <span className="text-slate-400">Absences</span>
-                    <span className="text-red-400 font-semibold text-base">{totalAbsences}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-orange-500/10 rounded-lg">
-                    <span className="text-slate-400">Livraisons</span>
-                    <span className="text-orange-400 font-semibold text-base">{totalLivraisons}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-yellow-500/10 rounded-lg">
-                    <span className="text-slate-400">Terrain</span>
-                    <span className="text-yellow-400 font-semibold text-base">{totalTerrain}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-cyan-500/10 rounded-lg">
-                    <span className="text-slate-400">Signatures</span>
-                    <span className="text-cyan-400 font-semibold text-base">{totalSignatures}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-lg">
-                    <span className="text-slate-400">Fériés</span>
-                    <span className="text-blue-400 font-semibold text-base">{totalHolidays}</span>
-                  </div>
-                  <div className="flex flex-col items-center p-2 bg-purple-500/10 rounded-lg">
-                    <span className="text-slate-400">Anniv.</span>
-                    <span className="text-purple-400 font-semibold text-base">{totalBirthdays}</span>
-                  </div>
-                </div>
-              </div>
+
             </div>
           </CardHeader>
         </Card>
