@@ -1155,9 +1155,17 @@ export default function Profil() {
 
               {/* Vue Semaine */}
               {entreeTempsTab === "semaine" && (
-                <div className="space-y-4">
-                  <div className="text-white font-semibold mb-3">
-                    {format(getEntreeTempsWeekDays()[0], "d MMMM", { locale: fr })} au {format(getEntreeTempsWeekDays()[6], "d MMMM yyyy", { locale: fr })}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-white font-semibold text-sm">
+                      {format(getEntreeTempsWeekDays()[0], "d MMM", { locale: fr })} au {format(getEntreeTempsWeekDays()[6], "d MMM yyyy", { locale: fr })}
+                    </div>
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                      Total: {getEntreeTempsWeekDays().reduce((sum, day) => {
+                        const dayEntries = getEntreeTempsForDate(day);
+                        return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
+                      }, 0).toFixed(1)}h
+                    </Badge>
                   </div>
                   {getEntreeTempsWeekDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
@@ -1167,16 +1175,15 @@ export default function Profil() {
                     
                     return (
                       <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-4 h-4 text-emerald-400" />
-                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(day, "EEEE d MMMM yyyy", { locale: fr })}
+                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(day, "EEE d MMM", { locale: fr })}
                             </span>
                           </div>
                           {totalHours > 0 && (
-                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                              Total: {totalHours.toFixed(2)}h
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                              {totalHours.toFixed(1)}h
                             </Badge>
                           )}
                         </div>
@@ -1186,38 +1193,34 @@ export default function Profil() {
                             {dayEntries.map((entree) => {
                               const dossier = dossiers.find(d => d.id === entree.dossier_id);
                               return (
-                                <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex-1 space-y-1">
-                                      <div className="flex items-center gap-2 flex-wrap">
-                                        {dossier && (
-                                          <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                            {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                          </Badge>
-                                        )}
-                                        {entree.mandat && (
-                                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                            {entree.mandat}
-                                          </Badge>
-                                        )}
-                                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                          {entree.tache}
+                                <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 flex-wrap flex-1">
+                                      {dossier && (
+                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                         </Badge>
-                                      </div>
-                                      {entree.description && (
-                                        <p className="text-slate-400 text-sm">{entree.description}</p>
                                       )}
+                                      {dossier && (
+                                        <span className="text-slate-400 text-xs">- {getClientsNames(dossier.clients_ids)}</span>
+                                      )}
+                                      {entree.mandat && (
+                                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
+                                          {entree.mandat}
+                                        </Badge>
+                                      )}
+                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                        {entree.tache}
+                                      </Badge>
                                     </div>
-                                    <div className="text-right">
-                                      <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
-                                    </div>
+                                    <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
                         ) : (
-                          <div className="p-4 text-center text-slate-500 text-sm">
+                          <div className="p-3 text-center text-slate-500 text-xs">
                             Aucune entrée
                           </div>
                         )}
@@ -1229,9 +1232,17 @@ export default function Profil() {
 
               {/* Vue Mois */}
               {entreeTempsTab === "mois" && (
-                <div className="space-y-4">
-                  <div className="text-white font-semibold mb-3">
-                    {format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-white font-semibold text-sm">
+                      {format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).charAt(0).toUpperCase() + format(entreeTempsCurrentDate, "MMMM yyyy", { locale: fr }).slice(1)}
+                    </div>
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                      Total: {getEntreeTempsMonthDays().reduce((sum, day) => {
+                        const dayEntries = getEntreeTempsForDate(day);
+                        return sum + dayEntries.reduce((s, e) => s + (e.heures || 0), 0);
+                      }, 0).toFixed(1)}h
+                    </Badge>
                   </div>
                   {getEntreeTempsMonthDays().map(day => {
                     const dayEntries = getEntreeTempsForDate(day);
@@ -1243,15 +1254,14 @@ export default function Profil() {
                     
                     return (
                       <div key={dateStr} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-4 h-4 text-emerald-400" />
-                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(day, "EEEE d MMMM yyyy", { locale: fr })}
+                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(day, "EEE d MMM", { locale: fr })}
                             </span>
                           </div>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                            Total: {totalHours.toFixed(2)}h
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {totalHours.toFixed(1)}h
                           </Badge>
                         </div>
                         
@@ -1259,31 +1269,27 @@ export default function Profil() {
                           {dayEntries.map((entree) => {
                             const dossier = dossiers.find(d => d.id === entree.dossier_id);
                             return (
-                              <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1 space-y-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      {dossier && (
-                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                        </Badge>
-                                      )}
-                                      {entree.mandat && (
-                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                          {entree.mandat}
-                                        </Badge>
-                                      )}
-                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                        {entree.tache}
+                              <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap flex-1">
+                                    {dossier && (
+                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
-                                    </div>
-                                    {entree.description && (
-                                      <p className="text-slate-400 text-sm">{entree.description}</p>
                                     )}
+                                    {dossier && (
+                                      <span className="text-slate-400 text-xs">- {getClientsNames(dossier.clients_ids)}</span>
+                                    )}
+                                    {entree.mandat && (
+                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
+                                        {entree.mandat}
+                                      </Badge>
+                                    )}
+                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                      {entree.tache}
+                                    </Badge>
                                   </div>
-                                  <div className="text-right">
-                                    <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
-                                  </div>
+                                  <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
                                 </div>
                               </div>
                             );
@@ -1297,7 +1303,7 @@ export default function Profil() {
 
               {/* Vue Tous */}
               {entreeTempsTab === "tous" && (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {sortedDates.map(date => {
                     const dayEntries = groupedEntrees[date];
                     const totalHours = calculateTotalHours(date);
@@ -1306,15 +1312,14 @@ export default function Profil() {
                     
                     return (
                       <div key={date} className={`border border-slate-700 rounded-lg overflow-hidden ${isToday ? 'ring-2 ring-emerald-500' : ''}`}>
-                        <div className="bg-slate-800/50 px-4 py-2 flex items-center justify-between border-b border-slate-700">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-4 h-4 text-emerald-400" />
-                            <span className={`font-semibold ${isToday ? 'text-emerald-400' : 'text-white'}`}>
-                              {format(new Date(date + 'T00:00:00'), "EEEE d MMMM yyyy", { locale: fr })}
+                        <div className="bg-slate-800/50 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold text-xs ${isToday ? 'text-emerald-400' : 'text-white'}`}>
+                              {format(new Date(date + 'T00:00:00'), "EEE d MMM yyyy", { locale: fr })}
                             </span>
                           </div>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
-                            Total: {totalHours.toFixed(2)}h
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                            {totalHours.toFixed(1)}h
                           </Badge>
                         </div>
                         
@@ -1322,31 +1327,27 @@ export default function Profil() {
                           {dayEntries.map((entree) => {
                             const dossier = dossiers.find(d => d.id === entree.dossier_id);
                             return (
-                              <div key={entree.id} className="p-3 hover:bg-slate-800/30 transition-colors">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1 space-y-1">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      {dossier && (
-                                        <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
-                                          {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
-                                        </Badge>
-                                      )}
-                                      {entree.mandat && (
-                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 border text-xs">
-                                          {entree.mandat}
-                                        </Badge>
-                                      )}
-                                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
-                                        {entree.tache}
+                              <div key={entree.id} className="px-3 py-2 hover:bg-slate-800/30 transition-colors">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap flex-1">
+                                    {dossier && (
+                                      <Badge variant="outline" className={`${getArpenteurColor(dossier.arpenteur_geometre)} border text-xs`}>
+                                        {getArpenteurInitials(dossier.arpenteur_geometre)}{dossier.numero_dossier}
                                       </Badge>
-                                    </div>
-                                    {entree.description && (
-                                      <p className="text-slate-400 text-sm">{entree.description}</p>
                                     )}
+                                    {dossier && (
+                                      <span className="text-slate-400 text-xs">- {getClientsNames(dossier.clients_ids)}</span>
+                                    )}
+                                    {entree.mandat && (
+                                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 border text-xs">
+                                        {entree.mandat}
+                                      </Badge>
+                                    )}
+                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 border text-xs">
+                                      {entree.tache}
+                                    </Badge>
                                   </div>
-                                  <div className="text-right">
-                                    <span className="text-emerald-400 font-bold text-lg">{entree.heures}h</span>
-                                  </div>
+                                  <span className="text-emerald-400 font-bold text-sm">{entree.heures}h</span>
                                 </div>
                               </div>
                             );
